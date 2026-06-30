@@ -1,0 +1,172 @@
+import React, { useState } from "react";
+import { Shield, Settings, CheckCircle, Clock, DollarSign, Search, Eye, RefreshCw, Save, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
+
+const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)", boxShadow:"0 2px 12px rgba(32,64,192,0.06)", borderRadius:16 };
+const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+
+const paidFees = [
+  { id:"LCF-0012", user:"James Doe", email:"james.doe@email.com", plan:"Premium", paidBy:"Account Owner", paidDate:"Jun 8, 2026", amount:199, txId:"pi_3A8BC2D4E5F6G7H8", status:"paid", activationPeriod:24, activated:false },
+  { id:"LCF-0011", user:"Patricia Wells", email:"p.wells@email.com", plan:"Legacy Pro", paidBy:"Legacy Contact", paidDate:"May 22, 2026", amount:199, txId:"pi_2B9CD3E4F5G6H7I8", status:"paid", activationPeriod:24, activated:false },
+  { id:"LCF-0010", user:"Robert Kim", email:"r.kim@email.com", plan:"Essential", paidBy:"Account Owner", paidDate:"Apr 10, 2026", amount:199, txId:"pi_1C0DE2E3F4G5H6I7", status:"paid", activationPeriod:24, activated:true, activatedDate:"May 5, 2026", expiresDate:"May 5, 2028" },
+];
+
+export function ContinuationFeeAdmin() {
+  const [feeAmount, setFeeAmount] = useState("199.00");
+  const [periodMonths, setPeriodMonths] = useState("24");
+  const [savedConfig, setSavedConfig] = useState(false);
+  const [search, setSearch] = useState("");
+  const [fees, setFees] = useState(paidFees);
+
+  const saveConfig = () => {
+    setSavedConfig(true);
+    toast.success(`Configuration updated: $${feeAmount} · ${periodMonths} month activation window`);
+    setTimeout(() => setSavedConfig(false), 3000);
+  };
+
+  const activateFee = (id: string, userName: string) => {
+    setFees(prev => prev.map(f => f.id === id ? { ...f, activated: true, activatedDate: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}), expiresDate: `${parseInt(periodMonths)} months from today` } : f));
+    toast.success(`Continuation fee activated for ${userName}. Vault will remain active for ${periodMonths} months.`);
+  };
+
+  const filtered = fees.filter(f => f.user.toLowerCase().includes(search.toLowerCase()) || f.email.includes(search) || f.id.includes(search));
+
+  const totalRevenue = fees.reduce((s,f) => s + f.amount, 0);
+  const activated = fees.filter(f => f.activated).length;
+  const pending = fees.filter(f => !f.activated).length;
+
+  return (
+    <div style={{ background:"#F0F4FA", minHeight:"100%", padding:24 }}>
+      <div style={{ maxWidth:1100, margin:"0 auto" }} className="space-y-6">
+
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Shield size={14} color="#2040C0"/>
+            <span style={{ color:"#2040C0", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · LEGACY CONTINUATION FEE</span>
+          </div>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Legacy Continuation Fee Control</h1>
+          <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>Set the fee amount and activation period. Manually activate accounts when a user passes away.</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label:"Total Revenue", value:`$${totalRevenue.toLocaleString()}`, color:"#2040C0" },
+            { label:"Fees Collected", value:fees.length, color:"#48BB78" },
+            { label:"Currently Activated", value:activated, color:"#9F7AEA" },
+            { label:"Pending Activation", value:pending, color:"#F6AD55" },
+          ].map(s => (
+            <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
+              <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Admin Configuration */}
+        <div className="p-6 rounded-2xl" style={CARD}>
+          <div className="flex items-center gap-2 mb-5">
+            <Settings size={16} color="#2040C0"/>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Fee Configuration</h3>
+            <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.25)", ...MONO, fontSize:9 }}>ADMIN ONLY — Changes affect all future payments</span>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            <div>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ONE-TIME FEE AMOUNT ($)</label>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(32,64,192,0.15)" }}>
+                <DollarSign size={15} color="#2040C0"/>
+                <input type="number" step="0.01" value={feeAmount} onChange={e => setFeeAmount(e.target.value)}
+                  style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
+              </div>
+              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>Currently displayed as ${feeAmount} to users</div>
+            </div>
+            <div>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ACTIVATION WINDOW (MONTHS)</label>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(32,64,192,0.15)" }}>
+                <Clock size={15} color="#2040C0"/>
+                <input type="number" step="1" min="1" max="120" value={periodMonths} onChange={e => setPeriodMonths(e.target.value)}
+                  style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
+              </div>
+              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>How long vault stays active after death activation</div>
+            </div>
+            <div className="flex flex-col justify-end">
+              <button onClick={saveConfig} className="flex items-center gap-2 px-5 py-3.5 rounded-xl font-semibold text-sm"
+                style={{ background: savedConfig ? "rgba(72,187,120,0.12)" : "linear-gradient(135deg,#2040C0,#3355E0)", color: savedConfig ? "#48BB78" : "#fff", border: savedConfig ? "1px solid rgba(72,187,120,0.3)" : "none", boxShadow: savedConfig ? "none" : "0 4px 12px rgba(32,64,192,0.3)" }}>
+                {savedConfig ? <CheckCircle size={15}/> : <Save size={15}/>}
+                {savedConfig ? "Configuration Saved!" : "Save Configuration"}
+              </button>
+              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:6 }}>Changes update in real-time via Supabase</div>
+            </div>
+          </div>
+          <div className="mt-4 flex items-start gap-3 px-4 py-3 rounded-xl border" style={{ background:"rgba(246,173,85,0.05)", borderColor:"rgba(246,173,85,0.25)" }}>
+            <AlertTriangle size={14} color="#F6AD55" style={{ marginTop:2, flexShrink:0 }}/>
+            <p style={{ color:"#374669", fontSize:12, lineHeight:1.7 }}>
+              <strong>Activation is a manual process.</strong> When a user is reported as no longer living, a legacy contact submits confirmation of passing — accepted documents include death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record. Review the submission, verify the document, then click "Activate" to begin the continuation window. Verification and admin approval are required, with a follow-up confirmation of death once received. The Stripe payment is non-refundable once processed.
+            </p>
+          </div>
+        </div>
+
+        {/* Paid fees table */}
+        <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(32,64,192,0.1)" }}>
+          <div className="flex items-center justify-between px-5 py-3 border-b" style={{ background:"#EAF0FC", borderColor:"rgba(32,64,192,0.08)" }}>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>Paid Legacy Continuation Fees</h3>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)" }}>
+              <Search size={13} color="#8A9AB8"/>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:12, width:160 }}/>
+            </div>
+          </div>
+
+          {/* Table header */}
+          <div className="grid px-5 py-3" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:"#F5F8FE", borderBottom:"1px solid rgba(32,64,192,0.08)", gap:16, alignItems:"center" }}>
+            {["ID","User","Paid By","Date","Amount","Status","Action"].map(h => (
+              <div key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
+            ))}
+          </div>
+
+          {filtered.map((fee, i) => (
+            <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:i%2===0?"#FFFFFF":"#F8FAFF", borderColor:"rgba(32,64,192,0.06)", gap:16 }}>
+              <span style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{fee.id}</span>
+              <div>
+                <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{fee.user}</div>
+                <div style={{ color:"#5A6A88", fontSize:11 }}>{fee.email} · {fee.plan}</div>
+              </div>
+              <span style={{ color:"#374669", fontSize:12 }}>{fee.paidBy}</span>
+              <span style={{ color:"#5A6A88", fontSize:12 }}>{fee.paidDate}</span>
+              <span style={{ color:"#2040C0", fontSize:13, fontWeight:700, ...MONO }}>${fee.amount}</span>
+              <div>
+                {fee.activated ? (
+                  <div>
+                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(159,122,234,0.12)", color:"#9F7AEA", ...MONO, fontSize:9 }}>ACTIVATED</span>
+                    <div style={{ color:"#5A6A88", fontSize:10, marginTop:2 }}>Expires: {fee.expiresDate}</div>
+                  </div>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", ...MONO, fontSize:9 }}>PAID · PENDING ACTIVATION</span>
+                )}
+              </div>
+              <div>
+                {!fee.activated ? (
+                  <button onClick={() => activateFee(fee.id, fee.user)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    style={{ background:"rgba(159,122,234,0.12)", color:"#9F7AEA", border:"1px solid rgba(159,122,234,0.25)" }}>
+                    <Shield size={11}/> Activate
+                  </button>
+                ) : (
+                  <div style={{ color:"#8A9AB8", fontSize:11 }}>Active since {fee.activatedDate}</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-5 py-4 rounded-2xl border" style={{ background:"rgba(32,64,192,0.03)", borderColor:"rgba(32,64,192,0.12)" }}>
+          <div style={{ color:"#2040C0", fontSize:11, ...MONO, fontWeight:700, marginBottom:6 }}>STRIPE WEBHOOK EVENTS TO HANDLE</div>
+          <div className="grid md:grid-cols-2 gap-2">
+            {["payment_intent.succeeded → mark fee as paid + send confirmation email","customer.subscription.deleted → check for continuation fee before suspending","invoice.payment_failed → send warning before suspension"].map(e => (
+              <div key={e} style={{ color:"#5A6A88", fontSize:12 }}>• {e}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
