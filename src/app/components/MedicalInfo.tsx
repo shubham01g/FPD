@@ -43,7 +43,7 @@ function AddAllergyModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(a:Omit<A
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6" style={GLASS}>
+      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Allergy</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
         <div className="space-y-3">
           {[{key:"allergen",label:"ALLERGEN NAME",ph:"e.g. Penicillin, Shellfish"},{key:"reaction",label:"REACTION",ph:"e.g. Anaphylaxis, Hives"},{key:"diagnosed",label:"YEAR DIAGNOSED",ph:"2015"}].map(f=>(
@@ -86,7 +86,7 @@ function AddMedModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(m:Omit<Medic
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6" style={GLASS}>
+      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Medication</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
         <div className="space-y-3">
           {[{key:"name",label:"MEDICATION NAME",ph:"e.g. Metformin"},{key:"dose",label:"DOSE",ph:"e.g. 1000mg"},{key:"frequency",label:"FREQUENCY",ph:"e.g. Twice daily with meals"},{key:"condition",label:"CONDITION",ph:"e.g. Type 2 Diabetes"},{key:"prescriber",label:"PRESCRIBER",ph:"e.g. Dr. Karen Fields"},{key:"pharmacy",label:"PHARMACY",ph:"e.g. CVS Pharmacy"},{key:"refillDate",label:"NEXT REFILL DATE",ph:"e.g. Jul 1, 2026"}].map(f=>(
@@ -135,7 +135,7 @@ export function MedicalInfo() {
 
       {tab==="emergency" && (
         <div className="grid md:grid-cols-2 gap-5">
-          <div className="p-6 rounded-2xl space-y-3" style={GLASS}>
+          <div className="p-6 rounded-2xl space-y-3 glow-surface" style={GLASS}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:12 }}>Vital Information</h3>
             <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.08)", border:"1px solid rgba(108,92,231,0.2)" }}>
               <span style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Blood Type</span>
@@ -154,7 +154,7 @@ export function MedicalInfo() {
               ))}
             </div>
           </div>
-          <div className="p-6 rounded-2xl space-y-3" style={GLASS}>
+          <div className="p-6 rounded-2xl space-y-3 glow-surface" style={GLASS}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:12 }}>Primary Physician & Hospital</h3>
             <Field label="Primary Care Physician" value={emergencyInfo.primaryDoctor.name}/>
             <Field label="Doctor Phone" value={emergencyInfo.primaryDoctor.phone}/>
@@ -162,7 +162,7 @@ export function MedicalInfo() {
             <Field label="Preferred Hospital" value={emergencyInfo.hospital.name}/>
             <Field label="Hospital Phone" value={emergencyInfo.hospital.phone}/>
           </div>
-          <div className="p-6 rounded-2xl md:col-span-2" style={GLASS}>
+          <div className="p-6 rounded-2xl md:col-span-2 glow-surface" style={GLASS}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:12 }}>Active Medical Conditions</h3>
             <div className="flex flex-wrap gap-2">
               {emergencyInfo.conditions.map(c=>(
@@ -183,11 +183,11 @@ export function MedicalInfo() {
               <Plus size={14}/> Add Allergy
             </button>
           </div>
-          {allergies.length===0 && <div className="py-12 text-center rounded-2xl" style={GLASS}><AlertTriangle size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No allergies recorded.</div></div>}
+          {allergies.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><AlertTriangle size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No allergies recorded.</div></div>}
           {allergies.map(a=>{
             const s = sevStyle[a.severity];
             return (
-              <div key={a.id} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={a.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -215,9 +215,9 @@ export function MedicalInfo() {
               <Plus size={14}/> Add Medication
             </button>
           </div>
-          {medications.length===0 && <div className="py-12 text-center rounded-2xl" style={GLASS}><Pill size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No medications recorded.</div></div>}
+          {medications.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Pill size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No medications recorded.</div></div>}
           {medications.map(m=>(
-            <div key={m.id} className="p-5 rounded-2xl" style={GLASS}>
+            <div key={m.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">

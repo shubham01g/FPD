@@ -112,7 +112,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(108,92,231,0.12)" }}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={{ border:"1px solid rgba(108,92,231,0.12)" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b"
         style={{ borderColor:"rgba(108,92,231,0.08)", background:"rgba(108,92,231,0.04)" }}>
         <div className="flex items-center gap-2">

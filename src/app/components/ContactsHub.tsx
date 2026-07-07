@@ -227,7 +227,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 
               {/* Security word / Q&A fields */}
               {selectedVerifications.includes("security_word") && (
-                <div className="mt-3 p-4 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="mt-3 p-4 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
                   <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SHARED SECRET WORD</label>
                   <input value={securityWord} onChange={e=>setSecurityWord(e.target.value)}
                     placeholder="A word only you and your contact know — e.g. a childhood memory"
@@ -236,7 +236,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
                 </div>
               )}
               {selectedVerifications.includes("security_qa") && (
-                <div className="mt-3 p-4 rounded-xl space-y-3" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="mt-3 p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
                   <div>
                     <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SECURITY QUESTION</label>
                     <input value={securityQ} onChange={e=>setSecurityQ(e.target.value)}
@@ -556,7 +556,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
 
       {/* Chain of authority — Legacy only, multiple contacts */}
       {activeType === "legacy" && legacyContacts.length > 1 && (
-        <div className="p-5 rounded-2xl" style={{ background:"rgba(108,92,231,0.04)", border:"2px solid rgba(108,92,231,0.2)" }}>
+        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"2px solid rgba(108,92,231,0.2)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Crown size={16} color="#6C5CE7"/>
             <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF" }}>Chain of Authority</span>

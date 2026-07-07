@@ -66,7 +66,7 @@ export function PayoutManagement() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} color="#F6AD55" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Pending Payouts</span>
@@ -74,7 +74,7 @@ export function PayoutManagement() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#F6AD55" }}>${pendingTotal.toFixed(2)}</div>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "pending").length} recipients</div>
         </div>
-        <div className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} color="#4A90D9" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Processing</span>
@@ -82,7 +82,7 @@ export function PayoutManagement() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#4A90D9" }}>${processingTotal.toFixed(2)}</div>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "processing").length} in transit</div>
         </div>
-        <div className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} color="#48BB78" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Paid This Month</span>

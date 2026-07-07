@@ -58,7 +58,7 @@ function BlastEmailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.5)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={CARD}>
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden glow-surface" style={CARD}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
           style={{ borderColor:"rgba(108,92,231,0.08)" }}>
           <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ function BlastEmailModal({
         </div>
         <div className="p-6 space-y-4">
           {/* Recipients */}
-          <div className="p-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+          <div className="p-3 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:6 }}>
               RECIPIENTS ({withEmail.length} with email / {members.length} total in group)
             </div>
@@ -162,7 +162,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.4)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
+      <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
         <div className="flex items-center justify-between mb-6">
           <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Contact</h3>
           <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
@@ -455,7 +455,7 @@ export function FamilyFriends() {
         {/* Contact list */}
         <div className="lg:col-span-2 space-y-3">
           {filtered.length === 0 && (
-            <div className="py-12 text-center rounded-2xl" style={CARD}>
+            <div className="py-12 text-center rounded-2xl glow-surface" style={CARD}>
               <Users size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
               <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14 }}>No contacts found.</div>
             </div>
@@ -501,7 +501,7 @@ export function FamilyFriends() {
         {/* Detail panel */}
         <div>
           {selected ? (
-            <div className="rounded-2xl overflow-hidden sticky top-4" style={CARD}>
+            <div className="rounded-2xl overflow-hidden sticky top-4 glow-surface" style={CARD}>
               {/* Photo */}
               <div className="relative h-32 flex items-center justify-center" style={{ background:`${selected.color}12` }}>
                 {selected.photo
@@ -533,7 +533,7 @@ export function FamilyFriends() {
                   )}
                 </div>
                 {selected.notes && (
-                  <div className="mt-4 p-3 rounded-xl" style={{ background:"#0A0A0F" }}>
+                  <div className="mt-4 p-3 rounded-xl glow-surface" style={{ background:"#0A0A0F" }}>
                     <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
                     <div style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.7 }}>{selected.notes}</div>
                   </div>
@@ -558,7 +558,7 @@ export function FamilyFriends() {
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl p-8 text-center" style={CARD}>
+            <div className="rounded-2xl p-8 text-center glow-surface" style={CARD}>
               <Heart size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
               <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14 }}>Select a contact to view details</div>
             </div>

@@ -98,7 +98,7 @@ export function SubscriptionConfig() {
       <div className="space-y-4">
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)" }}>Subscription Plans</h2>
         {plans.map((plan) => (
-          <div key={plan.id} className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={plan.id} className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-lg w-3 h-3 rounded-full" style={{ background: plan.color }} />
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>{plan.name}</h3>
@@ -206,7 +206,7 @@ export function SubscriptionConfig() {
       </div>
 
       {/* Notification thresholds */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)", marginBottom: 6 }}>Storage Notification Thresholds</h2>
         <p style={{ color: "var(--muted-foreground)", fontSize: 13, marginBottom: 20 }}>
           Automatic email alerts are sent to users when their storage crosses these thresholds. All values are percentages of plan storage limit.

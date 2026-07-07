@@ -109,7 +109,7 @@ function BillingEditor({
       )}
 
       {/* Live charge preview */}
-      <div className="p-3 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+      <div className="p-3 rounded-xl glow-surface" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
         <div style={{ color:"#48BB78", fontSize:9, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[50, 200, 1000].map(n => (
@@ -205,7 +205,7 @@ function PackageModal({ pkg, onClose, onSave }: {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
+          <div className="p-4 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
             <div style={{ color:"#0D1428", fontSize:13, fontWeight:600, marginBottom:12 }}>Billing Configuration</div>
             <BillingEditor billing={form.billing} onChange={b => setForm(p => ({ ...p, billing:b }))}/>
           </div>
@@ -246,7 +246,7 @@ function PackageModal({ pkg, onClose, onSave }: {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-xl"
+          <div className="flex items-center justify-between p-4 rounded-xl glow-surface"
             style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
             <div>
               <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Package Active</div>
@@ -354,7 +354,7 @@ export function PartnerOnboardingAdmin() {
             { label:"WL Platform MRR",      value:`$${totalMRR.toLocaleString()}`,     color:"#9F7AEA" },
             { label:"Total WL Revenue",     value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
           ].map(s => (
-            <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
+            <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
               <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
             </div>
@@ -374,7 +374,7 @@ export function PartnerOnboardingAdmin() {
 
         {/* Search bar */}
         {(tab === "packages" || tab === "sales") && (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={CARD}>
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl glow-surface" style={CARD}>
             <Search size={13} color="#8A9AB8"/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
               style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:13, flex:1 }}/>
@@ -392,7 +392,7 @@ export function PartnerOnboardingAdmin() {
                   ? `$${b.perUserAmount}/user/mo (min $${b.minMonthly.toLocaleString()})`
                   : `${b.percentOfRevenue}% of revenue (min $${b.minMonthly.toLocaleString()})`;
               return (
-                <div key={pkg.id} className="p-5 rounded-2xl" style={CARD}>
+                <div key={pkg.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div style={{ width:36, height:36, borderRadius:10, background:`${pkg.color}15`, border:`1px solid ${pkg.color}40`, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -460,7 +460,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── WL Sales ── */}
         {tab === "sales" && (
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl" style={CARD}>
+            <div className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:14 }}>Revenue by Package</div>
               <div className="space-y-3">
                 {packages.map(pkg => {
@@ -525,7 +525,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── Onboarding Links ── */}
         {tab === "links" && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 rounded-2xl"
+            <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
               style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
               <AlertCircle size={14} color="#6C5CE7" style={{ marginTop:1, flexShrink:0 }}/>
               <p style={{ color:"#5A6A88", fontSize:12 }}>
@@ -534,14 +534,14 @@ export function PartnerOnboardingAdmin() {
             </div>
 
             {packages.map(pkg => (
-              <div key={pkg.id} className="p-5 rounded-2xl" style={CARD}>
+              <div key={pkg.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
                 <div className="flex items-center gap-2 mb-3">
                   <div style={{ width:8, height:8, borderRadius:"50%", background:pkg.color }}/>
                   <span style={{ color:pkg.color, fontSize:11, fontWeight:700, ...MONO }}>{pkg.tier}</span>
                   <span style={{ color:"#0D1428", fontSize:14, fontWeight:500 }}>{pkg.name}</span>
                   {!pkg.active && <span style={{ color:"#8A9AB8", fontSize:10 }}>(inactive)</span>}
                 </div>
-                <div className="flex items-center gap-2 p-3 rounded-xl mb-3"
+                <div className="flex items-center gap-2 p-3 rounded-xl mb-3 glow-surface"
                   style={{ background:"#F5F8FE", border:"1px solid rgba(108,92,231,0.1)" }}>
                   <Globe size={11} color="#8A9AB8"/>
                   <span style={{ color:"#5A6A88", fontSize:11, ...MONO, flex:1 }} className="truncate">
@@ -568,7 +568,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── Payment Processors ── */}
         {tab === "processors" && (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.15)" }}>
+            <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.15)" }}>
               <p style={{ color:"#5A6A88", fontSize:12 }}>
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
                 WL partners can also bring their own processor — configure a per-package override in the package editor.
@@ -576,7 +576,7 @@ export function PartnerOnboardingAdmin() {
             </div>
 
             {processors.map(proc => (
-              <div key={proc.id} className="p-5 rounded-2xl" style={CARD}>
+              <div key={proc.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <span style={{ fontSize:28 }}>{proc.logo}</span>
@@ -634,7 +634,7 @@ export function PartnerOnboardingAdmin() {
               </div>
             ))}
 
-            <div className="p-5 text-center rounded-2xl"
+            <div className="p-5 text-center rounded-2xl glow-surface"
               style={{ border:"2px dashed rgba(108,92,231,0.2)", borderRadius:16 }}>
               <div style={{ color:"#5A6A88", fontSize:13, fontWeight:500, marginBottom:4 }}>Need a custom processor deal?</div>
               <div style={{ color:"#8A9AB8", fontSize:12, marginBottom:12 }}>
@@ -654,7 +654,7 @@ export function PartnerOnboardingAdmin() {
       {showSend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
+          <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
             <div className="flex items-center justify-between mb-5">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#0D1428" }}>Send Onboarding Invite</h3>
               <button onClick={() => setShowSend(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>

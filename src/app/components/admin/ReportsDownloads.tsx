@@ -295,7 +295,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
   const cat = CATEGORY_META[report.category];
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={CARD}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
@@ -437,7 +437,7 @@ export function ReportsDownloads() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -502,7 +502,7 @@ export function ReportsDownloads() {
             </button>
           </div>
 
-          <div className="rounded-2xl overflow-hidden" style={CARD}>
+          <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
             <table className="w-full text-sm" style={{ borderCollapse:"collapse" }}>
               <thead>
                 <tr style={{ background:"rgba(108,92,231,0.04)", borderBottom:"1px solid rgba(108,92,231,0.08)" }}>

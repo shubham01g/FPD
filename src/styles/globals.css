@@ -1,0 +1,64 @@
+/* ── Spotlight glow-surface utility ──
+   Cursor-tracking spotlight border, driven by --x/--y/--xp/--yp set once
+   on :root (see src/app/glowCursor.ts). Add the `glow-surface` class to
+   any existing card container to layer the effect on top of its own
+   background/border/padding — it never overrides them. */
+:root {
+  --glow-base: 247; /* brand violet hue, matches --primary #6C5CE7 */
+  --glow-spread: 40;
+  --glow-radius: 16;
+  --glow-border-size: 1.5;
+}
+
+.glow-surface {
+  position: relative;
+  border-radius: calc(var(--glow-radius) * 1px);
+  --glow-hue: calc(var(--glow-base) + (var(--xp, 0.5) * var(--glow-spread, 0)));
+}
+
+.glow-surface::before,
+.glow-surface::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: calc(var(--glow-border-size) * -1px);
+  border: calc(var(--glow-border-size) * 1px) solid transparent;
+  border-radius: inherit;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+  -webkit-mask-composite: source-out;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.glow-surface:hover::before,
+.glow-surface:hover::after {
+  opacity: 1;
+}
+
+.glow-surface::before {
+  background-image: radial-gradient(
+    180px 180px at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+    hsl(var(--glow-hue, 247) 85% 65% / 1),
+    transparent 100%
+  );
+  filter: brightness(1.6);
+}
+
+.glow-surface::after {
+  background-image: radial-gradient(
+    100px 100px at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+    hsl(0 100% 100% / 0.9),
+    transparent 100%
+  );
+}
+
+/* Optional color variants — default is brand violet */
+.glow-blue   { --glow-base: 220; --glow-spread: 50; }
+.glow-green  { --glow-base: 152; --glow-spread: 40; }
+.glow-orange { --glow-base: 30;  --glow-spread: 40; }
+.glow-teal   { --glow-base: 176; --glow-spread: 40; }

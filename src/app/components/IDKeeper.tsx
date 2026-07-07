@@ -124,7 +124,7 @@ export function IDKeeper() {
           const expiring = isExpiringSoon(r.expiryDate);
 
           return (
-            <div key={r.id} className="p-5 rounded-2xl" style={CARD}>
+            <div key={r.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
               {/* Card header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -180,13 +180,13 @@ export function IDKeeper() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add ID Document</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
             </div>
             {/* Scan or upload the ID card */}
-            <div className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor:"rgba(108,92,231,0.25)", background:"rgba(108,92,231,0.02)" }}>
+            <div className="p-4 rounded-xl border-2 border-dashed glow-surface" style={{ borderColor:"rgba(108,92,231,0.25)", background:"rgba(108,92,231,0.02)" }}>
               <div style={{ color:"var(--muted-foreground)", fontSize:12, marginBottom:10, fontWeight:600 }}>SCAN OR UPLOAD ID DOCUMENT</div>
               <div className="flex gap-2 flex-wrap">
                 <ScanButton folder="personal" onUpload={doc => { setForm(p=>({...p,documentScanned:"true" as any})); toast.success(`"${doc.name}" scanned and attached`); }} size="sm" label="📷 Scan with Camera"/>

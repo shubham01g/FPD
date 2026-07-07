@@ -146,7 +146,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         {/* stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-12 fpd-fade-in-up" style={{ animationDelay:"240ms" }}>
           {stats.map(([val, label]) => (
-            <div key={label} className="p-4 rounded-2xl text-center fpd-hover-lift" style={GLASS}>
+            <div key={label} className="p-4 rounded-2xl text-center fpd-hover-lift glow-surface" style={GLASS}>
               <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 700, color: "#6C5CE7" }}>{val}</div>
               <div style={{ color: "#6B7FA8", fontSize: 12, marginTop: 4, ...MONO }}>{label}</div>
             </div>
@@ -217,7 +217,7 @@ function About() {
                 <img src="https://images.unsplash.com/photo-1662987619545-1844207dedac?w=350&h=220&fit=crop&auto=format" alt="Three generations family" style={{ width: "100%", height: 130, objectFit: "cover" }} />
               </div>
             </div>
-            <div className="absolute -top-4 -right-4 p-5 rounded-2xl" style={GLASS}>
+            <div className="absolute -top-4 -right-4 p-5 rounded-2xl glow-surface" style={GLASS}>
               <div style={{ ...MONO, color: "#6C5CE7", fontSize: 11, marginBottom: 4 }}>PLATFORM COVERAGE</div>
               <div style={{ ...DISPLAY, fontSize: 32, color: "#E8EDF5" }}>30+</div>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>Life Categories</div>
@@ -245,7 +245,7 @@ function HowItWorks() {
         <SectionTitle tag="HOW IT WORKS" title={<>Four Steps to a<br /><span style={{ color: "#6C5CE7" }}>Secure Legacy</span></>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
         <div className="grid md:grid-cols-4 gap-6">
           {steps.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl flex flex-col p-6 fpd-hover-lift" style={{ ...GLASS }}>
+            <div key={s.n} className="relative rounded-2xl flex flex-col p-6 fpd-hover-lift glow-surface" style={{ ...GLASS }}>
               {i < steps.length - 1 && <div className="hidden md:block absolute top-10 -right-3 z-10" style={{ width: 6, height: 6, borderRadius: "50%", background: "#6C5CE7", boxShadow: "0 0 12px #6C5CE7" }} />}
               <div className="mb-4 w-11 h-11 rounded-full flex items-center justify-center" style={{ ...DISPLAY, background: "linear-gradient(135deg,#6C5CE7,#8B7CF6)", color: "#fff", fontWeight: 700, fontSize: 15 }}>{s.n}</div>
               <div className="mb-4 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(108,92,231,0.12)", color: "#6C5CE7" }}>{s.icon}</div>
@@ -319,7 +319,7 @@ function Features() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {filtered.map((f) => (
-            <div key={f.title} className="p-5 rounded-2xl group cursor-pointer transition-all fpd-hover-lift" style={{ ...GLASS }}>
+            <div key={f.title} className="p-5 rounded-2xl group cursor-pointer transition-all fpd-hover-lift glow-surface" style={{ ...GLASS }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7" }}>{f.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 13, color: "#E8EDF5", marginBottom: 6 }}>{f.title}</div>
               <p style={{ color: "#6B7FA8", fontSize: 11, lineHeight: 1.7 }}>{f.desc}</p>
@@ -352,7 +352,7 @@ function Security() {
         <SectionTitle tag="ENTERPRISE-GRADE SECURITY" title={<>Your Data is<br /><span style={{ color: "#6C5CE7" }}>Fortress-Protected</span></>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(item => (
-            <div key={item.title} className="p-7 rounded-2xl fpd-hover-lift" style={GLASS}>
+            <div key={item.title} className="p-7 rounded-2xl fpd-hover-lift glow-surface" style={GLASS}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7", boxShadow: "0 0 20px rgba(108,92,231,0.15)" }}>{item.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 16, color: "#E8EDF5", marginBottom: 10 }}>{item.title}</h3>
               <p style={{ color: "#6B7FA8", fontSize: 13, lineHeight: 1.8 }}>{item.desc}</p>
@@ -373,7 +373,7 @@ function Security() {
             </div>
           ))}
         </div>
-        <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
+        <div className="p-8 rounded-2xl text-center glow-surface" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
           <div style={{ ...MONO, color: "#6C5CE7", fontSize: 12, letterSpacing: "0.1em", marginBottom: 12 }}>SECURITY CERTIFICATION</div>
           <div className="flex flex-wrap items-center justify-center gap-8">
             {["AES-256 Encrypted","Zero-Knowledge","SOC 2 Type II","HIPAA Compliant","GDPR Ready","ISO 27001"].map(badge => (
@@ -431,7 +431,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
           {plans.map(plan => (
-            <div key={plan.name} className="relative p-8 rounded-2xl flex flex-col fpd-hover-lift" style={{ ...GLASS, borderColor: plan.popular ? plan.color : "rgba(108,92,231,0.15)", borderWidth: plan.popular ? 2 : 1, boxShadow: plan.popular ? `0 0 60px rgba(108,92,231,0.15)` : undefined }}>
+            <div key={plan.name} className="relative p-8 rounded-2xl flex flex-col fpd-hover-lift glow-surface" style={{ ...GLASS, borderColor: plan.popular ? plan.color : "rgba(108,92,231,0.15)", borderWidth: plan.popular ? 2 : 1, boxShadow: plan.popular ? `0 0 60px rgba(108,92,231,0.15)` : undefined }}>
               {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1 rounded-full text-xs font-bold" style={{ background: "#6C5CE7", color: "#04080F", ...MONO }}>MOST POPULAR</div>}
               <div style={{ ...MONO, color: plan.color, fontSize: 11, letterSpacing: "0.12em", marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
               <div className="flex items-baseline gap-1 mb-2">
@@ -495,7 +495,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
           </div>
           <div className="space-y-4">
             {tiers.map(t => (
-              <div key={t.tier} className="p-6 rounded-2xl fpd-hover-lift" style={{ ...GLASS, borderColor: `${t.color}30` }}>
+              <div key={t.tier} className="p-6 rounded-2xl fpd-hover-lift glow-surface" style={{ ...GLASS, borderColor: `${t.color}30` }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div style={{ ...MONO, color: t.color, fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{t.tier.toUpperCase()}</div>
@@ -506,7 +506,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
                 </div>
               </div>
             ))}
-            <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
+            <div className="p-5 rounded-2xl text-center glow-surface" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>Example: 30 referrals on Legacy Archive ($24.99/mo) =</div>
               <div style={{ ...DISPLAY, fontSize: 28, color: "#6C5CE7", marginTop: 4 }}>$187.43 / month</div>
               <div style={{ color: "#6B7FA8", fontSize: 12, marginTop: 2 }}>at Tier 2 (25%) for 12 months</div>
@@ -549,7 +549,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         <SectionTitle tag="STRATEGIC PARTNERSHIPS" title={<>Recurring <span style={{ color: "#6C5CE7" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
         <div className="grid md:grid-cols-3 gap-5 mb-12">
           {tiers.map(t => (
-            <div key={t.tier} className="p-7 rounded-2xl text-center fpd-hover-lift" style={{ ...GLASS, borderColor: `${t.color}30` }}>
+            <div key={t.tier} className="p-7 rounded-2xl text-center fpd-hover-lift glow-surface" style={{ ...GLASS, borderColor: `${t.color}30` }}>
               <div style={{ ...DISPLAY, fontSize: 52, fontWeight: 700, color: t.color, lineHeight: 1 }}>{t.rate}</div>
               <div style={{ ...MONO, color: t.color, fontSize: 11, letterSpacing: "0.1em", margin: "8px 0 4px" }}>{t.tier.toUpperCase()}</div>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>{t.range}</div>
@@ -575,7 +575,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           {partners.map(p => (
-            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl fpd-hover-lift" style={GLASS}>
+            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl fpd-hover-lift glow-surface" style={GLASS}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7" }}>{p.icon}</div>
               <div>
                 <div style={{ color: "#E8EDF5", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{p.label}</div>
@@ -642,7 +642,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
         {/* 4 steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {steps.map((s, i) => (
-            <div key={i} className="relative p-6 rounded-2xl fpd-hover-lift"
+            <div key={i} className="relative p-6 rounded-2xl fpd-hover-lift glow-surface"
               style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.15)", borderTop:`3px solid rgba(159,122,234,0.5)` }}>
               <div style={{ color:"rgba(159,122,234,0.25)", fontSize:52, fontFamily:"var(--font-display)", fontWeight:900, lineHeight:1, marginBottom:12 }}>{s.num}</div>
               <div style={{ color:"#C4B5FD", marginBottom:10 }}>{s.icon}</div>
@@ -654,7 +654,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
 
         {/* Pricing — two cards */}
         <div className="grid md:grid-cols-2 gap-5 mb-14">
-          <div className="rounded-3xl p-8 text-center fpd-hover-lift"
+          <div className="rounded-3xl p-8 text-center fpd-hover-lift glow-surface"
             style={{ background:"linear-gradient(135deg,#0A0520,#1A0840)", border:"2px solid rgba(159,122,234,0.4)", boxShadow:"0 0 48px rgba(159,122,234,0.15)" }}>
             <div style={{ color:"#C4B5FD", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:6 }}>$99</div>
@@ -669,7 +669,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
             </div>
           </div>
 
-          <div className="rounded-3xl p-8 text-center"
+          <div className="rounded-3xl p-8 text-center glow-surface"
             style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.25)" }}>
             <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
             <div style={{ ...DISPLAY, fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:6 }}>$25</div>
@@ -704,7 +704,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
             </ul>
           </div>
 
-          <div className="rounded-3xl overflow-hidden fpd-hover-lift"
+          <div className="rounded-3xl overflow-hidden fpd-hover-lift glow-surface"
             style={{ background:"rgba(159,122,234,0.08)", border:"2px solid rgba(159,122,234,0.25)", boxShadow:"0 0 60px rgba(159,122,234,0.1)" }}>
             {/* Specialist photo */}
             <div style={{ position:"relative", height:200, overflow:"hidden" }}>
@@ -765,7 +765,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
             { icon:<Star size={18}/>,        title:"Real Humans, Always",      desc:"No chatbots. No automated systems. Every session is with a named, trained Final Pass Down specialist." },
             { icon:<Heart size={18}/>,       title:"At Your Pace, Always",     desc:"Sessions happen when you're ready. Most clients finish in 2–3 calls over 1–2 weeks. We never rush." },
           ].map(t => (
-            <div key={t.title} className="p-5 rounded-2xl text-center fpd-hover-lift"
+            <div key={t.title} className="p-5 rounded-2xl text-center fpd-hover-lift glow-surface"
               style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.1)" }}>
               <div style={{ color:"#9F7AEA", margin:"0 auto 10px" }}>{t.icon}</div>
               <div style={{ ...DISPLAY, fontSize:14, color:"#E8EDF5", marginBottom:4 }}>{t.title}</div>
@@ -815,7 +815,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
           {active.map(p => {
             const monthly = getMonthlyPrice(p);
             return (
-              <div key={p.id} className="rounded-2xl p-7 relative flex flex-col fpd-hover-lift"
+              <div key={p.id} className="rounded-2xl p-7 relative flex flex-col fpd-hover-lift glow-surface"
                 style={{ ...GLASS, borderColor:`${p.color}40`, background:p.badge?"rgba(8,15,26,0.92)":"rgba(8,15,26,0.78)", boxShadow:p.badge?`0 0 48px ${p.color}40`:"none" }}>
                 {p.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold"
@@ -862,7 +862,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
             { icon:<Award size={18}/>,  title:"HIPAA + SOC 2", desc:"Legacy Vault compliance baked in at no extra cost" },
             { icon:<Zap size={18}/>,    title:"Stripe + More", desc:"Stripe, PayPal, Square or bring your own processor" },
           ].map(f => (
-            <div key={f.title} className="flex gap-3 p-5 rounded-2xl fpd-hover-lift" style={GLASS}>
+            <div key={f.title} className="flex gap-3 p-5 rounded-2xl fpd-hover-lift glow-surface" style={GLASS}>
               <div style={{ color:"#9F7AEA", flexShrink:0 }}>{f.icon}</div>
               <div>
                 <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:3 }}>{f.title}</div>
@@ -891,7 +891,7 @@ function Testimonials() {
         <SectionTitle tag="TESTIMONIALS" title={<>Trusted by Thousands<br /><span style={{ color: "#6C5CE7" }}>Across America</span></>} />
         <div className="grid md:grid-cols-3 gap-6">
           {quotes.map(q => (
-            <div key={q.name} className="rounded-2xl flex flex-col overflow-hidden fpd-hover-lift" style={GLASS}>
+            <div key={q.name} className="rounded-2xl flex flex-col overflow-hidden fpd-hover-lift glow-surface" style={GLASS}>
               {/* Background image strip */}
               <div style={{ height: 120, overflow: "hidden", position: "relative" }}>
                 <img src={`https://images.unsplash.com/${q.bg}?w=500&h=200&fit=crop&auto=format`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }}/>
@@ -951,7 +951,7 @@ function Help() {
             </div>
           ))}
         </div>
-        <div className="mt-12 p-8 rounded-2xl text-center fpd-hover-lift" style={{ ...GLASS }}>
+        <div className="mt-12 p-8 rounded-2xl text-center fpd-hover-lift glow-surface" style={{ ...GLASS }}>
           <div style={{ ...DISPLAY, fontSize: 20, color: "#E8EDF5", marginBottom: 8 }}>Still have questions?</div>
           <p style={{ color: "#6B7FA8", fontSize: 14, marginBottom: 20 }}>Our team is available 7 days a week. Average response time: under 2 hours.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

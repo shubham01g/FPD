@@ -52,7 +52,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-lg rounded-2xl p-7" style={GLASS}>
+      <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#0D1428" }}>Send Onboarding Invite</h3>
@@ -158,7 +158,7 @@ export function PartnershipAdmin() {
           { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#48BB78" },
           { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#4A90D9" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -167,7 +167,7 @@ export function PartnershipAdmin() {
       </div>
 
       {/* MRR chart — pure CSS, no recharts */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
           <div style={{ color: "#48BB78", fontSize: 13 }}>+264% in 6 months</div>

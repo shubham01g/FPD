@@ -677,7 +677,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           {tab === "clients" && (
             <>
               {myClients.length === 0 && (
-                <div className="py-16 text-center rounded-2xl" style={GLASS}>
+                <div className="py-16 text-center rounded-2xl glow-surface" style={GLASS}>
                   <Star size={40} color="rgba(159,122,234,0.2)" style={{ margin:"0 auto 12px" }}/>
                   <div style={{ color:"#8A9AB8", fontSize:14 }}>No clients assigned yet.</div>
                   <div style={{ color:"#6B7FA8", fontSize:12, marginTop:4 }}>Your administrator will assign clients to you shortly.</div>
@@ -691,13 +691,13 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           {tab === "schedule" && (
             <div className="space-y-4">
               {upcomingSessions.length === 0 ? (
-                <div className="py-12 text-center rounded-2xl" style={GLASS}>
+                <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}>
                   <Calendar size={36} color="rgba(159,122,234,0.2)" style={{ margin:"0 auto 12px" }}/>
                   <div style={{ color:"#8A9AB8", fontSize:14 }}>No upcoming sessions scheduled.</div>
                 </div>
               ) : (
                 upcomingSessions.map(s => (
-                  <div key={s.id} className="p-5 rounded-2xl" style={GLASS}>
+                  <div key={s.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center rounded-xl"
@@ -733,7 +733,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           {/* ── Waivers tab ── */}
           {tab === "waivers" && (
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 rounded-2xl"
+              <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
                 style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.15)" }}>
                 <Shield size={13} color="#9F7AEA" style={{ marginTop:1 }}/>
                 <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
@@ -745,7 +745,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                 const statusColor = !w ? "#8A9AB8" : w.status === "signed" ? "#48BB78" : "#F6AD55";
                 const statusLabel = !w ? "No Waiver Sent" : w.status === "signed" ? "Signed ✓" : "Awaiting Signature";
                 return (
-                  <div key={client.id} className="p-5 rounded-2xl" style={GLASS}>
+                  <div key={client.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                     <div className="flex items-center justify-between">
                       <div>
                         <div style={{ ...DISPLAY, fontSize:15, color:"#0D1428" }}>{client.name}</div>

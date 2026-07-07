@@ -215,7 +215,7 @@ export function WhiteGloveService() {
         {/* Pricing — shown prominently at top */}
         <div className="grid md:grid-cols-2 gap-5">
           {/* Setup fee card */}
-          <div className="rounded-3xl p-8 text-center"
+          <div className="rounded-3xl p-8 text-center glow-surface"
             style={{ background:"linear-gradient(135deg,#1A0840,#0A0520)", border:"2px solid rgba(159,122,234,0.4)", boxShadow:"0 0 48px rgba(159,122,234,0.15)" }}>
             <div style={{ color:"#C4B5FD", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:8 }}>
@@ -233,7 +233,7 @@ export function WhiteGloveService() {
           </div>
 
           {/* Per-session card */}
-          <div className="rounded-3xl p-8 text-center"
+          <div className="rounded-3xl p-8 text-center glow-surface"
             style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.25)" }}>
             <div style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
             <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#FFFFFF", lineHeight:1, marginBottom:4 }}>
@@ -269,7 +269,7 @@ export function WhiteGloveService() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             {STEPS.map((s, i) => (
-              <div key={i} className="flex items-start gap-4 p-5 rounded-2xl" style={GLASS}>
+              <div key={i} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
                   style={{ width:48, height:48, background:"rgba(159,122,234,0.1)", color:"#9F7AEA" }}>
                   {s.icon}
@@ -287,7 +287,7 @@ export function WhiteGloveService() {
         </div>
 
         {/* What's included */}
-        <div className="p-8 rounded-3xl" style={{ ...GLASS, background:"rgba(159,122,234,0.04)" }}>
+        <div className="p-8 rounded-3xl glow-surface" style={{ ...GLASS, background:"rgba(159,122,234,0.04)" }}>
           <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:20, textAlign:"center" }}>
             Everything Is Included
           </div>
@@ -309,7 +309,7 @@ export function WhiteGloveService() {
         </div>
 
         {/* Inline form */}
-        <div className="p-8 rounded-3xl" style={GLASS}>
+        <div className="p-8 rounded-3xl glow-surface" style={GLASS}>
           <div className="text-center mb-8">
             <Star size={28} color="#9F7AEA" fill="rgba(159,122,234,0.3)" style={{ margin:"0 auto 12px" }}/>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>Ready to Get Started?</h2>
@@ -337,7 +337,7 @@ export function WhiteGloveService() {
             { icon:<Heart size={20}/>,   title:"Real People, Always", desc:"No bots, no automated systems. A real FPD specialist handles your account." },
             { icon:<Clock size={20}/>,   title:"Your Pace, Always",   desc:"Sessions happen when you're ready. We never rush. Most complete in 1–2 weeks." },
           ].map(r => (
-            <div key={r.title} className="p-5 rounded-2xl text-center" style={GLASS}>
+            <div key={r.title} className="p-5 rounded-2xl text-center glow-surface" style={GLASS}>
               <div style={{ color:"#9F7AEA", margin:"0 auto 10px" }}>{r.icon}</div>
               <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", marginBottom:4 }}>{r.title}</div>
               <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{r.desc}</div>

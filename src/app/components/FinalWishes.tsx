@@ -111,7 +111,7 @@ export function FinalWishes() {
           </div>
           <div className="space-y-3">
             {finalWishes.map((wish, i) => (
-              <div key={wish.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+              <div key={wish.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -140,7 +140,7 @@ export function FinalWishes() {
       {tab === "funeral" && (
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Service Details</h3>
               <div className="space-y-3">
                 {[
@@ -157,7 +157,7 @@ export function FinalWishes() {
                 ))}
               </div>
             </div>
-            <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Service Preferences</h3>
               <div className="space-y-3">
                 <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
@@ -187,9 +187,9 @@ export function FinalWishes() {
               </div>
             </div>
           </div>
-          <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 12 }}>Obituary Draft</h3>
-            <div className="p-4 rounded-xl" style={{ background: "#1C1C28", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8 }}>
+            <div className="p-4 rounded-xl glow-surface" style={{ background: "#1C1C28", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8 }}>
               {funeralPlan.obituaryDraft}
             </div>
             <button className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}>

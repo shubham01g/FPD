@@ -84,7 +84,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
       {/* stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
-          <div key={card.label} className="p-5 relative overflow-hidden fpd-hover-lift fpd-fade-in-up" style={{
+          <div key={card.label} className="p-5 relative overflow-hidden fpd-hover-lift glow-surface fpd-fade-in-up" style={{
             ...CARD, borderRadius:20, animationDelay:`${i*60}ms`,
             ...(card.filled ? { background:`linear-gradient(135deg,${ACCENT},${ACCENT2})`, border:"none", boxShadow:"0 8px 28px rgba(108,92,231,0.45)" } : {}),
           }}>
@@ -106,7 +106,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
       {/* storage chart + document verification gauge + profile */}
       <div className="grid lg:grid-cols-5 gap-5">
-        <div className="lg:col-span-3 p-6 fpd-hover-lift" style={CARD}>
+        <div className="lg:col-span-3 p-6 fpd-hover-lift glow-surface" style={CARD}>
           <div className="flex items-center justify-between mb-1">
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:TEXT }}>Storage Usage — 6 Months</h3>
             <span className="px-2.5 py-1 rounded-full" style={{ background: pct>=80?"rgba(246,173,85,0.16)":"rgba(72,187,120,0.14)", color: pct>=80?"#F6AD55":"#48BB78", fontSize:10.5, fontWeight:700 }}>
@@ -151,7 +151,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
         </div>
 
-        <div className="lg:col-span-1 p-5 flex flex-col items-center text-center fpd-hover-lift" style={CARD}>
+        <div className="lg:col-span-1 p-5 flex flex-col items-center text-center fpd-hover-lift glow-surface" style={CARD}>
           <h3 style={{ fontFamily:"var(--font-display)", fontSize:13, color:TEXT, alignSelf:"flex-start", marginBottom:2 }}>Document Verification</h3>
           <p style={{ color:MUTED, fontSize:10.5, alignSelf:"flex-start", marginBottom:10 }}>{docsVerified} of {docsTotal} verified</p>
           <svg width="110" height="110" viewBox="0 0 110 110">
@@ -163,7 +163,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           <p style={{ color:MUTED, fontSize:10.5, marginTop:8 }}>{docsPending} awaiting review</p>
         </div>
 
-        <div className="lg:col-span-1 p-5 flex flex-col items-center text-center fpd-hover-lift" style={CARD}>
+        <div className="lg:col-span-1 p-5 flex flex-col items-center text-center fpd-hover-lift glow-surface" style={CARD}>
           <div className="flex items-center justify-center rounded-full mb-3" style={{ width:56, height:56, background:"rgba(108,92,231,0.25)", color:HILITE, fontFamily:"var(--font-display)", fontSize:18 }}>J</div>
           <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:TEXT }}>James</div>
           <div style={{ color:MUTED, fontSize:10.5, marginBottom:14 }}>Legacy Vault Member</div>
@@ -186,7 +186,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
       {/* documents + activity */}
       <div className="grid lg:grid-cols-2 gap-5">
-        <div className="p-6 fpd-hover-lift" style={CARD}>
+        <div className="p-6 fpd-hover-lift glow-surface" style={CARD}>
           <div className="flex items-center justify-between mb-5">
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:TEXT }}>Recent Documents</h3>
             <button onClick={()=>onNavigate("legacy-vault")} style={{ color:HILITE, fontSize:12 }}>Open Vault →</button>
@@ -209,7 +209,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
         </div>
 
-        <div className="p-6 fpd-hover-lift" style={CARD}>
+        <div className="p-6 fpd-hover-lift glow-surface" style={CARD}>
           <div className="flex items-center justify-between mb-5">
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:TEXT }}>Activity Feed</h3>
             <Bell size={14} color={MUTED} />
@@ -236,7 +236,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           { label:"Check Storage", icon:<HardDrive size={15}/>, page:"storage-usage", color:"#F6AD55" },
           { label:"Refer & Earn", icon:<TrendingUp size={15}/>, page:"affiliate", color:"#9F7AEA" },
         ].map(action => (
-          <button key={action.label} onClick={()=>onNavigate(action.page)} className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-left fpd-hover-lift" style={CARD}>
+          <button key={action.label} onClick={()=>onNavigate(action.page)} className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-left fpd-hover-lift glow-surface" style={CARD}>
             <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${action.color}1E`, color:action.color }}>{action.icon}</div>
             <span style={{ color:TEXT, fontSize:12, fontWeight:500 }}>{action.label}</span>
           </button>

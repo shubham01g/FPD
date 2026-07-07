@@ -260,7 +260,7 @@ function AdminCard({
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={CARD}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -523,7 +523,7 @@ export function AdminRoles() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -531,7 +531,7 @@ export function AdminRoles() {
       </div>
 
       {/* Role reference */}
-      <div className="p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
+      <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
         <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:10 }}>ROLE PRESETS — QUICK REFERENCE</div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][]).map(([key, r]) => (

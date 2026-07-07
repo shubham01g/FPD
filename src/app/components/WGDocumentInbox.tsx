@@ -322,7 +322,7 @@ function SendLinkModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-md rounded-2xl overflow-hidden" style={GLASS}>
+      <div className="w-full max-w-md rounded-2xl overflow-hidden glow-surface" style={GLASS}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
           style={{ borderColor:"rgba(108,92,231,0.08)" }}>
           <div className="flex items-center gap-2">
@@ -484,7 +484,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       </div>
 
       {/* Send link buttons per client */}
-      <div className="p-4 rounded-2xl space-y-3" style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.15)" }}>
+      <div className="p-4 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.15)" }}>
         <div style={{ color:"#9F7AEA", fontSize:11, fontWeight:700, ...MONO }}>SEND UPLOAD LINK TO CLIENT</div>
         <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
           Send each client a simple link they can open on their phone to photograph and upload their documents. No app or login required.
@@ -518,7 +518,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
 
       {/* Document list */}
       {filtered.length === 0 ? (
-        <div className="py-12 text-center rounded-2xl" style={GLASS}>
+        <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}>
           <Inbox size={36} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
           <div style={{ color:"#8A9AB8", fontSize:14 }}>
             {filter === "all" ? "No documents submitted yet." : `No ${filter} documents.`}
@@ -539,7 +539,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
             }[doc.status];
 
             return (
-              <div key={doc.id} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={doc.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div className="flex items-start gap-4">
                   {/* Thumbnail or icon */}
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"

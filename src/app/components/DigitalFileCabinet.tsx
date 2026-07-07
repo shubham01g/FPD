@@ -370,7 +370,7 @@ export function DigitalFileCabinet() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex gap-1 p-1 rounded-xl" style={CARD}>
+            <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
               <button onClick={() => setView("grid")} className="p-2 rounded-lg" style={{ background:view==="grid"?"#6C5CE7":"transparent", color:view==="grid"?"#fff":"rgba(255,255,255,0.7)" }}><Grid size={13}/></button>
               <button onClick={() => setView("list")} className="p-2 rounded-lg" style={{ background:view==="list"?"#6C5CE7":"transparent", color:view==="list"?"#fff":"rgba(255,255,255,0.7)" }}><List size={13}/></button>
             </div>

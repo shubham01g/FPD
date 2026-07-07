@@ -68,7 +68,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.88)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-xl rounded-2xl relative overflow-hidden" style={GLASS}>
+      <div className="w-full max-w-xl rounded-2xl relative overflow-hidden glow-surface" style={GLASS}>
         <button onClick={onClose} className="absolute top-5 right-5 z-10" style={{ color:"rgba(255,255,255,0.7)" }}><X size={16}/></button>
 
         {/* Header */}
@@ -92,7 +92,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {/* ── Locked state ── */}
           {!isUnlocked && step === "overview" && (
             <div className="space-y-5">
-              <div className="p-5 rounded-2xl text-center"
+              <div className="p-5 rounded-2xl text-center glow-surface"
                 style={{ background:"rgba(229,62,62,0.08)", border:"2px solid rgba(229,62,62,0.25)" }}>
                 <AlertTriangle size={32} color="#FC8181" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"#FC8181", fontSize:16, fontFamily:"var(--font-display)", marginBottom:8 }}>
@@ -115,7 +115,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl space-y-3" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
+              <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
                 <div style={{ color:"#A29BFE", fontSize:12, fontWeight:700, ...MONO }}>WHAT GETS UNLOCKED</div>
                 <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, lineHeight:1.7 }}>
                   Once both conditions are met, legacy contacts can click this button to download a complete, encrypted package of <strong style={{ color:"#E8EDF5" }}>everything</strong> in this account — {totalItems}+ items across all 30+ life categories.
@@ -141,7 +141,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {/* ── Unlocked: Overview ── */}
           {isUnlocked && step === "overview" && (
             <div className="space-y-5">
-              <div className="p-4 rounded-2xl flex items-start gap-3"
+              <div className="p-4 rounded-2xl flex items-start gap-3 glow-surface"
                 style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.25)" }}>
                 <Shield size={16} color="#48BB78" style={{ marginTop:1, flexShrink:0 }}/>
                 <div>
@@ -196,7 +196,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {/* ── Confirm ── */}
           {isUnlocked && step === "confirm" && (
             <div className="space-y-5">
-              <div className="p-5 rounded-2xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
+              <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle size={16} color="#F6AD55"/>
                   <span style={{ color:"#F6AD55", fontSize:13, fontWeight:700 }}>Confirm Complete Download</span>
@@ -208,7 +208,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
+              <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
                 <div style={{ color:"rgba(255,255,255,0.55)", fontSize:11, ...MONO, marginBottom:8 }}>DOWNLOAD SUMMARY</div>
                 {[
                   ["Total Items",      `${totalItems}+ records`],
@@ -290,7 +290,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 <div style={{ color:"#48BB78", fontFamily:"var(--font-mono)", fontSize:15, fontWeight:700 }}>{downloadId}</div>
               </div>
 
-              <div className="p-4 rounded-2xl text-left space-y-2"
+              <div className="p-4 rounded-2xl text-left space-y-2 glow-surface"
                 style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.18)" }}>
                 <div style={{ color:"#F6AD55", fontSize:11, fontWeight:700, ...MONO }}>IMPORTANT</div>
                 <p style={{ color:"rgba(255,255,255,0.6)", fontSize:12, lineHeight:1.7 }}>

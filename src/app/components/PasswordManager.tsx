@@ -80,7 +80,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={CARD}>
+      <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
           <div className="flex items-center gap-2">
             <Key size={18} color="#6C5CE7"/>
@@ -207,7 +207,7 @@ export function PasswordManager() {
             { label:"Weak/Fair Passwords", value:passwords.filter(p=>p.strength==="weak"||p.strength==="fair").length, color:"#FC8181" },
             { label:"2FA Enabled", value:passwords.filter(p=>p.twoFactor).length, color:"#9F7AEA" },
           ].map(s => (
-            <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
+            <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
               <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>{s.label}</div>
             </div>
@@ -216,12 +216,12 @@ export function PasswordManager() {
 
         {/* Search + Category */}
         <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48" style={CARD}>
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48 glow-surface" style={CARD}>
             <Search size={13} color="rgba(255,255,255,0.65)"/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search passwords..."
               style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
           </div>
-          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto" style={CARD}>
+          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto glow-surface" style={CARD}>
             {categories.slice(0,6).map(c => (
               <button key={c} onClick={() => setCategory(c)}
                 className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
@@ -270,7 +270,7 @@ export function PasswordManager() {
           {/* Detail panel */}
           <div>
             {selected ? (
-              <div className="rounded-2xl p-5 sticky top-4 space-y-4" style={CARD}>
+              <div className="rounded-2xl p-5 sticky top-4 space-y-4 glow-surface" style={CARD}>
                 <div className="flex items-center justify-between">
                   <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>{selected.title}</div>
                   <div className="flex gap-1">
@@ -344,7 +344,7 @@ export function PasswordManager() {
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>Last updated: {selected.lastUpdated}</div>
               </div>
             ) : (
-              <div className="rounded-2xl p-8 text-center" style={CARD}>
+              <div className="rounded-2xl p-8 text-center glow-surface" style={CARD}>
                 <Key size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Select a password entry to view details</div>
               </div>

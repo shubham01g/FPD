@@ -43,7 +43,7 @@ function OTPModal({ method, contact, onVerify, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-7" style={CARD}>
+      <div className="w-full max-w-sm rounded-2xl p-7 glow-surface" style={CARD}>
         <div className="flex items-center justify-between mb-5">
           <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Verify Your Identity</h3>
           <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
@@ -191,7 +191,7 @@ export function AccountSettings() {
       {tab === "profile" && (
         <div className="space-y-5">
           {/* Avatar */}
-          <div className="p-6 rounded-2xl" style={CARD}>
+          <div className="p-6 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:16 }}>Profile Photo</div>
             <div className="flex items-center gap-6">
               <div className="relative">
@@ -224,7 +224,7 @@ export function AccountSettings() {
           </div>
 
           {/* Profile fields */}
-          <div className="p-6 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Personal Information</div>
             {[
               { label:"FULL NAME",     value:name,  set:setName,  ph:"Your full name",     icon:<User size={14}/>,  type:"text" },
@@ -273,7 +273,7 @@ export function AccountSettings() {
           </div>
 
           {/* 2FA method selection */}
-          <div className="p-6 rounded-2xl space-y-5" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-5 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Two-Factor Authentication (2FA)</div>
 
             <div className="grid md:grid-cols-3 gap-3">
@@ -340,7 +340,7 @@ export function AccountSettings() {
           </div>
 
           {/* Change password */}
-          <div className="p-6 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Change Password</div>
             {[
               { label:"CURRENT PASSWORD", value:currentPw, set:setCurrentPw, show:showCurrentPw, toggle:() => setShowCurrentPw(!showCurrentPw) },
@@ -379,7 +379,7 @@ export function AccountSettings() {
       {tab === "encryption" && (
         <div className="space-y-5">
           {/* Active encryption banner */}
-          <div className="p-5 rounded-2xl flex items-start gap-4"
+          <div className="p-5 rounded-2xl flex items-start gap-4 glow-surface"
             style={{ background:"rgba(72,187,120,0.06)", border:"2px solid rgba(72,187,120,0.3)" }}>
             <div className="flex items-center justify-center rounded-xl flex-shrink-0"
               style={{ width:48, height:48, background:"rgba(72,187,120,0.12)" }}>
@@ -396,7 +396,7 @@ export function AccountSettings() {
           </div>
 
           {/* How it works */}
-          <div className="p-6 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>How Your Files Are Protected</div>
             <div className="space-y-3">
               {[
@@ -421,7 +421,7 @@ export function AccountSettings() {
                   desc:"Your encryption key is derived from your master password using PBKDF2 (100,000 iterations, SHA-256). This key is never transmitted to FPD. We mathematically cannot read your files — not even if we wanted to.",
                 },
               ].map(s => (
-                <div key={s.step} className="flex items-start gap-4 p-4 rounded-xl"
+                <div key={s.step} className="flex items-start gap-4 p-4 rounded-xl glow-surface"
                   style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.08)" }}>
                   <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
                     style={{ width:32, height:32, background:`${s.color}15`, color:s.color, fontFamily:"var(--font-mono)", fontSize:13 }}>
@@ -443,7 +443,7 @@ export function AccountSettings() {
               { label:"Key Derivation",       value:"PBKDF2",      color:"#9F7AEA", sub:"100,000 iterations" },
               { label:"Architecture",         value:"Zero-Knowledge", color:"#48BB78", sub:"FPD cannot read your data" },
             ].map(s => (
-              <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+              <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
                 <div style={{ color:s.color, fontSize:15, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
                 <div style={{ color:"#FFFFFF", fontSize:11, fontWeight:500, marginTop:4 }}>{s.label}</div>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, marginTop:2 }}>{s.sub}</div>
@@ -452,7 +452,7 @@ export function AccountSettings() {
           </div>
 
           {/* Encrypted badge shown on all files */}
-          <div className="p-5 rounded-2xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+          <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
             <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:8 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
             <div className="flex flex-wrap gap-2">
               {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
@@ -475,7 +475,7 @@ export function AccountSettings() {
       {/* ── Notifications tab ── */}
       {tab === "notifications" && (
         <div className="space-y-4">
-          <div className="p-6 rounded-2xl space-y-5" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-5 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Notification Preferences</div>
             {[
               { label:"Email Notifications",        sub:"Receive important updates to your email address",       value:notifEmail,          set:setNotifEmail },

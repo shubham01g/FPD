@@ -39,9 +39,9 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partnership badge */}
-      <div className="p-6 rounded-xl border" style={{ background: "linear-gradient(135deg, rgba(108,92,231,0.06), rgba(159,122,234,0.04))", borderColor: "var(--gold)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(108,92,231,0.06), rgba(159,122,234,0.04))", borderColor: "var(--gold)" }}>
         <div className="flex items-center gap-4">
-          <div className="rounded-2xl p-3" style={{ background: "rgba(108,92,231,0.15)" }}>
+          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(108,92,231,0.15)" }}>
             <Star size={28} color="var(--gold)" />
           </div>
           <div>
@@ -90,7 +90,7 @@ export function PartnershipProgram() {
           { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#48BB78" },
           { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#9F7AEA" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 500 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -99,7 +99,7 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partner link */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Your Partner Referral Link</h3>
         <div className="flex gap-3">
           <div className="flex items-center gap-3 flex-1 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
@@ -118,7 +118,7 @@ export function PartnershipProgram() {
       </div>
 
       {/* Recurring chart */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Monthly Recurring Revenue</h3>
           <div className="flex items-center gap-1" style={{ color: "#48BB78", fontSize: 13 }}>

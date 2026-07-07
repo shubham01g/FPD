@@ -110,7 +110,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
           <p style={{ color:"#5A6A88", fontSize:14, lineHeight:1.8, marginBottom:32 }}>
             You start at <strong style={{ color:"#4A90D9" }}>Tier 1 (20% commission)</strong>. As you grow to 51+ accounts you automatically advance to Tier 2 (25%), and 101+ unlocks Tier 3 (30%).
           </p>
-          <div className="p-5 rounded-2xl mb-6" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
+          <div className="p-5 rounded-2xl mb-6 glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#5A6A88", fontSize:10, ...MONO, marginBottom:6 }}>YOUR PARTNER REFERENCE</div>
             <div style={{ ...MONO, fontSize:20, color:"#6C5CE7", fontWeight:700, marginBottom:4 }}>{refCode}</div>
             <div style={{ color:"#8A9AB8", fontSize:11 }}>Your unique referral link will be emailed within 24 hours</div>
@@ -155,7 +155,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             {/* Setup fee card */}
-            <div className="rounded-2xl p-7 text-center" style={{ ...GLASS, border:"2px solid rgba(108,92,231,0.2)", background:"rgba(108,92,231,0.02)" }}>
+            <div className="rounded-2xl p-7 text-center glow-surface" style={{ ...GLASS, border:"2px solid rgba(108,92,231,0.2)", background:"rgba(108,92,231,0.02)" }}>
               <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:8 }}>ONE-TIME SETUP FEE</div>
               <div style={{ ...DISPLAY, fontSize:56, color:"#6C5CE7", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
               <div style={{ color:"#5A6A88", fontSize:14, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
@@ -191,7 +191,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             {/* Earnings estimate */}
-            <div className="rounded-2xl p-6" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
+            <div className="rounded-2xl p-6 glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
               <div style={{ color:"#6C5CE7", fontSize:11, ...MONO, marginBottom:12 }}>ESTIMATED MONTHLY EARNINGS AT SCALE</div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 {[
@@ -227,7 +227,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               <h1 style={{ ...DISPLAY, fontSize:28, color:"#0D1428", marginBottom:6 }}>Your Organization</h1>
               <p style={{ color:"#5A6A88", fontSize:14 }}>Tell us about your business so we can set up your partner account.</p>
             </div>
-            <div className="rounded-2xl p-8 space-y-5" style={GLASS}>
+            <div className="rounded-2xl p-8 space-y-5 glow-surface" style={GLASS}>
               <div>
                 <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>ORGANIZATION TYPE</label>
                 <div className="flex flex-wrap gap-2">
@@ -284,7 +284,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
             <div className="space-y-4">
               {/* Summary */}
-              <div className="rounded-2xl p-6" style={{ ...GLASS, border:"2px solid rgba(108,92,231,0.2)" }}>
+              <div className="rounded-2xl p-6 glow-surface" style={{ ...GLASS, border:"2px solid rgba(108,92,231,0.2)" }}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div style={{ ...DISPLAY, fontSize:18, color:"#0D1428" }}>Final Pass Down Partner Setup</div>
@@ -310,7 +310,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               </div>
 
               {/* Payment form */}
-              <div className="rounded-2xl p-6 space-y-4" style={GLASS}>
+              <div className="rounded-2xl p-6 space-y-4 glow-surface" style={GLASS}>
                 <div style={{ color:"#5A6A88", fontSize:11, ...MONO }}>PAYMENT DETAILS — STRIPE SECURE CHECKOUT</div>
                 <div>
                   <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>CARDHOLDER NAME</label>
@@ -467,7 +467,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { label:"Monthly Earned",  value:`$${stats.monthlyEarned.toLocaleString()}`, sub:"This month",  color:"#9F7AEA" },
                   { label:"Total Earned",    value:`$${stats.totalEarned.toLocaleString()}`,   sub:"All time",    color:"#F6AD55" },
                 ].map(kpi => (
-                  <div key={kpi.label} className="p-4 rounded-2xl" style={GLASS}>
+                  <div key={kpi.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
                     <div style={{ color:"#5A6A88", fontSize:9, ...MONO, marginBottom:6 }}>{kpi.label.toUpperCase()}</div>
                     <div style={{ ...DISPLAY, fontSize:22, color:"#0D1428", marginBottom:2 }}>{kpi.value}</div>
                     <div style={{ color:"#8A9AB8", fontSize:10 }}>{kpi.sub}</div>
@@ -500,7 +500,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
               )}
 
               {/* Commission bar chart */}
-              <div className="p-5 rounded-2xl" style={GLASS}>
+              <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{ ...DISPLAY, fontSize:14, color:"#0D1428", marginBottom:2 }}>Monthly Commission Earnings</div>
                 <div style={{ color:"#8A9AB8", fontSize:10, marginBottom:14 }}>Last 6 months</div>
                 {(() => {
@@ -529,12 +529,12 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)", background:"rgba(72,187,120,0.03)" }}>
+                <div className="p-5 rounded-2xl glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)", background:"rgba(72,187,120,0.03)" }}>
                   <div style={{ color:"#48BB78", fontSize:9, ...MONO, marginBottom:6 }}>NEXT PAYOUT</div>
                   <div style={{ ...DISPLAY, fontSize:24, color:"#0D1428", marginBottom:2 }}>${stats.pendingPayout.toLocaleString()}</div>
                   <div style={{ color:"#5A6A88", fontSize:11 }}>Scheduled {stats.nextPayout} · Auto-deposit</div>
                 </div>
-                <div className="p-5 rounded-2xl space-y-2" style={GLASS}>
+                <div className="p-5 rounded-2xl space-y-2 glow-surface" style={GLASS}>
                   <div style={{ color:"#5A6A88", fontSize:9, ...MONO, marginBottom:4 }}>QUICK ACTIONS</div>
                   {[
                     { label:"Copy Referral Link", fn:()=>{ copyToClipboard("https://finalpassdown.com/ref/HTC-2026"); toast.success("Referral link copied!") } },
@@ -565,7 +565,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   <Copy size={12}/> Copy Referral Link
                 </button>
               </div>
-              <div className="rounded-2xl overflow-hidden" style={GLASS}>
+              <div className="rounded-2xl overflow-hidden glow-surface" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(108,92,231,0.08)" }}>
@@ -606,13 +606,13 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { label:"Pending",       value:`$${stats.pendingPayout.toLocaleString()}`, color:"#F6AD55" },
                   { label:"Next Pay Date", value:stats.nextPayout, color:"#48BB78" },
                 ].map(k => (
-                  <div key={k.label} className="p-4 rounded-2xl" style={GLASS}>
+                  <div key={k.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
                     <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:5 }}>{k.label.toUpperCase()}</div>
                     <div style={{ ...DISPLAY, fontSize:20, color:k.color }}>{k.value}</div>
                   </div>
                 ))}
               </div>
-              <div className="rounded-2xl overflow-hidden" style={GLASS}>
+              <div className="rounded-2xl overflow-hidden glow-surface" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(108,92,231,0.08)" }}>
@@ -651,7 +651,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { title:"Client Onboarding Guide", desc:"Step-by-step guide to onboard clients onto FPD", emoji:"📋" },
                   { title:"Tier Advancement Guide",  desc:"How to move from Tier 1 → 2 → 3",              emoji:"📈" },
                 ].map(r => (
-                  <div key={r.title} className="p-5 rounded-2xl flex items-start gap-4" style={GLASS}>
+                  <div key={r.title} className="p-5 rounded-2xl flex items-start gap-4 glow-surface" style={GLASS}>
                     <span style={{ fontSize:26 }}>{r.emoji}</span>
                     <div className="flex-1">
                       <div style={{ color:"#0D1428", fontSize:13, fontWeight:600, marginBottom:2 }}>{r.title}</div>
@@ -680,7 +680,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                 { label:"Setup Fee Paid",    value:"$599 · Jun 2025 · Confirmed" },
                 { label:"Current Tier",      value:`${currentTier.label} — ${currentTier.rate}% commission (${stats.accounts} accounts)` },
               ].map(f => (
-                <div key={f.label} className="flex items-center justify-between p-4 rounded-xl" style={GLASS}>
+                <div key={f.label} className="flex items-center justify-between p-4 rounded-xl glow-surface" style={GLASS}>
                   <div>
                     <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{f.label.toUpperCase()}</div>
                     <div style={{ color:"#0D1428", fontSize:12, marginTop:2 }}>{f.value}</div>

@@ -141,7 +141,7 @@ export function DaycareInfo() {
 
       <div className="space-y-4">
         {records.map(rec => (
-          <div key={rec.id} className="rounded-2xl overflow-hidden" style={CARD}>
+          <div key={rec.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
             {/* Header */}
             <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===rec.id ? null : rec.id)}>
               <div className="flex items-start justify-between gap-4">
@@ -223,7 +223,7 @@ export function DaycareInfo() {
                         These individuals are authorized to pick up {rec.childName}. All must present a government-issued photo ID to facility staff.
                       </div>
                       {rec.authorizedPickups.map((p,i) => (
-                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
                           <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0" style={{ width:40, height:40, background:"rgba(159,122,234,0.12)", color:"#9F7AEA", fontFamily:"var(--font-display)", fontSize:14 }}>
                             {p.name.split(" ").map((w:string)=>w[0]).join("").slice(0,2)}
                           </div>
@@ -268,7 +268,7 @@ export function DaycareInfo() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Daycare / Childcare</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

@@ -147,7 +147,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
   /* ── IDLE — choose call type ─────────────────────────────────────── */
   if (callState === "idle") {
     return (
-      <div className="rounded-2xl p-5 space-y-4"
+      <div className="rounded-2xl p-5 space-y-4 glow-surface"
         style={{ background:"rgba(159,122,234,0.04)", border:"1px dashed rgba(159,122,234,0.25)" }}>
 
         {/* Header */}
@@ -278,7 +278,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
   /* ── ENDED ───────────────────────────────────────────────────────── */
   if (callState === "ended") {
     return (
-      <div className="rounded-2xl p-5 space-y-3"
+      <div className="rounded-2xl p-5 space-y-3 glow-surface"
         style={{ background:"rgba(72,187,120,0.05)", border:"1px solid rgba(72,187,120,0.2)" }}>
         <div className="flex items-center gap-3">
           <CheckCircle size={20} color="#48BB78"/>

@@ -228,7 +228,7 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
 
 function StatChip({ label, value, sub, color }: { label:string; value:string|number; sub?:string; color:string }) {
   return (
-    <div className="p-4 rounded-2xl" style={{ background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)" }}>
+    <div className="p-4 rounded-2xl glow-surface" style={{ background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)" }}>
       <div style={{ fontFamily:"var(--font-display)", fontSize:26, color, lineHeight:1 }}>{value}</div>
       <div style={{ color:"#0D1428", fontSize:12, fontWeight:500, marginTop:4 }}>{label}</div>
       {sub && <div style={{ color:"#8A9AB8", fontSize:10, marginTop:2 }}>{sub}</div>}
@@ -371,7 +371,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               ))}
 
               {/* White Glove toggle */}
-              <div className="flex items-center justify-between p-4 rounded-xl" style={{ background:"rgba(159,122,234,0.06)", border:"1px solid rgba(159,122,234,0.25)" }}>
+              <div className="flex items-center justify-between p-4 rounded-xl glow-surface" style={{ background:"rgba(159,122,234,0.06)", border:"1px solid rgba(159,122,234,0.25)" }}>
                 <div>
                   <div className="flex items-center gap-2">
                     <Star size={14} color="#9F7AEA"/>
@@ -466,7 +466,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               </div>
 
               {/* Send welcome email toggle */}
-              <div className="flex items-center justify-between p-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+              <div className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
                 <div className="flex items-center gap-2">
                   <Send size={13} color="#6C5CE7"/>
                   <span style={{ color:"#0D1428", fontSize:13 }}>Send welcome email to user</span>
@@ -638,7 +638,7 @@ function PushNotificationCenter() {
           { label:"Avg Open Rate",         value:`${avgOpenRate}%`,               color:"#9F7AEA" },
           { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
             <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -660,7 +660,7 @@ function PushNotificationCenter() {
       {view === "compose" && (
         <div className="grid md:grid-cols-2 gap-5">
           {/* Form */}
-          <div className="p-6 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Compose Push Notification</div>
 
             {/* Type */}
@@ -745,7 +745,7 @@ function PushNotificationCenter() {
             </div>
 
             {/* Schedule toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl"
+            <div className="flex items-center justify-between p-3 rounded-xl glow-surface"
               style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
               <div>
                 <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Schedule for later</div>
@@ -784,13 +784,13 @@ function PushNotificationCenter() {
 
           {/* Live preview */}
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl" style={CARD}>
+            <div className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div style={{ color:"#5A6A88", fontSize:12, fontFamily:"var(--font-mono)", marginBottom:12 }}>LIVE PREVIEW</div>
 
               {/* Mobile push notification mockup */}
-              <div className="rounded-2xl p-4 space-y-3" style={{ background:"#1A1A2E", border:"1px solid rgba(255,255,255,0.1)" }}>
+              <div className="rounded-2xl p-4 space-y-3 glow-surface" style={{ background:"#1A1A2E", border:"1px solid rgba(255,255,255,0.1)" }}>
                 <div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, fontFamily:"var(--font-mono)" }}>LOCK SCREEN NOTIFICATION</div>
-                <div className="flex items-start gap-3 p-3 rounded-xl"
+                <div className="flex items-start gap-3 p-3 rounded-xl glow-surface"
                   style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(10px)" }}>
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                     style={{ width:36, height:36, background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)" }}>
@@ -811,7 +811,7 @@ function PushNotificationCenter() {
               </div>
 
               {/* In-app notification preview */}
-              <div className="mt-4 rounded-2xl p-4 space-y-3" style={{ background:"#F0F4FA", border:"1px solid rgba(108,92,231,0.1)" }}>
+              <div className="mt-4 rounded-2xl p-4 space-y-3 glow-surface" style={{ background:"#F0F4FA", border:"1px solid rgba(108,92,231,0.1)" }}>
                 <div style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
                 <div className="flex items-start gap-3 px-4 py-3 rounded-xl"
                   style={{ background:"#fff", border:"1px solid rgba(108,92,231,0.1)" }}>
@@ -827,7 +827,7 @@ function PushNotificationCenter() {
             </div>
 
             {/* Tips */}
-            <div className="p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+            <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
               <div style={{ color:"#6C5CE7", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
               <ul className="space-y-1.5">
                 {[
@@ -852,7 +852,7 @@ function PushNotificationCenter() {
       {view === "history" && (
         <div className="space-y-3">
           {history.map(n => (
-            <div key={n.id} className="p-5 rounded-2xl" style={CARD}>
+            <div key={n.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"
@@ -951,7 +951,7 @@ export function MasterAdmin() {
             style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 16px rgba(108,92,231,0.35)" }}>
             <UserPlus size={14}/> Onboard User
           </button>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={GLASS}>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
             <Activity size={13} color="#48BB78" />
             <span style={{ color:"#48BB78", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
           </div>
@@ -981,7 +981,7 @@ export function MasterAdmin() {
       {/* Top metrics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {topMetrics.map(m => (
-          <div key={m.label} className="p-4 rounded-2xl" style={GLASS}>
+          <div key={m.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center justify-between mb-2">
               <div style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
@@ -1345,7 +1345,7 @@ export function MasterAdmin() {
                 { label:"Storage Overage Rate",     value:"8.4%",      sub:"Users over plan limit", color:"#F6AD55" },
                 { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#48BB78" },
               ].map(m => (
-                <div key={m.label} className="p-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.08)" }}>
+                <div key={m.label} className="p-3 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.08)" }}>
                   <div style={{ color:m.color, fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>{m.value}</div>
                   <div style={{ color:"#0D1428", fontSize:11, fontWeight:500, marginTop:2 }}>{m.label}</div>
                   <div style={{ color:"#8A9AB8", fontSize:10, marginTop:1 }}>{m.sub}</div>
@@ -1361,7 +1361,7 @@ export function MasterAdmin() {
       {tab === "overview" && (
         <div className="space-y-5">
           <div className="grid lg:grid-cols-3 gap-5">
-            <div className="lg:col-span-2 p-6 rounded-2xl" style={GLASS}>
+            <div className="lg:col-span-2 p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
               <div className="flex items-center gap-4 mb-4">
                 {[{color:"#6C5CE7",label:"MRR"},{color:"#9F7AEA",label:"Overage"}].map(l=>(
@@ -1385,7 +1385,7 @@ export function MasterAdmin() {
                 })}
               </div>
             </div>
-            <div className="p-6 rounded-2xl" style={GLASS}>
+            <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:16 }}>Plan Distribution</h3>
               <div className="space-y-3">
                 {planDist.map(p => {
@@ -1407,7 +1407,7 @@ export function MasterAdmin() {
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
-            <div className="p-6 rounded-2xl" style={GLASS}>
+            <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>User Growth vs Churn</h3>
               <div className="flex items-center gap-4 mb-4">
                 {[{color:"#6C5CE7",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
@@ -1429,7 +1429,7 @@ export function MasterAdmin() {
                 })}
               </div>
             </div>
-            <div className="p-6 rounded-2xl" style={GLASS}>
+            <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:16 }}>ID Verification Queue</h3>
               {pendingVerifications.length > 0 && (
                 <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{background:"rgba(246,173,85,0.08)",border:"1px solid rgba(246,173,85,0.25)"}}>
@@ -1439,7 +1439,7 @@ export function MasterAdmin() {
               )}
               <div className="space-y-2">
                 {pendingVerifications.map(v=>(
-                  <div key={v.id} className="flex items-center justify-between p-3 rounded-xl" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
+                  <div key={v.id} className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
                     <div>
                       <div style={{color:"#0D1428",fontSize:13}}>{v.contact}</div>
                       <div style={{color:"#5A6A88",fontSize:11}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
@@ -1460,7 +1460,7 @@ export function MasterAdmin() {
       {tab === "users" && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1" style={GLASS}>
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 glow-surface" style={GLASS}>
               <Search size={13} color="#5A6A88"/>
               <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:13,width:"100%"}}/>
             </div>
@@ -1502,7 +1502,7 @@ export function MasterAdmin() {
           {/* User detail modal */}
           {selectedUser && (
             <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:"rgba(0,0,0,0.8)",backdropFilter:"blur(8px)"}}>
-              <div className="w-full max-w-lg rounded-2xl p-7" style={GLASS}>
+              <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
                 <div className="flex items-center justify-between mb-6">
                   <h3 style={{fontFamily:"var(--font-display)",fontSize:18,color:"#0D1428"}}>{selectedUser.name}</h3>
                   <button onClick={()=>setSelectedUser(null)} style={{color:"#5A6A88"}}>✕</button>
@@ -1530,14 +1530,14 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#6C5CE7"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#9F7AEA"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#48BB78"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
-              <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
                 <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
                 <div style={{color:"#5A6A88",fontSize:11,marginTop:2,...MONO}}>{s.sub}</div>
               </div>
             ))}
           </div>
-          <div className="p-6 rounded-2xl" style={GLASS}>
+          <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
             <div className="flex items-center gap-4 mb-4">
               {[{color:"#6C5CE7",label:"Subscriptions"},{color:"#9F7AEA",label:"Overage"},{color:"#48BB78",label:"Affiliates"}].map(l=>(
@@ -1568,7 +1568,7 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div className="grid md:grid-cols-3 gap-5">
             {storageByPlan.map(s=>(
-              <div key={s.plan} className="p-6 rounded-2xl" style={GLASS}>
+              <div key={s.plan} className="p-6 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{color:"#6C5CE7",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
                 <div style={{fontFamily:"var(--font-display)",fontSize:28,color:"#0D1428"}}>{s.avgUsed} GB</div>
                 <div style={{color:"#5A6A88",fontSize:13,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
@@ -1579,11 +1579,11 @@ export function MasterAdmin() {
               </div>
             ))}
           </div>
-          <div className="p-6 rounded-2xl" style={GLASS}>
+          <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:16}}>Platform Storage Totals</h3>
             <div className="grid grid-cols-4 gap-4">
               {[{label:"Total Data Stored",value:"428.4 TB",color:"#6C5CE7"},{label:"Total Overage Billed",value:"52,120 GB",color:"#9F7AEA"},{label:"Avg per User",value:"12.4 GB",color:"#48BB78"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
-                <div key={s.label} className="p-4 rounded-xl" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
+                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
                   <div style={{color:"#5A6A88",fontSize:12,marginTop:4}}>{s.label}</div>
                 </div>
@@ -1598,14 +1598,14 @@ export function MasterAdmin() {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#48BB78"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#6C5CE7"}].map(s=>(
-              <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:28,color:s.color}}>{s.value}</div>
                 <div style={{color:"#5A6A88",fontSize:13,marginTop:4}}>{s.label}</div>
               </div>
             ))}
           </div>
           {pendingVerifications.map(v=>(
-            <div key={v.id} className="p-6 rounded-2xl" style={GLASS}>
+            <div key={v.id} className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div style={{fontFamily:"var(--font-display)",fontSize:16,color:"#0D1428",marginBottom:2}}>{v.contact}</div>
@@ -1613,7 +1613,7 @@ export function MasterAdmin() {
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs" style={{background:"rgba(246,173,85,0.12)",color:"#F6AD55",...MONO,fontWeight:700}}>PENDING REVIEW</span>
               </div>
-              <div className="flex items-center gap-2 mb-4 p-4 rounded-xl" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
+              <div className="flex items-center gap-2 mb-4 p-4 rounded-xl glow-surface" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.1)"}}>
                 <div style={{color:"#5A6A88",fontSize:13}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
               </div>
               <div className="flex gap-3">
@@ -1637,20 +1637,20 @@ export function MasterAdmin() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#6C5CE7"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#48BB78"}].map(s=>(
-              <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
                 <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
                 <div style={{color:"#5A6A88",fontSize:11,marginTop:2,...MONO}}>{s.n} recipients</div>
               </div>
             ))}
           </div>
-          <div className="p-6 rounded-2xl" style={GLASS}>
+          <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center justify-between mb-4">
               <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428"}}>Pending Payouts</h3>
               <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(108,92,231,0.3)"}}>Process All Pending</button>
             </div>
             {[{id:"PAY-0912",name:"James Doe",type:"Affiliate",amount:189.50,method:"ACH"},{id:"PAY-0911",name:"Sarah Chen",type:"Affiliate",amount:847.20,method:"ACH"},{id:"PAY-0910",name:"Greenfield Law Offices",type:"Partnership",amount:3359.88,method:"Wire"}].map((p,i)=>(
-              <div key={p.id} className="flex items-center justify-between p-4 rounded-xl mb-2" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.08)"}}>
+              <div key={p.id} className="flex items-center justify-between p-4 rounded-xl mb-2 glow-surface" style={{background:"rgba(108,92,231,0.04)",border:"1px solid rgba(108,92,231,0.08)"}}>
                 <div>
                   <div style={{color:"#0D1428",fontSize:13}}>{p.name}</div>
                   <div style={{color:"#5A6A88",fontSize:11,...MONO}}>{p.id} · {p.type} · {p.method}</div>
@@ -1692,7 +1692,7 @@ export function MasterAdmin() {
       {tab === "continuation" && (
         <div className="space-y-5">
           {/* Admin config */}
-          <div className="p-6 rounded-2xl" style={GLASS}>
+          <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center gap-2 mb-5">
               <DollarSign size={16} color="#6C5CE7"/>
               <h3 style={{fontFamily:"var(--font-display)",fontSize:16,color:"#0D1428"}}>Legacy Continuation Fee Configuration</h3>
@@ -1700,7 +1700,7 @@ export function MasterAdmin() {
             </div>
             <div className="grid md:grid-cols-3 gap-5 mb-5">
               {[{label:"Current Fee Amount",value:"$199.00",color:"#6C5CE7"},{label:"Activation Window",value:"24 Months",color:"#48BB78"},{label:"Total Revenue Collected",value:"$597.00",color:"#9F7AEA"}].map(s=>(
-                <div key={s.label} className="p-4 rounded-xl" style={{background:"#F5F8FE",border:"1px solid rgba(108,92,231,0.1)"}}>
+                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"#F5F8FE",border:"1px solid rgba(108,92,231,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
                   <div style={{color:"#5A6A88",fontSize:12,marginTop:2}}>{s.label}</div>
                 </div>

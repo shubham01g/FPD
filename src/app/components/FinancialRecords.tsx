@@ -69,7 +69,7 @@ function AddModal({ title, fields, onClose, onAdd }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-      <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+      <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
         <div className="flex items-center justify-between mb-2">
           <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>{title}</h3>
           <button onClick={onClose} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
@@ -147,7 +147,7 @@ export function FinancialRecords() {
   const [bizList, setBizList]         = useState(businessAccounts);
 
   const Card = ({ children }: { children: React.ReactNode }) => (
-    <div className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>{children}</div>
+    <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>{children}</div>
   );
 
   const Field = ({ label, value }: { label: string; value: string }) => (

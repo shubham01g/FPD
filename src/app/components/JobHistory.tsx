@@ -70,7 +70,7 @@ export function JobHistory() {
       {/* Timeline */}
       <div className="space-y-4">
         {jobs.map((job, i) => (
-          <div key={job.id} className="rounded-2xl overflow-hidden" style={CARD}>
+          <div key={job.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
             <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded === job.id ? null : job.id)}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -154,7 +154,7 @@ export function JobHistory() {
       {/* Add modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Employment Record</h3>
               <button onClick={() => setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

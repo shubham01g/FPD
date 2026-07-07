@@ -314,12 +314,12 @@ export function DigitalDiary() {
 
         {/* Search + Filter */}
         <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48" style={CARD}>
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48 glow-surface" style={CARD}>
             <Search size={13} color="rgba(255,255,255,0.65)"/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search diary entries..."
               style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
           </div>
-          <div className="flex gap-1 p-1 rounded-xl" style={CARD}>
+          <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
             {[{id:"all",label:"All"},{id:"written",label:"📝"},{id:"audio",label:"🎙️"},{id:"video",label:"🎥"}].map(f => (
               <button key={f.id} onClick={() => setFilterType(f.id as any)}
                 className="px-3 py-1.5 rounded-lg text-sm transition-all"
@@ -334,7 +334,7 @@ export function DigitalDiary() {
           {/* Entry list */}
           <div className="lg:col-span-2 space-y-3">
             {filtered.length === 0 && (
-              <div className="py-16 text-center rounded-2xl" style={CARD}>
+              <div className="py-16 text-center rounded-2xl glow-surface" style={CARD}>
                 <BookOpen size={36} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)" }}>No entries found. Start writing your story.</div>
               </div>
@@ -406,7 +406,7 @@ export function DigitalDiary() {
           {/* Selected detail / calendar sidebar */}
           <div className="space-y-4">
             {selected ? (
-              <div className="rounded-2xl p-5 sticky top-4" style={CARD}>
+              <div className="rounded-2xl p-5 sticky top-4 glow-surface" style={CARD}>
                 <div className="flex items-center justify-between mb-4">
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO }}>{selected.date}</div>
                   <div className="flex gap-1">
@@ -464,7 +464,7 @@ export function DigitalDiary() {
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl p-6 text-center" style={CARD}>
+              <div className="rounded-2xl p-6 text-center glow-surface" style={CARD}>
                 <BookOpen size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13, marginBottom:12 }}>Select an entry to read</div>
                 <div className="space-y-2">
@@ -490,7 +490,7 @@ export function DigitalDiary() {
       {/* NEW ENTRY MODAL */}
       {creating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.4)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={CARD}>
+          <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>New Diary Entry</h3>
               <button onClick={() => setCreating(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
@@ -535,7 +535,7 @@ export function DigitalDiary() {
 
               {/* Video recorder */}
               {newType === "video" && (
-                <div className="rounded-2xl p-4" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="rounded-2xl p-4 glow-surface" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)" }}>
                   {videoDuration
                     ? <div className="py-6 text-center"><div className="text-2xl mb-2">✅</div><div style={{ color:"#48BB78", fontWeight:600 }}>Video recorded: {videoDuration}</div></div>
                     : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}

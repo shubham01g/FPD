@@ -339,7 +339,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
         <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, marginBottom:24 }}>
           Your White Glove Concierge Authorization has been recorded. {waiver.specialistName} can now begin setting up your Final Pass Down vault. You'll receive a call to schedule your first session.
         </p>
-        <div className="p-4 rounded-2xl mb-6 text-left space-y-2" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+        <div className="p-4 rounded-2xl mb-6 text-left space-y-2 glow-surface" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
           {[
             ["Document ID", waiver.id],
             ["Signed", waiverStore.find(w=>w.id===waiver.id)?.signedAt ?? waiver.signedAt ?? "Just now"],
@@ -365,9 +365,9 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl"
+      <div className="flex items-center gap-4 p-5 rounded-2xl glow-surface"
         style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
-        <div className="rounded-xl p-3 flex-shrink-0" style={{ background:"rgba(108,92,231,0.08)" }}>
+        <div className="rounded-xl p-3 flex-shrink-0 glow-surface" style={{ background:"rgba(108,92,231,0.08)" }}>
           <FileText size={22} color="#6C5CE7"/>
         </div>
         <div>
@@ -407,7 +407,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
             <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>Please read the entire agreement before signing.</span>
           </div>
           <div ref={readRef} onScroll={onScroll}
-            className="rounded-2xl p-6 overflow-y-auto"
+            className="rounded-2xl p-6 overflow-y-auto glow-surface"
             style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.12)", maxHeight:500, boxShadow:"inset 0 -20px 20px -10px rgba(108,92,231,0.04)" }}>
             <WaiverText waiver={waiver}/>
           </div>
@@ -464,7 +464,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           )}
 
           {/* Acknowledgment checkboxes */}
-          <div className="space-y-3 p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
+          <div className="space-y-3 p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, marginBottom:6 }}>ACKNOWLEDGMENTS</div>
             {[
               [checked1, setChecked1, `I am ${waiver.userName} or their legally authorized representative, and I have the authority to sign this agreement.`],
@@ -580,7 +580,7 @@ export function WaiverManager() {
           { label:"Pending",       value:waivers.filter(w=>w.status==="pending").length, color:"#F6AD55" },
           { label:"Sign Rate",     value:`${Math.round(waivers.filter(w=>w.status==="signed").length/Math.max(waivers.length,1)*100)}%`, color:"#9F7AEA" },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
             <div style={{ ...DISPLAY, fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>

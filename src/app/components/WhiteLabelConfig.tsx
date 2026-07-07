@@ -199,7 +199,7 @@ export function WhiteLabelConfig() {
         </div>
         <div className="flex items-center gap-3">
           {/* Enable toggle */}
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={GLASS}>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
             <span style={{ color: "#5A6A88", fontSize: 12 }}>White Label {config.enabled ? "ON" : "OFF"}</span>
             <Toggle checked={config.enabled} onChange={v => update({ enabled: v })} />
           </div>
@@ -241,7 +241,7 @@ export function WhiteLabelConfig() {
       {tab === "brand" && (
         <div className="space-y-5">
           {/* Quick presets */}
-          <div className="p-5 rounded-2xl" style={GLASS}>
+          <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
             <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, marginBottom: 12 }}>QUICK-APPLY BRAND PRESETS</div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {PRESET_BRANDS.map(preset => (
@@ -260,14 +260,14 @@ export function WhiteLabelConfig() {
 
           <div className="grid md:grid-cols-2 gap-5">
             {/* Brand identity */}
-            <div className="p-6 rounded-2xl space-y-4" style={GLASS}>
+            <div className="p-6 rounded-2xl space-y-4 glow-surface" style={GLASS}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#0D1428", marginBottom: 4 }}>Brand Identity</h3>
               <Field label="Company Name" value={config.companyName} onChange={v => update({ companyName: v })} placeholder="Your Company Name" />
               <Field label="Tagline" value={config.tagline} onChange={v => update({ tagline: v })} placeholder="Your brand tagline" />
               <Field label="Logo Text / Abbreviation" value={config.logoText} onChange={v => update({ logoText: v.slice(0, 3) })} placeholder="FPD" />
               <div>
                 <label style={{ color: "#5A6A88", fontSize: 11, ...MONO, display: "block", marginBottom: 6 }}>LOGO UPLOAD</label>
-                <div className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer"
+                <div className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer glow-surface"
                   style={{ borderColor: "rgba(159,122,234,0.3)", background: "rgba(159,122,234,0.04)" }}
                   onClick={() => toast.info("File upload available in production build")}>
                   <Upload size={16} color="#9F7AEA" />
@@ -278,7 +278,7 @@ export function WhiteLabelConfig() {
             </div>
 
             {/* Colors */}
-            <div className="p-6 rounded-2xl space-y-4" style={GLASS}>
+            <div className="p-6 rounded-2xl space-y-4 glow-surface" style={GLASS}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#0D1428", marginBottom: 4 }}>Brand Colors</h3>
               <div>
                 <label style={{ color: "#5A6A88", fontSize: 11, ...MONO, display: "block", marginBottom: 8 }}>PRIMARY COLOR</label>
@@ -334,7 +334,7 @@ export function WhiteLabelConfig() {
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {featureList.map(f => (
-              <div key={f.key} className="flex items-center justify-between p-4 rounded-2xl" style={GLASS}>
+              <div key={f.key} className="flex items-center justify-between p-4 rounded-2xl glow-surface" style={GLASS}>
                 <div>
                   <div style={{ color: "#0D1428", fontSize: 14, fontWeight: 500 }}>{f.label}</div>
                   <div style={{ color: "#5A6A88", fontSize: 12, marginTop: 2 }}>{f.desc}</div>
@@ -343,7 +343,7 @@ export function WhiteLabelConfig() {
               </div>
             ))}
           </div>
-          <div className="p-4 rounded-2xl" style={GLASS}>
+          <div className="p-4 rounded-2xl glow-surface" style={GLASS}>
             <div style={{ color: "#5A6A88", fontSize: 12 }}>
               <strong style={{ color: "#0D1428" }}>{Object.values(config.features).filter(Boolean).length}</strong> of {featureList.length} features enabled for this white label instance
             </div>
@@ -369,7 +369,7 @@ export function WhiteLabelConfig() {
               </div>
             ))}
           </div>
-          <div className="p-5 rounded-2xl" style={GLASS}>
+          <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
             <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, marginBottom: 10 }}>HOW PLAN NAMES APPEAR</div>
             <div className="flex gap-4">
               {(["essential", "premium", "legacyPro"] as const).map((k, i) => (
@@ -385,7 +385,7 @@ export function WhiteLabelConfig() {
       {/* DOMAIN TAB */}
       {tab === "domain" && (
         <div className="grid md:grid-cols-2 gap-5">
-          <div className="p-6 rounded-2xl space-y-4" style={GLASS}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={GLASS}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#0D1428" }}>Domain Configuration</h3>
             <Field label="Custom Domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourcompany.com" />
             <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(72,187,120,0.06)", border: "1px solid rgba(72,187,120,0.2)" }}>
@@ -395,7 +395,7 @@ export function WhiteLabelConfig() {
             <Field label="Terms of Service URL" value={config.termsUrl} onChange={v => update({ termsUrl: v })} placeholder="https://yourcompany.com/terms" />
             <Field label="Privacy Policy URL" value={config.privacyUrl} onChange={v => update({ privacyUrl: v })} placeholder="https://yourcompany.com/privacy" />
           </div>
-          <div className="p-6 rounded-2xl space-y-4" style={GLASS}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={GLASS}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#0D1428" }}>Email Configuration</h3>
             <Field label="From Name" value={config.senderName} onChange={v => update({ senderName: v })} placeholder="Your Company Name" />
             <Field label="Support Email" value={config.supportEmail} onChange={v => update({ supportEmail: v })} placeholder="support@yourcompany.com" />
@@ -425,7 +425,7 @@ export function WhiteLabelConfig() {
               { label: "Plan Names", value: `${config.planNames.starter} → ${config.planNames.essential} → ${config.planNames.premium} → ${config.planNames.legacyPro} → ${config.planNames.enterprise}`, color: "#F6AD55" },
               { label: "Status", value: config.enabled ? "LIVE" : "DRAFT", color: config.enabled ? "#48BB78" : "#F6AD55" },
             ].map(item => (
-              <div key={item.label} className="p-4 rounded-2xl" style={GLASS}>
+              <div key={item.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, marginBottom: 4 }}>{item.label.toUpperCase()}</div>
                 <div style={{ color: item.color, fontSize: 13, fontWeight: 600, wordBreak: "break-all" }}>{item.value}</div>
               </div>

@@ -212,7 +212,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
       <div className="max-w-lg mx-auto px-5 py-8 space-y-5">
 
         {/* Welcome card */}
-        <div className="p-5 rounded-2xl"
+        <div className="p-5 rounded-2xl glow-surface"
           style={{ background:"linear-gradient(135deg,#0A0520,#1A0840)", border:"1px solid rgba(159,122,234,0.3)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Star size={16} color="#C4B5FD" fill="rgba(196,181,253,0.3)"/>
@@ -254,7 +254,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
           <div className="space-y-4">
 
             {/* Step 1: Get the document */}
-            <div className="p-5 rounded-2xl" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
+            <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
               <div style={{ color:"#9F7AEA", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 1 — GET YOUR DOCUMENT READY
               </div>
@@ -316,7 +316,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             </div>
 
             {/* Step 2: Label it */}
-            <div className="p-5 rounded-2xl" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
+            <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
               <div style={{ color:"#9F7AEA", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 2 — WHAT KIND OF DOCUMENT IS THIS?
               </div>
@@ -350,7 +350,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             </div>
 
             {/* Step 3: Notes */}
-            <div className="p-5 rounded-2xl" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
+            <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
               <div style={{ color:"#9F7AEA", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 3 — ADD A NOTE (OPTIONAL)
               </div>
@@ -395,7 +395,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                 { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#6C5CE7" },
                 { label:"In Vault", value:uploadedCount, color:"#48BB78" },
               ].map(s => (
-                <div key={s.label} className="p-3 rounded-xl text-center"
+                <div key={s.label} className="p-3 rounded-xl text-center glow-surface"
                   style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
                   <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.label}</div>
@@ -415,7 +415,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             ) : (
               <div className="space-y-3">
                 {submissions.map(sub => (
-                  <div key={sub.id} className="p-4 rounded-2xl"
+                  <div key={sub.id} className="p-4 rounded-2xl glow-surface"
                     style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
                     <div className="flex items-start gap-3">
                       <div className="flex items-center justify-center rounded-xl flex-shrink-0"
@@ -444,7 +444,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             )}
 
             {/* Help contact */}
-            <div className="p-4 rounded-2xl flex items-center gap-3"
+            <div className="p-4 rounded-2xl flex items-center gap-3 glow-surface"
               style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.15)" }}>
               <Phone size={18} color="#9F7AEA" style={{ flexShrink:0 }}/>
               <div>

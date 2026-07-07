@@ -81,7 +81,7 @@ export function WillsAndTrusts() {
 
       {/* Document list */}
       {wills.length === 0 && (
-        <div className="py-16 text-center rounded-2xl" style={CARD}>
+        <div className="py-16 text-center rounded-2xl glow-surface" style={CARD}>
           <FileText size={40} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
           <div style={{ color:"var(--muted-foreground)", fontSize:14 }}>No legal documents added yet.</div>
           <button onClick={() => setShowAdd(true)} className="mt-3 text-sm underline" style={{ color:"var(--primary)" }}>
@@ -92,7 +92,7 @@ export function WillsAndTrusts() {
 
       <div className="space-y-4">
         {wills.map(will => (
-          <div key={will.id} className="p-6 rounded-2xl" style={CARD}>
+          <div key={will.id} className="p-6 rounded-2xl glow-surface" style={CARD}>
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-start gap-3">
                 <div className="flex items-center justify-center rounded-xl flex-shrink-0"
@@ -157,7 +157,7 @@ export function WillsAndTrusts() {
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background:"rgba(0,0,0,0.7)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-7 space-y-4 overflow-y-auto"
+          <div className="w-full max-w-lg rounded-2xl p-7 space-y-4 overflow-y-auto glow-surface"
             style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(7,13,26,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>

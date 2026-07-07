@@ -104,7 +104,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
   const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#6C5CE7", paused:"#8A9AB8" }[client.status];
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={CARD}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
@@ -365,7 +365,7 @@ export function WhiteGloveAdmin() {
           <div className="space-y-4">
             <div style={{ color:"#5A6A88", fontSize:11, fontFamily:"var(--font-mono)" }}>PAYMENT METHODS ON FILE</div>
             {clients.map(c => (
-              <div key={c.id} className="p-4 rounded-2xl" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
+              <div key={c.id} className="p-4 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(159,122,234,0.12)" }}>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428", marginBottom:10 }}>{c.name}</div>
                 <WGCardOnFile clientId={c.id} clientName={c.name}/>
               </div>
@@ -385,7 +385,7 @@ export function WhiteGloveAdmin() {
           { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#6C5CE7" },
           { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
         ].map(s => (
-          <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
+          <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color }}>{s.value}</div>
             <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -393,7 +393,7 @@ export function WhiteGloveAdmin() {
       </div>
 
       {/* Specialist roster */}
-      <div className="p-5 rounded-2xl" style={CARD}>
+      <div className="p-5 rounded-2xl glow-surface" style={CARD}>
         <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:14 }}>Specialist Roster</div>
         <div className="grid md:grid-cols-3 gap-4">
           {SPECIALISTS.map(s => (
@@ -429,7 +429,7 @@ export function WhiteGloveAdmin() {
 
       <div className="space-y-4">
         {filtered.length === 0 && (
-          <div className="py-12 text-center rounded-2xl" style={CARD}>
+          <div className="py-12 text-center rounded-2xl glow-surface" style={CARD}>
             <Star size={32} color="rgba(159,122,234,0.2)" style={{ margin:"0 auto 12px" }}/>
             <div style={{ color:"#8A9AB8", fontSize:14 }}>No clients in this category</div>
           </div>
@@ -495,7 +495,7 @@ export function WhiteGloveAdmin() {
                   placeholder="Why does this client need White Glove assistance?" className="w-full resize-none" style={INPUT}/>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-xl"
+              <div className="flex items-center justify-between p-3 rounded-xl glow-surface"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <span style={{ color:"#0D1428", fontSize:13 }}>Waive subscription fee</span>
                 <button onClick={() => setNewClient(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}

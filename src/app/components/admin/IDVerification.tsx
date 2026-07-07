@@ -67,7 +67,7 @@ export function IDVerification() {
           { label: "Rejected Today", value: 1, color: "#FC8181", icon: <XCircle size={16} /> },
           { label: "Avg Review Time", value: "4.2h", color: "#4A90D9", icon: <Shield size={16} /> },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="rounded-lg p-2 mb-3" style={{ background: `${stat.color}15`, color: stat.color, width: "fit-content" }}>
               {stat.icon}
             </div>
@@ -81,7 +81,7 @@ export function IDVerification() {
       <div className="space-y-4">
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Pending Verifications</h3>
         {pendingVerifications.map((verif) => (
-          <div key={verif.id} className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={verif.id} className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
                 <div className="rounded-full flex items-center justify-center" style={{ width: 44, height: 44, background: "var(--secondary)", flexShrink: 0 }}>
@@ -201,7 +201,7 @@ export function IDVerification() {
       {/* Rejection modal */}
       {selectedVerif && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
-          <div className="w-full max-w-md rounded-2xl border p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div className="w-full max-w-md rounded-2xl border p-7 glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)", marginBottom: 16 }}>Reject Verification</h3>
             <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 16 }}>
               You are rejecting the ID verification for <strong style={{ color: "var(--foreground)" }}>{selectedVerif.contactName}</strong>. Please provide a reason.

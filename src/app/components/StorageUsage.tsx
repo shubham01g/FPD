@@ -89,7 +89,7 @@ export function StorageUsage() {
           { label: "Projected EOM", value: `${projectedEOM} GB`, sub: "End-of-month estimate", color: projectedEOM > total ? "#FC8181" : "#48BB78" },
           { label: "Est. Overage", value: projectedOverage > 0 ? `$${(projectedOverage * overageRate).toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "No overage projected", color: projectedOverage > 0 ? "#FC8181" : "#48BB78" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 500 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -98,7 +98,7 @@ export function StorageUsage() {
       </div>
 
       {/* Storage meter */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Current Billing Cycle</h3>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>
@@ -142,7 +142,7 @@ export function StorageUsage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Usage by month — pure CSS bar chart */}
-        <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>6-Month Usage History</h3>
           <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:160, position:"relative" }}>
             {/* 25 GB limit line */}
@@ -167,7 +167,7 @@ export function StorageUsage() {
         </div>
 
         {/* Usage by category */}
-        <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Usage by Category</h3>
           <div className="space-y-3">
             {usageByCategory.map((cat) => (
@@ -186,13 +186,13 @@ export function StorageUsage() {
       </div>
 
       {/* Plan comparison + upgrade */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Your Plan & Upgrade Options</h3>
         <div className="grid md:grid-cols-3 gap-4">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className="p-5 rounded-xl border"
+              className="p-5 rounded-xl border glow-surface"
               style={{
                 background: plan.current ? "rgba(32, 64, 192, 0.06)" : "#1C1C28",
                 borderColor: plan.current ? "var(--gold)" : "var(--border)",
@@ -243,7 +243,7 @@ export function StorageUsage() {
       </div>
 
       {/* Alert history */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Notification History</h3>
         <div className="space-y-3">
           {alertHistory.map((alert, i) => (

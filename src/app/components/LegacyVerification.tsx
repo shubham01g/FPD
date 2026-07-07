@@ -101,7 +101,7 @@ export function LegacyVerification() {
           { label:"Pending / In Review", value:contacts.filter(c=>c.status==="pending"||c.status==="id_submitted").length, color:"#F6AD55" },
           { label:"Rejected",        value:contacts.filter(c=>c.status==="rejected").length, color:"#FC8181" },
         ].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -121,7 +121,7 @@ export function LegacyVerification() {
         {contacts.map(contact => {
           const sc = statusConfig[contact.status];
           return (
-            <div key={contact.id} className="p-6 rounded-2xl" style={CARD}>
+            <div key={contact.id} className="p-6 rounded-2xl glow-surface" style={CARD}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center justify-center rounded-full font-semibold flex-shrink-0"
@@ -202,7 +202,7 @@ export function LegacyVerification() {
       </div>
 
       {/* Process steps */}
-      <div className="p-6 rounded-2xl" style={CARD}>
+      <div className="p-6 rounded-2xl glow-surface" style={CARD}>
         <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"var(--foreground)", marginBottom:16 }}>Verification Process</h3>
         <div className="grid md:grid-cols-4 gap-4">
           {[

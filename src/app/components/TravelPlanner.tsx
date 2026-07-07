@@ -81,7 +81,7 @@ export function TravelPlanner() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[{label:"Total Trips",value:stats.total,color:"var(--primary)"},{label:"Completed",value:stats.completed,color:"#48BB78"},{label:"Planned",value:stats.planned,color:"#4A90D9"},{label:"Countries",value:stats.countries,color:"#ED8936"}].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -103,7 +103,7 @@ export function TravelPlanner() {
         {filtered.map(trip => {
           const sc = statusConfig[trip.status];
           return (
-            <div key={trip.id} className="rounded-2xl overflow-hidden" style={CARD}>
+            <div key={trip.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
               {trip.photo && <img src={trip.photo} alt={trip.destination} style={{ width:"100%", height:180, objectFit:"cover" }}/>}
               <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===trip.id ? null : trip.id)}>
                 <div className="flex items-start justify-between gap-4">
@@ -186,7 +186,7 @@ export function TravelPlanner() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Trip</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

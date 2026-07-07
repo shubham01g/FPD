@@ -266,7 +266,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
 
               {/* QR code */}
               <div className="flex justify-center">
-                <div className="p-4 rounded-2xl" style={{ background:"#FFFFFF" }}>
+                <div className="p-4 rounded-2xl glow-surface" style={{ background:"#FFFFFF" }}>
                   <QRCode value={selectedCoin.address} color={selectedCoin.color} size={140}/>
                 </div>
               </div>

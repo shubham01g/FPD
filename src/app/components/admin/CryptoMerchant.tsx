@@ -145,7 +145,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={CARD}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -297,7 +297,7 @@ export function CryptoMerchant() {
           { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#6C5CE7" },
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
-          <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
+          <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -305,7 +305,7 @@ export function CryptoMerchant() {
       </div>
 
       {/* Accepted coins strip */}
-      <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
+      <div className="flex items-center gap-3 p-4 rounded-2xl glow-surface" style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
         <span style={{ color:"#F7931A", fontSize:12, fontWeight:600 }}>Accepting:</span>
         <div className="flex flex-wrap gap-2 flex-1">
           {["BTC","ETH","USDC","USDT","SOL","BNB","XRP","LTC"].map(coin => (
@@ -332,7 +332,7 @@ export function CryptoMerchant() {
       {/* ── Processors tab ── */}
       {tab === "processors" && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 rounded-2xl"
+          <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
             style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
             <Shield size={14} color="#6C5CE7" style={{ marginTop:1, flexShrink:0 }}/>
             <div>
@@ -349,7 +349,7 @@ export function CryptoMerchant() {
       {tab === "transactions" && (
         <div className="space-y-4">
           {/* Volume by coin */}
-          <div className="p-5 rounded-2xl" style={CARD}>
+          <div className="p-5 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:14 }}>Volume by Cryptocurrency</div>
             <div className="space-y-2.5">
               {(["BTC","ETH","USDC","USDT","SOL"] as const).map(coin => {
@@ -417,7 +417,7 @@ export function CryptoMerchant() {
       {/* ── Wallets tab ── */}
       {tab === "wallets" && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 rounded-2xl"
+          <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
             style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
             <span style={{ fontSize:16 }}>🔐</span>
             <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
@@ -430,7 +430,7 @@ export function CryptoMerchant() {
             { coin:"ETH", emoji:"Ξ", color:"#627EEA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"0.8241 ETH", usd:"$2,707", custody:"Coinbase Commerce" },
             { coin:"USDC",emoji:"$", color:"#2775CA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"1,284.00 USDC", usd:"$1,284", custody:"BitPay" },
           ].map(w => (
-            <div key={w.coin} className="p-5 rounded-2xl" style={CARD}>
+            <div key={w.coin} className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center rounded-full font-bold"
@@ -468,7 +468,7 @@ export function CryptoMerchant() {
       {/* ── Settings tab ── */}
       {tab === "settings" && (
         <div className="space-y-5 max-w-lg">
-          <div className="p-5 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-5 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:4 }}>Payment Preferences</div>
 
             {[
@@ -509,7 +509,7 @@ export function CryptoMerchant() {
           </div>
 
           {/* Merchant verification */}
-          <div className="p-5 rounded-2xl" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
+          <div className="p-5 rounded-2xl glow-surface" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
             <div className="flex items-center gap-2 mb-3">
               <span style={{ fontSize:20 }}>₿</span>
               <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>Merchant Business Verification</span>

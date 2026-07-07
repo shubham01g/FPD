@@ -118,7 +118,7 @@ export function FavoritePlaces() {
         {filtered.map(place => {
           const meta = getMeta(place.category);
           return (
-            <div key={place.id} className="rounded-2xl overflow-hidden" style={CARD}>
+            <div key={place.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
               {place.photo && <img src={place.photo} alt={place.name} style={{ width:"100%", height:160, objectFit:"cover" }}/>}
               <div className="p-5">
               <div className="flex items-start justify-between mb-3">
@@ -171,7 +171,7 @@ export function FavoritePlaces() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Favorite Place</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

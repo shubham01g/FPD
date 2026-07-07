@@ -77,7 +77,7 @@ export function AffiliateProgram() {
 
       {/* Progress to next tier */}
       {nextTier && (
-        <div className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
             <span style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500 }}>Progress to {nextTier.label} ({nextTier.rate}%)</span>
             <span style={{ color: nextTier.color, fontFamily: "var(--font-mono)", fontSize: 13 }}>{activeReferrals} / {nextTier.tier === 2 ? 25 : 75} active referrals</span>
@@ -105,7 +105,7 @@ export function AffiliateProgram() {
           { label: "Total Earned", value: `$${totalEarned.toFixed(2)}`, sub: "All time", color: "var(--gold)" },
           { label: "Pending Payout", value: `$${pendingPayout.toFixed(2)}`, sub: "Next payout: Jul 1", color: "#9F7AEA" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 500 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -114,7 +114,7 @@ export function AffiliateProgram() {
       </div>
 
       {/* Referral link */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Your Referral Link</h3>
         <div className="flex gap-3">
           <div
@@ -147,7 +147,7 @@ export function AffiliateProgram() {
       </div>
 
       {/* Earnings chart — pure CSS */}
-      <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Monthly Earnings</h3>
         {(() => {
           const maxEarned = Math.max(...monthlyEarnings.map(d => d.earned));

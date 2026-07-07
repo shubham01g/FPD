@@ -241,7 +241,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         </div>
 
         {/* Billing meter */}
-        <div className="mx-4 mb-4 p-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.12)" }}>
+        <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.12)" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color:"#5A6A88", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
             <span style={{ color:"#6C5CE7", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
@@ -363,7 +363,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
 
   // ── Done ──
   return (
-    <div className="rounded-2xl p-5 text-center" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
+    <div className="rounded-2xl p-5 text-center glow-surface" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
       <CheckCircle size={36} color="#48BB78" style={{ margin:"0 auto 12px" }}/>
       <div style={{ color:"#0D1428", fontSize:15, fontWeight:700, marginBottom:4 }}>Session Complete</div>
       <div style={{ color:"#5A6A88", fontSize:13, marginBottom:12 }}>

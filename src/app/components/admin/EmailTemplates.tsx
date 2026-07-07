@@ -558,7 +558,7 @@ export function EmailTemplates() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#0D1428" }}>Email Template Manager</h1>
           <p style={{ color: "#5A6A88", fontSize: 13, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={GLASS}>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
           <span style={{ color: "#48BB78", fontSize: 11, ...MONO }}>SENDGRID CONNECTED</span>
         </div>
@@ -566,7 +566,7 @@ export function EmailTemplates() {
 
       <div className="grid" style={{ gridTemplateColumns: "300px 1fr", gap: 16, minHeight: 700 }}>
         {/* Template list */}
-        <div className="rounded-2xl overflow-hidden flex flex-col" style={GLASS}>
+        <div className="rounded-2xl overflow-hidden flex flex-col glow-surface" style={GLASS}>
           {/* Search + filter */}
           <div className="p-3 border-b space-y-2" style={{ borderColor: "rgba(108,92,231,0.1)" }}>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.15)" }}>
@@ -602,7 +602,7 @@ export function EmailTemplates() {
 
         {/* Editor + Preview */}
         {selected && (
-          <div className="rounded-2xl overflow-hidden flex flex-col" style={GLASS}>
+          <div className="rounded-2xl overflow-hidden flex flex-col glow-surface" style={GLASS}>
             {/* Toolbar */}
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "rgba(108,92,231,0.1)", background: "rgba(3,7,16,0.6)" }}>
               <div>

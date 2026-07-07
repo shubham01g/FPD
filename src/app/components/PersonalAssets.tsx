@@ -187,7 +187,7 @@ export function PersonalAssets() {
         <div className="space-y-4">
           <div className="flex justify-end"><button onClick={() => setShowAdd("vehicles")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Vehicle</button></div>
           {vehicleList.map(v => (
-            <div key={v.id} className="rounded-xl border overflow-hidden" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={v.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {(v as any).photo && (
                 <img src={(v as any).photo} alt={`${v.year} ${v.make} ${v.model}`} style={{ width:"100%", height:200, objectFit:"cover" }}/>
               )}
@@ -228,7 +228,7 @@ export function PersonalAssets() {
             </button>
           </div>
           {realEstateList.map(r => (
-            <div key={r.id} className="rounded-xl border overflow-hidden" style={{ background:"var(--card)", borderColor:"var(--border)" }}>
+            <div key={r.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Property photo */}
               <div className="relative" style={{ height: r.photo ? 220 : 80, background: r.photo ? "transparent" : "rgba(108,92,231,0.04)", borderBottom:"1px solid var(--border)" }}>
                 {r.photo ? (
@@ -282,7 +282,7 @@ export function PersonalAssets() {
         <div className="space-y-3">
           <div className="flex justify-end"><button onClick={() => setShowAdd("utilities")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Utility</button></div>
           {utilityList.map(u => (
-            <div key={u.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={u.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <Zap size={16} color="var(--primary)" />
@@ -317,7 +317,7 @@ export function PersonalAssets() {
             <button onClick={() => setShowAdd("digital")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Asset</button>
           </div>
           {digitalList.map(d => (
-            <div key={d.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={d.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -348,7 +348,7 @@ export function PersonalAssets() {
             <button onClick={() => setShowAdd("weapons")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm ml-4" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Firearm</button>
           </div>
           {weaponList.map(w => (
-            <div key={w.id} className="rounded-xl border overflow-hidden" style={{ background:"var(--card)", borderColor:"var(--border)" }}>
+            <div key={w.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Firearm photo */}
               <div className="relative" style={{ height: w.photo ? 200 : 72, background:"rgba(108,92,231,0.03)", borderBottom:"1px solid var(--border)" }}>
                 {w.photo ? (
@@ -397,7 +397,7 @@ export function PersonalAssets() {
             </button>
           </div>
           {weaponsLockerList.map(w => (
-            <div key={w.id} className="rounded-xl border overflow-hidden" style={{ background:"var(--card)", borderColor:"var(--border)" }}>
+            <div key={w.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {(w as any).photo && <img src={(w as any).photo} alt={`${w.make} ${w.model}`} style={{ width:"100%", height:180, objectFit:"cover" }}/>}
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-4">
@@ -432,7 +432,7 @@ export function PersonalAssets() {
             </button>
           </div>
           {collectiblesList.map(c => (
-            <div key={c.id} className="rounded-xl border overflow-hidden" style={{ background:"var(--card)", borderColor:"var(--border)" }}>
+            <div key={c.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {c.photo && <img src={c.photo} alt={c.name} style={{ width:"100%", height:220, objectFit:"cover" }}/>}
               <div className="p-5">
                 <div className="flex items-start justify-between mb-3 gap-4">
@@ -468,7 +468,7 @@ export function PersonalAssets() {
       {/* Add Vehicle Modal */}
       {showAdd === "vehicles" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-2"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Vehicle</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             <PhotoPicker value={vForm.photo} onChange={url => setVForm(p=>({...p,photo:url}))} label="Vehicle Photo" aspectRatio="16/9"/>
             {([["Year","year","2024"],["Make","make","e.g. Toyota"],["Model","model","e.g. Camry"],["Color","color","e.g. Silver"],["VIN","vin","Vehicle ID number"],["License Plate","plate","e.g. 7ABC123 CA"],["Title Holder","title","Name on title"],["Lien / Loan","lien","e.g. None or lender name"],["Insurance","insurance","Provider — Policy #"],["Registration Exp.","registration","e.g. Dec 2027"],["Estimated Value","value","e.g. $28,000"],["Notes","notes","Any special instructions"]] as [string,string,string][]).map(([label,key,ph])=>(
@@ -484,7 +484,7 @@ export function PersonalAssets() {
       {/* Add Utility Modal */}
       {showAdd === "utilities" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
             <div className="flex items-center justify-between mb-2"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Utility Account</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             {([["Service Type","service","e.g. Electricity, Internet, Water"],["Provider","provider","e.g. AT&T, PG&E"],["Account Number","accountNum",""],["Phone","phone",""],["Website","website",""],["Monthly Average","monthlyAvg","e.g. $85"],["Notes","notes","Optional"]] as [string,string,string][]).map(([label,key,ph])=>(
               <div key={key}><label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{label.toUpperCase()}</label>
@@ -498,7 +498,7 @@ export function PersonalAssets() {
       {/* Add Digital Asset Modal */}
       {showAdd === "digital" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
             <div className="flex items-center justify-between mb-2"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Digital Asset</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             <div><label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>CATEGORY</label>
               <select value={dForm.category} onChange={e=>setDForm(p=>({...p,category:e.target.value}))} style={INPUT}>
@@ -516,7 +516,7 @@ export function PersonalAssets() {
       {/* Add Firearm Modal */}
       {showAdd === "weapons" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)" }}>
             <div className="flex items-center justify-between mb-2"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Firearm Record</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             <PhotoPicker value={wForm.photo} onChange={url => setWForm(p=>({...p,photo:url}))} label="Firearm Photo" aspectRatio="4/3"/>
             <div><label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>TYPE</label>
@@ -536,7 +536,7 @@ export function PersonalAssets() {
       {/* Add Real Estate Modal */}
       {showAdd === "realestate" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-2">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Property</h3>
               <button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
@@ -574,7 +574,7 @@ export function PersonalAssets() {
       {/* Add Weapons Locker Modal */}
       {showAdd === "weapons_locker" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add to Weapons Locker</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             <PhotoPicker value={wlForm.photo} onChange={url => setWlForm(p=>({...p,photo:url}))} label="Photo of Item" aspectRatio="4/3"/>
             <div><label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>ITEM TYPE</label>
@@ -594,7 +594,7 @@ export function PersonalAssets() {
       {/* Add Collectible Modal */}
       {showAdd === "collectibles" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1"><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Collectible</h3><button onClick={()=>setShowAdd(null)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button></div>
             <PhotoPicker value={cForm.photo} onChange={url => setCForm(p=>({...p,photo:url}))} label="Photo of Item" aspectRatio="4/3"/>
             <div><label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>CATEGORY</label>

@@ -359,7 +359,7 @@ export function FamilyMemories() {
           <div className="flex justify-end"><button onClick={()=>setShowAdd("memories")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Memory</button></div>
           <div className="grid md:grid-cols-2 gap-4">
             {memoriesList.map(m => (
-              <div key={m.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+              <div key={m.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   {m.type === "video" ? <Video size={16} color="var(--primary)" /> : <Camera size={16} color="var(--primary)" />}
                   <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{m.date}</span>
@@ -383,7 +383,7 @@ export function FamilyMemories() {
             <button onClick={()=>setShowAdd("messages")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Video size={14} /> Record Message</button>
           </div>
           {messagesList.map(msg => (
-            <div key={msg.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start gap-4">
                 <div className="flex items-center justify-center rounded-xl" style={{ width: 52, height: 52, background: "rgba(108,92,231,0.1)", flexShrink: 0 }}>
                   <Play size={22} color="var(--primary)" />
@@ -409,7 +409,7 @@ export function FamilyMemories() {
           <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Record your voice for loved ones — stories, life advice, love letters, songs. Private audio messages delivered after your passing.</p>
 
           {/* ── Recorder ─────────────────────────────────────────────── */}
-          <div className="p-6 rounded-2xl space-y-4" style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.2)" }}>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.2)" }}>
             <div style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>🎙️ AUDIO RECORDER</div>
 
             {/* Mic error */}
@@ -531,7 +531,7 @@ export function FamilyMemories() {
               <div style={{ color:"var(--muted-foreground)", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:10 }}>SAVED AUDIO MESSAGES ({audioList.length})</div>
               <div className="space-y-3">
                 {audioList.map(msg => (
-                  <div key={msg.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+                  <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                         style={{ width: 52, height: 52, background: "rgba(159,122,234,0.1)" }}>
@@ -566,7 +566,7 @@ export function FamilyMemories() {
         <div className="space-y-4">
           <div className="flex justify-end"><button onClick={()=>setShowAdd("kids")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Child</button></div>
           {kidsList.map(kid => (
-            <div key={kid.id} className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={kid.id} className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)", marginBottom: 4 }}>{kid.child}</div>
               <div style={{ color: "var(--muted-foreground)", fontSize: 13, marginBottom: 12 }}>School: {kid.school}</div>
               <div className="mb-3">
@@ -585,7 +585,7 @@ export function FamilyMemories() {
         <div className="space-y-4">
           <div className="flex justify-end"><button onClick={()=>setShowAdd("keepsakes")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Keepsake</button></div>
           {keepsakesList.map(k => (
-            <div key={k.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={k.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 4 }}>{k.item}</div>
@@ -613,7 +613,7 @@ export function FamilyMemories() {
           {goalsList.map(g => {
             const s = statusStyles[g.status as keyof typeof statusStyles];
             return (
-              <div key={g.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+              <div key={g.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div style={{ color: "var(--foreground)", fontSize: 15, fontWeight: 500 }}>{g.goal}</div>
                   <span className="px-2 py-1 rounded text-xs font-bold whitespace-nowrap" style={{ background: s.bg, color: s.color, fontFamily: "var(--font-mono)" }}>{s.label}</span>
@@ -638,9 +638,9 @@ export function FamilyMemories() {
         <div className="space-y-4">
           <div className="flex justify-end"><button onClick={()=>setShowAdd("awards")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Award</button></div>
           {awardsList.map(a => (
-            <div key={a.id} className="p-5 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={a.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start gap-4">
-                <div className="rounded-xl p-3" style={{ background: "rgba(108,92,231,0.1)", flexShrink: 0 }}>
+                <div className="rounded-xl p-3 glow-surface" style={{ background: "rgba(108,92,231,0.1)", flexShrink: 0 }}>
                   <Trophy size={20} color="var(--primary)" />
                 </div>
                 <div>
@@ -666,7 +666,7 @@ export function FamilyMemories() {
           </div>
 
           {petsList.map(pet => (
-            <div key={pet.id} className="rounded-2xl border overflow-hidden" style={{ background:"var(--card)", borderColor:"var(--border)" }}>
+            <div key={pet.id} className="rounded-2xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Photos */}
               {pet.photos.length > 0 && (
                 <div className="flex gap-2 p-3 overflow-x-auto" style={{ background:"rgba(108,92,231,0.03)" }}>
@@ -679,7 +679,7 @@ export function FamilyMemories() {
               <div className="p-5 space-y-5">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                  <div className="rounded-2xl p-3" style={{ background:"rgba(108,92,231,0.1)" }}><PawPrint size={24} color="var(--primary)"/></div>
+                  <div className="rounded-2xl p-3 glow-surface" style={{ background:"rgba(108,92,231,0.1)" }}><PawPrint size={24} color="var(--primary)"/></div>
                   <div>
                     <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"var(--foreground)" }}>{pet.name}</div>
                     <div style={{ color:"var(--muted-foreground)", fontSize:13 }}>{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
@@ -937,7 +937,7 @@ export function FamilyMemories() {
       {/* Universal Add Modal */}
       {showAdd && showAdd !== "pets" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-2">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>
                 Add {showAdd === "memories" ? "Memory" : showAdd === "messages" ? "Video Message" : showAdd === "audio" ? "Audio Message" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : showAdd === "awards" ? "Award" : "Pet"}

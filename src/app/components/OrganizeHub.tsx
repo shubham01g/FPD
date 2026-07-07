@@ -42,7 +42,7 @@ function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6" style={GLASS}>
+      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Reminder</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
         <div className="space-y-3">
           {[{key:"title",label:"REMINDER TITLE",ph:"e.g. Update Will"},{key:"dueDate",label:"DUE DATE",ph:"e.g. Sep 15, 2026"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
@@ -82,7 +82,7 @@ function AddOccasionModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(o:Omit<
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6" style={GLASS}>
+      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Occasion</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
         <div className="space-y-3">
           {[{key:"name",label:"OCCASION NAME",ph:"e.g. Sarah's Birthday"},{key:"date",label:"DATE",ph:"e.g. Aug 14"},{key:"recipient",label:"RECIPIENT",ph:"e.g. Sarah Johnson"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
@@ -175,7 +175,7 @@ export function OrganizeHub() {
           {/* Add folder modal */}
           {showAddFolder && (
             <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.7)", backdropFilter:"blur(6px)" }}>
-              <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={GLASS}>
+              <div className="w-full max-w-sm rounded-2xl p-6 space-y-4 glow-surface" style={GLASS}>
                 <div className="flex items-center justify-between">
                   <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Create New Folder</h3>
                   <button onClick={()=>setShowAddFolder(false)} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button>
@@ -214,11 +214,11 @@ export function OrganizeHub() {
               <Plus size={14}/> Add Reminder
             </button>
           </div>
-          {reminders.length===0 && <div className="py-12 text-center rounded-2xl" style={GLASS}><Bell size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No reminders yet.</div></div>}
+          {reminders.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Bell size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No reminders yet.</div></div>}
           {reminders.map(r=>{
             const s = remStatus[r.status];
             return (
-              <div key={r.id} className="p-5 rounded-2xl" style={GLASS}>
+              <div key={r.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -255,12 +255,12 @@ export function OrganizeHub() {
               <Plus size={14}/> Add Occasion
             </button>
           </div>
-          {occasions.length===0 && <div className="py-12 text-center rounded-2xl" style={GLASS}><Calendar size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No occasions yet.</div></div>}
+          {occasions.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Calendar size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No occasions yet.</div></div>}
           <div className="grid md:grid-cols-2 gap-4">
             {occasions.map(o=>{
               const ot = occType[o.type];
               return (
-                <div key={o.id} className="p-5 rounded-2xl" style={GLASS}>
+                <div key={o.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="flex items-center justify-center rounded-xl text-lg" style={{ width:40, height:40, background:ot.bg }}>{ot.icon}</div>
                     <div className="flex-1">

@@ -90,7 +90,7 @@ export function Warranties() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[{label:"Total",value:warranties.length,color:"var(--primary)"},{label:"Active",value:active,color:"#48BB78"},{label:"Expiring < 90 Days",value:expiringSoon,color:"#F6AD55"},{label:"Expired",value:expired,color:"#FC8181"}].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -111,7 +111,7 @@ export function Warranties() {
       {/* Warranty list */}
       <div className="space-y-3">
         {filtered.map(w => (
-          <div key={w.id} className="rounded-2xl overflow-hidden" style={CARD}>
+          <div key={w.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
             {(w as any).photo && <img src={(w as any).photo} alt={w.product} style={{ width:"100%", height:160, objectFit:"cover" }}/>}
             <button className="w-full p-5 text-left" onClick={()=>setExpanded(expanded===w.id?null:w.id)}>
               <div className="flex items-start justify-between gap-4">
@@ -201,7 +201,7 @@ export function Warranties() {
       {/* Add modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Warranty</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

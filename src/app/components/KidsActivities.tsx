@@ -156,7 +156,7 @@ export function KidsActivities() {
           { label:"Active",           value:activities.filter(a=>a.status==="active").length,  color:"#48BB78" },
           { label:"Children",         value:new Set(activities.map(a=>a.childName)).size,      color:"#9F7AEA" },
         ].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -179,7 +179,7 @@ export function KidsActivities() {
         {filtered.map(act => {
           const meta = getMeta(act.activityType);
           return (
-            <div key={act.id} className="rounded-2xl overflow-hidden" style={CARD}>
+            <div key={act.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
               <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===act.id ? null : act.id)}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
@@ -267,7 +267,7 @@ export function KidsActivities() {
 
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-1">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Activity</h3>
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>

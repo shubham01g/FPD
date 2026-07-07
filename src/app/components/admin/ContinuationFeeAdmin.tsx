@@ -56,7 +56,7 @@ export function ContinuationFeeAdmin() {
             { label:"Currently Activated", value:activated, color:"#9F7AEA" },
             { label:"Pending Activation", value:pending, color:"#F6AD55" },
           ].map(s => (
-            <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
+            <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
               <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
             </div>
@@ -64,7 +64,7 @@ export function ContinuationFeeAdmin() {
         </div>
 
         {/* Admin Configuration */}
-        <div className="p-6 rounded-2xl" style={CARD}>
+        <div className="p-6 rounded-2xl glow-surface" style={CARD}>
           <div className="flex items-center gap-2 mb-5">
             <Settings size={16} color="#6C5CE7"/>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Fee Configuration</h3>

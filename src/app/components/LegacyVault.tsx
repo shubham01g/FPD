@@ -176,7 +176,7 @@ export function LegacyVault() {
       </div>
 
       {/* Two-condition gate */}
-      <div className="p-5 rounded-2xl space-y-3" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.12)" }}>
+      <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.12)" }}>
         <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:8 }}>
           🔐 Two Conditions Required to Unlock Downloads
         </div>
@@ -227,7 +227,7 @@ export function LegacyVault() {
 
         <div className="grid md:grid-cols-2 gap-3">
           {(expanded ? PACKAGE_SECTIONS : PACKAGE_SECTIONS.slice(0, 6)).map(section => (
-            <div key={section.label} className="flex items-start gap-4 p-4 rounded-2xl" style={GLASS}>
+            <div key={section.label} className="flex items-start gap-4 p-4 rounded-2xl glow-surface" style={GLASS}>
               <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                 style={{ width:42, height:42, background:`${section.color}14`, color:section.color }}>
                 {section.icon}

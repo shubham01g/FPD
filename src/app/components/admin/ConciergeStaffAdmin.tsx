@@ -56,7 +56,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
 
         <div className="p-6 space-y-4">
           {/* Info banner */}
-          <div className="flex items-start gap-2 p-3 rounded-xl"
+          <div className="flex items-start gap-2 p-3 rounded-xl glow-surface"
             style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)" }}>
             <Shield size={12} color="#9F7AEA" style={{ marginTop:1 }}/>
             <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
@@ -312,7 +312,7 @@ export function ConciergeStaffAdmin() {
           { label:"Pending Invite", value:invited,   color:"#F6AD55" },
           { label:"Suspended",      value:suspended, color:"#FC8181" },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl" style={{ background:"#FFFFFF", border:"1px solid rgba(159,122,234,0.12)" }}>
+          <div key={s.label} className="p-4 rounded-2xl glow-surface" style={{ background:"#FFFFFF", border:"1px solid rgba(159,122,234,0.12)" }}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -320,7 +320,7 @@ export function ConciergeStaffAdmin() {
       </div>
 
       {/* How it works banner */}
-      <div className="p-4 rounded-2xl" style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.2)" }}>
+      <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.2)" }}>
         <div style={{ color:"#9F7AEA", fontSize:11, fontWeight:700, ...MONO, marginBottom:8 }}>HOW CONCIERGE ACCESS WORKS</div>
         <div className="grid md:grid-cols-4 gap-3">
           {[

@@ -149,7 +149,7 @@ export function LegacyContinuationFee() {
         </div>
 
         {/* Two-condition gate explanation */}
-        <div className="p-5 rounded-2xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
+        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
           <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:10 }}>HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3 p-4 rounded-xl"
@@ -193,7 +193,7 @@ export function LegacyContinuationFee() {
         </div>
 
         {/* What gets downloaded */}
-        <div className="p-5 rounded-2xl" style={CARD}>
+        <div className="p-5 rounded-2xl glow-surface" style={CARD}>
           <button onClick={() => setShowCoverage(!showCoverage)}
             className="w-full flex items-center justify-between"
             style={{ background:"transparent", border:"none", cursor:"pointer" }}>
@@ -227,7 +227,7 @@ export function LegacyContinuationFee() {
 
         {/* Paid status banner */}
         {status.paid && (
-          <div className="flex items-start gap-4 p-6 rounded-2xl border" style={{ background:"rgba(72,187,120,0.05)", borderColor:"rgba(72,187,120,0.3)" }}>
+          <div className="flex items-start gap-4 p-6 rounded-2xl border glow-surface" style={{ background:"rgba(72,187,120,0.05)", borderColor:"rgba(72,187,120,0.3)" }}>
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background:"rgba(72,187,120,0.12)" }}>
               <CheckCircle size={24} color="#48BB78"/>
             </div>
@@ -257,7 +257,7 @@ export function LegacyContinuationFee() {
           {/* Payment panel */}
           <div className="space-y-4">
             {!status.paid ? (
-              <div className="p-6 rounded-2xl" style={CARD}>
+              <div className="p-6 rounded-2xl glow-surface" style={CARD}>
                 <div className="text-center mb-6">
                   <div style={{ fontFamily:"var(--font-display)", fontSize:52, color:"#6C5CE7", fontWeight:900, lineHeight:1 }}>$199</div>
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, marginTop:4 }}>One-time · Never expires · Non-refundable</div>
@@ -314,7 +314,7 @@ export function LegacyContinuationFee() {
                 </div>
               </div>
             ) : (
-              <div className="p-6 rounded-2xl text-center space-y-4" style={CARD}>
+              <div className="p-6 rounded-2xl text-center space-y-4 glow-surface" style={CARD}>
                 <div className="text-5xl">🛡️</div>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Fee Paid — Awaiting Confirmation of Passing</div>
                 <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
@@ -335,7 +335,7 @@ export function LegacyContinuationFee() {
           </div>
 
           {/* FAQ */}
-          <div className="p-5 rounded-2xl space-y-4" style={CARD}>
+          <div className="p-5 rounded-2xl space-y-4 glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:4 }}>Common Questions</div>
             {[
               { q:"Can my legacy contact pay the fee after I pass?", a:"Yes. Either the account owner or a designated legacy contact can pay the $199 fee — before or after the passing. Both conditions (fee paid + confirmation of passing verified) must be met to unlock downloads." },
@@ -358,7 +358,7 @@ export function LegacyContinuationFee() {
       {/* Stripe Payment Modal */}
       {showPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
+          <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background:"rgba(108,92,231,0.1)" }}>
                 <CreditCard size={20} color="#6C5CE7"/>
