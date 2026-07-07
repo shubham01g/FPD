@@ -6,9 +6,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.12)", borderRadius:16, boxShadow:"0 2px 12px rgba(32,64,192,0.06)" };
+const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.12)", borderRadius:16, boxShadow:"0 2px 12px rgba(108,92,231,0.06)" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none" };
 
 /* ── Report catalog ──────────────────────────────────────────────── */
 interface ReportDef {
@@ -240,7 +240,7 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF","XLSX"],
     icon: <BarChart3 size={16}/>,
-    color: "#2040C0",
+    color: "#6C5CE7",
     fields: ["Notification ID","Title","Type","Target Segment","Sent At","Delivered","Opened","Open Rate %","Scheduled"],
     estimatedRows: "~240 rows",
   },
@@ -251,7 +251,7 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF"],
     icon: <Send size={16}/>,
-    color: "#2040C0",
+    color: "#6C5CE7",
     fields: ["Template","Sent","Delivered","Opens","Open Rate %","Bounces","Bounce Rate %","Unsubscribes"],
     estimatedRows: "~16 rows (one per template)",
   },
@@ -263,7 +263,7 @@ const CATEGORY_META: Record<ReportDef["category"], { label: string; color: strin
   storage:     { label:"Storage",     color:"#9F7AEA", icon:<HardDrive size={13}/> },
   operations:  { label:"Operations",  color:"#ED8936", icon:<Star size={13}/> },
   compliance:  { label:"Compliance",  color:"#FC8181", icon:<Shield size={13}/> },
-  marketing:   { label:"Marketing",   color:"#2040C0", icon:<BarChart3 size={13}/> },
+  marketing:   { label:"Marketing",   color:"#6C5CE7", icon:<BarChart3 size={13}/> },
 };
 
 /* ── Recent downloads seed ───────────────────────────────────────── */
@@ -331,7 +331,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
             {report.formats.map(f => (
               <button key={f} onClick={() => setFmt(f)}
                 className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
-                style={{ background:fmt===f?`${report.color}18`:"rgba(32,64,192,0.04)", color:fmt===f?report.color:"#8A9AB8", border:`1px solid ${fmt===f?report.color+"30":"rgba(32,64,192,0.1)"}` }}>
+                style={{ background:fmt===f?`${report.color}18`:"rgba(108,92,231,0.04)", color:fmt===f?report.color:"#8A9AB8", border:`1px solid ${fmt===f?report.color+"30":"rgba(108,92,231,0.1)"}` }}>
                 {f}
               </button>
             ))}
@@ -356,12 +356,12 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
 
       {/* Expanded — field list */}
       {expanded && (
-        <div className="px-5 pb-5 border-t pt-4 space-y-3" style={{ borderColor:"rgba(32,64,192,0.08)" }}>
+        <div className="px-5 pb-5 border-t pt-4 space-y-3" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
           <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>INCLUDED FIELDS ({report.fields.length})</div>
           <div className="flex flex-wrap gap-1.5">
             {report.fields.map(f => (
               <span key={f} className="px-2 py-1 rounded-lg text-xs"
-                style={{ background:"rgba(32,64,192,0.04)", color:"#5A6A88", border:"1px solid rgba(32,64,192,0.08)" }}>
+                style={{ background:"rgba(108,92,231,0.04)", color:"#5A6A88", border:"1px solid rgba(108,92,231,0.08)" }}>
                 {f}
               </span>
             ))}
@@ -413,7 +413,7 @@ export function ReportsDownloads() {
   );
 
   const stats = [
-    { label:"Available Reports", value:REPORTS.length,  color:"#2040C0" },
+    { label:"Available Reports", value:REPORTS.length,  color:"#6C5CE7" },
     { label:"Generated This Month", value:downloads.length, color:"#48BB78" },
     { label:"Categories",          value:6,              color:"#9F7AEA" },
     { label:"Export Formats",      value:4,              color:"#ED8936" },
@@ -425,8 +425,8 @@ export function ReportsDownloads() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Download size={15} color="#2040C0"/>
-          <span style={{ color:"#2040C0", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
+          <Download size={15} color="#6C5CE7"/>
+          <span style={{ color:"#6C5CE7", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
         </div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Reports & Downloads</h1>
         <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -445,11 +445,11 @@ export function ReportsDownloads() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.1)" }}>
         {([["reports","📋 Report Catalog"],["history","📥 Download History"]] as const).map(([id, label]) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className="px-5 py-2 rounded-lg text-sm font-semibold"
-            style={{ background:activeTab===id?"#2040C0":"transparent", color:activeTab===id?"#fff":"#5A6A88" }}>
+            style={{ background:activeTab===id?"#6C5CE7":"transparent", color:activeTab===id?"#fff":"#5A6A88" }}>
             {label}
           </button>
         ))}
@@ -465,13 +465,13 @@ export function ReportsDownloads() {
             <div className="flex gap-1 flex-wrap">
               <button onClick={() => setActiveCategory("all")}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background:activeCategory==="all"?"#2040C0":"rgba(32,64,192,0.04)", color:activeCategory==="all"?"#fff":"#5A6A88", border:"1px solid rgba(32,64,192,0.1)" }}>
+                style={{ background:activeCategory==="all"?"#6C5CE7":"rgba(108,92,231,0.04)", color:activeCategory==="all"?"#fff":"#5A6A88", border:"1px solid rgba(108,92,231,0.1)" }}>
                 All
               </button>
               {(Object.entries(CATEGORY_META) as [ReportDef["category"], typeof CATEGORY_META[ReportDef["category"]]][]).map(([key, meta]) => (
                 <button key={key} onClick={() => setActiveCategory(key)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background:activeCategory===key?`${meta.color}18`:"rgba(32,64,192,0.04)", color:activeCategory===key?meta.color:"#5A6A88", border:`1px solid ${activeCategory===key?meta.color+"30":"rgba(32,64,192,0.1)"}` }}>
+                  style={{ background:activeCategory===key?`${meta.color}18`:"rgba(108,92,231,0.04)", color:activeCategory===key?meta.color:"#5A6A88", border:`1px solid ${activeCategory===key?meta.color+"30":"rgba(108,92,231,0.1)"}` }}>
                   {meta.icon} {meta.label}
                 </button>
               ))}
@@ -505,7 +505,7 @@ export function ReportsDownloads() {
           <div className="rounded-2xl overflow-hidden" style={CARD}>
             <table className="w-full text-sm" style={{ borderCollapse:"collapse" }}>
               <thead>
-                <tr style={{ background:"rgba(32,64,192,0.04)", borderBottom:"1px solid rgba(32,64,192,0.08)" }}>
+                <tr style={{ background:"rgba(108,92,231,0.04)", borderBottom:"1px solid rgba(108,92,231,0.08)" }}>
                   {["Report","Format","Generated","By","Size","Rows","Action"].map(h => (
                     <th key={h} style={{ padding:"12px 16px", textAlign:"left", color:"#8A9AB8", fontSize:10, ...MONO, fontWeight:600 }}>{h}</th>
                   ))}
@@ -516,7 +516,7 @@ export function ReportsDownloads() {
                   const fmtColor: Record<string, string> = { CSV:"#48BB78", PDF:"#FC8181", XLSX:"#4A90D9", JSON:"#F6AD55" };
                   const color = fmtColor[dl.format] ?? "#8A9AB8";
                   return (
-                    <tr key={dl.id} style={{ borderBottom: i < downloads.length-1 ? "1px solid rgba(32,64,192,0.06)" : "none" }}>
+                    <tr key={dl.id} style={{ borderBottom: i < downloads.length-1 ? "1px solid rgba(108,92,231,0.06)" : "none" }}>
                       <td style={{ padding:"12px 16px" }}>
                         <div style={{ color:"#0D1428", fontWeight:500, fontSize:13 }}>{dl.reportName}</div>
                         <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{dl.id}</div>
@@ -532,7 +532,7 @@ export function ReportsDownloads() {
                         {dl.status === "ready" ? (
                           <button onClick={() => toast.success(`Downloading ${dl.reportName}.${dl.format.toLowerCase()}…`)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                            style={{ background:"rgba(32,64,192,0.06)", color:"#2040C0" }}>
+                            style={{ background:"rgba(108,92,231,0.06)", color:"#6C5CE7" }}>
                             <Download size={11}/> Download
                           </button>
                         ) : dl.status === "generating" ? (
@@ -553,8 +553,8 @@ export function ReportsDownloads() {
           </div>
 
           {/* Info banner */}
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.1)" }}>
-            <Shield size={14} color="#2040C0" style={{ marginTop:1, flexShrink:0 }}/>
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+            <Shield size={14} color="#6C5CE7" style={{ marginTop:1, flexShrink:0 }}/>
             <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
               All reports are generated in real time from the live database. Files are retained for 30 days. Reports containing PII are access-logged per your admin audit policy. GDPR data requests are archived separately for 7 years per compliance requirements.
             </div>

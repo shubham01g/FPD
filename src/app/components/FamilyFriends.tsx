@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(32,64,192,0.1)", boxShadow: "0 2px 12px rgba(32,64,192,0.06)", borderRadius: 16 };
+const CARD: React.CSSProperties = { background: "#16161F", border: "1px solid rgba(108,92,231,0.1)", boxShadow: "0 2px 12px rgba(108,92,231,0.06)", borderRadius: 16 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 interface Contact {
@@ -23,7 +23,7 @@ interface ContactGroup {
   createdAt: string;
 }
 
-const GROUP_COLORS = ["#2040C0","#9F7AEA","#48BB78","#F7931A","#FC8181","#4A90D9","#38B2AC","#F6AD55"];
+const GROUP_COLORS = ["#6C5CE7","#9F7AEA","#48BB78","#F7931A","#FC8181","#4A90D9","#38B2AC","#F6AD55"];
 
 /* ── Blast Email Modal ─────────────────────────────────────────────── */
 function BlastEmailModal({
@@ -36,8 +36,8 @@ function BlastEmailModal({
   const [sending, setSending] = useState(false);
 
   const INPUT: React.CSSProperties = {
-    background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)",
-    color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%",
+    background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)",
+    color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%",
   };
 
   function sendEmail() {
@@ -60,31 +60,31 @@ function BlastEmailModal({
       style={{ background:"rgba(0,0,0,0.5)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={CARD}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor:"rgba(32,64,192,0.08)" }}>
+          style={{ borderColor:"rgba(108,92,231,0.08)" }}>
           <div className="flex items-center gap-2">
-            <Send size={16} color="#2040C0"/>
-            <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#0D1428" }}>
+            <Send size={16} color="#6C5CE7"/>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>
               Blast Email — {group.name}
             </h3>
           </div>
-          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+          <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
         </div>
         <div className="p-6 space-y-4">
           {/* Recipients */}
-          <div className="p-3 rounded-xl" style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.12)" }}>
-            <div style={{ color:"#5A6A88", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:6 }}>
+          <div className="p-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:6 }}>
               RECIPIENTS ({withEmail.length} with email / {members.length} total in group)
             </div>
             <div className="flex flex-wrap gap-1.5">
               {withEmail.map(c => (
                 <span key={c.id} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                  style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+                  style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
                   {c.initials} {c.name}
                 </span>
               ))}
               {members.filter(c => !c.email).map(c => (
                 <span key={c.id} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-                  style={{ background:"rgba(107,114,128,0.1)", color:"#8A9AB8" }}>
+                  style={{ background:"rgba(107,114,128,0.1)", color:"rgba(255,255,255,0.65)" }}>
                   {c.name} (no email)
                 </span>
               ))}
@@ -92,12 +92,12 @@ function BlastEmailModal({
           </div>
 
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>SUBJECT *</label>
+            <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>SUBJECT *</label>
             <input value={subject} onChange={e => setSubject(e.target.value)}
               placeholder="e.g. Family Reunion — Save the Date!" style={INPUT}/>
           </div>
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>MESSAGE *</label>
+            <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>MESSAGE *</label>
             <textarea value={body} onChange={e => setBody(e.target.value)} rows={5}
               placeholder="Write your message here…" className="w-full resize-none"
               style={INPUT}/>
@@ -112,11 +112,11 @@ function BlastEmailModal({
           <div className="flex gap-3">
             <button onClick={sendEmail} disabled={sending}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Opening Email…" : `Send to ${withEmail.length} Recipients`}
             </button>
             <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
-              style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+              style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -124,10 +124,10 @@ function BlastEmailModal({
   );
 }
 
-const COLORS = ["#2040C0","#48BB78","#9F7AEA","#F6AD55","#FC8181","#38B2AC","#ED8936","#4A90D9"];
+const COLORS = ["#6C5CE7","#48BB78","#9F7AEA","#F6AD55","#FC8181","#38B2AC","#ED8936","#4A90D9"];
 
 const initContacts: Contact[] = [
-  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#2040C0", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
+  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#6C5CE7", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
   { id:"c2", name:"Michael Doe", relationship:"Son", phone:"(415) 555-0871", email:"m.doe@email.com", birthday:"Mar 5", group:"immediate", starred:true, initials:"MD", color:"#48BB78", notes:"Married to Amanda. Has Tyler and Lily." },
   { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#9F7AEA", notes:"Lives in Sacramento. Loves art and teaching." },
   { id:"c4", name:"Tyler Doe", relationship:"Grandson", birthday:"Mar 5", group:"immediate", initials:"TD", color:"#F6AD55", notes:"Age 8. Loves dinosaurs and baseball. Peanut allergy." },
@@ -135,14 +135,14 @@ const initContacts: Contact[] = [
   { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#38B2AC" },
   { id:"c7", name:"Linda Torres", relationship:"Sister-in-law", phone:"(916) 555-0821", email:"ltorres@email.com", birthday:"Apr 12", group:"extended", initials:"LT", color:"#ED8936" },
   { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#4A90D9", notes:"We go back to Army days. Fishing partner." },
-  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#2040C0", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
+  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#6C5CE7", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
   { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#9F7AEA", notes:"Grace Community Church. Has conducted family funerals." },
 ];
 
 const groupConfig = {
-  immediate: { label: "Immediate Family", color: "#2040C0", bg: "#EAF0FC" },
+  immediate: { label: "Immediate Family", color: "#6C5CE7", bg: "#1C1C28" },
   extended:  { label: "Extended Family",  color: "#48BB78", bg: "#F0FFF4" },
-  friends:   { label: "Friends",          color: "#9F7AEA", bg: "#FAF5FF" },
+  friends:   { label: "Friends",          color: "#9F7AEA", bg: "#17122E" },
   other:     { label: "Other Contacts",   color: "#F6AD55", bg: "#FFFBEB" },
 };
 
@@ -164,8 +164,8 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.4)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
         <div className="flex items-center justify-between mb-6">
-          <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#0D1428" }}>Add Contact</h3>
-          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+          <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Contact</h3>
+          <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
         </div>
         <div className="space-y-3">
           {[
@@ -177,29 +177,29 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
             { key:"address", label:"ADDRESS", ph:"Street, City, State" },
           ].map(f => (
             <div key={f.key}>
-              <label style={{ color:"#8A9AB8", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{f.label}{f.required ? " *" : ""}</label>
+              <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{f.label}{f.required ? " *" : ""}</label>
               <input value={(form as any)[f.key]} onChange={e => setForm(p => ({...p,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#F0F4FA", border:"1px solid rgba(32,64,192,0.12)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0A0A0F", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>GROUP</label>
+            <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>GROUP</label>
             <select value={form.group} onChange={e => setForm(p => ({...p, group:e.target.value as Contact["group"]}))}
-              className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#F0F4FA", border:"1px solid rgba(32,64,192,0.12)", color:"#0D1428", fontSize:13, outline:"none" }}>
+              className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0A0A0F", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
               {Object.entries(groupConfig).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>NOTES</label>
+            <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>NOTES</label>
             <textarea value={form.notes} onChange={e => setForm(p => ({...p,notes:e.target.value}))} placeholder="Personal notes..." rows={2}
-              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#F0F4FA", border:"1px solid rgba(32,64,192,0.12)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0A0A0F", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={submit} disabled={loading} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#fff", boxShadow:"0 4px 12px rgba(32,64,192,0.3)", opacity:loading?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)", opacity:loading?0.7:1 }}>
               {loading ? "Saving..." : "Add Contact"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"#F0F4FA", color:"#5A6A88" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -208,7 +208,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
 }
 
 const initGroups: ContactGroup[] = [
-  { id:"g1", name:"Estate Team", color:"#2040C0", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
+  { id:"g1", name:"Estate Team", color:"#6C5CE7", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
   { id:"g2", name:"Close Family", color:"#9F7AEA", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
   { id:"g3", name:"Sacramento Neighbors", color:"#48BB78", description:"Local friends and neighbors", memberIds:["c8","c9"], createdAt:"Jun 5, 2026" },
 ];
@@ -250,12 +250,12 @@ export function FamilyFriends() {
   };
 
   return (
-    <div className="p-6 space-y-5" style={{ maxWidth: 1200, background: "#F0F4FA", minHeight: "100%" }}>
+    <div className="p-6 space-y-5" style={{ maxWidth: 1200, background: "#0A0A0F", minHeight: "100%" }}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428", marginBottom:4 }}>Family & Friends</h1>
-          <p style={{ color:"#5A6A88", fontSize:13 }}>{contacts.length} contacts · {contacts.filter(c=>c.starred).length} starred · organized by relationship</p>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Family & Friends</h1>
+          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>{contacts.length} contacts · {contacts.filter(c=>c.starred).length} starred · organized by relationship</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowGroupsPanel(!showGroupsPanel)}
@@ -264,7 +264,7 @@ export function FamilyFriends() {
             <Layers size={14}/> Groups & Email Blast ({groups.length})
           </button>
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#fff", boxShadow:"0 4px 12px rgba(32,64,192,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
             <Plus size={15}/> Add Contact
           </button>
         </div>
@@ -277,8 +277,8 @@ export function FamilyFriends() {
             style={{ background:"rgba(159,122,234,0.05)", borderColor:"rgba(159,122,234,0.15)" }}>
             <div className="flex items-center gap-2">
               <Layers size={15} color="#9F7AEA"/>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>Contact Groups</span>
-              <span style={{ color:"#8A9AB8", fontSize:12 }}>— create groups to send blast emails to multiple contacts at once</span>
+              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF" }}>Contact Groups</span>
+              <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>— create groups to send blast emails to multiple contacts at once</span>
             </div>
             <button onClick={() => setShowCreateGroup(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
@@ -288,7 +288,7 @@ export function FamilyFriends() {
           </div>
 
           {groups.length === 0 && (
-            <div className="py-8 text-center" style={{ color:"#8A9AB8", fontSize:13 }}>
+            <div className="py-8 text-center" style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>
               No groups yet. Create a group to send blast emails.
             </div>
           )}
@@ -304,19 +304,19 @@ export function FamilyFriends() {
                     {g.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div style={{ color:"#0D1428", fontSize:14, fontWeight:600 }}>{g.name}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:11 }}>
+                    <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{g.name}</div>
+                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>
                       {members.length} contacts · {withEmail} with email{g.description ? ` · ${g.description}` : ""}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1 flex-1 min-w-0">
                     {members.slice(0,5).map(m => (
                       <span key={m.id} className="px-2 py-0.5 rounded-full text-xs"
-                        style={{ background:"rgba(32,64,192,0.06)", color:"#2040C0" }}>
+                        style={{ background:"rgba(108,92,231,0.06)", color:"#6C5CE7" }}>
                         {m.name.split(" ")[0]}
                       </span>
                     ))}
-                    {members.length > 5 && <span style={{ color:"#8A9AB8", fontSize:11 }}>+{members.length-5} more</span>}
+                    {members.length > 5 && <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>+{members.length-5} more</span>}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => setBlastGroup(g)}
@@ -339,20 +339,20 @@ export function FamilyFriends() {
               <div style={{ color:"#9F7AEA", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>CREATE NEW GROUP</div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>GROUP NAME *</label>
+                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>GROUP NAME *</label>
                   <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)}
                     placeholder="e.g. Estate Team" className="w-full px-3 py-2 rounded-xl"
-                    style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                    style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                 </div>
                 <div>
-                  <label style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>DESCRIPTION (optional)</label>
+                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>DESCRIPTION (optional)</label>
                   <input value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)}
                     placeholder="What is this group for?" className="w-full px-3 py-2 rounded-xl"
-                    style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                    style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                 </div>
               </div>
               <div>
-                <label style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>COLOR</label>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>COLOR</label>
                 <div className="flex gap-2">
                   {GROUP_COLORS.map(c => (
                     <button key={c} onClick={() => setNewGroupColor(c)}
@@ -364,13 +364,13 @@ export function FamilyFriends() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <label style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)" }}>
+                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, fontFamily:"var(--font-mono)" }}>
                     ADD MEMBERS ({newGroupMembers.length}/{contacts.length} selected)
                   </label>
                   <div className="flex gap-2">
                     <button onClick={() => setNewGroupMembers(contacts.map(c => c.id))}
                       className="px-3 py-1 rounded-lg text-xs font-bold"
-                      style={{ background:"rgba(32,64,192,0.1)", color:"#2040C0", border:"1px solid rgba(32,64,192,0.2)" }}>
+                      style={{ background:"rgba(108,92,231,0.1)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)" }}>
                       + Add All
                     </button>
                     {newGroupMembers.length > 0 && (
@@ -388,9 +388,9 @@ export function FamilyFriends() {
                     return (
                       <button key={c.id} onClick={() => setNewGroupMembers(prev => sel ? prev.filter(x=>x!==c.id) : [...prev,c.id])}
                         className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all"
-                        style={{ background:sel?`${newGroupColor}15`:"rgba(32,64,192,0.04)",
-                          border:`1px solid ${sel?newGroupColor:"rgba(32,64,192,0.12)"}`,
-                          color:sel?newGroupColor:"#5A6A88" }}>
+                        style={{ background:sel?`${newGroupColor}15`:"rgba(108,92,231,0.04)",
+                          border:`1px solid ${sel?newGroupColor:"rgba(108,92,231,0.12)"}`,
+                          color:sel?newGroupColor:"rgba(255,255,255,0.7)" }}>
                         {sel && <CheckCircle size={10}/>}
                         {c.name.split(" ")[0]}
                         {c.email && <Mail size={9} style={{ opacity:0.6 }}/>}
@@ -412,7 +412,7 @@ export function FamilyFriends() {
                   <Plus size={11}/> Create Group
                 </button>
                 <button onClick={() => setShowCreateGroup(false)}
-                  className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>
+                  className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>
                   Cancel
                 </button>
               </div>
@@ -426,25 +426,25 @@ export function FamilyFriends() {
         {(Object.entries(groupConfig) as [Contact["group"], typeof groupConfig[Contact["group"]]][]).map(([g, cfg]) => (
           <button key={g} onClick={() => setActiveGroup(activeGroup === g ? "all" : g)}
             className="p-4 rounded-2xl text-left transition-all"
-            style={{ ...CARD, borderColor: activeGroup === g ? cfg.color : "rgba(32,64,192,0.1)", borderWidth: activeGroup === g ? 2 : 1 }}>
+            style={{ ...CARD, borderColor: activeGroup === g ? cfg.color : "rgba(108,92,231,0.1)", borderWidth: activeGroup === g ? 2 : 1 }}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:cfg.color }}>{byGroup(g).length}</div>
-            <div style={{ color:"#0D1428", fontSize:13, fontWeight:500, marginTop:2 }}>{cfg.label}</div>
+            <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500, marginTop:2 }}>{cfg.label}</div>
           </button>
         ))}
       </div>
 
       {/* Search + Filter */}
       <div className="flex flex-wrap gap-3">
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48" style={{ background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)" }}>
-          <Search size={13} color="#8A9AB8"/>
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48" style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.1)" }}>
+          <Search size={13} color="rgba(255,255,255,0.65)"/>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search family & friends..."
-            style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:13, width:"100%" }}/>
+            style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
         </div>
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)" }}>
+        <div className="flex gap-1 p-1 rounded-xl" style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.1)" }}>
           {([["all","All"],["starred","⭐ Starred"]] as const).map(([id, label]) => (
             <button key={id} onClick={() => setActiveGroup(id as any)}
               className="px-4 py-2 rounded-lg text-sm transition-all"
-              style={{ background: activeGroup === id ? "#2040C0" : "transparent", color: activeGroup === id ? "#fff" : "#5A6A88", fontWeight: activeGroup === id ? 600 : 400 }}>
+              style={{ background: activeGroup === id ? "#6C5CE7" : "transparent", color: activeGroup === id ? "#fff" : "rgba(255,255,255,0.7)", fontWeight: activeGroup === id ? 600 : 400 }}>
               {label}
             </button>
           ))}
@@ -456,8 +456,8 @@ export function FamilyFriends() {
         <div className="lg:col-span-2 space-y-3">
           {filtered.length === 0 && (
             <div className="py-12 text-center rounded-2xl" style={CARD}>
-              <Users size={32} color="rgba(32,64,192,0.2)" style={{ margin:"0 auto 12px" }}/>
-              <div style={{ color:"#8A9AB8", fontSize:14 }}>No contacts found.</div>
+              <Users size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14 }}>No contacts found.</div>
             </div>
           )}
           {filtered.map(contact => {
@@ -465,33 +465,33 @@ export function FamilyFriends() {
             return (
               <div key={contact.id}
                 className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all"
-                style={{ ...CARD, borderColor: selected?.id === contact.id ? "#2040C0" : "rgba(32,64,192,0.1)", borderWidth: selected?.id === contact.id ? 2 : 1 }}
+                style={{ ...CARD, borderColor: selected?.id === contact.id ? "#6C5CE7" : "rgba(108,92,231,0.1)", borderWidth: selected?.id === contact.id ? 2 : 1 }}
                 onClick={() => setSelected(selected?.id === contact.id ? null : contact)}>
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
                   {contact.photo
-                    ? <img src={contact.photo} alt={contact.name} style={{ width:48, height:48, borderRadius:"50%", objectFit:"cover", border:"2px solid rgba(32,64,192,0.2)" }}/>
+                    ? <img src={contact.photo} alt={contact.name} style={{ width:48, height:48, borderRadius:"50%", objectFit:"cover", border:"2px solid rgba(108,92,231,0.2)" }}/>
                     : <div className="flex items-center justify-center rounded-full" style={{ width:48, height:48, background:`${contact.color}18`, color:contact.color, fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{contact.initials}</div>
                   }
                   {contact.starred && <Star size={12} fill="#F6AD55" color="#F6AD55" style={{ position:"absolute", bottom:0, right:0 }}/>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span style={{ color:"#0D1428", fontSize:14, fontWeight:600 }}>{contact.name}</span>
+                    <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{contact.name}</span>
                     <span className="px-2 py-0.5 rounded-full text-xs" style={{ background:cfg.bg, color:cfg.color, fontSize:10, ...MONO }}>{contact.relationship}</span>
                   </div>
                   <div className="flex flex-wrap gap-3 mt-1">
-                    {contact.phone && <span style={{ color:"#5A6A88", fontSize:12 }}>{contact.phone}</span>}
-                    {contact.birthday && <span style={{ color:"#5A6A88", fontSize:12 }}>🎂 {contact.birthday}</span>}
+                    {contact.phone && <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{contact.phone}</span>}
+                    {contact.birthday && <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>🎂 {contact.birthday}</span>}
                   </div>
-                  {contact.notes && <div style={{ color:"#8A9AB8", fontSize:11, marginTop:3, fontStyle:"italic" }} className="truncate">"{contact.notes}"</div>}
+                  {contact.notes && <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:3, fontStyle:"italic" }} className="truncate">"{contact.notes}"</div>}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={e => { e.stopPropagation(); toggleStar(contact.id); }} style={{ color: contact.starred ? "#F6AD55" : "#C8D4EE" }}>
+                  <button onClick={e => { e.stopPropagation(); toggleStar(contact.id); }} style={{ color: contact.starred ? "#F6AD55" : "rgba(255,255,255,0.75)" }}>
                     <Star size={14} fill={contact.starred ? "#F6AD55" : "transparent"}/>
                   </button>
-                  {contact.phone && <a href={`tel:${contact.phone}`} onClick={e => e.stopPropagation()} style={{ color:"#8A9AB8" }}><Phone size={13}/></a>}
-                  {contact.email && <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} style={{ color:"#8A9AB8" }}><Mail size={13}/></a>}
+                  {contact.phone && <a href={`tel:${contact.phone}`} onClick={e => e.stopPropagation()} style={{ color:"rgba(255,255,255,0.65)" }}><Phone size={13}/></a>}
+                  {contact.email && <a href={`mailto:${contact.email}`} onClick={e => e.stopPropagation()} style={{ color:"rgba(255,255,255,0.65)" }}><Mail size={13}/></a>}
                 </div>
               </div>
             );
@@ -511,31 +511,31 @@ export function FamilyFriends() {
                 <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(selected.id, e.target.files?.[0] ?? null)}/>
                 <button onClick={() => photoRef.current?.click()}
                   className="absolute bottom-2 right-2 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs"
-                  style={{ background:"rgba(255,255,255,0.9)", color:"#2040C0", fontWeight:600 }}>
+                  style={{ background:"rgba(22,22,31,0.9)", color:"#6C5CE7", fontWeight:600 }}>
                   <Camera size={11}/> {selected.photo ? "Change" : "Add Photo"}
                 </button>
               </div>
               <div className="p-5">
-                <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#0D1428", marginBottom:4 }}>{selected.name}</div>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#FFFFFF", marginBottom:4 }}>{selected.name}</div>
                 <div style={{ color:groupConfig[selected.group].color, fontSize:13, fontWeight:500, marginBottom:16 }}>{selected.relationship}</div>
                 <div className="space-y-3">
                   {selected.phone && (
-                    <div className="flex items-center gap-2"><Phone size={13} color="#8A9AB8"/><span style={{ color:"#0D1428", fontSize:13 }}>{selected.phone}</span></div>
+                    <div className="flex items-center gap-2"><Phone size={13} color="rgba(255,255,255,0.65)"/><span style={{ color:"#FFFFFF", fontSize:13 }}>{selected.phone}</span></div>
                   )}
                   {selected.email && (
-                    <div className="flex items-center gap-2"><Mail size={13} color="#8A9AB8"/><span style={{ color:"#0D1428", fontSize:13 }}>{selected.email}</span></div>
+                    <div className="flex items-center gap-2"><Mail size={13} color="rgba(255,255,255,0.65)"/><span style={{ color:"#FFFFFF", fontSize:13 }}>{selected.email}</span></div>
                   )}
                   {selected.address && (
-                    <div className="flex items-start gap-2"><MapPin size={13} color="#8A9AB8" style={{ marginTop:2 }}/><span style={{ color:"#0D1428", fontSize:13 }}>{selected.address}</span></div>
+                    <div className="flex items-start gap-2"><MapPin size={13} color="rgba(255,255,255,0.65)" style={{ marginTop:2 }}/><span style={{ color:"#FFFFFF", fontSize:13 }}>{selected.address}</span></div>
                   )}
                   {selected.birthday && (
-                    <div className="flex items-center gap-2"><Gift size={13} color="#8A9AB8"/><span style={{ color:"#0D1428", fontSize:13 }}>{selected.birthday}</span></div>
+                    <div className="flex items-center gap-2"><Gift size={13} color="rgba(255,255,255,0.65)"/><span style={{ color:"#FFFFFF", fontSize:13 }}>{selected.birthday}</span></div>
                   )}
                 </div>
                 {selected.notes && (
-                  <div className="mt-4 p-3 rounded-xl" style={{ background:"#F0F4FA" }}>
-                    <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
-                    <div style={{ color:"#374669", fontSize:13, lineHeight:1.7 }}>{selected.notes}</div>
+                  <div className="mt-4 p-3 rounded-xl" style={{ background:"#0A0A0F" }}>
+                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
+                    <div style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.7 }}>{selected.notes}</div>
                   </div>
                 )}
                 <div className="flex gap-2 mt-4">
@@ -547,7 +547,7 @@ export function FamilyFriends() {
                       toast.success(`Updated to "${newName.trim()}"`);
                     }
                   }}
-                    className="flex-1 py-2 rounded-xl text-sm" style={{ background:"#EAF0FC", color:"#2040C0" }}>
+                    className="flex-1 py-2 rounded-xl text-sm" style={{ background:"#1C1C28", color:"#6C5CE7" }}>
                     <Edit2 size={13} style={{ display:"inline", marginRight:4 }}/>Edit Name
                   </button>
                   <button onClick={() => { setContacts(prev => prev.filter(c => c.id !== selected.id)); setSelected(null); toast.success(`${selected.name} removed`); }}
@@ -559,8 +559,8 @@ export function FamilyFriends() {
             </div>
           ) : (
             <div className="rounded-2xl p-8 text-center" style={CARD}>
-              <Heart size={32} color="rgba(32,64,192,0.2)" style={{ margin:"0 auto 12px" }}/>
-              <div style={{ color:"#8A9AB8", fontSize:14 }}>Select a contact to view details</div>
+              <Heart size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14 }}>Select a contact to view details</div>
             </div>
           )}
         </div>

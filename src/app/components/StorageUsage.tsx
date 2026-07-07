@@ -13,7 +13,7 @@ const usageByCategory = [
   { category: "Legal Docs", gb: 4.2, color: "#4A90D9" },
   { category: "Financial", gb: 4.7, color: "#48BB78" },
   { category: "Video Messages", gb: 5.5, color: "#9F7AEA" },
-  { category: "Personal", gb: 0.8, color: "#2040C0" },
+  { category: "Personal", gb: 0.8, color: "#6C5CE7" },
   { category: "Digital Assets", gb: 0.4, color: "#ED8936" },
   { category: "Photos", gb: 1.3, color: "#FC8181" },
 ];
@@ -46,7 +46,7 @@ export function StorageUsage() {
     if (pct >= 95) return "#E53E3E";
     if (pct >= 90) return "#FC8181";
     if (pct >= 80) return "#F6AD55";
-    return "#2040C0";
+    return "#6C5CE7";
   };
 
   return (
@@ -151,7 +151,7 @@ export function StorageUsage() {
             </div>
             {usageByMonth.map((d, i) => {
               const barH = Math.round((d.used / total) * 120);
-              const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? "#FC8181" : d.used >= total * 0.8 ? "#F6AD55" : "#2040C0";
+              const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? "#FC8181" : d.used >= total * 0.8 ? "#F6AD55" : "#6C5CE7";
               return (
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                   <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.used}GB</span>
@@ -194,7 +194,7 @@ export function StorageUsage() {
               key={plan.name}
               className="p-5 rounded-xl border"
               style={{
-                background: plan.current ? "rgba(32, 64, 192, 0.06)" : "#EAF0FC",
+                background: plan.current ? "rgba(32, 64, 192, 0.06)" : "#1C1C28",
                 borderColor: plan.current ? "var(--gold)" : "var(--border)",
                 borderWidth: plan.current ? 2 : 1,
               }}
@@ -232,7 +232,7 @@ export function StorageUsage() {
             </div>
           ))}
         </div>
-        <div className="mt-4 px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+        <div className="mt-4 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
           <div className="flex items-center gap-2">
             <ArrowUp size={13} color="#FC8181" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
@@ -247,7 +247,7 @@ export function StorageUsage() {
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Notification History</h3>
         <div className="space-y-3">
           {alertHistory.map((alert, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
               <div className="rounded-lg px-2 py-1" style={{ background: `${alert.color}18`, color: alert.color, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
                 {alert.type}
               </div>

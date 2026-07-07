@@ -47,7 +47,7 @@ export function WillsAndTrusts() {
     setShowAdd(false);
   }
 
-  const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+  const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
@@ -71,7 +71,7 @@ export function WillsAndTrusts() {
 
       {/* Info banner */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.15)" }}>
+        style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
         <Shield size={16} color="var(--primary)" style={{ marginTop:2, flexShrink:0 }}/>
         <div style={{ color:"var(--muted-foreground)", fontSize:13, lineHeight:1.7 }}>
           <strong style={{ color:"var(--foreground)" }}>Important:</strong> Your legal documents should be prepared and executed by a licensed estate attorney.
@@ -82,7 +82,7 @@ export function WillsAndTrusts() {
       {/* Document list */}
       {wills.length === 0 && (
         <div className="py-16 text-center rounded-2xl" style={CARD}>
-          <FileText size={40} color="rgba(32,64,192,0.2)" style={{ margin:"0 auto 12px" }}/>
+          <FileText size={40} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
           <div style={{ color:"var(--muted-foreground)", fontSize:14 }}>No legal documents added yet.</div>
           <button onClick={() => setShowAdd(true)} className="mt-3 text-sm underline" style={{ color:"var(--primary)" }}>
             Add your first document
@@ -96,7 +96,7 @@ export function WillsAndTrusts() {
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-start gap-3">
                 <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                  style={{ width:44, height:44, background:"rgba(32,64,192,0.08)" }}>
+                  style={{ width:44, height:44, background:"rgba(108,92,231,0.08)" }}>
                   <FileText size={20} color="var(--primary)"/>
                 </div>
                 <div>
@@ -122,7 +122,7 @@ export function WillsAndTrusts() {
                 { label:"Last Reviewed",    value:will.lastReviewed },
                 { label:"Document Location",value:will.location },
               ].map(f => (
-                <div key={f.label} className="px-4 py-3 rounded-xl" style={{ background:"#EAF0FC" }}>
+                <div key={f.label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
                   <div style={{ color:"var(--muted-foreground)", fontSize:10, marginBottom:4, ...MONO }}>
                     {f.label.toUpperCase()}
                   </div>
@@ -134,7 +134,7 @@ export function WillsAndTrusts() {
             <div className="flex items-center gap-2 flex-wrap mt-1">
               <button onClick={() => toast.success(`Opening ${will.type} in Legacy Vault`)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                style={{ background:"rgba(32,64,192,0.1)", color:"var(--primary)" }}>
+                style={{ background:"rgba(108,92,231,0.1)", color:"var(--primary)" }}>
                 <FileText size={13}/> View in Vault
               </button>
               <button onClick={() => toast.success("Update record — opens edit form")}

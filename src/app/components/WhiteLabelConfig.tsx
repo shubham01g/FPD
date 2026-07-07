@@ -8,12 +8,12 @@ import {
 import { useWhiteLabel, type WhiteLabelConfig } from "../context/WhiteLabelContext";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(32,64,192,0.1)", boxShadow: "0 2px 12px rgba(32,64,192,0.06)", borderRadius: 16 };
-const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(32,64,192,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(32,64,192,0.03) 1px,transparent 1px)", backgroundSize: "50px 50px" };
+const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(108,92,231,0.1)", boxShadow: "0 2px 12px rgba(108,92,231,0.06)", borderRadius: 16 };
+const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px)", backgroundSize: "50px 50px" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 const PRESET_COLORS = [
-  { name: "Ocean Blue",    primary: "#2040C0", accent: "#3355E0" },
+  { name: "Ocean Blue",    primary: "#6C5CE7", accent: "#8B7CF6" },
   { name: "Royal Purple",  primary: "#9F7AEA", accent: "#C4B5FD" },
   { name: "Emerald",       primary: "#48BB78", accent: "#68D391" },
   { name: "Amber",         primary: "#F6AD55", accent: "#FBD38D" },
@@ -35,7 +35,7 @@ type Tab = "brand" | "features" | "plans" | "domain" | "preview";
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button onClick={() => onChange(!checked)} className="flex-shrink-0 transition-all"
-      style={{ width: 40, height: 22, borderRadius: 11, background: checked ? "#2040C0" : "rgba(32,64,192,0.1)", border: `1px solid ${checked ? "#2040C0" : "rgba(32,64,192,0.25)"}`, position: "relative", boxShadow: checked ? "0 0 12px rgba(32,64,192,0.3)" : "none" }}>
+      style={{ width: 40, height: 22, borderRadius: 11, background: checked ? "#6C5CE7" : "rgba(108,92,231,0.1)", border: `1px solid ${checked ? "#6C5CE7" : "rgba(108,92,231,0.25)"}`, position: "relative", boxShadow: checked ? "0 0 12px rgba(108,92,231,0.3)" : "none" }}>
       <div style={{ position: "absolute", top: 2, borderRadius: "50%", width: 16, height: 16, background: "#fff", left: checked ? 20 : 2, transition: "left 0.15s" }} />
     </button>
   );
@@ -46,7 +46,7 @@ function Field({ label, value, onChange, type = "text", placeholder }: { label: 
     <div>
       <label style={{ color: "#5A6A88", fontSize: 11, ...MONO, display: "block", marginBottom: 6 }}>{label.toUpperCase()}</label>
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-xl" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.2)", color: "#0D1428", fontSize: 14, outline: "none" }} />
+        className="w-full px-4 py-3 rounded-xl" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)", color: "#0D1428", fontSize: 14, outline: "none" }} />
     </div>
   );
 }
@@ -60,7 +60,7 @@ function LivePreview({ config }: { config: WhiteLabelConfig }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div style={{ color: "#5A6A88", fontSize: 11, ...MONO }}>LIVE PLATFORM PREVIEW</div>
-        <div className="flex gap-1 p-1 rounded-lg" style={{ background: "rgba(32,64,192,0.06)" }}>
+        <div className="flex gap-1 p-1 rounded-lg" style={{ background: "rgba(108,92,231,0.06)" }}>
           {[["desktop", <Monitor size={13}/>], ["mobile", <Smartphone size={13}/>]].map(([id, icon]) => (
             <button key={id as string} onClick={() => setPreviewTab(id as any)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
@@ -286,7 +286,7 @@ export function WhiteLabelConfig() {
                   <input type="color" value={config.primaryColor} onChange={e => update({ primaryColor: e.target.value })}
                     style={{ width: 48, height: 40, borderRadius: 8, border: "none", cursor: "pointer", background: "transparent" }} />
                   <input value={config.primaryColor} onChange={e => update({ primaryColor: e.target.value })}
-                    className="flex-1 px-4 py-2.5 rounded-xl uppercase" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.2)", color: "#0D1428", fontSize: 14, outline: "none", ...MONO }} />
+                    className="flex-1 px-4 py-2.5 rounded-xl uppercase" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)", color: "#0D1428", fontSize: 14, outline: "none", ...MONO }} />
                 </div>
               </div>
               <div>
@@ -295,7 +295,7 @@ export function WhiteLabelConfig() {
                   <input type="color" value={config.accentColor} onChange={e => update({ accentColor: e.target.value })}
                     style={{ width: 48, height: 40, borderRadius: 8, border: "none", cursor: "pointer", background: "transparent" }} />
                   <input value={config.accentColor} onChange={e => update({ accentColor: e.target.value })}
-                    className="flex-1 px-4 py-2.5 rounded-xl uppercase" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.2)", color: "#0D1428", fontSize: 14, outline: "none", ...MONO }} />
+                    className="flex-1 px-4 py-2.5 rounded-xl uppercase" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)", color: "#0D1428", fontSize: 14, outline: "none", ...MONO }} />
                 </div>
               </div>
               <div>
@@ -329,7 +329,7 @@ export function WhiteLabelConfig() {
       {/* FEATURES TAB */}
       {tab === "features" && (
         <div className="space-y-3">
-          <div className="px-5 py-3 rounded-2xl border" style={{ background: "rgba(32,64,192,0.06)", borderColor: "rgba(32,64,192,0.2)" }}>
+          <div className="px-5 py-3 rounded-2xl border" style={{ background: "rgba(108,92,231,0.06)", borderColor: "rgba(108,92,231,0.2)" }}>
             <p style={{ color: "#8AA3C8", fontSize: 13 }}>Toggle features on/off for this white label instance. Disabled features are completely hidden from end users. Changes take effect immediately.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-3">
@@ -354,11 +354,11 @@ export function WhiteLabelConfig() {
       {/* PLANS TAB */}
       {tab === "plans" && (
         <div className="space-y-4">
-          <div className="px-5 py-3 rounded-2xl border" style={{ background: "rgba(32,64,192,0.06)", borderColor: "rgba(32,64,192,0.2)" }}>
+          <div className="px-5 py-3 rounded-2xl border" style={{ background: "rgba(108,92,231,0.06)", borderColor: "rgba(108,92,231,0.2)" }}>
             <p style={{ color: "#8AA3C8", fontSize: 13 }}>Customize plan names to match your brand. Pricing and features are managed separately in Subscription Config.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
-            {([["starter","#48BB78"],["essential","#4A90D9"],["premium","#2040C0"],["legacyPro","#9F7AEA"],["enterprise","#ED8936"]] as const).map(([key, color], planIdx) => (
+            {([["starter","#48BB78"],["essential","#4A90D9"],["premium","#6C5CE7"],["legacyPro","#9F7AEA"],["enterprise","#ED8936"]] as const).map(([key, color], planIdx) => (
               <div key={key} className="p-6 rounded-2xl" style={{ ...GLASS, borderColor: `${color}30` }}>
                 <div style={{ color, fontSize: 10, ...MONO, marginBottom: 8 }}>PLAN {planIdx+1} — {key.toUpperCase()}</div>
                 <input value={config.planNames[key]} onChange={e => updatePlanName(key, e.target.value)}
@@ -373,7 +373,7 @@ export function WhiteLabelConfig() {
             <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, marginBottom: 10 }}>HOW PLAN NAMES APPEAR</div>
             <div className="flex gap-4">
               {(["essential", "premium", "legacyPro"] as const).map((k, i) => (
-                <div key={k} className="px-4 py-2 rounded-xl text-sm" style={{ background: ["rgba(74,144,217,0.12)","rgba(32,64,192,0.12)","rgba(159,122,234,0.12)"][i], color: ["#4A90D9","#2040C0","#9F7AEA"][i] }}>
+                <div key={k} className="px-4 py-2 rounded-xl text-sm" style={{ background: ["rgba(74,144,217,0.12)","rgba(108,92,231,0.12)","rgba(159,122,234,0.12)"][i], color: ["#4A90D9","#6C5CE7","#9F7AEA"][i] }}>
                   {config.planNames[k]}
                 </div>
               ))}
@@ -399,7 +399,7 @@ export function WhiteLabelConfig() {
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "#0D1428" }}>Email Configuration</h3>
             <Field label="From Name" value={config.senderName} onChange={v => update({ senderName: v })} placeholder="Your Company Name" />
             <Field label="Support Email" value={config.supportEmail} onChange={v => update({ supportEmail: v })} placeholder="support@yourcompany.com" />
-            <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.15)" }}>
+            <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.15)" }}>
               <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, marginBottom: 6 }}>EMAIL PREVIEW</div>
               <div style={{ color: "#0D1428", fontSize: 13 }}>From: <strong>{config.senderName}</strong> &lt;{config.supportEmail}&gt;</div>
               <div style={{ color: "#5A6A88", fontSize: 12, marginTop: 4 }}>Subject: Welcome to {config.companyName} — Your Legacy Begins Today</div>
@@ -420,7 +420,7 @@ export function WhiteLabelConfig() {
             {[
               { label: "Brand Name", value: config.companyName, color: "#9F7AEA" },
               { label: "Primary Color", value: config.primaryColor, color: config.primaryColor },
-              { label: "Domain", value: config.domain, color: "#2040C0" },
+              { label: "Domain", value: config.domain, color: "#6C5CE7" },
               { label: "Features Active", value: `${Object.values(config.features).filter(Boolean).length}/${featureList.length}`, color: "#48BB78" },
               { label: "Plan Names", value: `${config.planNames.starter} → ${config.planNames.essential} → ${config.planNames.premium} → ${config.planNames.legacyPro} → ${config.planNames.enterprise}`, color: "#F6AD55" },
               { label: "Status", value: config.enabled ? "LIVE" : "DRAFT", color: config.enabled ? "#48BB78" : "#F6AD55" },
@@ -443,7 +443,7 @@ export function WhiteLabelConfig() {
             </button>
             <button onClick={() => { copyToClipboard(JSON.stringify(config, null, 2)); toast.success("Config JSON copied") }}
               className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm"
-              style={{ background: "rgba(32,64,192,0.06)", color: "#5A6A88" }}>
+              style={{ background: "rgba(108,92,231,0.06)", color: "#5A6A88" }}>
               <Copy size={13} /> Export Config JSON
             </button>
           </div>

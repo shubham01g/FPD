@@ -83,15 +83,15 @@ const SCOPE_LABELS: Record<string, string> = {
 /* ── Waiver document text ────────────────────────────────────────── */
 function WaiverText({ waiver }: { waiver: WaiverRecord }) {
   return (
-    <div className="space-y-5" style={{ color:"#374669", fontSize:13, lineHeight:1.9 }}>
-      <div className="text-center pb-4 border-b" style={{ borderColor:"rgba(32,64,192,0.1)" }}>
-        <div style={{ ...DISPLAY, fontSize:18, color:"#0D1428", marginBottom:4 }}>
+    <div className="space-y-5" style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.9 }}>
+      <div className="text-center pb-4 border-b" style={{ borderColor:"rgba(108,92,231,0.1)" }}>
+        <div style={{ ...DISPLAY, fontSize:18, color:"#FFFFFF", marginBottom:4 }}>
           White Glove Concierge Service
         </div>
-        <div style={{ ...DISPLAY, fontSize:15, color:"#2040C0" }}>
+        <div style={{ ...DISPLAY, fontSize:15, color:"#6C5CE7" }}>
           Authorization, Consent & Limited Power of Attorney
         </div>
-        <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginTop:4 }}>
+        <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, marginTop:4 }}>
           Document ID: {waiver.id} · Final Pass Down Inc. · finalpassdown.com
         </div>
       </div>
@@ -103,7 +103,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </p>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>1. DESIGNATED SPECIALIST</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>1. DESIGNATED SPECIALIST</div>
         <p>
           I hereby designate <strong>{waiver.specialistName}</strong>, a certified Final Pass Down
           White Glove Specialist ("Specialist"), to access my FPD account and perform the
@@ -113,7 +113,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>2. PURPOSE OF AUTHORIZATION</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>2. PURPOSE OF AUTHORIZATION</div>
         <p>
           I understand that I am authorizing the Specialist to perform specific account setup
           and configuration tasks within the Final Pass Down platform on my behalf because I
@@ -124,13 +124,13 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:10 }}>3. AUTHORIZED SCOPE OF ACCESS</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:10 }}>3. AUTHORIZED SCOPE OF ACCESS</div>
         <p style={{ marginBottom:10 }}>I authorize the designated Specialist to perform the following actions:</p>
         <div className="space-y-2">
           {waiver.specialistScope.map(scope => (
             <div key={scope} className="flex items-start gap-2.5 px-4 py-2.5 rounded-xl"
-              style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.1)" }}>
-              <CheckCircle size={13} color="#2040C0" style={{ marginTop:2, flexShrink:0 }}/>
+              style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+              <CheckCircle size={13} color="#6C5CE7" style={{ marginTop:2, flexShrink:0 }}/>
               <span style={{ fontSize:13 }}>{SCOPE_LABELS[scope] ?? scope}</span>
             </div>
           ))}
@@ -141,7 +141,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>4. SESSION RECORDING & AUDIT</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>4. SESSION RECORDING & AUDIT</div>
         <p>
           I understand and consent that all Specialist actions within my account are logged in
           a tamper-evident audit trail. Session activity, document uploads, and configuration
@@ -151,7 +151,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>5. SECURITY & ZERO-KNOWLEDGE ENCRYPTION</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>5. SECURITY & ZERO-KNOWLEDGE ENCRYPTION</div>
         <p>
           I understand that FPD uses AES-256 zero-knowledge encryption. <strong>The Specialist
           assists with uploading and organizing my documents but cannot read the contents of
@@ -163,7 +163,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>6. VOLUNTARY PROVISION OF INFORMATION</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>6. VOLUNTARY PROVISION OF INFORMATION</div>
         <p>
           I voluntarily provide documents, records, and personal information to the Specialist
           during our sessions. I represent that I have the legal right to share all information
@@ -173,7 +173,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>7. LIMITATION OF LIABILITY</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>7. LIMITATION OF LIABILITY</div>
         <p>
           Final Pass Down Inc. and its Specialists are not responsible for the accuracy,
           completeness, or legal validity of any documents uploaded, contact information provided,
@@ -184,7 +184,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>8. REVOCATION</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>8. REVOCATION</div>
         <p>
           I may revoke this authorization at any time by calling FPD at 1-800-FPD-HELP or
           emailing support@finalpassdown.com. Revocation does not undo actions already completed
@@ -194,7 +194,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#0D1428", fontSize:14, fontWeight:700, marginBottom:8 }}>9. ACKNOWLEDGMENT</div>
+        <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:700, marginBottom:8 }}>9. ACKNOWLEDGMENT</div>
         <p>
           By signing below, I confirm that: (a) I am the legal account holder or their
           authorized legal representative; (b) I have read and understand this entire Agreement;
@@ -240,7 +240,7 @@ function SignaturePad({ onSign }: { onSign: (dataUrl: string) => void }) {
     const ctx = canvas.getContext("2d"); if (!ctx) return;
     const pos = getPos(e, canvas);
     ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = "#0D1428";
+    ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -265,18 +265,18 @@ function SignaturePad({ onSign }: { onSign: (dataUrl: string) => void }) {
 
   return (
     <div>
-      <div className="relative rounded-xl overflow-hidden" style={{ border:"2px solid rgba(32,64,192,0.25)", background:"#FAFBFF", touchAction:"none" }}>
+      <div className="relative rounded-xl overflow-hidden" style={{ border:"2px solid rgba(108,92,231,0.25)", background:"#0F1A33", touchAction:"none" }}>
         <canvas ref={canvasRef} width={560} height={120} style={{ width:"100%", height:120, display:"block", cursor:"crosshair" }}
           onMouseDown={start} onMouseMove={draw} onMouseUp={stop} onMouseLeave={stop}
           onTouchStart={start} onTouchMove={draw} onTouchEnd={stop}/>
         {!hasSignature && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span style={{ color:"rgba(32,64,192,0.3)", fontSize:13, ...MONO }}>Draw your signature here</span>
+            <span style={{ color:"rgba(108,92,231,0.3)", fontSize:13, ...MONO }}>Draw your signature here</span>
           </div>
         )}
       </div>
       <div className="flex items-center justify-between mt-2">
-        <span style={{ color:"#8A9AB8", fontSize:11 }}>Draw with mouse, finger, or stylus</span>
+        <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>Draw with mouse, finger, or stylus</span>
         {hasSignature && (
           <button onClick={clear} className="flex items-center gap-1 text-xs" style={{ color:"#FC8181" }}>
             <X size={11}/> Clear
@@ -335,8 +335,8 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
         <div className="rounded-full p-6 mx-auto mb-6 w-fit" style={{ background:"rgba(72,187,120,0.1)", border:"2px solid rgba(72,187,120,0.3)" }}>
           <CheckCircle size={52} color="#48BB78"/>
         </div>
-        <h2 style={{ ...DISPLAY, fontSize:26, color:"#0D1428", marginBottom:8 }}>Waiver Signed Successfully</h2>
-        <p style={{ color:"#5A6A88", fontSize:14, lineHeight:1.8, marginBottom:24 }}>
+        <h2 style={{ ...DISPLAY, fontSize:26, color:"#FFFFFF", marginBottom:8 }}>Waiver Signed Successfully</h2>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, marginBottom:24 }}>
           Your White Glove Concierge Authorization has been recorded. {waiver.specialistName} can now begin setting up your Final Pass Down vault. You'll receive a call to schedule your first session.
         </p>
         <div className="p-4 rounded-2xl mb-6 text-left space-y-2" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
@@ -347,14 +347,14 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
             ["Specialist", waiver.specialistName],
           ].map(([k,v]) => (
             <div key={k} className="flex justify-between">
-              <span style={{ color:"#8A9AB8", fontSize:12, ...MONO }}>{k}</span>
-              <span style={{ color:"#0D1428", fontSize:12, fontWeight:500 }}>{v}</span>
+              <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12, ...MONO }}>{k}</span>
+              <span style={{ color:"#FFFFFF", fontSize:12, fontWeight:500 }}>{v}</span>
             </div>
           ))}
         </div>
         {onBack && (
           <button onClick={onBack} className="px-6 py-3 rounded-2xl font-bold text-sm"
-            style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+            style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
             ← Back to Dashboard
           </button>
         )}
@@ -366,13 +366,13 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
     <div className="max-w-2xl mx-auto p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-4 p-5 rounded-2xl"
-        style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.15)" }}>
-        <div className="rounded-xl p-3 flex-shrink-0" style={{ background:"rgba(32,64,192,0.08)" }}>
-          <FileText size={22} color="#2040C0"/>
+        style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
+        <div className="rounded-xl p-3 flex-shrink-0" style={{ background:"rgba(108,92,231,0.08)" }}>
+          <FileText size={22} color="#6C5CE7"/>
         </div>
         <div>
-          <div style={{ ...DISPLAY, fontSize:18, color:"#0D1428" }}>White Glove Concierge Authorization</div>
-          <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>
+          <div style={{ ...DISPLAY, fontSize:18, color:"#FFFFFF" }}>White Glove Concierge Authorization</div>
+          <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>
             Sent by FPD Admin · {waiver.sentAt} · Specialist: {waiver.specialistName}
           </div>
         </div>
@@ -389,12 +389,12 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           <React.Fragment key={id}>
             <div className="flex items-center gap-1.5">
               <div className="flex items-center justify-center rounded-full text-xs font-bold"
-                style={{ width:22, height:22, background:step===id?"#2040C0":i<["read","sign","done"].indexOf(step)?"#48BB78":"rgba(32,64,192,0.1)", color:step===id||i<["read","sign","done"].indexOf(step)?"#fff":"#8A9AB8" }}>
+                style={{ width:22, height:22, background:step===id?"#6C5CE7":i<["read","sign","done"].indexOf(step)?"#48BB78":"rgba(108,92,231,0.1)", color:step===id||i<["read","sign","done"].indexOf(step)?"#fff":"#8A9AB8" }}>
                 {i<["read","sign","done"].indexOf(step) ? <CheckCircle size={12}/> : i+1}
               </div>
-              <span style={{ fontSize:11, color:step===id?"#0D1428":"#8A9AB8", fontWeight:step===id?600:400 }}>{label}</span>
+              <span style={{ fontSize:11, color:step===id?"#FFFFFF":"rgba(255,255,255,0.65)", fontWeight:step===id?600:400 }}>{label}</span>
             </div>
-            {i<2 && <div style={{ flex:1, height:1, background:"rgba(32,64,192,0.1)" }}/>}
+            {i<2 && <div style={{ flex:1, height:1, background:"rgba(108,92,231,0.1)" }}/>}
           </React.Fragment>
         ))}
       </div>
@@ -403,12 +403,12 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
       {step === "read" && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <Eye size={14} color="#8A9AB8"/>
-            <span style={{ color:"#8A9AB8", fontSize:12 }}>Please read the entire agreement before signing.</span>
+            <Eye size={14} color="rgba(255,255,255,0.65)"/>
+            <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>Please read the entire agreement before signing.</span>
           </div>
           <div ref={readRef} onScroll={onScroll}
             className="rounded-2xl p-6 overflow-y-auto"
-            style={{ background:"#fff", border:"1px solid rgba(32,64,192,0.12)", maxHeight:500, boxShadow:"inset 0 -20px 20px -10px rgba(32,64,192,0.04)" }}>
+            style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.12)", maxHeight:500, boxShadow:"inset 0 -20px 20px -10px rgba(108,92,231,0.04)" }}>
             <WaiverText waiver={waiver}/>
           </div>
           {!scrolled && (
@@ -420,7 +420,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           )}
           <button onClick={() => { if (!scrolled) { setScrolled(true); } setStep("sign"); }}
             className="w-full mt-4 py-4 rounded-2xl font-bold text-base"
-            style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", boxShadow:"0 0 24px rgba(32,64,192,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 24px rgba(108,92,231,0.3)" }}>
             I Have Read the Agreement — Continue to Sign →
           </button>
         </div>
@@ -431,12 +431,12 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
         <div className="space-y-5">
           {/* Signature mode toggle */}
           <div>
-            <div style={{ color:"#5A6A88", fontSize:11, ...MONO, marginBottom:8 }}>SIGNATURE METHOD</div>
-            <div className="flex gap-2 p-1 rounded-xl w-fit" style={{ background:"rgba(32,64,192,0.06)" }}>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, marginBottom:8 }}>SIGNATURE METHOD</div>
+            <div className="flex gap-2 p-1 rounded-xl w-fit" style={{ background:"rgba(108,92,231,0.06)" }}>
               {[["type","Type Name"],["draw","Draw Signature"]].map(([id,label]) => (
                 <button key={id} onClick={() => setSigMode(id as "type"|"draw")}
                   className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                  style={{ background:sigMode===id?"#2040C0":"transparent", color:sigMode===id?"#fff":"#5A6A88" }}>
+                  style={{ background:sigMode===id?"#6C5CE7":"transparent", color:sigMode===id?"#fff":"rgba(255,255,255,0.7)" }}>
                   {label}
                 </button>
               ))}
@@ -445,27 +445,27 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
 
           {sigMode === "type" ? (
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>TYPE YOUR FULL LEGAL NAME TO SIGN</label>
+              <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>TYPE YOUR FULL LEGAL NAME TO SIGN</label>
               <input value={typedName} onChange={e => setTypedName(e.target.value)}
                 placeholder={waiver.userName}
                 className="w-full px-4 py-4 rounded-xl text-lg"
-                style={{ background:"#FAFBFF", border:"2px solid rgba(32,64,192,0.25)", color:"#0D1428", outline:"none", fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:20 }}/>
+                style={{ background:"#0F1A33", border:"2px solid rgba(108,92,231,0.25)", color:"#FFFFFF", outline:"none", fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:20 }}/>
               {typedName && (
-                <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>
-                  Signature: <em style={{ fontFamily:"Georgia, serif", color:"#0D1428" }}>{typedName}</em>
+                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:4 }}>
+                  Signature: <em style={{ fontFamily:"Georgia, serif", color:"#FFFFFF" }}>{typedName}</em>
                 </div>
               )}
             </div>
           ) : (
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>DRAW YOUR SIGNATURE</label>
+              <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>DRAW YOUR SIGNATURE</label>
               <SignaturePad onSign={setDrawnSig}/>
             </div>
           )}
 
           {/* Acknowledgment checkboxes */}
-          <div className="space-y-3 p-4 rounded-2xl" style={{ background:"rgba(32,64,192,0.03)", border:"1px solid rgba(32,64,192,0.1)" }}>
-            <div style={{ color:"#5A6A88", fontSize:10, ...MONO, marginBottom:6 }}>ACKNOWLEDGMENTS</div>
+          <div className="space-y-3 p-4 rounded-2xl" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, marginBottom:6 }}>ACKNOWLEDGMENTS</div>
             {[
               [checked1, setChecked1, `I am ${waiver.userName} or their legally authorized representative, and I have the authority to sign this agreement.`],
               [checked2, setChecked2, `I have read and understand the full White Glove Concierge Authorization agreement, including the scope of access granted to ${waiver.specialistName}.`],
@@ -474,10 +474,10 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
               <div key={i} className="flex items-start gap-3">
                 <button onClick={() => (setChecked as React.Dispatch<React.SetStateAction<boolean>>)(!checked)}
                   className="flex items-center justify-center rounded-lg flex-shrink-0 mt-0.5 transition-all"
-                  style={{ width:20, height:20, background:checked?"#2040C0":"#fff", border:`2px solid ${checked?"#2040C0":"rgba(32,64,192,0.3)"}` }}>
+                  style={{ width:20, height:20, background:checked?"#6C5CE7":"#16161F", border:`2px solid ${checked?"#6C5CE7":"rgba(108,92,231,0.3)"}` }}>
                   {checked && <CheckCircle size={12} color="#fff"/>}
                 </button>
-                <span style={{ color:"#374669", fontSize:12, lineHeight:1.6 }}>{label as string}</span>
+                <span style={{ color:"rgba(255,255,255,0.8)", fontSize:12, lineHeight:1.6 }}>{label as string}</span>
               </div>
             ))}
           </div>
@@ -494,11 +494,11 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
 
           <div className="flex gap-3">
             <button onClick={() => setStep("read")} className="px-5 py-3 rounded-2xl text-sm"
-              style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>← Back</button>
+              style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>← Back</button>
             <button onClick={submit} disabled={submitting}
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA",
-                boxShadow:"0 0 24px rgba(32,64,192,0.35)", opacity:submitting?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF",
+                boxShadow:"0 0 24px rgba(108,92,231,0.35)", opacity:submitting?0.7:1 }}>
               <Shield size={16}/>{submitting ? "Recording Signature…" : "Sign & Authorize White Glove Service"}
             </button>
           </div>
@@ -547,7 +547,7 @@ export function WaiverManager() {
     return (
       <div>
         <button onClick={() => setPreviewId(null)} className="flex items-center gap-2 mb-4 text-sm"
-          style={{ color:"#2040C0" }}>
+          style={{ color:"#6C5CE7" }}>
           ← Back to Waivers
         </button>
         <WaiverSignPage waiverId={previewId} onBack={() => setPreviewId(null)}/>
@@ -555,15 +555,15 @@ export function WaiverManager() {
     );
   }
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)", boxShadow:"0 2px 12px rgba(32,64,192,0.06)", borderRadius:16 };
-  const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+  const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+  const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>WHITE GLOVE · WAIVER MANAGEMENT</div>
-          <h2 style={{ ...DISPLAY, fontSize:20, color:"#0D1428" }}>Concierge Authorization Waivers</h2>
+          <h2 style={{ ...DISPLAY, fontSize:20, color:"#FFFFFF" }}>Concierge Authorization Waivers</h2>
         </div>
         <button onClick={() => setShowSend(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
@@ -575,39 +575,39 @@ export function WaiverManager() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label:"Total Sent",    value:waivers.length,                           color:"#2040C0" },
+          { label:"Total Sent",    value:waivers.length,                           color:"#6C5CE7" },
           { label:"Signed",        value:waivers.filter(w=>w.status==="signed").length, color:"#48BB78" },
           { label:"Pending",       value:waivers.filter(w=>w.status==="pending").length, color:"#F6AD55" },
           { label:"Sign Rate",     value:`${Math.round(waivers.filter(w=>w.status==="signed").length/Math.max(waivers.length,1)*100)}%`, color:"#9F7AEA" },
         ].map(s => (
           <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
             <div style={{ ...DISPLAY, fontSize:24, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Waiver table */}
-      <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(32,64,192,0.1)" }}>
-        <div className="px-5 py-3 border-b" style={{ background:"#EAF0FC", borderColor:"rgba(32,64,192,0.1)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(108,92,231,0.1)" }}>
+        <div className="px-5 py-3 border-b" style={{ background:"#1C1C28", borderColor:"rgba(108,92,231,0.1)" }}>
           <div style={{ display:"grid", gridTemplateColumns:"auto 1fr auto auto auto auto", gap:16, alignItems:"center" }}>
             {["ID","Client","Specialist","Sent","Status","Actions"].map(h => (
-              <div key={h} style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
+              <div key={h} style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
             ))}
           </div>
         </div>
         {waivers.map((w, i) => (
           <div key={w.id} className="px-5 py-4 border-b"
             style={{ display:"grid", gridTemplateColumns:"auto 1fr auto auto auto auto", gap:16, alignItems:"center",
-              background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(32,64,192,0.06)" }}>
-            <span style={{ color:"#2040C0", fontSize:10, ...MONO }}>{w.id}</span>
+              background:i%2===0?"#16161F":"#0F1A33", borderColor:"rgba(108,92,231,0.06)" }}>
+            <span style={{ color:"#6C5CE7", fontSize:10, ...MONO }}>{w.id}</span>
             <div>
-              <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{w.userName}</div>
-              <div style={{ color:"#8A9AB8", fontSize:11 }}>{w.userEmail}</div>
+              <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500 }}>{w.userName}</div>
+              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>{w.userEmail}</div>
             </div>
-            <span style={{ color:"#5A6A88", fontSize:12 }}>{w.specialistName}</span>
+            <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{w.specialistName}</span>
             <div>
-              <div style={{ color:"#5A6A88", fontSize:11 }}>{w.sentAt.split(" · ")[0]}</div>
+              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11 }}>{w.sentAt.split(" · ")[0]}</div>
               {w.signedAt && <div style={{ color:"#48BB78", fontSize:10 }}>Signed: {w.signedAt.split(" · ")[0]}</div>}
             </div>
             <span className="px-2 py-1 rounded text-xs font-bold"
@@ -617,7 +617,7 @@ export function WaiverManager() {
             <div className="flex gap-2">
               <button onClick={() => setPreviewId(w.id)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+                style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
                 <Eye size={11}/> {w.status === "pending" ? "Preview" : "View"}
               </button>
               {w.status === "pending" && (
@@ -645,29 +645,29 @@ export function WaiverManager() {
           style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
           <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ ...CARD, maxHeight:"90vh", overflowY:"auto" }}>
             <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10"
-              style={{ borderColor:"rgba(32,64,192,0.08)" }}>
+              style={{ borderColor:"rgba(108,92,231,0.08)" }}>
               <div className="flex items-center gap-2">
                 <Star size={16} color="#9F7AEA"/>
-                <span style={{ ...DISPLAY, fontSize:16, color:"#0D1428" }}>Send Waiver to Client</span>
+                <span style={{ ...DISPLAY, fontSize:16, color:"#FFFFFF" }}>Send Waiver to Client</span>
               </div>
-              <button onClick={() => setShowSend(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+              <button onClick={() => setShowSend(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
             </div>
             <div className="p-6 space-y-4">
               {[["CLIENT FULL NAME *","name","Dorothy Henderson"],["CLIENT EMAIL *","email","client@email.com"]].map(([lbl,key,ph]) => (
                 <div key={key}>
-                  <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>{lbl}</label>
+                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>{lbl}</label>
                   <input value={(sendForm as any)[key]} placeholder={ph}
                     onChange={e => setSendForm(p=>({...p,[key]:e.target.value}))} style={INPUT}/>
                 </div>
               ))}
               <div>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>ASSIGNED SPECIALIST</label>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>ASSIGNED SPECIALIST</label>
                 <select value={sendForm.specialist} onChange={e => setSendForm(p=>({...p,specialist:e.target.value}))} style={INPUT}>
                   {["Marcus Williams","Patricia Chen","James Rivera"].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>AUTHORIZED SCOPE</label>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>AUTHORIZED SCOPE</label>
                 <div className="space-y-2">
                   {Object.entries(SCOPE_LABELS).map(([key, label]) => (
                     <div key={key} className="flex items-center gap-3">
@@ -675,10 +675,10 @@ export function WaiverManager() {
                         ...p,
                         scope: p.scope.includes(key) ? p.scope.filter(s=>s!==key) : [...p.scope, key]
                       }))} className="flex items-center justify-center rounded-lg flex-shrink-0"
-                        style={{ width:18, height:18, background:sendForm.scope.includes(key)?"#2040C0":"#fff", border:`2px solid ${sendForm.scope.includes(key)?"#2040C0":"rgba(32,64,192,0.3)"}` }}>
+                        style={{ width:18, height:18, background:sendForm.scope.includes(key)?"#6C5CE7":"#16161F", border:`2px solid ${sendForm.scope.includes(key)?"#6C5CE7":"rgba(108,92,231,0.3)"}` }}>
                         {sendForm.scope.includes(key) && <CheckCircle size={10} color="#fff"/>}
                       </button>
-                      <span style={{ color:"#374669", fontSize:12 }}>{label}</span>
+                      <span style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>{label}</span>
                     </div>
                   ))}
                 </div>
@@ -690,7 +690,7 @@ export function WaiverManager() {
                   <Star size={14}/>{sending ? "Sending…" : "Send Waiver via Email"}
                 </button>
                 <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-xl text-sm"
-                  style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+                  style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
               </div>
             </div>
           </div>

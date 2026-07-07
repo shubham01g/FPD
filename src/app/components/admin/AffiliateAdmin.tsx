@@ -15,7 +15,7 @@ const tierDistribution = [
   { tier: "Tier 3 (74+)", affiliates: 9, earn: 22891 },
 ];
 
-const tierColors = { 1: "#4A90D9", 2: "#2040C0", 3: "#48BB78" };
+const tierColors = { 1: "#4A90D9", 2: "#6C5CE7", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3" };
 
 export function AffiliateAdmin() {
@@ -69,7 +69,7 @@ export function AffiliateAdmin() {
                 <div className="h-3 rounded-full" style={{ background: "var(--secondary)" }}>
                   <div className="h-3 rounded-full" style={{ width: `${(t.affiliates / 181) * 100}%`, background: [
                     "linear-gradient(90deg, #4A90D9, #6AAFF0)",
-                    "linear-gradient(90deg, #2040C0, #4466D8)",
+                    "linear-gradient(90deg, #6C5CE7, #4466D8)",
                     "linear-gradient(90deg, #48BB78, #68D391)",
                   ][i] }} />
                 </div>
@@ -80,7 +80,7 @@ export function AffiliateAdmin() {
             {tierDistribution.map((t, i) => {
               const maxEarn = Math.max(...tierDistribution.map(x => x.earn));
               const h = Math.round((t.earn / maxEarn) * 120);
-              const colors = ["#4A90D9","#2040C0","#48BB78"];
+              const colors = ["#4A90D9","#6C5CE7","#48BB78"];
               return (
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                   <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${(t.earn/1000).toFixed(1)}k</span>

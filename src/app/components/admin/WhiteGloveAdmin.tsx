@@ -17,7 +17,7 @@ const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
 const SPECIALISTS = [
-  { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#2040C0" },
+  { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#6C5CE7" },
   { id:"patricia", name:"Patricia Chen",  title:"Legacy Onboarding Specialist", clients:9,  rating:4.8, avatar:"PC", color:"#9F7AEA" },
   { id:"james",   name:"James Rivera",   title:"Estate Documentation Specialist", clients:7, rating:5.0, avatar:"JR", color:"#48BB78" },
 ];
@@ -79,7 +79,7 @@ function SessionRow({ session }: { session: WGSession }) {
   const statusColor = { scheduled:"#F6AD55", completed:"#48BB78", cancelled:"#FC8181", pending:"#8A9AB8" }[session.status];
   const typeIcon = { phone:<Phone size={12}/>, video:<MessageSquare size={12}/>, in_person:<Users size={12}/> }[session.type];
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background:session.status==="scheduled"?"rgba(246,173,85,0.06)":"rgba(32,64,192,0.04)", border:`1px solid ${statusColor}25` }}>
+    <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background:session.status==="scheduled"?"rgba(246,173,85,0.06)":"rgba(108,92,231,0.04)", border:`1px solid ${statusColor}25` }}>
       <div className="flex items-center justify-center rounded-full mt-0.5" style={{ width:26, height:26, background:`${statusColor}18`, color:statusColor, flexShrink:0 }}>
         {typeIcon}
       </div>
@@ -101,7 +101,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
   const [addingNote, setAddingNote] = useState(false);
   const [noteText, setNoteText] = useState("");
   const specialist = SPECIALISTS.find(s => s.id === client.specialist);
-  const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#2040C0", paused:"#8A9AB8" }[client.status];
+  const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#6C5CE7", paused:"#8A9AB8" }[client.status];
 
   return (
     <div className="rounded-2xl overflow-hidden" style={CARD}>
@@ -157,7 +157,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
             <div className="grid grid-cols-3 gap-2 mt-3">
               {[
                 { label:"Setup Fee", value:"$99", color:"#9F7AEA", sub:"one-time" },
-                { label:"Session Time", value:`${totalMins} min`, color:"#2040C0", sub:`$${sessionCost} billed` },
+                { label:"Session Time", value:`${totalMins} min`, color:"#6C5CE7", sub:`$${sessionCost} billed` },
                 { label:"Total Billed", value:`$${totalCost}`, color:"#48BB78", sub:"to date" },
               ].map(s => (
                 <div key={s.label} className="px-3 py-2 rounded-xl text-center" style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.1)" }}>
@@ -207,7 +207,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           {client.notes && (
             <div>
               <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>SPECIALIST NOTES</div>
-              <div className="px-3 py-2.5 rounded-xl" style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.1)" }}>
+              <div className="px-3 py-2.5 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
                 <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>{client.notes}</div>
               </div>
             </div>
@@ -228,13 +228,13 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
                 }} className="flex-1 py-2 rounded-xl text-xs font-semibold"
                   style={{ background:"#9F7AEA", color:"#fff" }}>Save Note</button>
                 <button onClick={() => { setNoteText(""); setAddingNote(false); }}
-                  className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+                  className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Cancel</button>
               </div>
             </div>
           ) : (
             <button onClick={() => setAddingNote(true)}
               className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl"
-              style={{ background:"rgba(32,64,192,0.05)", color:"#5A6A88", border:"1px solid rgba(32,64,192,0.1)" }}>
+              style={{ background:"rgba(108,92,231,0.05)", color:"#5A6A88", border:"1px solid rgba(108,92,231,0.1)" }}>
               <Edit2 size={11}/> Add note
             </button>
           )}
@@ -243,7 +243,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           <div className="flex gap-2 pt-2">
             <button onClick={() => toast.success(`Sending check-in email to ${client.name}`)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-1"
-              style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+              style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
               <Send size={11}/> Send Check-in
             </button>
             <button onClick={() => { onUpdate(client.id, { completionPct:100, status:"completed", nextSession:undefined }); toast.success(`${client.name} marked as complete`); }}
@@ -382,7 +382,7 @@ export function WhiteGloveAdmin() {
         {[
           { label:"Active Clients",     value:activeCount,     color:"#9F7AEA" },
           { label:"Completed",          value:completedCount,  color:"#48BB78" },
-          { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#2040C0" },
+          { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#6C5CE7" },
           { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
@@ -471,8 +471,8 @@ export function WhiteGloveAdmin() {
                   {SPECIALISTS.map(s => (
                     <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
                       className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                      style={{ background:newClient.specialist===s.id?`${s.color}12`:"rgba(32,64,192,0.04)",
-                        border:`1px solid ${newClient.specialist===s.id?s.color:"rgba(32,64,192,0.12)"}`,
+                      style={{ background:newClient.specialist===s.id?`${s.color}12`:"rgba(108,92,231,0.04)",
+                        border:`1px solid ${newClient.specialist===s.id?s.color:"rgba(108,92,231,0.12)"}`,
                         color:newClient.specialist===s.id?s.color:"#5A6A88" }}>
                       {s.name.split(" ")[0]}
                     </button>
@@ -511,7 +511,7 @@ export function WhiteGloveAdmin() {
                   <Star size={14}/>{adding ? "Adding…" : "Add to White Glove Program"}
                 </button>
                 <button onClick={() => setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm"
-                  style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+                  style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Cancel</button>
               </div>
             </div>
           </div>

@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Home, Archive, Users, LogOut, Bell, BookOpen, Key, CreditCard,
-  Menu, X, UserCheck, HardDrive, Heart, Stethoscope, FileText,
+  UserCheck, HardDrive, Heart, Stethoscope, FileText,
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
-  FolderOpen, Star, Shield, Settings, AlertCircle, PawPrint, MessageCircle,
-  Briefcase, Plane, MapPin, Baby
+  FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
+  Briefcase, Plane, MapPin, Baby, ChevronDown
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_new_logo.png";
 import { VaultClone } from "./VaultClone";
 import { useDemo } from "../context/DemoContext";
+import { Dock, DockIcon, DockItem, DockLabel } from "./ui/dock";
 
 export type PageId =
   | "dashboard"
@@ -27,7 +28,10 @@ export type PageId =
 const navGroups = [
   {
     label: "Overview",
-    items: [{ id: "dashboard" as PageId, label: "Dashboard", icon: <Home size={14}/> }],
+    items: [
+      { id: "dashboard" as PageId, label: "Dashboard", icon: <Home size={14}/> },
+      { id: "fpd-ai" as PageId, label: "Ask FPD AI Assistant", icon: <MessageCircle size={14}/>, badge: "AI" },
+    ],
   },
   {
     label: "Digital File Cabinet",
@@ -100,149 +104,152 @@ const navGroups = [
       { id: "white-glove" as PageId, label: "White Glove Service", icon: <Star size={14}/>, badge: "⭐" },
     ],
   },
-  {
-    label: "AI Assistant",
-    items: [
-      { id: "fpd-ai" as PageId, label: "Ask FPD AI Assistant", icon: <MessageCircle size={14}/>, badge: "AI" },
-    ],
-  },
+];
+
+/* Quick-access shortcuts pinned to the slim icon sidebar */
+const quickIcons: { id: PageId; label: string; icon: React.ReactNode }[] = [
+  { id: "dashboard",       label: "Dashboard",       icon: <Home className="h-full w-full"/> },
+  { id: "file-cabinet",    label: "File Cabinet",    icon: <FolderOpen className="h-full w-full"/> },
+  { id: "legacy-vault",    label: "Legacy Vault",    icon: <Archive className="h-full w-full"/> },
+  { id: "storage-usage",   label: "Usage & Billing", icon: <HardDrive className="h-full w-full"/> },
+  { id: "contacts-legacy", label: "Contacts",        icon: <Users className="h-full w-full"/> },
+  { id: "fpd-ai",          label: "AI Assistant",    icon: <MessageCircle className="h-full w-full"/> },
 ];
 
 interface LayoutProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
   onGoAdmin?: () => void;
+  onSignOut?: () => void;
   children: React.ReactNode;
 }
 
-export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
-  const [open, setOpen] = useState(true);
+/* ── Premium dark-blue palette — white-only fonts ── */
+const BG      = "#0A0A0F";
+const PANEL   = "#16161F";
+const BORDER  = "rgba(108,92,231,0.2)";
+const TEXT    = "#FFFFFF";
+const MUTED   = "rgba(255,255,255,0.6)";
+const HILITE  = "#A29BFE";
+const ACCENT  = "#6C5CE7";
+const ACCENT2 = "#8B7CF6";
+
+export function Layout({ currentPage, onNavigate, onSignOut, children }: LayoutProps) {
   const [showClone, setShowClone] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
   const { unreadCount, user, markAllRead } = useDemo();
   const isActive = (id: PageId) => currentPage === id;
+  const groupIsActive = (group: (typeof navGroups)[number]) => group.items.some(i => i.id === currentPage);
 
-  const NavBtn = ({ item }: { item: (typeof navGroups)[0]["items"][0] & { badge?: string; highlight?: boolean } }) => (
-    <button onClick={() => onNavigate(item.id)}
-      className="w-full flex items-center gap-2.5 rounded-xl transition-all"
-      style={{
-        padding: open ? "7px 10px" : "9px",
-        justifyContent: open ? "flex-start" : "center",
-        background: isActive(item.id)
-          ? item.highlight ? "rgba(32,64,192,0.15)" : "rgba(32,64,192,0.1)"
-          : "transparent",
-        color: isActive(item.id) ? "#FFFFFF" : "#B0C0DC",
-        borderLeft: isActive(item.id) ? "2px solid #2040C0" : "2px solid transparent",
-      }}>
-      <span style={{ flexShrink:0, color: isActive(item.id) ? "#6090FF" : "inherit" }}>{item.icon}</span>
-      {open && (
-        <>
-          <span style={{ fontSize:12, fontWeight: isActive(item.id) ? 600 : 400, color: isActive(item.id) ? "#E8EDF5" : "#B0C0DC", flex:1, textAlign:"left" }}>{item.label}</span>
-          {item.badge && (
-            <span style={{ fontSize:9, fontFamily:"var(--font-mono)", background:"rgba(32,64,192,0.25)", color:"#6090FF", padding:"1px 6px", borderRadius:99, fontWeight:700 }}>
-              {item.badge}
-            </span>
-          )}
-        </>
-      )}
-    </button>
-  );
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenGroup(null);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
   return (
-    <div className="flex overflow-hidden" style={{ background:"#F0F4FA", fontFamily:"var(--font-body)", height:"100vh" }}>
-      {/* Dark navy sidebar */}
-      <aside className="flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: open ? 232 : 52, background:"#0A1428", borderRight:"1px solid rgba(32,64,192,0.12)" }}>
+    <div className="flex overflow-hidden" style={{ background:BG, fontFamily:"var(--font-body)", height:"100vh" }}>
+      {/* Slim icon sidebar */}
+      <aside className="flex flex-col items-center flex-shrink-0 py-4"
+        style={{ width:76, background:BG, borderRight:`1px solid ${BORDER}` }}>
+        <img src={fpdSquareLogo} alt="FPD" style={{ width:34, height:34, borderRadius:9, objectFit:"cover", marginBottom:22, boxShadow:"0 0 16px rgba(108,92,231,0.35)" }}/>
 
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(32,64,192,0.15)" }}>
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"cover", flexShrink:0, boxShadow:"0 0 16px rgba(32,64,192,0.3)" }}/>
-          {open && (
-            <div className="flex-1 min-w-0">
-              <div style={{ fontFamily:"var(--font-display)", color:"#6090FF", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#4A5A7A", fontSize:7.5, letterSpacing:"0.15em", marginTop:1 }}>MY LIFE · MY WISHES · MY WAY</div>
-            </div>
-          )}
-          <button onClick={() => setOpen(!open)} style={{ color:"#4A5A7A", flexShrink:0 }}>
-            {open ? <X size={13}/> : <Menu size={13}/>}
-          </button>
-        </div>
-
-        {/* User pill + settings shortcut */}
-        {open && (
-          <div className="px-3 py-2 border-b" style={{ borderColor:"rgba(32,64,192,0.1)" }}>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ width:28, height:28, background:"rgba(32,64,192,0.2)", color:"#6090FF", fontSize:11, fontWeight:700 }}>{user.avatar}</div>
-              <div className="min-w-0 flex-1">
-                <div style={{ color:"#E8EDF5", fontSize:11.5, fontWeight:500 }}>{user.name}</div>
-                <div style={{ color:"#6090FF", fontSize:8.5, fontFamily:"var(--font-mono)" }}>{user.plan.replace("_"," ").toUpperCase()} PLAN</div>
-              </div>
-              <button onClick={() => onNavigate("account-settings" as PageId)}
-                title="Account Settings"
-                style={{ color:"#4A5A7A", flexShrink:0, padding:4, borderRadius:8 }}
-                className="hover:bg-white/5 transition-colors">
-                <Settings size={13}/>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ═══ LEGACY VAULT CLONE — always visible ═══ */}
-        <div className="px-3 py-2 border-b" style={{ borderColor:"rgba(32,64,192,0.12)" }}>
-          <button onClick={() => setShowClone(true)}
-            className="w-full flex items-center rounded-xl transition-all"
-            style={{
-              padding: open ? "10px 14px" : "10px",
-              justifyContent: open ? "flex-start" : "center",
-              background:"linear-gradient(135deg,#2040C0,#3355E0)",
-              color:"#fff", gap:open?10:0,
-              boxShadow:"0 4px 16px rgba(32,64,192,0.4)",
-            }}>
-            <Copy size={15}/>
-            {open && (
-              <span style={{ fontSize:11, fontWeight:700, letterSpacing:"0.03em" }}>LEGACY VAULT CLONE</span>
-            )}
-          </button>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-2.5" style={{ scrollbarWidth:"none" }}>
-          {navGroups.map(group => (
-            <div key={group.label}>
-              {open && <div style={{ color:"#2A3A5A", fontSize:8.5, letterSpacing:"0.14em", paddingLeft:8, paddingBottom:3, paddingTop:3, fontFamily:"var(--font-mono)" }}>{group.label.toUpperCase()}</div>}
-              <div className="space-y-0.5">
-                {group.items.map(item => <NavBtn key={item.id} item={item}/>)}
-              </div>
-            </div>
+        <Dock>
+          {quickIcons.map(item => (
+            <DockItem key={item.id} title={item.label} onClick={() => onNavigate(item.id)}
+              className="rounded-2xl transition-colors"
+              style={{
+                background: isActive(item.id) ? `linear-gradient(135deg,${ACCENT},${ACCENT2})` : "rgba(108,92,231,0.15)",
+                color: isActive(item.id) ? "#FFFFFF" : HILITE,
+                boxShadow: isActive(item.id) ? "0 4px 16px rgba(108,92,231,0.5)" : "none",
+              }}>
+              <DockLabel>{item.label}</DockLabel>
+              <DockIcon>{item.icon}</DockIcon>
+            </DockItem>
           ))}
-        </nav>
+          <DockItem title="Legacy Vault Clone" onClick={() => setShowClone(true)}
+            className="rounded-2xl transition-colors"
+            style={{ background:"rgba(108,92,231,0.15)", color:HILITE }}>
+            <DockLabel>Legacy Vault Clone</DockLabel>
+            <DockIcon><Copy size={18}/></DockIcon>
+          </DockItem>
+          <DockItem title="Account Settings" onClick={() => onNavigate("account-settings" as PageId)}
+            className="rounded-2xl transition-colors" style={{ background:"rgba(108,92,231,0.15)", color:HILITE }}>
+            <DockLabel>Account Settings</DockLabel>
+            <DockIcon><Settings className="h-full w-full"/></DockIcon>
+          </DockItem>
+          <DockItem title="Sign Out" onClick={onSignOut}
+            className="rounded-2xl transition-colors" style={{ background:"rgba(108,92,231,0.15)", color:HILITE }}>
+            <DockLabel>Sign Out</DockLabel>
+            <DockIcon><LogOut className="h-full w-full"/></DockIcon>
+          </DockItem>
+        </Dock>
 
-        {/* Sign out */}
-        <div className="px-2 py-2 border-t" style={{ borderColor:"rgba(32,64,192,0.1)" }}>
-          <button className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2"
-            style={{ color:"#4A5A7A", justifyContent: open ? "flex-start" : "center" }}>
-            <LogOut size={13}/>
-            {open && <span style={{ fontSize:12 }}>Sign Out</span>}
-          </button>
+        <div className="flex flex-col items-center flex-1 justify-end">
+          <div className="flex items-center justify-center rounded-full mt-1"
+            style={{ width:38, height:38, background:"rgba(108,92,231,0.25)", color:HILITE, fontSize:12, fontWeight:700 }}>
+            {user.avatar}
+          </div>
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="flex items-center justify-between px-5 py-2.5 border-b flex-shrink-0"
-          style={{ background:"rgba(255,255,255,0.98)", borderColor:"rgba(32,64,192,0.1)", backdropFilter:"blur(16px)" }}>
-          <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
-            {new Date().toLocaleDateString("en-US",{ weekday:"long", year:"numeric", month:"long", day:"numeric" })}
+        {/* Top bar — one tab per main category, each opening its own subcategory dropdown */}
+        <header className="flex items-center justify-between gap-4 px-5 py-3 flex-shrink-0"
+          style={{ background:BG, borderBottom:`1px solid ${BORDER}` }}>
+          <div ref={navRef} className="flex items-center gap-1 flex-wrap" onMouseLeave={() => setOpenGroup(null)}>
+            {navGroups.map(group => (
+              <div key={group.label} className="relative" onMouseEnter={() => setOpenGroup(group.label)}>
+                <button onClick={() => setOpenGroup(openGroup === group.label ? null : group.label)}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl whitespace-nowrap transition-all"
+                  style={{
+                    background: groupIsActive(group) || openGroup === group.label ? "rgba(108,92,231,0.22)" : "transparent",
+                    color: TEXT, fontSize:12.5, fontWeight: groupIsActive(group) ? 700 : 500,
+                  }}>
+                  {group.label}
+                  <ChevronDown size={12} style={{ transform: openGroup === group.label ? "rotate(180deg)" : "none", transition:"transform 0.15s", color:HILITE }}/>
+                </button>
+
+                {openGroup === group.label && (
+                  <div className="absolute left-0 top-full mt-2 py-2 rounded-2xl z-50"
+                    style={{ minWidth:240, background:PANEL, border:`1px solid ${BORDER}`, boxShadow:"0 20px 56px rgba(0,0,0,0.55)" }}>
+                    {group.items.map(item => (
+                      <button key={item.id} onClick={() => { onNavigate(item.id); setOpenGroup(null); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 transition-all text-left"
+                        style={{
+                          background: isActive(item.id) ? "rgba(108,92,231,0.22)" : "transparent",
+                          color: TEXT,
+                        }}>
+                        <span style={{ flexShrink:0, color: isActive(item.id) ? HILITE : "inherit" }}>{item.icon}</span>
+                        <span style={{ fontSize:13, flex:1 }}>{item.label}</span>
+                        {(item as { badge?: string }).badge && (
+                          <span style={{ fontSize:8.5, fontFamily:"var(--font-mono)", background:"rgba(108,92,231,0.25)", color:HILITE, padding:"1px 6px", borderRadius:99, fontWeight:700 }}>
+                            {(item as { badge?: string }).badge}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full"
-              style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)" }}>
+
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div style={{ color:MUTED, fontSize:11, fontFamily:"var(--font-mono)", whiteSpace:"nowrap" }}>
+              {new Date().toLocaleDateString("en-US",{ weekday:"short", month:"short", day:"numeric" })}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ background:"rgba(72,187,120,0.1)", border:"1px solid rgba(72,187,120,0.25)" }}>
               <div style={{ width:5, height:5, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 6px #48BB78" }}/>
               <span style={{ color:"#48BB78", fontSize:10, fontFamily:"var(--font-mono)" }}>VAULT ACTIVE</span>
             </div>
-            <button className="relative" onClick={markAllRead} style={{ color:"#8A9AB8" }}>
-              <Bell size={15}/>
+            <button className="relative" onClick={markAllRead} style={{ color:MUTED }}>
+              <Bell size={16}/>
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full"
                   style={{ width:14, height:14, background:"#E53E3E", color:"#fff", fontSize:8, fontWeight:700 }}>
@@ -250,13 +257,11 @@ export function Layout({ currentPage, onNavigate, children }: LayoutProps) {
                 </span>
               )}
             </button>
-            <div className="flex items-center justify-center rounded-full"
-              style={{ width:28, height:28, background:"rgba(32,64,192,0.12)", color:"#2040C0", fontSize:11, fontWeight:700 }}>{user.avatar}</div>
           </div>
         </header>
 
         {/* Page */}
-        <main className="flex-1 overflow-y-auto relative" style={{ background:"#F0F4FA" }}>
+        <main className="flex-1 overflow-y-auto relative" style={{ background:BG }}>
           {children}
         </main>
       </div>

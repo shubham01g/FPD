@@ -6,9 +6,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(159,122,234,0.15)", boxShadow:"0 4px 24px rgba(159,122,234,0.08)", borderRadius:20 };
+const GLASS: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(159,122,234,0.15)", boxShadow:"0 4px 24px rgba(159,122,234,0.08)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)", color:"#0D1428", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
 
 const STEPS = [
   { icon:<Phone size={20}/>,    title:"Intake Call",          desc:"A specialist calls you personally to understand what you need and what documents you have." },
@@ -52,13 +52,13 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
     <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(159,122,234,0.15)" }}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left"
-        style={{ background:open?"rgba(159,122,234,0.04)":"#fff" }}>
-        <span style={{ color:"#0D1428", fontSize:14, fontWeight:500 }}>{faq.q}</span>
-        {open ? <ChevronUp size={16} color="#9F7AEA"/> : <ChevronDown size={16} color="#8A9AB8"/>}
+        style={{ background:open?"rgba(159,122,234,0.04)":"#16161F" }}>
+        <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{faq.q}</span>
+        {open ? <ChevronUp size={16} color="#9F7AEA"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
       </button>
       {open && (
         <div className="px-5 pb-4" style={{ background:"rgba(159,122,234,0.02)" }}>
-          <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.8 }}>{faq.a}</p>
+          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.8 }}>{faq.a}</p>
         </div>
       )}
     </div>
@@ -85,13 +85,13 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
             <CheckCircle size={40} color="#9F7AEA"/>
           </div>
         </div>
-        <h3 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428", marginBottom:8 }}>We'll Call You Soon!</h3>
-        <p style={{ color:"#5A6A88", fontSize:14, lineHeight:1.8, maxWidth:360, margin:"0 auto 24px" }}>
+        <h3 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>We'll Call You Soon!</h3>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, maxWidth:360, margin:"0 auto 24px" }}>
           Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.
         </p>
         <div className="px-5 py-4 rounded-2xl mb-4" style={{ background:"rgba(159,122,234,0.08)", border:"1px solid rgba(159,122,234,0.2)" }}>
           <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, marginBottom:4 }}>YOUR REFERENCE NUMBER</div>
-          <div style={{ color:"#0D1428", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
+          <div style={{ color:"#FFFFFF", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
             WG-{Math.random().toString(36).slice(2,7).toUpperCase()}
           </div>
         </div>
@@ -109,28 +109,28 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
-          <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>YOUR FULL NAME *</label>
+          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>YOUR FULL NAME *</label>
           <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} placeholder="As it appears on your ID" style={INPUT}/>
         </div>
         <div>
-          <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>PHONE NUMBER *</label>
+          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>PHONE NUMBER *</label>
           <input type="tel" value={form.phone} onChange={e => setForm(p=>({...p,phone:e.target.value}))} placeholder="+1 (555) 000-0000" style={INPUT}/>
         </div>
         <div>
-          <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EMAIL (optional)</label>
+          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EMAIL (optional)</label>
           <input type="email" value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} placeholder="your@email.com" style={INPUT}/>
         </div>
       </div>
 
       <div>
-        <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>BEST TIME TO CALL</label>
+        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>BEST TIME TO CALL</label>
         <div className="grid grid-cols-3 gap-2">
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))}
               className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.preferredTime===id?"rgba(159,122,234,0.12)":"rgba(32,64,192,0.04)",
-                border:`1px solid ${form.preferredTime===id?"#9F7AEA":"rgba(32,64,192,0.12)"}`,
-                color:form.preferredTime===id?"#9F7AEA":"#5A6A88" }}>
+              style={{ background:form.preferredTime===id?"rgba(159,122,234,0.12)":"rgba(108,92,231,0.04)",
+                border:`1px solid ${form.preferredTime===id?"#9F7AEA":"rgba(108,92,231,0.12)"}`,
+                color:form.preferredTime===id?"#9F7AEA":"rgba(255,255,255,0.7)" }}>
               {label}
             </button>
           ))}
@@ -138,14 +138,14 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div>
-        <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>WHO IS CONTACTING US?</label>
+        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>WHO IS CONTACTING US?</label>
         <div className="grid grid-cols-2 gap-2">
           {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))}
               className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.contactedBy===id?"rgba(159,122,234,0.12)":"rgba(32,64,192,0.04)",
-                border:`1px solid ${form.contactedBy===id?"#9F7AEA":"rgba(32,64,192,0.12)"}`,
-                color:form.contactedBy===id?"#9F7AEA":"#5A6A88" }}>
+              style={{ background:form.contactedBy===id?"rgba(159,122,234,0.12)":"rgba(108,92,231,0.04)",
+                border:`1px solid ${form.contactedBy===id?"#9F7AEA":"rgba(108,92,231,0.12)"}`,
+                color:form.contactedBy===id?"#9F7AEA":"rgba(255,255,255,0.7)" }}>
               {label}
             </button>
           ))}
@@ -153,7 +153,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div>
-        <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>ANYTHING ELSE WE SHOULD KNOW? (optional)</label>
+        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>ANYTHING ELSE WE SHOULD KNOW? (optional)</label>
         <textarea value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} rows={2}
           placeholder="e.g. I have a will and some insurance documents ready. My daughter may join the call."
           className="w-full resize-none" style={INPUT}/>
@@ -165,7 +165,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
           boxShadow:"0 0 32px rgba(159,122,234,0.4)", opacity:sending?0.7:1 }}>
         <Phone size={16}/>{sending ? "Sending Request…" : "Request My White Glove Call"}
       </button>
-      <p style={{ color:"#8A9AB8", fontSize:11, textAlign:"center" }}>
+      <p style={{ color:"rgba(255,255,255,0.65)", fontSize:11, textAlign:"center" }}>
         No tech skills required. A real person will call you. No automated systems.
       </p>
     </div>
@@ -177,13 +177,13 @@ export function WhiteGloveService() {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div style={{ fontFamily:"var(--font-body)", background:"#F8F4FF", minHeight:"100vh" }}>
+    <div style={{ fontFamily:"var(--font-body)", background:"#17122E", minHeight:"100vh" }}>
 
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ background:"linear-gradient(135deg,#0A0520,#1A0840)", padding:"80px 24px 100px" }}>
         <div style={{ position:"absolute", inset:0, backgroundImage:"linear-gradient(rgba(159,122,234,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(159,122,234,0.04) 1px,transparent 1px)", backgroundSize:"50px 50px" }}/>
         <div style={{ position:"absolute", top:"20%", left:"10%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(159,122,234,0.12) 0%,transparent 70%)", pointerEvents:"none" }}/>
-        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(32,64,192,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(108,92,231,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
 
         <div className="relative max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
@@ -203,7 +203,7 @@ export function WhiteGloveService() {
               style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F", boxShadow:"0 0 40px rgba(159,122,234,0.5)" }}>
               <Phone size={18}/> Request a Call
             </button>
-            <div className="flex items-center gap-2" style={{ color:"#8A9AB8", fontSize:13 }}>
+            <div className="flex items-center gap-2" style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>
               <Clock size={14}/> We call within 1 business day
             </div>
           </div>
@@ -221,12 +221,12 @@ export function WhiteGloveService() {
             <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:8 }}>
               ${PRICING.setupFee}
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:20 }}>Paid once · Gets you started</div>
+            <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14, marginBottom:20 }}>Paid once · Gets you started</div>
             <div className="space-y-2 text-left">
               {["Specialist assigned to your account","Intake call to understand your needs","Secure document upload link sent to you","Complete onboarding plan created"].map(f => (
                 <div key={f} className="flex items-center gap-2">
                   <CheckCircle size={13} color="#9F7AEA"/>
-                  <span style={{ color:"#B8C8E0", fontSize:13 }}>{f}</span>
+                  <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
                 </div>
               ))}
             </div>
@@ -236,25 +236,25 @@ export function WhiteGloveService() {
           <div className="rounded-3xl p-8 text-center"
             style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.25)" }}>
             <div style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#0D1428", lineHeight:1, marginBottom:4 }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#FFFFFF", lineHeight:1, marginBottom:4 }}>
               ${PRICING.sessionRate}
             </div>
-            <div style={{ color:"#5A6A88", fontSize:14, marginBottom:20 }}>per {PRICING.sessionLength} minutes · Only pay for what you use</div>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, marginBottom:20 }}>per {PRICING.sessionLength} minutes · Only pay for what you use</div>
             <div className="space-y-2 text-left">
               {["Phone or video call with your specialist","Specialist uploads documents during the session","Session notes and progress tracking","Typical setup: 2–4 sessions total"].map(f => (
                 <div key={f} className="flex items-center gap-2">
                   <CheckCircle size={13} color="#9F7AEA"/>
-                  <span style={{ color:"#374669", fontSize:13 }}>{f}</span>
+                  <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
                 </div>
               ))}
             </div>
             <div className="mt-5 px-4 py-3 rounded-2xl"
               style={{ background:"rgba(159,122,234,0.08)", border:"1px solid rgba(159,122,234,0.2)" }}>
               <div style={{ color:"#9F7AEA", fontSize:13, fontWeight:700 }}>Typical Total Cost</div>
-              <div style={{ color:"#0D1428", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700, marginTop:2 }}>
+              <div style={{ color:"#FFFFFF", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700, marginTop:2 }}>
                 ${PRICING.setupFee + PRICING.sessionRate * 4}–${PRICING.setupFee + PRICING.sessionRate * 6}
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:11 }}>$99 setup + 2–3 hours of sessions</div>
+              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>$99 setup + 2–3 hours of sessions</div>
             </div>
           </div>
         </div>
@@ -263,7 +263,7 @@ export function WhiteGloveService() {
         <div>
           <div className="text-center mb-10">
             <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:8 }}>HOW IT WORKS</div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(1.6rem,3vw,2.4rem)", color:"#0D1428", lineHeight:1.2 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(1.6rem,3vw,2.4rem)", color:"#FFFFFF", lineHeight:1.2 }}>
               Four Simple Steps.<br/>All Done By Phone.
             </h2>
           </div>
@@ -278,8 +278,8 @@ export function WhiteGloveService() {
                   <div className="flex items-center gap-2 mb-1">
                     <span style={{ color:"#9F7AEA", fontSize:10, fontWeight:700, ...MONO }}>STEP {i+1}</span>
                   </div>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428", marginBottom:4 }}>{s.title}</div>
-                  <div style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>{s.desc}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:4 }}>{s.title}</div>
+                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -288,14 +288,14 @@ export function WhiteGloveService() {
 
         {/* What's included */}
         <div className="p-8 rounded-3xl" style={{ ...GLASS, background:"rgba(159,122,234,0.04)" }}>
-          <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428", marginBottom:20, textAlign:"center" }}>
+          <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:20, textAlign:"center" }}>
             Everything Is Included
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {INCLUDES.map(f => (
               <div key={f} className="flex items-start gap-3">
                 <CheckCircle size={14} color="#9F7AEA" style={{ marginTop:2, flexShrink:0 }}/>
-                <span style={{ color:"#374669", fontSize:13, lineHeight:1.6 }}>{f}</span>
+                <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.6 }}>{f}</span>
               </div>
             ))}
           </div>
@@ -312,8 +312,8 @@ export function WhiteGloveService() {
         <div className="p-8 rounded-3xl" style={GLASS}>
           <div className="text-center mb-8">
             <Star size={28} color="#9F7AEA" fill="rgba(159,122,234,0.3)" style={{ margin:"0 auto 12px" }}/>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428", marginBottom:8 }}>Ready to Get Started?</h2>
-            <p style={{ color:"#5A6A88", fontSize:14, maxWidth:400, margin:"0 auto" }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>Ready to Get Started?</h2>
+            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, maxWidth:400, margin:"0 auto" }}>
               Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.
             </p>
           </div>
@@ -322,7 +322,7 @@ export function WhiteGloveService() {
 
         {/* FAQ */}
         <div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428", marginBottom:16, textAlign:"center" }}>
+          <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:16, textAlign:"center" }}>
             Common Questions
           </h2>
           <div className="space-y-3">
@@ -339,8 +339,8 @@ export function WhiteGloveService() {
           ].map(r => (
             <div key={r.title} className="p-5 rounded-2xl text-center" style={GLASS}>
               <div style={{ color:"#9F7AEA", margin:"0 auto 10px" }}>{r.icon}</div>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428", marginBottom:4 }}>{r.title}</div>
-              <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>{r.desc}</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", marginBottom:4 }}>{r.title}</div>
+              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{r.desc}</div>
             </div>
           ))}
         </div>
@@ -355,9 +355,9 @@ export function WhiteGloveService() {
               style={{ borderColor:"rgba(159,122,234,0.12)" }}>
               <div className="flex items-center gap-2">
                 <Star size={16} color="#9F7AEA" fill="rgba(159,122,234,0.3)"/>
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>White Glove Request</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>White Glove Request</span>
               </div>
-              <button onClick={() => setShowModal(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+              <button onClick={() => setShowModal(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
             </div>
             <div className="p-6">
               <IntakeForm onClose={() => setShowModal(false)}/>

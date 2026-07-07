@@ -95,7 +95,7 @@ const DEFAULT_SLOTS = (clientName: string) => {
 function MissedCallModal({ client, specialistName, onClose, onSent }: {
   client: WGClient; specialistName: string; onClose: () => void; onSent: (token: string) => void;
 }) {
-  const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none", width:"100%" };
+  const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none", width:"100%" };
   const [slots, setSlots] = useState<string[]>(DEFAULT_SLOTS(client.name));
   const [customSlot, setCustomSlot] = useState("");
   const [emailNote, setEmailNote] = useState("");
@@ -143,7 +143,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b flex-shrink-0"
-          style={{ borderColor:"rgba(32,64,192,0.1)" }}>
+          style={{ borderColor:"rgba(108,92,231,0.1)" }}>
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center rounded-xl"
               style={{ width:40, height:40, background:"rgba(246,173,85,0.12)" }}>
@@ -168,9 +168,9 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                 <div style={{ color:"#5A6A88", fontSize:11, fontWeight:600, fontFamily:"var(--font-mono)", marginBottom:8 }}>
                   EMAIL PREVIEW
                 </div>
-                <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(32,64,192,0.12)" }}>
+                <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(108,92,231,0.12)" }}>
                   <div className="px-4 py-2.5 flex items-center gap-1.5 border-b"
-                    style={{ background:"rgba(32,64,192,0.04)", borderColor:"rgba(32,64,192,0.08)" }}>
+                    style={{ background:"rgba(108,92,231,0.04)", borderColor:"rgba(108,92,231,0.08)" }}>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#FC8181" }}/>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#F6AD55" }}/>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#48BB78" }}/>
@@ -236,7 +236,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                     style={{ ...INPUT, flex:1 }}/>
                   <button onClick={addCustomSlot}
                     className="px-3 rounded-xl text-xs font-semibold flex-shrink-0"
-                    style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+                    style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
                     <Plus size={13}/>
                   </button>
                 </div>
@@ -250,7 +250,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                 <Send size={14}/> {sending ? "Sending…" : `Send Email to ${client.name.split(" ")[0]}`}
               </button>
               <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
-                style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+                style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Cancel</button>
             </div>
           </>
         ) : (
@@ -277,23 +277,23 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
               </div>
               <div className="flex gap-2">
                 <div className="flex-1 px-3 py-2.5 rounded-xl truncate text-xs"
-                  style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.12)", color:"#5A6A88", fontFamily:"var(--font-mono)" }}>
+                  style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)", color:"#5A6A88", fontFamily:"var(--font-mono)" }}>
                   {scheduleLink}
                 </div>
                 <button onClick={copyLink}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold flex-shrink-0"
-                  style={{ background:linkCopied?"rgba(72,187,120,0.1)":"rgba(32,64,192,0.08)", color:linkCopied?"#48BB78":"#2040C0", border:`1px solid ${linkCopied?"rgba(72,187,120,0.3)":"rgba(32,64,192,0.15)"}` }}>
+                  style={{ background:linkCopied?"rgba(72,187,120,0.1)":"rgba(108,92,231,0.08)", color:linkCopied?"#48BB78":"#6C5CE7", border:`1px solid ${linkCopied?"rgba(72,187,120,0.3)":"rgba(108,92,231,0.15)"}` }}>
                   {linkCopied ? <><CheckCircle size={11}/> Copied!</> : <><Copy size={11}/> Copy</>}
                 </button>
               </div>
             </div>
 
-            <div className="px-4 py-3 rounded-xl text-sm" style={{ background:"rgba(32,64,192,0.04)", color:"#5A6A88", lineHeight:1.6 }}>
+            <div className="px-4 py-3 rounded-xl text-sm" style={{ background:"rgba(108,92,231,0.04)", color:"#5A6A88", lineHeight:1.6 }}>
               📅 Once {client.name.split(" ")[0]} picks a time, it will automatically show as their <strong>Next Session</strong> on your client card — no manual update needed.
             </div>
 
             <button onClick={onClose} className="w-full py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Close</button>
+              style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Close</button>
           </div>
         )}
       </div>
@@ -312,7 +312,7 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
   const [showMissedCall, setShowMissedCall] = useState(false);
   const [scheduleToken, setScheduleToken] = useState<string | null>(null);
 
-  const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#2040C0", paused:"#8A9AB8" }[client.status];
+  const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#6C5CE7", paused:"#8A9AB8" }[client.status];
   const pendingWaiver = waiverStore.find(w => w.userId === client.id && w.status === "pending");
   const signedWaiver  = waiverStore.find(w => w.userId === client.id && w.status === "signed");
 
@@ -461,7 +461,7 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
                     Save Note
                   </button>
                   <button onClick={() => { setNoteText(""); setAddNote(false); }}
-                    className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>
+                    className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>
                     Cancel
                   </button>
                 </div>
@@ -719,7 +719,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                         </button>
                         <button onClick={() => toast.success("Session rescheduled (demo)")}
                           className="px-3 py-2 rounded-xl text-xs"
-                          style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>
+                          style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>
                           Reschedule
                         </button>
                       </div>

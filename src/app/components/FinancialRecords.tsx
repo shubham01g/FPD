@@ -47,7 +47,7 @@ const tabConfig = [
   { id: "business" as Tab, label: "Business", icon: <Briefcase size={14} /> },
 ];
 
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 
 function AddModal({ title, fields, onClose, onAdd }: {
   title: string;
@@ -103,7 +103,7 @@ function AddModal({ title, fields, onClose, onAdd }: {
               <button
                 onClick={() => fileRef.current?.click()}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm"
-                style={{ border:"1px dashed rgba(32,64,192,0.3)", background:"rgba(32,64,192,0.03)", color:"var(--primary)" }}>
+                style={{ border:"1px dashed rgba(108,92,231,0.3)", background:"rgba(108,92,231,0.03)", color:"var(--primary)" }}>
                 <Upload size={14}/> Upload File (PDF, image, doc)
               </button>
               <ScanButton
@@ -151,7 +151,7 @@ export function FinancialRecords() {
   );
 
   const Field = ({ label, value }: { label: string; value: string }) => (
-    <div className="flex flex-col gap-1 px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+    <div className="flex flex-col gap-1 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
       <span style={{ color: "var(--muted-foreground)", fontSize: 10 }}>{label.toUpperCase()}</span>
       <span style={{ color: "var(--foreground)", fontSize: 13 }}>{value}</span>
     </div>
@@ -274,7 +274,7 @@ export function FinancialRecords() {
             <Card key={r.id}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <span className="px-2 py-0.5 rounded text-xs mb-2 inline-block" style={{ background: "rgba(32,64,192,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{r.type}</span>
+                  <span className="px-2 py-0.5 rounded text-xs mb-2 inline-block" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{r.type}</span>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>{r.institution}</div>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{r.employer && `${r.employer} · `}{r.accountNum}</div>
                 </div>
@@ -322,7 +322,7 @@ export function FinancialRecords() {
           {bizList.map(b => (
             <Card key={b.id}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="rounded-xl p-2" style={{ background: "rgba(32,64,192,0.1)" }}><Briefcase size={18} color="var(--primary)" /></div>
+                <div className="rounded-xl p-2" style={{ background: "rgba(108,92,231,0.1)" }}><Briefcase size={18} color="var(--primary)" /></div>
                 <div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>{b.businessName}</div>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{b.type} · EIN: {b.ein}</div>

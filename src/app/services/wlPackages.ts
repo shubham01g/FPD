@@ -70,7 +70,7 @@ let _packages: WLPackage[] = [
     userLimitLabel: "Up to 500 users",
     billing: { type: "flat_monthly", flatMonthly: 2999, setupFee: 2500 },
     commission: 20,
-    color: "#2040C0",
+    color: "#6C5CE7",
     badge: null,
     features: [
       "Up to 500 user accounts",

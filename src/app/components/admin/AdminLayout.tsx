@@ -96,7 +96,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
     <div className="flex overflow-hidden" style={{ background:"#EAF0FC", fontFamily:"var(--font-body)", height:"100vh" }}>
       {/* Admin sidebar – purple-themed */}
       <aside className="flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: open ? 232 : 52, background:"rgba(10,20,40,0.98)", borderRight:"1px solid rgba(159,122,234,0.12)" }}>
+        style={{ width: open ? 232 : 52, background:"rgba(10,10,15,0.98)", borderRight:"1px solid rgba(159,122,234,0.12)" }}>
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(159,122,234,0.12)" }}>
@@ -150,7 +150,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Admin top bar */}
         <header className="flex items-center justify-between px-5 py-2.5 border-b flex-shrink-0"
-          style={{ background:"rgba(10,20,40,0.98)", borderColor:"rgba(159,122,234,0.1)", backdropFilter:"blur(16px)" }}>
+          style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(159,122,234,0.1)", backdropFilter:"blur(16px)" }}>
           <div className="flex items-center gap-3">
             <div style={{ color:"rgba(255,255,255,0.35)", fontSize:11, fontFamily:"var(--font-mono)" }}>
               {new Date().toLocaleDateString("en-US",{ weekday:"long", year:"numeric", month:"long", day:"numeric" })}

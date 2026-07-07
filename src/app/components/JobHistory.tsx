@@ -5,7 +5,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const EMP_TYPES = ["Full-time","Part-time","Contract","Freelance","Internship","Self-employed","Volunteer"];
@@ -75,14 +75,14 @@ export function JobHistory() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                    style={{ width:48, height:48, background: job.current ? "rgba(72,187,120,0.12)" : "rgba(32,64,192,0.08)" }}>
+                    style={{ width:48, height:48, background: job.current ? "rgba(72,187,120,0.12)" : "rgba(108,92,231,0.08)" }}>
                     <Briefcase size={20} color={job.current ? "#48BB78" : "var(--primary)"}/>
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"var(--foreground)" }}>{job.title}</span>
                       {job.current && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", ...MONO }}>CURRENT</span>}
-                      <span className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(32,64,192,0.08)", color:"var(--primary)", ...MONO }}>{job.type.toUpperCase()}</span>
+                      <span className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(108,92,231,0.08)", color:"var(--primary)", ...MONO }}>{job.type.toUpperCase()}</span>
                     </div>
                     <div style={{ color:"var(--foreground)", fontSize:14, fontWeight:500 }}>{job.employer}</div>
                     <div className="flex items-center gap-4 mt-1 flex-wrap">
@@ -109,7 +109,7 @@ export function JobHistory() {
                     { label:"Salary / Compensation", value:job.salary },
                     { label:"Reason for Leaving", value:job.reasonLeft || "N/A — Current position" },
                   ].map(f => (
-                    <div key={f.label} className="px-4 py-3 rounded-xl" style={{ background:"#EAF0FC" }}>
+                    <div key={f.label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
                       <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{f.label.toUpperCase()}</div>
                       <div style={{ color:"var(--foreground)", fontSize:13 }}>{f.value}</div>
                     </div>
@@ -137,7 +137,7 @@ export function JobHistory() {
                       {job.documents.map(d => (
                         <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs"
-                          style={{ background:"rgba(32,64,192,0.07)", color:"var(--primary)", border:"1px solid rgba(32,64,192,0.15)" }}>
+                          style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
                           📄 {d}
                         </button>
                       ))}

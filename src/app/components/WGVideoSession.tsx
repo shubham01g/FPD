@@ -237,7 +237,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         </div>
 
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
-          style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.08)" }}>
+          style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.08)" }}>
           <Clock size={11} color="#8A9AB8"/>
           <span style={{ color:"#8A9AB8", fontSize:11 }}>
             Billing starts when the session begins · $25 per 30-minute block · charged to card on file

@@ -7,9 +7,9 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 
-const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)", boxShadow:"0 2px 12px rgba(32,64,192,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
 
 type TwoFAMethod = "sms" | "email_otp" | "authenticator";
 type SettingsTab = "profile" | "security" | "encryption" | "notifications";
@@ -45,31 +45,31 @@ function OTPModal({ method, contact, onVerify, onClose }: {
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-sm rounded-2xl p-7" style={CARD}>
         <div className="flex items-center justify-between mb-5">
-          <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#0D1428" }}>Verify Your Identity</h3>
-          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+          <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Verify Your Identity</h3>
+          <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
         </div>
-        <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7, marginBottom:20 }}>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7, marginBottom:20 }}>
           A 6-digit verification code was sent via {destination}. Enter it below to confirm.
         </p>
         <div style={{ marginBottom:16 }}>
-          <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>VERIFICATION CODE</label>
+          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>VERIFICATION CODE</label>
           <input
             value={code} onChange={e => setCode(e.target.value.replace(/\D/g,"").slice(0,6))}
             placeholder="000000" maxLength={6}
             style={{ ...INPUT, textAlign:"center", fontSize:24, letterSpacing:"0.3em", fontFamily:"var(--font-mono)" }}
             autoFocus/>
-          <div style={{ color:"#8A9AB8", fontSize:11, textAlign:"center", marginTop:6 }}>
+          <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, textAlign:"center", marginTop:6 }}>
             Demo: any 6 digits will work
           </div>
         </div>
         <div className="flex gap-3">
           <button onClick={verify} disabled={verifying}
             className="flex-1 py-3 rounded-xl font-bold text-sm"
-            style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", opacity:verifying?0.7:1 }}>
+            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", opacity:verifying?0.7:1 }}>
             {verifying ? "Verifying…" : "Confirm Code"}
           </button>
           <button onClick={onClose} className="px-4 py-3 rounded-xl text-sm"
-            style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+            style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
         </div>
       </div>
     </div>
@@ -165,22 +165,22 @@ export function AccountSettings() {
     { id:"notifications", label:"Notifications" },
   ];
 
-  const methodColor = { sms:"#48BB78", email_otp:"#2040C0", authenticator:"#9F7AEA" }[twoFAMethod];
+  const methodColor = { sms:"#48BB78", email_otp:"#6C5CE7", authenticator:"#9F7AEA" }[twoFAMethod];
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth:800 }}>
       {/* Header */}
       <div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428", marginBottom:4 }}>Account Settings</h1>
-        <p style={{ color:"#5A6A88", fontSize:13 }}>Manage your profile, security, encryption, and notification preferences.</p>
+        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Account Settings</h1>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Manage your profile, security, encryption, and notification preferences.</p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(255,255,255,0.9)", border:"1px solid rgba(32,64,192,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(22,22,31,0.9)", border:"1px solid rgba(108,92,231,0.1)" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{ background:tab===t.id?"#2040C0":"transparent", color:tab===t.id?"#fff":"#5A6A88" }}>
+            style={{ background:tab===t.id?"#6C5CE7":"transparent", color:tab===t.id?"#fff":"rgba(255,255,255,0.7)" }}>
             {TAB_ICONS[t.id]}
             {t.label}
           </button>
@@ -192,31 +192,31 @@ export function AccountSettings() {
         <div className="space-y-5">
           {/* Avatar */}
           <div className="p-6 rounded-2xl" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428", marginBottom:16 }}>Profile Photo</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:16 }}>Profile Photo</div>
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="flex items-center justify-center rounded-full overflow-hidden flex-shrink-0"
-                  style={{ width:88, height:88, background:"rgba(32,64,192,0.1)", border:"3px solid rgba(32,64,192,0.2)" }}>
+                  style={{ width:88, height:88, background:"rgba(108,92,231,0.1)", border:"3px solid rgba(108,92,231,0.2)" }}>
                   {avatar
                     ? <img src={avatar} alt="Profile" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                    : <span style={{ fontFamily:"var(--font-display)", fontSize:32, color:"#2040C0", fontWeight:700 }}>
+                    : <span style={{ fontFamily:"var(--font-display)", fontSize:32, color:"#6C5CE7", fontWeight:700 }}>
                         {user.avatar}
                       </span>
                   }
                 </div>
                 <button onClick={() => photoRef.current?.click()}
                   className="absolute bottom-0 right-0 flex items-center justify-center rounded-full"
-                  style={{ width:28, height:28, background:"#2040C0", color:"#fff", border:"2px solid #fff", boxShadow:"0 2px 8px rgba(32,64,192,0.4)" }}>
+                  style={{ width:28, height:28, background:"#6C5CE7", color:"#fff", border:"2px solid #fff", boxShadow:"0 2px 8px rgba(108,92,231,0.4)" }}>
                   <Camera size={13}/>
                 </button>
                 <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload}/>
               </div>
               <div>
-                <div style={{ color:"#0D1428", fontSize:15, fontWeight:600 }}>{user.name}</div>
-                <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{user.email}</div>
+                <div style={{ color:"#FFFFFF", fontSize:15, fontWeight:600 }}>{user.name}</div>
+                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:12, marginTop:2 }}>{user.email}</div>
                 <button onClick={() => photoRef.current?.click()}
                   className="flex items-center gap-1.5 mt-3 text-xs px-4 py-2 rounded-xl font-semibold"
-                  style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0", border:"1px solid rgba(32,64,192,0.2)" }}>
+                  style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)" }}>
                   <Camera size={12}/> Change Photo
                 </button>
               </div>
@@ -225,16 +225,16 @@ export function AccountSettings() {
 
           {/* Profile fields */}
           <div className="p-6 rounded-2xl space-y-4" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Personal Information</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Personal Information</div>
             {[
               { label:"FULL NAME",     value:name,  set:setName,  ph:"Your full name",     icon:<User size={14}/>,  type:"text" },
               { label:"EMAIL ADDRESS", value:email, set:setEmail, ph:"your@email.com",      icon:<Mail size={14}/>,  type:"email" },
               { label:"PHONE NUMBER",  value:phone, set:setPhone, ph:"+1 (555) 000-0000",   icon:<Phone size={14}/>, type:"tel" },
             ].map(f => (
               <div key={f.label}>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
                 <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color:"#8A9AB8" }}>{f.icon}</div>
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color:"rgba(255,255,255,0.65)" }}>{f.icon}</div>
                   <input type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.ph}
                     style={{ ...INPUT, paddingLeft:40 }}/>
                 </div>
@@ -242,7 +242,7 @@ export function AccountSettings() {
             ))}
             <button onClick={saveProfile} disabled={saving}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(32,64,192,0.3)", opacity:saving?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(108,92,231,0.3)", opacity:saving?0.7:1 }}>
               <Save size={14}/>{saving ? "Saving…" : "Save Changes"}
             </button>
           </div>
@@ -264,7 +264,7 @@ export function AccountSettings() {
               <div style={{ color:twoFAEnabled?"#48BB78":"#F6AD55", fontSize:14, fontWeight:700, marginBottom:3 }}>
                 {twoFAEnabled ? `Two-Factor Authentication Active — ${twoFAMethod === "sms" ? "SMS" : twoFAMethod === "email_otp" ? "Email OTP" : "Authenticator App"}` : "Two-Factor Authentication Not Enabled"}
               </div>
-              <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
+              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.7 }}>
                 {twoFAEnabled
                   ? "Your account is protected with an extra verification step on every login."
                   : "Add an extra layer of security to your account. Choose SMS or Email OTP — each login will require a verification code."}
@@ -274,7 +274,7 @@ export function AccountSettings() {
 
           {/* 2FA method selection */}
           <div className="p-6 rounded-2xl space-y-5" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Two-Factor Authentication (2FA)</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Two-Factor Authentication (2FA)</div>
 
             <div className="grid md:grid-cols-3 gap-3">
               {[
@@ -289,7 +289,7 @@ export function AccountSettings() {
                 {
                   id:"email_otp" as TwoFAMethod,
                   icon:<Mail size={22}/>,
-                  color:"#2040C0",
+                  color:"#6C5CE7",
                   label:"Email OTP",
                   desc:"A one-time password is sent to your registered email address on each login.",
                   tag:"Recommended",
@@ -306,14 +306,14 @@ export function AccountSettings() {
                 const isActive = twoFAEnabled && twoFAMethod === m.id;
                 return (
                   <div key={m.id} className="rounded-2xl p-5 flex flex-col relative"
-                    style={{ background:isActive?`${m.color}08`:"#FAFBFF", border:`2px solid ${isActive?m.color:"rgba(32,64,192,0.1)"}`, boxShadow:isActive?`0 0 20px ${m.color}15`:"none" }}>
+                    style={{ background:isActive?`${m.color}08`:"#1C1C28", border:`2px solid ${isActive?m.color:"rgba(108,92,231,0.1)"}`, boxShadow:isActive?`0 0 20px ${m.color}15`:"none" }}>
                     {isActive && (
                       <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs font-bold"
                         style={{ background:m.color, color:"#fff", ...MONO }}>ACTIVE</div>
                     )}
                     <div style={{ color:m.color, marginBottom:10 }}>{m.icon}</div>
-                    <div style={{ color:"#0D1428", fontSize:13, fontWeight:700, marginBottom:4 }}>{m.label}</div>
-                    <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6, flex:1 }}>{m.desc}</div>
+                    <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:700, marginBottom:4 }}>{m.label}</div>
+                    <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6, flex:1 }}>{m.desc}</div>
                     <div style={{ color:m.color, fontSize:10, fontWeight:700, ...MONO, marginTop:8 }}>{m.tag}</div>
                     <button
                       onClick={() => isActive ? disable2FA() : enable2FA(m.id)}
@@ -341,26 +341,26 @@ export function AccountSettings() {
 
           {/* Change password */}
           <div className="p-6 rounded-2xl space-y-4" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Change Password</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Change Password</div>
             {[
               { label:"CURRENT PASSWORD", value:currentPw, set:setCurrentPw, show:showCurrentPw, toggle:() => setShowCurrentPw(!showCurrentPw) },
               { label:"NEW PASSWORD",     value:newPw,     set:setNewPw,     show:showNewPw,     toggle:() => setShowNewPw(!showNewPw) },
               { label:"CONFIRM NEW PASSWORD", value:confirmPw, set:setConfirmPw, show:showNewPw, toggle:() => setShowNewPw(!showNewPw) },
             ].map(f => (
               <div key={f.label}>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
                 <div className="relative">
                   <input type={f.show?"text":"password"} value={f.value} onChange={e => f.set(e.target.value)}
                     placeholder="••••••••••" style={{ ...INPUT, paddingRight:44 }}/>
                   <button type="button" onClick={f.toggle}
-                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color:"#8A9AB8" }}>
+                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color:"rgba(255,255,255,0.65)" }}>
                     {f.show ? <EyeOff size={16}/> : <Eye size={16}/>}
                   </button>
                 </div>
               </div>
             ))}
             {newPw && (
-              <div className="h-1.5 rounded-full" style={{ background:"#EAF0FC" }}>
+              <div className="h-1.5 rounded-full" style={{ background:"#1C1C28" }}>
                 <div className="h-1.5 rounded-full transition-all"
                   style={{ width:`${Math.min(newPw.length * 8, 100)}%`,
                     background: newPw.length < 8 ? "#FC8181" : newPw.length < 12 ? "#F6AD55" : "#48BB78" }}/>
@@ -368,7 +368,7 @@ export function AccountSettings() {
             )}
             <button onClick={changePassword} disabled={changingPw}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0", border:"1px solid rgba(32,64,192,0.2)", opacity:changingPw?0.7:1 }}>
+              style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)", opacity:changingPw?0.7:1 }}>
               <Lock size={14}/>{changingPw ? "Updating…" : "Update Password"}
             </button>
           </div>
@@ -389,19 +389,19 @@ export function AccountSettings() {
               <div style={{ color:"#48BB78", fontSize:15, fontWeight:700, marginBottom:4 }}>
                 AES-256 Encryption Active — Always On
               </div>
-              <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>
-                Every file you upload is encrypted with AES-256-GCM <strong style={{ color:"#0D1428" }}>before it leaves your device</strong>. Every file you download is decrypted <strong style={{ color:"#0D1428" }}>only on your device</strong>. No one — not FPD staff, not servers, not anyone — can read your files without your encryption key.
+              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
+                Every file you upload is encrypted with AES-256-GCM <strong style={{ color:"#FFFFFF" }}>before it leaves your device</strong>. Every file you download is decrypted <strong style={{ color:"#FFFFFF" }}>only on your device</strong>. No one — not FPD staff, not servers, not anyone — can read your files without your encryption key.
               </p>
             </div>
           </div>
 
           {/* How it works */}
           <div className="p-6 rounded-2xl space-y-4" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>How Your Files Are Protected</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>How Your Files Are Protected</div>
             <div className="space-y-3">
               {[
                 {
-                  step:"1", color:"#2040C0",
+                  step:"1", color:"#6C5CE7",
                   title:"Upload — Encrypted Before Sending",
                   desc:"When you upload a file, it is encrypted with AES-256-GCM in your browser before any data is transmitted. The encrypted file travels to FPD servers. The unencrypted original never leaves your device.",
                 },
@@ -422,14 +422,14 @@ export function AccountSettings() {
                 },
               ].map(s => (
                 <div key={s.step} className="flex items-start gap-4 p-4 rounded-xl"
-                  style={{ background:"rgba(32,64,192,0.03)", border:"1px solid rgba(32,64,192,0.08)" }}>
+                  style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.08)" }}>
                   <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
                     style={{ width:32, height:32, background:`${s.color}15`, color:s.color, fontFamily:"var(--font-mono)", fontSize:13 }}>
                     {s.step}
                   </div>
                   <div>
-                    <div style={{ color:"#0D1428", fontSize:13, fontWeight:600, marginBottom:4 }}>{s.title}</div>
-                    <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>{s.desc}</div>
+                    <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600, marginBottom:4 }}>{s.title}</div>
+                    <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.7 }}>{s.desc}</div>
                   </div>
                 </div>
               ))}
@@ -439,33 +439,33 @@ export function AccountSettings() {
           {/* Encryption stats */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label:"Encryption Standard", value:"AES-256-GCM", color:"#2040C0", sub:"Military-grade" },
+              { label:"Encryption Standard", value:"AES-256-GCM", color:"#6C5CE7", sub:"Military-grade" },
               { label:"Key Derivation",       value:"PBKDF2",      color:"#9F7AEA", sub:"100,000 iterations" },
               { label:"Architecture",         value:"Zero-Knowledge", color:"#48BB78", sub:"FPD cannot read your data" },
             ].map(s => (
               <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
                 <div style={{ color:s.color, fontSize:15, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
-                <div style={{ color:"#0D1428", fontSize:11, fontWeight:500, marginTop:4 }}>{s.label}</div>
-                <div style={{ color:"#8A9AB8", fontSize:10, marginTop:2 }}>{s.sub}</div>
+                <div style={{ color:"#FFFFFF", fontSize:11, fontWeight:500, marginTop:4 }}>{s.label}</div>
+                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, marginTop:2 }}>{s.sub}</div>
               </div>
             ))}
           </div>
 
           {/* Encrypted badge shown on all files */}
-          <div className="p-5 rounded-2xl" style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.12)" }}>
-            <div style={{ color:"#2040C0", fontSize:12, fontWeight:700, ...MONO, marginBottom:8 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
+          <div className="p-5 rounded-2xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+            <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:8 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
             <div className="flex flex-wrap gap-2">
               {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
                 <div key={f} className="flex items-center gap-2 px-3 py-2 rounded-xl"
                   style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)" }}>
                   <Lock size={10} color="#48BB78"/>
-                  <span style={{ color:"#0D1428", fontSize:12 }}>{f}</span>
+                  <span style={{ color:"#FFFFFF", fontSize:12 }}>{f}</span>
                   <span className="px-1.5 py-0.5 rounded text-xs font-bold"
                     style={{ background:"rgba(72,187,120,0.15)", color:"#48BB78", ...MONO }}>ENCRYPTED</span>
                 </div>
               ))}
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:11, marginTop:10 }}>
+            <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:10 }}>
               All {/* will use actual count in production */} 14 files in your vault are encrypted. This cannot be disabled.
             </div>
           </div>
@@ -476,7 +476,7 @@ export function AccountSettings() {
       {tab === "notifications" && (
         <div className="space-y-4">
           <div className="p-6 rounded-2xl space-y-5" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Notification Preferences</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>Notification Preferences</div>
             {[
               { label:"Email Notifications",        sub:"Receive important updates to your email address",       value:notifEmail,          set:setNotifEmail },
               { label:"SMS Notifications",          sub:"Receive alerts via text message to your phone number",  value:notifSMS,            set:setNotifSMS },
@@ -486,22 +486,22 @@ export function AccountSettings() {
               { label:"Marketing & Product Updates",sub:"News about new features and FPD announcements",         value:notifMarketing,      set:setNotifMarketing },
             ].map(n => (
               <div key={n.label} className="flex items-center justify-between py-3 border-b"
-                style={{ borderColor:"rgba(32,64,192,0.07)" }}>
+                style={{ borderColor:"rgba(108,92,231,0.07)" }}>
                 <div>
-                  <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{n.label}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>{n.sub}</div>
+                  <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500 }}>{n.label}</div>
+                  <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:2 }}>{n.sub}</div>
                 </div>
                 <button onClick={() => { n.set(!n.value); toast.success(`${n.label} ${!n.value?"enabled":"disabled"}`); }}
                   className="relative rounded-full transition-all flex-shrink-0"
-                  style={{ width:44, height:24, background:n.value?"#2040C0":"rgba(32,64,192,0.15)", border:`1px solid ${n.value?"#2040C0":"rgba(32,64,192,0.25)"}`, boxShadow:n.value?"0 0 12px rgba(32,64,192,0.3)":"none" }}>
+                  style={{ width:44, height:24, background:n.value?"#6C5CE7":"rgba(108,92,231,0.15)", border:`1px solid ${n.value?"#6C5CE7":"rgba(108,92,231,0.25)"}`, boxShadow:n.value?"0 0 12px rgba(108,92,231,0.3)":"none" }}>
                   <div className="absolute top-1 rounded-full transition-all"
-                    style={{ width:16, height:16, background:"#fff", left:n.value?24:4 }}/>
+                    style={{ width:16, height:16, background:"#16161F", left:n.value?24:4 }}/>
                 </button>
               </div>
             ))}
             <button onClick={() => toast.success("Notification preferences saved")}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA" }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF" }}>
               <Save size={14}/> Save Preferences
             </button>
           </div>

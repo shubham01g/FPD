@@ -17,11 +17,11 @@ const mrrGrowth = [
   { month: "Apr", mrr: 6870 }, { month: "May", mrr: 8920 }, { month: "Jun", mrr: 10333 },
 ];
 
-const tierColors = { 1: "#4A90D9", 2: "#2040C0", 3: "#48BB78" };
+const tierColors = { 1: "#4A90D9", 2: "#6C5CE7", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" };
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
-const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(32,64,192,0.1)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.1)", borderRadius:16 };
 
 function SendInviteModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
@@ -68,7 +68,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                  style={{ background:orgType===t.id?"rgba(32,64,192,0.1)":"rgba(32,64,192,0.04)", border:`1px solid ${orgType===t.id?"#2040C0":"rgba(32,64,192,0.12)"}`, color:orgType===t.id?"#2040C0":"#5A6A88" }}>
+                  style={{ background:orgType===t.id?"rgba(108,92,231,0.1)":"rgba(108,92,231,0.04)", border:`1px solid ${orgType===t.id?"#6C5CE7":"rgba(108,92,231,0.12)"}`, color:orgType===t.id?"#6C5CE7":"#5A6A88" }}>
                   {t.label}
                 </button>
               ))}
@@ -83,7 +83,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
               <input type={f.type||"text"} value={f.value} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
                 className="w-full px-4 py-3 rounded-xl"
-                style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
             </div>
           ))}
 
@@ -92,24 +92,24 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
               placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
               className="w-full px-4 py-3 rounded-xl resize-none"
-              style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+              style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
           </div>
 
           {/* Preview link */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.12)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.12)" }}>
             <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
-            <span style={{ color:"#2040C0", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
+            <span style={{ color:"#6C5CE7", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
             <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
-              style={{ color:"#2040C0", flexShrink:0 }}><Copy size={12}/></button>
+              style={{ color:"#6C5CE7", flexShrink:0 }}><Copy size={12}/></button>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending…" : "Send Invite Email"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Cancel</button>
           </div>
         </div>
       </div>

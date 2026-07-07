@@ -86,7 +86,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           </div>
           <button onClick={() => setMode("concierge")}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-            style={{ background:"rgba(32,64,192,0.08)", color:"#2040C0" }}>
+            style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7" }}>
             View {client.specialist.split(" ")[0]}'s Inbox →
           </button>
         </div>
@@ -139,8 +139,8 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
         </div>
 
         <div className="mt-6 p-4 rounded-2xl text-center"
-          style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.12)" }}>
-          <div style={{ color:"#2040C0", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
+          style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+          <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
           <ol style={{ color:"#5A6A88", fontSize:12, lineHeight:2, textAlign:"left" }}>
             <li>1. Select a client above (e.g. Dorothy Henderson)</li>
             <li>2. Submit a document on their page</li>
@@ -162,7 +162,7 @@ type AppMode = "landing" | "user" | "admin-login" | "admin" | "partner-onboardin
 
 const TOASTER_STYLE = {
   background: "rgba(8,15,26,0.98)",
-  border: "1px solid rgba(32,64,192,0.25)",
+  border: "1px solid rgba(108,92,231,0.25)",
   color: "#E8EDF5",
   fontFamily: "var(--font-body)",
   fontSize: 13,
@@ -191,9 +191,9 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
       {open && (
         <div style={{
           position:"absolute", bottom:"calc(100% + 8px)", right:0,
-          background:"rgba(10,20,40,0.97)", borderRadius:14,
+          background:"rgba(10,10,15,0.97)", borderRadius:14,
           boxShadow:"0 8px 40px rgba(0,0,0,0.6)", backdropFilter:"blur(20px)",
-          border:"1px solid rgba(32,64,192,0.3)", padding:"8px 6px",
+          border:"1px solid rgba(108,92,231,0.3)", padding:"8px 6px",
           display:"flex", flexDirection:"column", gap:3, minWidth:190,
         }}>
           <div style={{ color:"rgba(255,255,255,0.3)", fontSize:8, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
@@ -202,9 +202,9 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
               style={{
                 padding:"7px 12px", borderRadius:9, fontSize:11, fontWeight:700,
                 cursor:"pointer", textAlign:"left", transition:"all 0.12s",
-                background: mode===t.id ? "#2040C0" : "transparent",
+                background: mode===t.id ? "#6C5CE7" : "transparent",
                 color: mode===t.id ? "#fff" : "#8A9AB8",
-                border: mode===t.id ? "1px solid #2040C0" : "1px solid transparent",
+                border: mode===t.id ? "1px solid #6C5CE7" : "1px solid transparent",
               }}>
               {t.label}
             </button>
@@ -215,8 +215,8 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
         style={{
           display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
           borderRadius:99, fontSize:10, fontWeight:700, cursor:"pointer",
-          background:"rgba(10,20,40,0.95)", color:"#6090FF",
-          border:"1px solid rgba(32,64,192,0.4)",
+          background:"rgba(10,10,15,0.95)", color:"#A29BFE",
+          border:"1px solid rgba(108,92,231,0.4)",
           boxShadow:"0 4px 20px rgba(0,0,0,0.5)", backdropFilter:"blur(16px)",
           letterSpacing:"0.06em",
         }}>
@@ -298,7 +298,7 @@ function AppShell() {
   /* ── Landing ── */
   if (mode === "landing") {
     return (
-      <div className="size-full overflow-y-auto" style={{ fontFamily:"var(--font-body)" }}>
+      <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
         <LandingPage
           onGetStarted={() => setMode("user")}
           onAdminLogin={() => setMode("admin-login")}
@@ -378,7 +378,7 @@ function AppShell() {
     })();
     return (
       <div className="size-full overflow-y-auto">
-        <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(32,64,192,0.05)", borderBottom:"1px solid rgba(32,64,192,0.1)" }}>
+        <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(108,92,231,0.05)", borderBottom:"1px solid rgba(108,92,231,0.1)" }}>
           <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
             📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
           </span>
@@ -425,6 +425,7 @@ function AppShell() {
         currentPage={userPage}
         onNavigate={setUserPage}
         onGoAdmin={() => setMode("admin-login")}
+        onSignOut={() => setMode("landing")}
       >
         {renderUserPage()}
       </Layout>

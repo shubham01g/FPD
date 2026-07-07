@@ -101,7 +101,7 @@ const DOCUMENT_CATEGORIES = [
 function StatusBadge({ status }: { status: SubmittedDocument["status"] }) {
   const cfg = {
     pending:            { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",   label:"Waiting to be received" },
-    received:           { color:"#2040C0", bg:"rgba(32,64,192,0.1)",     label:"Received by specialist" },
+    received:           { color:"#6C5CE7", bg:"rgba(108,92,231,0.1)",     label:"Received by specialist" },
     uploaded_to_vault:  { color:"#48BB78", bg:"rgba(72,187,120,0.12)",   label:"Uploaded to your vault ✓" },
     needs_resubmit:     { color:"#FC8181", bg:"rgba(252,129,129,0.12)",  label:"Please resubmit — unclear scan" },
   }[status];
@@ -292,8 +292,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                         style={{ width:"100%", maxHeight:200, objectFit:"cover" }}/>
                     ) : (
                       <div className="flex items-center gap-3 px-4 py-5"
-                        style={{ background:"rgba(32,64,192,0.04)" }}>
-                        <FileText size={28} color="#2040C0"/>
+                        style={{ background:"rgba(108,92,231,0.04)" }}>
+                        <FileText size={28} color="#6C5CE7"/>
                         <div>
                           <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{selectedFile.name}</div>
                           <div style={{ color:"#8A9AB8", fontSize:11 }}>{selectedFile.type} · {Math.round(selectedFile.size/1024)}KB</div>
@@ -322,8 +322,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               </div>
               <button onClick={() => setShowCategoryPicker(!showCategoryPicker)}
                 className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl"
-                style={{ background:category?"rgba(159,122,234,0.08)":"rgba(32,64,192,0.04)",
-                  border:`1.5px solid ${category?"rgba(159,122,234,0.4)":"rgba(32,64,192,0.15)"}`,
+                style={{ background:category?"rgba(159,122,234,0.08)":"rgba(108,92,231,0.04)",
+                  border:`1.5px solid ${category?"rgba(159,122,234,0.4)":"rgba(108,92,231,0.15)"}`,
                   color:category?"#9F7AEA":"#8A9AB8" }}>
                 <span style={{ fontSize:14 }}>
                   {category
@@ -357,7 +357,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
                 placeholder={`e.g. "This is from 2019" or "The policy number is on page 2" — anything that helps ${specialistName} understand the document`}
                 className="w-full resize-none px-4 py-3 rounded-xl"
-                style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.15)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)", color:"#0D1428", fontSize:13, outline:"none" }}/>
             </div>
 
             {/* Send button */}
@@ -392,7 +392,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label:"Sent",     value:submissions.length,  color:"#9F7AEA" },
-                { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#2040C0" },
+                { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#6C5CE7" },
                 { label:"In Vault", value:uploadedCount, color:"#48BB78" },
               ].map(s => (
                 <div key={s.label} className="p-3 rounded-xl text-center"

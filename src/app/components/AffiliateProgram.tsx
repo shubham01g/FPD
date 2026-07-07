@@ -17,7 +17,7 @@ const monthlyEarnings = [
 
 const tiers = [
   { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#4A90D9" },
-  { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: "#2040C0" },
+  { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: "#6C5CE7" },
   { tier: 3, label: "Tier 3", range: "74+ accounts", rate: 30, color: "#48BB78" },
 ];
 
@@ -119,7 +119,7 @@ export function AffiliateProgram() {
         <div className="flex gap-3">
           <div
             className="flex items-center gap-3 flex-1 px-4 py-3 rounded-xl border"
-            style={{ background: "#EAF0FC", borderColor: "var(--border)" }}
+            style={{ background: "#1C1C28", borderColor: "var(--border)" }}
           >
             <Link size={14} color="var(--gold)" />
             <span style={{ color: "var(--foreground)", fontSize: 13, fontFamily: "var(--font-mono)" }}>{affiliateLink}</span>
@@ -159,7 +159,7 @@ export function AffiliateProgram() {
                   <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${d.earned.toFixed(0)}</span>
                     <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
-                      <div style={{ width:"100%", height:h, background:"#2040C0", borderRadius:"4px 4px 0 0", opacity: i === monthlyEarnings.length-1 ? 1 : 0.55 }}/>
+                      <div style={{ width:"100%", height:h, background:"#6C5CE7", borderRadius:"4px 4px 0 0", opacity: i === monthlyEarnings.length-1 ? 1 : 0.55 }}/>
                     </div>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                   </div>
@@ -179,7 +179,7 @@ export function AffiliateProgram() {
           {/* Header */}
           <div
             className="grid px-5 py-3"
-            style={{ gridTemplateColumns: "1fr auto auto auto auto", background: "#EAF0FC", borderBottom: "1px solid var(--border)", gap: 16 }}
+            style={{ gridTemplateColumns: "1fr auto auto auto auto", background: "#1C1C28", borderBottom: "1px solid var(--border)", gap: 16 }}
           >
             {["User", "Plan", "Joined", "Commission/Mo", "Status"].map((h) => (
               <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
@@ -189,7 +189,7 @@ export function AffiliateProgram() {
             <div
               key={i}
               className="grid px-5 py-3 items-center border-b"
-              style={{ gridTemplateColumns: "1fr auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
+              style={{ gridTemplateColumns: "1fr auto auto auto auto", background: i % 2 === 0 ? "#16161F" : "#0F1A33", borderColor: "var(--border)", gap: 16 }}
             >
               <div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{ref.name}</div>

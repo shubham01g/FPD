@@ -192,7 +192,7 @@ export function DaycareInfo() {
                           ["Emergency Contact",rec.emergencyContact],["Emergency Phone",rec.emergencyPhone],
                           ["Enrolled",rec.enrollDate],["Address",rec.address],
                         ].map(([label,value])=>(
-                          <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#EAF0FC" }}>
+                          <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
                             <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
                             <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
                           </div>
@@ -223,7 +223,7 @@ export function DaycareInfo() {
                         These individuals are authorized to pick up {rec.childName}. All must present a government-issued photo ID to facility staff.
                       </div>
                       {rec.authorizedPickups.map((p,i) => (
-                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl" style={{ background:"rgba(32,64,192,0.04)", border:"1px solid rgba(32,64,192,0.1)" }}>
+                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
                           <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0" style={{ width:40, height:40, background:"rgba(159,122,234,0.12)", color:"#9F7AEA", fontFamily:"var(--font-display)", fontSize:14 }}>
                             {p.name.split(" ").map((w:string)=>w[0]).join("").slice(0,2)}
                           </div>
@@ -251,7 +251,7 @@ export function DaycareInfo() {
                         {rec.documents.map(d => (
                           <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                            style={{ background:"rgba(32,64,192,0.07)", color:"var(--primary)", border:"1px solid rgba(32,64,192,0.15)" }}>
+                            style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
                             📄 {d}
                           </button>
                         ))}

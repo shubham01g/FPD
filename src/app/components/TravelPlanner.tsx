@@ -6,7 +6,7 @@ import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const TRIP_TYPES = ["Vacation","Family Visit","Business Travel","Medical Travel","Honeymoon","Anniversary Trip","Holiday Travel","Road Trip","Cruise","Backpacking","Mission / Volunteer","Other"];
@@ -108,7 +108,7 @@ export function TravelPlanner() {
               <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===trip.id ? null : trip.id)}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex items-center justify-center rounded-xl flex-shrink-0 text-2xl" style={{ width:52, height:52, background:"rgba(32,64,192,0.08)" }}>
+                    <div className="flex items-center justify-center rounded-xl flex-shrink-0 text-2xl" style={{ width:52, height:52, background:"rgba(108,92,231,0.08)" }}>
                       {trip.status==="planned" ? "✈️" : "🌍"}
                     </div>
                     <div>
@@ -142,7 +142,7 @@ export function TravelPlanner() {
                       ["Travel Companions",trip.companions||"Solo"],
                       ["Trip Type",trip.tripType],
                     ].map(([label,value])=>(
-                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#EAF0FC" }}>
+                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
                         <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
                         <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
                       </div>
@@ -170,7 +170,7 @@ export function TravelPlanner() {
                       {trip.documents.map(d => (
                         <button key={d.name} onClick={() => toast.success(`Opening: ${d.name}`)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                          style={{ background:"rgba(32,64,192,0.07)", color:"var(--primary)", border:"1px solid rgba(32,64,192,0.15)" }}>
+                          style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
                           📄 {d.name} <span style={{ color:"var(--muted-foreground)", marginLeft:4 }}>({d.type})</span>
                         </button>
                       ))}

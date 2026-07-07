@@ -115,7 +115,7 @@ export function FinalWishes() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(32,64,192,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>
+                      <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>
                         {wish.category.toUpperCase()}
                       </span>
                     </div>
@@ -150,7 +150,7 @@ export function FinalWishes() {
                   { label: "Budget Range", value: funeralPlan.budget },
                   { label: "Prearranged Contract", value: funeralPlan.prearranged ? funeralPlan.prearrangedWith : "Not prearranged" },
                 ].map(f => (
-                  <div key={f.label} className="flex flex-col gap-1 px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+                  <div key={f.label} className="flex flex-col gap-1 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
                     <span style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{f.label.toUpperCase()}</span>
                     <span style={{ color: "var(--foreground)", fontSize: 13 }}>{f.value}</span>
                   </div>
@@ -160,15 +160,15 @@ export function FinalWishes() {
             <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Service Preferences</h3>
               <div className="space-y-3">
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+                <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 6 }}>MUSIC</div>
                   <div className="flex flex-wrap gap-2">
                     {funeralPlan.music.map(m => (
-                      <span key={m} className="px-2 py-1 rounded text-xs" style={{ background: "rgba(32,64,192,0.1)", color: "var(--primary)" }}>{m}</span>
+                      <span key={m} className="px-2 py-1 rounded text-xs" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)" }}>{m}</span>
                     ))}
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+                <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 6 }}>READINGS</div>
                   <div className="flex flex-wrap gap-2">
                     {funeralPlan.readings.map(r => (
@@ -176,11 +176,11 @@ export function FinalWishes() {
                     ))}
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+                <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>FLOWERS</div>
                   <div style={{ color: "var(--foreground)", fontSize: 13 }}>{funeralPlan.flowers}</div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+                <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>SPECIAL REQUESTS</div>
                   <div style={{ color: "var(--foreground)", fontSize: 13 }}>{funeralPlan.specialRequests}</div>
                 </div>
@@ -189,7 +189,7 @@ export function FinalWishes() {
           </div>
           <div className="p-6 rounded-xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 12 }}>Obituary Draft</h3>
-            <div className="p-4 rounded-xl" style={{ background: "#EAF0FC", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8 }}>
+            <div className="p-4 rounded-xl" style={{ background: "#1C1C28", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8 }}>
               {funeralPlan.obituaryDraft}
             </div>
             <button className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}>
@@ -204,12 +204,12 @@ export function FinalWishes() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Answer these questions to help your loved ones understand your wishes and values.</p>
-            <div className="px-3 py-1.5 rounded-lg" style={{ background: "rgba(32,64,192,0.1)", color: "var(--primary)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
+            <div className="px-3 py-1.5 rounded-lg" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
               {completedAnswers}/{totalQuestions} Answered
             </div>
           </div>
           <div className="h-2 rounded-full" style={{ background: "var(--secondary)" }}>
-            <div className="h-2 rounded-full transition-all" style={{ width: `${(completedAnswers / totalQuestions) * 100}%`, background: "linear-gradient(90deg, #2040C0, #4466D8)" }} />
+            <div className="h-2 rounded-full transition-all" style={{ width: `${(completedAnswers / totalQuestions) * 100}%`, background: "linear-gradient(90deg, #6C5CE7, #4466D8)" }} />
           </div>
           {questionnaireCategories.map((cat, ci) => (
             <div key={ci} className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
@@ -227,7 +227,7 @@ export function FinalWishes() {
                 </div>
               </button>
               {expandedCat === ci && (
-                <div className="space-y-4 p-5 border-t" style={{ borderColor: "var(--border)", background: "#EAF0FC" }}>
+                <div className="space-y-4 p-5 border-t" style={{ borderColor: "var(--border)", background: "#1C1C28" }}>
                   {cat.questions.map(q => (
                     <div key={q.id}>
                       <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>{q.q}</div>

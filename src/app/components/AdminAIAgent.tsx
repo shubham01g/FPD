@@ -129,7 +129,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("• ") || line.startsWith("* ")) {
       const content = line.slice(2).replace(/\*\*([^*]+)\*\*/g,"$1");
-      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#374669" }}><span style={{ color:"#2040C0", flexShrink:0 }}>•</span><span>{content}</span></div>;
+      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#374669" }}><span style={{ color:"#6C5CE7", flexShrink:0 }}>•</span><span>{content}</span></div>;
     }
     const parts = line.split(/\*\*([^*]+)\*\*/g);
     return (

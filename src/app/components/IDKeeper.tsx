@@ -5,17 +5,17 @@ import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const ID_TYPES = ["Driver's License","Passport","Social Security Card","Birth Certificate","Military ID","Medicare Card","Medicaid Card","Health Insurance Card","Dental Insurance Card","Vision Insurance Card","Work / Employee ID","Student ID","Global Entry / TSA PreCheck","Green Card / Permanent Resident","Voter Registration","Vehicle Registration","Concealed Carry Permit","Professional License","Other"];
 
 const CATEGORIES: Record<string, { color:string; bg:string; emoji:string }> = {
-  "Government ID":   { color:"#2040C0", bg:"rgba(32,64,192,0.1)",   emoji:"🪪" },
+  "Government ID":   { color:"#6C5CE7", bg:"rgba(108,92,231,0.1)",   emoji:"🪪" },
   "Insurance":       { color:"#48BB78", bg:"rgba(72,187,120,0.1)",  emoji:"🛡️" },
   "Professional":    { color:"#9F7AEA", bg:"rgba(159,122,234,0.1)", emoji:"💼" },
   "Military":        { color:"#ED8936", bg:"rgba(237,137,54,0.1)",  emoji:"🎖️" },
-  "Other":           { color:"#8A9AB8", bg:"rgba(138,154,184,0.1)", emoji:"📋" },
+  "Other":           { color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)", emoji:"📋" },
 };
 
 const typeCategory: Record<string, string> = {
@@ -108,7 +108,7 @@ export function IDKeeper() {
           return (
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-              style={{ background:activeCategory===cat ? (meta?.bg || "rgba(32,64,192,0.1)") : "rgba(32,64,192,0.04)", color:activeCategory===cat ? (meta?.color || "var(--primary)") : "var(--muted-foreground)", border:`1px solid ${activeCategory===cat ? (meta?.color || "var(--primary)")+"40" : "rgba(32,64,192,0.1)"}` }}>
+              style={{ background:activeCategory===cat ? (meta?.bg || "rgba(108,92,231,0.1)") : "rgba(108,92,231,0.04)", color:activeCategory===cat ? (meta?.color || "var(--primary)") : "var(--muted-foreground)", border:`1px solid ${activeCategory===cat ? (meta?.color || "var(--primary)")+"40" : "rgba(108,92,231,0.1)"}` }}>
               {meta ? `${meta.emoji} ${cat}` : "📂 All IDs"}
             </button>
           );
@@ -144,7 +144,7 @@ export function IDKeeper() {
               </div>
 
               {/* ID number with mask toggle */}
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl mb-3" style={{ background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.12)" }}>
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl mb-3" style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.12)" }}>
                 <div>
                   <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:2 }}>ID NUMBER</div>
                   <div style={{ color:"var(--foreground)", fontSize:14, ...MONO, fontWeight:600 }}>
@@ -159,7 +159,7 @@ export function IDKeeper() {
               {/* Fields */}
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {[["Issued By",r.issuedBy],["Issue Date",r.issueDate],["Expiry Date",r.expiryDate]].map(([label,value])=>(
-                  <div key={label} className="px-3 py-2 rounded-lg" style={{ background:"#EAF0FC" }}>
+                  <div key={label} className="px-3 py-2 rounded-lg" style={{ background:"#1C1C28" }}>
                     <div style={{ color:"var(--muted-foreground)", fontSize:9, ...MONO }}>{label.toUpperCase()}</div>
                     <div style={{ color:label==="Expiry Date" && expired ? "#FC8181" : "var(--foreground)", fontSize:12 }}>{value||"—"}</div>
                   </div>
@@ -186,7 +186,7 @@ export function IDKeeper() {
               <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
             </div>
             {/* Scan or upload the ID card */}
-            <div className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor:"rgba(32,64,192,0.25)", background:"rgba(32,64,192,0.02)" }}>
+            <div className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor:"rgba(108,92,231,0.25)", background:"rgba(108,92,231,0.02)" }}>
               <div style={{ color:"var(--muted-foreground)", fontSize:12, marginBottom:10, fontWeight:600 }}>SCAN OR UPLOAD ID DOCUMENT</div>
               <div className="flex gap-2 flex-wrap">
                 <ScanButton folder="personal" onUpload={doc => { setForm(p=>({...p,documentScanned:"true" as any})); toast.success(`"${doc.name}" scanned and attached`); }} size="sm" label="📷 Scan with Camera"/>

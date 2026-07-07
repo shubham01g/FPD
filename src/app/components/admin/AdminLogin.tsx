@@ -56,7 +56,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
         <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(159,122,234,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(159,122,234,0.04) 1px,transparent 1px)", backgroundSize: "50px 50px" }} />
         {/* Orbs */}
         <div style={{ position:"absolute", top:"15%", left:"10%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(159,122,234,0.1) 0%,transparent 70%)", pointerEvents:"none" }} />
-        <div style={{ position:"absolute", bottom:"10%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(32,64,192,0.07) 0%,transparent 70%)", pointerEvents:"none" }} />
+        <div style={{ position:"absolute", bottom:"10%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(108,92,231,0.07) 0%,transparent 70%)", pointerEvents:"none" }} />
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-16">

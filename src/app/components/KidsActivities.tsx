@@ -5,7 +5,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(32,64,192,0.05)", border:"1px solid rgba(32,64,192,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const ACTIVITY_TYPES = ["Soccer","Baseball / Softball","Basketball","Football","Swimming","Tennis","Gymnastics","Dance","Martial Arts","Track & Field","Volleyball","Cheerleading","Music / Band","Piano","Guitar","Violin","Drama / Theater","Art Class","Coding / STEM","Chess","Scouts / Scouting","Religious Education","Tutoring","Language Class","Yoga / Fitness","Other"];
@@ -19,20 +19,20 @@ const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
   "Gymnastics":      {emoji:"🤸",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
   "Dance":           {emoji:"💃",color:"#9F7AEA",bg:"rgba(159,122,234,0.1)"},
   "Martial Arts":    {emoji:"🥋",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Music / Band":    {emoji:"🎵",color:"#2040C0",bg:"rgba(32,64,192,0.1)"},
-  "Piano":           {emoji:"🎹",color:"#2040C0",bg:"rgba(32,64,192,0.1)"},
+  "Music / Band":    {emoji:"🎵",color:"#6C5CE7",bg:"rgba(108,92,231,0.1)"},
+  "Piano":           {emoji:"🎹",color:"#6C5CE7",bg:"rgba(108,92,231,0.1)"},
   "Guitar":          {emoji:"🎸",color:"#9F7AEA",bg:"rgba(159,122,234,0.1)"},
   "Drama / Theater": {emoji:"🎭",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
   "Art Class":       {emoji:"🎨",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
   "Coding / STEM":   {emoji:"💻",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Chess":           {emoji:"♟️",color:"#2040C0",bg:"rgba(32,64,192,0.1)"},
+  "Chess":           {emoji:"♟️",color:"#6C5CE7",bg:"rgba(108,92,231,0.1)"},
   "Scouts / Scouting":{emoji:"🏕️",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Religious Education":{emoji:"⛪",color:"#2040C0",bg:"rgba(32,64,192,0.1)"},
+  "Religious Education":{emoji:"⛪",color:"#6C5CE7",bg:"rgba(108,92,231,0.1)"},
   "Tutoring":        {emoji:"📚",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Tennis":          {emoji:"🎾",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
   "Violin":          {emoji:"🎻",color:"#9F7AEA",bg:"rgba(159,122,234,0.1)"},
 };
-function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"#8A9AB8",bg:"rgba(138,154,184,0.1)"}; }
+function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"rgba(255,255,255,0.65)",bg:"rgba(138,154,184,0.1)"}; }
 
 interface Activity {
   id: number;
@@ -168,7 +168,7 @@ export function KidsActivities() {
         {children.map(child => (
           <button key={child} onClick={() => setFilterChild(child)}
             className="px-4 py-1.5 rounded-xl text-sm font-semibold"
-            style={{ background:filterChild===child?"var(--primary)":"rgba(32,64,192,0.06)", color:filterChild===child?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterChild===child?"var(--primary)":"rgba(32,64,192,0.12)"}` }}>
+            style={{ background:filterChild===child?"var(--primary)":"rgba(108,92,231,0.06)", color:filterChild===child?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterChild===child?"var(--primary)":"rgba(108,92,231,0.12)"}` }}>
             {child==="all" ? "👦👧 All Children" : `👧 ${child}`}
           </button>
         ))}
@@ -221,7 +221,7 @@ export function KidsActivities() {
                       ["Emergency Contact",act.emergencyContact],
                       ["Emergency Phone",act.emergencyPhone],
                     ].map(([label,value])=>(
-                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#EAF0FC" }}>
+                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
                         <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
                         <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
                       </div>
@@ -251,7 +251,7 @@ export function KidsActivities() {
                       {act.documents.map(d => (
                         <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                          style={{ background:"rgba(32,64,192,0.07)", color:"var(--primary)", border:"1px solid rgba(32,64,192,0.15)" }}>
+                          style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
                           📄 {d}
                         </button>
                       ))}

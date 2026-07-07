@@ -18,15 +18,15 @@ import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
 
-const GLASS: React.CSSProperties = { background:"rgba(255,255,255,0.95)", border:"1px solid rgba(32,64,192,0.14)", backdropFilter:"blur(12px)" };
-const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(32,64,192,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(32,64,192,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
+const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(108,92,231,0.14)", backdropFilter:"blur(12px)" };
+const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
 const MONO:  React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 /* ── What gets included in the legacy package ───────────────────── */
 const PACKAGE_SECTIONS = [
   {
     icon: <FileText size={18}/>,
-    color: "#2040C0",
+    color: "#6C5CE7",
     label: "Digital File Cabinet",
     desc: "All 18+ folders — Legal, Financial, Medical, Property, Insurance, Vehicles, Utilities, Digital Assets, Pet Records, Warranties, Weapons Locker, and more",
     itemCount: "18+ folders",
@@ -42,7 +42,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <FileText size={18}/>,
-    color: "#2040C0",
+    color: "#6C5CE7",
     label: "Wills and Living Trusts",
     desc: "All executed legal documents with attorney details, dates, and locations",
     itemCount: "3 documents",
@@ -74,7 +74,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <Camera size={18}/>,
-    color: "#3355E0",
+    color: "#8B7CF6",
     label: "Memories & Media",
     desc: "Family photos, video messages to loved ones, keepsakes, goals, awards, and pet records",
     itemCount: "7 tabs",
@@ -106,7 +106,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <FileText size={18}/>,
-    color: "#8A9AB8",
+    color: "rgba(255,255,255,0.65)",
     label: "ID Keeper",
     desc: "All stored identification documents — government IDs, insurance cards, professional licenses",
     itemCount: "All IDs",
@@ -140,10 +140,10 @@ function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; titl
         {met ? <CheckCircle size={16}/> : num}
       </div>
       <div>
-        <div style={{ color:"#0D1428", fontSize:13, fontWeight:600, marginBottom:3 }}>
+        <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600, marginBottom:3 }}>
           {met ? `✓ ${title}` : title}
         </div>
-        <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>{desc}</div>
+        <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{desc}</div>
       </div>
     </div>
   );
@@ -166,18 +166,18 @@ export function LegacyVault() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Lock size={13} color="#2040C0"/>
-          <span style={{ color:"#2040C0", fontSize:10, ...MONO, letterSpacing:"0.12em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
+          <Lock size={13} color="#6C5CE7"/>
+          <span style={{ color:"#6C5CE7", fontSize:10, ...MONO, letterSpacing:"0.12em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
         </div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428", marginBottom:6 }}>Your Legacy Package</h1>
-        <p style={{ color:"#5A6A88", fontSize:14, lineHeight:1.7 }}>
+        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:6 }}>Your Legacy Package</h1>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.7 }}>
           This is a preview of everything your verified legacy contacts will receive. All content is stored across your platform sections — organized, encrypted, and ready to be delivered. Use the sections in the sidebar to add or update any information.
         </p>
       </div>
 
       {/* Two-condition gate */}
-      <div className="p-5 rounded-2xl space-y-3" style={{ background:"rgba(32,64,192,0.03)", border:"1px solid rgba(32,64,192,0.12)" }}>
-        <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>
+      <div className="p-5 rounded-2xl space-y-3" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.12)" }}>
+        <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:8 }}>
           🔐 Two Conditions Required to Unlock Downloads
         </div>
         <ConditionRow
@@ -203,7 +203,7 @@ export function LegacyVault() {
           <button
             onClick={() => toast.info("Go to Security → Activate Legacy Access in the sidebar to pay.")}
             className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm w-full justify-center"
-            style={{ background:"linear-gradient(135deg,#2040C0,#3355E0)", color:"#F0F4FA", boxShadow:"0 4px 16px rgba(32,64,192,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 4px 16px rgba(108,92,231,0.3)" }}>
             Go to Activate Legacy Access <ArrowRight size={15}/>
           </button>
         )}
@@ -213,14 +213,14 @@ export function LegacyVault() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#0D1428" }}>What Your Legacy Contacts Receive</div>
-            <div style={{ color:"#5A6A88", fontSize:13, marginTop:2 }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>What Your Legacy Contacts Receive</div>
+            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:2 }}>
               Everything below is included in the Legacy Vault Clone — a complete encrypted download of your entire account.
             </div>
           </div>
           <button onClick={() => setExpanded(e => !e)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
-            style={{ background:"rgba(32,64,192,0.07)", color:"#2040C0" }}>
+            style={{ background:"rgba(108,92,231,0.07)", color:"#6C5CE7" }}>
             {expanded ? <><ChevronUp size={14}/> Collapse</> : <><ChevronDown size={14}/> See All {PACKAGE_SECTIONS.length} Sections</>}
           </button>
         </div>
@@ -234,20 +234,20 @@ export function LegacyVault() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>{section.label}</span>
+                  <span style={{ color:"#FFFFFF", fontSize:13, fontWeight:600 }}>{section.label}</span>
                   <span className="px-1.5 py-0.5 rounded text-xs flex-shrink-0"
                     style={{ background:`${section.color}12`, color:section.color, ...MONO }}>
                     {section.itemCount}
                   </span>
                 </div>
-                <div style={{ color:"#5A6A88", fontSize:11, lineHeight:1.5 }}>{section.desc}</div>
+                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, lineHeight:1.5 }}>{section.desc}</div>
               </div>
               <div className="flex-shrink-0 flex gap-1">
                 <button
                   onClick={() => continuationFeePaid
                     ? toast.success(`Viewing: ${section.label}`)
                     : toast.error("Pay the $199 fee to preview content")}
-                  style={{ color: continuationFeePaid ? "#8A9AB8" : "#C8D4EE", padding:4 }}
+                  style={{ color: continuationFeePaid ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.75)", padding:4 }}
                   title={continuationFeePaid ? "Preview" : "Locked"}>
                   <Eye size={13}/>
                 </button>
@@ -255,7 +255,7 @@ export function LegacyVault() {
                   onClick={() => continuationFeePaid
                     ? toast.success(`Downloading: ${section.label}`)
                     : toast.error("Pay the $199 fee to download")}
-                  style={{ color: continuationFeePaid ? "#8A9AB8" : "#C8D4EE", padding:4 }}
+                  style={{ color: continuationFeePaid ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.75)", padding:4 }}
                   title={continuationFeePaid ? "Download" : "Locked"}>
                   <Download size={13}/>
                 </button>
@@ -267,7 +267,7 @@ export function LegacyVault() {
         {!expanded && (
           <button onClick={() => setExpanded(true)}
             className="w-full mt-3 py-3 rounded-2xl text-sm flex items-center justify-center gap-2"
-            style={{ border:"1px dashed rgba(32,64,192,0.25)", color:"#5A6A88", background:"rgba(32,64,192,0.02)" }}>
+            style={{ border:"1px dashed rgba(108,92,231,0.25)", color:"rgba(255,255,255,0.7)", background:"rgba(108,92,231,0.02)" }}>
             <ChevronDown size={14}/> Show {PACKAGE_SECTIONS.length - 6} more sections
           </button>
         )}
@@ -275,12 +275,12 @@ export function LegacyVault() {
 
       {/* Legacy Vault Clone CTA */}
       <div className="p-6 rounded-2xl text-center space-y-4"
-        style={{ background: fullyUnlocked ? "rgba(72,187,120,0.06)" : "rgba(32,64,192,0.03)", border:`2px solid ${fullyUnlocked?"rgba(72,187,120,0.3)":"rgba(32,64,192,0.15)"}` }}>
+        style={{ background: fullyUnlocked ? "rgba(72,187,120,0.06)" : "rgba(108,92,231,0.03)", border:`2px solid ${fullyUnlocked?"rgba(72,187,120,0.3)":"rgba(108,92,231,0.15)"}` }}>
         <div style={{ fontSize:40 }}>{fullyUnlocked ? "🔓" : "🔒"}</div>
-        <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#0D1428" }}>
+        <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#FFFFFF" }}>
           {fullyUnlocked ? "Legacy Vault Clone — Ready to Download" : "Legacy Vault Clone — Locked"}
         </div>
-        <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7, maxWidth:500, margin:"0 auto" }}>
+        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7, maxWidth:500, margin:"0 auto" }}>
           {fullyUnlocked
             ? "Both conditions are met. Your legacy contacts can now download a complete encrypted copy of your entire account — all sections, all files, all records."
             : "When both the $199 fee is paid and your passing is verified, legacy contacts can download everything — all sections, all files, all records — in one complete encrypted package."}
@@ -288,17 +288,17 @@ export function LegacyVault() {
         <button
           onClick={() => fullyUnlocked ? setShowVaultClone(true) : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}
           className="px-8 py-3.5 rounded-2xl font-bold text-sm inline-flex items-center gap-2"
-          style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(32,64,192,0.08)", color: fullyUnlocked ? "#fff" : "#8A9AB8", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
+          style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(108,92,231,0.08)", color: fullyUnlocked ? "#fff" : "rgba(255,255,255,0.65)", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
           {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Clone</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
         </button>
       </div>
 
       {/* Tip */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background:"rgba(32,64,192,0.03)", border:"1px solid rgba(32,64,192,0.1)" }}>
+        style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
         <div style={{ fontSize:18, flexShrink:0 }}>💡</div>
-        <div style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>
-          <strong style={{ color:"#0D1428" }}>Want to add or update your information?</strong> Use the sections in the left sidebar — File Cabinet, Final Wishes, Medical Info, Financial Records, and all other sections. Everything you add there automatically becomes part of your legacy package here.
+        <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
+          <strong style={{ color:"#FFFFFF" }}>Want to add or update your information?</strong> Use the sections in the left sidebar — File Cabinet, Final Wishes, Medical Info, Financial Records, and all other sections. Everything you add there automatically becomes part of your legacy package here.
         </div>
       </div>
     </div>

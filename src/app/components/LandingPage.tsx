@@ -14,33 +14,33 @@ import fpdLongLogo   from "../../imports/FPD_long_logo_blue.png";
 
 /* ─── shared style helpers ─────────────────────────────────────── */
 const GRID = {
-  backgroundImage: "linear-gradient(rgba(32,64,192,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(32,64,192,0.04) 1px,transparent 1px)",
+  backgroundImage: "linear-gradient(rgba(108,92,231,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.04) 1px,transparent 1px)",
   backgroundSize: "60px 60px",
 };
 const GLASS = {
   background: "rgba(8,15,26,0.75)",
-  border: "1px solid rgba(32,64,192,0.18)",
+  border: "1px solid rgba(108,92,231,0.18)",
   backdropFilter: "blur(16px)",
-  boxShadow: "0 0 40px rgba(32,64,192,0.06), inset 0 1px 0 rgba(32,64,192,0.1)",
+  boxShadow: "0 0 40px rgba(108,92,231,0.06), inset 0 1px 0 rgba(108,92,231,0.1)",
 };
 const GLOW_BTN: React.CSSProperties = {
-  background: "linear-gradient(135deg,#2040C0,#3355E0)",
+  background: "linear-gradient(135deg,#6C5CE7,#8B7CF6)",
   color: "#04080F",
   fontWeight: 700,
-  boxShadow: "0 0 30px rgba(32,64,192,0.45)",
+  boxShadow: "0 0 30px rgba(108,92,231,0.45)",
 };
 const MONO = { fontFamily: "var(--font-mono)" } as React.CSSProperties;
 const DISPLAY = { fontFamily: "var(--font-display)" } as React.CSSProperties;
 
 const Orb = ({ x, y, size = 400, opacity = 0.07 }: { x: string; y: string; size?: number; opacity?: number }) => (
-  <div style={{ position: "absolute", left: x, top: y, width: size, height: size, borderRadius: "50%", background: `radial-gradient(circle,rgba(32,64,192,${opacity}) 0%,transparent 70%)`, pointerEvents: "none" }} />
+  <div style={{ position: "absolute", left: x, top: y, width: size, height: size, borderRadius: "50%", background: `radial-gradient(circle,rgba(108,92,231,${opacity}) 0%,transparent 70%)`, pointerEvents: "none" }} />
 );
 
 const Tag = ({ children }: { children: React.ReactNode }) => (
   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
-    style={{ background: "rgba(32,64,192,0.08)", border: "1px solid rgba(32,64,192,0.25)", ...MONO }}>
-    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#2040C0", boxShadow: "0 0 8px #2040C0" }} />
-    <span style={{ color: "#2040C0", fontSize: 11, letterSpacing: "0.12em" }}>{children}</span>
+    style={{ background: "rgba(108,92,231,0.08)", border: "1px solid rgba(108,92,231,0.25)", ...MONO }}>
+    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#6C5CE7", boxShadow: "0 0 8px #6C5CE7" }} />
+    <span style={{ color: "#6C5CE7", fontSize: 11, letterSpacing: "0.12em" }}>{children}</span>
   </div>
 );
 
@@ -71,7 +71,7 @@ function Nav({ onStart, onWhiteGlove }: { onStart: () => void; onWhiteGlove?: ()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      style={{ background: scrolled ? "rgba(4,8,15,0.97)" : "transparent", borderBottom: scrolled ? "1px solid rgba(32,64,192,0.12)" : "none", backdropFilter: scrolled ? "blur(20px)" : "none" }}>
+      style={{ background: scrolled ? "rgba(4,8,15,0.97)" : "transparent", borderBottom: scrolled ? "1px solid rgba(108,92,231,0.12)" : "none", backdropFilter: scrolled ? "blur(20px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-3">
           <img src={fpdSquareLogo} alt="FPD" style={{ width: 38, height: 38, borderRadius: 8, objectFit: "cover" }} />
@@ -86,12 +86,12 @@ function Nav({ onStart, onWhiteGlove }: { onStart: () => void; onWhiteGlove?: ()
           {/* White Glove — plain text link, matches other nav links */}
           <button
             onClick={scrollToWhiteGlove}
-            className="hidden md:flex items-center text-sm transition-colors hover:text-white"
+            className="hidden md:flex items-center text-sm transition-colors hover:text-white fpd-btn-lift"
             style={{ color: "#6B7FA8", ...MONO, outline:"none", border:"none", background:"transparent" }}>
             White Glove
           </button>
-          <button style={{ color: "#6B7FA8", fontSize: 13, outline:"none", border:"none" }}>Sign In</button>
-          <button onClick={onStart} className="px-5 py-2 rounded-xl text-sm transition-all" style={GLOW_BTN}>Get Started</button>
+          <button className="px-4 py-1.5 rounded-xl text-sm fpd-btn-lift" style={{ color: "#E8EDF5", border:"1px solid rgba(108,92,231,0.3)", background:"transparent" }}>Sign In</button>
+          <button onClick={onStart} className="px-5 py-2 rounded-xl text-sm fpd-btn-lift" style={GLOW_BTN}>Get Started</button>
           <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)} style={{ color: "#6B7FA8" }}>
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -124,30 +124,30 @@ function Hero({ onStart }: { onStart: () => void }) {
       <Orb x="60%" y="-5%" size={500} opacity={0.07} />
 
       <div className="relative max-w-6xl mx-auto px-6 text-center w-full" style={{ paddingTop: 120 }}>
-        <Tag>TRUSTED DIGITAL LEGACY PLATFORM · EST. 2024</Tag>
-        <h1 style={{ ...DISPLAY, fontSize: "clamp(2.8rem,7vw,5.5rem)", fontWeight: 900, color: "#F0F6FF", lineHeight: 1.08, marginBottom: 24 }}>
+        <div className="fpd-fade-in-up"><Tag>TRUSTED DIGITAL LEGACY PLATFORM · EST. 2024</Tag></div>
+        <h1 className="fpd-fade-in-up" style={{ ...DISPLAY, fontSize: "clamp(2.8rem,7vw,5.5rem)", fontWeight: 900, color: "#F0F6FF", lineHeight: 1.08, marginBottom: 24, animationDelay:"60ms" }}>
           My Life.{" "}
-          <span style={{ background: "linear-gradient(135deg,#2040C0,#3355E0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>My Wishes.</span>
+          <span style={{ background: "linear-gradient(135deg,#6C5CE7,#8B7CF6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>My Wishes.</span>
           <br />My Way.
         </h1>
-        <p style={{ color: "#8AA3C8", fontSize: "clamp(1rem,2vw,1.25rem)", maxWidth: 640, margin: "0 auto 40px", lineHeight: 1.8 }}>
+        <p className="fpd-fade-in-up" style={{ color: "#8AA3C8", fontSize: "clamp(1rem,2vw,1.25rem)", maxWidth: 640, margin: "0 auto 40px", lineHeight: 1.8, animationDelay:"120ms" }}>
           Final Pass Down is the world's most complete digital legacy platform — store your documents, record your wishes, protect your family, and ensure everything you care about is passed on exactly as you intend.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-          <button onClick={onStart} className="flex items-center gap-3 px-8 py-4 rounded-2xl text-base" style={GLOW_BTN}>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 fpd-fade-in-up" style={{ animationDelay:"180ms" }}>
+          <button onClick={onStart} className="flex items-center gap-3 px-8 py-4 rounded-2xl text-base fpd-btn-lift" style={GLOW_BTN}>
             Start Your Legacy <ArrowRight size={18} />
           </button>
-          <button className="flex items-center gap-3 px-8 py-4 rounded-2xl text-base"
-            style={{ border: "1px solid rgba(32,64,192,0.3)", color: "#E8EDF5", background: "rgba(32,64,192,0.05)" }}>
+          <button className="flex items-center gap-3 px-8 py-4 rounded-2xl text-base fpd-btn-lift"
+            style={{ border: "1px solid rgba(108,92,231,0.3)", color: "#E8EDF5", background: "rgba(108,92,231,0.05)" }}>
             <Play size={16} fill="currentColor" /> Watch Demo
           </button>
         </div>
 
         {/* stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-12 fpd-fade-in-up" style={{ animationDelay:"240ms" }}>
           {stats.map(([val, label]) => (
-            <div key={label} className="p-4 rounded-2xl text-center" style={GLASS}>
-              <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 700, color: "#2040C0" }}>{val}</div>
+            <div key={label} className="p-4 rounded-2xl text-center fpd-hover-lift" style={GLASS}>
+              <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 700, color: "#6C5CE7" }}>{val}</div>
               <div style={{ color: "#6B7FA8", fontSize: 12, marginTop: 4, ...MONO }}>{label}</div>
             </div>
           ))}
@@ -163,11 +163,11 @@ function Hero({ onStart }: { onStart: () => void }) {
               "photo-1672640770474-e1d8a28fd0d2",
               "photo-1662987619545-1844207dedac",
             ].map((id, i) => (
-              <div key={id} style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(32,64,192,0.4)", marginLeft: i > 0 ? -10 : 0, overflow: "hidden", background: "#04080F" }}>
+              <div key={id} style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(108,92,231,0.4)", marginLeft: i > 0 ? -10 : 0, overflow: "hidden", background: "#04080F" }}>
                 <img src={`https://images.unsplash.com/${id}?w=72&h=72&fit=crop&auto=format`} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>
               </div>
             ))}
-            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(32,64,192,0.4)", marginLeft: -10, background: "rgba(32,64,192,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#2040C0", fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(108,92,231,0.4)", marginLeft: -10, background: "rgba(108,92,231,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#6C5CE7", fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
           </div>
           <div style={{ color: "#6B7FA8", fontSize: 13 }}>Joined by 50,000+ families protecting their legacy</div>
         </div>
@@ -188,7 +188,7 @@ function About() {
             <Tag>ABOUT FINAL PASS DOWN</Tag>
             <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4vw,3rem)", color: "#E8EDF5", lineHeight: 1.15, marginBottom: 24 }}>
               What Happens to Your<br />
-              <span style={{ color: "#2040C0" }}>Life's Work</span> When You're Gone?
+              <span style={{ color: "#6C5CE7" }}>Life's Work</span> When You're Gone?
             </h2>
             <p style={{ color: "#8AA3C8", fontSize: 16, lineHeight: 1.9, marginBottom: 20 }}>
               Most families face chaos after a loved one passes — scrambling to find documents, discover accounts, and piece together final wishes. Final Pass Down changes everything.
@@ -199,26 +199,26 @@ function About() {
             <div className="space-y-3">
               {["Store every document securely in one encrypted vault","Designate Legacy, Guardian & Emergency Contacts","Record video messages for loved ones to receive after you pass","Plan your funeral, write your final wishes, answer life questions","Keep medical, financial, and personal records organized"].map(pt => (
                 <div key={pt} className="flex items-start gap-3">
-                  <CheckCircle size={16} color="#2040C0" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <CheckCircle size={16} color="#6C5CE7" style={{ marginTop: 3, flexShrink: 0 }} />
                   <span style={{ color: "#B8C8E0", fontSize: 14 }}>{pt}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="relative">
-            <div style={{ borderRadius: 24, overflow: "hidden", border: "1px solid rgba(32,64,192,0.2)", boxShadow: "0 0 80px rgba(32,64,192,0.12)" }}>
+            <div style={{ borderRadius: 24, overflow: "hidden", border: "1px solid rgba(108,92,231,0.2)", boxShadow: "0 0 80px rgba(108,92,231,0.12)" }}>
               <img src="https://images.unsplash.com/photo-1585813597616-63e881759e9d?w=700&h=500&fit=crop&auto=format" alt="Happy couple family" style={{ width: "100%", height: 340, objectFit: "cover", objectPosition: "center 20%" }} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
-              <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(32,64,192,0.15)" }}>
+              <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(108,92,231,0.15)" }}>
                 <img src="https://images.unsplash.com/photo-1642522029691-029b5a432954?w=350&h=220&fit=crop&auto=format" alt="Estate planning meeting" style={{ width: "100%", height: 130, objectFit: "cover" }} />
               </div>
-              <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(32,64,192,0.15)" }}>
+              <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(108,92,231,0.15)" }}>
                 <img src="https://images.unsplash.com/photo-1662987619545-1844207dedac?w=350&h=220&fit=crop&auto=format" alt="Three generations family" style={{ width: "100%", height: 130, objectFit: "cover" }} />
               </div>
             </div>
             <div className="absolute -top-4 -right-4 p-5 rounded-2xl" style={GLASS}>
-              <div style={{ ...MONO, color: "#2040C0", fontSize: 11, marginBottom: 4 }}>PLATFORM COVERAGE</div>
+              <div style={{ ...MONO, color: "#6C5CE7", fontSize: 11, marginBottom: 4 }}>PLATFORM COVERAGE</div>
               <div style={{ ...DISPLAY, fontSize: 32, color: "#E8EDF5" }}>30+</div>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>Life Categories</div>
             </div>
@@ -242,22 +242,15 @@ function HowItWorks() {
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <Orb x="10%" y="30%" />
       <div className="relative max-w-6xl mx-auto px-6">
-        <SectionTitle tag="HOW IT WORKS" title={<>Four Steps to a<br /><span style={{ color: "#2040C0" }}>Secure Legacy</span></>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
+        <SectionTitle tag="HOW IT WORKS" title={<>Four Steps to a<br /><span style={{ color: "#6C5CE7" }}>Secure Legacy</span></>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
         <div className="grid md:grid-cols-4 gap-6">
           {steps.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl overflow-hidden flex flex-col" style={{ ...GLASS }}>
-              {/* Photo */}
-              <div style={{ height: 140, overflow: "hidden", position: "relative" }}>
-                <img src={`https://images.unsplash.com/${s.img}?w=400&h=200&fit=crop&auto=format`} alt={s.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: s.imgPos, opacity: 0.65 }}/>
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(4,8,15,0.1), rgba(8,15,26,0.85))" }}/>
-                <div style={{ position: "absolute", top: 12, left: 14, ...MONO, color: "#2040C0", fontSize: 32, fontWeight: 700, opacity: 0.5 }}>{s.n}</div>
-              </div>
-              {i < steps.length - 1 && <div className="hidden md:block absolute top-16 -right-3 z-10" style={{ width: 6, height: 6, borderRadius: "50%", background: "#2040C0", boxShadow: "0 0 12px #2040C0" }} />}
-              <div className="p-6 flex-1">
-                <div className="mb-4 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(32,64,192,0.12)", color: "#2040C0" }}>{s.icon}</div>
-                <h3 style={{ ...DISPLAY, fontSize: 15, color: "#E8EDF5", marginBottom: 8 }}>{s.title}</h3>
-                <p style={{ color: "#6B7FA8", fontSize: 13, lineHeight: 1.8 }}>{s.desc}</p>
-              </div>
+            <div key={s.n} className="relative rounded-2xl flex flex-col p-6 fpd-hover-lift" style={{ ...GLASS }}>
+              {i < steps.length - 1 && <div className="hidden md:block absolute top-10 -right-3 z-10" style={{ width: 6, height: 6, borderRadius: "50%", background: "#6C5CE7", boxShadow: "0 0 12px #6C5CE7" }} />}
+              <div className="mb-4 w-11 h-11 rounded-full flex items-center justify-center" style={{ ...DISPLAY, background: "linear-gradient(135deg,#6C5CE7,#8B7CF6)", color: "#fff", fontWeight: 700, fontSize: 15 }}>{s.n}</div>
+              <div className="mb-4 w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "rgba(108,92,231,0.12)", color: "#6C5CE7" }}>{s.icon}</div>
+              <h3 style={{ ...DISPLAY, fontSize: 15, color: "#E8EDF5", marginBottom: 8 }}>{s.title}</h3>
+              <p style={{ color: "#6B7FA8", fontSize: 13, lineHeight: 1.8 }}>{s.desc}</p>
             </div>
           ))}
         </div>
@@ -311,14 +304,14 @@ function Features() {
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <Orb x="80%" y="40%" size={600} />
       <div className="relative max-w-7xl mx-auto px-6">
-        <SectionTitle tag="PLATFORM FEATURES" title={<>Everything Your<br /><span style={{ color: "#2040C0" }}>Legacy Needs</span></>} sub="30+ life categories, all in one military-grade encrypted vault." />
+        <SectionTitle tag="PLATFORM FEATURES" title={<>Everything Your<br /><span style={{ color: "#6C5CE7" }}>Legacy Needs</span></>} sub="30+ life categories, all in one military-grade encrypted vault." />
 
         {/* filter tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-12">
           {cats.map(c => (
             <button key={c} onClick={() => setActive(c)}
-              className="px-5 py-2 rounded-full text-sm transition-all"
-              style={{ background: active===c ? "#2040C0" : "rgba(32,64,192,0.06)", color: active===c ? "#04080F" : "#6B7FA8", border: `1px solid ${active===c ? "#2040C0" : "rgba(32,64,192,0.15)"}`, fontWeight: active===c ? 700 : 400, ...MONO }}>
+              className="px-5 py-2 rounded-full text-sm transition-all fpd-btn-lift"
+              style={{ background: active===c ? "#6C5CE7" : "rgba(108,92,231,0.06)", color: active===c ? "#04080F" : "#6B7FA8", border: `1px solid ${active===c ? "#6C5CE7" : "rgba(108,92,231,0.15)"}`, fontWeight: active===c ? 700 : 400, ...MONO }}>
               {catLabels[c]}
             </button>
           ))}
@@ -326,8 +319,8 @@ function Features() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {filtered.map((f) => (
-            <div key={f.title} className="p-5 rounded-2xl group cursor-pointer transition-all" style={{ ...GLASS }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all" style={{ background: "rgba(32,64,192,0.1)", color: "#2040C0" }}>{f.icon}</div>
+            <div key={f.title} className="p-5 rounded-2xl group cursor-pointer transition-all fpd-hover-lift" style={{ ...GLASS }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7" }}>{f.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 13, color: "#E8EDF5", marginBottom: 6 }}>{f.title}</div>
               <p style={{ color: "#6B7FA8", fontSize: 11, lineHeight: 1.7 }}>{f.desc}</p>
             </div>
@@ -356,11 +349,11 @@ function Security() {
       </div>
       <Orb x="20%" y="10%" size={600} opacity={0.08} />
       <div className="relative max-w-6xl mx-auto px-6">
-        <SectionTitle tag="ENTERPRISE-GRADE SECURITY" title={<>Your Data is<br /><span style={{ color: "#2040C0" }}>Fortress-Protected</span></>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
+        <SectionTitle tag="ENTERPRISE-GRADE SECURITY" title={<>Your Data is<br /><span style={{ color: "#6C5CE7" }}>Fortress-Protected</span></>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(item => (
-            <div key={item.title} className="p-7 rounded-2xl" style={GLASS}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(32,64,192,0.1)", color: "#2040C0", boxShadow: "0 0 20px rgba(32,64,192,0.15)" }}>{item.icon}</div>
+            <div key={item.title} className="p-7 rounded-2xl fpd-hover-lift" style={GLASS}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7", boxShadow: "0 0 20px rgba(108,92,231,0.15)" }}>{item.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 16, color: "#E8EDF5", marginBottom: 10 }}>{item.title}</h3>
               <p style={{ color: "#6B7FA8", fontSize: 13, lineHeight: 1.8 }}>{item.desc}</p>
             </div>
@@ -380,12 +373,12 @@ function Security() {
             </div>
           ))}
         </div>
-        <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.2)" }}>
-          <div style={{ ...MONO, color: "#2040C0", fontSize: 12, letterSpacing: "0.1em", marginBottom: 12 }}>SECURITY CERTIFICATION</div>
+        <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
+          <div style={{ ...MONO, color: "#6C5CE7", fontSize: 12, letterSpacing: "0.1em", marginBottom: 12 }}>SECURITY CERTIFICATION</div>
           <div className="flex flex-wrap items-center justify-center gap-8">
             {["AES-256 Encrypted","Zero-Knowledge","SOC 2 Type II","HIPAA Compliant","GDPR Ready","ISO 27001"].map(badge => (
               <div key={badge} className="flex items-center gap-2">
-                <CheckCircle size={14} color="#2040C0" />
+                <CheckCircle size={14} color="#6C5CE7" />
                 <span style={{ color: "#B8C8E0", fontSize: 13 }}>{badge}</span>
               </div>
             ))}
@@ -402,7 +395,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
   const plans = [
     { name:"Starter",      price:1.99,   storage:"1 GB",    contacts:1,  features:["1 GB Legacy Storage","1 Legacy Contact","1 Guardian Contact","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Email Support"], color:"#48BB78", popular:false },
     { name:"Foundation",   price:9.99,   storage:"50 GB",   contacts:3,  features:["50 GB Legacy Storage","3 Legacy Contacts","3 Guardian Contacts","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Email Support"], color:"#4A90D9", popular:false },
-    { name:"Legacy Archive",price:24.99, storage:"250 GB",  contacts:-1, features:["250 GB Legacy Storage","Unlimited Legacy Contacts","Unlimited Guardian Contacts","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Priority Support","Email and Chat"], color:"#2040C0", popular:true },
+    { name:"Legacy Archive",price:24.99, storage:"250 GB",  contacts:-1, features:["250 GB Legacy Storage","Unlimited Legacy Contacts","Unlimited Guardian Contacts","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Priority Support","Email and Chat"], color:"#6C5CE7", popular:true },
     { name:"Legacy Pro",   price:49.99,  storage:"500 GB",  contacts:-1, features:["500 GB Legacy Storage","Unlimited Legacy Contacts","Unlimited Guardian Contacts","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Priority Support","Email and Chat"], color:"#9F7AEA", popular:false },
     { name:"Legacy Vault", price:129.99, storage:"1 TB",    contacts:-1, features:["1 TB Legacy Storage","Unlimited Legacy Contacts","Unlimited Guardian Contacts","Document Vault","Encrypted Documents","Media Uploads","Photos and Videos","Legacy Messaging","Text, Video & Voice Messages","Calendar Reminders","Access Control","Advanced Security","Priority Support","Email and Chat"], color:"#ED8936", popular:false },
   ];
@@ -411,7 +404,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <Orb x="50%" y="0%" size={700} opacity={0.06} />
       <div className="relative max-w-6xl mx-auto px-6">
-        <SectionTitle tag="SIMPLE PRICING" title={<>Invest in Your<br /><span style={{ color: "#2040C0" }}>Family's Future</span></>} sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
+        <SectionTitle tag="SIMPLE PRICING" title={<>Invest in Your<br /><span style={{ color: "#6C5CE7" }}>Family's Future</span></>} sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
 
         {/* Pricing imagery banner */}
         <div className="grid grid-cols-4 gap-3 mb-14">
@@ -431,15 +424,15 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
         <div className="flex items-center justify-center gap-3 mb-12">
           <span style={{ color: "#6B7FA8", fontSize: 14 }}>Monthly</span>
-          <button onClick={() => setAnnual(!annual)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? "#2040C0" : "#0A1628", border: "1px solid rgba(32,64,192,0.3)", boxShadow: annual ? "0 0 20px rgba(32,64,192,0.4)" : "none" }}>
+          <button onClick={() => setAnnual(!annual)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? "#6C5CE7" : "#0A1628", border: "1px solid rgba(108,92,231,0.3)", boxShadow: annual ? "0 0 20px rgba(108,92,231,0.4)" : "none" }}>
             <div className="absolute top-1 rounded-full transition-all" style={{ width: 18, height: 18, background: "#fff", left: annual ? 26 : 4 }} />
           </button>
-          <span style={{ color: annual ? "#2040C0" : "#6B7FA8", fontSize: 14 }}>Annual <span style={{ color: "#48BB78", fontSize: 12 }}>Save 20%</span></span>
+          <span style={{ color: annual ? "#6C5CE7" : "#6B7FA8", fontSize: 14 }}>Annual <span style={{ color: "#48BB78", fontSize: 12 }}>Save 20%</span></span>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
           {plans.map(plan => (
-            <div key={plan.name} className="relative p-8 rounded-2xl flex flex-col" style={{ ...GLASS, borderColor: plan.popular ? plan.color : "rgba(32,64,192,0.15)", borderWidth: plan.popular ? 2 : 1, boxShadow: plan.popular ? `0 0 60px rgba(32,64,192,0.15)` : undefined }}>
-              {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1 rounded-full text-xs font-bold" style={{ background: "#2040C0", color: "#04080F", ...MONO }}>MOST POPULAR</div>}
+            <div key={plan.name} className="relative p-8 rounded-2xl flex flex-col fpd-hover-lift" style={{ ...GLASS, borderColor: plan.popular ? plan.color : "rgba(108,92,231,0.15)", borderWidth: plan.popular ? 2 : 1, boxShadow: plan.popular ? `0 0 60px rgba(108,92,231,0.15)` : undefined }}>
+              {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1 rounded-full text-xs font-bold" style={{ background: "#6C5CE7", color: "#04080F", ...MONO }}>MOST POPULAR</div>}
               <div style={{ ...MONO, color: plan.color, fontSize: 11, letterSpacing: "0.12em", marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
               <div className="flex items-baseline gap-1 mb-2">
                 <span style={{ ...DISPLAY, fontSize: 42, color: "#E8EDF5", fontWeight: 700 }}>${annual ? (plan.price*0.8).toFixed(2) : plan.price}</span>
@@ -454,8 +447,8 @@ function Pricing({ onStart }: { onStart: () => void }) {
                   </li>
                 ))}
               </ul>
-              <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold transition-all text-sm"
-                style={plan.popular ? GLOW_BTN : { background: "rgba(32,64,192,0.08)", color: "#2040C0", border: "1px solid rgba(32,64,192,0.25)" }}>
+              <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold transition-all text-sm fpd-btn-lift"
+                style={plan.popular ? GLOW_BTN : { background: "rgba(108,92,231,0.08)", color: "#6C5CE7", border: "1px solid rgba(108,92,231,0.25)" }}>
                 Get Started
               </button>
             </div>
@@ -471,8 +464,8 @@ function Pricing({ onStart }: { onStart: () => void }) {
 function Affiliates({ onStart }: { onStart: () => void }) {
   const tiers = [
     { tier:"Tier 1", range:"5–24 active accounts", rate:"20%", color:"#4A90D9", note:"12-month cap per referral" },
-    { tier:"Tier 2", range:"25–74 active accounts", rate:"25%", color:"#2040C0", note:"12-month cap per referral" },
-    { tier:"Tier 3", range:"74+ active accounts", rate:"30%", color:"#3355E0", note:"12-month cap per referral" },
+    { tier:"Tier 2", range:"25–74 active accounts", rate:"25%", color:"#6C5CE7", note:"12-month cap per referral" },
+    { tier:"Tier 3", range:"74+ active accounts", rate:"30%", color:"#8B7CF6", note:"12-month cap per referral" },
   ];
   return (
     <section id="affiliates" style={{ background: "#06101A", padding: "120px 0", position: "relative" }}>
@@ -483,7 +476,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
           <div>
             <Tag>AFFILIATE PROGRAM</Tag>
             <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4vw,3rem)", color: "#E8EDF5", lineHeight: 1.15, marginBottom: 20 }}>
-              Earn Up to <span style={{ color: "#2040C0" }}>30%</span><br />Referring Friends
+              Earn Up to <span style={{ color: "#6C5CE7" }}>30%</span><br />Referring Friends
             </h2>
             <p style={{ color: "#8AA3C8", fontSize: 16, lineHeight: 1.9, marginBottom: 32 }}>
               Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
@@ -491,18 +484,18 @@ function Affiliates({ onStart }: { onStart: () => void }) {
             <div className="space-y-3 mb-8">
               {[["Commission paid monthly","Commissions hit your account on the 1st of each month"],["12-month earning window","Each referral earns you commission for their full first 12 months"],["Automatic tier upgrades","Hit 25+ referrals and your rate jumps automatically"],["No cap on referrals","Refer as many people as you want — more referrals, more income"]].map(([bold, rest]) => (
                 <div key={bold} className="flex items-start gap-3">
-                  <CheckCircle size={15} color="#2040C0" style={{ marginTop: 3, flexShrink: 0 }} />
+                  <CheckCircle size={15} color="#6C5CE7" style={{ marginTop: 3, flexShrink: 0 }} />
                   <span style={{ color: "#B8C8E0", fontSize: 14 }}><strong style={{ color: "#E8EDF5" }}>{bold}</strong> — {rest}</span>
                 </div>
               ))}
             </div>
-            <button onClick={onStart} className="flex items-center gap-2 px-7 py-3 rounded-xl text-sm" style={GLOW_BTN}>
+            <button onClick={onStart} className="flex items-center gap-2 px-7 py-3 rounded-xl text-sm fpd-btn-lift" style={GLOW_BTN}>
               Join Affiliate Program <ArrowRight size={16} />
             </button>
           </div>
           <div className="space-y-4">
             {tiers.map(t => (
-              <div key={t.tier} className="p-6 rounded-2xl" style={{ ...GLASS, borderColor: `${t.color}30` }}>
+              <div key={t.tier} className="p-6 rounded-2xl fpd-hover-lift" style={{ ...GLASS, borderColor: `${t.color}30` }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div style={{ ...MONO, color: t.color, fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{t.tier.toUpperCase()}</div>
@@ -513,9 +506,9 @@ function Affiliates({ onStart }: { onStart: () => void }) {
                 </div>
               </div>
             ))}
-            <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(32,64,192,0.06)", border: "1px solid rgba(32,64,192,0.2)" }}>
+            <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(108,92,231,0.06)", border: "1px solid rgba(108,92,231,0.2)" }}>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>Example: 30 referrals on Legacy Archive ($24.99/mo) =</div>
-              <div style={{ ...DISPLAY, fontSize: 28, color: "#2040C0", marginTop: 4 }}>$187.43 / month</div>
+              <div style={{ ...DISPLAY, fontSize: 28, color: "#6C5CE7", marginTop: 4 }}>$187.43 / month</div>
               <div style={{ color: "#6B7FA8", fontSize: 12, marginTop: 2 }}>at Tier 2 (25%) for 12 months</div>
             </div>
             {/* Affiliate lifestyle photo */}
@@ -533,7 +526,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
 function Partnerships({ onStart }: { onStart: () => void }) {
   const tiers = [
     { tier:"Tier 1", range:"0–50 referred accounts", rate:"20%", color:"#48BB78" },
-    { tier:"Tier 2", range:"51–100 referred accounts", rate:"25%", color:"#2040C0" },
+    { tier:"Tier 2", range:"51–100 referred accounts", rate:"25%", color:"#6C5CE7" },
     { tier:"Tier 3", range:"101+ referred accounts", rate:"30%", color:"#9F7AEA" },
   ];
   const partners = [
@@ -553,10 +546,10 @@ function Partnerships({ onStart }: { onStart: () => void }) {
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <Orb x="60%" y="20%" size={600} opacity={0.07} />
       <div className="relative max-w-6xl mx-auto px-6">
-        <SectionTitle tag="STRATEGIC PARTNERSHIPS" title={<>Recurring <span style={{ color: "#2040C0" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
+        <SectionTitle tag="STRATEGIC PARTNERSHIPS" title={<>Recurring <span style={{ color: "#6C5CE7" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
         <div className="grid md:grid-cols-3 gap-5 mb-12">
           {tiers.map(t => (
-            <div key={t.tier} className="p-7 rounded-2xl text-center" style={{ ...GLASS, borderColor: `${t.color}30` }}>
+            <div key={t.tier} className="p-7 rounded-2xl text-center fpd-hover-lift" style={{ ...GLASS, borderColor: `${t.color}30` }}>
               <div style={{ ...DISPLAY, fontSize: 52, fontWeight: 700, color: t.color, lineHeight: 1 }}>{t.rate}</div>
               <div style={{ ...MONO, color: t.color, fontSize: 11, letterSpacing: "0.1em", margin: "8px 0 4px" }}>{t.tier.toUpperCase()}</div>
               <div style={{ color: "#6B7FA8", fontSize: 13 }}>{t.range}</div>
@@ -582,8 +575,8 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           {partners.map(p => (
-            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl" style={GLASS}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(32,64,192,0.1)", color: "#2040C0" }}>{p.icon}</div>
+            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl fpd-hover-lift" style={GLASS}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7" }}>{p.icon}</div>
               <div>
                 <div style={{ color: "#E8EDF5", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{p.label}</div>
                 <div style={{ color: "#6B7FA8", fontSize: 12, lineHeight: 1.7 }}>{p.desc}</div>
@@ -592,7 +585,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
           ))}
         </div>
         <div className="text-center">
-          <button onClick={onStart} className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base" style={GLOW_BTN}>
+          <button onClick={onStart} className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base fpd-btn-lift" style={GLOW_BTN}>
             Apply for Partnership <ArrowRight size={18} />
           </button>
         </div>
@@ -649,7 +642,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
         {/* 4 steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {steps.map((s, i) => (
-            <div key={i} className="relative p-6 rounded-2xl"
+            <div key={i} className="relative p-6 rounded-2xl fpd-hover-lift"
               style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.15)", borderTop:`3px solid rgba(159,122,234,0.5)` }}>
               <div style={{ color:"rgba(159,122,234,0.25)", fontSize:52, fontFamily:"var(--font-display)", fontWeight:900, lineHeight:1, marginBottom:12 }}>{s.num}</div>
               <div style={{ color:"#C4B5FD", marginBottom:10 }}>{s.icon}</div>
@@ -661,7 +654,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
 
         {/* Pricing — two cards */}
         <div className="grid md:grid-cols-2 gap-5 mb-14">
-          <div className="rounded-3xl p-8 text-center"
+          <div className="rounded-3xl p-8 text-center fpd-hover-lift"
             style={{ background:"linear-gradient(135deg,#0A0520,#1A0840)", border:"2px solid rgba(159,122,234,0.4)", boxShadow:"0 0 48px rgba(159,122,234,0.15)" }}>
             <div style={{ color:"#C4B5FD", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:6 }}>$99</div>
@@ -711,7 +704,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
             </ul>
           </div>
 
-          <div className="rounded-3xl overflow-hidden"
+          <div className="rounded-3xl overflow-hidden fpd-hover-lift"
             style={{ background:"rgba(159,122,234,0.08)", border:"2px solid rgba(159,122,234,0.25)", boxShadow:"0 0 60px rgba(159,122,234,0.1)" }}>
             {/* Specialist photo */}
             <div style={{ position:"relative", height:200, overflow:"hidden" }}>
@@ -754,7 +747,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
               </div>
             </div>
             <button onClick={onStart}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base fpd-btn-lift"
               style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F", boxShadow:"0 0 32px rgba(159,122,234,0.4)" }}>
               <Phone size={18}/> Request My White Glove Call
             </button>
@@ -772,7 +765,7 @@ function WhiteGloveLanding({ onStart }: { onStart: () => void }) {
             { icon:<Star size={18}/>,        title:"Real Humans, Always",      desc:"No chatbots. No automated systems. Every session is with a named, trained Final Pass Down specialist." },
             { icon:<Heart size={18}/>,       title:"At Your Pace, Always",     desc:"Sessions happen when you're ready. Most clients finish in 2–3 calls over 1–2 weeks. We never rush." },
           ].map(t => (
-            <div key={t.title} className="p-5 rounded-2xl text-center"
+            <div key={t.title} className="p-5 rounded-2xl text-center fpd-hover-lift"
               style={{ background:"rgba(159,122,234,0.04)", border:"1px solid rgba(159,122,234,0.1)" }}>
               <div style={{ color:"#9F7AEA", margin:"0 auto 10px" }}>{t.icon}</div>
               <div style={{ ...DISPLAY, fontSize:14, color:"#E8EDF5", marginBottom:4 }}>{t.title}</div>
@@ -822,7 +815,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
           {active.map(p => {
             const monthly = getMonthlyPrice(p);
             return (
-              <div key={p.id} className="rounded-2xl p-7 relative flex flex-col"
+              <div key={p.id} className="rounded-2xl p-7 relative flex flex-col fpd-hover-lift"
                 style={{ ...GLASS, borderColor:`${p.color}40`, background:p.badge?"rgba(8,15,26,0.92)":"rgba(8,15,26,0.78)", boxShadow:p.badge?`0 0 48px ${p.color}40`:"none" }}>
                 {p.badge && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold"
@@ -851,7 +844,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
                     </li>
                   ))}
                 </ul>
-                <button onClick={onStart} className="w-full py-3 rounded-xl font-bold text-sm"
+                <button onClick={onStart} className="w-full py-3 rounded-xl font-bold text-sm fpd-btn-lift"
                   style={{ background:p.badge?`linear-gradient(135deg,${p.color},${p.color}BB)`:"transparent",
                     color:p.badge?"#fff":p.color, border:`1px solid ${p.color}60`,
                     boxShadow:p.badge?`0 0 24px ${p.color}40`:"none" }}>
@@ -869,7 +862,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
             { icon:<Award size={18}/>,  title:"HIPAA + SOC 2", desc:"Legacy Vault compliance baked in at no extra cost" },
             { icon:<Zap size={18}/>,    title:"Stripe + More", desc:"Stripe, PayPal, Square or bring your own processor" },
           ].map(f => (
-            <div key={f.title} className="flex gap-3 p-5 rounded-2xl" style={GLASS}>
+            <div key={f.title} className="flex gap-3 p-5 rounded-2xl fpd-hover-lift" style={GLASS}>
               <div style={{ color:"#9F7AEA", flexShrink:0 }}>{f.icon}</div>
               <div>
                 <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:3 }}>{f.title}</div>
@@ -895,10 +888,10 @@ function Testimonials() {
     <section style={{ background: "#04080F", padding: "120px 0", position: "relative" }}>
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <div className="relative max-w-6xl mx-auto px-6">
-        <SectionTitle tag="TESTIMONIALS" title={<>Trusted by Thousands<br /><span style={{ color: "#2040C0" }}>Across America</span></>} />
+        <SectionTitle tag="TESTIMONIALS" title={<>Trusted by Thousands<br /><span style={{ color: "#6C5CE7" }}>Across America</span></>} />
         <div className="grid md:grid-cols-3 gap-6">
           {quotes.map(q => (
-            <div key={q.name} className="rounded-2xl flex flex-col overflow-hidden" style={GLASS}>
+            <div key={q.name} className="rounded-2xl flex flex-col overflow-hidden fpd-hover-lift" style={GLASS}>
               {/* Background image strip */}
               <div style={{ height: 120, overflow: "hidden", position: "relative" }}>
                 <img src={`https://images.unsplash.com/${q.bg}?w=500&h=200&fit=crop&auto=format`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }}/>
@@ -906,11 +899,11 @@ function Testimonials() {
               </div>
               <div className="p-6 flex flex-col flex-1">
                 <div className="flex gap-1 mb-4">
-                  {Array.from({length:q.rating}).map((_,i) => <Star key={i} size={13} fill="#2040C0" color="#2040C0" />)}
+                  {Array.from({length:q.rating}).map((_,i) => <Star key={i} size={13} fill="#6C5CE7" color="#6C5CE7" />)}
                 </div>
                 <p style={{ color: "#B8C8E0", fontSize: 14, lineHeight: 1.9, flex: 1, marginBottom: 20 }}>"{q.quote}"</p>
-                <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "rgba(32,64,192,0.12)" }}>
-                  <img src={q.photo} alt={q.name} style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", objectPosition: "center 20%", border: "2px solid rgba(32,64,192,0.4)", flexShrink: 0 }} />
+                <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "rgba(108,92,231,0.12)" }}>
+                  <img src={q.photo} alt={q.name} style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", objectPosition: "center 20%", border: "2px solid rgba(108,92,231,0.4)", flexShrink: 0 }} />
                   <div>
                     <div style={{ color: "#E8EDF5", fontSize: 14, fontWeight: 600 }}>{q.name}</div>
                     <div style={{ color: "#6B7FA8", fontSize: 12 }}>{q.role}</div>
@@ -943,29 +936,29 @@ function Help() {
       <div style={{ position: "absolute", inset: 0, ...GRID }} />
       <Orb x="70%" y="10%" />
       <div className="relative max-w-3xl mx-auto px-6">
-        <SectionTitle tag="HELP & ADVICE" title={<>Frequently Asked<br /><span style={{ color: "#2040C0" }}>Questions</span></>} sub="Everything you need to know about Final Pass Down." />
+        <SectionTitle tag="HELP & ADVICE" title={<>Frequently Asked<br /><span style={{ color: "#6C5CE7" }}>Questions</span></>} sub="Everything you need to know about Final Pass Down." />
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(32,64,192,0.15)" }}>
+            <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(108,92,231,0.15)" }}>
               <button className="w-full flex items-center justify-between px-6 py-5" onClick={() => setOpen(open===i ? null:i)}
-                style={{ background: open===i ? "rgba(32,64,192,0.08)" : "rgba(8,15,26,0.8)", textAlign:"left" }}>
+                style={{ background: open===i ? "rgba(108,92,231,0.08)" : "rgba(8,15,26,0.8)", textAlign:"left" }}>
                 <span style={{ color: "#E8EDF5", fontSize: 15, fontWeight: 500 }}>{faq.q}</span>
-                <ChevronDown size={16} color="#2040C0" style={{ transform: open===i?"rotate(180deg)":"rotate(0)", transition:"transform 0.2s", flexShrink:0 }} />
+                <ChevronDown size={16} color="#6C5CE7" style={{ transform: open===i?"rotate(180deg)":"rotate(0)", transition:"transform 0.2s", flexShrink:0 }} />
               </button>
               {open===i && (
-                <div className="px-6 pb-5" style={{ background: "rgba(32,64,192,0.04)", color: "#8AA3C8", fontSize: 14, lineHeight: 1.9 }}>{faq.a}</div>
+                <div className="px-6 pb-5" style={{ background: "rgba(108,92,231,0.04)", color: "#8AA3C8", fontSize: 14, lineHeight: 1.9 }}>{faq.a}</div>
               )}
             </div>
           ))}
         </div>
-        <div className="mt-12 p-8 rounded-2xl text-center" style={{ ...GLASS }}>
+        <div className="mt-12 p-8 rounded-2xl text-center fpd-hover-lift" style={{ ...GLASS }}>
           <div style={{ ...DISPLAY, fontSize: 20, color: "#E8EDF5", marginBottom: 8 }}>Still have questions?</div>
           <p style={{ color: "#6B7FA8", fontSize: 14, marginBottom: 20 }}>Our team is available 7 days a week. Average response time: under 2 hours.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm" style={{ background: "rgba(32,64,192,0.1)", color: "#2040C0", border: "1px solid rgba(32,64,192,0.3)" }}>
+            <button className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm fpd-btn-lift" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7", border: "1px solid rgba(108,92,231,0.3)" }}>
               <Mail size={15} /> Email Support
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm" style={{ background: "rgba(32,64,192,0.1)", color: "#2040C0", border: "1px solid rgba(32,64,192,0.3)" }}>
+            <button className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm fpd-btn-lift" style={{ background: "rgba(108,92,231,0.1)", color: "#6C5CE7", border: "1px solid rgba(108,92,231,0.3)" }}>
               <Phone size={15} /> Call Us
             </button>
           </div>
@@ -997,23 +990,23 @@ function CTA({ onStart }: { onStart: () => void }) {
             "https://images.unsplash.com/photo-1581065178047-8ee15951ede6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=120&q=80",
             "https://images.unsplash.com/photo-1522724709546-19901cb1818a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=120&q=80",
           ].map((src, i) => (
-            <img key={i} src={src} alt="FPD user" style={{ width:52, height:52, borderRadius:"50%", objectFit:"cover", border:"2px solid rgba(32,64,192,0.4)", marginLeft:i>0?-12:0, boxShadow:"0 0 0 2px #04080F" }}/>
+            <img key={i} src={src} alt="FPD user" style={{ width:52, height:52, borderRadius:"50%", objectFit:"cover", border:"2px solid rgba(108,92,231,0.4)", marginLeft:i>0?-12:0, boxShadow:"0 0 0 2px #04080F" }}/>
           ))}
-          <div className="flex items-center justify-center rounded-full text-xs font-bold" style={{ width:52, height:52, background:"rgba(32,64,192,0.15)", border:"2px solid rgba(32,64,192,0.4)", color:"#2040C0", marginLeft:-12, fontFamily:"var(--font-mono)" }}>50k+</div>
+          <div className="flex items-center justify-center rounded-full text-xs font-bold" style={{ width:52, height:52, background:"rgba(108,92,231,0.15)", border:"2px solid rgba(108,92,231,0.4)", color:"#6C5CE7", marginLeft:-12, fontFamily:"var(--font-mono)" }}>50k+</div>
         </div>
-        <img src={fpdSquareLogo} alt="FPD" style={{ width: 80, height: 80, borderRadius: 18, objectFit: "cover", margin: "0 auto 24px", boxShadow: "0 0 60px rgba(32,64,192,0.3)" }} />
+        <img src={fpdSquareLogo} alt="FPD" style={{ width: 80, height: 80, borderRadius: 18, objectFit: "cover", margin: "0 auto 24px", boxShadow: "0 0 60px rgba(108,92,231,0.3)" }} />
         <h2 style={{ ...DISPLAY, fontSize: "clamp(2.2rem,5vw,4rem)", color: "#E8EDF5", marginBottom: 20, lineHeight: 1.1 }}>
-          Start Your Legacy<br /><span style={{ color: "#2040C0" }}>Today</span>
+          Start Your Legacy<br /><span style={{ color: "#6C5CE7" }}>Today</span>
         </h2>
         <p style={{ color: "#8AA3C8", fontSize: 17, maxWidth: 500, margin: "0 auto 40px", lineHeight: 1.8 }}>
           Join 50,000+ people who have secured their digital legacy. Takes less than 10 minutes to start.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button onClick={onStart} className="flex items-center gap-3 px-10 py-4 rounded-2xl text-base" style={GLOW_BTN}>
+          <button onClick={onStart} className="flex items-center gap-3 px-10 py-4 rounded-2xl text-base fpd-btn-lift" style={GLOW_BTN}>
             Create Your Vault <ArrowRight size={18} />
           </button>
-          <button className="flex items-center gap-3 px-10 py-4 rounded-2xl text-base"
-            style={{ border: "1px solid rgba(32,64,192,0.3)", color: "#E8EDF5", background: "rgba(32,64,192,0.05)" }}>
+          <button className="flex items-center gap-3 px-10 py-4 rounded-2xl text-base fpd-btn-lift"
+            style={{ border: "1px solid rgba(108,92,231,0.3)", color: "#E8EDF5", background: "rgba(108,92,231,0.05)" }}>
             View Demo Account
           </button>
         </div>
@@ -1031,7 +1024,7 @@ function Footer({ onStart, onPartnerPortal, onConciergeLogin }: { onStart: () =>
     { title:"Company", links:["About Us","Careers","Press","Contact","Blog","Investor Relations"] },
   ];
   return (
-    <footer style={{ background: "#030710", borderTop: "1px solid rgba(32,64,192,0.1)", padding: "60px 0 30px" }}>
+    <footer style={{ background: "#030710", borderTop: "1px solid rgba(108,92,231,0.1)", padding: "60px 0 30px" }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-5 gap-10 mb-12">
           <div className="md:col-span-1">
@@ -1044,7 +1037,7 @@ function Footer({ onStart, onPartnerPortal, onConciergeLogin }: { onStart: () =>
           </div>
           {cols.map(col => (
             <div key={col.title}>
-              <div style={{ ...MONO, color: "#2040C0", fontSize: 10, letterSpacing: "0.12em", marginBottom: 16 }}>{col.title.toUpperCase()}</div>
+              <div style={{ ...MONO, color: "#6C5CE7", fontSize: 10, letterSpacing: "0.12em", marginBottom: 16 }}>{col.title.toUpperCase()}</div>
               <ul className="space-y-2">
                 {col.links.map(link => (
                   <li key={link}><a href="#" style={{ color: "#6B7FA8", fontSize: 13 }} className="hover:text-white transition-colors">{link}</a></li>
@@ -1053,29 +1046,29 @@ function Footer({ onStart, onPartnerPortal, onConciergeLogin }: { onStart: () =>
             </div>
           ))}
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t" style={{ borderColor: "rgba(32,64,192,0.08)" }}>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t" style={{ borderColor: "rgba(108,92,231,0.08)" }}>
           <div style={{ color: "#4A5A7A", fontSize: 12 }}>© 2026 Final Pass Down Inc. All rights reserved.</div>
           <div className="flex items-center gap-3">
             {["App Store","Google Play","PWA"].map(p => (
-              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(32,64,192,0.08)", color: "#2040C0", border: "1px solid rgba(32,64,192,0.2)", ...MONO }}>{p}</span>
+              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(108,92,231,0.08)", color: "#6C5CE7", border: "1px solid rgba(108,92,231,0.2)", ...MONO }}>{p}</span>
             ))}
             <button
               onClick={onPartnerPortal}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all fpd-btn-lift"
               style={{ background: "rgba(72,187,120,0.1)", color: "#48BB78", border: "1px solid rgba(72,187,120,0.3)", ...MONO, letterSpacing:"0.06em", boxShadow:"0 0 16px rgba(72,187,120,0.08)" }}
             >
               <Handshake size={11}/> PARTNER PORTAL
             </button>
             <button
               onClick={onConciergeLogin}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all fpd-btn-lift"
               style={{ background: "rgba(247,147,26,0.08)", color: "#F7931A", border: "1px solid rgba(247,147,26,0.3)", ...MONO, letterSpacing:"0.06em" }}
             >
               <Star size={11}/> CONCIERGE STAFF
             </button>
             <button
               onClick={() => (window as any).__adminLogin?.()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all fpd-btn-lift"
               style={{ background: "rgba(159,122,234,0.12)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.35)", ...MONO, letterSpacing:"0.06em", boxShadow:"0 0 16px rgba(159,122,234,0.1)" }}
             >
               <Lock size={11}/> MASTER ADMIN LOGIN

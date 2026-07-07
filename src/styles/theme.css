@@ -3,104 +3,106 @@
 :root {
   --font-size: 16px;
 
-  /* ── FPD Brand — Warm Pearl Light Mode ── */
-  --background:        #F0F4FA;
-  --foreground:        #0D1428;
-  --card:              #FFFFFF;
-  --card-foreground:   #0D1428;
-  --popover:           #FFFFFF;
-  --popover-foreground:#0D1428;
-  --primary:           #2040C0;
+  /* ── FPD Brand — Vital Clone Violet Mode (white-only fonts) ── */
+  --background:        #0A0A0F;
+  --foreground:        #F0F0F5;
+  --card:              #16161F;
+  --card-foreground:   #F0F0F5;
+  --popover:           #16161F;
+  --popover-foreground:#F0F0F5;
+  --primary:           #6C5CE7;
   --primary-foreground:#FFFFFF;
-  --secondary:         #EAF0FC;
-  --secondary-foreground:#0D1428;
-  --muted:             #E8EDF8;
-  --muted-foreground:  #5A6A88;
-  --accent:            #3355E0;
+  --secondary:         #1C1C28;
+  --secondary-foreground:#F0F0F5;
+  --muted:             #1C1C28;
+  --muted-foreground:  #8A8A9A;
+  --accent:            #8B7CF6;
   --accent-foreground: #FFFFFF;
-  --destructive:       #D92B2B;
+  --destructive:       #D4183D;
   --destructive-foreground:#FFFFFF;
-  --border:            rgba(32,64,192,0.12);
-  --input:             #FFFFFF;
-  --input-background:  #EAF0FC;
-  --switch-background: #C8D4EE;
+  --border:            rgba(108,92,231,0.22);
+  --input:             #16161F;
+  --input-background:  #1C1C28;
+  --switch-background:  rgba(240,240,245,0.15);
   --font-weight-medium:500;
   --font-weight-normal:400;
-  --ring:              #2040C0;
+  --ring:              #6C5CE7;
 
   /* Charts */
-  --chart-1: #2040C0;
-  --chart-2: #3355E0;
-  --chart-3: #16A34A;
-  --chart-4: #D97706;
+  --chart-1: #A29BFE;
+  --chart-2: #8B7CF6;
+  --chart-3: #00CEC9;
+  --chart-4: #FDCB6E;
   --chart-5: #7C3AED;
 
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Sidebar stays dark — contrast design */
-  --sidebar:                    #0A1428;
-  --sidebar-foreground:         #E8EDF5;
-  --sidebar-primary:            #2040C0;
+  /* Sidebar — dark, contrast design */
+  --sidebar:                    #0A0A0F;
+  --sidebar-foreground:         #F0F0F5;
+  --sidebar-primary:            #6C5CE7;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent:             #152040;
-  --sidebar-accent-foreground:  #E8EDF5;
-  --sidebar-border:             rgba(32,64,192,0.15);
-  --sidebar-ring:               #2040C0;
+  --sidebar-accent:             #1C1C28;
+  --sidebar-accent-foreground:  #F0F0F5;
+  --sidebar-border:             rgba(108,92,231,0.22);
+  --sidebar-ring:               #6C5CE7;
 
   /* Semantic aliases */
-  --gold:           #2040C0;
-  --gold-light:     #3355E0;
-  --navy:           #F0F4FA;
-  --navy-card:      #FFFFFF;
-  --navy-secondary: #EAF0FC;
+  --gold:           #6C5CE7;
+  --gold-light:     #8B7CF6;
+  --navy:           #0A0A0F;
+  --navy-card:      #16161F;
+  --navy-secondary: #1C1C28;
 
-  /* Card shadows for light mode */
-  --shadow-card: 0 1px 3px rgba(32,64,192,0.08), 0 4px 16px rgba(32,64,192,0.06);
-  --shadow-card-hover: 0 4px 20px rgba(32,64,192,0.14);
+  /* Card shadows for dark mode */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 4px 20px rgba(108,92,231,0.12);
+  --shadow-card-hover: 0 4px 24px rgba(108,92,231,0.25);
+  --shadow-glow: 0 0 40px rgba(108,92,231,0.3);
+  --transition-base: .3s cubic-bezier(.4,0,.2,1);
 
   /* FPD brand */
-  --fpd-blue:       #2040C0;
-  --fpd-blue-light: #3355E0;
-  --fpd-blue-dark:  #1A2D9E;
-  --fpd-sidebar:    #0A1428;
+  --fpd-blue:       #6C5CE7;
+  --fpd-blue-light: #8B7CF6;
+  --fpd-blue-dark:  #5849C4;
+  --fpd-sidebar:    #0A0A0F;
 }
 
 /* Keep dark block for Tailwind compile */
 .dark {
-  --background:        #0A1428;
-  --foreground:        #E8EDF5;
-  --card:              #111E38;
-  --card-foreground:   #E8EDF5;
-  --popover:           #111E38;
-  --popover-foreground:#E8EDF5;
-  --primary:           #2040C0;
+  --background:        #0A0A0F;
+  --foreground:        #F0F0F5;
+  --card:              #16161F;
+  --card-foreground:   #F0F0F5;
+  --popover:           #16161F;
+  --popover-foreground:#F0F0F5;
+  --primary:           #6C5CE7;
   --primary-foreground:#FFFFFF;
-  --secondary:         #152040;
-  --secondary-foreground:#E8EDF5;
-  --muted:             #152040;
-  --muted-foreground:  #7080A8;
-  --accent:            #3355E0;
+  --secondary:         #1C1C28;
+  --secondary-foreground:#F0F0F5;
+  --muted:             #1C1C28;
+  --muted-foreground:  #8A8A9A;
+  --accent:            #8B7CF6;
   --accent-foreground: #FFFFFF;
-  --destructive:       #D92B2B;
+  --destructive:       #D4183D;
   --destructive-foreground:#FFFFFF;
-  --border:            rgba(32,64,192,0.2);
-  --input:             #152040;
-  --ring:              #2040C0;
+  --border:            rgba(108,92,231,0.2);
+  --input:             #1C1C28;
+  --ring:              #6C5CE7;
   --font-weight-medium:500;
   --font-weight-normal:400;
-  --chart-1: #2040C0;
-  --chart-2: #3355E0;
-  --chart-3: #16A34A;
-  --chart-4: #D97706;
+  --chart-1: #6C5CE7;
+  --chart-2: #8B7CF6;
+  --chart-3: #00CEC9;
+  --chart-4: #FDCB6E;
   --chart-5: #7C3AED;
-  --sidebar:                    #060E1E;
-  --sidebar-foreground:         #E8EDF5;
-  --sidebar-primary:            #2040C0;
+  --sidebar:                    #050508;
+  --sidebar-foreground:         #F0F0F5;
+  --sidebar-primary:            #6C5CE7;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent:             #152040;
-  --sidebar-accent-foreground:  #E8EDF5;
-  --sidebar-border:             rgba(32,64,192,0.15);
-  --sidebar-ring:               #2040C0;
+  --sidebar-accent:             #1C1C28;
+  --sidebar-accent-foreground:  #F0F0F5;
+  --sidebar-border:             rgba(108,92,231,0.15);
+  --sidebar-ring:               #6C5CE7;
 }
 
 @theme inline {
@@ -155,4 +157,43 @@
   label  { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
   button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
   input  { font-size: var(--text-base); font-weight: var(--font-weight-normal);  line-height: 1.5; }
+}
+
+/* ── Motion — lifted from vital-clone's card/button hover language ── */
+@keyframes fpd-fade-in-up {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fpd-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .5; transform: scale(1.4); }
+}
+
+.fpd-hover-lift {
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.fpd-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(108,92,231,0.3);
+}
+.fpd-fade-in-up {
+  animation: fpd-fade-in-up .5s cubic-bezier(.4,0,.2,1) backwards;
+}
+.fpd-pulse-dot {
+  animation: fpd-pulse-dot 1.8s ease-in-out infinite;
+}
+.fpd-btn-lift {
+  transition: transform var(--transition-base), filter var(--transition-base);
+}
+.fpd-btn-lift:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fpd-hover-lift, .fpd-fade-in-up, .fpd-pulse-dot, .fpd-btn-lift {
+    animation: none !important;
+    transition: none !important;
+  }
 }

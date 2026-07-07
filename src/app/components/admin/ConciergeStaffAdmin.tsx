@@ -141,7 +141,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
               <Send size={14}/>{sending ? "Sending Invite…" : "Send Concierge Invite"}
             </button>
             <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
-              style={{ background:"rgba(32,64,192,0.06)", color:"#5A6A88" }}>Cancel</button>
+              style={{ background:"rgba(108,92,231,0.06)", color:"#5A6A88" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
             </button>
             <button onClick={() => toast.success(`Invite email resent to ${emp.email}`)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"rgba(32,64,192,0.06)", color:"#2040C0" }}>
+              style={{ background:"rgba(108,92,231,0.06)", color:"#6C5CE7" }}>
               <Send size={11}/> Resend Invite
             </button>
           </div>
