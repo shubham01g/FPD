@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Shield, Lock, Archive, Users, ArrowRight, CheckCircle2, Heart,
   KeyRound, Camera, FolderLock, Menu, X, Play, ChevronRight,
@@ -27,18 +27,37 @@ type MPage = "home" | "about" | "how" | "features" | "security" | "pricing" | "a
 type Nav = (p: MPage) => void;
 
 /* ── Swappable media backdrop ─────────────────────────────────────
-   Renders a branded gradient placeholder always; the <video>/poster
-   layer covers it once a real file exists at `src` (see public/media). */
-function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = false }:
-  { src?: string; poster?: string; tone?: "blue" | "deep" | "warm"; overlay?: number; showPlay?: boolean }) {
+   Renders a branded gradient placeholder always; a lightweight poster
+   image paints instantly, and the <video> only mounts/streams once the
+   backdrop is eager (hero) or scrolls near the viewport — so the page
+   loads fast on any device (see public/media). Poster defaults to the
+   `.jpg` alongside a `.mp4` src, so callers rarely pass it explicitly. */
+function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = false, eager = false }:
+  { src?: string; poster?: string; tone?: "blue" | "deep" | "warm"; overlay?: number; showPlay?: boolean; eager?: boolean }) {
   const gradients: Record<string, string> = {
     blue: "radial-gradient(120% 130% at 25% 15%, rgba(58,91,217,0.38), transparent 58%), radial-gradient(100% 110% at 85% 90%, rgba(91,123,245,0.26), transparent 55%), linear-gradient(160deg,#0C1630,#070A12)",
     deep: "radial-gradient(120% 130% at 80% 10%, rgba(46,75,176,0.42), transparent 60%), radial-gradient(90% 90% at 10% 100%, rgba(58,91,217,0.20), transparent 55%), linear-gradient(160deg,#080D1C,#05070E)",
     warm: "radial-gradient(120% 120% at 30% 20%, rgba(138,160,255,0.28), transparent 55%), radial-gradient(100% 100% at 90% 80%, rgba(58,91,217,0.30), transparent 55%), linear-gradient(160deg,#0B1226,#070A12)",
   };
+  const effPoster = poster ?? (src && /\.mp4$/.test(src) ? src.replace(/\.mp4$/, ".jpg") : undefined);
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(eager);
+  useEffect(() => {
+    if (active || !src || typeof IntersectionObserver === "undefined") return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { setActive(true); io.disconnect(); }
+    }, { rootMargin: "500px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [active, src]);
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: gradients[tone] }}>
+    <div ref={ref} style={{ position: "absolute", inset: 0, overflow: "hidden", background: gradients[tone] }}>
       <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(58,91,217,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.06) 1px,transparent 1px)", backgroundSize: "44px 44px", opacity: 0.5 }} />
+      {effPoster && (
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${effPoster})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+      )}
       {showPlay && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <div className="flex items-center justify-center rounded-full" style={{ width: 72, height: 72, background: "rgba(58,91,217,0.22)", border: "1px solid rgba(138,160,255,0.4)", backdropFilter: "blur(4px)" }}>
@@ -46,8 +65,8 @@ function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = 
           </div>
         </div>
       )}
-      {src && (
-        <video autoPlay loop muted playsInline poster={poster}
+      {src && active && (
+        <video autoPlay loop muted playsInline poster={effPoster} preload="auto"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
           <source src={src} type="video/mp4" />
         </video>
@@ -160,7 +179,7 @@ function PageHero({ kicker, title, sub, tone = "deep" }: { kicker: string; title
 function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: Nav }) {
   return (
     <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
-      <MediaBackdrop src="/media/hero.mp4" poster="/media/hero.jpg" tone="warm" overlay={0.5} />
+      <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
       <div className="relative max-w-7xl mx-auto w-full px-6 py-32">
         <div style={{ maxWidth: 720 }} className="fpd-fade-in-up">
           <Kicker>My Life · My Wishes · My Way</Kicker>
