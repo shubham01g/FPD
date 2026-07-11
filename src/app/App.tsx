@@ -229,8 +229,8 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
 }
 
 function AppShell() {
-  /* Default to "user" so the user portal is visible immediately in Figma preview */
-  const [mode, setMode] = useState<AppMode>("user");
+  /* Default to the public landing page; "Sign In" / "Get Started" route to the dashboard */
+  const [mode, setMode] = useState<AppMode>("landing");
   const [userPage, setUserPage] = useState<PageId>("dashboard");
   const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
   const [conciergeEmployee, setConciergeEmployee] = useState<ConciergeEmployee | null>(null);
