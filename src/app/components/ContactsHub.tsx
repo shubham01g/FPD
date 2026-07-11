@@ -528,7 +528,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   const legacyContacts = contacts.filter(c => c.type === "legacy");
 
   return (
-    <div className="p-6 space-y-6 relative" style={{ maxWidth:1100, margin:"0 auto", ...GRID }}>
+    <div className="p-6 space-y-6 relative" style={{ maxWidth:1240, margin:"0 auto", ...GRID }}>
       {/* Page header */}
       {(() => {
         const cfg = typeConfig[activeType];

@@ -232,21 +232,29 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         } : {}),
       }}>
         {/* Brand */}
-        <div className="flex items-center flex-shrink-0" style={{
+        <div className="flex flex-shrink-0" style={{
           height: 64, padding: collapsed ? 0 : "0 16px",
-          justifyContent: collapsed ? "center" : "flex-start", gap: 11,
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "flex-start",
           borderBottom: `1px solid ${BORDER}`,
         }}>
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{
-            width: 36, height: 36, borderRadius: 10, objectFit: "cover", flexShrink: 0,
-            boxShadow: "0 0 18px rgba(58,91,217,0.4)",
-          }}/>
-          {!collapsed && (
-            <div style={{ lineHeight: 1.15, overflow: "hidden" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 800, color: TEXT, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
-                FINAL PASS <span style={{ color: HILITE }}>DOWN</span>
-              </div>
-              <div style={{ fontSize: 9.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
+          {collapsed ? (
+            /* Collapsed rail — whole logo in a square, never cropped/distorted */
+            <div style={{
+              width: 42, height: 42, borderRadius: 11, flexShrink: 0,
+              background: "rgba(58,91,217,0.14)", border: `1px solid ${BORDER}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 0 18px rgba(58,91,217,0.35)",
+            }}>
+              <img src={fpdSquareLogo} alt="Final Pass Down"
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 10 }}/>
+            </div>
+          ) : (
+            /* Expanded — the full logo lockup (already contains the wordmark) + tagline */
+            <div style={{ overflow: "hidden" }}>
+              <img src={fpdSquareLogo} alt="Final Pass Down"
+                style={{ height: 38, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(58,91,217,0.35))" }}/>
+              <div style={{ fontSize: 9.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
                 MY LIFE · MY WISHES · MY WAY
               </div>
             </div>

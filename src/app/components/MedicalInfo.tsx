@@ -152,7 +152,7 @@ export function MedicalInfo() {
   ];
 
   return (
-    <div className="p-6 space-y-5 relative" style={{ maxWidth: 1100, ...GRID }}>
+    <div className="p-6 space-y-5 relative" style={{ maxWidth: 1240, margin: "0 auto", ...GRID }}>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#FFFFFF", marginBottom: 4 }}>Medical Information</h1>

@@ -1,9 +1,10 @@
 import React from "react";
 import {
   Archive, Users, HardDrive, TrendingUp, AlertTriangle, FileText, Shield,
-  ArrowRight, ArrowUpRight, CheckCircle2, Circle, Bell, Lock, Camera, Wallet, Heart
+  ArrowRight, ArrowUpRight, CheckCircle2, Circle, Bell, Lock, Camera, Wallet, Heart, Film
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
+import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -26,16 +27,15 @@ const storageHistory = [
   { month: "Apr", used: 11.5 }, { month: "May", used: 14.3 }, { month: "Jun", used: 16.9 },
 ];
 
-/* Maps a document category → a breakdown bucket (label + color + icon) */
-const CATEGORY_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  legal:     { label: "Legal & Estate",   color: HILITE,  icon: <FileText size={12}/> },
-  financial: { label: "Financial",        color: ACCENT2, icon: <Wallet size={12}/> },
-  personal:  { label: "Memories & Media",  color: SUCCESS, icon: <Camera size={12}/> },
-  digital:   { label: "Digital Assets",    color: WARN,    icon: <Lock size={12}/> },
-  medical:   { label: "Medical",           color: "#6E8BFF", icon: <Heart size={12}/> },
-  other:     { label: "Other",             color: "#6B7FA8", icon: <Archive size={12}/> },
+/* Icon per shared storage-breakdown category key */
+const CATEGORY_ICON: Record<string, React.ReactNode> = {
+  media:     <Film size={12}/>,
+  financial: <Wallet size={12}/>,
+  legal:     <FileText size={12}/>,
+  photos:    <Camera size={12}/>,
+  personal:  <Heart size={12}/>,
+  digital:   <Lock size={12}/>,
 };
-const toMB = (size: number, unit: "MB" | "GB") => (unit === "GB" ? size * 1024 : size);
 
 export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const { user, docs, contacts, wishes, notifications } = useDemo();
@@ -53,16 +53,11 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const guardianContacts = contacts.filter(c => c.type === "guardian");
   const legacyVerified = legacyContacts.filter(c => c.verificationStatus === "verified").length;
 
-  /* ── Usage breakdown by category (relative distribution of stored docs) ── */
-  const byCategory = new Map<string, number>();
-  docs.forEach(d => {
-    const key = CATEGORY_META[d.category] ? d.category : "other";
-    byCategory.set(key, (byCategory.get(key) ?? 0) + toMB(d.size, d.sizeUnit));
-  });
-  const totalMB = [...byCategory.values()].reduce((a, b) => a + b, 0) || 1;
-  const breakdown = [...byCategory.entries()]
-    .map(([key, mb]) => ({ key, mb, pct: (mb / totalMB) * 100, ...CATEGORY_META[key] }))
-    .sort((a, b) => b.mb - a.mb);
+  /* ── Usage breakdown by category — shared with the Usage & Billing page ── */
+  const breakdownTotalGb = STORAGE_BREAKDOWN.reduce((a, c) => a + c.gb, 0) || 1;
+  const breakdown = STORAGE_BREAKDOWN
+    .map(c => ({ ...c, pct: (c.gb / breakdownTotalGb) * 100, icon: CATEGORY_ICON[c.key] }))
+    .sort((a, b) => b.gb - a.gb);
 
   /* ── Legacy completion checklist (drives the ring) ── */
   const checklist = [

@@ -132,7 +132,7 @@ export function OrganizeHub() {
   ];
 
   return (
-    <div className="p-6 space-y-5 relative" style={{ maxWidth:1100, ...GRID }}>
+    <div className="p-6 space-y-5 relative" style={{ maxWidth:1240, margin:"0 auto", ...GRID }}>
       <div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Organize</h1>
         <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Personal folders, reminders, and important family occasions — fully interactive in demo mode.</p>

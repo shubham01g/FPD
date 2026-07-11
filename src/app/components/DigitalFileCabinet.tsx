@@ -265,6 +265,42 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
+    id:"ids", label:"IDs & Licensing", color:"#4A90D9", emoji:"🪪",
+    description:"Government IDs, driver's license, passport & professional licenses",
+    acceptedTypes:"application/pdf,.pdf,image/*",
+    subFolders:["Government IDs","Driver's License & Passport","Professional Licenses","Certifications"],
+    files:[
+      { id:"id1", name:"Driver's License – California", type:"image", size:"0.4 MB", modified:"Mar 2021", starred:true },
+      { id:"id2", name:"U.S. Passport", type:"image", size:"0.6 MB", modified:"Jun 2019" },
+      { id:"id3", name:"Social Security Card", type:"image", size:"0.3 MB", modified:"Jan 2026", locked:true },
+      { id:"id4", name:"Real Estate Broker License – DRE", type:"pdf", size:"0.5 MB", modified:"Feb 2026" },
+      { id:"id5", name:"Contractor License – CSLB", type:"pdf", size:"0.5 MB", modified:"Jan 2025" },
+    ],
+  },
+  {
+    id:"daycare", label:"Daycare & Childcare", color:"#F6AD55", emoji:"🧸",
+    description:"Enrollment, immunization records, authorizations & provider info",
+    acceptedTypes:"application/pdf,.pdf,image/*",
+    subFolders:["Enrollment","Immunization Records","Emergency Authorization","Provider Contracts"],
+    files:[
+      { id:"dc1", name:"Little Sprouts – Enrollment Agreement", type:"pdf", size:"0.6 MB", modified:"Aug 2025" },
+      { id:"dc2", name:"Immunization Record – Lucas", type:"pdf", size:"0.3 MB", modified:"Sep 2025", starred:true },
+      { id:"dc3", name:"Pickup Authorization Form", type:"pdf", size:"0.2 MB", modified:"Aug 2025" },
+      { id:"dc4", name:"Emergency Medical Consent", type:"pdf", size:"0.2 MB", modified:"Aug 2025" },
+    ],
+  },
+  {
+    id:"places", label:"Favorite Places", color:"#48BB78", emoji:"📍",
+    description:"Meaningful restaurants, parks, travel spots & family places",
+    acceptedTypes:"application/pdf,.pdf,image/*",
+    subFolders:["Restaurants","Parks & Nature","Travel","Family Spots"],
+    files:[
+      { id:"fp1", name:"Grange Restaurant – Anniversary Spot", type:"pdf", size:"0.2 MB", modified:"May 2026", starred:true },
+      { id:"fp2", name:"Effie Yeaw Nature Center – Notes", type:"pdf", size:"0.1 MB", modified:"Apr 2026" },
+      { id:"fp3", name:"Big Sur Camping – Favorite Sites", type:"pdf", size:"0.3 MB", modified:"Aug 2025" },
+    ],
+  },
+  {
     id:"secret", label:"Secret Vault", color:"#E53E3E", emoji:"🔐",
     description:"Ultra-sensitive items — AES-256 encrypted · PIN required",
     acceptedTypes:"*/*",

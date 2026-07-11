@@ -161,7 +161,7 @@ export function LegacyVault() {
   if (showVaultClone) return <VaultClone onBack={() => setShowVaultClone(false)}/>;
 
   return (
-    <div className="p-6 space-y-6 relative" style={{ maxWidth:1100, ...GRID }}>
+    <div className="p-6 space-y-6 relative" style={{ maxWidth:1240, margin:"0 auto", ...GRID }}>
 
       {/* Header */}
       <div>

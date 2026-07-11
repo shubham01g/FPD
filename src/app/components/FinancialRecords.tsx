@@ -158,7 +158,7 @@ export function FinancialRecords() {
   );
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth: 1240, margin: "0 auto" }}>
       <div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 4 }}>Financial Records</h1>
         <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Insurance policies, real estate, investments, retirement accounts, taxes, and business information.</p>

@@ -54,7 +54,7 @@ export function JobHistory() {
   }
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
       <div className="flex items-start justify-between">
         <div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Job History</h1>

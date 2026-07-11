@@ -67,7 +67,7 @@ export function TravelPlanner() {
   const stats = { total:trips.length, completed:trips.filter(t=>t.status==="completed").length, planned:trips.filter(t=>t.status==="planned").length, countries:new Set(trips.map(t=>t.country)).size };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
       <div className="flex items-start justify-between">
         <div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Travel Planner</h1>

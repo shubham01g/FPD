@@ -58,8 +58,10 @@ const initContacts: Contact[] = [
   { id:"CON-001", type:"legacy", name:"Sarah Johnson", relationship:"Spouse", email:"sarah.j@email.com", phone:"(916) 555-0234", verificationStatus:"verified", accessLevel:"Full vault access upon death confirmed by executor", avatar:"SJ" },
   { id:"CON-002", type:"legacy", name:"Michael Doe", relationship:"Son", email:"m.doe@email.com", phone:"(415) 555-0871", verificationStatus:"verified", accessLevel:"Full vault access upon death", avatar:"MD" },
   { id:"CON-003", type:"legacy", name:"Linda Torres, Esq.", relationship:"Estate Attorney", email:"ltorres@lawfirm.com", phone:"(916) 555-0482", verificationStatus:"pending", accessLevel:"Legal documents only — immediate", avatar:"LT" },
-  { id:"CON-004", type:"guardian", name:"Emily Doe", relationship:"Daughter", email:"e.doe@email.com", phone:"(916) 555-0392", verificationStatus:"verified", accessLevel:"Full access if primary contact incapacitated", avatar:"ED" },
+  { id:"CON-004", type:"guardian", name:"Emily Doe", relationship:"Daughter", email:"e.doe@email.com", phone:"(916) 555-0392", verificationStatus:"verified", accessLevel:"View Only — 4 folders assigned", avatar:"ED" },
+  { id:"CON-007", type:"guardian", name:"Robert Doe", relationship:"Brother", email:"r.doe@email.com", phone:"(530) 555-0157", verificationStatus:"pending", accessLevel:"View Only — 2 folders assigned", avatar:"RD" },
   { id:"CON-005", type:"emergency", name:"Dr. Karen Fields", relationship:"Primary Physician", email:"kfields@sacmedical.com", phone:"(916) 555-0182", verificationStatus:"verified", notes:"Has full medical history on file", avatar:"KF" },
+  { id:"CON-008", type:"emergency", name:"Frank Delgado", relationship:"Next-Door Neighbor", email:"fdelgado@email.com", phone:"(916) 555-0311", verificationStatus:"verified", notes:"Has a spare house key and the alarm code", avatar:"FD" },
   { id:"CON-006", type:"pet_emergency", name:"Emily Doe", relationship:"Daughter", email:"e.doe@email.com", phone:"(916) 555-0392", verificationStatus:"verified", notes:"Agreed to take Biscuit permanently", avatar:"ED" },
 ];
 

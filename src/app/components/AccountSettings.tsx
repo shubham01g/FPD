@@ -168,7 +168,7 @@ export function AccountSettings() {
   const methodColor = { sms:"#48BB78", email_otp:"#3A5BD9", authenticator:"#6E8BFF" }[twoFAMethod];
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:800 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:900, margin:"0 auto" }}>
       {/* Header */}
       <div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Account Settings</h1>

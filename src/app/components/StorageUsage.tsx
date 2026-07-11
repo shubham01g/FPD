@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { HardDrive, AlertTriangle, TrendingUp, Calendar, Bell, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
+import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
 
 const usageByMonth = [
   { month: "Jan", used: 4.2, limit: 25 }, { month: "Feb", used: 6.8, limit: 25 },
@@ -9,14 +10,8 @@ const usageByMonth = [
   { month: "May", used: 14.3, limit: 25 }, { month: "Jun", used: 16.9, limit: 25 },
 ];
 
-const usageByCategory = [
-  { category: "Legal Docs", gb: 4.2, color: "#4A90D9" },
-  { category: "Financial", gb: 4.7, color: "#48BB78" },
-  { category: "Video Messages", gb: 5.5, color: "#6E8BFF" },
-  { category: "Personal", gb: 0.8, color: "#3A5BD9" },
-  { category: "Digital Assets", gb: 0.4, color: "#ED8936" },
-  { category: "Photos", gb: 1.3, color: "#FC8181" },
-];
+/* Shared with the Dashboard breakdown so the two views always agree. */
+const usageByCategory = STORAGE_BREAKDOWN.map(c => ({ category: c.label, gb: c.gb, color: c.color }));
 
 const plans = [
   { name: "Starter",       storage: 1,   price: 1.99,   overage: 0.50, current: false },
@@ -35,8 +30,8 @@ const alertHistory = [
 export function StorageUsage() {
   const [overageBilling] = useState(true);
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
-  const used = 16.9;
-  const total = 25;
+  const used = STORAGE_USED_GB;
+  const total = STORAGE_LIMIT_GB;
   const percent = Math.round((used / total) * 100);
   const overageRate = 0.40; // $0.40/GB on Legacy Archive (Starter is $0.50/GB)
   const projectedEOM = 21.4;
@@ -50,7 +45,7 @@ export function StorageUsage() {
   };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth: 1240, margin: "0 auto" }}>
       <div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 4 }}>Storage & Usage</h1>
         <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>

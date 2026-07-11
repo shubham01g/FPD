@@ -76,7 +76,7 @@ export function Warranties() {
   const expired = warranties.filter(w => getDaysUntilExpiry(w.expiryDate) < 0 && !w.expiryDate.includes("Lifetime")).length;
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
       <div className="flex items-start justify-between">
         <div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Warranties</h1>

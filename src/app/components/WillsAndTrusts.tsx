@@ -50,7 +50,7 @@ export function WillsAndTrusts() {
   const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
 
       {/* Header */}
       <div className="flex items-start justify-between">

@@ -250,7 +250,7 @@ export function FamilyFriends() {
   };
 
   return (
-    <div className="p-6 space-y-5" style={{ maxWidth: 1200, background: "#070A12", minHeight: "100%" }}>
+    <div className="p-6 space-y-5" style={{ maxWidth: 1240, margin: "0 auto", background: "#070A12", minHeight: "100%" }}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

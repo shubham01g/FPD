@@ -167,7 +167,7 @@ export function PersonalAssets() {
   );
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth: 1240, margin: "0 auto" }}>
       <div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 4 }}>Personal Assets</h1>
         <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Vehicles, utility accounts, digital assets, and firearms — all in one secure record.</p>

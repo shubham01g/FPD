@@ -138,7 +138,7 @@ export function KidsActivities() {
   const statusBgs   = { active:"rgba(72,187,120,0.12)", inactive:"rgba(138,154,184,0.12)", seasonal:"rgba(246,173,85,0.12)" };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
       <div className="flex items-start justify-between">
         <div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Kids' Activities</h1>
