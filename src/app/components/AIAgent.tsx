@@ -253,7 +253,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("• ") || line.startsWith("* ")) {
       const content = line.slice(2).replace(/\*\*([^*]+)\*\*/g,"$1");
-      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"rgba(255,255,255,0.8)" }}><span style={{ color:"#6C5CE7", flexShrink:0 }}>•</span><span>{content}</span></div>;
+      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"rgba(255,255,255,0.8)" }}><span style={{ color:"#3A5BD9", flexShrink:0 }}>•</span><span>{content}</span></div>;
     }
     const parts = line.split(/\*\*([^*]+)\*\*/g);
     return (
@@ -268,7 +268,7 @@ function TypingIndicator() {
   return (
     <div className="flex gap-1 items-center px-4 py-3">
       {[0,1,2].map(i => (
-        <div key={i} style={{ width:7, height:7, borderRadius:"50%", background:"#6C5CE7", animation:`pulse 1.4s ease-in-out ${i*0.2}s infinite`, opacity:0.6 }}/>
+        <div key={i} style={{ width:7, height:7, borderRadius:"50%", background:"#3A5BD9", animation:`pulse 1.4s ease-in-out ${i*0.2}s infinite`, opacity:0.6 }}/>
       ))}
     </div>
   );
@@ -311,19 +311,19 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
   if (!open && !pageMode) return (
     <button onClick={() => setOpen(true)}
       className="fixed bottom-24 right-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl transition-all hover:scale-105"
-      style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 8px 32px rgba(108,92,231,0.45)" }}>
+      style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 8px 32px rgba(58,91,217,0.45)" }}>
       <Sparkles size={16}/> FPD Assistant
     </button>
   );
 
   const wrapStyle: React.CSSProperties = pageMode
-    ? { display:"flex", flexDirection:"column", height:"calc(100vh - 48px)", maxWidth:800, margin:"24px auto", borderRadius:20, overflow:"hidden", border:"1px solid rgba(108,92,231,0.15)", boxShadow:"0 8px 32px rgba(108,92,231,0.12)", background:"#16161F" }
-    : { position:"fixed", bottom:96, right:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:16, overflow:"hidden", boxShadow:"0 20px 60px rgba(108,92,231,0.25)", width:400, height:minimized?"auto":600, background:"#16161F", border:"1px solid rgba(108,92,231,0.15)" };
+    ? { display:"flex", flexDirection:"column", height:"calc(100vh - 48px)", maxWidth:800, margin:"24px auto", borderRadius:20, overflow:"hidden", border:"1px solid rgba(58,91,217,0.15)", boxShadow:"0 8px 32px rgba(58,91,217,0.12)", background:"#101728" }
+    : { position:"fixed", bottom:96, right:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:16, overflow:"hidden", boxShadow:"0 20px 60px rgba(58,91,217,0.25)", width:400, height:minimized?"auto":600, background:"#101728", border:"1px solid rgba(58,91,217,0.15)" };
 
   return (
     <div style={wrapStyle}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)" }}>
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
         <div className="flex items-center gap-2.5">
           <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:6, objectFit:"cover" }}/>
           <div>
@@ -347,36 +347,36 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
           <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background:"#0F1A33" }}>
             {messages.map(msg => (
               <div key={msg.id} className={`flex ${msg.role==="user"?"justify-end":"justify-start"}`}>
-                <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#6C5CE7,#8B7CF6)":"#16161F", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(108,92,231,0.08)":undefined, border:msg.role==="agent"?"1px solid rgba(108,92,231,0.1)":undefined }}>
+                <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#3A5BD9,#5B7BF5)":"#101728", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(58,91,217,0.08)":undefined, border:msg.role==="agent"?"1px solid rgba(58,91,217,0.1)":undefined }}>
                   {msg.role==="agent" ? <div className="space-y-1">{renderMarkdown(msg.text)}</div> : <p style={{ fontSize:13, lineHeight:1.5 }}>{msg.text}</p>}
                   <div style={{ fontSize:10, opacity:0.5, marginTop:4, textAlign:"right", ...MONO }}>{msg.time}</div>
                 </div>
               </div>
             ))}
-            {typing && <div style={{ background:"#16161F", borderRadius:16, border:"1px solid rgba(108,92,231,0.1)", width:"fit-content" }}><TypingIndicator/></div>}
+            {typing && <div style={{ background:"#101728", borderRadius:16, border:"1px solid rgba(58,91,217,0.1)", width:"fit-content" }}><TypingIndicator/></div>}
             <div ref={endRef}/>
           </div>
 
           {/* Suggestions */}
-          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ borderTop:"1px solid rgba(108,92,231,0.08)" }}>
+          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ borderTop:"1px solid rgba(58,91,217,0.08)" }}>
             {SUGGESTIONS.map(s => (
               <button key={s} onClick={() => send(s)}
                 className="text-xs px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background:"rgba(108,92,231,0.07)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.15)" }}>
+                style={{ background:"rgba(58,91,217,0.07)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.15)" }}>
                 {s}
               </button>
             ))}
           </div>
 
           {/* Input */}
-          <div className="flex gap-2 p-3 flex-shrink-0" style={{ borderTop:"1px solid rgba(108,92,231,0.08)", background:"#16161F" }}>
+          <div className="flex gap-2 p-3 flex-shrink-0" style={{ borderTop:"1px solid rgba(58,91,217,0.08)", background:"#101728" }}>
             <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&send(input)}
               placeholder="Ask anything about Final Pass Down…"
-              style={{ flex:1, border:"1px solid rgba(108,92,231,0.2)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(108,92,231,0.03)" }}/>
+              style={{ flex:1, border:"1px solid rgba(58,91,217,0.2)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(58,91,217,0.03)" }}/>
             <button onClick={()=>send(input)} disabled={!input.trim()}
               className="flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#6C5CE7,#8B7CF6)":"rgba(108,92,231,0.1)", color:input.trim()?"#fff":"rgba(255,255,255,0.65)" }}>
+              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#3A5BD9,#5B7BF5)":"rgba(58,91,217,0.1)", color:input.trim()?"#fff":"rgba(255,255,255,0.65)" }}>
               <Send size={16}/>
             </button>
           </div>

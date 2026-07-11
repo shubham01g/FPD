@@ -57,9 +57,9 @@ export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio 
           type="button"
           onClick={() => inputRef.current?.click()}
           className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-all"
-          style={{ aspectRatio, borderColor:"rgba(108,92,231,0.25)", background:"rgba(108,92,231,0.03)", color:"var(--muted-foreground)" }}>
+          style={{ aspectRatio, borderColor:"rgba(58,91,217,0.25)", background:"rgba(58,91,217,0.03)", color:"var(--muted-foreground)" }}>
           <div className="flex items-center justify-center rounded-full"
-            style={{ width:44, height:44, background:"rgba(108,92,231,0.08)" }}>
+            style={{ width:44, height:44, background:"rgba(58,91,217,0.08)" }}>
             <ImageIcon size={20} color="var(--primary)"/>
           </div>
           <div>

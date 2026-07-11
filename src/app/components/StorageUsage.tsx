@@ -12,8 +12,8 @@ const usageByMonth = [
 const usageByCategory = [
   { category: "Legal Docs", gb: 4.2, color: "#4A90D9" },
   { category: "Financial", gb: 4.7, color: "#48BB78" },
-  { category: "Video Messages", gb: 5.5, color: "#9F7AEA" },
-  { category: "Personal", gb: 0.8, color: "#6C5CE7" },
+  { category: "Video Messages", gb: 5.5, color: "#6E8BFF" },
+  { category: "Personal", gb: 0.8, color: "#3A5BD9" },
   { category: "Digital Assets", gb: 0.4, color: "#ED8936" },
   { category: "Photos", gb: 1.3, color: "#FC8181" },
 ];
@@ -46,7 +46,7 @@ export function StorageUsage() {
     if (pct >= 95) return "#E53E3E";
     if (pct >= 90) return "#FC8181";
     if (pct >= 80) return "#F6AD55";
-    return "#6C5CE7";
+    return "#3A5BD9";
   };
 
   return (
@@ -129,7 +129,7 @@ export function StorageUsage() {
             { label: "80% Threshold", pct: 80, msg: "Usage warning email", color: "#F6AD55" },
             { label: "90% Threshold", pct: 90, msg: "Upgrade recommended email", color: "#FC8181" },
             { label: "95% Threshold", pct: 95, msg: "Critical alert email", color: "#E53E3E" },
-            { label: "100% Limit", pct: 100, msg: "Overage billing begins", color: "#9F7AEA" },
+            { label: "100% Limit", pct: 100, msg: "Overage billing begins", color: "#6E8BFF" },
           ].map((t) => (
             <div key={t.pct} className="text-center flex-1">
               <div style={{ color: t.color, fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700 }}>{t.pct}%</div>
@@ -151,12 +151,12 @@ export function StorageUsage() {
             </div>
             {usageByMonth.map((d, i) => {
               const barH = Math.round((d.used / total) * 120);
-              const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? "#FC8181" : d.used >= total * 0.8 ? "#F6AD55" : "#6C5CE7";
+              const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? "#FC8181" : d.used >= total * 0.8 ? "#F6AD55" : "#3A5BD9";
               return (
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                   <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.used}GB</span>
                   <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
-                    <div style={{ width:"100%", height:barH, background:barColor, borderRadius:"4px 4px 0 0", opacity: i === usageByMonth.length-1 ? 1 : 0.65 }}/>
+                    <div style={{ width:"100%", height:barH, background:barColor, borderRadius:"4px 4px 0 0", opacity: i === usageByMonth.length-1 ? 1 : 0.88 }}/>
                   </div>
                   <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                 </div>
@@ -194,7 +194,7 @@ export function StorageUsage() {
               key={plan.name}
               className="p-5 rounded-xl border glow-surface"
               style={{
-                background: plan.current ? "rgba(32, 64, 192, 0.06)" : "#1C1C28",
+                background: plan.current ? "rgba(32, 64, 192, 0.06)" : "#141B2E",
                 borderColor: plan.current ? "var(--gold)" : "var(--border)",
                 borderWidth: plan.current ? 2 : 1,
               }}
@@ -232,7 +232,7 @@ export function StorageUsage() {
             </div>
           ))}
         </div>
-        <div className="mt-4 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
+        <div className="mt-4 px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
           <div className="flex items-center gap-2">
             <ArrowUp size={13} color="#FC8181" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
@@ -247,7 +247,7 @@ export function StorageUsage() {
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Notification History</h3>
         <div className="space-y-3">
           {alertHistory.map((alert, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}>
+            <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
               <div className="rounded-lg px-2 py-1" style={{ background: `${alert.color}18`, color: alert.color, fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
                 {alert.type}
               </div>

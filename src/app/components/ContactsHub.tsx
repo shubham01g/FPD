@@ -13,7 +13,7 @@ import { ScanButton } from "./DocumentScanner";
 type VerifStatus = "not_sent" | "pending" | "id_submitted" | "verified" | "rejected";
 
 const verifConfig: Record<VerifStatus, { label:string; color:string; bg:string; icon:React.ReactNode }> = {
-  not_sent:     { label:"NOT SENT",     color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)", icon:<X size={11}/> },
+  not_sent:     { label:"NOT SENT",     color:"#8A9AB8", bg:"rgba(138,154,184,0.1)", icon:<X size={11}/> },
   pending:      { label:"INVITE SENT",  color:"#F6AD55", bg:"rgba(246,173,85,0.12)", icon:<Clock size={11}/> },
   id_submitted: { label:"ID SUBMITTED", color:"#4A90D9", bg:"rgba(74,144,217,0.12)", icon:<Upload size={11}/> },
   verified:     { label:"VERIFIED",     color:"#48BB78", bg:"rgba(72,187,120,0.12)", icon:<CheckCircle size={11}/> },
@@ -27,17 +27,17 @@ function toVerifStatus(s: string): VerifStatus {
   return "not_sent";
 }
 
-const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(108,92,231,0.14)", backdropFilter:"blur(12px)" };
-const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
+const GLASS: React.CSSProperties = { background:"rgba(16,23,40,0.96)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
+const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
 const MONO:  React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 type ContactType = "legacy"|"guardian"|"emergency"|"pet_emergency";
 
 const typeConfig = {
-  legacy:       { label:"Legacy Contact",        color:"#6C5CE7", bg:"rgba(108,92,231,0.1)",    icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
+  legacy:       { label:"Legacy Contact",        color:"#3A5BD9", bg:"rgba(58,91,217,0.1)",    icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
   guardian:     { label:"Guardian Contact",      color:"#48BB78", bg:"rgba(72,187,120,0.1)",   icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
   emergency:    { label:"Emergency Contact",     color:"#F6AD55", bg:"rgba(246,173,85,0.1)",   icon:<AlertCircle size={13}/>,  desc:"Notified by first responders in an emergency." },
-  pet_emergency:{ label:"Pet Emergency Contact", color:"#9F7AEA", bg:"rgba(159,122,234,0.1)", icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
+  pet_emergency:{ label:"Pet Emergency Contact", color:"#6E8BFF", bg:"rgba(110,139,255,0.1)", icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
 };
 
 /* ── Verification methods a user can configure per Legacy Contact ─── */
@@ -55,29 +55,29 @@ const VERIFICATION_METHODS = [
 const verStyle = {
   verified: { color:"#48BB78", bg:"rgba(72,187,120,0.12)",  label:"VERIFIED",  icon:<CheckCircle size={11}/> },
   pending:  { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",  label:"PENDING",   icon:<Clock size={11}/> },
-  not_sent: { color:"rgba(255,255,255,0.7)", bg:"rgba(107,114,128,0.12)", label:"NOT SENT",  icon:<X size={11}/> },
+  not_sent: { color:"#8A9AB8", bg:"rgba(90,106,136,0.14)", label:"NOT SENT",  icon:<X size={11}/> },
 };
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
 const FOLDER_CATALOG = [
-  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#6C5CE7" },
+  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#3A5BD9" },
   { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#48BB78" },
   { id:"medical",   label:"Medical Records",         emoji:"🏥",  color:"#FC8181" },
   { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
   { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
   { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#4A90D9" },
   { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#38B2AC" },
-  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#9F7AEA" },
+  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#6E8BFF" },
   { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
   { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },
   { id:"photos",    label:"Photo Albums",            emoji:"📷",  color:"#F6AD55" },
-  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#9F7AEA" },
-  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#6C5CE7" },
+  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#6E8BFF" },
+  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#3A5BD9" },
   { id:"business",  label:"Business Records",        emoji:"📊",  color:"#48BB78" },
   { id:"crypto",    label:"Crypto & NFTs",           emoji:"₿",   color:"#F6AD55" },
   { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#4A90D9" },
   { id:"military",  label:"Military Records",        emoji:"🎖️",  color:"#ED8936" },
-  { id:"other",     label:"Other Documents",         emoji:"📁",  color:"rgba(255,255,255,0.7)" },
+  { id:"other",     label:"Other Documents",         emoji:"📁",  color:"#8A9AB8" },
 ];
 
 /* ── Folder selector ─────────────────────────────────────────────── */
@@ -91,10 +91,10 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
         <span style={{ color:"#48BB78", fontSize:11, fontWeight:700 }}>VIEW ONLY — Guardian contacts cannot download files</span>
       </div>
       <div className="flex items-center justify-between">
-        <span style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
+        <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
         <div className="flex gap-2">
-          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color:"#6C5CE7", fontSize:10, ...MONO, fontWeight:700 }}>All</button>
-          <button onClick={()=>onChange([])} style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO }}>Clear</button>
+          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color:"#3A5BD9", fontSize:10, ...MONO, fontWeight:700 }}>All</button>
+          <button onClick={()=>onChange([])} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>Clear</button>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight:200, overflowY:"auto" }}>
@@ -103,7 +103,7 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
           return (
             <button key={f.id} onClick={()=>toggle(f.id)}
               className="flex items-center gap-1.5 px-2 py-2 rounded-lg text-left transition-all"
-              style={{ background:active?`${f.color}15`:"rgba(108,92,231,0.03)", border:`1px solid ${active?f.color+"50":"rgba(108,92,231,0.1)"}`, color:active?f.color:"rgba(255,255,255,0.7)" }}>
+              style={{ background:active?`${f.color}15`:"rgba(58,91,217,0.03)", border:`1px solid ${active?f.color+"50":"rgba(58,91,217,0.1)"}`, color:active?f.color:"#8A9AB8" }}>
               <span style={{ fontSize:12 }}>{f.emoji}</span>
               <span style={{ fontSize:9, fontWeight:active?700:400, lineHeight:1.3 }}>{f.label}</span>
               {active && <CheckCircle size={9} color={f.color} style={{ marginLeft:"auto" }}/>}
@@ -155,9 +155,9 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>
               Add {typeConfig[form.type].label}
             </h3>
-            <p style={{ color:"rgba(255,255,255,0.65)", fontSize:12, marginTop:2 }}>{typeConfig[form.type].desc}</p>
+            <p style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{typeConfig[form.type].desc}</p>
           </div>
-          <button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={16}/></button>
+          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
         </div>
 
         <div className="space-y-4">
@@ -169,9 +169,9 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
             { key:"relationship", label:"RELATIONSHIP",     ph:"e.g. Spouse, Attorney, Daughter" },
           ].map(f=>(
             <div key={f.key}>
-              <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>{f.label}</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>{f.label}</label>
               <input value={(form as any)[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
 
@@ -196,7 +196,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
           {/* Legacy — verification requirements */}
           {isLegacy && (
             <div>
-              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, marginBottom:6 }}>
+              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:6 }}>
                 VERIFICATION REQUIREMENTS (choose what your legacy contact must provide)
               </div>
               <div className="space-y-2">
@@ -205,20 +205,20 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
                   return (
                     <button key={vm.id} onClick={()=>toggleVerification(vm.id)} disabled={vm.required}
                       className="w-full flex items-start gap-3 px-3 py-3 rounded-xl text-left transition-all"
-                      style={{ background:selected?"rgba(108,92,231,0.06)":"rgba(108,92,231,0.02)", border:`1px solid ${selected?"rgba(108,92,231,0.25)":"rgba(108,92,231,0.08)"}`, cursor:vm.required?"not-allowed":"pointer" }}>
+                      style={{ background:selected?"rgba(58,91,217,0.06)":"rgba(58,91,217,0.02)", border:`1px solid ${selected?"rgba(58,91,217,0.25)":"rgba(58,91,217,0.08)"}`, cursor:vm.required?"not-allowed":"pointer" }}>
                       <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                        style={{ width:32, height:32, background:selected?"rgba(108,92,231,0.1)":"rgba(108,92,231,0.04)", fontSize:16 }}>
+                        style={{ width:32, height:32, background:selected?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.04)", fontSize:16 }}>
                         {vm.icon}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span style={{ color:"#FFFFFF", fontSize:12, fontWeight:600 }}>{vm.label}</span>
-                          {vm.required && <span className="px-1.5 py-0.5 rounded text-xs" style={{ background:"rgba(108,92,231,0.1)", color:"#6C5CE7", ...MONO }}>REQUIRED</span>}
+                          {vm.required && <span className="px-1.5 py-0.5 rounded text-xs" style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>REQUIRED</span>}
                         </div>
-                        <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
+                        <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
                       </div>
                       <div className="flex-shrink-0 mt-0.5">
-                        {selected ? <CheckCircle size={15} color="#6C5CE7"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid #C0CDE0" }}/>}
+                        {selected ? <CheckCircle size={15} color="#3A5BD9"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid #C0CDE0" }}/>}
                       </div>
                     </button>
                   );
@@ -227,26 +227,26 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 
               {/* Security word / Q&A fields */}
               {selectedVerifications.includes("security_word") && (
-                <div className="mt-3 p-4 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SHARED SECRET WORD</label>
+                <div className="mt-3 p-4 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
+                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SHARED SECRET WORD</label>
                   <input value={securityWord} onChange={e=>setSecurityWord(e.target.value)}
                     placeholder="A word only you and your contact know — e.g. a childhood memory"
-                    className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-                  <p style={{ color:"rgba(255,255,255,0.65)", fontSize:10, marginTop:4 }}>Keep this private. Your contact must provide this word exactly to gain access.</p>
+                    className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                  <p style={{ color:"#8A9AB8", fontSize:10, marginTop:4 }}>Keep this private. Your contact must provide this word exactly to gain access.</p>
                 </div>
               )}
               {selectedVerifications.includes("security_qa") && (
-                <div className="mt-3 p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="mt-3 p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
                   <div>
-                    <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SECURITY QUESTION</label>
+                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SECURITY QUESTION</label>
                     <input value={securityQ} onChange={e=>setSecurityQ(e.target.value)}
                       placeholder="e.g. What is the name of the street I grew up on?"
-                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                   </div>
                   <div>
-                    <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>ANSWER</label>
+                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>ANSWER</label>
                     <input value={securityA} onChange={e=>setSecurityA(e.target.value)} placeholder="The exact answer your contact must provide"
-                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                   </div>
                 </div>
               )}
@@ -255,18 +255,18 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 
           {/* Notes */}
           <div>
-            <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>NOTES (optional)</label>
+            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>NOTES (optional)</label>
             <input value={form.notes} onChange={e=>setForm(p=>({...p,notes:e.target.value}))} placeholder="Any additional instructions or context"
-              className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+              className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button onClick={submit} disabled={loading}
               className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(108,92,231,0.3)", opacity:loading?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:loading?0.7:1 }}>
               {loading ? "Sending Invite…" : "Send Verification Invite"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"#8A9AB8" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -277,7 +277,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 /* ── Section wrapper with its own header + Add button ────────────── */
 function ContactSection({
   type, contacts, onAdd, onRemove,
-  getVerifStatus, advanceStatus, simulateVerify, verifying,
+  getVerifStatus, advanceStatus, simulateVerify, verifying, onScanId,
 }: {
   type: ContactType;
   contacts: Contact[];
@@ -287,6 +287,7 @@ function ContactSection({
   advanceStatus?: (id:string) => void;
   simulateVerify?: (id:string) => void;
   verifying?: string | null;
+  onScanId?: (id:string, name:string) => void;
 }) {
   const cfg = typeConfig[type];
   const isLegacy  = type === "legacy";
@@ -308,7 +309,7 @@ function ContactSection({
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                 style={{ background:`${cfg.color}15`, color:cfg.color, ...MONO }}>{contacts.length}</span>
             </div>
-            <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:1 }}>{cfg.desc}</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1 }}>{cfg.desc}</div>
           </div>
         </div>
         <button onClick={onAdd}
@@ -317,25 +318,6 @@ function ContactSection({
           <Plus size={12}/> Add {cfg.label}
         </button>
       </div>
-
-      {/* Legacy chain-of-command banner */}
-      {isLegacy && contacts.length > 0 && (
-        <div className="px-5 py-3 border-b" style={{ background:"rgba(108,92,231,0.04)", borderColor:"rgba(108,92,231,0.1)" }}>
-          <div className="flex items-start gap-2">
-            <Crown size={13} color="#6C5CE7" style={{ marginTop:1, flexShrink:0 }}/>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, lineHeight:1.6 }}>
-              <strong style={{ color:"#FFFFFF" }}>Chain of Authority:</strong>{" "}
-              {contacts.map((c,i) => (
-                <span key={c.id}>
-                  <strong style={{ color:"#6C5CE7" }}>#{i+1} {c.name}</strong>{" "}has {i===0?"primary":"contingent"} control.{" "}
-                  {i < contacts.length-1 && `If #${i+1} is unable to act, `}
-                </span>
-              ))}
-              {contacts.length > 1 && " This order is legally binding."}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Guardian view-only reminder */}
       {isGuardian && contacts.length > 0 && (
@@ -350,7 +332,7 @@ function ContactSection({
       <div className="divide-y" style={{ borderColor:`${cfg.color}12` }}>
         {contacts.length === 0 && (
           <div className="py-8 text-center">
-            <div style={{ color:"rgba(255,255,255,0.75)", fontSize:13 }}>No {cfg.label.toLowerCase()}s added yet.</div>
+            <div style={{ color:"#B8C8E0", fontSize:13 }}>No {cfg.label.toLowerCase()}s added yet.</div>
             <button onClick={onAdd} className="mt-2 text-xs underline" style={{ color:cfg.color }}>Add one now</button>
           </div>
         )}
@@ -363,8 +345,8 @@ function ContactSection({
                 {/* Priority number for Legacy */}
                 {isLegacy && (
                   <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0 relative"
-                    style={{ width:42, height:42, background:i===0?"rgba(108,92,231,0.15)":"rgba(108,92,231,0.06)", color:i===0?"#6C5CE7":"rgba(255,255,255,0.65)", fontSize:14, fontFamily:"var(--font-display)", border:i===0?"2px solid rgba(108,92,231,0.3)":"1px solid rgba(108,92,231,0.1)" }}>
-                    {i===0 ? <Crown size={18} color="#6C5CE7"/> : `#${i+1}`}
+                    style={{ width:42, height:42, background:i===0?"rgba(58,91,217,0.15)":"rgba(58,91,217,0.06)", color:i===0?"#3A5BD9":"#8A9AB8", fontSize:14, fontFamily:"var(--font-display)", border:i===0?"2px solid rgba(58,91,217,0.3)":"1px solid rgba(58,91,217,0.1)" }}>
+                    {i===0 ? <Crown size={18} color="#3A5BD9"/> : `#${i+1}`}
                   </div>
                 )}
 
@@ -381,22 +363,22 @@ function ContactSection({
                     <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{c.name}</span>
                     {isLegacy && i === 0 && (
                       <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-                        style={{ background:"rgba(108,92,231,0.1)", color:"#6C5CE7", ...MONO }}>
+                        style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>
                         <Crown size={9}/> PRIMARY
                       </span>
                     )}
                     {isLegacy && i > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                        style={{ background:"rgba(107,114,128,0.1)", color:"rgba(255,255,255,0.7)", ...MONO }}>
+                        style={{ background:"rgba(90,106,136,0.14)", color:"#8A9AB8", ...MONO }}>
                         CONTINGENT #{i+1}
                       </span>
                     )}
-                    <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>{c.relationship}</span>
+                    <span style={{ color:"#8A9AB8", fontSize:12 }}>{c.relationship}</span>
                   </div>
 
                   <div className="flex items-center gap-3 flex-wrap">
-                    {c.phone && <span className="flex items-center gap-1 text-xs" style={{ color:"rgba(255,255,255,0.7)" }}><Phone size={10}/>{c.phone}</span>}
-                    {c.email && <span className="flex items-center gap-1 text-xs" style={{ color:"rgba(255,255,255,0.7)" }}><Mail size={10}/>{c.email}</span>}
+                    {c.phone && <span className="flex items-center gap-1 text-xs" style={{ color:"#8A9AB8" }}><Phone size={10}/>{c.phone}</span>}
+                    {c.email && <span className="flex items-center gap-1 text-xs" style={{ color:"#8A9AB8" }}><Mail size={10}/>{c.email}</span>}
                     <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs" style={{ background:vs.bg, color:vs.color }}>
                       {vs.icon}<span style={{ ...MONO, marginLeft:3 }}>{vs.label}</span>
                     </div>
@@ -406,13 +388,13 @@ function ContactSection({
                   {isGuardian && c.accessLevel && (
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <FolderOpen size={10} color="#48BB78"/>
-                      <span style={{ color:"rgba(255,255,255,0.7)", fontSize:10 }}>{c.accessLevel}</span>
+                      <span style={{ color:"#8A9AB8", fontSize:10 }}>{c.accessLevel}</span>
                     </div>
                   )}
 
                   {/* Legacy priority note */}
                   {isLegacy && (
-                    <div className="mt-1.5 text-xs" style={{ color:"rgba(255,255,255,0.65)" }}>
+                    <div className="mt-1.5 text-xs" style={{ color:"#8A9AB8" }}>
                       {i === 0
                         ? "Has primary authority — notified first and assumes full control of the vault."
                         : `Backup #${i+1} — assumes control only if all contacts ranked above are unable to act.`}
@@ -429,7 +411,7 @@ function ContactSection({
                           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background:vc.bg, color:vc.color }}>
                             {vc.icon}<span style={{ fontFamily:"var(--font-mono)", marginLeft:3 }}>{vc.label}</span>
                           </div>
-                          <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>
+                          <span style={{ color:"#8A9AB8", fontSize:11 }}>
                             {vs==="not_sent" && "ID verification invite not yet sent"}
                             {vs==="pending" && "Invite sent — awaiting ID submission"}
                             {vs==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
@@ -443,7 +425,7 @@ function ContactSection({
                           {vs === "not_sent" && (
                             <button onClick={()=>advanceStatus(c.id)}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                              style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)" }}>
+                              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
                               <Mail size={10}/> Send Verification Invite
                             </button>
                           )}
@@ -456,7 +438,7 @@ function ContactSection({
                               </button>
                               <button onClick={()=>toast.success(`Invite resent to ${c.email}`)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs"
-                                style={{ background:"rgba(108,92,231,0.05)", color:"rgba(255,255,255,0.65)" }}>
+                                style={{ background:"rgba(58,91,217,0.05)", color:"#8A9AB8" }}>
                                 Resend Invite
                               </button>
                             </>
@@ -477,7 +459,7 @@ function ContactSection({
                           )}
                           {/* Scan ID option */}
                           {(vs === "not_sent" || vs === "pending") && (
-                            <ScanButton folder="legal" onUpload={doc => { setVerifStatus(p=>({...p,[c.id]:"id_submitted"})); toast.success(`ID scanned for ${c.name}`); }} size="sm" label="Scan ID"/>
+                            <ScanButton folder="legal" onUpload={() => onScanId?.(c.id, c.name)} size="sm" label="Scan ID"/>
                           )}
                         </div>
                       </div>
@@ -546,42 +528,66 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   const legacyContacts = contacts.filter(c => c.type === "legacy");
 
   return (
-    <div className="p-6 space-y-6 relative" style={{ maxWidth:1100, ...GRID }}>
-      <div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>
-          {typeConfig[activeType].label}s
-        </h1>
-        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>{typeConfig[activeType].desc}</p>
-      </div>
+    <div className="p-6 space-y-6 relative" style={{ maxWidth:1100, margin:"0 auto", ...GRID }}>
+      {/* Page header */}
+      {(() => {
+        const cfg = typeConfig[activeType];
+        const access: Record<ContactType, { label:string; color:string }> = {
+          legacy:        { label:"Full vault download — after verified passing", color:"#3A5BD9" },
+          guardian:      { label:"View-only assigned folders — never downloads", color:"#48BB78" },
+          emergency:     { label:"Informational only — no vault access", color:"#F6AD55" },
+          pet_emergency: { label:"Informational only — pet care details", color:"#6E8BFF" },
+        };
+        const Icon = activeType === "legacy" ? Shield : activeType === "guardian" ? Users : activeType === "emergency" ? AlertCircle : PawPrint;
+        return (
+          <div className="flex items-start justify-between gap-4 fpd-fade-in-up">
+            <div className="flex items-start gap-4">
+              <div className="flex items-center justify-center rounded-2xl flex-shrink-0" style={{ width:52, height:52, background:`${cfg.color}18`, color:cfg.color, boxShadow:`0 8px 24px -10px ${cfg.color}` }}>
+                <Icon size={24}/>
+              </div>
+              <div>
+                <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4, letterSpacing:"-0.01em" }}>
+                  {cfg.label}s
+                </h1>
+                <p style={{ color:"#8A9AB8", fontSize:13, maxWidth:"52ch", lineHeight:1.6 }}>{cfg.desc}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl flex-shrink-0" style={{ background:`${access[activeType].color}12`, border:`1px solid ${access[activeType].color}30` }}>
+              <div style={{ width:6, height:6, borderRadius:"50%", background:access[activeType].color, boxShadow:`0 0 6px ${access[activeType].color}` }}/>
+              <span style={{ color:access[activeType].color, fontSize:11, fontWeight:600 }}>{access[activeType].label}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Chain of authority — Legacy only, multiple contacts */}
       {activeType === "legacy" && legacyContacts.length > 1 && (
-        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"2px solid rgba(108,92,231,0.2)" }}>
+        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"2px solid rgba(58,91,217,0.2)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <Crown size={16} color="#6C5CE7"/>
+            <Crown size={16} color="#3A5BD9"/>
             <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF" }}>Chain of Authority</span>
           </div>
           <div className="space-y-2">
             {legacyContacts.map((c, i) => (
               <div key={c.id} className="flex items-center gap-3">
                 <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                  style={{ width:28, height:28, background:i===0?"#6C5CE7":"rgba(108,92,231,0.1)", color:i===0?"#fff":"rgba(255,255,255,0.7)", fontSize:11, fontWeight:700 }}>
+                  style={{ width:28, height:28, background:i===0?"#3A5BD9":"rgba(58,91,217,0.1)", color:i===0?"#fff":"#8A9AB8", fontSize:11, fontWeight:700 }}>
                   {i===0 ? <Crown size={12}/> : `${i+1}`}
                 </div>
                 <div className="flex-1 text-sm" style={{ color:"#FFFFFF" }}>
                   <strong>{c.name}</strong>
-                  <span style={{ color:"rgba(255,255,255,0.65)", marginLeft:8 }}>
+                  <span style={{ color:"#8A9AB8", marginLeft:8 }}>
                     {i===0 ? "Primary — notified first, assumes full vault authority" : `Contingent #${i+1} — activates only if contacts above cannot act`}
                   </span>
                 </div>
-                {i < legacyContacts.length-1 && <ArrowDown size={14} color="rgba(255,255,255,0.75)"/>}
+                {i < legacyContacts.length-1 && <ArrowDown size={14} color="#B8C8E0"/>}
               </div>
             ))}
           </div>
           <div className="mt-3 px-3 py-2 rounded-xl text-xs flex items-start gap-2"
             style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <AlertTriangle size={11} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
-            <span style={{ color:"rgba(255,255,255,0.7)", lineHeight:1.5 }}>
+            <span style={{ color:"#8A9AB8", lineHeight:1.5 }}>
               Authority passes automatically down the list if a contact above is deceased, incapacitated, or formally declines.
             </span>
           </div>
@@ -591,9 +597,9 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
       {/* Single legacy contact — suggest adding a backup */}
       {activeType === "legacy" && legacyContacts.length === 1 && (
         <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-          style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
-          <Info size={16} color="#6C5CE7" style={{ marginTop:1, flexShrink:0 }}/>
-          <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.7 }}>
+          style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
+          <Info size={16} color="#3A5BD9" style={{ marginTop:1, flexShrink:0 }}/>
+          <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
             You have one Legacy Contact. Consider adding a <strong style={{ color:"#FFFFFF" }}>contingent backup</strong> — if your primary contact is also deceased or unable to act, there would be no one to claim your vault.
           </div>
         </div>
@@ -609,6 +615,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
         advanceStatus={advanceStatus}
         simulateVerify={simulateVerify}
         verifying={verifying}
+        onScanId={(id, name) => { setVerifStatus(p => ({ ...p, [id]: "id_submitted" })); toast.success(`ID scanned for ${name}`); }}
       />
 
       {/* Add modal — locked to the active type */}

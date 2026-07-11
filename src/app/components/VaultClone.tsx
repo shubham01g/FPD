@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const GLASS: React.CSSProperties = {
   background: "rgba(8,15,26,0.95)",
-  border: "1px solid rgba(108,92,231,0.2)",
+  border: "1px solid rgba(58,91,217,0.2)",
   backdropFilter: "blur(16px)",
 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -21,12 +21,12 @@ interface VaultCloneProps {
 
 // Everything included in the full account download
 const ALL_CONTENTS = [
-  { icon:<FileText size={13}/>,    color:"#6C5CE7", label:"All Documents",         count:"14 files", desc:"All 18 folder categories" },
+  { icon:<FileText size={13}/>,    color:"#3A5BD9", label:"All Documents",         count:"14 files", desc:"All 18 folder categories" },
   { icon:<Heart size={13}/>,       color:"#FC8181", label:"Final Wishes",          count:"5 records",  desc:"Wills, bequests, instructions" },
   { icon:<Stethoscope size={13}/>, color:"#48BB78", label:"Medical Info",          count:"8 records",  desc:"Allergies, medications, directives" },
   { icon:<Wallet size={13}/>,      color:"#F6AD55", label:"Financial Records",     count:"12 records", desc:"Insurance, investments, real estate" },
-  { icon:<Car size={13}/>,         color:"#9F7AEA", label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
-  { icon:<Camera size={13}/>,      color:"#8B7CF6", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
+  { icon:<Car size={13}/>,         color:"#6E8BFF", label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
+  { icon:<Camera size={13}/>,      color:"#5B7BF5", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
   { icon:<BookOpen size={13}/>,    color:"#ED8936", label:"Digital Diary",         count:"12 entries", desc:"Audio, video, and text entries" },
   { icon:<Key size={13}/>,         color:"#38B2AC", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
   { icon:<Users size={13}/>,       color:"#68D391", label:"Contacts & Designations",count:"6 contacts",desc:"Legacy, guardian, emergency contacts" },
@@ -72,10 +72,10 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
         <button onClick={onClose} className="absolute top-5 right-5 z-10" style={{ color:"rgba(255,255,255,0.7)" }}><X size={16}/></button>
 
         {/* Header */}
-        <div className="px-7 pt-7 pb-5 border-b" style={{ borderColor:"rgba(108,92,231,0.15)" }}>
+        <div className="px-7 pt-7 pb-5 border-b" style={{ borderColor:"rgba(58,91,217,0.15)" }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background:"rgba(108,92,231,0.15)", color:"#A29BFE" }}>
+              style={{ background:"rgba(58,91,217,0.15)", color:"#8AA0FF" }}>
               <Copy size={18}/>
             </div>
             <div>
@@ -115,8 +115,8 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
-                <div style={{ color:"#A29BFE", fontSize:12, fontWeight:700, ...MONO }}>WHAT GETS UNLOCKED</div>
+              <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.15)" }}>
+                <div style={{ color:"#8AA0FF", fontSize:12, fontWeight:700, ...MONO }}>WHAT GETS UNLOCKED</div>
                 <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, lineHeight:1.7 }}>
                   Once both conditions are met, legacy contacts can click this button to download a complete, encrypted package of <strong style={{ color:"#E8EDF5" }}>everything</strong> in this account — {totalItems}+ items across all 30+ life categories.
                 </p>
@@ -132,7 +132,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               </div>
 
               <button onClick={onClose} className="w-full py-3 rounded-xl text-sm font-semibold"
-                style={{ background:"rgba(108,92,231,0.1)", color:"#A29BFE", border:"1px solid rgba(108,92,231,0.2)" }}>
+                style={{ background:"rgba(58,91,217,0.1)", color:"#8AA0FF", border:"1px solid rgba(58,91,217,0.2)" }}>
                 Close
               </button>
             </div>
@@ -186,7 +186,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
 
               <button onClick={() => setStep("confirm")}
                 className="w-full py-4 rounded-xl font-bold text-base"
-                style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 28px rgba(108,92,231,0.45)" }}>
+                style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 28px rgba(58,91,217,0.45)" }}>
                 <Download size={16} style={{ display:"inline", marginRight:8 }}/>
                 Download Complete Legacy Package
               </button>
@@ -208,7 +208,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
+              <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.15)" }}>
                 <div style={{ color:"rgba(255,255,255,0.55)", fontSize:11, ...MONO, marginBottom:8 }}>DOWNLOAD SUMMARY</div>
                 {[
                   ["Total Items",      `${totalItems}+ records`],
@@ -218,7 +218,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                   ["Download ID",      `Will be generated on confirm`],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-1.5 border-b"
-                    style={{ borderColor:"rgba(108,92,231,0.08)" }}>
+                    style={{ borderColor:"rgba(58,91,217,0.08)" }}>
                     <span style={{ color:"rgba(255,255,255,0.55)", fontSize:12 }}>{k}</span>
                     <span style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>{v}</span>
                   </div>
@@ -228,12 +228,12 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div className="flex gap-3">
                 <button onClick={() => setStep("overview")}
                   className="flex-1 py-3 rounded-xl text-sm"
-                  style={{ background:"rgba(108,92,231,0.06)", color:"#A29BFE", border:"1px solid rgba(108,92,231,0.2)" }}>
+                  style={{ background:"rgba(58,91,217,0.06)", color:"#8AA0FF", border:"1px solid rgba(58,91,217,0.2)" }}>
                   ← Back
                 </button>
                 <button onClick={startDownload}
                   className="flex-1 py-3 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(108,92,231,0.4)" }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(58,91,217,0.4)" }}>
                   Confirm & Download
                 </button>
               </div>
@@ -244,8 +244,8 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {step === "downloading" && (
             <div className="text-center py-8 space-y-5">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-                style={{ background:"rgba(108,92,231,0.15)", border:"1px solid rgba(108,92,231,0.3)" }}>
-                <Download size={28} color="#6C5CE7" style={{ animation:"bounce 1s infinite" }}/>
+                style={{ background:"rgba(58,91,217,0.15)", border:"1px solid rgba(58,91,217,0.3)" }}>
+                <Download size={28} color="#3A5BD9" style={{ animation:"bounce 1s infinite" }}/>
               </div>
               <div>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5", marginBottom:6 }}>
@@ -255,11 +255,11 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                   Encrypting and packaging all account data...
                 </div>
               </div>
-              <div className="h-2 rounded-full mx-auto" style={{ background:"rgba(108,92,231,0.15)", maxWidth:320 }}>
+              <div className="h-2 rounded-full mx-auto" style={{ background:"rgba(58,91,217,0.15)", maxWidth:320 }}>
                 <div className="h-2 rounded-full transition-all duration-300"
-                  style={{ width:`${progress}%`, background:"linear-gradient(90deg,#6C5CE7,#8B7CF6)", boxShadow:"0 0 12px rgba(108,92,231,0.5)" }}/>
+                  style={{ width:`${progress}%`, background:"linear-gradient(90deg,#3A5BD9,#5B7BF5)", boxShadow:"0 0 12px rgba(58,91,217,0.5)" }}/>
               </div>
-              <div style={{ color:"#6C5CE7", fontSize:14, ...MONO }}>{Math.round(progress)}%</div>
+              <div style={{ color:"#3A5BD9", fontSize:14, ...MONO }}>{Math.round(progress)}%</div>
               <div style={{ color:"rgba(255,255,255,0.55)", fontSize:11 }}>
                 {progress < 30 ? "Gathering documents and records..." :
                  progress < 60 ? "Packaging memories and media..." :
@@ -301,11 +301,11 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div className="flex gap-3">
                 <button onClick={() => toast.success("Legacy package download started (demo)")}
                   className="flex items-center gap-2 flex-1 justify-center py-3.5 rounded-xl text-sm font-bold"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(108,92,231,0.35)" }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(58,91,217,0.35)" }}>
                   <Download size={14}/> Save to Device
                 </button>
                 <button onClick={onClose} className="flex-1 py-3.5 rounded-xl text-sm"
-                  style={{ background:"rgba(108,92,231,0.08)", color:"#A29BFE", border:"1px solid rgba(108,92,231,0.2)" }}>
+                  style={{ background:"rgba(58,91,217,0.08)", color:"#8AA0FF", border:"1px solid rgba(58,91,217,0.2)" }}>
                   Close
                 </button>
               </div>

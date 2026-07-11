@@ -123,11 +123,11 @@ const pets: PetRecord[] = [
 
 const statusStyles = {
   completed: { color: "#48BB78", bg: "rgba(72,187,120,0.12)", label: "COMPLETED" },
-  in_progress: { color: "#6C5CE7", bg: "rgba(108,92,231,0.12)", label: "IN PROGRESS" },
+  in_progress: { color: "#3A5BD9", bg: "rgba(58,91,217,0.12)", label: "IN PROGRESS" },
   not_started: { color: "var(--muted-foreground)", bg: "var(--secondary)", label: "NOT STARTED" },
 };
 
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 
 export function FamilyMemories() {
   const [tab, setTab] = useState<Tab>("memories");
@@ -368,7 +368,7 @@ export function FamilyMemories() {
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--foreground)", marginBottom: 6 }}>{m.title}</div>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 13, lineHeight: 1.6 }}>{m.description}</div>
                 <div className="flex flex-wrap gap-1 mt-3">
-                  {m.tags.map(tag => <span key={tag} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)" }}>#{tag}</span>)}
+                  {m.tags.map(tag => <span key={tag} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)" }}>#{tag}</span>)}
                 </div>
               </div>
             ))}
@@ -385,7 +385,7 @@ export function FamilyMemories() {
           {messagesList.map(msg => (
             <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center rounded-xl" style={{ width: 52, height: 52, background: "rgba(108,92,231,0.1)", flexShrink: 0 }}>
+                <div className="flex items-center justify-center rounded-xl" style={{ width: 52, height: 52, background: "rgba(58,91,217,0.1)", flexShrink: 0 }}>
                   <Play size={22} color="var(--primary)" />
                 </div>
                 <div className="flex-1">
@@ -409,8 +409,8 @@ export function FamilyMemories() {
           <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Record your voice for loved ones — stories, life advice, love letters, songs. Private audio messages delivered after your passing.</p>
 
           {/* ── Recorder ─────────────────────────────────────────────── */}
-          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.2)" }}>
-            <div style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>🎙️ AUDIO RECORDER</div>
+          <div className="p-6 rounded-2xl space-y-4 glow-surface" style={{ background:"rgba(110,139,255,0.06)", border:"2px solid rgba(110,139,255,0.2)" }}>
+            <div style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>🎙️ AUDIO RECORDER</div>
 
             {/* Mic error */}
             {micError && (
@@ -423,15 +423,15 @@ export function FamilyMemories() {
             {recState === "idle" && !recBlob && (
               <div className="flex flex-col items-center gap-4 py-4">
                 <div className="flex items-center justify-center rounded-full"
-                  style={{ width:80, height:80, background:"rgba(159,122,234,0.12)", border:"2px solid rgba(159,122,234,0.25)" }}>
-                  <Mic size={36} color="#9F7AEA"/>
+                  style={{ width:80, height:80, background:"rgba(110,139,255,0.12)", border:"2px solid rgba(110,139,255,0.25)" }}>
+                  <Mic size={36} color="#6E8BFF"/>
                 </div>
                 <div style={{ color:"var(--muted-foreground)", fontSize:13, textAlign:"center" }}>
                   Press Record to start capturing your audio message.<br/>Your microphone will be activated.
                 </div>
                 <button onClick={startRecording}
                   className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F", boxShadow:"0 4px 20px rgba(159,122,234,0.4)" }}>
+                  style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 4px 20px rgba(110,139,255,0.4)" }}>
                   <Circle size={14} color="#FC8181" fill="#FC8181"/> Record
                 </button>
               </div>
@@ -455,7 +455,7 @@ export function FamilyMemories() {
                 {recState === "recording" && (
                   <div className="flex items-center gap-0.5" style={{ height:32 }}>
                     {Array.from({length:20}).map((_,i)=>(
-                      <div key={i} style={{ width:3, borderRadius:2, background:"#9F7AEA", animation:`pulse ${0.4+Math.random()*0.6}s ease-in-out ${i*0.05}s infinite alternate`, opacity:0.7, height:`${20+Math.floor(Math.random()*60)}%` }}/>
+                      <div key={i} style={{ width:3, borderRadius:2, background:"#6E8BFF", animation:`pulse ${0.4+Math.random()*0.6}s ease-in-out ${i*0.05}s infinite alternate`, opacity:0.7, height:`${20+Math.floor(Math.random()*60)}%` }}/>
                     ))}
                   </div>
                 )}
@@ -471,7 +471,7 @@ export function FamilyMemories() {
                   ) : (
                     <button onClick={resumeRecording}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-                      style={{ background:"rgba(159,122,234,0.15)", color:"#9F7AEA", border:"1px solid rgba(159,122,234,0.3)" }}>
+                      style={{ background:"rgba(110,139,255,0.15)", color:"#6E8BFF", border:"1px solid rgba(110,139,255,0.3)" }}>
                       <Mic size={14}/> Resume
                     </button>
                   )}
@@ -505,14 +505,14 @@ export function FamilyMemories() {
                   <div key={f.label}>
                     <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:4, fontFamily:"var(--font-mono)" }}>{f.label.toUpperCase()}</label>
                     <input value={f.val} onChange={e=>f.setter(e.target.value)} placeholder={f.ph}
-                      style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" }}/>
+                      style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" }}/>
                   </div>
                 ))}
 
                 <div className="flex gap-3">
                   <button onClick={saveAudioMessage}
                     className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                    style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F" }}>
+                    style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F" }}>
                     <Volume2 size={14}/> Save Audio Message
                   </button>
                   <button onClick={discardRecording}
@@ -534,12 +534,12 @@ export function FamilyMemories() {
                   <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                        style={{ width: 52, height: 52, background: "rgba(159,122,234,0.1)" }}>
-                        <Volume2 size={22} color="#9F7AEA"/>
+                        style={{ width: 52, height: 52, background: "rgba(110,139,255,0.1)" }}>
+                        <Volume2 size={22} color="#6E8BFF"/>
                       </div>
                       <div className="flex-1">
                         <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 2 }}>{msg.title}</div>
-                        <div style={{ color: "#9F7AEA", fontSize: 13, marginBottom: 4 }}>For: {msg.recipient}</div>
+                        <div style={{ color: "#6E8BFF", fontSize: 13, marginBottom: 4 }}>For: {msg.recipient}</div>
                         <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{msg.description}</div>
                         <div className="flex items-center gap-4 mt-3">
                           <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>{msg.duration}</span>
@@ -547,7 +547,7 @@ export function FamilyMemories() {
                           <button
                             onClick={() => toast.success(`▶ Playing: ${msg.title}`)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold ml-auto"
-                            style={{ background: "rgba(159,122,234,0.1)", color: "#9F7AEA" }}>
+                            style={{ background: "rgba(110,139,255,0.1)", color: "#6E8BFF" }}>
                             <Play size={11}/> Play
                           </button>
                           <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(72,187,120,0.12)", color: "#48BB78", fontFamily: "var(--font-mono)" }}>SECURED</span>
@@ -572,10 +572,10 @@ export function FamilyMemories() {
               <div className="mb-3">
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 8 }}>ACTIVITIES</div>
                 <div className="flex flex-wrap gap-2">
-                  {kid.activities.map(a => <span key={a} className="px-3 py-1.5 rounded-lg text-sm" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)" }}>{a}</span>)}
+                  {kid.activities.map(a => <span key={a} className="px-3 py-1.5 rounded-lg text-sm" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)" }}>{a}</span>)}
                 </div>
               </div>
-              {kid.notes && <div className="px-4 py-3 rounded-lg" style={{ background: "#1C1C28" }}><span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Notes: {kid.notes}</span></div>}
+              {kid.notes && <div className="px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}><span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Notes: {kid.notes}</span></div>}
             </div>
           ))}
         </div>
@@ -592,7 +592,7 @@ export function FamilyMemories() {
                   <div style={{ color: "var(--primary)", fontSize: 13, marginBottom: 8 }}>→ {k.intendedFor}</div>
                   <div className="grid md:grid-cols-2 gap-3 mb-3">
                     {[{ label: "Location", value: k.location }, { label: "Estimated Value", value: k.value }].map(f => (
-                      <div key={f.label} className="px-3 py-2 rounded-lg" style={{ background: "#1C1C28" }}>
+                      <div key={f.label} className="px-3 py-2 rounded-lg" style={{ background: "#141B2E" }}>
                         <div style={{ color: "var(--muted-foreground)", fontSize: 10 }}>{f.label.toUpperCase()}</div>
                         <div style={{ color: "var(--foreground)", fontSize: 12 }}>{f.value}</div>
                       </div>
@@ -640,7 +640,7 @@ export function FamilyMemories() {
           {awardsList.map(a => (
             <div key={a.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start gap-4">
-                <div className="rounded-xl p-3 glow-surface" style={{ background: "rgba(108,92,231,0.1)", flexShrink: 0 }}>
+                <div className="rounded-xl p-3 glow-surface" style={{ background: "rgba(58,91,217,0.1)", flexShrink: 0 }}>
                   <Trophy size={20} color="var(--primary)" />
                 </div>
                 <div>
@@ -669,7 +669,7 @@ export function FamilyMemories() {
             <div key={pet.id} className="rounded-2xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Photos */}
               {pet.photos.length > 0 && (
-                <div className="flex gap-2 p-3 overflow-x-auto" style={{ background:"rgba(108,92,231,0.03)" }}>
+                <div className="flex gap-2 p-3 overflow-x-auto" style={{ background:"rgba(58,91,217,0.03)" }}>
                   {pet.photos.map((url,i) => (
                     <img key={i} src={url} alt="" style={{ width:100, height:80, objectFit:"cover", borderRadius:10, flexShrink:0 }}/>
                   ))}
@@ -679,7 +679,7 @@ export function FamilyMemories() {
               <div className="p-5 space-y-5">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                  <div className="rounded-2xl p-3 glow-surface" style={{ background:"rgba(108,92,231,0.1)" }}><PawPrint size={24} color="var(--primary)"/></div>
+                  <div className="rounded-2xl p-3 glow-surface" style={{ background:"rgba(58,91,217,0.1)" }}><PawPrint size={24} color="var(--primary)"/></div>
                   <div>
                     <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"var(--foreground)" }}>{pet.name}</div>
                     <div style={{ color:"var(--muted-foreground)", fontSize:13 }}>{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
@@ -728,7 +728,7 @@ export function FamilyMemories() {
                 {/* Health Info */}
                 <div>
                   <div style={{ fontWeight:700, color:"var(--foreground)", fontSize:14, marginBottom:8 }}>Health Info</div>
-                  {pet.medicalHistory && <div className="px-4 py-3 rounded-xl mb-3" style={{ background:"#1C1C28" }}><div style={{ color:"var(--muted-foreground)", fontSize:10, marginBottom:3 }}>MEDICAL HISTORY / BACK STORY</div><div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.6 }}>{pet.medicalHistory}</div></div>}
+                  {pet.medicalHistory && <div className="px-4 py-3 rounded-xl mb-3" style={{ background:"#141B2E" }}><div style={{ color:"var(--muted-foreground)", fontSize:10, marginBottom:3 }}>MEDICAL HISTORY / BACK STORY</div><div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.6 }}>{pet.medicalHistory}</div></div>}
                   {pet.vaccinations.length > 0 && (
                     <div className="grid md:grid-cols-2 gap-2">
                       {pet.vaccinations.map((v,i) => (
@@ -746,7 +746,7 @@ export function FamilyMemories() {
                   <div style={{ fontWeight:700, color:"var(--foreground)", fontSize:14, marginBottom:8 }}>Vet Info</div>
                   <div className="grid md:grid-cols-3 gap-3">
                     {[["Name",pet.vetName],["Phone",pet.vetPhone],["Email",pet.vetEmail]].map(([label,value])=>(
-                      <div key={label} className="px-3 py-2.5 rounded-xl" style={{ background:"#1C1C28" }}>
+                      <div key={label} className="px-3 py-2.5 rounded-xl" style={{ background:"#141B2E" }}>
                         <div style={{ color:"var(--muted-foreground)", fontSize:10 }}>{(label as string).toUpperCase()}</div>
                         <div style={{ color:"var(--foreground)", fontSize:12 }}>{value||"—"}</div>
                       </div>
@@ -761,7 +761,7 @@ export function FamilyMemories() {
                     {pet.feedings.map((f,i) => (
                       <div key={i} className="grid md:grid-cols-4 gap-2 mb-2">
                         {[["Food Type",f.foodType],["Time",f.timeType],["Quantity",f.quantity],["Location of Food",f.locationOfFood]].map(([label,value])=>(
-                          <div key={label} className="px-3 py-2 rounded-lg" style={{ background:"#1C1C28" }}>
+                          <div key={label} className="px-3 py-2 rounded-lg" style={{ background:"#141B2E" }}>
                             <div style={{ color:"var(--muted-foreground)", fontSize:9 }}>{(label as string).toUpperCase()}</div>
                             <div style={{ color:"var(--foreground)", fontSize:12 }}>{value||"—"}</div>
                           </div>
@@ -775,7 +775,7 @@ export function FamilyMemories() {
                 {pet.documents.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {pet.documents.map(d=>(
-                      <button key={d} onClick={()=>toast.success(`Opening: ${d}`)} className="px-3 py-1.5 rounded-xl text-xs" style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>📄 {d}</button>
+                      <button key={d} onClick={()=>toast.success(`Opening: ${d}`)} className="px-3 py-1.5 rounded-xl text-xs" style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>📄 {d}</button>
                     ))}
                   </div>
                 )}
@@ -789,7 +789,7 @@ export function FamilyMemories() {
       {showPetForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(6px)" }}>
           <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.4)", maxHeight:"92vh", display:"flex", flexDirection:"column" }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ borderColor:"var(--border)", background:"rgba(108,92,231,0.05)" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ borderColor:"var(--border)", background:"rgba(58,91,217,0.05)" }}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Upload Pet Records</h3>
               <button onClick={()=>{ setShowPetForm(false); resetPetForm(); }} style={{ color:"var(--muted-foreground)" }}><X size={18}/></button>
             </div>
@@ -799,7 +799,7 @@ export function FamilyMemories() {
               <div>
                 <button onClick={()=>petPhotoRef.current?.click()}
                   className="w-full flex flex-col items-center gap-2 py-6 rounded-2xl border-2 border-dashed"
-                  style={{ borderColor:"rgba(108,92,231,0.3)", background:"rgba(108,92,231,0.02)" }}>
+                  style={{ borderColor:"rgba(58,91,217,0.3)", background:"rgba(58,91,217,0.02)" }}>
                   <ImageIcon size={32} color="var(--primary)"/>
                   <div style={{ color:"var(--foreground)", fontWeight:600, fontSize:14 }}>Upload Images or Videos</div>
                   <div style={{ color:"var(--muted-foreground)", fontSize:12 }}>Minimum 1 Maximum 10 images or videos</div>
@@ -874,13 +874,13 @@ export function FamilyMemories() {
                   <input value={petAbout.breed} onChange={e=>setPetAbout(p=>({...p,breed:e.target.value}))} placeholder="Breed" style={INPUT}/>
                   <input value={petAbout.colour} onChange={e=>setPetAbout(p=>({...p,colour:e.target.value}))} placeholder="Colour" style={INPUT}/>
                   {/* Upload Documents */}
-                  <div className="flex flex-col items-center gap-2 py-5 rounded-xl border-2 border-dashed" style={{ borderColor:"rgba(108,92,231,0.25)", background:"rgba(108,92,231,0.02)" }}>
+                  <div className="flex flex-col items-center gap-2 py-5 rounded-xl border-2 border-dashed" style={{ borderColor:"rgba(58,91,217,0.25)", background:"rgba(58,91,217,0.02)" }}>
                     <span style={{ fontSize:28 }}>📄</span>
                     <div style={{ color:"var(--foreground)", fontWeight:600, fontSize:13 }}>Upload Documents</div>
                     <div style={{ color:"var(--muted-foreground)", fontSize:11 }}>Minimum 1 Maximum 10 documents</div>
                     <ScanButton folder="pets" onUpload={doc=>{ setPetDocs(p=>[...p,doc.name]); toast.success(`"${doc.name}" attached`); }} size="sm" label="Scan or Upload"/>
                   </div>
-                  {petDocs.length > 0 && <div className="flex flex-wrap gap-1.5">{petDocs.map(d=><span key={d} className="px-2 py-1 rounded text-xs" style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)" }}>📄 {d}</span>)}</div>}
+                  {petDocs.length > 0 && <div className="flex flex-wrap gap-1.5">{petDocs.map(d=><span key={d} className="px-2 py-1 rounded text-xs" style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)" }}>📄 {d}</span>)}</div>}
                 </div>
               </div>
 

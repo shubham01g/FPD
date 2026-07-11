@@ -16,7 +16,7 @@ const recurringHistory = [
 
 const tiers = [
   { tier: 1, range: "0–50 accounts", rate: 20, color: "#4A90D9" },
-  { tier: 2, range: "51–100 accounts", rate: 25, color: "#6C5CE7" },
+  { tier: 2, range: "51–100 accounts", rate: 25, color: "#3A5BD9" },
   { tier: 3, range: "101+ accounts", rate: 30, color: "#48BB78" },
 ];
 
@@ -39,9 +39,9 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partnership badge */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(108,92,231,0.06), rgba(159,122,234,0.04))", borderColor: "var(--gold)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(58,91,217,0.06), rgba(110,139,255,0.04))", borderColor: "var(--gold)" }}>
         <div className="flex items-center gap-4">
-          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(108,92,231,0.15)" }}>
+          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(58,91,217,0.15)" }}>
             <Star size={28} color="var(--gold)" />
           </div>
           <div>
@@ -88,7 +88,7 @@ export function PartnershipProgram() {
           { label: "Partner Organizations", value: partnerReferrals.length, sub: "Active partnerships", color: "#4A90D9" },
           { label: "Total Accounts", value: totalAccounts, sub: "Across all partners", color: "var(--gold)" },
           { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#48BB78" },
-          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#9F7AEA" },
+          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#6E8BFF" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -135,7 +135,7 @@ export function PartnershipProgram() {
                   <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${d.earned.toFixed(0)}</span>
                     <div style={{ width:"100%", height:140, display:"flex", alignItems:"flex-end" }}>
-                      <div style={{ width:"100%", height:h, background:"linear-gradient(180deg,#6C5CE7,#8B7CF6)", borderRadius:"4px 4px 0 0", opacity: i === recurringHistory.length-1 ? 1 : 0.55 }}/>
+                      <div style={{ width:"100%", height:h, background:"linear-gradient(180deg,#3A5BD9,#5B7BF5)", borderRadius:"4px 4px 0 0", opacity: i === recurringHistory.length-1 ? 1 : 0.55 }}/>
                     </div>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                   </div>
@@ -166,7 +166,7 @@ export function PartnershipProgram() {
             style={{ gridTemplateColumns: "1fr auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg p-2" style={{ background: "rgba(108,92,231,0.1)" }}>
+              <div className="rounded-lg p-2" style={{ background: "rgba(58,91,217,0.1)" }}>
                 <Building size={14} color="var(--gold)" />
               </div>
               <div>
@@ -187,7 +187,7 @@ export function PartnershipProgram() {
         ))}
       </div>
 
-      <div className="flex gap-3 px-5 py-4 rounded-xl border" style={{ background: "rgba(108,92,231,0.05)", borderColor: "rgba(108,92,231,0.2)" }}>
+      <div className="flex gap-3 px-5 py-4 rounded-xl border" style={{ background: "rgba(58,91,217,0.05)", borderColor: "rgba(58,91,217,0.2)" }}>
         <Info size={15} color="var(--gold)" style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ color: "var(--muted-foreground)", fontSize: 13, lineHeight: 1.7 }}>
           <strong style={{ color: "var(--foreground)" }}>Lifetime Recurring Commissions:</strong> Partnership commissions are paid every billing cycle for the lifetime of each referred account — no 12-month cap. As you grow your total account count, your tier upgrades automatically and applies to all existing accounts.

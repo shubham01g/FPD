@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"10px 14px", color:"var(--foreground)", fontSize:14, outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"10px 14px", color:"var(--foreground)", fontSize:14, outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 type VerifStatus = "verified" | "pending" | "id_submitted" | "rejected";
@@ -88,7 +88,7 @@ export function LegacyVerification() {
           </p>
         </div>
         <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl"
-          style={{ background:"linear-gradient(135deg,#6C5CE7,#4466D8)", color:"#070D1A", fontWeight:600, fontSize:14 }}>
+          style={{ background:"linear-gradient(135deg,#3A5BD9,#3A5BD9)", color:"#070D1A", fontWeight:600, fontSize:14 }}>
           <Plus size={16}/> Add Contact
         </button>
       </div>
@@ -125,7 +125,7 @@ export function LegacyVerification() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center justify-center rounded-full font-semibold flex-shrink-0"
-                    style={{ width:48, height:48, background:"rgba(108,92,231,0.1)", color:"var(--primary)", fontSize:16, fontFamily:"var(--font-display)" }}>
+                    style={{ width:48, height:48, background:"rgba(58,91,217,0.1)", color:"var(--primary)", fontSize:16, fontFamily:"var(--font-display)" }}>
                     {contact.avatar}
                   </div>
                   <div>
@@ -166,7 +166,7 @@ export function LegacyVerification() {
                     </div>
                     <button onClick={() => toast.success(`Invite resent to ${contact.email}`)}
                       className="text-xs px-3 py-1.5 rounded-xl ml-auto"
-                      style={{ color:"var(--primary)", background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
+                      style={{ color:"var(--primary)", background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.15)" }}>
                       Resend Invite
                     </button>
                   </>
@@ -213,7 +213,7 @@ export function LegacyVerification() {
           ].map(s => (
             <div key={s.step} className="text-center">
               <div className="mx-auto mb-3 flex items-center justify-center rounded-full"
-                style={{ width:36, height:36, background:"rgba(108,92,231,0.12)", color:"var(--primary)", fontFamily:"var(--font-display)", fontWeight:700 }}>
+                style={{ width:36, height:36, background:"rgba(58,91,217,0.12)", color:"var(--primary)", fontFamily:"var(--font-display)", fontWeight:700 }}>
                 {s.step}
               </div>
               <div style={{ color:"var(--foreground)", fontSize:14, fontWeight:500, marginBottom:4 }}>{s.label}</div>
@@ -251,7 +251,7 @@ export function LegacyVerification() {
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
-              <div className="border-2 border-dashed rounded-xl p-5 text-center" style={{ borderColor:"rgba(108,92,231,0.3)" }}>
+              <div className="border-2 border-dashed rounded-xl p-5 text-center" style={{ borderColor:"rgba(58,91,217,0.3)" }}>
                 <Upload size={22} color="var(--primary)" style={{ margin:"0 auto 8px" }}/>
                 <div style={{ color:"var(--foreground)", fontSize:13, marginBottom:4 }}>Upload or Scan Their ID Now (optional)</div>
                 <div style={{ color:"var(--muted-foreground)", fontSize:12, marginBottom:12 }}>Driver's License, Passport, or State ID</div>
@@ -262,7 +262,7 @@ export function LegacyVerification() {
               <div className="flex gap-3 pt-2">
                 <button onClick={addContact}
                   className="flex-1 py-3 rounded-xl font-semibold"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#4466D8)", color:"#070D1A", fontSize:14 }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#3A5BD9)", color:"#070D1A", fontSize:14 }}>
                   Send Verification Invite
                 </button>
                 <button onClick={() => setShowAdd(false)} className="px-6 py-3 rounded-xl"

@@ -5,7 +5,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(110,139,255,0.05)", border:"1px solid rgba(110,139,255,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 interface AuthorizedPerson {
@@ -146,8 +146,8 @@ export function DaycareInfo() {
             <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===rec.id ? null : rec.id)}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:48, height:48, background:"rgba(159,122,234,0.12)" }}>
-                    <Baby size={22} color="#9F7AEA"/>
+                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:48, height:48, background:"rgba(110,139,255,0.12)" }}>
+                    <Baby size={22} color="#6E8BFF"/>
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -168,11 +168,11 @@ export function DaycareInfo() {
             {expanded===rec.id && (
               <div className="border-t" style={{ borderColor:"var(--border)" }}>
                 {/* Sub tabs */}
-                <div className="flex gap-1 p-2 px-5" style={{ background:"rgba(159,122,234,0.03)" }}>
+                <div className="flex gap-1 p-2 px-5" style={{ background:"rgba(110,139,255,0.03)" }}>
                   {[["info","📋 Facility Info"],["pickups","🚗 Authorized Pickups"],["docs","📄 Documents"]].map(([id,label]) => (
                     <button key={id} onClick={() => setActiveTab(id as any)}
                       className="px-4 py-1.5 rounded-lg text-xs font-semibold"
-                      style={{ background:activeTab===id?"#9F7AEA":"transparent", color:activeTab===id?"#fff":"var(--muted-foreground)" }}>
+                      style={{ background:activeTab===id?"#6E8BFF":"transparent", color:activeTab===id?"#fff":"var(--muted-foreground)" }}>
                       {label}
                     </button>
                   ))}
@@ -192,7 +192,7 @@ export function DaycareInfo() {
                           ["Emergency Contact",rec.emergencyContact],["Emergency Phone",rec.emergencyPhone],
                           ["Enrolled",rec.enrollDate],["Address",rec.address],
                         ].map(([label,value])=>(
-                          <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
+                          <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
                             <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
                             <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
                           </div>
@@ -223,8 +223,8 @@ export function DaycareInfo() {
                         These individuals are authorized to pick up {rec.childName}. All must present a government-issued photo ID to facility staff.
                       </div>
                       {rec.authorizedPickups.map((p,i) => (
-                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
-                          <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0" style={{ width:40, height:40, background:"rgba(159,122,234,0.12)", color:"#9F7AEA", fontFamily:"var(--font-display)", fontSize:14 }}>
+                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
+                          <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0" style={{ width:40, height:40, background:"rgba(110,139,255,0.12)", color:"#6E8BFF", fontFamily:"var(--font-display)", fontSize:14 }}>
                             {p.name.split(" ").map((w:string)=>w[0]).join("").slice(0,2)}
                           </div>
                           <div className="flex-1">
@@ -239,7 +239,7 @@ export function DaycareInfo() {
                       ))}
                       <button onClick={() => toast.success("Add authorized pickup — opens form (demo)")}
                         className="w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
-                        style={{ border:"1px dashed rgba(159,122,234,0.4)", color:"#9F7AEA", background:"rgba(159,122,234,0.04)" }}>
+                        style={{ border:"1px dashed rgba(110,139,255,0.4)", color:"#6E8BFF", background:"rgba(110,139,255,0.04)" }}>
                         <Plus size={13}/> Add Authorized Pickup Person
                       </button>
                     </div>
@@ -251,7 +251,7 @@ export function DaycareInfo() {
                         {rec.documents.map(d => (
                           <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                            style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
+                            style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
                             📄 {d}
                           </button>
                         ))}

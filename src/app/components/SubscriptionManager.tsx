@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 type Frequency = "Weekly"|"Biweekly"|"Monthly"|"Quarterly"|"Yearly";
@@ -33,7 +33,7 @@ const initSubs: Subscription[] = [
   { id:"s6", title:"Planet Fitness", amount:24.99, frequency:"Monthly", phone:"(916) 555-0291", website:"https://planetfitness.com", billingAccountNumber:"PF-8821", paymentType:"Checking Account", lastFour:"8821", category:"Health & Fitness", status:"active", nextBilling:"Jun 30, 2026", autoPay:true, cancelInstructions:"Must cancel IN PERSON at the gym or via certified mail." },
 ];
 
-const frequencyColor: Record<Frequency,string> = { Weekly:"#48BB78", Biweekly:"#38B2AC", Monthly:"#6C5CE7", Quarterly:"#9F7AEA", Yearly:"#F6AD55" };
+const frequencyColor: Record<Frequency,string> = { Weekly:"#48BB78", Biweekly:"#38B2AC", Monthly:"#3A5BD9", Quarterly:"#6E8BFF", Yearly:"#F6AD55" };
 const statusColor: Record<string, { color:string; bg:string }> = {
   active:    { color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
   paused:    { color:"#F6AD55", bg:"rgba(246,173,85,0.1)" },
@@ -59,7 +59,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
     <div>
       <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{label}</label>
       <input type={type} value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))} placeholder={ph}
-        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
     </div>
   );
 
@@ -67,7 +67,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
     <div>
       <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{label}</label>
       <select value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))}
-        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
         {opts.map(o => <option key={o}>{o}</option>)}
       </select>
     </div>
@@ -76,8 +76,8 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
-          <div className="flex items-center gap-2"><CreditCard size={18} color="#6C5CE7"/><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Subscription / Auto Pay</h3></div>
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+          <div className="flex items-center gap-2"><CreditCard size={18} color="#3A5BD9"/><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Subscription / Auto Pay</h3></div>
           <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
         </div>
         <div className="p-6 overflow-y-auto space-y-4" style={{ maxHeight:"80vh" }}>
@@ -106,15 +106,15 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
             </div>
           </div>
           {/* Login details */}
-          <div className="p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
-            <div style={{ color:"#6C5CE7", fontSize:10, ...MONO, fontWeight:700 }}>ACCOUNT LOGIN DETAILS (for legacy contacts)</div>
+          <div className="p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.1)" }}>
+            <div style={{ color:"#3A5BD9", fontSize:10, ...MONO, fontWeight:700 }}>ACCOUNT LOGIN DETAILS (for legacy contacts)</div>
             <div className="grid grid-cols-2 gap-3">
               {inp("username","USERNAME / EMAIL","your.username")}
               <div>
                 <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>PASSWORD</label>
                 <div className="relative">
                   <input type={showPw?"text":"password"} value={form.password??""} onChange={e => setForm(p=>({...p,password:e.target.value}))} placeholder="Account password"
-                    className="w-full px-4 py-2.5 rounded-xl pr-9" style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none", ...MONO }}/>
+                    className="w-full px-4 py-2.5 rounded-xl pr-9" style={{ background:"#101728", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none", ...MONO }}/>
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color:"rgba(255,255,255,0.65)" }}>
                     {showPw ? <EyeOff size={13}/> : <Eye size={13}/>}
                   </button>
@@ -125,12 +125,12 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
           <div>
             <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>CANCELLATION INSTRUCTIONS</label>
             <textarea value={form.cancelInstructions??""} onChange={e => setForm(p=>({...p,cancelInstructions:e.target.value}))} placeholder="Step-by-step instructions to cancel this subscription..." rows={2}
-              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
           {inp("notes","ADDITIONAL NOTES","Account details, login quirks, etc.")}
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.autoPay??true} onChange={e => setForm(p=>({...p,autoPay:e.target.checked}))} style={{ accentColor:"#6C5CE7", width:15, height:15 }}/>
+              <input type="checkbox" checked={form.autoPay??true} onChange={e => setForm(p=>({...p,autoPay:e.target.checked}))} style={{ accentColor:"#3A5BD9", width:15, height:15 }}/>
               <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>Auto-Pay Enabled</span>
             </label>
           </div>
@@ -139,8 +139,8 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
             <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>ATTACH DOCUMENTS</label>
             <input ref={fileRef} type="file" multiple className="hidden" onChange={e => { if(e.target.files?.[0]) toast.success(`Attached: ${e.target.files[0].name}`); }}/>
             <div className="flex items-center gap-2">
-              <div onClick={() => fileRef.current?.click()} className="flex-1 flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer" style={{ borderColor:"rgba(108,92,231,0.2)", background:"rgba(108,92,231,0.02)" }}>
-                <Upload size={14} color="#6C5CE7" style={{ opacity:0.6 }}/>
+              <div onClick={() => fileRef.current?.click()} className="flex-1 flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer" style={{ borderColor:"rgba(58,91,217,0.2)", background:"rgba(58,91,217,0.02)" }}>
+                <Upload size={14} color="#3A5BD9" style={{ opacity:0.6 }}/>
                 <span style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Attach bill, statement, or agreement</span>
               </div>
               <ScanButton folder="financial" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
@@ -148,10 +148,10 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={submit} disabled={loading} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)", opacity:loading?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)", opacity:loading?0.7:1 }}>
               {loading?"Saving...":"Save Subscription"}
             </button>
-            <button onClick={onClose} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            <button onClick={onClose} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -181,7 +181,7 @@ export function SubscriptionManager() {
   const deleteSub = (id: string) => { setSubs(p => p.filter(s => s.id !== id)); if(selected?.id===id) setSelected(null); toast.success("Subscription removed"); };
 
   return (
-    <div style={{ background:"#0A0A0F", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:1200, margin:"0 auto" }} className="space-y-5">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -190,7 +190,7 @@ export function SubscriptionManager() {
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:4 }}>{subs.filter(s=>s.status==="active").length} active subscriptions · ~${totalMonthly.toFixed(2)}/month total</p>
           </div>
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
             <Plus size={15}/> Add Subscription
           </button>
         </div>
@@ -198,10 +198,10 @@ export function SubscriptionManager() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label:"Monthly Cost", value:`$${totalMonthly.toFixed(2)}`, color:"#6C5CE7" },
+            { label:"Monthly Cost", value:`$${totalMonthly.toFixed(2)}`, color:"#3A5BD9" },
             { label:"Annual Cost", value:`$${(totalMonthly*12).toFixed(0)}`, color:"#FC8181" },
             { label:"Auto-Pay Active", value:subs.filter(s=>s.autoPay&&s.status==="active").length, color:"#48BB78" },
-            { label:"Total Subscriptions", value:subs.length, color:"#9F7AEA" },
+            { label:"Total Subscriptions", value:subs.length, color:"#6E8BFF" },
           ].map(s => (
             <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
@@ -227,7 +227,7 @@ export function SubscriptionManager() {
             {categories.slice(0,6).map(c => (
               <button key={c} onClick={() => setCategory(c)}
                 className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
-                style={{ background:category===c?"#6C5CE7":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>
+                style={{ background:category===c?"#3A5BD9":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>
                 {c}
               </button>
             ))}
@@ -239,7 +239,7 @@ export function SubscriptionManager() {
           <div className="lg:col-span-2 space-y-2">
             {filtered.map(sub => (
               <div key={sub.id} className="flex items-center gap-4 px-4 py-4 rounded-2xl cursor-pointer transition-all"
-                style={{ ...CARD, borderColor:selected?.id===sub.id?"#6C5CE7":"rgba(108,92,231,0.1)", borderWidth:selected?.id===sub.id?2:1 }}
+                style={{ ...CARD, borderColor:selected?.id===sub.id?"#3A5BD9":"rgba(58,91,217,0.1)", borderWidth:selected?.id===sub.id?2:1 }}
                 onClick={() => setSelected(selected?.id===sub.id ? null : sub)}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${frequencyColor[sub.frequency]}14` }}>
                   <CreditCard size={18} color={frequencyColor[sub.frequency]}/>
@@ -316,7 +316,7 @@ export function SubscriptionManager() {
               </div>
             ) : (
               <div className="rounded-2xl p-8 text-center glow-surface" style={CARD}>
-                <CreditCard size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+                <CreditCard size={32} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Select a subscription to view details</div>
               </div>
             )}

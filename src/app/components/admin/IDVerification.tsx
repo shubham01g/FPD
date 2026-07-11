@@ -124,7 +124,7 @@ export function IDVerification() {
             <div className="flex gap-4 mt-4">
               <div
                 className="flex-1 flex items-center justify-center rounded-xl border h-28 cursor-pointer transition-all"
-                style={{ borderColor: "rgba(108,92,231,0.3)", background: "rgba(108,92,231,0.04)", borderStyle: "dashed" }}
+                style={{ borderColor: "rgba(58,91,217,0.3)", background: "rgba(58,91,217,0.04)", borderStyle: "dashed" }}
                 onClick={() => setSelectedVerif(verif)}
               >
                 <div className="text-center">
@@ -135,7 +135,7 @@ export function IDVerification() {
               {verif.idBack && (
                 <div
                   className="flex-1 flex items-center justify-center rounded-xl border h-28 cursor-pointer"
-                  style={{ borderColor: "rgba(108,92,231,0.3)", background: "rgba(108,92,231,0.04)", borderStyle: "dashed" }}
+                  style={{ borderColor: "rgba(58,91,217,0.3)", background: "rgba(58,91,217,0.04)", borderStyle: "dashed" }}
                   onClick={() => setSelectedVerif(verif)}
                 >
                   <div className="text-center">

@@ -77,7 +77,7 @@ export function AttachDocumentField({
             type="button"
             onClick={() => fileRef.current?.click()}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold"
-            style={{ border:"1px dashed rgba(108,92,231,0.3)", background:"rgba(108,92,231,0.03)", color:"var(--primary)" }}>
+            style={{ border:"1px dashed rgba(58,91,217,0.3)", background:"rgba(58,91,217,0.03)", color:"var(--primary)" }}>
             <Upload size={13}/> Upload File
           </button>
           <ScanButton

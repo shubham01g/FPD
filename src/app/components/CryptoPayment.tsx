@@ -306,9 +306,9 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                   </p>
                 </div>
                 <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
-                  style={{ background:"rgba(108,92,231,0.08)", border:"1px solid rgba(108,92,231,0.15)" }}>
-                  <Shield size={12} color="#A29BFE" style={{ marginTop:1, flexShrink:0 }}/>
-                  <p style={{ color:"#A29BFE", fontSize:11, lineHeight:1.6 }}>
+                  style={{ background:"rgba(58,91,217,0.08)", border:"1px solid rgba(58,91,217,0.15)" }}>
+                  <Shield size={12} color="#8AA0FF" style={{ marginTop:1, flexShrink:0 }}/>
+                  <p style={{ color:"#8AA0FF", fontSize:11, lineHeight:1.6 }}>
                     Only send {selectedCoin.symbol} on the {selectedCoin.network} network. Sending on wrong network will result in permanent loss.
                   </p>
                 </div>

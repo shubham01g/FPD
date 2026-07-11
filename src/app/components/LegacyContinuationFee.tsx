@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { CryptoPayment } from "./CryptoPayment";
 
-const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 interface ContinuationStatus {
@@ -32,12 +32,12 @@ const initStatus: ContinuationStatus = {
 
 // Everything the legacy contact receives when fully unlocked
 const FULL_COVERAGE = [
-  { icon:<FileText size={14}/>,    color:"#6C5CE7", label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
+  { icon:<FileText size={14}/>,    color:"#3A5BD9", label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
   { icon:<Heart size={14}/>,       color:"#FC8181", label:"Final Wishes & Wills", desc:"Complete estate instructions and bequests" },
   { icon:<Stethoscope size={14}/>, color:"#48BB78", label:"Medical Records", desc:"Allergies, medications, healthcare directives" },
   { icon:<Wallet size={14}/>,      color:"#F6AD55", label:"Financial Records", desc:"Insurance, investments, real estate, retirement" },
-  { icon:<Car size={14}/>,         color:"#9F7AEA", label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
-  { icon:<Camera size={14}/>,      color:"#8B7CF6", label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
+  { icon:<Car size={14}/>,         color:"#6E8BFF", label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
+  { icon:<Camera size={14}/>,      color:"#5B7BF5", label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
   { icon:<BookOpen size={14}/>,    color:"#ED8936", label:"Digital Diary", desc:"All audio, video, and written diary entries" },
   { icon:<Key size={14}/>,         color:"#38B2AC", label:"Password Manager", desc:"All saved credentials and account information" },
   { icon:<Users size={14}/>,       color:"#68D391", label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
@@ -95,14 +95,14 @@ export function LegacyContinuationFee() {
   };
 
   return (
-    <div style={{ background:"#0A0A0F", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:960, margin:"0 auto" }} className="space-y-6">
 
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Shield size={15} color="#6C5CE7"/>
-            <span style={{ color:"#6C5CE7", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>LEGACY PROTECTION</span>
+            <Shield size={15} color="#3A5BD9"/>
+            <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>LEGACY PROTECTION</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:8 }}>Activate Legacy Access</h1>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8 }}>
@@ -113,9 +113,9 @@ export function LegacyContinuationFee() {
 
         {/* Demo simulation banner */}
         <div className="flex items-center justify-between px-5 py-4 rounded-2xl flex-wrap gap-3"
-          style={{ background:"rgba(159,122,234,0.07)", border:"1px dashed rgba(159,122,234,0.4)" }}>
+          style={{ background:"rgba(110,139,255,0.07)", border:"1px dashed rgba(110,139,255,0.4)" }}>
           <div>
-            <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, fontWeight:700, marginBottom:2 }}>🎮 DEMO MODE — SIMULATE THE FULL FLOW</div>
+            <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, fontWeight:700, marginBottom:2 }}>🎮 DEMO MODE — SIMULATE THE FULL FLOW</div>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>
               {!status.paid && !status.deathCertificateVerified && "Step 1: Pay the $199 fee using the payment form below, then Step 2: simulate admin verification."}
               {status.paid && !status.deathCertificateVerified && "Fee paid ✓ — Now simulate the FPD admin verifying the confirmation of passing to fully unlock."}
@@ -127,14 +127,14 @@ export function LegacyContinuationFee() {
             {!status.paid && (
               <button onClick={() => { setShowPayment(true); }}
                 className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background:"rgba(108,92,231,0.1)", color:"#6C5CE7" }}>
+                style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9" }}>
                 1. Pay Fee →
               </button>
             )}
             {!status.deathCertificateVerified && (
               <button onClick={simulateAdminVerification} disabled={simulatingVerif}
                 className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background:"rgba(159,122,234,0.15)", color:"#9F7AEA" }}>
+                style={{ background:"rgba(110,139,255,0.15)", color:"#6E8BFF" }}>
                 {simulatingVerif ? "Verifying…" : "2. Simulate Admin Verification →"}
               </button>
             )}
@@ -149,13 +149,13 @@ export function LegacyContinuationFee() {
         </div>
 
         {/* Two-condition gate explanation */}
-        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.15)" }}>
-          <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:10 }}>HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
+        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
+          <div style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO, marginBottom:10 }}>HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3 p-4 rounded-xl"
-              style={{ background:status.paid?"rgba(72,187,120,0.08)":"rgba(108,92,231,0.04)", border:`1px solid ${status.paid?"rgba(72,187,120,0.25)":"rgba(108,92,231,0.12)"}` }}>
+              style={{ background:status.paid?"rgba(72,187,120,0.08)":"rgba(58,91,217,0.04)", border:`1px solid ${status.paid?"rgba(72,187,120,0.25)":"rgba(58,91,217,0.12)"}` }}>
               <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ width:32, height:32, background:status.paid?"rgba(72,187,120,0.15)":"rgba(108,92,231,0.1)", color:status.paid?"#48BB78":"#6C5CE7", fontSize:13, fontWeight:700 }}>
+                style={{ width:32, height:32, background:status.paid?"rgba(72,187,120,0.15)":"rgba(58,91,217,0.1)", color:status.paid?"#48BB78":"#3A5BD9", fontSize:13, fontWeight:700 }}>
                 {status.paid ? <CheckCircle size={16}/> : "1"}
               </div>
               <div>
@@ -198,19 +198,19 @@ export function LegacyContinuationFee() {
             className="w-full flex items-center justify-between"
             style={{ background:"transparent", border:"none", cursor:"pointer" }}>
             <div className="flex items-center gap-2">
-              <Download size={16} color="#6C5CE7"/>
+              <Download size={16} color="#3A5BD9"/>
               <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>What the Legacy Vault Clone Downloads</span>
             </div>
             {showCoverage ? <ChevronUp size={16} color="rgba(255,255,255,0.65)"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
           </button>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:6, lineHeight:1.7 }}>
-            When conditions are met and a legacy contact clicks <strong style={{ color:"#FFFFFF" }}>LEGACY VAULT CLONE</strong>, they receive a complete, encrypted download of <strong style={{ color:"#6C5CE7" }}>everything</strong> the account holder ever saved — across all 30+ life categories.
+            When conditions are met and a legacy contact clicks <strong style={{ color:"#FFFFFF" }}>LEGACY VAULT CLONE</strong>, they receive a complete, encrypted download of <strong style={{ color:"#3A5BD9" }}>everything</strong> the account holder ever saved — across all 30+ life categories.
           </p>
           {showCoverage && (
             <div className="grid md:grid-cols-2 gap-3 mt-4">
               {FULL_COVERAGE.map(item => (
                 <div key={item.label} className="flex items-start gap-3 px-4 py-3 rounded-xl"
-                  style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.08)" }}>
+                  style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.08)" }}>
                   <div className="flex items-center justify-center rounded-lg flex-shrink-0"
                     style={{ width:28, height:28, background:`${item.color}14`, color:item.color }}>
                     {item.icon}
@@ -259,7 +259,7 @@ export function LegacyContinuationFee() {
             {!status.paid ? (
               <div className="p-6 rounded-2xl glow-surface" style={CARD}>
                 <div className="text-center mb-6">
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:52, color:"#6C5CE7", fontWeight:900, lineHeight:1 }}>$199</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:52, color:"#3A5BD9", fontWeight:900, lineHeight:1 }}>$199</div>
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, marginTop:4 }}>One-time · Never expires · Non-refundable</div>
                   <div className="flex items-center justify-center gap-2 mt-3 px-4 py-2 rounded-full mx-auto"
                     style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", width:"fit-content" }}>
@@ -276,10 +276,10 @@ export function LegacyContinuationFee() {
                   ].map(opt => (
                     <button key={opt.id} onClick={() => setPayerType(opt.id as any)}
                       className="w-full flex items-start gap-3 p-3.5 rounded-xl text-left transition-all"
-                      style={{ background:payerType===opt.id?"rgba(108,92,231,0.08)":"#0F1A33", border:`2px solid ${payerType===opt.id?"#6C5CE7":"transparent"}`, color:"#FFFFFF" }}>
+                      style={{ background:payerType===opt.id?"rgba(58,91,217,0.08)":"#0F1A33", border:`2px solid ${payerType===opt.id?"#3A5BD9":"transparent"}`, color:"#FFFFFF" }}>
                       <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ borderColor:payerType===opt.id?"#6C5CE7":"#C8D4EE" }}>
-                        {payerType===opt.id && <div style={{ width:8, height:8, borderRadius:"50%", background:"#6C5CE7" }}/>}
+                        style={{ borderColor:payerType===opt.id?"#3A5BD9":"#C8D4EE" }}>
+                        {payerType===opt.id && <div style={{ width:8, height:8, borderRadius:"50%", background:"#3A5BD9" }}/>}
                       </div>
                       <div>
                         <div style={{ fontSize:13, fontWeight:500 }}>{opt.label}</div>
@@ -291,7 +291,7 @@ export function LegacyContinuationFee() {
 
                 <div className="space-y-3">
                   <button onClick={() => setShowPayment(true)} className="w-full py-4 rounded-2xl font-bold text-base"
-                    style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 8px 24px rgba(108,92,231,0.4)" }}>
+                    style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 8px 24px rgba(58,91,217,0.4)" }}>
                     <CreditCard size={16} style={{ display:"inline", marginRight:8 }}/>
                     Pay $199 with Card (Stripe)
                   </button>
@@ -318,17 +318,17 @@ export function LegacyContinuationFee() {
                 <div className="text-5xl">🛡️</div>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Fee Paid — Awaiting Confirmation of Passing</div>
                 <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
-                  Your legacy contacts will be able to download <strong style={{ color:"#6C5CE7" }}>everything in your account</strong> for <strong style={{ color:"#6C5CE7" }}>{status.activationPeriod} months</strong> from your date of passing — once a legacy contact submits confirmation of passing and FPD administrators verify it.
+                  Your legacy contacts will be able to download <strong style={{ color:"#3A5BD9" }}>everything in your account</strong> for <strong style={{ color:"#3A5BD9" }}>{status.activationPeriod} months</strong> from your date of passing — once a legacy contact submits confirmation of passing and FPD administrators verify it.
                 </p>
-                <div className="px-4 py-3 rounded-xl text-left" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+                <div className="px-4 py-3 rounded-xl text-left" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
                   <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:6 }}>ACCEPTED CONFIRMATION DOCUMENTS</div>
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.7 }}>
                     Death certificates · Obituaries · Hospital or hospice notices · Coroner reports · Funeral home letters · Probate filings · Any credible official record
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.1)" }}>
+                <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.1)" }}>
                   <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, marginBottom:4 }}>TRANSACTION ID</div>
-                  <div style={{ color:"#6C5CE7", fontSize:13, ...MONO }}>{status.transactionId}</div>
+                  <div style={{ color:"#3A5BD9", fontSize:13, ...MONO }}>{status.transactionId}</div>
                 </div>
               </div>
             )}
@@ -346,7 +346,7 @@ export function LegacyContinuationFee() {
               { q:"Is the fee refundable?", a:"No. The Legacy Continuation Fee is non-refundable once processed." },
               { q:"What if I'm still alive when the period ends?", a:"The fee only applies during the post-passing continuation window. Your standard subscription continues normally while you're alive." },
             ].map(item => (
-              <div key={item.q} className="pb-3 border-b" style={{ borderColor:"rgba(108,92,231,0.06)" }}>
+              <div key={item.q} className="pb-3 border-b" style={{ borderColor:"rgba(58,91,217,0.06)" }}>
                 <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:600, marginBottom:3 }}>{item.q}</div>
                 <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{item.a}</div>
               </div>
@@ -360,8 +360,8 @@ export function LegacyContinuationFee() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
           <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background:"rgba(108,92,231,0.1)" }}>
-                <CreditCard size={20} color="#6C5CE7"/>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background:"rgba(58,91,217,0.1)" }}>
+                <CreditCard size={20} color="#3A5BD9"/>
               </div>
               <div>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Payment Details</div>
@@ -372,37 +372,37 @@ export function LegacyContinuationFee() {
               <div>
                 <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CARDHOLDER NAME</label>
                 <input value={name} onChange={e=>setName(e.target.value)} placeholder="James Doe"
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.15)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
+                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
               </div>
               <div>
                 <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CARD NUMBER</label>
                 <input value={cardNum} onChange={e=>setCardNum(formatCard(e.target.value))} placeholder="4242 4242 4242 4242" maxLength={19}
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>EXPIRY</label>
                   <input value={expiry} onChange={e=>setExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" maxLength={5}
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
                 </div>
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CVC</label>
                   <input value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="•••"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
                 </div>
               </div>
-              <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+              <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
                 <div className="flex justify-between mb-1"><span style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Legacy Continuation Fee</span><span style={{ color:"#FFFFFF", fontSize:13 }}>$199.00</span></div>
                 <div className="flex justify-between mb-1"><span style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Processing Fee</span><span style={{ color:"#FFFFFF", fontSize:13 }}>$0.00</span></div>
-                <div className="border-t my-2" style={{ borderColor:"rgba(108,92,231,0.1)" }}/>
-                <div className="flex justify-between"><span style={{ color:"#FFFFFF", fontSize:14, fontWeight:700 }}>Total</span><span style={{ color:"#6C5CE7", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>$199.00</span></div>
+                <div className="border-t my-2" style={{ borderColor:"rgba(58,91,217,0.1)" }}/>
+                <div className="flex justify-between"><span style={{ color:"#FFFFFF", fontSize:14, fontWeight:700 }}>Total</span><span style={{ color:"#3A5BD9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>$199.00</span></div>
               </div>
               <div className="flex gap-3">
                 <button onClick={handlePay} disabled={processing} className="flex-1 py-3.5 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 16px rgba(108,92,231,0.35)", opacity:processing?0.8:1 }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 16px rgba(58,91,217,0.35)", opacity:processing?0.8:1 }}>
                   {processing ? "Processing Stripe Payment..." : "Pay $199 Now"}
                 </button>
-                <button onClick={() => setShowPayment(false)} className="px-5 py-3.5 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+                <button onClick={() => setShowPayment(false)} className="px-5 py-3.5 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <Lock size={11} color="rgba(255,255,255,0.65)"/>

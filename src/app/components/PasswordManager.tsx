@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 interface PasswordEntry {
@@ -22,7 +22,7 @@ interface PasswordEntry {
 
 const categories = ["All","Social Media","Banking","Email","Shopping","Work","Healthcare","Government","Entertainment","Other"];
 
-const strengthColor = { weak:"#E53E3E", fair:"#F6AD55", good:"#48BB78", strong:"#6C5CE7" };
+const strengthColor = { weak:"#E53E3E", fair:"#F6AD55", good:"#48BB78", strong:"#3A5BD9" };
 const strengthLabel = { weak:"Weak", fair:"Fair", good:"Good", strong:"Strong" };
 
 function getStrength(pw: string): PasswordEntry["strength"] {
@@ -47,7 +47,7 @@ function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"]
     <div className="flex items-center gap-2">
       <div className="flex gap-0.5">
         {[1,2,3,4].map(n => (
-          <div key={n} style={{ width:28, height:4, borderRadius:2, background: n <= levels[strength] ? strengthColor[strength] : "rgba(108,92,231,0.1)" }}/>
+          <div key={n} style={{ width:28, height:4, borderRadius:2, background: n <= levels[strength] ? strengthColor[strength] : "rgba(58,91,217,0.1)" }}/>
         ))}
       </div>
       <span style={{ fontSize:11, color:strengthColor[strength], fontWeight:600 }}>{strengthLabel[strength]}</span>
@@ -74,16 +74,16 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
     <div>
       <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{label}</label>
       <input type={type} value={(form as any)[key]} onChange={e => setForm(p => ({...p,[key]:e.target.value}))} placeholder={ph}
-        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
     </div>
   );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
           <div className="flex items-center gap-2">
-            <Key size={18} color="#6C5CE7"/>
+            <Key size={18} color="#3A5BD9"/>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Password Entry</h3>
           </div>
           <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
@@ -94,7 +94,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
             <div>
               <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>CATEGORY</label>
               <select value={form.category} onChange={e => setForm(p=>({...p,category:e.target.value}))}
-                className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+                className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
                 {categories.filter(c=>c!=="All").map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -112,7 +112,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
             <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>PASSWORD *</label>
             <div className="relative">
               <input type={showPw?"text":"password"} value={form.password} onChange={e => setForm(p=>({...p,password:e.target.value}))} placeholder="Enter password"
-                className="w-full px-4 py-2.5 rounded-xl pr-10" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none", ...MONO }}/>
+                className="w-full px-4 py-2.5 rounded-xl pr-10" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none", ...MONO }}/>
               <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color:"rgba(255,255,255,0.65)" }}>
                 {showPw ? <EyeOff size={14}/> : <Eye size={14}/>}
               </button>
@@ -126,11 +126,11 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
           <div>
             <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>NOTES & SIGN-IN PROCEDURES</label>
             <textarea value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} placeholder="Special instructions for logging in, 2FA notes, backup codes location..." rows={3}
-              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.twoFactor} onChange={e => setForm(p=>({...p,twoFactor:e.target.checked}))} style={{ accentColor:"#6C5CE7", width:15, height:15 }}/>
+              <input type="checkbox" checked={form.twoFactor} onChange={e => setForm(p=>({...p,twoFactor:e.target.checked}))} style={{ accentColor:"#3A5BD9", width:15, height:15 }}/>
               <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>2FA / MFA Enabled</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -144,8 +144,8 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
             <input ref={fileRef} type="file" multiple className="hidden" accept=".pdf,.jpg,.png,.doc,.docx" onChange={e => { if (e.target.files?.[0]) toast.success(`Document attached: ${e.target.files[0].name}`); }}/>
             <div className="flex items-center gap-2">
               <div onClick={() => fileRef.current?.click()} className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer"
-                style={{ borderColor:"rgba(108,92,231,0.2)", background:"rgba(108,92,231,0.02)" }}>
-                <Upload size={15} color="#6C5CE7" style={{ opacity:0.6 }}/>
+                style={{ borderColor:"rgba(58,91,217,0.2)", background:"rgba(58,91,217,0.02)" }}>
+                <Upload size={15} color="#3A5BD9" style={{ opacity:0.6 }}/>
                 <span style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Attach PDF, image, or document</span>
               </div>
               <ScanButton folder="other" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
@@ -153,10 +153,10 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
           </div>
           <div className="flex gap-3 pt-2">
             <button onClick={submit} disabled={loading} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)", opacity:loading?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)", opacity:loading?0.7:1 }}>
               <Lock size={13} style={{ display:"inline", marginRight:6 }}/>{loading?"Encrypting & Saving...":"Save to Vault"}
             </button>
-            <button onClick={onClose} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            <button onClick={onClose} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -181,20 +181,20 @@ export function PasswordManager() {
   const copy = (text: string, label: string) => { copyToClipboard(text); toast.success(`${label} copied to clipboard`) };
 
   return (
-    <div style={{ background:"#0A0A0F", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:1200, margin:"0 auto" }} className="space-y-5">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Lock size={14} color="#6C5CE7"/>
-              <span style={{ color:"#6C5CE7", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
+              <Lock size={14} color="#3A5BD9"/>
+              <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
             </div>
             <h1 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#FFFFFF" }}>Password Manager</h1>
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:4 }}>{passwords.length} entries · Encrypted and accessible to your designated legacy contacts</p>
           </div>
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
             <Plus size={15}/> Add Password
           </button>
         </div>
@@ -202,10 +202,10 @@ export function PasswordManager() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label:"Total Entries", value:passwords.length, color:"#6C5CE7" },
+            { label:"Total Entries", value:passwords.length, color:"#3A5BD9" },
             { label:"Strong Passwords", value:passwords.filter(p=>p.strength==="strong").length, color:"#48BB78" },
             { label:"Weak/Fair Passwords", value:passwords.filter(p=>p.strength==="weak"||p.strength==="fair").length, color:"#FC8181" },
-            { label:"2FA Enabled", value:passwords.filter(p=>p.twoFactor).length, color:"#9F7AEA" },
+            { label:"2FA Enabled", value:passwords.filter(p=>p.twoFactor).length, color:"#6E8BFF" },
           ].map(s => (
             <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
@@ -225,7 +225,7 @@ export function PasswordManager() {
             {categories.slice(0,6).map(c => (
               <button key={c} onClick={() => setCategory(c)}
                 className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
-                style={{ background:category===c?"#6C5CE7":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>
+                style={{ background:category===c?"#3A5BD9":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>
                 {c}
               </button>
             ))}
@@ -237,11 +237,11 @@ export function PasswordManager() {
           <div className="lg:col-span-2 space-y-2">
             {filtered.map(p => (
               <div key={p.id} className="flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all"
-                style={{ ...CARD, borderColor:selected?.id===p.id?"#6C5CE7":"rgba(108,92,231,0.1)", borderWidth:selected?.id===p.id?2:1 }}
+                style={{ ...CARD, borderColor:selected?.id===p.id?"#3A5BD9":"rgba(58,91,217,0.1)", borderWidth:selected?.id===p.id?2:1 }}
                 onClick={() => setSelected(selected?.id===p.id ? null : p)}>
                 {/* Icon */}
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:"rgba(108,92,231,0.08)" }}>
-                  <Globe size={18} color="#6C5CE7"/>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:"rgba(58,91,217,0.08)" }}>
+                  <Globe size={18} color="#3A5BD9"/>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -301,7 +301,7 @@ export function PasswordManager() {
                           <div style={{ color:"#FFFFFF", fontSize:13 }} className="truncate">{row.value}</div>
                         </div>
                       </div>
-                      {row.copy && <button onClick={() => copy(row.value!, row.label)} style={{ color:"#6C5CE7", flexShrink:0 }}><Copy size={12}/></button>}
+                      {row.copy && <button onClick={() => copy(row.value!, row.label)} style={{ color:"#3A5BD9", flexShrink:0 }}><Copy size={12}/></button>}
                     </div>
                   ))}
                   {/* Password field */}
@@ -317,7 +317,7 @@ export function PasswordManager() {
                       <button onClick={() => setShowPwFor(showPwFor===selected.id ? null : selected.id)} style={{ color:"rgba(255,255,255,0.65)" }}>
                         {showPwFor===selected.id ? <EyeOff size={12}/> : <Eye size={12}/>}
                       </button>
-                      <button onClick={() => copy(selected.password, "Password")} style={{ color:"#6C5CE7" }}><Copy size={12}/></button>
+                      <button onClick={() => copy(selected.password, "Password")} style={{ color:"#3A5BD9" }}><Copy size={12}/></button>
                     </div>
                   </div>
                 </div>
@@ -345,7 +345,7 @@ export function PasswordManager() {
               </div>
             ) : (
               <div className="rounded-2xl p-8 text-center glow-surface" style={CARD}>
-                <Key size={32} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+                <Key size={32} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Select a password entry to view details</div>
               </div>
             )}

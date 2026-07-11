@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { PhotoPicker } from "./PhotoPicker";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const PLACE_CATEGORIES = ["Restaurant","Coffee Shop","Bakery","Bar / Lounge","Park / Nature","Beach","Museum / Art","Entertainment","Shopping","Grocery / Market","Pharmacy","Doctor / Medical","Dentist","Hair / Salon","Gym / Fitness","Religious / Church","Library","Hotel / Resort","Vacation Spot","Family Home","Friend's Place","Other"];
@@ -13,20 +13,20 @@ const CAT_META: Record<string, { emoji:string; color:string; bg:string }> = {
   "Restaurant":        { emoji:"🍽️", color:"#ED8936", bg:"rgba(237,137,54,0.1)" },
   "Coffee Shop":       { emoji:"☕",  color:"#92400E", bg:"rgba(146,64,14,0.1)" },
   "Bakery":            { emoji:"🥐",  color:"#F6AD55", bg:"rgba(246,173,85,0.1)" },
-  "Bar / Lounge":      { emoji:"🍸",  color:"#9F7AEA", bg:"rgba(159,122,234,0.1)" },
+  "Bar / Lounge":      { emoji:"🍸",  color:"#6E8BFF", bg:"rgba(110,139,255,0.1)" },
   "Park / Nature":     { emoji:"🌳",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
   "Beach":             { emoji:"🏖️", color:"#4A90D9", bg:"rgba(74,144,217,0.1)" },
-  "Museum / Art":      { emoji:"🏛️", color:"#6C5CE7", bg:"rgba(108,92,231,0.1)" },
+  "Museum / Art":      { emoji:"🏛️", color:"#3A5BD9", bg:"rgba(58,91,217,0.1)" },
   "Entertainment":     { emoji:"🎭",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
-  "Shopping":          { emoji:"🛍️", color:"#9F7AEA", bg:"rgba(159,122,234,0.1)" },
+  "Shopping":          { emoji:"🛍️", color:"#6E8BFF", bg:"rgba(110,139,255,0.1)" },
   "Grocery / Market":  { emoji:"🛒",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
   "Doctor / Medical":  { emoji:"🏥",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
   "Dentist":           { emoji:"🦷",  color:"#4A90D9", bg:"rgba(74,144,217,0.1)" },
-  "Religious / Church":{ emoji:"⛪",  color:"#6C5CE7", bg:"rgba(108,92,231,0.1)" },
+  "Religious / Church":{ emoji:"⛪",  color:"#3A5BD9", bg:"rgba(58,91,217,0.1)" },
   "Gym / Fitness":     { emoji:"💪",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
   "Hotel / Resort":    { emoji:"🏨",  color:"#ED8936", bg:"rgba(237,137,54,0.1)" },
   "Vacation Spot":     { emoji:"🌴",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
-  "Family Home":       { emoji:"🏡",  color:"#6C5CE7", bg:"rgba(108,92,231,0.1)" },
+  "Family Home":       { emoji:"🏡",  color:"#3A5BD9", bg:"rgba(58,91,217,0.1)" },
 };
 
 function getMeta(cat:string) { return CAT_META[cat] || { emoji:"📍", color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)" }; }
@@ -105,7 +105,7 @@ export function FavoritePlaces() {
             return (
               <button key={cat} onClick={() => setFilterCat(cat)}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                style={{ background:filterCat===cat?meta.bg:"rgba(108,92,231,0.04)", color:filterCat===cat?meta.color:"var(--muted-foreground)", border:`1px solid ${filterCat===cat?meta.color+"40":"rgba(108,92,231,0.1)"}` }}>
+                style={{ background:filterCat===cat?meta.bg:"rgba(58,91,217,0.04)", color:filterCat===cat?meta.color:"var(--muted-foreground)", border:`1px solid ${filterCat===cat?meta.color+"40":"rgba(58,91,217,0.1)"}` }}>
                 {cat==="all" ? "📍 All" : `${meta.emoji} ${cat}`}
               </button>
             );
@@ -153,15 +153,15 @@ export function FavoritePlaces() {
               <div className="flex items-center justify-between">
                 <div className="flex flex-wrap gap-1">
                   {place.tags.map(tag => (
-                    <span key={tag} className="px-1.5 py-0.5 rounded text-xs" style={{ background:"rgba(108,92,231,0.06)", color:"var(--primary)" }}>#{tag}</span>
+                    <span key={tag} className="px-1.5 py-0.5 rounded text-xs" style={{ background:"rgba(58,91,217,0.06)", color:"var(--primary)" }}>#{tag}</span>
                   ))}
                 </div>
                 {place.visited && <span style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO }}>{place.visited}</span>}
               </div>
 
               <div className="flex gap-2 mt-3">
-                {place.phone && <button onClick={() => toast.success(`Calling ${place.name}: ${place.phone}`)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg" style={{ background:"rgba(108,92,231,0.06)", color:"var(--primary)" }}><Phone size={10}/>{place.phone}</button>}
-                {place.website && <button onClick={() => toast.success(`Opening: ${place.website}`)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg" style={{ background:"rgba(108,92,231,0.06)", color:"var(--primary)" }}><Globe size={10}/>{place.website}</button>}
+                {place.phone && <button onClick={() => toast.success(`Calling ${place.name}: ${place.phone}`)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg" style={{ background:"rgba(58,91,217,0.06)", color:"var(--primary)" }}><Phone size={10}/>{place.phone}</button>}
+                {place.website && <button onClick={() => toast.success(`Opening: ${place.website}`)} className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg" style={{ background:"rgba(58,91,217,0.06)", color:"var(--primary)" }}><Globe size={10}/>{place.website}</button>}
               </div>
               </div>
             </div>

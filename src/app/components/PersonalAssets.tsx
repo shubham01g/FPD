@@ -52,7 +52,7 @@ const weaponsLockerInit = [
   { id:3, type:"Tactical Tomahawk", make:"SOG", model:"Fasthawk", blade:"2.75 inch 420 stainless", handle:"GRN reinforced polymer", storage:"Canvas roll bag — garage cabinet", transfer:"Michael Doe", notes:"Camping / utility tool.", photo:"" },
 ];
 
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 
 export function PersonalAssets() {
   const [tab, setTab] = useState<Tab>("vehicles");
@@ -160,7 +160,7 @@ export function PersonalAssets() {
   ];
 
   const Field = ({ label, value }: { label: string; value: string }) => (
-    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background: "#1C1C28" }}>
+    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background: "#141B2E" }}>
       <span style={{ color: "var(--muted-foreground)", fontSize: 10 }}>{label.toUpperCase()}</span>
       <span style={{ color: "var(--foreground)", fontSize: 12 }}>{value}</span>
     </div>
@@ -194,7 +194,7 @@ export function PersonalAssets() {
               <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-xl p-2.5" style={{ background: "rgba(108,92,231,0.1)" }}><Car size={20} color="var(--primary)" /></div>
+                  <div className="rounded-xl p-2.5" style={{ background: "rgba(58,91,217,0.1)" }}><Car size={20} color="var(--primary)" /></div>
                   <div>
                     <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)" }}>{v.year} {v.make} {v.model}</div>
                     <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{v.color} · {v.plate}</div>
@@ -230,12 +230,12 @@ export function PersonalAssets() {
           {realEstateList.map(r => (
             <div key={r.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Property photo */}
-              <div className="relative" style={{ height: r.photo ? 220 : 80, background: r.photo ? "transparent" : "rgba(108,92,231,0.04)", borderBottom:"1px solid var(--border)" }}>
+              <div className="relative" style={{ height: r.photo ? 220 : 80, background: r.photo ? "transparent" : "rgba(58,91,217,0.04)", borderBottom:"1px solid var(--border)" }}>
                 {r.photo ? (
                   <img src={r.photo} alt={r.address} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full gap-2">
-                    <Home size={28} color="rgba(108,92,231,0.25)"/>
+                    <Home size={28} color="rgba(58,91,217,0.25)"/>
                     <span style={{ color:"var(--muted-foreground)", fontSize:12 }}>No photo — add one below</span>
                   </div>
                 )}
@@ -321,7 +321,7 @@ export function PersonalAssets() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(108,92,231,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{d.category.toUpperCase()}</span>
+                    <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>{d.category.toUpperCase()}</span>
                   </div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>{d.asset}</div>
                   <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{d.platform}</div>
@@ -350,12 +350,12 @@ export function PersonalAssets() {
           {weaponList.map(w => (
             <div key={w.id} className="rounded-xl border overflow-hidden glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               {/* Firearm photo */}
-              <div className="relative" style={{ height: w.photo ? 200 : 72, background:"rgba(108,92,231,0.03)", borderBottom:"1px solid var(--border)" }}>
+              <div className="relative" style={{ height: w.photo ? 200 : 72, background:"rgba(58,91,217,0.03)", borderBottom:"1px solid var(--border)" }}>
                 {w.photo ? (
                   <img src={w.photo} alt={`${w.make} ${w.model}`} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
                 ) : (
                   <div className="flex items-center justify-center h-full gap-2">
-                    <Image size={20} color="rgba(108,92,231,0.2)"/>
+                    <Image size={20} color="rgba(58,91,217,0.2)"/>
                     <span style={{ color:"var(--muted-foreground)", fontSize:12 }}>No photo</span>
                   </div>
                 )}
@@ -409,7 +409,7 @@ export function PersonalAssets() {
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   {[["Blade / Edge",w.blade],["Handle / Grip",w.handle],["Storage Location",w.storage],["Transfer Instructions",w.transfer]].map(([label,value])=>(
-                    <div key={label} className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background:"#1C1C28" }}>
+                    <div key={label} className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background:"#141B2E" }}>
                       <span style={{ color:"var(--muted-foreground)", fontSize:10 }}>{(label as string).toUpperCase()}</span>
                       <span style={{ color:"var(--foreground)", fontSize:12 }}>{value||"—"}</span>
                     </div>
@@ -438,7 +438,7 @@ export function PersonalAssets() {
                 <div className="flex items-start justify-between mb-3 gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(159,122,234,0.1)", color:"#9F7AEA", fontFamily:"var(--font-mono)" }}>{c.category.toUpperCase()}</span>
+                      <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(110,139,255,0.1)", color:"#6E8BFF", fontFamily:"var(--font-mono)" }}>{c.category.toUpperCase()}</span>
                     </div>
                     <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"var(--foreground)" }}>{c.name}</div>
                   </div>
@@ -449,13 +449,13 @@ export function PersonalAssets() {
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   {[["Condition",c.condition||"—"],["Purchased From",c.purchasedFrom||"—"],["Purchase Date",c.purchaseDate||"—"],["Serial / Cert #",c.serialNum||"—"],["Intended For",c.intendedFor||"—"]].map(([label,value])=>(
-                    <div key={label} className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background:"#1C1C28" }}>
+                    <div key={label} className="flex flex-col gap-1 px-3 py-2.5 rounded-lg" style={{ background:"#141B2E" }}>
                       <span style={{ color:"var(--muted-foreground)", fontSize:10 }}>{(label as string).toUpperCase()}</span>
                       <span style={{ color:"var(--foreground)", fontSize:12 }}>{value}</span>
                     </div>
                   ))}
                 </div>
-                {c.notes && <div className="mt-3 px-4 py-3 rounded-lg" style={{ background:"rgba(159,122,234,0.06)", border:"1px solid rgba(159,122,234,0.2)" }}><span style={{ color:"#9F7AEA", fontSize:13 }}>{c.notes}</span></div>}
+                {c.notes && <div className="mt-3 px-4 py-3 rounded-lg" style={{ background:"rgba(110,139,255,0.06)", border:"1px solid rgba(110,139,255,0.2)" }}><span style={{ color:"#6E8BFF", fontSize:13 }}>{c.notes}</span></div>}
                 <div className="mt-3 flex gap-2 flex-wrap">
                   <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" linked to ${c.name}`)} size="sm" label="Attach Document"/>
                 </div>

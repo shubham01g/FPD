@@ -12,9 +12,9 @@ import { ScanButton } from "./DocumentScanner";
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
 
 const CARD: React.CSSProperties = {
-  background: "#16161F",
-  border: "1px solid rgba(108,92,231,0.1)",
-  boxShadow: "0 2px 12px rgba(108,92,231,0.06)",
+  background: "#101728",
+  border: "1px solid rgba(58,91,217,0.1)",
+  boxShadow: "0 2px 12px rgba(58,91,217,0.06)",
   borderRadius: 16,
 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -34,7 +34,7 @@ interface Cabinet {
 
 const cabinets: Cabinet[] = [
   {
-    id:"legal", label:"Legal Documents", color:"#6C5CE7", emoji:"⚖️",
+    id:"legal", label:"Legal Documents", color:"#3A5BD9", emoji:"⚖️",
     description:"Wills, trusts, power of attorney, contracts & deeds",
     acceptedTypes:"application/pdf,.pdf,.doc,.docx",
     subFolders:["Wills & Trusts","Power of Attorney","Property Deeds","Contracts","Court Documents"],
@@ -121,7 +121,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"insurance", label:"Insurance Policies", color:"#9F7AEA", emoji:"🛡️",
+    id:"insurance", label:"Insurance Policies", color:"#6E8BFF", emoji:"🛡️",
     description:"Life, health, home, auto, umbrella — all policies",
     acceptedTypes:"application/pdf,.pdf",
     subFolders:["Life Insurance","Health Insurance","Home Insurance","Auto Insurance","Umbrella"],
@@ -183,7 +183,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#9F7AEA", emoji:"🏺",
+    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#6E8BFF", emoji:"🏺",
     description:"Photos and records of heirlooms, collectibles, and sentimental items",
     acceptedTypes:"image/*,.jpg,.jpeg,.png,application/pdf",
     subFolders:["Jewelry","Coins & Currency","Art","Military Memorabilia","Family Heirlooms"],
@@ -252,7 +252,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"warranties", label:"Warranties", color:"#9F7AEA", emoji:"🛡️",
+    id:"warranties", label:"Warranties", color:"#6E8BFF", emoji:"🛡️",
     description:"Product warranties, extended protection plans, and proof of purchase",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electronics","Appliances","Vehicles","Home & HVAC","Other"],
@@ -276,13 +276,13 @@ const cabinets: Cabinet[] = [
   },
 ];
 
-function getIcon(type: string, color = "#6C5CE7", size = 28) {
+function getIcon(type: string, color = "#3A5BD9", size = 28) {
   if (type === "folder") return <Folder size={size} color={color} fill={`${color}22`}/>;
   if (type === "image")  return <Image size={size} color="#F6AD55"/>;
   if (type === "video")  return <Film  size={size} color="#4A90D9"/>;
-  if (type === "pdf" || type === "doc") return <FileText size={size} color="#6C5CE7"/>;
+  if (type === "pdf" || type === "doc") return <FileText size={size} color="#3A5BD9"/>;
   if (type === "other") return <Lock size={size} color="#E53E3E"/>;
-  return <Archive size={size} color="rgba(255,255,255,0.6)"/>;
+  return <Archive size={size} color="#8A9AB8"/>;
 }
 
 export function DigitalFileCabinet() {
@@ -340,7 +340,7 @@ export function DigitalFileCabinet() {
   const totalFiles = cabinets.reduce((s,c) => s + c.files.length + (extras[c.id]?.length??0), 0) + syncedDocs.length;
 
   return (
-    <div style={{ background:"#0A0A0F", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:1280, margin:"0 auto" }} className="space-y-5">
 
         {/* Header */}
@@ -350,29 +350,29 @@ export function DigitalFileCabinet() {
               <button onClick={() => { setCurrent(null); setSearch(""); setSelected(null); }}
                 className="flex items-center justify-center rounded-xl flex-shrink-0"
                 style={{ width:36, height:36, ...CARD }}>
-                <ArrowLeft size={16} color="#6C5CE7"/>
+                <ArrowLeft size={16} color="#3A5BD9"/>
               </button>
             )}
             <div>
               {current && (
                 <div className="flex items-center gap-2 mb-1">
-                  <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>File Cabinet</span>
-                  <ChevronRight size={12} color="rgba(255,255,255,0.65)"/>
-                  <span style={{ color:"#6C5CE7", fontSize:12, fontWeight:600 }}>{current.emoji} {current.label}</span>
+                  <span style={{ color:"#8A9AB8", fontSize:12 }}>File Cabinet</span>
+                  <ChevronRight size={12} color="#8A9AB8"/>
+                  <span style={{ color:"#3A5BD9", fontSize:12, fontWeight:600 }}>{current.emoji} {current.label}</span>
                 </div>
               )}
               <h1 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#FFFFFF" }}>
                 {current ? current.label : "Digital File Cabinet"}
               </h1>
-              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:4 }}>
+              <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
                 {current ? current.description : `${cabinets.length} folders · ${totalFiles}+ files · AES-256 encrypted`}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
-              <button onClick={() => setView("grid")} className="p-2 rounded-lg" style={{ background:view==="grid"?"#6C5CE7":"transparent", color:view==="grid"?"#fff":"rgba(255,255,255,0.7)" }}><Grid size={13}/></button>
-              <button onClick={() => setView("list")} className="p-2 rounded-lg" style={{ background:view==="list"?"#6C5CE7":"transparent", color:view==="list"?"#fff":"rgba(255,255,255,0.7)" }}><List size={13}/></button>
+              <button onClick={() => setView("grid")} className="p-2 rounded-lg" style={{ background:view==="grid"?"#3A5BD9":"transparent", color:view==="grid"?"#fff":"#8A9AB8" }}><Grid size={13}/></button>
+              <button onClick={() => setView("list")} className="p-2 rounded-lg" style={{ background:view==="list"?"#3A5BD9":"transparent", color:view==="list"?"#fff":"#8A9AB8" }}><List size={13}/></button>
             </div>
             {current && (
               <>
@@ -384,7 +384,7 @@ export function DigitalFileCabinet() {
                   label="Scan"
                 />
                 <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
                   <Upload size={14}/> {uploading ? "Uploading..." : "Upload Files"}
                 </button>
               </>
@@ -394,11 +394,11 @@ export function DigitalFileCabinet() {
 
         {/* Search */}
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ ...CARD, maxWidth:420 }}>
-          <Search size={13} color="rgba(255,255,255,0.65)"/>
+          <Search size={13} color="#8A9AB8"/>
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={current ? `Search in ${current.label}...` : "Search all folders..."}
             style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
-          {search && <button onClick={() => setSearch("")} style={{ color:"rgba(255,255,255,0.65)" }}><X size={13}/></button>}
+          {search && <button onClick={() => setSearch("")} style={{ color:"#8A9AB8" }}><X size={13}/></button>}
         </div>
 
         {/* Drop zone when inside a folder */}
@@ -408,13 +408,13 @@ export function DigitalFileCabinet() {
             onDragLeave={() => setDragging(false)}
             onDrop={e => { e.preventDefault(); setDragging(false); doUpload(current.id, e.dataTransfer.files); }}
             className="flex items-center gap-3 px-5 py-3 rounded-xl border-2 border-dashed transition-all cursor-pointer"
-            style={{ borderColor:dragging?"#6C5CE7":"rgba(108,92,231,0.2)", background:dragging?"rgba(108,92,231,0.04)":"transparent" }}
+            style={{ borderColor:dragging?"#3A5BD9":"rgba(58,91,217,0.2)", background:dragging?"rgba(58,91,217,0.04)":"transparent" }}
             onClick={() => fileRef.current?.click()}>
-            <Upload size={16} color={dragging?"#6C5CE7":"rgba(255,255,255,0.65)"}/>
-            <span style={{ color:dragging?"#6C5CE7":"rgba(255,255,255,0.65)", fontSize:13 }}>
+            <Upload size={16} color={dragging?"#3A5BD9":"#8A9AB8"}/>
+            <span style={{ color:dragging?"#3A5BD9":"#8A9AB8", fontSize:13 }}>
               {uploading ? "Encrypting and uploading..." : dragging ? "Drop files here" : `Drag & drop ${current.acceptedTypes.includes("image") ? "documents, images or videos" : "files"} here, or click to browse`}
             </span>
-            <span className="ml-auto text-xs px-2 py-0.5 rounded" style={{ background:"rgba(108,92,231,0.1)", color:"#6C5CE7", ...MONO }}>
+            <span className="ml-auto text-xs px-2 py-0.5 rounded" style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>
               {current.acceptedTypes.includes("image/*") && current.acceptedTypes.includes("video/*") ? "PDF · IMG · VIDEO" :
                current.acceptedTypes.includes("image/*") ? "PDF · IMG" :
                current.acceptedTypes.includes("video/*") ? "VIDEO" : "PDF · DOC"}
@@ -428,15 +428,35 @@ export function DigitalFileCabinet() {
             {current.subFolders.map(sf => (
               <button key={sf} onClick={() => toast.info(`Opening sub-folder: ${sf}`)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all"
-                style={{ background:"#16161F", border:"1px solid rgba(108,92,231,0.12)", color:"rgba(255,255,255,0.8)" }}>
+                style={{ background:"#101728", border:"1px solid rgba(58,91,217,0.12)", color:"#B8C8E0" }}>
                 <Folder size={13} color={current.color} fill={`${current.color}22`}/> {sf}
               </button>
             ))}
             <button onClick={() => toast.info("Create new sub-folder")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm"
-              style={{ border:"1px dashed rgba(108,92,231,0.2)", color:"rgba(255,255,255,0.65)" }}>
+              style={{ border:"1px dashed rgba(58,91,217,0.2)", color:"#8A9AB8" }}>
               <Plus size={13}/> New Sub-folder
             </button>
+          </div>
+        )}
+
+        {/* ROOT OVERVIEW STRIP */}
+        {!current && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label:"Folders", value:String(cabinets.length), icon:<FolderOpen size={16}/>, color:"#3A5BD9" },
+              { label:"Total Files", value:`${totalFiles}+`, icon:<FileText size={16}/>, color:"#5B7BF5" },
+              { label:"Protected Vaults", value:String(cabinets.filter(c=>c.files.some(f=>f.locked)).length), icon:<Lock size={16}/>, color:"#F6AD55" },
+              { label:"Encryption", value:"AES-256", icon:<Shield size={16}/>, color:"#48BB78" },
+            ].map((s,i) => (
+              <div key={s.label} className="flex items-center gap-3 p-4 fpd-fade-in-up" style={{ ...CARD, animationDelay:`${i*50}ms` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${s.color}1E`, color:s.color }}>{s.icon}</div>
+                <div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF", lineHeight:1.1 }}>{s.value}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.04em" }}>{s.label}</div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -450,7 +470,7 @@ export function DigitalFileCabinet() {
               const isLocked = (folder as any).locked || folder.id === "secret";
               return view==="grid" ? (
                 <button key={folder.id} onClick={() => openFolder(folder)}
-                  className="text-left rounded-2xl overflow-hidden transition-all hover:shadow-md group w-full"
+                  className="text-left rounded-2xl overflow-hidden group w-full fpd-hover-lift glow-surface"
                   style={CARD}>
                   <div style={{ height:5, background:`linear-gradient(90deg,${folder.color},${folder.color}88)` }}/>
                   <div className="p-5">
@@ -461,7 +481,7 @@ export function DigitalFileCabinet() {
                       </span>
                     </div>
                     <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", fontWeight:600, marginBottom:6 }}>{folder.label}</div>
-                    <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, lineHeight:1.5 }}>{folder.description}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:11, lineHeight:1.5 }}>{folder.description}</div>
                   </div>
                 </button>
               ) : (
@@ -471,17 +491,17 @@ export function DigitalFileCabinet() {
                   <div className="text-2xl flex-shrink-0">{folder.emoji}</div>
                   <div className="flex-1 min-w-0">
                     <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{folder.label}</div>
-                    <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{folder.description}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:12 }}>{folder.description}</div>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{ background:`${folder.color}14`, color:folder.color, ...MONO }}>{isLocked?"🔒":count+" files"}</span>
-                  <ChevronRight size={14} color="rgba(255,255,255,0.65)"/>
+                  <ChevronRight size={14} color="#8A9AB8"/>
                 </button>
               );
             })}
             {/* New folder */}
             <button onClick={() => toast.info("Enter a folder name to create a custom folder")}
               className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 p-6 transition-all"
-              style={{ borderColor:"rgba(108,92,231,0.2)", minHeight:140, color:"rgba(255,255,255,0.65)" }}>
+              style={{ borderColor:"rgba(58,91,217,0.2)", minHeight:140, color:"#8A9AB8" }}>
               <Plus size={22} style={{ opacity:0.5 }}/>
               <span style={{ fontSize:13 }}>New Custom Folder</span>
             </button>
@@ -497,7 +517,7 @@ export function DigitalFileCabinet() {
               view==="grid" ? (
                 <div key={file.id}
                   className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-md"
-                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(108,92,231,0.1)", borderWidth:selected?.id===file.id?2:1 }}
+                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(58,91,217,0.1)", borderWidth:selected?.id===file.id?2:1 }}
                   onClick={() => setSelected(selected?.id===file.id ? null : file)}>
                   <div className="flex items-center justify-center relative" style={{ height:100, background:`${current.color}08` }}>
                     {file.thumbnail
@@ -508,13 +528,13 @@ export function DigitalFileCabinet() {
                   </div>
                   <div className="p-3">
                     <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:500, marginBottom:2 }} className="truncate">{file.name}</div>
-                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO }}>{file.count?`${file.count} files`:file.size} · {file.modified}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{file.count?`${file.count} files`:file.size} · {file.modified}</div>
                   </div>
                 </div>
               ) : (
                 <div key={file.id}
                   className="flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all"
-                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(108,92,231,0.08)" }}
+                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(58,91,217,0.08)" }}
                   onClick={() => setSelected(selected?.id===file.id ? null : file)}>
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background:`${current.color}10` }}>
                     {file.thumbnail
@@ -524,21 +544,21 @@ export function DigitalFileCabinet() {
                   <div className="flex-1 min-w-0">
                     <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500 }} className="truncate">{file.name}</div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO }}>{file.count?`${file.count} files`:file.size}</span>
+                      <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{file.count?`${file.count} files`:file.size}</span>
                       {(file as any)._synced && (
                         <span className="px-1.5 py-0.5 rounded text-xs inline-flex items-center gap-1"
-                          style={{ background:"rgba(108,92,231,0.07)", color:"#6C5CE7" }}>
+                          style={{ background:"rgba(58,91,217,0.07)", color:"#3A5BD9" }}>
                           🔗 {(file as any)._sourceSection}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, flexShrink:0 }}>{file.modified}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11, flexShrink:0 }}>{file.modified}</div>
                   {file.starred && <Star size={13} fill="#F6AD55" color="#F6AD55"/>}
                   {file.locked && <Lock size={13} color="#E53E3E"/>}
                   <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.success(`Downloading: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download files");}} style={{color:"rgba(255,255,255,0.65)",padding:4}}><Download size={12}/></button>
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.info(`Previewing: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview files");}} style={{color:"rgba(255,255,255,0.65)",padding:4}}><Eye size={12}/></button>
+                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.success(`Downloading: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download files");}} style={{color:"#8A9AB8",padding:4}}><Download size={12}/></button>
+                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.info(`Previewing: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview files");}} style={{color:"#8A9AB8",padding:4}}><Eye size={12}/></button>
                     <button onClick={e=>{e.stopPropagation(); if((file as any)._synced){ removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); } else { toast.success(`Deleted: ${file.name}`); }}} style={{color:"#FC8181",padding:4}}><Trash2 size={12}/></button>
                   </div>
                 </div>
@@ -551,9 +571,9 @@ export function DigitalFileCabinet() {
               onDrop={e=>{e.preventDefault();setDragging(false);doUpload(current.id,e.dataTransfer.files);}}
               onClick={() => fileRef.current?.click()}
               className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
-              style={{ borderColor:dragging?"#6C5CE7":"rgba(108,92,231,0.2)", background:dragging?"rgba(108,92,231,0.04)":"transparent", minHeight:view==="grid"?140:56 }}>
-              <Upload size={20} color="#6C5CE7" style={{ opacity:0.6 }}/>
-              <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>Upload or drop files</span>
+              style={{ borderColor:dragging?"#3A5BD9":"rgba(58,91,217,0.2)", background:dragging?"rgba(58,91,217,0.04)":"transparent", minHeight:view==="grid"?140:56 }}>
+              <Upload size={20} color="#3A5BD9" style={{ opacity:0.6 }}/>
+              <span style={{ color:"#8A9AB8", fontSize:12 }}>Upload or drop files</span>
             </div>
           </div>
         )}
@@ -561,10 +581,10 @@ export function DigitalFileCabinet() {
 
       {/* File detail panel */}
       {selected && (
-        <div className="fixed bottom-20 right-6 w-72 rounded-2xl p-5 z-40" style={{ ...CARD, boxShadow:"0 8px 40px rgba(108,92,231,0.15)" }}>
+        <div className="fixed bottom-20 right-6 w-72 rounded-2xl p-5 z-40" style={{ ...CARD, boxShadow:"0 8px 40px rgba(58,91,217,0.15)" }}>
           <div className="flex items-center justify-between mb-4">
             <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600 }} className="truncate">{selected.name}</div>
-            <button onClick={() => setSelected(null)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={14}/></button>
+            <button onClick={() => setSelected(null)} style={{ color:"#8A9AB8" }}><X size={14}/></button>
           </div>
           {selected.thumbnail && <img src={selected.thumbnail} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:12 }}/>}
           <div className="space-y-2 mb-4">
@@ -575,16 +595,16 @@ export function DigitalFileCabinet() {
               ["Encrypted", "AES-256"],
             ].map(([l,v]) => (
               <div key={l as string} className="flex justify-between">
-                <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>{l}</span>
+                <span style={{ color:"#8A9AB8", fontSize:12 }}>{l}</span>
                 <span style={{ color:"#FFFFFF", fontSize:12, fontWeight:500 }}>{v}</span>
               </div>
             ))}
           </div>
           <div className="flex gap-2">
-            <button onClick={() => continuationFeePaid ? toast.success(`Downloading: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"#1C1C28", color:"#6C5CE7" }}>
+            <button onClick={() => continuationFeePaid ? toast.success(`Downloading: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"#141B2E", color:"#3A5BD9" }}>
               <Download size={13}/> Download
             </button>
-            <button onClick={() => continuationFeePaid ? toast.info(`Previewing: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff" }}>
+            <button onClick={() => continuationFeePaid ? toast.info(`Previewing: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff" }}>
               <Eye size={13}/> Preview
             </button>
           </div>

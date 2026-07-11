@@ -176,8 +176,8 @@ export function PayoutManagement() {
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{payout.email} · {payout.id}</div>
               </div>
               <div className="flex items-center gap-1.5">
-                {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#9F7AEA" />}
-                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#9F7AEA", fontSize: 12, textTransform: "capitalize" }}>{payout.type}</span>
+                {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#6E8BFF" />}
+                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#6E8BFF", fontSize: 12, textTransform: "capitalize" }}>{payout.type}</span>
               </div>
               <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{payout.period}</div>
               <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{payout.rate}%</div>

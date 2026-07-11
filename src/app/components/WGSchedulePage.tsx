@@ -53,12 +53,12 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
           {/* FPD logo area */}
           <div>
-            <div style={{ color:"#6C5CE7", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:4 }}>
+            <div style={{ color:"#3A5BD9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:4 }}>
               FINAL PASS DOWN
             </div>
             <div className="flex items-center justify-center gap-1">
-              <Star size={14} color="#9F7AEA"/>
-              <span style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
+              <Star size={14} color="#6E8BFF"/>
+              <span style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
             </div>
           )}
 
-          <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.1)" }}>
+          <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
             <div style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>
               <strong style={{ color:"#0D1428" }}>What to have ready:</strong><br/>
               Any documents you'd like to upload — wills, insurance policies, photos, medical records — have them nearby so your specialist can walk you through everything.
@@ -104,7 +104,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
           </div>
 
           <div style={{ color:"#B0C0DC", fontSize:12 }}>
-            Need to reschedule? Call us at <strong style={{ color:"#6C5CE7" }}>(800) 555-0199</strong>
+            Need to reschedule? Call us at <strong style={{ color:"#3A5BD9" }}>(800) 555-0199</strong>
           </div>
         </div>
       </div>
@@ -116,19 +116,19 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
     <div className="min-h-screen flex flex-col" style={{ background:"#F8FAFF", fontFamily:"var(--font-body)" }}>
 
       {/* Header */}
-      <div className="px-6 py-8 text-center" style={{ background:"#fff", borderBottom:"1px solid rgba(108,92,231,0.08)" }}>
-        <div style={{ color:"#6C5CE7", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:6 }}>
+      <div className="px-6 py-8 text-center" style={{ background:"#fff", borderBottom:"1px solid rgba(58,91,217,0.08)" }}>
+        <div style={{ color:"#3A5BD9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:6 }}>
           FINAL PASS DOWN
         </div>
         <div className="flex items-center justify-center gap-1 mb-4">
-          <Star size={13} color="#9F7AEA"/>
-          <span style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
+          <Star size={13} color="#6E8BFF"/>
+          <span style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
         </div>
 
         {/* Specialist avatar */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center justify-center rounded-full font-bold"
-            style={{ width:72, height:72, background:"rgba(159,122,234,0.15)", color:"#9F7AEA", fontSize:26, fontFamily:"var(--font-display)", border:"3px solid rgba(159,122,234,0.3)" }}>
+            style={{ width:72, height:72, background:"rgba(110,139,255,0.15)", color:"#6E8BFF", fontSize:26, fontFamily:"var(--font-display)", border:"3px solid rgba(110,139,255,0.3)" }}>
             {scheduleData.specialistName.split(" ").map(w => w[0]).join("").slice(0, 2)}
           </div>
           <div>
@@ -165,17 +165,17 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
               style={{
                 padding:"20px 24px",
                 background: isSelecting ? "rgba(72,187,120,0.08)" : "#fff",
-                border: `2px solid ${isSelecting ? "rgba(72,187,120,0.4)" : "rgba(108,92,231,0.15)"}`,
-                boxShadow: isSelecting ? "0 4px 16px rgba(72,187,120,0.15)" : "0 2px 8px rgba(108,92,231,0.06)",
+                border: `2px solid ${isSelecting ? "rgba(72,187,120,0.4)" : "rgba(58,91,217,0.15)"}`,
+                boxShadow: isSelecting ? "0 4px 16px rgba(72,187,120,0.15)" : "0 2px 8px rgba(58,91,217,0.06)",
                 opacity: selecting && !isSelecting ? 0.5 : 1,
                 cursor: selecting ? "not-allowed" : "pointer",
               }}>
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                  style={{ width:48, height:48, background: isSelecting ? "rgba(72,187,120,0.15)" : "rgba(108,92,231,0.06)" }}>
+                  style={{ width:48, height:48, background: isSelecting ? "rgba(72,187,120,0.15)" : "rgba(58,91,217,0.06)" }}>
                   {isSelecting
                     ? <CheckCircle size={24} color="#48BB78"/>
-                    : <Calendar size={24} color="#6C5CE7"/>
+                    : <Calendar size={24} color="#3A5BD9"/>
                   }
                 </div>
                 <div>
@@ -197,8 +197,8 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
         {/* Reassurance note */}
         <div className="flex items-start gap-3 px-4 py-4 rounded-2xl mt-2"
-          style={{ background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.15)" }}>
-          <Phone size={18} color="#9F7AEA" style={{ flexShrink:0, marginTop:2 }}/>
+          style={{ background:"rgba(110,139,255,0.05)", border:"1px solid rgba(110,139,255,0.15)" }}>
+          <Phone size={18} color="#6E8BFF" style={{ flexShrink:0, marginTop:2 }}/>
           <div style={{ color:"#5A6A88", fontSize:13, lineHeight:1.6 }}>
             Your specialist will call you at the phone number you provided. You don't need to download anything or be online — just answer your phone at the chosen time.
           </div>
@@ -206,7 +206,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
         <div style={{ color:"#B0C0DC", fontSize:12, textAlign:"center" }}>
           None of these times work?<br/>
-          Call us at <strong style={{ color:"#6C5CE7" }}>(800) 555-0199</strong>
+          Call us at <strong style={{ color:"#3A5BD9" }}>(800) 555-0199</strong>
         </div>
       </div>
     </div>

@@ -18,15 +18,15 @@ import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
 
-const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(108,92,231,0.14)", backdropFilter:"blur(12px)" };
-const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
+const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
+const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
 const MONO:  React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 /* ── What gets included in the legacy package ───────────────────── */
 const PACKAGE_SECTIONS = [
   {
     icon: <FileText size={18}/>,
-    color: "#6C5CE7",
+    color: "#3A5BD9",
     label: "Digital File Cabinet",
     desc: "All 18+ folders — Legal, Financial, Medical, Property, Insurance, Vehicles, Utilities, Digital Assets, Pet Records, Warranties, Weapons Locker, and more",
     itemCount: "18+ folders",
@@ -42,7 +42,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <FileText size={18}/>,
-    color: "#6C5CE7",
+    color: "#3A5BD9",
     label: "Wills and Living Trusts",
     desc: "All executed legal documents with attorney details, dates, and locations",
     itemCount: "3 documents",
@@ -66,7 +66,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <Car size={18}/>,
-    color: "#9F7AEA",
+    color: "#6E8BFF",
     label: "Personal Assets",
     desc: "Vehicles, real estate, utilities, digital assets, firearms, weapons locker, collectibles",
     itemCount: "7 categories",
@@ -74,7 +74,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <Camera size={18}/>,
-    color: "#8B7CF6",
+    color: "#5B7BF5",
     label: "Memories & Media",
     desc: "Family photos, video messages to loved ones, keepsakes, goals, awards, and pet records",
     itemCount: "7 tabs",
@@ -114,7 +114,7 @@ const PACKAGE_SECTIONS = [
   },
   {
     icon: <Shield size={18}/>,
-    color: "#9F7AEA",
+    color: "#6E8BFF",
     label: "Warranties",
     desc: "All product warranties, coverage details, and claim instructions",
     itemCount: "All warranties",
@@ -166,8 +166,8 @@ export function LegacyVault() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Lock size={13} color="#6C5CE7"/>
-          <span style={{ color:"#6C5CE7", fontSize:10, ...MONO, letterSpacing:"0.12em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
+          <Lock size={13} color="#3A5BD9"/>
+          <span style={{ color:"#3A5BD9", fontSize:10, ...MONO, letterSpacing:"0.12em" }}>AES-256 ENCRYPTED · ZERO-KNOWLEDGE</span>
         </div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:6 }}>Your Legacy Package</h1>
         <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.7 }}>
@@ -176,7 +176,7 @@ export function LegacyVault() {
       </div>
 
       {/* Two-condition gate */}
-      <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.12)" }}>
+      <div className="p-5 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.12)" }}>
         <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF", marginBottom:8 }}>
           🔐 Two Conditions Required to Unlock Downloads
         </div>
@@ -203,7 +203,7 @@ export function LegacyVault() {
           <button
             onClick={() => toast.info("Go to Security → Activate Legacy Access in the sidebar to pay.")}
             className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm w-full justify-center"
-            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 4px 16px rgba(108,92,231,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 4px 16px rgba(58,91,217,0.3)" }}>
             Go to Activate Legacy Access <ArrowRight size={15}/>
           </button>
         )}
@@ -220,7 +220,7 @@ export function LegacyVault() {
           </div>
           <button onClick={() => setExpanded(e => !e)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
-            style={{ background:"rgba(108,92,231,0.07)", color:"#6C5CE7" }}>
+            style={{ background:"rgba(58,91,217,0.07)", color:"#3A5BD9" }}>
             {expanded ? <><ChevronUp size={14}/> Collapse</> : <><ChevronDown size={14}/> See All {PACKAGE_SECTIONS.length} Sections</>}
           </button>
         </div>
@@ -267,7 +267,7 @@ export function LegacyVault() {
         {!expanded && (
           <button onClick={() => setExpanded(true)}
             className="w-full mt-3 py-3 rounded-2xl text-sm flex items-center justify-center gap-2"
-            style={{ border:"1px dashed rgba(108,92,231,0.25)", color:"rgba(255,255,255,0.7)", background:"rgba(108,92,231,0.02)" }}>
+            style={{ border:"1px dashed rgba(58,91,217,0.25)", color:"rgba(255,255,255,0.7)", background:"rgba(58,91,217,0.02)" }}>
             <ChevronDown size={14}/> Show {PACKAGE_SECTIONS.length - 6} more sections
           </button>
         )}
@@ -275,7 +275,7 @@ export function LegacyVault() {
 
       {/* Legacy Vault Clone CTA */}
       <div className="p-6 rounded-2xl text-center space-y-4"
-        style={{ background: fullyUnlocked ? "rgba(72,187,120,0.06)" : "rgba(108,92,231,0.03)", border:`2px solid ${fullyUnlocked?"rgba(72,187,120,0.3)":"rgba(108,92,231,0.15)"}` }}>
+        style={{ background: fullyUnlocked ? "rgba(72,187,120,0.06)" : "rgba(58,91,217,0.03)", border:`2px solid ${fullyUnlocked?"rgba(72,187,120,0.3)":"rgba(58,91,217,0.15)"}` }}>
         <div style={{ fontSize:40 }}>{fullyUnlocked ? "🔓" : "🔒"}</div>
         <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#FFFFFF" }}>
           {fullyUnlocked ? "Legacy Vault Clone — Ready to Download" : "Legacy Vault Clone — Locked"}
@@ -288,14 +288,14 @@ export function LegacyVault() {
         <button
           onClick={() => fullyUnlocked ? setShowVaultClone(true) : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}
           className="px-8 py-3.5 rounded-2xl font-bold text-sm inline-flex items-center gap-2"
-          style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(108,92,231,0.08)", color: fullyUnlocked ? "#fff" : "rgba(255,255,255,0.65)", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
+          style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(58,91,217,0.08)", color: fullyUnlocked ? "#fff" : "rgba(255,255,255,0.65)", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
           {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Clone</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
         </button>
       </div>
 
       {/* Tip */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.1)" }}>
+        style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.1)" }}>
         <div style={{ fontSize:18, flexShrink:0 }}>💡</div>
         <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
           <strong style={{ color:"#FFFFFF" }}>Want to add or update your information?</strong> Use the sections in the left sidebar — File Cabinet, Final Wishes, Medical Info, Financial Records, and all other sections. Everything you add there automatically becomes part of your legacy package here.

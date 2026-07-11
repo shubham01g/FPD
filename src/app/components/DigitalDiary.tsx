@@ -9,9 +9,9 @@ import {
 import { toast } from "sonner";
 
 const CARD: React.CSSProperties = {
-  background: "#16161F",
-  border: "1px solid rgba(108,92,231,0.1)",
-  boxShadow: "0 2px 12px rgba(108,92,231,0.06)",
+  background: "#101728",
+  border: "1px solid rgba(58,91,217,0.1)",
+  boxShadow: "0 2px 12px rgba(58,91,217,0.06)",
   borderRadius: 16,
 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -38,7 +38,7 @@ const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: st
   great:     { icon: <Sun size={16}/>,      label: "Great",     color: "#F6AD55", bg: "#FFFBEB" },
   good:      { icon: <Smile size={16}/>,    label: "Good",      color: "#48BB78", bg: "#F0FFF4" },
   okay:      { icon: <Meh size={16}/>,      label: "Okay",      color: "#4A90D9", bg: "#EBF8FF" },
-  sad:       { icon: <Cloud size={16}/>,    label: "Sad",       color: "#9F7AEA", bg: "#17122E" },
+  sad:       { icon: <Cloud size={16}/>,    label: "Sad",       color: "#6E8BFF", bg: "#0C1322" },
   difficult: { icon: <CloudRain size={16}/>,label: "Difficult", color: "#FC8181", bg: "#FFF5F5" },
 };
 
@@ -76,10 +76,10 @@ const sampleEntries: DiaryEntry[] = [
   },
 ];
 
-const TAGS_PALETTE = ["#6C5CE7","#48BB78","#9F7AEA","#F6AD55","#FC8181","#38B2AC","#ED8936","#E53E3E"];
+const TAGS_PALETTE = ["#3A5BD9","#48BB78","#6E8BFF","#F6AD55","#FC8181","#38B2AC","#ED8936","#E53E3E"];
 
 function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
-  const c = color ?? "#6C5CE7";
+  const c = color ?? "#3A5BD9";
   const configs: Record<EntryType, { icon: React.ReactNode; label: string }> = {
     written: { icon: <BookOpen size={11}/>, label: "Written" },
     audio:   { icon: <Mic size={11}/>,      label: "Audio" },
@@ -137,10 +137,10 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
     <div className="flex flex-col items-center gap-5 py-8">
       <div className="relative">
         <div className="w-24 h-24 rounded-full flex items-center justify-center"
-          style={{ background: recording ? "rgba(229,62,62,0.1)" : "rgba(108,92,231,0.1)", border: `3px solid ${recording?"#E53E3E":"#6C5CE7"}`, transition:"all 0.3s" }}>
+          style={{ background: recording ? "rgba(229,62,62,0.1)" : "rgba(58,91,217,0.1)", border: `3px solid ${recording?"#E53E3E":"#3A5BD9"}`, transition:"all 0.3s" }}>
           {recording
             ? <Square size={28} color="#E53E3E" fill="#E53E3E"/>
-            : <Mic size={28} color="#6C5CE7"/>}
+            : <Mic size={28} color="#3A5BD9"/>}
         </div>
         {recording && (
           <div className="absolute inset-0 rounded-full animate-ping" style={{ background:"rgba(229,62,62,0.15)" }}/>
@@ -154,7 +154,7 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
       </div>
       <button onClick={recording ? stop : start}
         className="px-8 py-3 rounded-2xl font-semibold text-sm"
-        style={{ background: recording ? "linear-gradient(135deg,#E53E3E,#FC8181)" : "linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:`0 4px 16px ${recording?"rgba(229,62,62,0.35)":"rgba(108,92,231,0.35)"}` }}>
+        style={{ background: recording ? "linear-gradient(135deg,#E53E3E,#FC8181)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:`0 4px 16px ${recording?"rgba(229,62,62,0.35)":"rgba(58,91,217,0.35)"}` }}>
         {recording ? "Stop Recording" : "Start Recording"}
       </button>
     </div>
@@ -212,12 +212,12 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
   if (!preview) {
     return (
       <div className="flex flex-col items-center gap-5 py-8">
-        <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background:"rgba(108,92,231,0.1)", border:"3px solid #6C5CE7" }}>
-          <Video size={28} color="#6C5CE7"/>
+        <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background:"rgba(58,91,217,0.1)", border:"3px solid #3A5BD9" }}>
+          <Video size={28} color="#3A5BD9"/>
         </div>
         <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Start your camera to record a video diary entry</div>
         <button onClick={startPreview} className="px-8 py-3 rounded-2xl font-semibold text-sm"
-          style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 16px rgba(108,92,231,0.35)" }}>
+          style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 16px rgba(58,91,217,0.35)" }}>
           Open Camera
         </button>
       </div>
@@ -240,7 +240,7 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
           ? <button onClick={startRecording} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"#E53E3E", color:"#fff" }}><div className="w-3 h-3 rounded-full bg-white"/>Record</button>
           : <button onClick={stopRecording} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"#374669", color:"#fff" }}><Square size={13} fill="white"/>Stop</button>
         }
-        <button onClick={stopAll} className="px-6 py-2.5 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+        <button onClick={stopAll} className="px-6 py-2.5 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
       </div>
     </div>
   );
@@ -297,7 +297,7 @@ export function DigitalDiary() {
   const today = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 
   return (
-    <div style={{ background:"#0A0A0F", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:1200, margin:"0 auto" }} className="space-y-5">
 
         {/* Header */}
@@ -307,7 +307,7 @@ export function DigitalDiary() {
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>{today} · {entries.length} entries · Written, audio & video recordings</p>
           </div>
           <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
             <Plus size={15}/> New Entry
           </button>
         </div>
@@ -323,7 +323,7 @@ export function DigitalDiary() {
             {[{id:"all",label:"All"},{id:"written",label:"📝"},{id:"audio",label:"🎙️"},{id:"video",label:"🎥"}].map(f => (
               <button key={f.id} onClick={() => setFilterType(f.id as any)}
                 className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                style={{ background:filterType===f.id?"#6C5CE7":"transparent", color:filterType===f.id?"#fff":"rgba(255,255,255,0.7)", fontWeight:filterType===f.id?600:400 }}>
+                style={{ background:filterType===f.id?"#3A5BD9":"transparent", color:filterType===f.id?"#fff":"rgba(255,255,255,0.7)", fontWeight:filterType===f.id?600:400 }}>
                 {f.label}
               </button>
             ))}
@@ -335,7 +335,7 @@ export function DigitalDiary() {
           <div className="lg:col-span-2 space-y-3">
             {filtered.length === 0 && (
               <div className="py-16 text-center rounded-2xl glow-surface" style={CARD}>
-                <BookOpen size={36} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+                <BookOpen size={36} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)" }}>No entries found. Start writing your story.</div>
               </div>
             )}
@@ -344,7 +344,7 @@ export function DigitalDiary() {
               return (
                 <div key={entry.id}
                   className="p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md"
-                  style={{ ...CARD, borderColor:selected?.id===entry.id?"#6C5CE7":"rgba(108,92,231,0.1)", borderWidth:selected?.id===entry.id?2:1 }}
+                  style={{ ...CARD, borderColor:selected?.id===entry.id?"#3A5BD9":"rgba(58,91,217,0.1)", borderWidth:selected?.id===entry.id?2:1 }}
                   onClick={() => setSelected(selected?.id===entry.id ? null : entry)}>
                   {/* thumbnail for video */}
                   {entry.thumbnail && (
@@ -378,14 +378,14 @@ export function DigitalDiary() {
                     <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }} className="line-clamp-2">{entry.body}</p>
                   )}
                   {entry.type === "audio" && entry.duration && (
-                    <div className="flex items-center gap-3 mt-3 px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)" }}>
+                    <div className="flex items-center gap-3 mt-3 px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)" }}>
                       <button onClick={e => { e.stopPropagation(); setPlayingAudio(playingAudio===entry.id ? null : entry.id); if (playingAudio !== entry.id) toast.success("▶ Playing audio entry — " + entry.duration); }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background:"#6C5CE7", color:"#fff" }}>
+                        className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background:"#3A5BD9", color:"#fff" }}>
                         {playingAudio===entry.id ? <Pause size={14}/> : <Play size={14}/>}
                       </button>
                       <div style={{ flex:1 }}>
-                        <div className="h-1 rounded-full" style={{ background:"rgba(108,92,231,0.2)" }}>
-                          <div className="h-1 rounded-full" style={{ width:playingAudio===entry.id?"35%":"0%", background:"#6C5CE7", transition:"width 0.3s" }}/>
+                        <div className="h-1 rounded-full" style={{ background:"rgba(58,91,217,0.2)" }}>
+                          <div className="h-1 rounded-full" style={{ width:playingAudio===entry.id?"35%":"0%", background:"#3A5BD9", transition:"width 0.3s" }}/>
                         </div>
                       </div>
                       <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO }}>{entry.duration}</span>
@@ -394,7 +394,7 @@ export function DigitalDiary() {
                   {entry.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-3">
                       {entry.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#1C1C28", color:"#A29BFE" }}>#{tag}</span>
+                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#141B2E", color:"#8AA0FF" }}>#{tag}</span>
                       ))}
                     </div>
                   )}
@@ -436,10 +436,10 @@ export function DigitalDiary() {
                   <div style={{ color:"rgba(255,255,255,0.8)", fontSize:14, lineHeight:1.9, whiteSpace:"pre-wrap" }}>{selected.body}</div>
                 )}
                 {selected.type === "audio" && (
-                  <div className="mt-4 px-4 py-4 rounded-xl text-center" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.15)" }}>
-                    <Mic size={24} color="#6C5CE7" style={{ margin:"0 auto 8px" }}/>
+                  <div className="mt-4 px-4 py-4 rounded-xl text-center" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.15)" }}>
+                    <Mic size={24} color="#3A5BD9" style={{ margin:"0 auto 8px" }}/>
                     <div style={{ color:"#FFFFFF", fontSize:13 }}>Voice Recording · {selected.duration}</div>
-                    <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 rounded-xl text-sm" style={{ background:"#6C5CE7", color:"#fff" }}>
+                    <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 rounded-xl text-sm" style={{ background:"#3A5BD9", color:"#fff" }}>
                       <Play size={13}/> Play Recording
                     </button>
                   </div>
@@ -448,7 +448,7 @@ export function DigitalDiary() {
                   <div className="mt-4 rounded-xl overflow-hidden relative" style={{ cursor:"pointer" }} onClick={() => toast.success("▶ Video playback started — demo mode")}>
                     {selected.thumbnail
                       ? <img src={selected.thumbnail} alt="" style={{ width:"100%", height:140, objectFit:"cover" }}/>
-                      : <div className="h-32 flex items-center justify-center" style={{ background:"rgba(108,92,231,0.08)" }}><Video size={28} color="#6C5CE7"/></div>
+                      : <div className="h-32 flex items-center justify-center" style={{ background:"rgba(58,91,217,0.08)" }}><Video size={28} color="#3A5BD9"/></div>
                     }
                     <div className="absolute inset-0 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.25)" }}>
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background:"rgba(22,22,31,0.9)" }}>
@@ -459,13 +459,13 @@ export function DigitalDiary() {
                 )}
                 {selected.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-4">
-                    {selected.tags.map(t => <span key={t} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#1C1C28", color:"#A29BFE" }}>#{t}</span>)}
+                    {selected.tags.map(t => <span key={t} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#141B2E", color:"#8AA0FF" }}>#{t}</span>)}
                   </div>
                 )}
               </div>
             ) : (
               <div className="rounded-2xl p-6 text-center glow-surface" style={CARD}>
-                <BookOpen size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/>
+                <BookOpen size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13, marginBottom:12 }}>Select an entry to read</div>
                 <div className="space-y-2">
                   <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600 }}>Your Diary Stats</div>
@@ -477,7 +477,7 @@ export function DigitalDiary() {
                   ].map(s => (
                     <div key={s.label} className="flex justify-between px-3 py-2 rounded-lg" style={{ background:"#0F1A33" }}>
                       <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{s.label}</span>
-                      <span style={{ color:"#A29BFE", fontSize:12, fontWeight:600 }}>{s.value}</span>
+                      <span style={{ color:"#8AA0FF", fontSize:12, fontWeight:600 }}>{s.value}</span>
                     </div>
                   ))}
                 </div>
@@ -491,7 +491,7 @@ export function DigitalDiary() {
       {creating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.4)", backdropFilter:"blur(8px)" }}>
           <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(108,92,231,0.08)" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>New Diary Entry</h3>
               <button onClick={() => setCreating(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
             </div>
@@ -501,7 +501,7 @@ export function DigitalDiary() {
                 {typeButtons.map(tb => (
                   <button key={tb.id} onClick={() => setNewType(tb.id)}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all text-sm"
-                    style={{ background:newType===tb.id?"rgba(108,92,231,0.12)":"#0F1A33", border:`2px solid ${newType===tb.id?"#6C5CE7":"transparent"}`, color:newType===tb.id?"#6C5CE7":"rgba(255,255,255,0.7)" }}>
+                    style={{ background:newType===tb.id?"rgba(58,91,217,0.12)":"#0F1A33", border:`2px solid ${newType===tb.id?"#3A5BD9":"transparent"}`, color:newType===tb.id?"#3A5BD9":"rgba(255,255,255,0.7)" }}>
                     {tb.icon}
                     <span style={{ fontSize:11 }}>{tb.label}</span>
                   </button>
@@ -512,7 +512,7 @@ export function DigitalDiary() {
               <div>
                 <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>TITLE</label>
                 <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))} placeholder="What's on your mind today?"
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:15, outline:"none", fontFamily:"var(--font-display)" }}/>
+                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:15, outline:"none", fontFamily:"var(--font-display)" }}/>
               </div>
 
               {/* Written body */}
@@ -520,13 +520,13 @@ export function DigitalDiary() {
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR ENTRY</label>
                   <textarea value={form.body} onChange={e => setForm(p=>({...p,body:e.target.value}))} placeholder="Write freely. This is your space…" rows={8}
-                    className="w-full px-4 py-3 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:14, outline:"none", lineHeight:1.8 }}/>
+                    className="w-full px-4 py-3 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:14, outline:"none", lineHeight:1.8 }}/>
                 </div>
               )}
 
               {/* Audio recorder */}
               {newType === "audio" && (
-                <div className="rounded-2xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="rounded-2xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)" }}>
                   {audioSaved
                     ? <div className="py-6 text-center"><div className="text-2xl mb-2">✅</div><div style={{ color:"#48BB78", fontWeight:600 }}>Audio recorded successfully</div></div>
                     : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); toast.success(`Recorded ${dur} of audio`); }}/>}
@@ -535,7 +535,7 @@ export function DigitalDiary() {
 
               {/* Video recorder */}
               {newType === "video" && (
-                <div className="rounded-2xl p-4 glow-surface" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)" }}>
+                <div className="rounded-2xl p-4 glow-surface" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)" }}>
                   {videoDuration
                     ? <div className="py-6 text-center"><div className="text-2xl mb-2">✅</div><div style={{ color:"#48BB78", fontWeight:600 }}>Video recorded: {videoDuration}</div></div>
                     : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
@@ -551,8 +551,8 @@ export function DigitalDiary() {
                   }}/>
                   <div onClick={() => fileRef.current?.click()}
                     className="flex flex-col items-center gap-3 py-8 rounded-2xl border-2 border-dashed cursor-pointer"
-                    style={{ borderColor:"rgba(108,92,231,0.25)", background:"#0F1A33" }}>
-                    <Upload size={28} color="#6C5CE7" style={{ opacity:0.6 }}/>
+                    style={{ borderColor:"rgba(58,91,217,0.25)", background:"#0F1A33" }}>
+                    <Upload size={28} color="#3A5BD9" style={{ opacity:0.6 }}/>
                     <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Upload video, photo, or audio file</div>
                     <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
                   </div>
@@ -582,13 +582,13 @@ export function DigitalDiary() {
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>TAGS (comma separated)</label>
                   <input value={form.tags} onChange={e => setForm(p=>({...p,tags:e.target.value}))} placeholder="family, reflection, love"
-                    className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(108,92,231,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                    className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                 </div>
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>PRIVACY</label>
                   <button onClick={() => setForm(p=>({...p,private:!p.private}))}
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-                    style={{ background:form.private?"rgba(229,62,62,0.08)":"#0F1A33", border:`1px solid ${form.private?"rgba(229,62,62,0.25)":"rgba(108,92,231,0.12)"}`, color:form.private?"#E53E3E":"rgba(255,255,255,0.7)" }}>
+                    style={{ background:form.private?"rgba(229,62,62,0.08)":"#0F1A33", border:`1px solid ${form.private?"rgba(229,62,62,0.25)":"rgba(58,91,217,0.12)"}`, color:form.private?"#E53E3E":"rgba(255,255,255,0.7)" }}>
                     {form.private ? <Lock size={14}/> : <Eye size={14}/>}
                     {form.private ? "Private — restricted" : "Shared with legacy contacts"}
                   </button>
@@ -598,10 +598,10 @@ export function DigitalDiary() {
               {/* Actions */}
               <div className="flex gap-3 pt-2">
                 <button onClick={handleSave} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-                  style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#fff", boxShadow:"0 4px 12px rgba(108,92,231,0.3)" }}>
+                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
                   <Save size={14} style={{ display:"inline", marginRight:6 }}/>Save Entry
                 </button>
-                <button onClick={() => setCreating(false)} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#0A0A0F", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+                <button onClick={() => setCreating(false)} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
               </div>
             </div>
           </div>

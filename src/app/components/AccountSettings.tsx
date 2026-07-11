@@ -7,9 +7,9 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 
-const CARD: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
 
 type TwoFAMethod = "sms" | "email_otp" | "authenticator";
 type SettingsTab = "profile" | "security" | "encryption" | "notifications";
@@ -65,11 +65,11 @@ function OTPModal({ method, contact, onVerify, onClose }: {
         <div className="flex gap-3">
           <button onClick={verify} disabled={verifying}
             className="flex-1 py-3 rounded-xl font-bold text-sm"
-            style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", opacity:verifying?0.7:1 }}>
+            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", opacity:verifying?0.7:1 }}>
             {verifying ? "Verifying…" : "Confirm Code"}
           </button>
           <button onClick={onClose} className="px-4 py-3 rounded-xl text-sm"
-            style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
         </div>
       </div>
     </div>
@@ -165,7 +165,7 @@ export function AccountSettings() {
     { id:"notifications", label:"Notifications" },
   ];
 
-  const methodColor = { sms:"#48BB78", email_otp:"#6C5CE7", authenticator:"#9F7AEA" }[twoFAMethod];
+  const methodColor = { sms:"#48BB78", email_otp:"#3A5BD9", authenticator:"#6E8BFF" }[twoFAMethod];
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth:800 }}>
@@ -176,11 +176,11 @@ export function AccountSettings() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(22,22,31,0.9)", border:"1px solid rgba(108,92,231,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(22,22,31,0.9)", border:"1px solid rgba(58,91,217,0.1)" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{ background:tab===t.id?"#6C5CE7":"transparent", color:tab===t.id?"#fff":"rgba(255,255,255,0.7)" }}>
+            style={{ background:tab===t.id?"#3A5BD9":"transparent", color:tab===t.id?"#fff":"rgba(255,255,255,0.7)" }}>
             {TAB_ICONS[t.id]}
             {t.label}
           </button>
@@ -196,17 +196,17 @@ export function AccountSettings() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="flex items-center justify-center rounded-full overflow-hidden flex-shrink-0"
-                  style={{ width:88, height:88, background:"rgba(108,92,231,0.1)", border:"3px solid rgba(108,92,231,0.2)" }}>
+                  style={{ width:88, height:88, background:"rgba(58,91,217,0.1)", border:"3px solid rgba(58,91,217,0.2)" }}>
                   {avatar
                     ? <img src={avatar} alt="Profile" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                    : <span style={{ fontFamily:"var(--font-display)", fontSize:32, color:"#6C5CE7", fontWeight:700 }}>
+                    : <span style={{ fontFamily:"var(--font-display)", fontSize:32, color:"#3A5BD9", fontWeight:700 }}>
                         {user.avatar}
                       </span>
                   }
                 </div>
                 <button onClick={() => photoRef.current?.click()}
                   className="absolute bottom-0 right-0 flex items-center justify-center rounded-full"
-                  style={{ width:28, height:28, background:"#6C5CE7", color:"#fff", border:"2px solid #fff", boxShadow:"0 2px 8px rgba(108,92,231,0.4)" }}>
+                  style={{ width:28, height:28, background:"#3A5BD9", color:"#fff", border:"2px solid #fff", boxShadow:"0 2px 8px rgba(58,91,217,0.4)" }}>
                   <Camera size={13}/>
                 </button>
                 <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload}/>
@@ -216,7 +216,7 @@ export function AccountSettings() {
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:12, marginTop:2 }}>{user.email}</div>
                 <button onClick={() => photoRef.current?.click()}
                   className="flex items-center gap-1.5 mt-3 text-xs px-4 py-2 rounded-xl font-semibold"
-                  style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)" }}>
+                  style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
                   <Camera size={12}/> Change Photo
                 </button>
               </div>
@@ -242,7 +242,7 @@ export function AccountSettings() {
             ))}
             <button onClick={saveProfile} disabled={saving}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(108,92,231,0.3)", opacity:saving?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:saving?0.7:1 }}>
               <Save size={14}/>{saving ? "Saving…" : "Save Changes"}
             </button>
           </div>
@@ -289,7 +289,7 @@ export function AccountSettings() {
                 {
                   id:"email_otp" as TwoFAMethod,
                   icon:<Mail size={22}/>,
-                  color:"#6C5CE7",
+                  color:"#3A5BD9",
                   label:"Email OTP",
                   desc:"A one-time password is sent to your registered email address on each login.",
                   tag:"Recommended",
@@ -297,7 +297,7 @@ export function AccountSettings() {
                 {
                   id:"authenticator" as TwoFAMethod,
                   icon:<Key size={22}/>,
-                  color:"#9F7AEA",
+                  color:"#6E8BFF",
                   label:"Authenticator App",
                   desc:"Use Google Authenticator or Authy to generate time-based codes without internet.",
                   tag:"Most secure",
@@ -306,7 +306,7 @@ export function AccountSettings() {
                 const isActive = twoFAEnabled && twoFAMethod === m.id;
                 return (
                   <div key={m.id} className="rounded-2xl p-5 flex flex-col relative"
-                    style={{ background:isActive?`${m.color}08`:"#1C1C28", border:`2px solid ${isActive?m.color:"rgba(108,92,231,0.1)"}`, boxShadow:isActive?`0 0 20px ${m.color}15`:"none" }}>
+                    style={{ background:isActive?`${m.color}08`:"#141B2E", border:`2px solid ${isActive?m.color:"rgba(58,91,217,0.1)"}`, boxShadow:isActive?`0 0 20px ${m.color}15`:"none" }}>
                     {isActive && (
                       <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs font-bold"
                         style={{ background:m.color, color:"#fff", ...MONO }}>ACTIVE</div>
@@ -360,7 +360,7 @@ export function AccountSettings() {
               </div>
             ))}
             {newPw && (
-              <div className="h-1.5 rounded-full" style={{ background:"#1C1C28" }}>
+              <div className="h-1.5 rounded-full" style={{ background:"#141B2E" }}>
                 <div className="h-1.5 rounded-full transition-all"
                   style={{ width:`${Math.min(newPw.length * 8, 100)}%`,
                     background: newPw.length < 8 ? "#FC8181" : newPw.length < 12 ? "#F6AD55" : "#48BB78" }}/>
@@ -368,7 +368,7 @@ export function AccountSettings() {
             )}
             <button onClick={changePassword} disabled={changingPw}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"rgba(108,92,231,0.08)", color:"#6C5CE7", border:"1px solid rgba(108,92,231,0.2)", opacity:changingPw?0.7:1 }}>
+              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)", opacity:changingPw?0.7:1 }}>
               <Lock size={14}/>{changingPw ? "Updating…" : "Update Password"}
             </button>
           </div>
@@ -401,12 +401,12 @@ export function AccountSettings() {
             <div className="space-y-3">
               {[
                 {
-                  step:"1", color:"#6C5CE7",
+                  step:"1", color:"#3A5BD9",
                   title:"Upload — Encrypted Before Sending",
                   desc:"When you upload a file, it is encrypted with AES-256-GCM in your browser before any data is transmitted. The encrypted file travels to FPD servers. The unencrypted original never leaves your device.",
                 },
                 {
-                  step:"2", color:"#9F7AEA",
+                  step:"2", color:"#6E8BFF",
                   title:"Storage — Encrypted at Rest",
                   desc:"Your files are stored on FPD's Supabase infrastructure in encrypted form only. FPD servers store ciphertext — unreadable without your personal encryption key. Even a complete server breach exposes nothing readable.",
                 },
@@ -422,7 +422,7 @@ export function AccountSettings() {
                 },
               ].map(s => (
                 <div key={s.step} className="flex items-start gap-4 p-4 rounded-xl glow-surface"
-                  style={{ background:"rgba(108,92,231,0.03)", border:"1px solid rgba(108,92,231,0.08)" }}>
+                  style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.08)" }}>
                   <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
                     style={{ width:32, height:32, background:`${s.color}15`, color:s.color, fontFamily:"var(--font-mono)", fontSize:13 }}>
                     {s.step}
@@ -439,8 +439,8 @@ export function AccountSettings() {
           {/* Encryption stats */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label:"Encryption Standard", value:"AES-256-GCM", color:"#6C5CE7", sub:"Military-grade" },
-              { label:"Key Derivation",       value:"PBKDF2",      color:"#9F7AEA", sub:"100,000 iterations" },
+              { label:"Encryption Standard", value:"AES-256-GCM", color:"#3A5BD9", sub:"Military-grade" },
+              { label:"Key Derivation",       value:"PBKDF2",      color:"#6E8BFF", sub:"100,000 iterations" },
               { label:"Architecture",         value:"Zero-Knowledge", color:"#48BB78", sub:"FPD cannot read your data" },
             ].map(s => (
               <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
@@ -452,8 +452,8 @@ export function AccountSettings() {
           </div>
 
           {/* Encrypted badge shown on all files */}
-          <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
-            <div style={{ color:"#6C5CE7", fontSize:12, fontWeight:700, ...MONO, marginBottom:8 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
+          <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
+            <div style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO, marginBottom:8 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
             <div className="flex flex-wrap gap-2">
               {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
                 <div key={f} className="flex items-center gap-2 px-3 py-2 rounded-xl"
@@ -486,22 +486,22 @@ export function AccountSettings() {
               { label:"Marketing & Product Updates",sub:"News about new features and FPD announcements",         value:notifMarketing,      set:setNotifMarketing },
             ].map(n => (
               <div key={n.label} className="flex items-center justify-between py-3 border-b"
-                style={{ borderColor:"rgba(108,92,231,0.07)" }}>
+                style={{ borderColor:"rgba(58,91,217,0.07)" }}>
                 <div>
                   <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500 }}>{n.label}</div>
                   <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:2 }}>{n.sub}</div>
                 </div>
                 <button onClick={() => { n.set(!n.value); toast.success(`${n.label} ${!n.value?"enabled":"disabled"}`); }}
                   className="relative rounded-full transition-all flex-shrink-0"
-                  style={{ width:44, height:24, background:n.value?"#6C5CE7":"rgba(108,92,231,0.15)", border:`1px solid ${n.value?"#6C5CE7":"rgba(108,92,231,0.25)"}`, boxShadow:n.value?"0 0 12px rgba(108,92,231,0.3)":"none" }}>
+                  style={{ width:44, height:24, background:n.value?"#3A5BD9":"rgba(58,91,217,0.15)", border:`1px solid ${n.value?"#3A5BD9":"rgba(58,91,217,0.25)"}`, boxShadow:n.value?"0 0 12px rgba(58,91,217,0.3)":"none" }}>
                   <div className="absolute top-1 rounded-full transition-all"
-                    style={{ width:16, height:16, background:"#16161F", left:n.value?24:4 }}/>
+                    style={{ width:16, height:16, background:"#101728", left:n.value?24:4 }}/>
                 </button>
               </div>
             ))}
             <button onClick={() => toast.success("Notification preferences saved")}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF" }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF" }}>
               <Save size={14}/> Save Preferences
             </button>
           </div>

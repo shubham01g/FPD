@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Shield, Settings, CheckCircle, Clock, DollarSign, Search, Eye, RefreshCw, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.1)", boxShadow:"0 2px 12px rgba(108,92,231,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const paidFees = [
@@ -41,8 +41,8 @@ export function ContinuationFeeAdmin() {
 
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Shield size={14} color="#6C5CE7"/>
-            <span style={{ color:"#6C5CE7", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · LEGACY CONTINUATION FEE</span>
+            <Shield size={14} color="#3A5BD9"/>
+            <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · LEGACY CONTINUATION FEE</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Legacy Continuation Fee Control</h1>
           <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>Set the fee amount and activation period. Manually activate accounts when a user passes away.</p>
@@ -51,9 +51,9 @@ export function ContinuationFeeAdmin() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label:"Total Revenue", value:`$${totalRevenue.toLocaleString()}`, color:"#6C5CE7" },
+            { label:"Total Revenue", value:`$${totalRevenue.toLocaleString()}`, color:"#3A5BD9" },
             { label:"Fees Collected", value:fees.length, color:"#48BB78" },
-            { label:"Currently Activated", value:activated, color:"#9F7AEA" },
+            { label:"Currently Activated", value:activated, color:"#6E8BFF" },
             { label:"Pending Activation", value:pending, color:"#F6AD55" },
           ].map(s => (
             <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
@@ -66,15 +66,15 @@ export function ContinuationFeeAdmin() {
         {/* Admin Configuration */}
         <div className="p-6 rounded-2xl glow-surface" style={CARD}>
           <div className="flex items-center gap-2 mb-5">
-            <Settings size={16} color="#6C5CE7"/>
+            <Settings size={16} color="#3A5BD9"/>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Fee Configuration</h3>
             <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.25)", ...MONO, fontSize:9 }}>ADMIN ONLY — Changes affect all future payments</span>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             <div>
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ONE-TIME FEE AMOUNT ($)</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(108,92,231,0.15)" }}>
-                <DollarSign size={15} color="#6C5CE7"/>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(58,91,217,0.15)" }}>
+                <DollarSign size={15} color="#3A5BD9"/>
                 <input type="number" step="0.01" value={feeAmount} onChange={e => setFeeAmount(e.target.value)}
                   style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
               </div>
@@ -82,8 +82,8 @@ export function ContinuationFeeAdmin() {
             </div>
             <div>
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ACTIVATION WINDOW (MONTHS)</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(108,92,231,0.15)" }}>
-                <Clock size={15} color="#6C5CE7"/>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#F5F8FE", border:"1px solid rgba(58,91,217,0.15)" }}>
+                <Clock size={15} color="#3A5BD9"/>
                 <input type="number" step="1" min="1" max="120" value={periodMonths} onChange={e => setPeriodMonths(e.target.value)}
                   style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
               </div>
@@ -91,7 +91,7 @@ export function ContinuationFeeAdmin() {
             </div>
             <div className="flex flex-col justify-end">
               <button onClick={saveConfig} className="flex items-center gap-2 px-5 py-3.5 rounded-xl font-semibold text-sm"
-                style={{ background: savedConfig ? "rgba(72,187,120,0.12)" : "linear-gradient(135deg,#6C5CE7,#8B7CF6)", color: savedConfig ? "#48BB78" : "#fff", border: savedConfig ? "1px solid rgba(72,187,120,0.3)" : "none", boxShadow: savedConfig ? "none" : "0 4px 12px rgba(108,92,231,0.3)" }}>
+                style={{ background: savedConfig ? "rgba(72,187,120,0.12)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color: savedConfig ? "#48BB78" : "#fff", border: savedConfig ? "1px solid rgba(72,187,120,0.3)" : "none", boxShadow: savedConfig ? "none" : "0 4px 12px rgba(58,91,217,0.3)" }}>
                 {savedConfig ? <CheckCircle size={15}/> : <Save size={15}/>}
                 {savedConfig ? "Configuration Saved!" : "Save Configuration"}
               </button>
@@ -107,24 +107,24 @@ export function ContinuationFeeAdmin() {
         </div>
 
         {/* Paid fees table */}
-        <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(108,92,231,0.1)" }}>
-          <div className="flex items-center justify-between px-5 py-3 border-b" style={{ background:"#EAF0FC", borderColor:"rgba(108,92,231,0.08)" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(58,91,217,0.1)" }}>
+          <div className="flex items-center justify-between px-5 py-3 border-b" style={{ background:"#EAF0FC", borderColor:"rgba(58,91,217,0.08)" }}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>Paid Legacy Continuation Fees</h3>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"#FFFFFF", border:"1px solid rgba(108,92,231,0.1)" }}>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)" }}>
               <Search size={13} color="#8A9AB8"/>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." style={{ background:"transparent", border:"none", outline:"none", color:"#0D1428", fontSize:12, width:160 }}/>
             </div>
           </div>
 
           {/* Table header */}
-          <div className="grid px-5 py-3" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:"#F5F8FE", borderBottom:"1px solid rgba(108,92,231,0.08)", gap:16, alignItems:"center" }}>
+          <div className="grid px-5 py-3" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:"#F5F8FE", borderBottom:"1px solid rgba(58,91,217,0.08)", gap:16, alignItems:"center" }}>
             {["ID","User","Paid By","Date","Amount","Status","Action"].map(h => (
               <div key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
             ))}
           </div>
 
           {filtered.map((fee, i) => (
-            <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:i%2===0?"#FFFFFF":"#F8FAFF", borderColor:"rgba(108,92,231,0.06)", gap:16 }}>
+            <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:i%2===0?"#FFFFFF":"#F8FAFF", borderColor:"rgba(58,91,217,0.06)", gap:16 }}>
               <span style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{fee.id}</span>
               <div>
                 <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{fee.user}</div>
@@ -132,11 +132,11 @@ export function ContinuationFeeAdmin() {
               </div>
               <span style={{ color:"#374669", fontSize:12 }}>{fee.paidBy}</span>
               <span style={{ color:"#5A6A88", fontSize:12 }}>{fee.paidDate}</span>
-              <span style={{ color:"#6C5CE7", fontSize:13, fontWeight:700, ...MONO }}>${fee.amount}</span>
+              <span style={{ color:"#3A5BD9", fontSize:13, fontWeight:700, ...MONO }}>${fee.amount}</span>
               <div>
                 {fee.activated ? (
                   <div>
-                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(159,122,234,0.12)", color:"#9F7AEA", ...MONO, fontSize:9 }}>ACTIVATED</span>
+                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(110,139,255,0.12)", color:"#6E8BFF", ...MONO, fontSize:9 }}>ACTIVATED</span>
                     <div style={{ color:"#5A6A88", fontSize:10, marginTop:2 }}>Expires: {fee.expiresDate}</div>
                   </div>
                 ) : (
@@ -147,7 +147,7 @@ export function ContinuationFeeAdmin() {
                 {!fee.activated ? (
                   <button onClick={() => activateFee(fee.id, fee.user)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                    style={{ background:"rgba(159,122,234,0.12)", color:"#9F7AEA", border:"1px solid rgba(159,122,234,0.25)" }}>
+                    style={{ background:"rgba(110,139,255,0.12)", color:"#6E8BFF", border:"1px solid rgba(110,139,255,0.25)" }}>
                     <Shield size={11}/> Activate
                   </button>
                 ) : (
@@ -158,8 +158,8 @@ export function ContinuationFeeAdmin() {
           ))}
         </div>
 
-        <div className="px-5 py-4 rounded-2xl border" style={{ background:"rgba(108,92,231,0.03)", borderColor:"rgba(108,92,231,0.12)" }}>
-          <div style={{ color:"#6C5CE7", fontSize:11, ...MONO, fontWeight:700, marginBottom:6 }}>STRIPE WEBHOOK EVENTS TO HANDLE</div>
+        <div className="px-5 py-4 rounded-2xl border" style={{ background:"rgba(58,91,217,0.03)", borderColor:"rgba(58,91,217,0.12)" }}>
+          <div style={{ color:"#3A5BD9", fontSize:11, ...MONO, fontWeight:700, marginBottom:6 }}>STRIPE WEBHOOK EVENTS TO HANDLE</div>
           <div className="grid md:grid-cols-2 gap-2">
             {["payment_intent.succeeded → mark fee as paid + send confirmation email","customer.subscription.deleted → check for continuation fee before suspending","invoice.payment_failed → send warning before suspension"].map(e => (
               <div key={e} style={{ color:"#5A6A88", fontSize:12 }}>• {e}</div>

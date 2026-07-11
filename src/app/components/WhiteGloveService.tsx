@@ -6,9 +6,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"#16161F", border:"1px solid rgba(159,122,234,0.15)", boxShadow:"0 4px 24px rgba(159,122,234,0.08)", borderRadius:20 };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(110,139,255,0.15)", boxShadow:"0 4px 24px rgba(110,139,255,0.08)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(159,122,234,0.05)", border:"1px solid rgba(159,122,234,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(110,139,255,0.05)", border:"1px solid rgba(110,139,255,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
 
 const STEPS = [
   { icon:<Phone size={20}/>,    title:"Intake Call",          desc:"A specialist calls you personally to understand what you need and what documents you have." },
@@ -49,15 +49,15 @@ const FAQS = [
 function FaqItem({ faq }: { faq: { q: string; a: string } }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(159,122,234,0.15)" }}>
+    <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(110,139,255,0.15)" }}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left"
-        style={{ background:open?"rgba(159,122,234,0.04)":"#16161F" }}>
+        style={{ background:open?"rgba(110,139,255,0.04)":"#101728" }}>
         <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{faq.q}</span>
-        {open ? <ChevronUp size={16} color="#9F7AEA"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
+        {open ? <ChevronUp size={16} color="#6E8BFF"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
       </button>
       {open && (
-        <div className="px-5 pb-4" style={{ background:"rgba(159,122,234,0.02)" }}>
+        <div className="px-5 pb-4" style={{ background:"rgba(110,139,255,0.02)" }}>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.8 }}>{faq.a}</p>
         </div>
       )}
@@ -81,23 +81,23 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
     return (
       <div className="text-center py-8 px-4">
         <div className="flex items-center justify-center mb-6">
-          <div className="rounded-full p-5" style={{ background:"rgba(159,122,234,0.12)", border:"2px solid rgba(159,122,234,0.3)" }}>
-            <CheckCircle size={40} color="#9F7AEA"/>
+          <div className="rounded-full p-5" style={{ background:"rgba(110,139,255,0.12)", border:"2px solid rgba(110,139,255,0.3)" }}>
+            <CheckCircle size={40} color="#6E8BFF"/>
           </div>
         </div>
         <h3 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>We'll Call You Soon!</h3>
         <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, maxWidth:360, margin:"0 auto 24px" }}>
           Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.
         </p>
-        <div className="px-5 py-4 rounded-2xl mb-4" style={{ background:"rgba(159,122,234,0.08)", border:"1px solid rgba(159,122,234,0.2)" }}>
-          <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, marginBottom:4 }}>YOUR REFERENCE NUMBER</div>
+        <div className="px-5 py-4 rounded-2xl mb-4" style={{ background:"rgba(110,139,255,0.08)", border:"1px solid rgba(110,139,255,0.2)" }}>
+          <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, marginBottom:4 }}>YOUR REFERENCE NUMBER</div>
           <div style={{ color:"#FFFFFF", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
             WG-{Math.random().toString(36).slice(2,7).toUpperCase()}
           </div>
         </div>
         {onClose && (
           <button onClick={onClose} className="px-6 py-3 rounded-2xl font-bold text-sm"
-            style={{ background:"rgba(159,122,234,0.1)", color:"#9F7AEA" }}>
+            style={{ background:"rgba(110,139,255,0.1)", color:"#6E8BFF" }}>
             Close
           </button>
         )}
@@ -128,9 +128,9 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))}
               className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.preferredTime===id?"rgba(159,122,234,0.12)":"rgba(108,92,231,0.04)",
-                border:`1px solid ${form.preferredTime===id?"#9F7AEA":"rgba(108,92,231,0.12)"}`,
-                color:form.preferredTime===id?"#9F7AEA":"rgba(255,255,255,0.7)" }}>
+              style={{ background:form.preferredTime===id?"rgba(110,139,255,0.12)":"rgba(58,91,217,0.04)",
+                border:`1px solid ${form.preferredTime===id?"#6E8BFF":"rgba(58,91,217,0.12)"}`,
+                color:form.preferredTime===id?"#6E8BFF":"rgba(255,255,255,0.7)" }}>
               {label}
             </button>
           ))}
@@ -143,9 +143,9 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
           {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))}
               className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.contactedBy===id?"rgba(159,122,234,0.12)":"rgba(108,92,231,0.04)",
-                border:`1px solid ${form.contactedBy===id?"#9F7AEA":"rgba(108,92,231,0.12)"}`,
-                color:form.contactedBy===id?"#9F7AEA":"rgba(255,255,255,0.7)" }}>
+              style={{ background:form.contactedBy===id?"rgba(110,139,255,0.12)":"rgba(58,91,217,0.04)",
+                border:`1px solid ${form.contactedBy===id?"#6E8BFF":"rgba(58,91,217,0.12)"}`,
+                color:form.contactedBy===id?"#6E8BFF":"rgba(255,255,255,0.7)" }}>
               {label}
             </button>
           ))}
@@ -161,8 +161,8 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
 
       <button onClick={submit} disabled={sending}
         className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base"
-        style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F",
-          boxShadow:"0 0 32px rgba(159,122,234,0.4)", opacity:sending?0.7:1 }}>
+        style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F",
+          boxShadow:"0 0 32px rgba(110,139,255,0.4)", opacity:sending?0.7:1 }}>
         <Phone size={16}/>{sending ? "Sending Request…" : "Request My White Glove Call"}
       </button>
       <p style={{ color:"rgba(255,255,255,0.65)", fontSize:11, textAlign:"center" }}>
@@ -177,22 +177,22 @@ export function WhiteGloveService() {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div style={{ fontFamily:"var(--font-body)", background:"#17122E", minHeight:"100vh" }}>
+    <div style={{ fontFamily:"var(--font-body)", background:"#0C1322", minHeight:"100vh" }}>
 
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ background:"linear-gradient(135deg,#0A0520,#1A0840)", padding:"80px 24px 100px" }}>
-        <div style={{ position:"absolute", inset:0, backgroundImage:"linear-gradient(rgba(159,122,234,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(159,122,234,0.04) 1px,transparent 1px)", backgroundSize:"50px 50px" }}/>
-        <div style={{ position:"absolute", top:"20%", left:"10%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(159,122,234,0.12) 0%,transparent 70%)", pointerEvents:"none" }}/>
-        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(108,92,231,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
+      <div className="relative overflow-hidden" style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", padding:"80px 24px 100px" }}>
+        <div style={{ position:"absolute", inset:0, backgroundImage:"linear-gradient(rgba(110,139,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(110,139,255,0.04) 1px,transparent 1px)", backgroundSize:"50px 50px" }}/>
+        <div style={{ position:"absolute", top:"20%", left:"10%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(110,139,255,0.12) 0%,transparent 70%)", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(58,91,217,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
 
         <div className="relative max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{ background:"rgba(159,122,234,0.15)", border:"1px solid rgba(159,122,234,0.3)" }}>
-            <Star size={13} color="#9F7AEA" fill="#9F7AEA"/>
-            <span style={{ color:"#C4B5FD", fontSize:12, ...MONO, letterSpacing:"0.1em" }}>WHITE GLOVE SERVICE</span>
+            style={{ background:"rgba(110,139,255,0.15)", border:"1px solid rgba(110,139,255,0.3)" }}>
+            <Star size={13} color="#6E8BFF" fill="#6E8BFF"/>
+            <span style={{ color:"#B8C6F5", fontSize:12, ...MONO, letterSpacing:"0.1em" }}>WHITE GLOVE SERVICE</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(2rem,5vw,3.5rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:20 }}>
-            We Set Everything Up<br/><span style={{ color:"#C4B5FD" }}>For You.</span>
+            We Set Everything Up<br/><span style={{ color:"#B8C6F5" }}>For You.</span>
           </h1>
           <p style={{ color:"#A0B0D0", fontSize:17, lineHeight:1.9, maxWidth:520, margin:"0 auto 40px" }}>
             Not comfortable with technology? No problem. A dedicated Final Pass Down specialist will call you, walk you through everything, and upload all your important documents on your behalf.
@@ -200,7 +200,7 @@ export function WhiteGloveService() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => setShowModal(true)}
               className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base"
-              style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F", boxShadow:"0 0 40px rgba(159,122,234,0.5)" }}>
+              style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 0 40px rgba(110,139,255,0.5)" }}>
               <Phone size={18}/> Request a Call
             </button>
             <div className="flex items-center gap-2" style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>
@@ -216,8 +216,8 @@ export function WhiteGloveService() {
         <div className="grid md:grid-cols-2 gap-5">
           {/* Setup fee card */}
           <div className="rounded-3xl p-8 text-center glow-surface"
-            style={{ background:"linear-gradient(135deg,#1A0840,#0A0520)", border:"2px solid rgba(159,122,234,0.4)", boxShadow:"0 0 48px rgba(159,122,234,0.15)" }}>
-            <div style={{ color:"#C4B5FD", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
+            style={{ background:"linear-gradient(135deg,#0A1020,#060B16)", border:"2px solid rgba(110,139,255,0.4)", boxShadow:"0 0 48px rgba(110,139,255,0.15)" }}>
+            <div style={{ color:"#B8C6F5", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:8 }}>
               ${PRICING.setupFee}
             </div>
@@ -225,7 +225,7 @@ export function WhiteGloveService() {
             <div className="space-y-2 text-left">
               {["Specialist assigned to your account","Intake call to understand your needs","Secure document upload link sent to you","Complete onboarding plan created"].map(f => (
                 <div key={f} className="flex items-center gap-2">
-                  <CheckCircle size={13} color="#9F7AEA"/>
+                  <CheckCircle size={13} color="#6E8BFF"/>
                   <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
                 </div>
               ))}
@@ -234,8 +234,8 @@ export function WhiteGloveService() {
 
           {/* Per-session card */}
           <div className="rounded-3xl p-8 text-center glow-surface"
-            style={{ background:"rgba(159,122,234,0.06)", border:"2px solid rgba(159,122,234,0.25)" }}>
-            <div style={{ color:"#9F7AEA", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
+            style={{ background:"rgba(110,139,255,0.06)", border:"2px solid rgba(110,139,255,0.25)" }}>
+            <div style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
             <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#FFFFFF", lineHeight:1, marginBottom:4 }}>
               ${PRICING.sessionRate}
             </div>
@@ -243,14 +243,14 @@ export function WhiteGloveService() {
             <div className="space-y-2 text-left">
               {["Phone or video call with your specialist","Specialist uploads documents during the session","Session notes and progress tracking","Typical setup: 2–4 sessions total"].map(f => (
                 <div key={f} className="flex items-center gap-2">
-                  <CheckCircle size={13} color="#9F7AEA"/>
+                  <CheckCircle size={13} color="#6E8BFF"/>
                   <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
                 </div>
               ))}
             </div>
             <div className="mt-5 px-4 py-3 rounded-2xl"
-              style={{ background:"rgba(159,122,234,0.08)", border:"1px solid rgba(159,122,234,0.2)" }}>
-              <div style={{ color:"#9F7AEA", fontSize:13, fontWeight:700 }}>Typical Total Cost</div>
+              style={{ background:"rgba(110,139,255,0.08)", border:"1px solid rgba(110,139,255,0.2)" }}>
+              <div style={{ color:"#6E8BFF", fontSize:13, fontWeight:700 }}>Typical Total Cost</div>
               <div style={{ color:"#FFFFFF", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700, marginTop:2 }}>
                 ${PRICING.setupFee + PRICING.sessionRate * 4}–${PRICING.setupFee + PRICING.sessionRate * 6}
               </div>
@@ -262,7 +262,7 @@ export function WhiteGloveService() {
         {/* How it works */}
         <div>
           <div className="text-center mb-10">
-            <div style={{ color:"#9F7AEA", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:8 }}>HOW IT WORKS</div>
+            <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:8 }}>HOW IT WORKS</div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(1.6rem,3vw,2.4rem)", color:"#FFFFFF", lineHeight:1.2 }}>
               Four Simple Steps.<br/>All Done By Phone.
             </h2>
@@ -271,12 +271,12 @@ export function WhiteGloveService() {
             {STEPS.map((s, i) => (
               <div key={i} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
-                  style={{ width:48, height:48, background:"rgba(159,122,234,0.1)", color:"#9F7AEA" }}>
+                  style={{ width:48, height:48, background:"rgba(110,139,255,0.1)", color:"#6E8BFF" }}>
                   {s.icon}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span style={{ color:"#9F7AEA", fontSize:10, fontWeight:700, ...MONO }}>STEP {i+1}</span>
+                    <span style={{ color:"#6E8BFF", fontSize:10, fontWeight:700, ...MONO }}>STEP {i+1}</span>
                   </div>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:4 }}>{s.title}</div>
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>{s.desc}</div>
@@ -287,14 +287,14 @@ export function WhiteGloveService() {
         </div>
 
         {/* What's included */}
-        <div className="p-8 rounded-3xl glow-surface" style={{ ...GLASS, background:"rgba(159,122,234,0.04)" }}>
+        <div className="p-8 rounded-3xl glow-surface" style={{ ...GLASS, background:"rgba(110,139,255,0.04)" }}>
           <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:20, textAlign:"center" }}>
             Everything Is Included
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {INCLUDES.map(f => (
               <div key={f} className="flex items-start gap-3">
-                <CheckCircle size={14} color="#9F7AEA" style={{ marginTop:2, flexShrink:0 }}/>
+                <CheckCircle size={14} color="#6E8BFF" style={{ marginTop:2, flexShrink:0 }}/>
                 <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.6 }}>{f}</span>
               </div>
             ))}
@@ -302,7 +302,7 @@ export function WhiteGloveService() {
           <div className="text-center mt-8">
             <button onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold"
-              style={{ background:"linear-gradient(135deg,#9F7AEA,#C4B5FD)", color:"#04080F", boxShadow:"0 0 30px rgba(159,122,234,0.35)" }}>
+              style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 0 30px rgba(110,139,255,0.35)" }}>
               <Phone size={16}/> Request Your White Glove Call
             </button>
           </div>
@@ -311,7 +311,7 @@ export function WhiteGloveService() {
         {/* Inline form */}
         <div className="p-8 rounded-3xl glow-surface" style={GLASS}>
           <div className="text-center mb-8">
-            <Star size={28} color="#9F7AEA" fill="rgba(159,122,234,0.3)" style={{ margin:"0 auto 12px" }}/>
+            <Star size={28} color="#6E8BFF" fill="rgba(110,139,255,0.3)" style={{ margin:"0 auto 12px" }}/>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>Ready to Get Started?</h2>
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, maxWidth:400, margin:"0 auto" }}>
               Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.
@@ -338,7 +338,7 @@ export function WhiteGloveService() {
             { icon:<Clock size={20}/>,   title:"Your Pace, Always",   desc:"Sessions happen when you're ready. We never rush. Most complete in 1–2 weeks." },
           ].map(r => (
             <div key={r.title} className="p-5 rounded-2xl text-center glow-surface" style={GLASS}>
-              <div style={{ color:"#9F7AEA", margin:"0 auto 10px" }}>{r.icon}</div>
+              <div style={{ color:"#6E8BFF", margin:"0 auto 10px" }}>{r.icon}</div>
               <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", marginBottom:4 }}>{r.title}</div>
               <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{r.desc}</div>
             </div>
@@ -352,9 +352,9 @@ export function WhiteGloveService() {
           style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
           <div className="w-full max-w-md rounded-3xl overflow-hidden" style={{ ...GLASS, maxHeight:"90vh", overflowY:"auto" }}>
             <div className="flex items-center justify-between px-6 py-4 border-b"
-              style={{ borderColor:"rgba(159,122,234,0.12)" }}>
+              style={{ borderColor:"rgba(110,139,255,0.12)" }}>
               <div className="flex items-center gap-2">
-                <Star size={16} color="#9F7AEA" fill="rgba(159,122,234,0.3)"/>
+                <Star size={16} color="#6E8BFF" fill="rgba(110,139,255,0.3)"/>
                 <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>White Glove Request</span>
               </div>
               <button onClick={() => setShowModal(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>

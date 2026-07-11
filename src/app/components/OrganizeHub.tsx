@@ -3,15 +3,15 @@ import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, Clock, X } from "luc
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(108,92,231,0.14)", backdropFilter:"blur(12px)" };
-const GRID: React.CSSProperties = { backgroundImage:"linear-gradient(rgba(108,92,231,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(108,92,231,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
+const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
+const GRID: React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 type Tab = "folders"|"reminders"|"occasions";
 
 const folders = [
-  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:"#6C5CE7", desc:"Wills, trusts, power of attorney" },
+  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:"#3A5BD9", desc:"Wills, trusts, power of attorney" },
   { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:"#48BB78", desc:"Bank statements, tax returns" },
-  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:"#9F7AEA", desc:"Test results, prescriptions" },
+  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:"#6E8BFF", desc:"Test results, prescriptions" },
   { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:"#ED8936", desc:"Deeds, mortgage statements" },
   { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:"#FC8181", desc:"Life, home, auto policies" },
   { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:"#F6AD55", desc:"Letters to family" },
@@ -26,8 +26,8 @@ const remStatus = {
   completed:{ color:"rgba(255,255,255,0.7)", bg:"rgba(107,114,128,0.12)", label:"DONE" },
 };
 const occType = {
-  birthday:    { color:"#9F7AEA", bg:"rgba(159,122,234,0.12)", icon:"🎂" },
-  anniversary: { color:"#6C5CE7", bg:"rgba(108,92,231,0.12)",   icon:"💍" },
+  birthday:    { color:"#6E8BFF", bg:"rgba(110,139,255,0.12)", icon:"🎂" },
+  anniversary: { color:"#3A5BD9", bg:"rgba(58,91,217,0.12)",   icon:"💍" },
   holiday:     { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",  icon:"🎄" },
 };
 
@@ -48,22 +48,22 @@ function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<
           {[{key:"title",label:"REMINDER TITLE",ph:"e.g. Update Will"},{key:"dueDate",label:"DUE DATE",ph:"e.g. Sep 15, 2026"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
             <div key={f.key}><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
               <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
           <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>FREQUENCY</label>
-            <select value={form.frequency} onChange={e=>setForm(f=>({...f,frequency:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+            <select value={form.frequency} onChange={e=>setForm(f=>({...f,frequency:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
               <option>Annual</option><option>Quarterly</option><option>Monthly</option><option>6 months</option><option>One-time</option>
             </select>
           </div>
           <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>CATEGORY</label>
-            <select value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+            <select value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
               <option>Legal</option><option>Financial</option><option>Medical</option><option>Legacy</option><option>Vehicles</option><option>Pets</option>
             </select>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Create Reminder"}</button>
-            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Create Reminder"}</button>
+            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -88,17 +88,17 @@ function AddOccasionModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(o:Omit<
           {[{key:"name",label:"OCCASION NAME",ph:"e.g. Sarah's Birthday"},{key:"date",label:"DATE",ph:"e.g. Aug 14"},{key:"recipient",label:"RECIPIENT",ph:"e.g. Sarah Johnson"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
             <div key={f.key}><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
               <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
           <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>TYPE</label>
-            <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value as any}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+            <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value as any}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
               <option value="birthday">Birthday</option><option value="anniversary">Anniversary</option><option value="holiday">Holiday</option>
             </select>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Save Occasion"}</button>
-            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Save Occasion"}</button>
+            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function OrganizeHub() {
   const [showAddFolder, setShowAddFolder] = useState(false);
   const [folderList, setFolderList] = useState(folders);
   const [newFolder, setNewFolder] = useState({ name:"", desc:"" });
-  const FOLDER_COLORS = ["#6C5CE7","#48BB78","#9F7AEA","#ED8936","#FC8181","#F6AD55","#4A90D9","#38B2AC"];
+  const FOLDER_COLORS = ["#3A5BD9","#48BB78","#6E8BFF","#ED8936","#FC8181","#F6AD55","#4A90D9","#38B2AC"];
 
   function addFolder() {
     if (!newFolder.name.trim()) { toast.error("Folder name required"); return; }
@@ -140,7 +140,7 @@ export function OrganizeHub() {
       <div className="flex gap-1 p-1 rounded-2xl" style={{ background:"rgba(22,22,31,0.95)", width:"fit-content" }}>
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
-            style={{ background:tab===t.id?"#6C5CE7":"transparent", color:tab===t.id?"#FFFFFF":"rgba(255,255,255,0.7)", fontWeight:tab===t.id?700:400 }}>
+            style={{ background:tab===t.id?"#3A5BD9":"transparent", color:tab===t.id?"#FFFFFF":"rgba(255,255,255,0.7)", fontWeight:tab===t.id?700:400 }}>
             {t.icon} {t.label}
           </button>
         ))}
@@ -150,7 +150,7 @@ export function OrganizeHub() {
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={()=>setShowAddFolder(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(108,92,231,0.3)" }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
               <Plus size={14}/> Create New Folder
             </button>
           </div>
@@ -184,21 +184,21 @@ export function OrganizeHub() {
                   <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>FOLDER NAME *</label>
                   <input value={newFolder.name} onChange={e=>setNewFolder(p=>({...p,name:e.target.value}))}
                     placeholder="e.g. Medical Directives"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                 </div>
                 <div>
                   <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION (optional)</label>
                   <input value={newFolder.desc} onChange={e=>setNewFolder(p=>({...p,desc:e.target.value}))}
                     placeholder="What this folder is for"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.06)", border:"1px solid rgba(108,92,231,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
                 </div>
                 <div className="flex gap-3 pt-1">
                   <button onClick={addFolder} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF" }}>
+                    style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF" }}>
                     Create Folder
                   </button>
                   <button onClick={()=>setShowAddFolder(false)} className="px-4 py-3 rounded-xl text-sm"
-                    style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+                    style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
                 </div>
               </div>
             </div>
@@ -210,11 +210,11 @@ export function OrganizeHub() {
         <div className="space-y-3">
           <div className="flex justify-end">
             <button onClick={()=>setShowAddRem(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(108,92,231,0.3)" }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
               <Plus size={14}/> Add Reminder
             </button>
           </div>
-          {reminders.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Bell size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No reminders yet.</div></div>}
+          {reminders.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Bell size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No reminders yet.</div></div>}
           {reminders.map(r=>{
             const s = remStatus[r.status];
             return (
@@ -222,13 +222,13 @@ export function OrganizeHub() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Bell size={13} color="#6C5CE7"/>
+                      <Bell size={13} color="#3A5BD9"/>
                       <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{r.title}</span>
                     </div>
                     <div className="flex flex-wrap gap-4 mb-1">
                       <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Due: <strong style={{ color:"#FFFFFF" }}>{r.dueDate}</strong></span>
                       <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Repeats: {r.frequency}</span>
-                      <span className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(108,92,231,0.06)", color:"rgba(255,255,255,0.7)" }}>{r.category}</span>
+                      <span className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>{r.category}</span>
                     </div>
                     {r.notes && <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>{r.notes}</div>}
                   </div>
@@ -251,11 +251,11 @@ export function OrganizeHub() {
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={()=>setShowAddOcc(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#6C5CE7,#8B7CF6)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(108,92,231,0.3)" }}>
+              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
               <Plus size={14}/> Add Occasion
             </button>
           </div>
-          {occasions.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Calendar size={28} color="rgba(108,92,231,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No occasions yet.</div></div>}
+          {occasions.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Calendar size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No occasions yet.</div></div>}
           <div className="grid md:grid-cols-2 gap-4">
             {occasions.map(o=>{
               const ot = occType[o.type];

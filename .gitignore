@@ -4,3 +4,6 @@ dist-ssr/
 *.local
 .DS_Store
 FPD.zip
+
+# Internal engagement / working notes — not for the client repo
+memory/

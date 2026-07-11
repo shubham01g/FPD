@@ -5,7 +5,7 @@ import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(108,92,231,0.05)", border:"1px solid rgba(108,92,231,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const CATEGORIES = ["Electronics","Appliances","HVAC / Plumbing","Roofing / Structure","Vehicles","Furniture","Jewelry","Tools / Power Tools","Lawn & Garden","Sporting Goods","Medical Devices","Other"];
@@ -102,7 +102,7 @@ export function Warranties() {
         {["all",...CATEGORIES].map(cat=>(
           <button key={cat} onClick={()=>setFilterCat(cat)}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-            style={{ background:filterCat===cat?"var(--primary)":"rgba(108,92,231,0.05)", color:filterCat===cat?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterCat===cat?"var(--primary)":"rgba(108,92,231,0.12)"}` }}>
+            style={{ background:filterCat===cat?"var(--primary)":"rgba(58,91,217,0.05)", color:filterCat===cat?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterCat===cat?"var(--primary)":"rgba(58,91,217,0.12)"}` }}>
             {cat==="all" ? "All" : cat}
           </button>
         ))}
@@ -116,7 +116,7 @@ export function Warranties() {
             <button className="w-full p-5 text-left" onClick={()=>setExpanded(expanded===w.id?null:w.id)}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:44, height:44, background:"rgba(108,92,231,0.08)" }}>
+                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:44, height:44, background:"rgba(58,91,217,0.08)" }}>
                     <Shield size={20} color="var(--primary)"/>
                   </div>
                   <div>
@@ -128,7 +128,7 @@ export function Warranties() {
                     <div className="flex items-center gap-4 flex-wrap">
                       <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Calendar size={10}/> Expires: {w.expiryDate}</span>
                       <span className="text-xs" style={{ color:"var(--muted-foreground)" }}>{w.warrantyType}</span>
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)" }}>{w.category}</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)" }}>{w.category}</span>
                     </div>
                   </div>
                 </div>
@@ -140,7 +140,7 @@ export function Warranties() {
               <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"var(--border)" }}>
                 <div className="grid md:grid-cols-2 gap-3 pt-4">
                   {[["Brand / Make",w.brand],["Model",w.model],["Serial / Item #",w.serialNum||"—"],["Purchase Date",w.purchaseDate],["Purchased From",w.purchasedFrom],["Purchase Price",w.price],["Warranty Provider",w.provider],["Provider Phone",w.providerPhone||"—"],["Provider Website",w.providerWebsite||"—"],["Expiry Date",w.expiryDate]].map(([label,value])=>(
-                    <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#1C1C28" }}>
+                    <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
                       <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{(label as string).toUpperCase()}</div>
                       <div style={{ color:"var(--foreground)", fontSize:13 }}>{value||"—"}</div>
                     </div>
@@ -155,7 +155,7 @@ export function Warranties() {
                 )}
 
                 {w.claimInstructions && (
-                  <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(108,92,231,0.04)", border:"1px solid rgba(108,92,231,0.12)" }}>
+                  <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
                     <div style={{ color:"var(--primary)", fontSize:10, ...MONO, marginBottom:4 }}>HOW TO CLAIM</div>
                     <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{w.claimInstructions}</div>
                   </div>
@@ -175,7 +175,7 @@ export function Warranties() {
                     {w.documents.map(d=>(
                       <button key={d} onClick={()=>toast.success(`Opening: ${d}`)}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                        style={{ background:"rgba(108,92,231,0.07)", color:"var(--primary)", border:"1px solid rgba(108,92,231,0.15)" }}>
+                        style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
                         📄 {d}
                       </button>
                     ))}
