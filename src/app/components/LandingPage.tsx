@@ -414,7 +414,7 @@ function CTA({ onStart }: { onStart: () => void }) {
   return (
     <section className="relative py-28 px-6">
       <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-20" style={{ border: "1px solid rgba(58,91,217,0.24)" }}>
-        <MediaBackdrop tone="blue" overlay={0.6} />
+        <MediaBackdrop src="/media/cta.mp4" tone="blue" overlay={0.6} />
         <div className="relative flex flex-col items-center">
           <Kicker>Start today</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4.5vw,3.4rem)", fontWeight: 800, color: TEXT, margin: "18px 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 680 }}>

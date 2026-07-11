@@ -12,7 +12,6 @@ layout looks intentional with or without assets.
 | `story-vault.mp4`      | "A vault that outlives you" split         | Documents / secure vault / organizing papers        |
 | `story-contacts.mp4`   | "The right people, at the right time"     | Handing keys / trusted person / signing             |
 | `story-memories.mp4`   | "Memories that speak for you" split       | Recording a video message / looking at photos       |
-| `affiliate.mp4`        | Affiliate program band                    | Sharing / social / earning                          |
-| `partnership.mp4`      | Partnership band                          | Business handshake / advisors                        |
+| `cta.mp4`              | Closing CTA band background               | Abstract royal-blue light particles / calm aura      |
 
 Poster convention: for any `foo.mp4` you may add `foo.jpg` as its poster frame.
