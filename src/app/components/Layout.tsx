@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu
+  ShieldCheck, ChevronRight, X, Menu, Layers
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_new_logo.png";
 import { VaultClone } from "./VaultClone";
@@ -20,7 +20,7 @@ export type PageId =
   | "family-friends"
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
-  | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
+  | "legacy-continuation" | "white-glove" | "white-label" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
   | "warranties";
@@ -97,6 +97,7 @@ const navGroups: NavGroup[] = [
       { id: "storage-usage", label: "Usage & Billing",   icon: <HardDrive size={16}/> },
       { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/>, badge: "30%" },
       { id: "white-glove",   label: "White Glove Service", icon: <Star size={16}/>, badge: "⭐" },
+      { id: "white-label",   label: "White Label", icon: <Layers size={16}/>, badge: "Partner" },
     ],
   },
 ];

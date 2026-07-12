@@ -52,6 +52,7 @@ import { WhiteLabelConfig } from "./components/WhiteLabelConfig";
 import { ContinuationFeeAdmin } from "./components/admin/ContinuationFeeAdmin";
 import { WhiteGloveAdmin } from "./components/admin/WhiteGloveAdmin";
 import { WhiteGloveService } from "./components/WhiteGloveService";
+import { WhiteLabelStudio } from "./components/WhiteLabelStudio";
 import { WaiverSignPage } from "./components/WaiverForm";
 import { AccountSettings } from "./components/AccountSettings";
 import { WGClientSubmit } from "./components/WGClientSubmit";
@@ -268,6 +269,7 @@ function AppShell() {
       case "storage-usage":       return <StorageUsage/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;
+      case "white-label":         return <WhiteLabelStudio/>;
       case "waiver-sign":         return <div className="p-6"><WaiverSignPage onBack={() => nav("dashboard")}/></div>;
       case "account-settings":    return <AccountSettings/>;
       case "fpd-ai":              return <AIAgent pageMode={true}/>;
