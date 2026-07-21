@@ -5,8 +5,7 @@ import {
   HandCoins, Handshake, FileCheck2, Fingerprint, Server, Mail, Phone,
   Star, MessageSquare, Building2, Scale, Landmark, TrendingUp,
 } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
-import fpdLongLogo from "../../imports/FPD_long_logo_blue.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -135,8 +134,8 @@ function TopNav({ current, onNavigate, onStart }: { current: MPage; onNavigate: 
       style={{ background: solid ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: solid ? "1px solid rgba(58,91,217,0.14)" : "1px solid transparent", backdropFilter: solid ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
         <button onClick={() => go("home")} className="flex items-center gap-2.5">
-          <img src={fpdSquareLogo} alt="FPD" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
-          <img src={fpdLongLogo} alt="Final Pass Down" className="hidden sm:block" style={{ height: 22, objectFit: "contain" }} />
+          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 36, height: 36, borderRadius: 8, objectFit:"contain" }} />
+          <span className="hidden sm:block" style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 15, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
         </button>
         <div className="hidden xl:flex items-center gap-0.5">
           {NAV_LINKS.map(([l, p]) => (
@@ -467,8 +466,8 @@ function Footer({ onStart, onNavigate, onAdminLogin }: { onStart: () => void; on
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <img src={fpdSquareLogo} alt="FPD" style={{ width: 34, height: 34, borderRadius: 8, objectFit: "cover" }} />
-              <img src={fpdLongLogo} alt="Final Pass Down" style={{ height: 20, objectFit: "contain" }} />
+              <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 34, height: 34, borderRadius: 8, objectFit:"contain" }} />
+              <span style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
             </div>
             <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.7, maxWidth: 300 }}>
               The secure digital vault for everything that matters — prepared by you, passed down to those you love.

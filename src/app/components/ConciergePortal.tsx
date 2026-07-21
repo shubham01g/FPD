@@ -12,7 +12,7 @@ import {
   BookOpen, Camera, Inbox, PhoneMissed, Link, Copy
 } from "lucide-react";
 import { toast } from "sonner";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { type ConciergeEmployee, ROLE_LABELS, ROLE_COLORS } from "../services/conciergeStaff";
 import { subscribeToClients, createScheduleToken, type WGClient } from "../services/wgClientStore";
 import { ScanButton } from "./DocumentScanner";
@@ -580,7 +580,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
         style={{ background:"#060B16", borderRight:"1px solid rgba(110,139,255,0.12)" }}>
         <div className="px-4 py-4 border-b" style={{ borderColor:"rgba(110,139,255,0.12)" }}>
           <div className="flex items-center gap-2.5">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:30, height:30, borderRadius:7, objectFit:"cover" }}/>
+            <img src={fpdSquareLogo} alt="FPD" style={{ width:30, height:30, borderRadius:7, objectFit:"contain" }}/>
             <div>
               <div style={{ ...DISPLAY, color:"#B8C6F5", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#34456A", fontSize:7, letterSpacing:"0.12em", ...MONO }}>CONCIERGE PORTAL</div>

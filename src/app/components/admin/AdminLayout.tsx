@@ -4,7 +4,7 @@ import {
   Code, Mail, Layers, LogOut, Bell, Menu, X, BarChart3,
   Shield, ChevronDown, ChevronRight, UserCheck, Activity
 } from "lucide-react";
-import fpdSquareLogo from "../../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
 
 export type AdminPageId =
   | "master-admin" | "admin-affiliate" | "admin-partnership"
@@ -100,7 +100,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(110,139,255,0.12)" }}>
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"cover", flexShrink:0, boxShadow:"0 0 16px rgba(110,139,255,0.3)" }}/>
+          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(110,139,255,0.3)" }}/>
           {open && (
             <div className="flex-1 min-w-0">
               <div style={{ fontFamily:"var(--font-display)", color:"#6E8BFF", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>

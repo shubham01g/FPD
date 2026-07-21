@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useEscapeKey } from "../hooks/useEscapeKey";
 import { Camera, Video, Star, Trophy, Target, Heart, PawPrint, Plus, Edit2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
@@ -236,6 +237,8 @@ export function FamilyMemories() {
   const [showAdd, setShowAdd] = useState<Tab|null>(null);
   const [showPetForm, setShowPetForm] = useState(false);
   const [expandedPet, setExpandedPet] = useState<number|null>(1);
+
+  useEscapeKey(showAdd !== null || showPetForm, () => { setShowAdd(null); setShowPetForm(false); });
 
   // Pet form state matching screenshot fields exactly
   const [petPhotos, setPetPhotos] = useState<string[]>([]);

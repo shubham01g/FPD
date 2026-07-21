@@ -97,6 +97,9 @@ function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
 function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  /* onstop fires from a closure created at start(), where `seconds` is still 0.
+     The ref is what the handler must read to report a real duration. */
+  const secondsRef = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -106,18 +109,24 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
       chunks.current = [];
+      secondsRef.current = 0;
+      setSeconds(0);
       mr.ondataavailable = e => chunks.current.push(e.data);
       mr.onstop = () => {
         const blob = new Blob(chunks.current, { type:"audio/webm" });
-        const mins = Math.floor(seconds/60);
-        const secs = seconds % 60;
+        const total = secondsRef.current;
+        const mins = Math.floor(total/60);
+        const secs = total % 60;
         onSave(blob, `${mins}:${secs.toString().padStart(2,"0")}`);
         stream.getTracks().forEach(t => t.stop());
       };
       mr.start();
       mediaRef.current = mr;
       setRecording(true);
-      intervalRef.current = setInterval(() => setSeconds(s => s+1), 1000);
+      intervalRef.current = setInterval(() => {
+        secondsRef.current += 1;
+        setSeconds(secondsRef.current);
+      }, 1000);
     } catch {
       toast.error("Microphone access denied. Please allow microphone access.");
     }
@@ -169,31 +178,46 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
   const mediaRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const secondsRef = useRef(0);
   const chunks = useRef<Blob[]>([]);
 
   const startPreview = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
       streamRef.current = stream;
-      if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
       setPreview(true);
     } catch { toast.error("Camera/microphone access denied."); }
   };
 
+  /* The <video> only mounts once preview is true, so the stream has to be
+     attached after that render — assigning inside startPreview hit a null ref
+     and left the panel black. */
+  useEffect(() => {
+    if (!preview || !videoRef.current || !streamRef.current) return;
+    videoRef.current.srcObject = streamRef.current;
+    videoRef.current.play().catch(() => {});
+  }, [preview]);
+
   const startRecording = () => {
     if (!streamRef.current) return;
     chunks.current = [];
+    secondsRef.current = 0;
+    setSeconds(0);
     const mr = new MediaRecorder(streamRef.current);
     mr.ondataavailable = e => chunks.current.push(e.data);
     mr.onstop = () => {
-      const mins = Math.floor(seconds/60), secs = seconds % 60;
+      const total = secondsRef.current;
+      const mins = Math.floor(total/60), secs = total % 60;
       onSave(`${mins}:${secs.toString().padStart(2,"0")}`);
       stopAll();
     };
     mr.start();
     mediaRef.current = mr;
     setRecording(true);
-    intervalRef.current = setInterval(() => setSeconds(s => s+1), 1000);
+    intervalRef.current = setInterval(() => {
+      secondsRef.current += 1;
+      setSeconds(secondsRef.current);
+    }, 1000);
   };
 
   const stopRecording = () => {
@@ -258,6 +282,18 @@ export function DigitalDiary() {
   const [videoDuration, setVideoDuration] = useState<string | null>(null);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  /* Escape closes the open overlay, matching Messages to Loved Ones. */
+  useEffect(() => {
+    if (!creating && !selected) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (creating) setCreating(false);
+      else setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [creating, selected]);
 
   const filtered = entries.filter(e => {
     const matchSearch = e.title.toLowerCase().includes(search.toLowerCase()) || (e.body??"").toLowerCase().includes(search.toLowerCase()) || e.tags.some(t => t.includes(search.toLowerCase()));

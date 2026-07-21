@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import {
-  Heart, FileText, Church, HelpCircle, Plus, ChevronRight,
-  Save, CheckCircle, Edit2, Trash2, ChevronDown
+  Heart, Church, HelpCircle, Plus, X,
+  CheckCircle, Edit2, Trash2, ChevronDown
 } from "lucide-react";
+import { toast } from "sonner";
 
 type Tab = "wishes" | "funeral" | "questionnaire";
 
@@ -48,7 +49,13 @@ const funeralPlan = {
   specialRequests: "No black attire — please wear bright colors to celebrate a life well lived.",
 };
 
-const finalWishes = [
+const WISH_CATEGORIES = ["Personal Property", "Sentimental Items", "Financial", "Digital", "Charitable", "Other"];
+
+interface Wish {
+  id: number; category: string; item: string; recipient: string; notes: string;
+}
+
+const initialWishes: Wish[] = [
   { id: 1, category: "Personal Property", item: "1967 Ford Mustang (Red)", recipient: "Michael Doe (Son)", notes: "Keep it in the family. Never sell it." },
   { id: 2, category: "Sentimental Items", item: "Grandfather's pocket watch", recipient: "Emily Doe (Daughter)", notes: "Has been in the family since 1892." },
   { id: 3, category: "Financial", item: "Savings account at First National", recipient: "Sarah Johnson (Spouse)", notes: "Primary beneficiary already designated." },
@@ -62,13 +69,107 @@ const wills = [
   { id: 3, type: "Durable Power of Attorney", attorney: "Linda Torres, Esq.", dateExecuted: "March 15, 2026", lastReviewed: "March 15, 2026", status: "current", location: "Legacy Vault" },
 ];
 
+/* ── Add / edit a bequest ── */
+function WishModal({ editing, onClose, onSave }: {
+  editing: Wish | null; onClose: () => void; onSave: (w: Wish) => void;
+}) {
+  const [form, setForm] = useState<Partial<Wish>>(editing ?? { category: WISH_CATEGORIES[0], item: "", recipient: "", notes: "" });
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const submit = () => {
+    if (!form.item?.trim()) return toast.error("Describe the item or asset.");
+    if (!form.recipient?.trim()) return toast.error("Name who should receive it.");
+    onSave({
+      id: editing?.id ?? Date.now(),
+      category: form.category ?? WISH_CATEGORIES[0],
+      item: form.item.trim(),
+      recipient: form.recipient.trim(),
+      notes: form.notes?.trim() ?? "",
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: "rgba(3,6,12,0.75)", backdropFilter: "blur(4px)", zIndex: 100 }}
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="rounded-2xl" style={{ background: "var(--card)", border: "1px solid rgba(58,91,217,0.3)", width: "100%", maxWidth: 520, boxShadow: "0 30px 80px rgba(0,0,0,0.7)" }}>
+        <div className="flex items-center justify-between" style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>
+            {editing ? "Edit Wish" : "Add a Wish"}
+          </h3>
+          <button onClick={onClose} style={{ color: "var(--muted-foreground)" }}><X size={18} /></button>
+        </div>
+        <div className="space-y-4" style={{ padding: 22 }}>
+          <div>
+            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>CATEGORY</label>
+            <select className="fpd-field" style={{ marginTop: 6 }} value={form.category}
+              onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
+              {WISH_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>ITEM OR ASSET *</label>
+            <input className="fpd-field" style={{ marginTop: 6 }} value={form.item ?? ""}
+              onChange={e => setForm(p => ({ ...p, item: e.target.value }))}
+              placeholder="e.g. Grandmother's wedding ring" />
+          </div>
+          <div>
+            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>RECIPIENT *</label>
+            <input className="fpd-field" style={{ marginTop: 6 }} value={form.recipient ?? ""}
+              onChange={e => setForm(p => ({ ...p, recipient: e.target.value }))}
+              placeholder="e.g. Emily Doe (Daughter)" />
+          </div>
+          <div>
+            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>NOTES</label>
+            <textarea className="fpd-field" style={{ marginTop: 6, minHeight: 80 }} value={form.notes ?? ""}
+              onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+              placeholder="Why this matters, or any conditions attached" />
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2" style={{ padding: "16px 22px", borderTop: "1px solid var(--border)" }}>
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm"
+            style={{ background: "rgba(138,154,184,0.12)", color: "#8A9AB8", fontWeight: 600 }}>Cancel</button>
+          <button onClick={submit} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
+            style={{ background: "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color: "#fff", fontWeight: 600 }}>
+            <CheckCircle size={14} /> {editing ? "Save Changes" : "Add Wish"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FinalWishes() {
   const [tab, setTab] = useState<Tab>("wishes");
   const [expandedCat, setExpandedCat] = useState<number | null>(0);
   const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
+  const [wishes, setWishes] = useState<Wish[]>(initialWishes);
+  const [wishModal, setWishModal] = useState(false);
+  const [editingWish, setEditingWish] = useState<Wish | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>(
     Object.fromEntries(questionnaireCategories.flatMap(c => c.questions).map(q => [q.id, q.a]))
   );
+
+  const saveWish = (w: Wish) => {
+    setWishes(prev => editingWish ? prev.map(x => x.id === w.id ? w : x) : [w, ...prev]);
+    toast.success(editingWish ? "Wish updated." : `"${w.item}" added to your final wishes.`);
+    setWishModal(false);
+    setEditingWish(null);
+  };
+
+  const deleteWish = (id: number) => {
+    const w = wishes.find(x => x.id === id);
+    setWishes(prev => prev.filter(x => x.id !== id));
+    toast.success(`"${w?.item}" removed.`);
+  };
+
+  const [obituary, setObituary] = useState(funeralPlan.obituaryDraft);
+  const [editingObit, setEditingObit] = useState(false);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "wishes",        label: "Final Wishes",    icon: <Heart size={15} /> },
@@ -105,12 +206,20 @@ export function FinalWishes() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Specific items, property, or bequests you want to leave to individuals or organizations.</p>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}>
+            <button onClick={() => { setEditingWish(null); setWishModal(true); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#FFFFFF", fontWeight: 600 }}>
               <Plus size={14} /> Add Wish
             </button>
           </div>
           <div className="space-y-3">
-            {finalWishes.map((wish, i) => (
+            {wishes.length === 0 && (
+              <div className="text-center rounded-2xl" style={{ padding: "40px 20px", border: "1px dashed rgba(58,91,217,0.25)", background: "var(--card)" }}>
+                <Heart size={26} color="rgba(58,91,217,0.35)" style={{ margin: "0 auto 10px" }} />
+                <div style={{ color: "var(--foreground)", fontSize: 15, marginBottom: 4 }}>No wishes recorded yet</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Add the first item you want passed to someone specific.</div>
+              </div>
+            )}
+            {wishes.map((wish) => (
               <div key={wish.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -125,9 +234,11 @@ export function FinalWishes() {
                     </div>
                     {wish.notes && <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 6, fontStyle: "italic" }}>"{wish.notes}"</div>}
                   </div>
-                  <div className="flex gap-2">
-                    <button style={{ color: "var(--muted-foreground)" }}><Edit2 size={14} /></button>
-                    <button style={{ color: "#FC8181" }}><Trash2 size={14} /></button>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button title="Edit wish" onClick={() => { setEditingWish(wish); setWishModal(true); }}
+                      style={{ color: "var(--muted-foreground)" }}><Edit2 size={14} /></button>
+                    <button title="Delete wish" onClick={() => deleteWish(wish.id)}
+                      style={{ color: "#FC8181" }}><Trash2 size={14} /></button>
                   </div>
                 </div>
               </div>
@@ -189,12 +300,35 @@ export function FinalWishes() {
           </div>
           <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 12 }}>Obituary Draft</h3>
-            <div className="p-4 rounded-xl glow-surface" style={{ background: "#141B2E", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8 }}>
-              {funeralPlan.obituaryDraft}
-            </div>
-            <button className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}>
-              <Edit2 size={13} /> Edit Obituary
-            </button>
+            {editingObit ? (
+              <>
+                <textarea className="fpd-field" style={{ minHeight: 160, lineHeight: 1.8 }} value={obituary}
+                  onChange={e => setObituary(e.target.value)} />
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => { setEditingObit(false); toast.success("Obituary draft saved."); }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                    style={{ background: "rgba(72,187,120,0.15)", color: "#48BB78", fontWeight: 600 }}>
+                    <CheckCircle size={13} /> Save Draft
+                  </button>
+                  <button onClick={() => { setObituary(funeralPlan.obituaryDraft); setEditingObit(false); }}
+                    className="px-4 py-2 rounded-xl text-sm"
+                    style={{ background: "rgba(138,154,184,0.12)", color: "#8A9AB8", fontWeight: 600 }}>
+                    Revert
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-4 rounded-xl glow-surface" style={{ background: "#141B2E", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
+                  {obituary}
+                </div>
+                <button onClick={() => setEditingObit(true)}
+                  className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                  style={{ background: "var(--primary)", color: "#FFFFFF", fontWeight: 600 }}>
+                  <Edit2 size={13} /> Edit Obituary
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -265,6 +399,14 @@ export function FinalWishes() {
             </div>
           ))}
         </div>
+      )}
+
+      {wishModal && (
+        <WishModal
+          editing={editingWish}
+          onClose={() => { setWishModal(false); setEditingWish(null); }}
+          onSave={saveWish}
+        />
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { DemoProvider } from "./context/DemoContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
+import { WLEntitlementProvider } from "./context/WLEntitlementContext";
 
 /* User portal */
 import { Layout, type PageId } from "./components/Layout";
@@ -30,6 +31,9 @@ import { AffiliateProgram } from "./components/AffiliateProgram";
 import { DigitalFileCabinet } from "./components/DigitalFileCabinet";
 import { FamilyFriends } from "./components/FamilyFriends";
 import { DigitalDiary } from "./components/DigitalDiary";
+import { LifeCalendar } from "./components/LifeCalendar";
+import { MessagesToLovedOnes } from "./components/MessagesToLovedOnes";
+import { VitalClone } from "./components/VitalClone";
 import { PasswordManager } from "./components/PasswordManager";
 import { SubscriptionManager } from "./components/SubscriptionManager";
 import { LegacyContinuationFee } from "./components/LegacyContinuationFee";
@@ -258,6 +262,9 @@ function AppShell() {
       case "personal-assets":     return <PersonalAssets/>;
       case "family-memories":     return <FamilyMemories/>;
       case "digital-diary":         return <DigitalDiary/>;
+      case "calendar":              return <LifeCalendar onNavigate={nav}/>;
+      case "messages-loved-ones":   return <MessagesToLovedOnes/>;
+      case "vital-clone":           return <VitalClone/>;
       case "password-manager":      return <PasswordManager/>;
       case "subscription-manager":   return <SubscriptionManager/>;
       case "legacy-continuation":    return <LegacyContinuationFee/>;
@@ -269,7 +276,9 @@ function AppShell() {
       case "storage-usage":       return <StorageUsage/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;
-      case "white-label":         return <WhiteLabelStudio/>;
+      // Always reachable — the Studio renders its own locked state until the
+      // partner package is paid for, and routes here to the purchase flow.
+      case "white-label":         return <WhiteLabelStudio onPurchase={() => setMode("partner-onboarding")}/>;
       case "waiver-sign":         return <div className="p-6"><WaiverSignPage onBack={() => nav("dashboard")}/></div>;
       case "account-settings":    return <AccountSettings/>;
       case "fpd-ai":              return <AIAgent pageMode={true}/>;
@@ -440,10 +449,12 @@ export default function App() {
   return (
     <WLPackagesProvider>
       <WhiteLabelProvider>
+        <WLEntitlementProvider>
         <DemoProvider>
           <Toaster position="bottom-right" toastOptions={{ style: TOASTER_STYLE }} theme="dark"/>
           <AppShell/>
         </DemoProvider>
+        </WLEntitlementProvider>
       </WhiteLabelProvider>
     </WLPackagesProvider>
   );

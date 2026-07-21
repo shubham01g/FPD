@@ -119,6 +119,11 @@ interface DemoCtx {
   user: UserProfile;
   continuationFeePaid: boolean;
   setContinuationFeePaid: (paid: boolean) => void;
+  /* Condition 2 of the Legacy Vault gate: a legacy contact has submitted a
+     record of passing and FPD admin has accepted it. */
+  deathVerified: boolean;
+  deathVerifiedDoc: string | null;
+  submitDeathRecord: (docName: string) => void;
   docs: Doc[];
   contacts: Contact[];
   wishes: FinalWish[];
@@ -177,6 +182,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [occasions, setOccasions] = useState<Occasion[]>(initOccasions);
   const [notifications, setNotifs] = useState<Notification[]>(initNotifications);
   const [continuationFeePaid, setContinuationFeePaid] = useState(false);
+  const [deathVerifiedDoc, setDeathVerifiedDoc] = useState<string | null>(null);
+
+  /* Stands in for the admin review queue: a legacy contact submits a record of
+     passing, FPD reviews it, and the second unlock condition flips. */
+  const submitDeathRecord = useCallback((docName: string) => {
+    setDeathVerifiedDoc(docName);
+    toast.success(`"${docName}" accepted — confirmation of passing verified`);
+  }, []);
 
   /* User */
   const updateUser = useCallback(async (data: Partial<UserProfile>) => {
@@ -317,6 +330,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       addReminder, completeReminder, removeReminder, addMemory, removeMemory, addOccasion,
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,
+      deathVerified: deathVerifiedDoc !== null, deathVerifiedDoc, submitDeathRecord,
     }}>
       {children}
     </DemoContext.Provider>

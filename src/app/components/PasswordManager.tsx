@@ -1,24 +1,38 @@
 import { copyToClipboard } from "../utils/clipboard";
+import { useEscapeKey } from "../hooks/useEscapeKey";
 import React, { useState, useRef } from "react";
 import { ScanButton } from "./DocumentScanner";
 import {
   Key, Eye, EyeOff, Copy, Plus, Trash2, Edit2, X, Search,
   Lock, Globe, User, FileText, Shield, CheckCircle, Upload,
-  AlertTriangle, Star, ChevronDown
+  AlertTriangle, ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
+/* Importance drives what a legacy contact should open first. A plain
+   starred/not-starred boolean couldn't express "this one keeps the lights on"
+   versus "nice to have", so it is now a graded flag. */
+type Importance = "critical" | "high" | "normal";
+
 interface PasswordEntry {
   id: string; title: string; website?: string; username?: string;
   email?: string; password: string; accountNumber?: string;
   securityQuestion?: string; securityAnswer?: string; notes?: string;
   category: string; strength: "weak"|"fair"|"good"|"strong";
-  lastUpdated: string; starred?: boolean; twoFactor?: boolean;
+  lastUpdated: string; importance?: Importance; twoFactor?: boolean;
   documents?: string[];
 }
+
+const IMPORTANCE_META: Record<Importance, { label: string; short: string; color: string; desc: string; rank: number }> = {
+  critical: { label: "Critical", short: "CRITICAL", color: "#E53E3E", rank: 0, desc: "Losing access here would block everything else — primary email, main bank, password recovery." },
+  high:     { label: "High",     short: "HIGH",     color: "#F6AD55", rank: 1, desc: "Money, health or legal records live behind this account." },
+  normal:   { label: "Normal",   short: "NORMAL",   color: "#8A9AB8", rank: 2, desc: "Convenience accounts — shopping, streaming, social." },
+};
+
+const rankOf = (p: PasswordEntry) => IMPORTANCE_META[p.importance ?? "normal"].rank;
 
 const categories = ["All","Social Media","Banking","Email","Shopping","Work","Healthcare","Government","Entertainment","Other"];
 
@@ -33,12 +47,12 @@ function getStrength(pw: string): PasswordEntry["strength"] {
 }
 
 const initPasswords: PasswordEntry[] = [
-  { id:"p1", title:"Gmail – Primary", website:"https://mail.google.com", username:"james.doe", email:"james.doe@gmail.com", password:"MyP@ssw0rd2024!", category:"Email", strength:"strong", lastUpdated:"Jun 8, 2026", starred:true, twoFactor:true, securityQuestion:"What was your first car?", securityAnswer:"1967 Ford Mustang" },
-  { id:"p2", title:"Wells Fargo Online Banking", website:"https://wellsfargo.com", username:"jdoe8821", accountNumber:"XXXX-XXXX-8821", password:"WF@Banking99!", category:"Banking", strength:"strong", lastUpdated:"May 15, 2026", starred:true, twoFactor:true, securityQuestion:"Mother's maiden name", securityAnswer:"Williams" },
-  { id:"p3", title:"Fidelity Investments", website:"https://fidelity.com", username:"james.doe@fidelity", accountNumber:"7721-XXXX", password:"Fid3lity$Invest!", category:"Banking", strength:"strong", lastUpdated:"Apr 1, 2026", twoFactor:true },
-  { id:"p4", title:"Facebook", website:"https://facebook.com", username:"james.doe.1962", email:"james.doe@gmail.com", password:"FB#Social24!", category:"Social Media", strength:"good", lastUpdated:"Mar 20, 2026" },
-  { id:"p5", title:"Amazon Shopping", website:"https://amazon.com", email:"james.doe@gmail.com", password:"Amaz0n@Shop!", category:"Shopping", strength:"good", lastUpdated:"Feb 10, 2026" },
-  { id:"p6", title:"Kaiser Permanente Patient Portal", website:"https://kp.org", username:"jdoe8821", password:"KP$Health22", category:"Healthcare", strength:"fair", lastUpdated:"Jan 5, 2026", notes:"Use this to access all medical records and test results online." },
+  { id:"p1", title:"Gmail – Primary", website:"https://mail.google.com", username:"james.doe", email:"james.doe@gmail.com", password:"MyP@ssw0rd2024!", category:"Email", strength:"strong", lastUpdated:"Jun 8, 2026", importance:"critical", twoFactor:true, securityQuestion:"What was your first car?", securityAnswer:"1967 Ford Mustang", notes:"Password resets for almost every other account land here. Open this one first." },
+  { id:"p2", title:"Wells Fargo Online Banking", website:"https://wellsfargo.com", username:"jdoe8821", accountNumber:"XXXX-XXXX-8821", password:"WF@Banking99!", category:"Banking", strength:"strong", lastUpdated:"May 15, 2026", importance:"critical", twoFactor:true, securityQuestion:"Mother's maiden name", securityAnswer:"Williams" },
+  { id:"p3", title:"Fidelity Investments", website:"https://fidelity.com", username:"james.doe@fidelity", accountNumber:"7721-XXXX", password:"Fid3lity$Invest!", category:"Banking", strength:"strong", lastUpdated:"Apr 1, 2026", importance:"high", twoFactor:true },
+  { id:"p4", title:"Facebook", website:"https://facebook.com", username:"james.doe.1962", email:"james.doe@gmail.com", password:"FB#Social24!", category:"Social Media", strength:"good", lastUpdated:"Mar 20, 2026", importance:"normal" },
+  { id:"p5", title:"Amazon Shopping", website:"https://amazon.com", email:"james.doe@gmail.com", password:"Amaz0n@Shop!", category:"Shopping", strength:"good", lastUpdated:"Feb 10, 2026", importance:"normal" },
+  { id:"p6", title:"Kaiser Permanente Patient Portal", website:"https://kp.org", username:"jdoe8821", password:"KP$Health22", category:"Healthcare", strength:"fair", lastUpdated:"Jan 5, 2026", importance:"high", notes:"Use this to access all medical records and test results online." },
 ];
 
 function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"] }) {
@@ -56,7 +70,8 @@ function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"]
 }
 
 function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:PasswordEntry)=>void }) {
-  const [form, setForm] = useState({ title:"", website:"", username:"", email:"", password:"", accountNumber:"", securityQuestion:"", securityAnswer:"", notes:"", category:"Other", twoFactor:false, starred:false });
+  useEscapeKey(true, onClose);
+  const [form, setForm] = useState({ title:"", website:"", username:"", email:"", password:"", accountNumber:"", securityQuestion:"", securityAnswer:"", notes:"", category:"Other", twoFactor:false, importance:"normal" as Importance });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -128,14 +143,33 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
             <textarea value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} placeholder="Special instructions for logging in, 2FA notes, backup codes location..." rows={3}
               className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
+          {/* Importance — graded, because legacy contacts need a triage order */}
+          <div>
+            <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:6 }}>IMPORTANCE</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(IMPORTANCE_META) as Importance[]).map(k => {
+                const meta = IMPORTANCE_META[k];
+                const on = form.importance === k;
+                return (
+                  <button key={k} type="button" onClick={() => setForm(p=>({...p,importance:k}))}
+                    className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all"
+                    style={{ background: on ? `${meta.color}1F` : "#0F1A33",
+                      border:`1px solid ${on ? meta.color : "rgba(58,91,217,0.12)"}`,
+                      color: on ? meta.color : "rgba(255,255,255,0.6)" }}>
+                    <AlertTriangle size={13} style={{ opacity: k === "normal" ? 0.5 : 1 }}/>
+                    <span style={{ fontSize:12, fontWeight:600 }}>{meta.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ color:"rgba(255,255,255,0.5)", fontSize:11, marginTop:6, lineHeight:1.6 }}>
+              {IMPORTANCE_META[form.importance].desc}
+            </div>
+          </div>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.twoFactor} onChange={e => setForm(p=>({...p,twoFactor:e.target.checked}))} style={{ accentColor:"#3A5BD9", width:15, height:15 }}/>
               <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>2FA / MFA Enabled</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.starred} onChange={e => setForm(p=>({...p,starred:e.target.checked}))} style={{ accentColor:"#F6AD55", width:15, height:15 }}/>
-              <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>Mark as important</span>
             </label>
           </div>
           {/* Document upload */}
@@ -172,11 +206,15 @@ export function PasswordManager() {
   const [showPwFor, setShowPwFor] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
 
-  const filtered = passwords.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || (p.website??"").includes(search) || (p.username??"").includes(search);
-    const matchCat = category === "All" || p.category === category;
-    return matchSearch && matchCat;
-  });
+  /* Critical entries float to the top so a legacy contact opening this page
+     under stress sees the accounts that unlock everything else first. */
+  const filtered = passwords
+    .filter(p => {
+      const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || (p.website??"").includes(search) || (p.username??"").includes(search);
+      const matchCat = category === "All" || p.category === category;
+      return matchSearch && matchCat;
+    })
+    .sort((a, b) => rankOf(a) - rankOf(b));
 
   const copy = (text: string, label: string) => { copyToClipboard(text); toast.success(`${label} copied to clipboard`) };
 
@@ -203,7 +241,7 @@ export function PasswordManager() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { label:"Total Entries", value:passwords.length, color:"#3A5BD9" },
-            { label:"Strong Passwords", value:passwords.filter(p=>p.strength==="strong").length, color:"#48BB78" },
+            { label:"Critical Accounts", value:passwords.filter(p=>p.importance==="critical").length, color:"#E53E3E" },
             { label:"Weak/Fair Passwords", value:passwords.filter(p=>p.strength==="weak"||p.strength==="fair").length, color:"#FC8181" },
             { label:"2FA Enabled", value:passwords.filter(p=>p.twoFactor).length, color:"#6E8BFF" },
           ].map(s => (
@@ -244,9 +282,15 @@ export function PasswordManager() {
                   <Globe size={18} color="#3A5BD9"/>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{p.title}</span>
-                    {p.starred && <Star size={12} fill="#F6AD55" color="#F6AD55"/>}
+                    {p.importance && p.importance !== "normal" && (
+                      <span className="px-1.5 py-0.5 rounded" title={IMPORTANCE_META[p.importance].desc}
+                        style={{ background:`${IMPORTANCE_META[p.importance].color}1F`, color:IMPORTANCE_META[p.importance].color,
+                          fontSize:8.5, ...MONO, fontWeight:700, letterSpacing:"0.06em" }}>
+                        {IMPORTANCE_META[p.importance].short}
+                      </span>
+                    )}
                     {p.twoFactor && <Shield size={12} color="#48BB78"/>}
                   </div>
                   <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{p.username || p.email || p.website}</div>

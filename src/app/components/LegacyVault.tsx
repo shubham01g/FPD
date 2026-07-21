@@ -17,6 +17,7 @@ import {
 import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
+import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
 
 const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
 const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
@@ -130,6 +131,73 @@ const PACKAGE_SECTIONS = [
   },
 ];
 
+/* ── Archive builders ────────────────────────────────────────────────
+   The download is a real ZIP, not a stub. In demo mode the entries are
+   generated manifests describing what each section contains; when the API
+   lands, swap buildEntries() to stream the actual stored files in — the
+   zip/download plumbing below does not change. */
+
+const stamp = () => new Date().toISOString().slice(0, 10);
+
+function sectionManifest(section: typeof PACKAGE_SECTIONS[number], owner: string): string {
+  return [
+    `FINAL PASS DOWN — LEGACY PACKAGE`,
+    `Section: ${section.label}`,
+    `Account holder: ${owner}`,
+    `Generated: ${new Date().toLocaleString("en-US")}`,
+    ``,
+    `CONTENTS`,
+    `${section.itemCount}`,
+    ``,
+    `DESCRIPTION`,
+    section.desc,
+    ``,
+    `--`,
+    `NOTE: This is a DEMONSTRATION export. It contains an index of what this`,
+    `section holds, not the stored files themselves — this build has no server`,
+    `and no file storage behind it. Do not treat this archive as a backup or as`,
+    `delivery of the account holder's records.`,
+  ].join("\n");
+}
+
+function buildEntries(owner: string, sections: typeof PACKAGE_SECTIONS): ZipEntry[] {
+  const entries: ZipEntry[] = sections.map(s => ({
+    name: `${s.label.replace(/[\\/:*?"<>|]/g, "-")}/MANIFEST.txt`,
+    content: sectionManifest(s, owner),
+  }));
+
+  entries.unshift({
+    name: "README.txt",
+    content: [
+      `FINAL PASS DOWN — LEGACY VAULT CLONE`,
+      `Account holder: ${owner}`,
+      `Exported: ${new Date().toLocaleString("en-US")}`,
+      `Sections included: ${sections.length}`,
+      ``,
+      `*** DEMONSTRATION EXPORT — NOT A BACKUP ***`,
+      ``,
+      `This build of Final Pass Down has no server and no file storage. This`,
+      `archive contains an INDEX of what each section would hold, not the`,
+      `account holder's actual documents, photos, recordings or credentials.`,
+      ``,
+      `Each folder corresponds to one section of the account. Open MANIFEST.txt`,
+      `inside any folder to see what that section is meant to contain.`,
+      ``,
+      `If you received this as a legacy contact and expected real records,`,
+      `contact Final Pass Down support with the account holder's name.`,
+    ].join("\n"),
+  });
+
+  entries.push({
+    name: "INDEX.csv",
+    content: ["Section,Contents,Description",
+      ...sections.map(s => `"${s.label}","${s.itemCount}","${s.desc.replace(/"/g, "'")}"`),
+    ].join("\n"),
+  });
+
+  return entries;
+}
+
 /* ── Two-condition checklist ─────────────────────────────────────── */
 function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; title:string; desc:string }) {
   return (
@@ -150,13 +218,30 @@ function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; titl
 }
 
 export function LegacyVault() {
-  const { continuationFeePaid, user } = useDemo();
+  const { continuationFeePaid, user, deathVerified, deathVerifiedDoc, submitDeathRecord } = useDemo();
   const [showVaultClone, setShowVaultClone] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const recordRef = React.useRef<HTMLInputElement>(null);
 
-  // In demo, treat fee paid as both conditions met for simplicity
-  const deathVerified = false; // admin-controlled — always false in user demo
   const fullyUnlocked = continuationFeePaid && deathVerified;
+
+  const owner = user?.name ?? "Account Holder";
+
+  /* Single section → a one-folder archive. */
+  const downloadSection = (section: typeof PACKAGE_SECTIONS[number]) => {
+    const blob = createZip(buildEntries(owner, [section]));
+    const safe = section.label.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    downloadBlob(blob, `fpd-${safe}-${stamp()}.zip`);
+    toast.success(`Downloaded: ${section.label}`);
+  };
+
+  /* Everything → the full Legacy Vault Clone archive. */
+  const downloadFullPackage = () => {
+    const blob = createZip(buildEntries(owner, PACKAGE_SECTIONS));
+    const kb = Math.max(1, Math.round(blob.size / 1024));
+    downloadBlob(blob, `fpd-legacy-vault-clone-${stamp()}.zip`);
+    toast.success(`Legacy Vault Clone downloaded — ${PACKAGE_SECTIONS.length} sections, ${kb} KB`);
+  };
 
   if (showVaultClone) return <VaultClone onBack={() => setShowVaultClone(false)}/>;
 
@@ -190,8 +275,26 @@ export function LegacyVault() {
           num="2"
           met={deathVerified}
           title="Confirmation of Passing — Verified by FPD Admin"
-          desc="Accepted documents: death certificate, obituary, hospital notice, coroner report, funeral home letter, probate filing, or any credible official record. Submitted by a legacy contact after your passing."
+          desc={deathVerified
+            ? `Accepted record on file: ${deathVerifiedDoc}. Verified by FPD admin review.`
+            : "Accepted documents: death certificate, obituary, hospital notice, coroner report, funeral home letter, probate filing, or any credible official record. Submitted by a legacy contact after your passing."}
         />
+        {!deathVerified && (
+          <>
+            <input
+              ref={recordRef}
+              type="file"
+              className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) submitDeathRecord(f.name); }}
+            />
+            <button
+              onClick={() => recordRef.current?.click()}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm w-full justify-center"
+              style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.28)", color:"#F6AD55" }}>
+              <FileText size={15}/> Submit Record of Passing (Legacy Contact)
+            </button>
+          </>
+        )}
         <div className="flex items-center gap-2 px-4 py-3 rounded-xl mt-1"
           style={{ background:fullyUnlocked?"rgba(72,187,120,0.06)":"rgba(229,62,62,0.04)", border:`1px solid ${fullyUnlocked?"rgba(72,187,120,0.2)":"rgba(229,62,62,0.2)"}` }}>
           {fullyUnlocked
@@ -253,7 +356,7 @@ export function LegacyVault() {
                 </button>
                 <button
                   onClick={() => continuationFeePaid
-                    ? toast.success(`Downloading: ${section.label}`)
+                    ? downloadSection(section)
                     : toast.error("Pay the $199 fee to download")}
                   style={{ color: continuationFeePaid ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.75)", padding:4 }}
                   title={continuationFeePaid ? "Download" : "Locked"}>
@@ -285,12 +388,22 @@ export function LegacyVault() {
             ? "Both conditions are met. Your legacy contacts can now download a complete encrypted copy of your entire account — all sections, all files, all records."
             : "When both the $199 fee is paid and your passing is verified, legacy contacts can download everything — all sections, all files, all records — in one complete encrypted package."}
         </p>
-        <button
-          onClick={() => fullyUnlocked ? setShowVaultClone(true) : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}
-          className="px-8 py-3.5 rounded-2xl font-bold text-sm inline-flex items-center gap-2"
-          style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(58,91,217,0.08)", color: fullyUnlocked ? "#fff" : "rgba(255,255,255,0.65)", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
-          {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Clone</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
-        </button>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <button
+            onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}
+            className="px-8 py-3.5 rounded-2xl font-bold text-sm inline-flex items-center gap-2"
+            style={{ background: fullyUnlocked ? "linear-gradient(135deg,#48BB78,#38A169)" : "rgba(58,91,217,0.08)", color: fullyUnlocked ? "#fff" : "rgba(255,255,255,0.65)", boxShadow: fullyUnlocked ? "0 4px 20px rgba(72,187,120,0.35)" : "none", cursor: fullyUnlocked ? "pointer" : "not-allowed" }}>
+            {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Clone (.zip)</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
+          </button>
+          {fullyUnlocked && (
+            <button
+              onClick={() => setShowVaultClone(true)}
+              className="px-6 py-3.5 rounded-2xl font-bold text-sm inline-flex items-center gap-2"
+              style={{ background:"rgba(58,91,217,0.12)", color:"#8AA0FF", border:"1px solid rgba(58,91,217,0.3)" }}>
+              <Eye size={15}/> Browse Contents
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tip */}
