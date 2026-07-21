@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useEscapeKey } from "../hooks/useEscapeKey";
 import { ScanButton } from "./DocumentScanner";
 import {
   CreditCard, Plus, X, Search, Trash2, Edit2, Upload,
@@ -41,6 +42,7 @@ const statusColor: Record<string, { color:string; bg:string }> = {
 };
 
 function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscription)=>void }) {
+  useEscapeKey(true, onClose);
   const [form, setForm] = useState<Partial<Subscription>>({ frequency:"Monthly", paymentType:"Visa", status:"active", autoPay:true, category:"Other" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -167,6 +169,10 @@ export function SubscriptionManager() {
   const [showAdd, setShowAdd] = useState(false);
   const [showPwFor, setShowPwFor] = useState<string|null>(null);
 
+  /* Chips follow the data. A fixed slice used to cut Utilities off the end,
+     leaving live subscriptions with no reachable filter. */
+  const activeCategories = ["All", ...categories.filter(c => c !== "All" && subs.some(s => s.category === c))];
+
   const filtered = subs.filter(s => {
     const matchSearch = s.title.toLowerCase().includes(search.toLowerCase());
     const matchCat = category==="All" || s.category===category;
@@ -224,7 +230,7 @@ export function SubscriptionManager() {
               style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
           </div>
           <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
-            {categories.slice(0,6).map(c => (
+            {activeCategories.map(c => (
               <button key={c} onClick={() => setCategory(c)}
                 className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
                 style={{ background:category===c?"#3A5BD9":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>

@@ -1,13 +1,14 @@
 import { copyToClipboard } from "../utils/clipboard";
 import React, { useState } from "react";
 import { CryptoPayment } from "./CryptoPayment";
+import { useWLEntitlement } from "../context/WLEntitlementContext";
 import {
   ArrowRight, ArrowLeft, CheckCircle, Copy, TrendingUp, Users,
   DollarSign, BarChart3, Globe, FileText, Download, Bell,
   Settings, LogOut, ChevronRight, Activity, Calendar, Award,
   Send, Building, Mail, Phone, Handshake, Shield, Zap, Star
 } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { toast } from "sonner";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -83,15 +84,31 @@ function StepTracker({ step }: { step: WizardStep }) {
 }
 
 function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
+  const { activate } = useWLEntitlement();
   const [step, setStep] = useState<WizardStep>("overview");
   const [org, setOrg] = useState({ name:"", type:"law_firm", email:"", phone:"", contact:"", website:"", why:"" });
   const [paying, setPaying] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
   const [refCode] = useState(`FPD-PART-${Math.random().toString(36).slice(2,8).toUpperCase()}`);
 
+  /* Unlocks the White Label Studio. Only ever called from a settled payment,
+     never from package selection. In production the paymentRef must come from
+     the processor webhook, not the client. */
+  const unlockWhiteLabel = (processor: string) => {
+    activate({
+      packageId:   "partner_program",
+      packageName: "Partner Program",
+      paymentRef:  `${processor}_${Date.now().toString(36).toUpperCase()}`,
+    });
+  };
+
   const submitPayment = () => {
     setPaying(true);
-    setTimeout(() => { setPaying(false); setStep("complete"); }, 1500);
+    setTimeout(() => {
+      setPaying(false);
+      unlockWhiteLabel("card");
+      setStep("complete");
+    }, 1500);
   };
 
   if (step === "complete") {
@@ -132,7 +149,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
         style={{ background:"rgba(255,255,255,0.98)", borderColor:"rgba(58,91,217,0.1)", backdropFilter:"blur(16px)" }}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:8, objectFit:"cover" }}/>
+            <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:8, objectFit:"contain" }}/>
             <div>
               <div style={{ ...DISPLAY, color:"#3A5BD9", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>PARTNER PORTAL — ONBOARDING</div>
@@ -368,7 +385,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
       open={showCrypto}
       amountUSD={SETUP_FEE}
       label={`$${SETUP_FEE} Partner Program Setup Fee`}
-      onSuccess={() => { setShowCrypto(false); setStep("complete"); }}
+      onSuccess={() => { setShowCrypto(false); unlockWhiteLabel("crypto"); setStep("complete"); }}
       onClose={() => setShowCrypto(false)}
     />
     </>
@@ -398,7 +415,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
       <aside className="w-52 flex flex-col flex-shrink-0" style={{ background:"#070A12", borderRight:"1px solid rgba(58,91,217,0.12)" }}>
         <div className="px-4 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.12)" }}>
           <div className="flex items-center gap-2.5">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:7, objectFit:"cover" }}/>
+            <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:7, objectFit:"contain" }}/>
             <div>
               <div style={{ ...DISPLAY, color:"#8AA0FF", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#4A5A7A", fontSize:7, letterSpacing:"0.12em", ...MONO }}>PARTNER PORTAL</div>

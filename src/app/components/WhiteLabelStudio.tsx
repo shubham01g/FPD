@@ -2,10 +2,11 @@ import React, { useMemo, useState } from "react";
 import {
   Layers, Palette, Globe, Mail, Eye, Save, CheckCircle, Check,
   Monitor, Smartphone, Sparkles, Crown, Building2, ArrowRight,
-  ShieldCheck, RefreshCw, Type, AtSign, Rocket, Star,
+  ShieldCheck, RefreshCw, Type, AtSign, Rocket, Star, Lock,
 } from "lucide-react";
 import { useWhiteLabel } from "../context/WhiteLabelContext";
 import { useWLPackages } from "../context/WLPackagesContext";
+import { useWLEntitlement } from "../context/WLEntitlementContext";
 import { type WLPackage, type BillingModel } from "../services/wlPackages";
 import { toast } from "sonner";
 
@@ -71,15 +72,40 @@ function SectionCard({ icon, title, sub, children, step }: { icon: React.ReactNo
   );
 }
 
-function Field({ label, value, onChange, placeholder, icon }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; icon?: React.ReactNode }) {
+function Field({ label, value, onChange, placeholder, icon, disabled }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; icon?: React.ReactNode; disabled?: boolean }) {
   return (
     <div>
       <label style={{ color: MUTED, fontSize: 11, ...MONO, display: "block", marginBottom: 7 }}>{label.toUpperCase()}</label>
       <div className="relative">
         {icon && <span style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{icon}</span>}
-        <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-          style={{ ...INPUT, paddingLeft: icon ? 40 : 14 }} />
+        <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
+          style={{ ...INPUT, paddingLeft: icon ? 40 : 14, opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "text" }} />
+        {disabled && <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: MUTED }}><Lock size={13} /></span>}
       </div>
+    </div>
+  );
+}
+
+/* Paywall banner — shown in place of the config controls until payment clears */
+function UnlockBanner({ onPurchase }: { onPurchase?: () => void }) {
+  return (
+    <div className="p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 justify-between"
+      style={{ background: "linear-gradient(135deg,rgba(58,91,217,0.14),rgba(91,123,245,0.06))", border: "1px solid rgba(110,139,255,0.32)" }}>
+      <div className="flex items-start gap-3.5 min-w-0">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(58,91,217,0.2)", color: HILITE }}><Lock size={18} /></div>
+        <div className="min-w-0">
+          <div style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 700 }}>White Label is locked</div>
+          <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6, marginTop: 3 }}>
+            Pick the partner package you want below, then activate to unlock branding, colors, and your custom domain.
+          </p>
+        </div>
+      </div>
+      {onPurchase && (
+        <button onClick={onPurchase} className="flex-shrink-0 px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
+          style={{ background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", boxShadow: "0 8px 26px rgba(58,91,217,0.4)" }}>
+          <Rocket size={15} /> Unlock White Label
+        </button>
+      )}
     </div>
   );
 }
@@ -145,14 +171,21 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
 }
 
 /* ── Main page ─────────────────────────────────────────────────────── */
-export function WhiteLabelStudio() {
+export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {}) {
   const { config, update } = useWhiteLabel();
+  const { isEntitled } = useWLEntitlement();
   const { packages } = useWLPackages();
   const activePackages = useMemo(() => packages.filter(p => p.active), [packages]);
+
+  /* The section is always visible; every branding control stays inert until paid. */
+  const locked = !isEntitled;
 
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
   const publish = () => {
+    // Final paywall check. Publishing provisions branding + domain, so it is
+    // gated here too rather than trusting the disabled state of the controls.
+    if (locked) { onPurchase?.(); return; }
     if (!config.companyName.trim()) { toast.error("Add your brand name first."); return; }
     if (!selectedTier && activePackages.length) { toast.error("Choose a partner package to publish."); return; }
     update({ enabled: true });
@@ -192,21 +225,23 @@ export function WhiteLabelStudio() {
         </div>
       </div>
 
+      {locked && <UnlockBanner onPurchase={onPurchase} />}
+
       <div className="grid lg:grid-cols-5 gap-6 items-start">
         {/* ── Left: config ── */}
         <div className="lg:col-span-3 space-y-6">
           {/* Brand identity */}
           <SectionCard step={1} icon={<Type size={18} />} title="Brand identity" sub="This is what your clients see across the whole platform and every email.">
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Brand name" value={config.companyName} onChange={v => update({ companyName: v })} placeholder="Heritage Trust Co." icon={<Building2 size={15} />} />
-              <Field label="Logo initials" value={config.logoText} onChange={v => update({ logoText: v.slice(0, 3).toUpperCase() })} placeholder="HT" icon={<Sparkles size={15} />} />
+              <Field label="Brand name" value={config.companyName} onChange={v => update({ companyName: v })} placeholder="Heritage Trust Co." icon={<Building2 size={15} />} disabled={locked} />
+              <Field label="Logo initials" value={config.logoText} onChange={v => update({ logoText: v.slice(0, 3).toUpperCase() })} placeholder="HT" icon={<Sparkles size={15} />} disabled={locked} />
             </div>
             <div className="mt-4">
-              <Field label="Tagline" value={config.tagline} onChange={v => update({ tagline: v })} placeholder="Protecting family legacies since 1987" />
+              <Field label="Tagline" value={config.tagline} onChange={v => update({ tagline: v })} placeholder="Protecting family legacies since 1987" disabled={locked} />
             </div>
             <div className="grid sm:grid-cols-2 gap-4 mt-4">
-              <Field label="Support email" value={config.supportEmail} onChange={v => update({ supportEmail: v })} placeholder="support@yourbrand.com" icon={<Mail size={15} />} />
-              <Field label="Email sender name" value={config.senderName} onChange={v => update({ senderName: v })} placeholder="Heritage Trust" icon={<AtSign size={15} />} />
+              <Field label="Support email" value={config.supportEmail} onChange={v => update({ supportEmail: v })} placeholder="support@yourbrand.com" icon={<Mail size={15} />} disabled={locked} />
+              <Field label="Email sender name" value={config.senderName} onChange={v => update({ senderName: v })} placeholder="Heritage Trust" icon={<AtSign size={15} />} disabled={locked} />
             </div>
           </SectionCard>
 
@@ -216,9 +251,10 @@ export function WhiteLabelStudio() {
               {PRESET_COLORS.map(c => {
                 const on = config.primaryColor.toLowerCase() === c.primary.toLowerCase();
                 return (
-                  <button key={c.name} title={c.name} onClick={() => update({ primaryColor: c.primary, accentColor: c.accent })}
+                  <button key={c.name} title={locked ? "Unlock White Label to change colors" : c.name} disabled={locked}
+                    onClick={() => update({ primaryColor: c.primary, accentColor: c.accent })}
                     className="aspect-square rounded-xl flex items-center justify-center transition-all"
-                    style={{ background: `linear-gradient(135deg,${c.primary},${c.accent})`, border: on ? "2px solid #fff" : "2px solid transparent", boxShadow: on ? `0 0 16px ${c.primary}88` : "none", transform: on ? "scale(1.05)" : "none" }}>
+                    style={{ background: `linear-gradient(135deg,${c.primary},${c.accent})`, border: on ? "2px solid #fff" : "2px solid transparent", boxShadow: on ? `0 0 16px ${c.primary}88` : "none", transform: on ? "scale(1.05)" : "none", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
                     {on && <Check size={16} color="#fff" />}
                   </button>
                 );
@@ -228,23 +264,24 @@ export function WhiteLabelStudio() {
               {([["Primary", "primaryColor"], ["Accent", "accentColor"]] as const).map(([lbl, key]) => (
                 <div key={key}>
                   <label style={{ color: MUTED, fontSize: 11, ...MONO, display: "block", marginBottom: 7 }}>{lbl.toUpperCase()} COLOR</label>
-                  <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2" style={{ background: "rgba(110,139,255,0.05)", border: "1px solid rgba(110,139,255,0.2)" }}>
-                    <input type="color" value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)}
-                      style={{ width: 34, height: 34, border: "none", borderRadius: 8, background: "transparent", cursor: "pointer", padding: 0 }} />
-                    <input value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)}
-                      style={{ ...INPUT, ...MONO, border: "none", background: "transparent", padding: 0, textTransform: "uppercase" }} />
+                  <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2" style={{ background: "rgba(110,139,255,0.05)", border: "1px solid rgba(110,139,255,0.2)", opacity: locked ? 0.5 : 1 }}>
+                    <input type="color" value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)} disabled={locked}
+                      style={{ width: 34, height: 34, border: "none", borderRadius: 8, background: "transparent", cursor: locked ? "not-allowed" : "pointer", padding: 0 }} />
+                    <input value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)} disabled={locked}
+                      style={{ ...INPUT, ...MONO, border: "none", background: "transparent", padding: 0, textTransform: "uppercase", cursor: locked ? "not-allowed" : "text" }} />
+                    {locked && <Lock size={13} color={MUTED} style={{ flexShrink: 0 }} />}
                   </div>
                 </div>
               ))}
             </div>
-            <button onClick={resetBrand} className="inline-flex items-center gap-1.5 mt-4 text-xs" style={{ color: MUTED }}>
+            <button onClick={resetBrand} disabled={locked} className="inline-flex items-center gap-1.5 mt-4 text-xs" style={{ color: MUTED, opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
               <RefreshCw size={12} /> Reset colors
             </button>
           </SectionCard>
 
           {/* Domain */}
           <SectionCard step={3} icon={<Globe size={18} />} title="Custom domain" sub="Run the platform on your own web address. We'll issue the SSL certificate automatically.">
-            <Field label="Portal domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourbrand.com" icon={<Globe size={15} />} />
+            <Field label="Portal domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourbrand.com" icon={<Globe size={15} />} disabled={locked} />
             <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-xl" style={{ background: "rgba(58,91,217,0.06)", border: "1px solid rgba(58,91,217,0.15)" }}>
               <ShieldCheck size={15} color={HILITE} style={{ marginTop: 1, flexShrink: 0 }} />
               <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.65 }}>
@@ -332,14 +369,18 @@ export function WhiteLabelStudio() {
             </div>
             <button onClick={publish} className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
               style={{ background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", boxShadow: "0 8px 26px rgba(58,91,217,0.4)" }}>
-              <Rocket size={16} /> {config.enabled ? "Update Live Portal" : "Publish White-Label Portal"}
+              {locked
+                ? <><Lock size={16} /> Unlock White Label</>
+                : <><Rocket size={16} /> {config.enabled ? "Update Live Portal" : "Publish White-Label Portal"}</>}
             </button>
-            <button onClick={() => toast.success("Draft saved (demo).")} className="w-full py-2.5 mt-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: "rgba(110,139,255,0.08)", color: HILITE, border: "1px solid rgba(110,139,255,0.2)" }}>
+            <button onClick={() => toast.success("Draft saved (demo).")} disabled={locked} className="w-full py-2.5 mt-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+              style={{ background: "rgba(110,139,255,0.08)", color: HILITE, border: "1px solid rgba(110,139,255,0.2)", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
               <Save size={15} /> Save Draft
             </button>
             <p style={{ color: MUTED, fontSize: 11, lineHeight: 1.6, marginTop: 14, textAlign: "center" }}>
-              Publishing notifies your onboarding manager. Setup and first-month billing begin once your package is confirmed.
+              {locked
+                ? "Branding, colors, and your custom domain unlock as soon as your partner payment clears."
+                : "Publishing notifies your onboarding manager. Setup and first-month billing begin once your package is confirmed."}
             </p>
           </div>
         </div>

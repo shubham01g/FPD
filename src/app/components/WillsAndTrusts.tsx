@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEscapeKey } from "../hooks/useEscapeKey";
 import { FileText, Plus, Edit2, CheckCircle, Upload, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
@@ -29,6 +30,8 @@ export function WillsAndTrusts() {
   const [wills, setWills] = useState(initWills);
   const [showAdd, setShowAdd] = useState(false);
   const [newDoc, setNewDoc] = useState({ type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" });
+
+  useEscapeKey(showAdd, () => setShowAdd(false));
 
   function addDocument() {
     if (!newDoc.attorney.trim()) { toast.error("Attorney name is required"); return; }

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 export interface SubmittedDocument {
@@ -197,7 +197,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
       <div className="px-5 py-4 border-b"
         style={{ background:"#fff", borderColor:"rgba(110,139,255,0.15)", boxShadow:"0 1px 12px rgba(110,139,255,0.08)" }}>
         <div className="max-w-lg mx-auto flex items-center gap-3">
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"cover" }}/>
+          <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
           <div>
             <div style={{ fontFamily:"var(--font-display)", color:"#6E8BFF", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>
               FINAL PASS DOWN

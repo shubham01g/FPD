@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, X, Minimize2, Maximize2, Sparkles, RefreshCw } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
@@ -325,7 +325,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
         <div className="flex items-center gap-2.5">
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:6, objectFit:"cover" }}/>
+          <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:6, objectFit:"contain" }}/>
           <div>
             <div style={{ color:"#fff", fontSize:13, fontWeight:700 }}>FPD AI Assistant</div>
             <div className="flex items-center gap-1">

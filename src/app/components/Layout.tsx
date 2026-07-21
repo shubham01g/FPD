@@ -5,9 +5,10 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Layers
+  ShieldCheck, ChevronRight, X, Menu, Layers, CalendarDays, Activity
 } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import { useWLEntitlement } from "../context/WLEntitlementContext";
 import { VaultClone } from "./VaultClone";
 import { useDemo } from "../context/DemoContext";
 
@@ -20,6 +21,7 @@ export type PageId =
   | "family-friends"
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
+  | "calendar" | "messages-loved-ones" | "vital-clone"
   | "legacy-continuation" | "white-glove" | "white-label" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
@@ -33,6 +35,7 @@ const navGroups: NavGroup[] = [
     label: "Overview",
     items: [
       { id: "dashboard", label: "Dashboard", icon: <Home size={16}/> },
+      { id: "calendar", label: "Calendar", icon: <CalendarDays size={16}/> },
       { id: "fpd-ai", label: "Ask FPD AI Assistant", icon: <MessageCircle size={16}/>, badge: "AI" },
     ],
   },
@@ -58,7 +61,8 @@ const navGroups: NavGroup[] = [
       { id: "financial-records", label: "Financial Records",  icon: <Wallet size={16}/> },
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
       { id: "family-memories",   label: "Family & Memories",  icon: <Camera size={16}/> },
-      { id: "digital-diary",     label: "Digital Diary",      icon: <BookOpen size={16}/>, badge: "New" },
+      { id: "messages-loved-ones", label: "Messages to Loved Ones", icon: <Heart size={16}/>, badge: "New" },
+      { id: "digital-diary",     label: "Digital Diary",      icon: <BookOpen size={16}/> },
       { id: "job-history",       label: "Job History",        icon: <Briefcase size={16}/> },
       { id: "id-keeper",         label: "ID Keeper",          icon: <CreditCard size={16}/> },
       { id: "warranties",        label: "Warranties",         icon: <Shield size={16}/> },
@@ -98,6 +102,7 @@ const navGroups: NavGroup[] = [
       { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/>, badge: "30%" },
       { id: "white-glove",   label: "White Glove Service", icon: <Star size={16}/>, badge: "⭐" },
       { id: "white-label",   label: "White Label", icon: <Layers size={16}/>, badge: "Partner" },
+      { id: "vital-clone",   label: "VitalClone", icon: <Activity size={16}/> },
     ],
   },
 ];
@@ -136,6 +141,7 @@ interface LayoutProps {
 }
 
 export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children }: LayoutProps) {
+  const { isEntitled: wlEntitled } = useWLEntitlement();
   const [showClone, setShowClone] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState("");
@@ -151,14 +157,24 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   const meta = pageMeta[currentPage] ?? { group: "Overview", label: "Dashboard" };
   const storagePct = Math.min(100, Math.round((user.storageUsed / user.storageLimit) * 100));
 
+  /* White Label is always visible so clients can see what they'd get, but it
+     carries a lock badge until the partner package is paid for. */
+  const visibleGroups = useMemo(() => {
+    if (wlEntitled) return navGroups;
+    return navGroups.map(g => ({
+      ...g,
+      items: g.items.map(i => i.id === "white-label" ? { ...i, badge: "Locked" } : i),
+    }));
+  }, [wlEntitled]);
+
   /* Filter nav by search query */
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return navGroups;
-    return navGroups
+    if (!q) return visibleGroups;
+    return visibleGroups
       .map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q)) }))
       .filter(g => g.items.length > 0);
-  }, [query]);
+  }, [query, visibleGroups]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {

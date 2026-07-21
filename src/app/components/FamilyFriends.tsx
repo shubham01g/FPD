@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useEscapeKey } from "../hooks/useEscapeKey";
 import {
   Users, Phone, Mail, MapPin, Gift, Heart, Plus, Search,
   Edit2, Trash2, X, Upload, Star, Camera, ChevronDown,
@@ -29,6 +30,7 @@ const GROUP_COLORS = ["#3A5BD9","#6E8BFF","#48BB78","#F7931A","#FC8181","#4A90D9
 function BlastEmailModal({
   group, contacts, onClose,
 }: { group: ContactGroup; contacts: Contact[]; onClose: () => void }) {
+  useEscapeKey(true, onClose);
   const members = contacts.filter(c => group.memberIds.includes(c.id));
   const withEmail = members.filter(c => c.email);
   const [subject, setSubject] = useState("");
@@ -147,6 +149,7 @@ const groupConfig = {
 };
 
 function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: Contact) => void }) {
+  useEscapeKey(true, onClose);
   const [form, setForm] = useState({ name:"", relationship:"", phone:"", email:"", birthday:"", address:"", group:"immediate" as Contact["group"], notes:"" });
   const [loading, setLoading] = useState(false);
 

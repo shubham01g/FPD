@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
-import fpdSquareLogo from "../../../imports/FPD_new_logo.png";
+import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -60,7 +60,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-16">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"cover", boxShadow:"0 0 20px rgba(110,139,255,0.3)" }}/>
+            <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"contain", boxShadow:"0 0 20px rgba(110,139,255,0.3)" }}/>
             <div>
               <div style={{ fontFamily:"var(--font-display)", color:"#6E8BFF", fontSize:13, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#34456A", fontSize:9, letterSpacing:"0.15em", ...MONO }}>PLATFORM ADMINISTRATION</div>
@@ -96,7 +96,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"cover" }}/>
+            <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
             <div style={{ fontFamily:"var(--font-display)", color:"#6E8BFF", fontSize:12, fontWeight:700, letterSpacing:"0.06em" }}>ADMIN PORTAL</div>
           </div>
 
