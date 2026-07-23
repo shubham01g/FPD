@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
+import { SystemHealth } from "./SystemHealth";
 import { AdminAIAgent } from "../AdminAIAgent";
 import {
   Users, DollarSign, HardDrive, TrendingUp, Globe, Crown,
@@ -70,7 +71,7 @@ const pendingVerifications = [
   { id:"VER-2026-0835", contact:"Grace Nakamura", forUser:"Kevin Park", type:"Driver's License", submitted:"Jun 9, 2026" },
 ];
 
-type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"admin_ai";
+type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"admin_ai"|"system_health";
 
 /* ─────────────────────────────────────────────────────────────────
    ANALYTICS DATA — all demo-mode seed data
@@ -927,6 +928,7 @@ export function MasterAdmin() {
     { id:"payouts",      label:"Payouts",         icon:<TrendingUp size={13}/> },
     { id:"continuation", label:"$199 Fee",        icon:<DollarSign size={13}/> },
     { id:"audit",        label:"Audit Log",       icon:<Shield size={13}/> },
+    { id:"system_health",label:"System Health",   icon:<Activity size={13}/>, badge:"Live" },
     { id:"notifications",label:"Push Notifications",icon:<Bell size={13}/>, badge:"NEW" },
     { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/>,   badge:"New" },
     { id:"reports",      label:"Reports & Downloads", icon:<Download size={13}/> },
@@ -1797,6 +1799,7 @@ export function MasterAdmin() {
       {/* ADMIN TEAM & ROLES TAB */}
       {tab === "admin_roles" && <AdminRoles/>}
       {tab === "reports"     && <ReportsDownloads/>}
+      {tab === "system_health" && <SystemHealth/>}
       {tab === "admin_ai"    && (
         <div className="p-6" style={{ maxWidth:900 }}>
           <div className="mb-5">
