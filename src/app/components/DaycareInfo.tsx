@@ -126,7 +126,7 @@ const DAYCARE_CSS = `
 .fpd-daycare-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-daycare .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-daycare .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-daycare .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-daycare .card.pad{padding:22px;}
 .fpd-daycare .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
@@ -136,10 +136,10 @@ const DAYCARE_CSS = `
 .fpd-daycare .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-daycare .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-daycare .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-daycare .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-daycare .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* segmented sub-tabs (per record) */
-.fpd-daycare .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);width:fit-content;flex-wrap:wrap;}
+.fpd-daycare .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;flex-wrap:wrap;}
 .fpd-daycare .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-daycare .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
 
@@ -153,14 +153,20 @@ const DAYCARE_CSS = `
 .fpd-daycare .rmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .fpd-daycare .rmeta span{display:flex;align-items:center;gap:5px;color:${MUTED};font-size:11.5px;}
 .fpd-daycare .stat-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;}
-.fpd-daycare .rbody{border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-daycare .rbody{border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-daycare .rtabbar{padding:16px 22px 0;}
 .fpd-daycare .rpanel{padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;}
 
 /* facility info tile grid */
-.fpd-daycare .igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media (max-width:760px){.fpd-daycare .igrid{grid-template-columns:1fr;}}
-.fpd-daycare .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-daycare .igrid{display:grid;grid-template-columns:1fr 1fr;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;}
+.fpd-daycare .igrid .tile:nth-child(2n){border-left:1px solid rgba(255,255,255,0.22);}
+.fpd-daycare .igrid .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}
+@media (max-width:760px){
+.fpd-daycare .igrid{grid-template-columns:1fr;}
+.fpd-daycare .igrid .tile:nth-child(2n){border-left:none;}
+.fpd-daycare .igrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.22);}
+}
+.fpd-daycare .tile{padding:12px 14px;}
 .fpd-daycare .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
 .fpd-daycare .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
 
@@ -193,15 +199,15 @@ const DAYCARE_CSS = `
 /* modal */
 .fpd-daycare .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-daycare .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
-.fpd-daycare .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-daycare .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.22);}
 .fpd-daycare .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-daycare .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-daycare .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
 .fpd-daycare .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-daycare .field input,.fpd-daycare .field select,.fpd-daycare .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-daycare .field input,.fpd-daycare .field select,.fpd-daycare .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-daycare .field input::placeholder,.fpd-daycare .field textarea::placeholder{color:${FAINT};}
 .fpd-daycare .field input:focus,.fpd-daycare .field select:focus,.fpd-daycare .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
-.fpd-daycare .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);flex-wrap:wrap;}
+.fpd-daycare .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);flex-wrap:wrap;}
 .fpd-daycare .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-daycare .modal-foot .save:hover{filter:brightness(1.08);}
 `;

@@ -344,7 +344,7 @@ const CAB_CSS = `
 .fpd-cab-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-cab .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-cab .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-cab .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-cab .card.pad{padding:22px;}
 .fpd-cab .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
 .fpd-cab .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;}
@@ -357,7 +357,7 @@ const CAB_CSS = `
 /* header */
 .fpd-cab .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-cab .pg-h1row{display:flex;align-items:flex-start;gap:12px;}
-.fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.065);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
+.fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
 .fpd-cab .backbtn:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
 .fpd-cab .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cab .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
@@ -367,7 +367,7 @@ const CAB_CSS = `
 .fpd-cab .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
 
 /* segmented view toggle */
-.fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);flex-shrink:0;}
+.fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);flex-shrink:0;}
 .fpd-cab .seg button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border-radius:7px;color:${MUTED};background:none;border:none;cursor:pointer;transition:color .18s,background .18s;}
 .fpd-cab .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
 
@@ -379,15 +379,15 @@ const CAB_CSS = `
 
 /* KPI ledger */
 .fpd-cab .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.22);position:relative;text-align:left;overflow:hidden;}
 .fpd-cab .kcell:first-child{border-left:none;}
 .fpd-cab .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-cab .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-cab .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-cab .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-cab .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}}
 
 /* drop zone */
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:13px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
@@ -398,23 +398,23 @@ const CAB_CSS = `
 
 /* chips (sub-folders) */
 .fpd-cab .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.065);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
+.fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.22);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
 .fpd-cab .chip:hover{border-color:rgba(91,123,245,0.32);background:rgba(91,123,245,0.06);}
 .fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
 
 /* root folder grid */
 .fpd-cab .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;}
-.fpd-cab .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
+.fpd-cab .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
 .fpd-cab .fcard:hover{transform:translateY(-2px);border-color:rgba(91,123,245,0.3);}
 .fpd-cab .fcard .bar{height:3px;}
 .fpd-cab .fcard .fbody{padding:18px;}
 .fpd-cab .fcard .ftop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
-.fpd-cab .fcard .femoji{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-cab .fcard .femoji{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-cab .fcard .fcount{font-family:var(--font-mono);font-size:10px;letter-spacing:0.03em;padding:4px 9px;border-radius:7px;flex-shrink:0;}
 .fpd-cab .fcard .ftitle{font-family:var(--font-display);font-size:13.5px;font-weight:600;color:${TEXT};margin-bottom:5px;letter-spacing:-0.005em;}
 .fpd-cab .fcard .fdesc{color:${MUTED};font-size:11.5px;line-height:1.55;}
 
-.fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.05);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
+.fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
 .fpd-cab .frow:hover{border-color:rgba(91,123,245,0.28);background:rgba(91,123,245,0.05);}
 .fpd-cab .frow .femoji2{font-size:20px;flex-shrink:0;}
 .fpd-cab .frow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;}
@@ -426,7 +426,7 @@ const CAB_CSS = `
 
 /* files */
 .fpd-cab .filegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;}
-.fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
 .fpd-cab .filecard.sel{border-color:${ACCENT2};box-shadow:0 0 0 1px rgba(138,160,255,0.4);}
 .fpd-cab .filecard .thumb{height:92px;display:flex;align-items:center;justify-content:center;position:relative;background:#0F1624;}
 .fpd-cab .filecard .thumb img{width:100%;height:100%;object-fit:cover;}
@@ -435,9 +435,9 @@ const CAB_CSS = `
 .fpd-cab .filecard .fname{color:${TEXT};font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
 .fpd-cab .filecard .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:9.5px;}
 
-.fpd-cab .filerow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filerow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
 .fpd-cab .filerow.sel{border-color:${ACCENT2};}
-.fpd-cab .filerow .ftico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-cab .filerow .ftico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-cab .filerow .ftico img{width:34px;height:34px;object-fit:cover;}
 .fpd-cab .filerow .fname{color:${TEXT};font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .filerow .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:11px;}
@@ -458,13 +458,13 @@ const CAB_CSS = `
 .fpd-cab .detail .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .fpd-cab .detail .dname{color:${TEXT};font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .detail .dclose{color:${MUTED};background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;}
-.fpd-cab .detail .drow{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(255,255,255,0.065);font-size:12px;}
+.fpd-cab .detail .drow{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(255,255,255,0.22);font-size:12px;}
 .fpd-cab .detail .drow:first-of-type{border-top:none;}
 .fpd-cab .detail .dk{color:${MUTED};}
 .fpd-cab .detail .dv{color:${TEXT};font-weight:500;}
 .fpd-cab .detail .dbtns{display:flex;gap:8px;margin-top:14px;}
 .fpd-cab .detail .dbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);}
-.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.065);color:${ACCENT2};}
+.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${ACCENT2};}
 .fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;}
 
 /* empty */
@@ -592,7 +592,7 @@ export function DigitalFileCabinet() {
         </div>
 
         {/* ── Search ── */}
-        <div className="card search">
+        <div className="card search glow-surface">
           <Search size={13} color={MUTED}/>
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={current ? `Search in ${current.label}...` : "Search all folders..."}/>

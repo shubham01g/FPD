@@ -446,7 +446,7 @@ const CONTACTS_CSS = `
 .fpd-contacts-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-contacts .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-contacts .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-contacts .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-contacts .card.pad{padding:22px;}
 .fpd-contacts .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
@@ -458,7 +458,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .access-dot{width:6px;height:6px;border-radius:50%;}
 
 .fpd-contacts .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;background:none;}
-.fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* chain of authority */
 .fpd-contacts .chain-box{padding:20px;border-radius:15px;background:rgba(91,123,245,0.05);border:2px solid rgba(91,123,245,0.22);}
@@ -473,7 +473,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .info-banner p{color:${MUTED};font-size:12px;line-height:1.7;}
 
 /* section */
-.fpd-contacts .section-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-contacts .section-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.22);}
 .fpd-contacts .section-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .fpd-contacts .section-title{font-family:var(--font-display);font-size:15px;color:${TEXT};}
 .fpd-contacts .section-count{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--font-mono);}
@@ -483,7 +483,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .add-one-link{margin-top:6px;font-size:11px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* contact row */
-.fpd-contacts .contact-row{padding:18px 20px;border-top:1px solid rgba(255,255,255,0.05);}
+.fpd-contacts .contact-row{padding:18px 20px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-contacts .contact-row:first-child{border-top:none;}
 .fpd-contacts .priority-badge{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:var(--font-display);}
 .fpd-contacts .rank-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;font-family:var(--font-mono);}
@@ -494,16 +494,16 @@ const CONTACTS_CSS = `
 /* modal */
 .fpd-contacts .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.8);backdrop-filter:blur(8px);}
 .fpd-contacts .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
-.fpd-contacts .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-contacts .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.22);}
 .fpd-contacts .modal-head h3{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;}
 .fpd-contacts .modal-sub{color:${MUTED};font-size:12px;margin-top:3px;}
 .fpd-contacts .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-contacts .modal-body{padding:22px 24px;display:flex;flex-direction:column;gap:14px;}
 .fpd-contacts .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-contacts .field input::placeholder{color:${FAINT};}
 .fpd-contacts .field input:focus,.fpd-contacts .field select:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
-.fpd-contacts .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-contacts .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:11px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(74,99,222,0.7);}
 
 /* folder picker */
@@ -518,7 +518,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,123,245,0.14);color:${ACCENT2};font-family:var(--font-mono);}
 .fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:11px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);}
 .fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
-.fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
+.fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
 .fpd-contacts .sub-hint{color:${MUTED};font-size:10px;margin-top:5px;}
 `;
 

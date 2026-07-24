@@ -49,7 +49,7 @@ const STORAGE_CSS = `
 .fpd-storage-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-storage .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-storage .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-storage .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-storage .card.pad{padding:22px;}
 .fpd-storage .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
@@ -65,15 +65,15 @@ const STORAGE_CSS = `
 
 /* KPI ledger */
 .fpd-storage .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-storage .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-storage .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.22);position:relative;text-align:left;overflow:hidden;}
 .fpd-storage .kcell:first-child{border-left:none;}
 .fpd-storage .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-storage .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-storage .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-storage .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-storage .kcell .kval{font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-storage .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-storage .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-storage .kstrip{grid-template-columns:1fr 1fr;}.fpd-storage .kcell:nth-child(3){border-left:none;}.fpd-storage .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+@media (max-width:880px){.fpd-storage .kstrip{grid-template-columns:1fr 1fr;}.fpd-storage .kcell:nth-child(3){border-left:none;}.fpd-storage .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}}
 
 /* meter */
 .fpd-storage .meter-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -107,7 +107,7 @@ const STORAGE_CSS = `
 /* plans */
 .fpd-storage .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media (max-width:900px){.fpd-storage .plan-grid{grid-template-columns:1fr;}}
-.fpd-storage .plan-card{padding:20px;border-radius:13px;border:1px solid rgba(255,255,255,0.065);background:#0F1624;}
+.fpd-storage .plan-card{padding:20px;border-radius:13px;border:1px solid rgba(255,255,255,0.22);background:#0F1624;}
 .fpd-storage .plan-card.current{background:rgba(91,123,245,0.08);border:2px solid ${ACCENT};}
 .fpd-storage .plan-tag{font-size:10px;font-family:var(--font-mono);color:${ACCENT2};margin-bottom:6px;}
 .fpd-storage .plan-name{font-family:var(--font-display);font-size:17px;color:${TEXT};margin-bottom:6px;}
