@@ -8,8 +8,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 type Frequency = "Weekly"|"Biweekly"|"Monthly"|"Quarterly"|"Yearly";
 type PaymentType = "Checking Account"|"Savings Account"|"American Express"|"Mastercard"|"Visa"|"Discover"|"PayPal"|"Apple Pay"|"Google Pay";
@@ -34,12 +42,141 @@ const initSubs: Subscription[] = [
   { id:"s6", title:"Planet Fitness", amount:24.99, frequency:"Monthly", phone:"(916) 555-0291", website:"https://planetfitness.com", billingAccountNumber:"PF-8821", paymentType:"Checking Account", lastFour:"8821", category:"Health & Fitness", status:"active", nextBilling:"Jun 30, 2026", autoPay:true, cancelInstructions:"Must cancel IN PERSON at the gym or via certified mail." },
 ];
 
-const frequencyColor: Record<Frequency,string> = { Weekly:"#48BB78", Biweekly:"#38B2AC", Monthly:"#3A5BD9", Quarterly:"#6E8BFF", Yearly:"#F6AD55" };
+const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#6FB2B4", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
 const statusColor: Record<string, { color:string; bg:string }> = {
-  active:    { color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
-  paused:    { color:"#F6AD55", bg:"rgba(246,173,85,0.1)" },
-  cancelled: { color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
+  active:    { color:POS,  bg:"rgba(95,190,145,0.12)" },
+  paused:    { color:WARN, bg:"rgba(217,165,94,0.12)" },
+  cancelled: { color:NEG,  bg:"rgba(208,107,107,0.12)" },
 };
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-sub so nothing else in the app is affected. */
+const SUB_CSS = `
+.fpd-sub{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-sub *{box-sizing:border-box;}
+.fpd-sub-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-sub .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-sub .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-sub .card.pad{padding:22px;}
+.fpd-sub .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-sub .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-sub .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-sub .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
+.fpd-sub .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-sub .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-sub .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-sub .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-sub .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-sub .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-sub .btn-pos:hover{background:rgba(95,190,145,0.2);}
+
+/* KPI ledger */
+.fpd-sub .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-sub .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-sub .kcell:first-child{border-left:none;}
+.fpd-sub .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-sub .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-sub .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-sub .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-sub .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-sub .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-sub .kstrip{grid-template-columns:1fr 1fr;}.fpd-sub .kcell:nth-child(3){border-left:none;}.fpd-sub .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* alert banner (warning variant of the shared footnote) */
+.fpd-sub .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.22);}
+.fpd-sub .foot .ft{color:${SOFT};font-size:12.5px;line-height:1.7;}
+.fpd-sub .foot .ft b{color:${TEXT};font-weight:600;}
+
+/* search + category filters */
+.fpd-sub .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.fpd-sub .search{display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:11px;background:#0D1421;border:1px solid rgba(255,255,255,0.065);flex:1;min-width:220px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
+.fpd-sub .search input{background:none;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
+.fpd-sub .search input::placeholder{color:${FAINT};}
+.fpd-sub .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fpd-sub .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
+.fpd-sub .chip.off{opacity:.55;}
+.fpd-sub .chip.off:hover{opacity:.8;}
+
+/* two-column bento */
+.fpd-sub .bento{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start;}
+@media (max-width:980px){.fpd-sub .bento{grid-template-columns:1fr;}}
+
+/* subscription list rows */
+.fpd-sub .plist{display:flex;flex-direction:column;gap:10px;}
+.fpd-sub .prow{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s;}
+.fpd-sub .prow.sel{border-color:rgba(91,123,245,0.5);box-shadow:inset 0 0 0 1px rgba(91,123,245,0.4),0 6px 20px -8px rgba(91,123,245,0.45);}
+.fpd-sub .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-sub .ptitle-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
+.fpd-sub .ptitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
+.fpd-sub .pbadge{padding:2.5px 8px;border-radius:99px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.05em;}
+.fpd-sub .autotag{color:${POS};font-size:10px;font-family:var(--font-mono);font-weight:600;letter-spacing:0.04em;}
+.fpd-sub .psub{color:${MUTED};font-size:12px;}
+.fpd-sub .pamt{text-align:right;flex-shrink:0;}
+.fpd-sub .pamt .val{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;font-variant-numeric:tabular-nums;}
+.fpd-sub .pamt .freq{font-family:var(--font-mono);font-size:10px;margin-top:2px;}
+.fpd-sub .icon-btn{background:none;border:none;cursor:pointer;padding:7px;border-radius:8px;display:flex;color:${MUTED};transition:color .16s,background .16s;flex-shrink:0;}
+.fpd-sub .icon-btn:hover{color:${ACCENT2};background:rgba(91,123,245,0.1);}
+.fpd-sub .icon-btn.del:hover{color:${NEG};background:rgba(208,107,107,0.1);}
+
+/* detail panel */
+.fpd-sub .dpanel{position:sticky;top:16px;}
+.fpd-sub .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.fpd-sub .dhead .dname{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-sub .damt{display:flex;align-items:baseline;gap:8px;margin-bottom:14px;}
+.fpd-sub .damt .val{font-family:var(--font-display);font-size:26px;color:${TEXT};font-weight:600;letter-spacing:-0.02em;}
+.fpd-sub .damt .freq{font-family:var(--font-mono);font-size:12.5px;}
+.fpd-sub .tile-group{display:flex;flex-direction:column;gap:8px;}
+.fpd-sub .tile-row{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-sub .tile-row.between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.fpd-sub .tile-row .tk{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;}
+.fpd-sub .tile-row .tv{color:${TEXT};font-size:13px;}
+.fpd-sub .tile-row .tv.mono{font-family:var(--font-mono);}
+.fpd-sub .cancel-box{padding:13px 15px;border-radius:11px;background:rgba(208,107,107,0.06);border:1px solid rgba(208,107,107,0.22);margin-top:10px;}
+.fpd-sub .cancel-box .tk{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${NEG};margin-bottom:4px;}
+.fpd-sub .cancel-box .tv{color:${SOFT};font-size:12.5px;line-height:1.7;}
+.fpd-sub .notes-box{padding:13px 15px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);margin-top:10px;}
+.fpd-sub .notes-box .tk{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-sub .notes-box .tv{color:${SOFT};font-size:13px;line-height:1.6;}
+
+/* empty state */
+.fpd-sub .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 16px;}
+.fpd-sub .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-sub .empty .et{color:${SOFT};font-size:13.5px;}
+
+/* modal */
+.fpd-sub .check-row{display:flex;align-items:center;gap:9px;cursor:pointer;color:${SOFT};font-size:13px;}
+.fpd-sub .check-row input{width:15px;height:15px;accent-color:${ACCENT};}
+.fpd-sub .dropzone{flex:1;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:11px;border:1.5px dashed rgba(91,123,245,0.28);background:rgba(91,123,245,0.03);cursor:pointer;color:${MUTED};font-size:13px;}
+.fpd-sub .pw-wrap{position:relative;}
+.fpd-sub .pw-wrap input{padding-right:38px;}
+.fpd-sub .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-sub .login-box{padding:15px;border-radius:12px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);display:flex;flex-direction:column;gap:12px;}
+.fpd-sub .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT2};font-weight:700;}
+.fpd-sub .payment-box{padding:15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-sub .payment-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:10px;}
+.fpd-sub .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-sub .modal{width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
+.fpd-sub .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-sub .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;display:flex;align-items:center;gap:9px;}
+.fpd-sub .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-sub .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-sub .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-sub .field input,.fpd-sub .field select,.fpd-sub .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-sub .field input::placeholder,.fpd-sub .field textarea::placeholder{color:${FAINT};}
+.fpd-sub .field input:focus,.fpd-sub .field select:focus,.fpd-sub .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-sub .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fpd-sub .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-sub .modal-foot .save:hover{filter:brightness(1.08);}
+.fpd-sub .modal-foot .save[disabled]{opacity:.6;cursor:default;}
+@media (max-width:560px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
+`;
 
 function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscription)=>void }) {
   useEscapeKey(true, onClose);
@@ -58,103 +195,96 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
   };
 
   const inp = (key: string, label: string, ph: string, type = "text") => (
-    <div>
-      <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{label}</label>
-      <input type={type} value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))} placeholder={ph}
-        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+    <div className="field">
+      <label>{label}</label>
+      <input type={type} value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))} placeholder={ph} />
     </div>
   );
 
   const sel = (key: string, label: string, opts: string[]) => (
-    <div>
-      <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>{label}</label>
-      <select value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))}
-        className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
+    <div className="field">
+      <label>{label}</label>
+      <select value={(form as any)[key]??""} onChange={e => setForm(p=>({...p,[key]:e.target.value}))}>
         {opts.map(o => <option key={o}>{o}</option>)}
       </select>
     </div>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
-          <div className="flex items-center gap-2"><CreditCard size={18} color="#3A5BD9"/><h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Add Subscription / Auto Pay</h3></div>
-          <button onClick={onClose} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
+    <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="card modal glow-surface">
+        <div className="modal-head">
+          <h3><CreditCard size={16} color={ACCENT2} /> Add Subscription / Auto Pay</h3>
+          <button onClick={onClose}><X size={16}/></button>
         </div>
-        <div className="p-6 overflow-y-auto space-y-4" style={{ maxHeight:"80vh" }}>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="modal-body">
+          <div className="field-grid">
             {inp("title","TITLE *","e.g. Netflix, Adobe CC")}
             {sel("category","CATEGORY",categories.filter(c=>c!=="All"))}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="field-grid">
             {inp("amount","MONTHLY AMOUNT ($) *","0.00","number")}
             {sel("frequency","BILLING FREQUENCY",["Weekly","Biweekly","Monthly","Quarterly","Yearly"])}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="field-grid">
             {inp("phone","PHONE NUMBER","1-800-000-0000","tel")}
             {inp("website","WEBSITE / LOGIN URL","https://example.com","url")}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="field-grid">
             {inp("billingAccountNumber","BILLING ACCOUNT NUMBER","e.g. ACC-8821")}
             {inp("nextBilling","NEXT BILLING DATE","e.g. Jul 1, 2026")}
           </div>
           {/* Payment */}
-          <div className="p-4 rounded-xl glow-surface" style={{ background:"#0F1A33" }}>
-            <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, marginBottom:10 }}>PAYMENT METHOD</div>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="payment-box">
+            <div className="lbl">PAYMENT METHOD</div>
+            <div className="field-grid">
               {sel("paymentType","PAYMENT TYPE",["Checking Account","Savings Account","American Express","Mastercard","Visa","Discover","PayPal","Apple Pay","Google Pay","Bitcoin (BTC)","Ethereum (ETH)","USDC","Other Crypto"])}
               {inp("lastFour","LAST 4 DIGITS","e.g. 8821")}
             </div>
           </div>
           {/* Login details */}
-          <div className="p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.1)" }}>
-            <div style={{ color:"#3A5BD9", fontSize:10, ...MONO, fontWeight:700 }}>ACCOUNT LOGIN DETAILS (for legacy contacts)</div>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="login-box">
+            <div className="lbl">ACCOUNT LOGIN DETAILS (for legacy contacts)</div>
+            <div className="field-grid">
               {inp("username","USERNAME / EMAIL","your.username")}
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>PASSWORD</label>
-                <div className="relative">
-                  <input type={showPw?"text":"password"} value={form.password??""} onChange={e => setForm(p=>({...p,password:e.target.value}))} placeholder="Account password"
-                    className="w-full px-4 py-2.5 rounded-xl pr-9" style={{ background:"#101728", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none", ...MONO }}/>
-                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color:"rgba(255,255,255,0.65)" }}>
+              <div className="field">
+                <label>PASSWORD</label>
+                <div className="pw-wrap">
+                  <input type={showPw?"text":"password"} value={form.password??""} onChange={e => setForm(p=>({...p,password:e.target.value}))} placeholder="Account password" style={{ fontFamily:"var(--font-mono)" }} />
+                  <button type="button" className="pw-toggle" onClick={() => setShowPw(!showPw)}>
                     {showPw ? <EyeOff size={13}/> : <Eye size={13}/>}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div>
-            <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>CANCELLATION INSTRUCTIONS</label>
-            <textarea value={form.cancelInstructions??""} onChange={e => setForm(p=>({...p,cancelInstructions:e.target.value}))} placeholder="Step-by-step instructions to cancel this subscription..." rows={2}
-              className="w-full px-4 py-2.5 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+          <div className="field">
+            <label>CANCELLATION INSTRUCTIONS</label>
+            <textarea style={{ resize:"vertical" }} value={form.cancelInstructions??""} onChange={e => setForm(p=>({...p,cancelInstructions:e.target.value}))} placeholder="Step-by-step instructions to cancel this subscription..." rows={2} />
           </div>
           {inp("notes","ADDITIONAL NOTES","Account details, login quirks, etc.")}
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.autoPay??true} onChange={e => setForm(p=>({...p,autoPay:e.target.checked}))} style={{ accentColor:"#3A5BD9", width:15, height:15 }}/>
-              <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>Auto-Pay Enabled</span>
-            </label>
-          </div>
+          <label className="check-row">
+            <input type="checkbox" checked={form.autoPay??true} onChange={e => setForm(p=>({...p,autoPay:e.target.checked}))} />
+            Auto-Pay Enabled
+          </label>
           {/* Upload */}
-          <div>
-            <label style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>ATTACH DOCUMENTS</label>
-            <input ref={fileRef} type="file" multiple className="hidden" onChange={e => { if(e.target.files?.[0]) toast.success(`Attached: ${e.target.files[0].name}`); }}/>
-            <div className="flex items-center gap-2">
-              <div onClick={() => fileRef.current?.click()} className="flex-1 flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer" style={{ borderColor:"rgba(58,91,217,0.2)", background:"rgba(58,91,217,0.02)" }}>
-                <Upload size={14} color="#3A5BD9" style={{ opacity:0.6 }}/>
-                <span style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Attach bill, statement, or agreement</span>
+          <div className="field">
+            <label>ATTACH DOCUMENTS</label>
+            <input ref={fileRef} type="file" multiple style={{ display:"none" }} onChange={e => { if(e.target.files?.[0]) toast.success(`Attached: ${e.target.files[0].name}`); }}/>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div onClick={() => fileRef.current?.click()} className="dropzone">
+                <Upload size={14} color={ACCENT2} style={{ opacity:0.7 }}/>
+                <span>Attach bill, statement, or agreement</span>
               </div>
               <ScanButton folder="financial" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
             </div>
           </div>
-          <div className="flex gap-3 pt-2">
-            <button onClick={submit} disabled={loading} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)", opacity:loading?0.7:1 }}>
-              {loading?"Saving...":"Save Subscription"}
-            </button>
-            <button onClick={onClose} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-          </div>
+        </div>
+        <div className="modal-foot">
+          <button className="save" onClick={submit} disabled={loading}>
+            {loading?"Saving...":"Save Subscription"}
+          </button>
+          <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>
@@ -186,85 +316,93 @@ export function SubscriptionManager() {
 
   const deleteSub = (id: string) => { setSubs(p => p.filter(s => s.id !== id)); if(selected?.id===id) setSelected(null); toast.success("Subscription removed"); };
 
+  const kpis = [
+    { label: "Monthly Cost", value: `$${totalMonthly.toFixed(2)}`, sub: "Across active subscriptions", icon: <DollarSign size={14} />, dot: ACCENT2 },
+    { label: "Annual Cost", value: `$${(totalMonthly*12).toFixed(0)}`, sub: "Projected per year", icon: <Calendar size={14} />, dot: WARN },
+    { label: "Auto-Pay Active", value: String(subs.filter(s=>s.autoPay&&s.status==="active").length), sub: "Charging automatically", icon: <RefreshCw size={14} />, dot: POS },
+    { label: "Total Subscriptions", value: String(subs.length), sub: "On record", icon: <CreditCard size={14} />, dot: ACCENT2 },
+  ];
+
   return (
-    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
-      <div style={{ maxWidth:1200, margin:"0 auto" }} className="space-y-5">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#FFFFFF" }}>Auto Pay & Subscriptions</h1>
-            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:4 }}>{subs.filter(s=>s.status==="active").length} active subscriptions · ~${totalMonthly.toFixed(2)}/month total</p>
+    <div className="fpd-sub">
+      <style dangerouslySetInnerHTML={{ __html: SUB_CSS }} />
+      <div className="fpd-sub-grain" />
+
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><CreditCard size={12} /> Recurring Billing</div>
+            <h1 className="pg-h1">Auto Pay &amp; Subscriptions</h1>
+            <div className="pg-sub">{subs.filter(s=>s.status==="active").length} active subscriptions · ~${totalMonthly.toFixed(2)}/month total</div>
           </div>
-          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
-            <Plus size={15}/> Add Subscription
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Subscription
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { label:"Monthly Cost", value:`$${totalMonthly.toFixed(2)}`, color:"#3A5BD9" },
-            { label:"Annual Cost", value:`$${(totalMonthly*12).toFixed(0)}`, color:"#FC8181" },
-            { label:"Auto-Pay Active", value:subs.filter(s=>s.autoPay&&s.status==="active").length, color:"#48BB78" },
-            { label:"Total Subscriptions", value:subs.length, color:"#6E8BFF" },
-          ].map(s => (
-            <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
-              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>{s.label}</div>
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
+              </div>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Alert */}
-        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border" style={{ background:"rgba(246,173,85,0.05)", borderColor:"rgba(246,173,85,0.25)" }}>
-          <AlertTriangle size={14} color="#F6AD55"/>
-          <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>These subscriptions and accounts need to be cancelled or transferred when a user passes. Ensure legacy contacts have access to this page.</span>
-        </div>
-
-        {/* Search + Category */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48 glow-surface" style={CARD}>
-            <Search size={13} color="rgba(255,255,255,0.65)"/>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search subscriptions..."
-              style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
-          </div>
-          <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
-            {activeCategories.map(c => (
-              <button key={c} onClick={() => setCategory(c)}
-                className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
-                style={{ background:category===c?"#3A5BD9":"transparent", color:category===c?"#fff":"rgba(255,255,255,0.7)", fontWeight:category===c?600:400 }}>
-                {c}
-              </button>
-            ))}
+        {/* ── Alert ── */}
+        <div className="foot">
+          <AlertTriangle size={16} color={WARN} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div className="ft">
+            <b>These subscriptions and accounts need to be cancelled or transferred when a user passes.</b> Ensure legacy contacts have access to this page.
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
+        {/* ── Search + category filters ── */}
+        <div className="toolbar-row">
+          <div className="search">
+            <Search size={13} color={MUTED} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search subscriptions..." />
+          </div>
+          <div className="filters">
+            {activeCategories.map(c => {
+              const on = category === c;
+              return (
+                <button key={c} onClick={() => setCategory(c)} className={`chip ${on ? "" : "off"}`}
+                  style={{ background: on ? "rgba(91,123,245,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,123,245,0.4)" : "rgba(255,255,255,0.09)" }}>
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bento">
           {/* Subscription list */}
-          <div className="lg:col-span-2 space-y-2">
+          <div className="plist">
             {filtered.map(sub => (
-              <div key={sub.id} className="flex items-center gap-4 px-4 py-4 rounded-2xl cursor-pointer transition-all"
-                style={{ ...CARD, borderColor:selected?.id===sub.id?"#3A5BD9":"rgba(58,91,217,0.1)", borderWidth:selected?.id===sub.id?2:1 }}
-                onClick={() => setSelected(selected?.id===sub.id ? null : sub)}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${frequencyColor[sub.frequency]}14` }}>
+              <div key={sub.id} className={`card prow glow-surface ${selected?.id===sub.id ? "sel" : ""}`} onClick={() => setSelected(selected?.id===sub.id ? null : sub)}>
+                <div className="pico" style={{ background:`${frequencyColor[sub.frequency]}1C` }}>
                   <CreditCard size={18} color={frequencyColor[sub.frequency]}/>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{sub.title}</span>
-                    <span className="px-2 py-0.5 rounded-full text-xs" style={{ background:statusColor[sub.status].bg, color:statusColor[sub.status].color, fontSize:9, ...MONO, fontWeight:700 }}>{sub.status.toUpperCase()}</span>
-                    {sub.autoPay && <span style={{ color:"#48BB78", fontSize:10, ...MONO }}>AUTO-PAY</span>}
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div className="ptitle-row">
+                    <span className="ptitle">{sub.title}</span>
+                    <span className="pbadge" style={{ background:statusColor[sub.status].bg, color:statusColor[sub.status].color }}>{sub.status.toUpperCase()}</span>
+                    {sub.autoPay && <span className="autotag">AUTO-PAY</span>}
                   </div>
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>
-                    {sub.paymentType}{sub.lastFour ? ` ···· ${sub.lastFour}` : ""} · Next: {sub.nextBilling || "—"}
-                  </div>
+                  <div className="psub">{sub.paymentType}{sub.lastFour ? ` ···· ${sub.lastFour}` : ""} · Next: {sub.nextBilling || "—"}</div>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>${sub.amount.toFixed(2)}</div>
-                  <div style={{ color:frequencyColor[sub.frequency], fontSize:10, ...MONO }}>{sub.frequency}</div>
+                <div className="pamt">
+                  <div className="val">${sub.amount.toFixed(2)}</div>
+                  <div className="freq" style={{ color:frequencyColor[sub.frequency] }}>{sub.frequency}</div>
                 </div>
-                <button onClick={e => { e.stopPropagation(); deleteSub(sub.id); }} style={{ color:"#FC8181", padding:4 }}><Trash2 size={13}/></button>
+                <button className="icon-btn del" onClick={e => { e.stopPropagation(); deleteSub(sub.id); }}><Trash2 size={13}/></button>
               </div>
             ))}
           </div>
@@ -272,16 +410,16 @@ export function SubscriptionManager() {
           {/* Detail panel */}
           <div>
             {selected ? (
-              <div className="rounded-2xl p-5 sticky top-4 space-y-4 glow-surface" style={CARD}>
-                <div className="flex items-center justify-between">
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>{selected.title}</div>
-                  <button onClick={() => setSelected(null)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={13}/></button>
+              <div className="card pad glow-surface dpanel">
+                <div className="dhead">
+                  <div className="dname">{selected.title}</div>
+                  <button className="icon-btn" onClick={() => setSelected(null)}><X size={13}/></button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#FFFFFF" }}>${selected.amount.toFixed(2)}</span>
-                  <span style={{ color:frequencyColor[selected.frequency], fontSize:12, ...MONO }}>/{selected.frequency.toLowerCase()}</span>
+                <div className="damt">
+                  <span className="val">${selected.amount.toFixed(2)}</span>
+                  <span className="freq" style={{ color:frequencyColor[selected.frequency] }}>/{selected.frequency.toLowerCase()}</span>
                 </div>
-                <div className="space-y-2">
+                <div className="tile-group">
                   {[
                     { label:"Payment", value:`${selected.paymentType}${selected.lastFour ? ` ···· ${selected.lastFour}` : ""}` },
                     { label:"Account #", value:selected.billingAccountNumber },
@@ -290,40 +428,40 @@ export function SubscriptionManager() {
                     { label:"Username", value:selected.username },
                     { label:"Next Billing", value:selected.nextBilling },
                   ].filter(r => r.value).map(row => (
-                    <div key={row.label} className="flex flex-col px-3 py-2 rounded-xl" style={{ background:"#0F1A33" }}>
-                      <span style={{ color:"rgba(255,255,255,0.65)", fontSize:9, ...MONO }}>{row.label.toUpperCase()}</span>
-                      <span style={{ color:"#FFFFFF", fontSize:12 }}>{row.value}</span>
+                    <div key={row.label} className="tile-row">
+                      <div className="tk">{row.label.toUpperCase()}</div>
+                      <div className="tv">{row.value}</div>
                     </div>
                   ))}
                   {selected.password && (
-                    <div className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background:"#0F1A33" }}>
+                    <div className="tile-row between">
                       <div>
-                        <div style={{ color:"rgba(255,255,255,0.65)", fontSize:9, ...MONO }}>PASSWORD</div>
-                        <div style={{ color:"#FFFFFF", fontSize:12, ...MONO }}>{showPwFor===selected.id ? selected.password : "••••••••"}</div>
+                        <div className="tk">PASSWORD</div>
+                        <div className="tv mono">{showPwFor===selected.id ? selected.password : "••••••••"}</div>
                       </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => setShowPwFor(showPwFor===selected.id ? null : selected.id)} style={{ color:"rgba(255,255,255,0.65)" }}>{showPwFor===selected.id ? <EyeOff size={12}/> : <Eye size={12}/>}</button>
-                      </div>
+                      <button className="icon-btn" onClick={() => setShowPwFor(showPwFor===selected.id ? null : selected.id)}>
+                        {showPwFor===selected.id ? <EyeOff size={12}/> : <Eye size={12}/>}
+                      </button>
                     </div>
                   )}
                 </div>
                 {selected.cancelInstructions && (
-                  <div className="px-3 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.06)", border:"1px solid rgba(252,129,129,0.2)" }}>
-                    <div style={{ color:"#FC8181", fontSize:9, ...MONO, marginBottom:4 }}>CANCELLATION INSTRUCTIONS</div>
-                    <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12, lineHeight:1.7 }}>{selected.cancelInstructions}</div>
+                  <div className="cancel-box">
+                    <div className="tk">CANCELLATION INSTRUCTIONS</div>
+                    <div className="tv">{selected.cancelInstructions}</div>
                   </div>
                 )}
                 {selected.notes && (
-                  <div className="px-3 py-3 rounded-xl" style={{ background:"#0F1A33" }}>
-                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:9, ...MONO, marginBottom:4 }}>NOTES</div>
-                    <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12 }}>{selected.notes}</div>
+                  <div className="notes-box">
+                    <div className="tk">NOTES</div>
+                    <div className="tv">{selected.notes}</div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl p-8 text-center glow-surface" style={CARD}>
-                <CreditCard size={32} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
-                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>Select a subscription to view details</div>
+              <div className="card empty glow-surface">
+                <div className="ei"><CreditCard size={24}/></div>
+                <div className="et">Select a subscription to view details</div>
               </div>
             )}
           </div>

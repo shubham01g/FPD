@@ -1,13 +1,20 @@
 import React, { useState } from "react";
-import { Plane, Plus, X, MapPin, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Hotel, FileText, CheckCircle } from "lucide-react";
+import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
 
-const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 const TRIP_TYPES = ["Vacation","Family Visit","Business Travel","Medical Travel","Honeymoon","Anniversary Trip","Holiday Travel","Road Trip","Cruise","Backpacking","Mission / Volunteer","Other"];
 
@@ -41,10 +48,88 @@ const initTrips: Trip[] = [
 ];
 
 const statusConfig = {
-  planned:   { color:"#4A90D9", bg:"rgba(74,144,217,0.12)",   label:"PLANNED" },
-  completed: { color:"#48BB78", bg:"rgba(72,187,120,0.12)",  label:"COMPLETED" },
-  cancelled: { color:"#FC8181", bg:"rgba(252,129,129,0.12)", label:"CANCELLED" },
+  planned:   { color:ACCENT2, bg:"rgba(138,160,255,0.14)", label:"PLANNED" },
+  completed: { color:POS, bg:"rgba(95,190,145,0.14)",  label:"COMPLETED" },
+  cancelled: { color:NEG, bg:"rgba(208,107,107,0.14)", label:"CANCELLED" },
 };
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-travel so nothing else in the app is affected. */
+const TRAVEL_CSS = `
+.fpd-travel{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-travel *{box-sizing:border-box;}
+.fpd-travel-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-travel .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-travel .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-travel .card.pad{padding:22px;}
+.fpd-travel .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+.fpd-travel .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-travel .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-travel .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
+.fpd-travel .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-travel .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-travel .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* segmented status filter */
+.fpd-travel .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);width:fit-content;}
+.fpd-travel .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-travel .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+
+/* KPI ledger */
+.fpd-travel .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-travel .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-travel .kcell:first-child{border-left:none;}
+.fpd-travel .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-travel .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-travel .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-travel .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-travel .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-travel .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-travel .kstrip{grid-template-columns:1fr 1fr;}.fpd-travel .kcell:nth-child(3){border-left:none;}.fpd-travel .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* trip cards */
+.fpd-travel .tlist{display:flex;flex-direction:column;gap:14px;}
+.fpd-travel .tcard{overflow:hidden;}
+.fpd-travel .tcover{width:100%;height:180px;object-fit:cover;display:block;}
+.fpd-travel .thead{width:100%;text-align:left;padding:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-travel .tico{width:52px;height:52px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(91,123,245,0.10);}
+.fpd-travel .tdest{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;}
+.fpd-travel .tcountry{color:${MUTED};font-size:13px;}
+.fpd-travel .tbadge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.04em;}
+.fpd-travel .tmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;}
+.fpd-travel .tmeta span{display:flex;align-items:center;gap:5px;font-size:11.5px;color:${MUTED};}
+.fpd-travel .tbody{padding:0 20px 20px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-travel .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:16px;}
+.fpd-travel .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-travel .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-travel .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
+.fpd-travel .callout{padding:12px 14px;border-radius:11px;margin-top:14px;}
+.fpd-travel .callout .ck{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:4px;}
+.fpd-travel .callout .cv{color:${TEXT};font-size:13px;line-height:1.7;}
+.fpd-travel .docs-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:${MUTED};margin-bottom:8px;margin-top:14px;}
+.fpd-travel .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,123,245,0.08);color:${ACCENT2};border:1px solid rgba(91,123,245,0.18);cursor:pointer;font-family:var(--font-body);}
+@media (max-width:640px){.fpd-travel .tgrid{grid-template-columns:1fr;}}
+
+/* modal */
+.fpd-travel .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-travel .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.fpd-travel .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-travel .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-travel .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-travel .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-travel .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-travel .field input,.fpd-travel .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-travel .field input::placeholder{color:${FAINT};}
+.fpd-travel .field input:focus,.fpd-travel .field select:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-travel .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-travel .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-travel .modal-foot .save:hover{filter:brightness(1.08);}
+`;
 
 export function TravelPlanner() {
   const [trips, setTrips] = useState<Trip[]>(initTrips);
@@ -66,154 +151,169 @@ export function TravelPlanner() {
   const filtered = trips.filter(t => filterStatus==="all" || t.status===filterStatus);
   const stats = { total:trips.length, completed:trips.filter(t=>t.status==="completed").length, planned:trips.filter(t=>t.status==="planned").length, countries:new Set(trips.map(t=>t.country)).size };
 
+  const kpis = [
+    { label: "Total Trips", value: String(stats.total), sub: "Recorded in this vault", icon: <Plane size={14} />, dot: ACCENT2 },
+    { label: "Completed", value: String(stats.completed), sub: "Trips taken", icon: <Globe size={14} />, dot: POS },
+    { label: "Planned", value: String(stats.planned), sub: "Upcoming trips", icon: <Calendar size={14} />, dot: ACCENT2 },
+    { label: "Countries", value: String(stats.countries), sub: "Visited or planned", icon: <Globe size={14} />, dot: ACCENT2 },
+  ];
+
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Travel Planner</h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>Record every trip — past and future. Attach itineraries, tickets, hotel confirmations, and travel documents.</p>
-        </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>
-          <Plus size={14}/> Add Trip
-        </button>
-      </div>
+    <div className="fpd-travel">
+      <style dangerouslySetInnerHTML={{ __html: TRAVEL_CSS }} />
+      <div className="fpd-travel-grain" />
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        {[{label:"Total Trips",value:stats.total,color:"var(--primary)"},{label:"Completed",value:stats.completed,color:"#48BB78"},{label:"Planned",value:stats.planned,color:"#4A90D9"},{label:"Countries",value:stats.countries,color:"#ED8936"}].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Plane size={12} /> TRAVEL RECORDS</div>
+            <h1 className="pg-h1">Travel Planner</h1>
+            <div className="pg-sub">
+              Record every trip — past and future. Attach itineraries, tickets, hotel confirmations, and travel documents.
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Filter */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"var(--card)" }}>
-        {(["all","planned","completed"] as const).map(s=>(
-          <button key={s} onClick={()=>setFilterStatus(s)} className="px-4 py-2 rounded-lg text-sm font-semibold"
-            style={{ background:filterStatus===s?"var(--primary)":"transparent", color:filterStatus===s?"#070D1A":"var(--muted-foreground)" }}>
-            {s.charAt(0).toUpperCase()+s.slice(1)}
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Trip
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Trip list */}
-      <div className="space-y-4">
-        {filtered.map(trip => {
-          const sc = statusConfig[trip.status];
-          return (
-            <div key={trip.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
-              {trip.photo && <img src={trip.photo} alt={trip.destination} style={{ width:"100%", height:180, objectFit:"cover" }}/>}
-              <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===trip.id ? null : trip.id)}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex items-center justify-center rounded-xl flex-shrink-0 text-2xl" style={{ width:52, height:52, background:"rgba(58,91,217,0.08)" }}>
-                      {trip.status==="planned" ? "✈️" : "🌍"}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>{trip.destination}</span>
-                        <span style={{ color:"var(--muted-foreground)", fontSize:13 }}>{trip.country}</span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:sc.bg, color:sc.color, ...MONO }}>{sc.label}</span>
-                      </div>
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Calendar size={10}/>{trip.startDate} – {trip.endDate}</span>
-                        <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Users size={10}/>{trip.companions || "Solo"}</span>
-                        <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Globe size={10}/>{trip.tripType}</span>
-                        {trip.budget && <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><DollarSign size={10}/>Budget: {trip.budget}</span>}
-                      </div>
-                    </div>
-                  </div>
-                  {expanded===trip.id ? <ChevronUp size={16} color="var(--muted-foreground)"/> : <ChevronDown size={16} color="var(--muted-foreground)"/>}
-                </div>
-              </button>
-
-              {expanded===trip.id && (
-                <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"var(--border)" }}>
-                  <div className="grid md:grid-cols-2 gap-3 pt-4">
-                    {[
-                      ["Accommodation",trip.accommodation||"—"],
-                      ["Accommodation Phone",trip.accommodationPhone||"—"],
-                      ["Confirmation #",trip.confirmationNum||"—"],
-                      ["Transportation",trip.transportation||"—"],
-                      ["Budget",trip.budget||"—"],
-                      ["Actual Cost",trip.actualCost||"—"],
-                      ["Travel Companions",trip.companions||"Solo"],
-                      ["Trip Type",trip.tripType],
-                    ].map(([label,value])=>(
-                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
-                        <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
-                        <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {trip.highlights && (
-                    <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(72,187,120,0.05)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                      <div style={{ color:"#48BB78", fontSize:10, ...MONO, marginBottom:4 }}>HIGHLIGHTS & MEMORIES</div>
-                      <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{trip.highlights}</div>
-                    </div>
-                  )}
-
-                  {trip.notes && (
-                    <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(246,173,85,0.05)", border:"1px solid rgba(246,173,85,0.15)" }}>
-                      <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
-                      <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.6 }}>{trip.notes}</div>
-                    </div>
-                  )}
-
-                  {/* Documents */}
-                  <div>
-                    <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:8 }}>TRAVEL DOCUMENTS ({trip.documents.length})</div>
-                    <div className="flex flex-wrap gap-2">
-                      {trip.documents.map(d => (
-                        <button key={d.name} onClick={() => toast.success(`Opening: ${d.name}`)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                          style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
-                          📄 {d.name} <span style={{ color:"var(--muted-foreground)", marginLeft:4 }}>({d.type})</span>
-                        </button>
-                      ))}
-                      <ScanButton folder="personal" onUpload={doc => { setTrips(p=>p.map(t=>t.id===trip.id?{...t,documents:[...t.documents,{name:doc.name,type:"Document"}]}:t)); toast.success(`"${doc.name}" added to ${trip.destination}`); }} size="sm" label="Add Document"/>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
-            <div className="flex items-center justify-between mb-1">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Trip</h3>
-              <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
-            </div>
-            <PhotoPicker value={form.photo} onChange={url => setForm(p=>({...p,photo:url}))} label="Cover Photo (destination)" aspectRatio="16/9"/>
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>TRIP TYPE</label>
-              <select value={form.tripType} onChange={F("tripType")} style={INPUT}>{TRIP_TYPES.map(t=><option key={t}>{t}</option>)}</select>
-            </div>
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>STATUS</label>
-              <select value={form.status} onChange={F("status")} style={INPUT}><option value="planned">Planned</option><option value="completed">Completed</option></select>
-            </div>
-            {[["Destination *","destination","e.g. Paris, France"],["Country","country","e.g. France"],["Start Date","startDate","e.g. Jun 15, 2026"],["End Date","endDate","e.g. Jun 25, 2026"],["Travel Companions","companions","e.g. Sarah, Emma (leave blank for solo)"],["Accommodation","accommodation","Hotel name or Airbnb"],["Accommodation Phone","accommodationPhone",""],["Confirmation Number","confirmationNum",""],["Transportation","transportation","e.g. United Airlines UA-100 (SFO→CDG)"],["Budget","budget","e.g. $5,000"],["Notes","notes","Planning notes, reminders, tips"]].map(([label,key,ph])=>(
-              <div key={key}>
-                <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{label.toUpperCase()}</label>
-                <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} style={INPUT}/>
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
               </div>
-            ))}
-            <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
-            <div className="flex gap-3 pt-2">
-              <button onClick={addTrip} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>Add Trip</button>
-              <button onClick={()=>setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Status filter ── */}
+        <div className="seg">
+          {(["all","planned","completed"] as const).map(s => (
+            <button key={s} className={filterStatus === s ? "on" : ""} onClick={() => setFilterStatus(s)}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Trip list ── */}
+        <div className="tlist">
+          {filtered.map(trip => {
+            const sc = statusConfig[trip.status];
+            return (
+              <div key={trip.id} className="card tcard glow-surface">
+                {trip.photo && <img src={trip.photo} alt={trip.destination} className="tcover" />}
+                <button className="thead" onClick={() => setExpanded(expanded===trip.id ? null : trip.id)}>
+                  <div className="flex items-start gap-4">
+                    <div className="tico">{trip.status==="planned" ? "✈️" : "🌍"}</div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 3 }}>
+                        <span className="tdest">{trip.destination}</span>
+                        <span className="tcountry">{trip.country}</span>
+                        <span className="tbadge" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
+                      </div>
+                      <div className="tmeta">
+                        <span><Calendar size={10}/>{trip.startDate} – {trip.endDate}</span>
+                        <span><Users size={10}/>{trip.companions || "Solo"}</span>
+                        <span><Globe size={10}/>{trip.tripType}</span>
+                        {trip.budget && <span><DollarSign size={10}/>Budget: {trip.budget}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  {expanded===trip.id ? <ChevronUp size={16} color={MUTED}/> : <ChevronDown size={16} color={MUTED}/>}
+                </button>
+
+                {expanded===trip.id && (
+                  <div className="tbody">
+                    <div className="tgrid">
+                      {[
+                        ["Accommodation",trip.accommodation||"—"],
+                        ["Accommodation Phone",trip.accommodationPhone||"—"],
+                        ["Confirmation #",trip.confirmationNum||"—"],
+                        ["Transportation",trip.transportation||"—"],
+                        ["Budget",trip.budget||"—"],
+                        ["Actual Cost",trip.actualCost||"—"],
+                        ["Travel Companions",trip.companions||"Solo"],
+                        ["Trip Type",trip.tripType],
+                      ].map(([label,value])=>(
+                        <div key={label} className="tile">
+                          <div className="tk">{label.toUpperCase()}</div>
+                          <div className="tv">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {trip.highlights && (
+                      <div className="callout" style={{ background: "rgba(95,190,145,0.06)", border: "1px solid rgba(95,190,145,0.2)" }}>
+                        <div className="ck" style={{ color: POS }}>HIGHLIGHTS & MEMORIES</div>
+                        <div className="cv">{trip.highlights}</div>
+                      </div>
+                    )}
+
+                    {trip.notes && (
+                      <div className="callout" style={{ background: "rgba(217,165,94,0.06)", border: "1px solid rgba(217,165,94,0.15)" }}>
+                        <div className="ck" style={{ color: WARN }}>NOTES</div>
+                        <div className="cv">{trip.notes}</div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="docs-lbl">TRAVEL DOCUMENTS ({trip.documents.length})</div>
+                      <div className="flex flex-wrap gap-2">
+                        {trip.documents.map(d => (
+                          <button key={d.name} className="docchip" onClick={() => toast.success(`Opening: ${d.name}`)}>
+                            📄 {d.name} <span style={{ color: MUTED, marginLeft: 4 }}>({d.type})</span>
+                          </button>
+                        ))}
+                        <ScanButton folder="personal" onUpload={doc => { setTrips(p=>p.map(t=>t.id===trip.id?{...t,documents:[...t.documents,{name:doc.name,type:"Document"}]}:t)); toast.success(`"${doc.name}" added to ${trip.destination}`); }} size="sm" label="Add Document"/>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Add modal ── */}
+        {showAdd && (
+          <div className="backdrop">
+            <div className="card modal glow-surface">
+              <div className="modal-head">
+                <h3>Add Trip</h3>
+                <button onClick={()=>setShowAdd(false)}><X size={16}/></button>
+              </div>
+              <div className="modal-body">
+                <PhotoPicker value={form.photo} onChange={url => setForm(p=>({...p,photo:url}))} label="Cover Photo (destination)" aspectRatio="16/9"/>
+                <div className="field">
+                  <label>TRIP TYPE</label>
+                  <select value={form.tripType} onChange={F("tripType")}>{TRIP_TYPES.map(t=><option key={t}>{t}</option>)}</select>
+                </div>
+                <div className="field">
+                  <label>STATUS</label>
+                  <select value={form.status} onChange={F("status")}><option value="planned">Planned</option><option value="completed">Completed</option></select>
+                </div>
+                {[["Destination *","destination","e.g. Paris, France"],["Country","country","e.g. France"],["Start Date","startDate","e.g. Jun 15, 2026"],["End Date","endDate","e.g. Jun 25, 2026"],["Travel Companions","companions","e.g. Sarah, Emma (leave blank for solo)"],["Accommodation","accommodation","Hotel name or Airbnb"],["Accommodation Phone","accommodationPhone",""],["Confirmation Number","confirmationNum",""],["Transportation","transportation","e.g. United Airlines UA-100 (SFO→CDG)"],["Budget","budget","e.g. $5,000"],["Notes","notes","Planning notes, reminders, tips"]].map(([label,key,ph])=>(
+                  <div className="field" key={key}>
+                    <label>{label}</label>
+                    <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
+                  </div>
+                ))}
+                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
+              </div>
+              <div className="modal-foot">
+                <button className="save" onClick={addTrip}>Add Trip</button>
+                <button className="btn-sec" onClick={()=>setShowAdd(false)}>Cancel</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

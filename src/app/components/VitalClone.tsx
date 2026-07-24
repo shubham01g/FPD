@@ -26,7 +26,17 @@ import {
   Activity, ExternalLink, RefreshCw, Maximize2, Minimize2,
   TriangleAlert, Settings2, ShieldCheck, Loader2,
 } from "lucide-react";
-import { Page, PageHeader, Card, CardTitle, EmptyState, GhostButton, PrimaryButton, MONO } from "./ui/PageShell";
+
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 /** ← Replace with the real VitalClone URL. Empty string = not configured. */
 export const VITALCLONE_URL = "";
@@ -35,6 +45,59 @@ export const VITALCLONE_URL = "";
 const LOAD_TIMEOUT_MS = 12000;
 
 type FrameState = "loading" | "ready" | "timeout";
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-vital so nothing else in the app is affected. */
+const VITAL_CSS = `
+.fpd-vital{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-vital *{box-sizing:border-box;}
+.fpd-vital-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-vital .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+.fpd-vital .wrap.wide{max-width:1900px;}
+
+.fpd-vital .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-vital .card.pad{padding:22px;}
+.fpd-vital .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-vital .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};margin-bottom:16px;}
+.fpd-vital .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+
+/* header */
+.fpd-vital .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-vital .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-vital .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
+.fpd-vital .head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
+.fpd-vital .btn-sec:hover{background:rgba(91,123,245,0.1);color:${ACCENT2};}
+
+/* empty state */
+.fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
+.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-vital .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
+.fpd-vital .empty-desc{color:${MUTED};font-size:12.5px;max-width:440px;line-height:1.6;}
+
+/* requirement rows */
+.fpd-vital .reqs{display:flex;flex-direction:column;gap:10px;}
+.fpd-vital .req-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-vital .req-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-vital .req-title{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:4px;}
+.fpd-vital .req-body{color:${MUTED};font-size:12px;line-height:1.7;}
+.fpd-vital .req-body code{font-family:var(--font-mono);color:${SOFT};}
+
+/* frame */
+.fpd-vital .frame-wrap{position:relative;border-radius:15px;overflow:hidden;border:1px solid rgba(255,255,255,0.065);background:#0B111D;}
+.fpd-vital .frame-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0B111D;}
+.fpd-vital .frame-overlay .url{font-family:var(--font-mono);font-size:11px;color:${FAINT};opacity:.8;}
+.fpd-vital .spin{animation:fpdvitalspin 1s linear infinite;}
+@keyframes fpdvitalspin{to{transform:rotate(360deg);}}
+
+/* footer note */
+.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);color:${MUTED};font-size:12px;line-height:1.7;}
+`;
 
 export function VitalClone() {
   const [state, setState] = useState<FrameState>("loading");
@@ -67,91 +130,86 @@ export function VitalClone() {
 
   /* ── Not configured: explain rather than render a dead frame ── */
   if (!configured) {
+    const reqs = [
+      {
+        icon: <ExternalLink size={15} />, color: ACCENT2, title: "A live https:// URL",
+        body: "The running VitalClone web app — not a GitHub repository. An iframe loads a served page, not source code. GitHub also refuses to be framed, so a repo URL can never work here.",
+      },
+      {
+        icon: <ShieldCheck size={15} />, color: POS, title: "Permissive framing headers",
+        body: <>VitalClone must not send X-Frame-Options: DENY or SAMEORIGIN, and its Content-Security-Policy frame-ancestors must list this app's origin. Both are set on VitalClone's server — this page cannot override them.</>,
+      },
+      {
+        icon: <TriangleAlert size={15} />, color: WARN, title: "Cross-site cookies, if it needs a login",
+        body: "A session cookie without SameSite=None; Secure is dropped inside a cross-origin iframe, so users would hit a login screen that can never succeed. Worth testing before launch.",
+      },
+    ];
+
     return (
-      <Page>
-        <PageHeader
-          eyebrow="EXTERNAL INTEGRATION"
-          icon={<Activity size={13} />}
-          title="VitalClone"
-          description="VitalClone runs as a separate application embedded inside Final Pass Down. The embed is built and ready — it just needs the address VitalClone is served from."
-        />
-
-        <EmptyState
-          icon={<Settings2 size={22} />}
-          title="VitalClone URL not configured"
-          description="Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render VitalClone inline, with loading, reload and fullscreen controls already wired."
-        />
-
-        <Card padding={20}>
-          <CardTitle>What the integration needs</CardTitle>
-          <div className="space-y-3">
-            {[
-              {
-                icon: <ExternalLink size={15} />, color: "#3A5BD9", title: "A live https:// URL",
-                body: "The running VitalClone web app — not a GitHub repository. An iframe loads a served page, not source code. GitHub also refuses to be framed, so a repo URL can never work here.",
-              },
-              {
-                icon: <ShieldCheck size={15} />, color: "#48BB78", title: "Permissive framing headers",
-                body: "VitalClone must not send X-Frame-Options: DENY or SAMEORIGIN, and its Content-Security-Policy frame-ancestors must list this app's origin. Both are set on VitalClone's server — this page cannot override them.",
-              },
-              {
-                icon: <TriangleAlert size={15} />, color: "#F6AD55", title: "Cross-site cookies, if it needs a login",
-                body: "A session cookie without SameSite=None; Secure is dropped inside a cross-origin iframe, so users would hit a login screen that can never succeed. Worth testing before launch.",
-              },
-            ].map(r => (
-              <div key={r.title} className="flex items-start gap-3 px-4 py-3.5 rounded-xl" style={{ background: "#141B2E", border: `1px solid ${r.color}22` }}>
-                <div className="flex items-center justify-center rounded-lg flex-shrink-0" style={{ width: 32, height: 32, background: `${r.color}1A`, color: r.color }}>
-                  {r.icon}
-                </div>
-                <div>
-                  <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{r.title}</div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 12, lineHeight: 1.7 }}>{r.body}</div>
-                </div>
-              </div>
-            ))}
+      <div className="fpd-vital">
+        <style dangerouslySetInnerHTML={{ __html: VITAL_CSS }} />
+        <div className="fpd-vital-grain" />
+        <div className="wrap">
+          <div className="pg-head">
+            <div style={{ minWidth: 0 }}>
+              <div className="eyebrow"><Activity size={12} /> External Integration</div>
+              <h1 className="pg-h1">VitalClone</h1>
+              <div className="pg-sub">VitalClone runs as a separate application embedded inside Final Pass Down. The embed is built and ready — it just needs the address VitalClone is served from.</div>
+            </div>
           </div>
-        </Card>
-      </Page>
+
+          <div className="card pad glow-surface empty">
+            <div className="empty-ico"><Settings2 size={22} /></div>
+            <div className="empty-title">VitalClone URL not configured</div>
+            <div className="empty-desc">Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render VitalClone inline, with loading, reload and fullscreen controls already wired.</div>
+          </div>
+
+          <div className="card pad glow-surface">
+            <div className="sec-title"><span className="tick" />What the integration needs</div>
+            <div className="reqs">
+              {reqs.map(r => (
+                <div key={r.title} className="req-row">
+                  <div className="req-ico" style={{ background: `${r.color}1A`, color: r.color }}>{r.icon}</div>
+                  <div>
+                    <div className="req-title">{r.title}</div>
+                    <div className="req-body">{r.body}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   /* ── Configured: render the frame ── */
   const frame = (
-    <div
-      className="relative rounded-xl overflow-hidden"
-      style={{
-        border: "1px solid var(--border)",
-        background: "#0B1120",
-        height: fullscreen ? "calc(100vh - 96px)" : 720,
-      }}
-    >
+    <div className="frame-wrap" style={{ height: fullscreen ? "calc(100vh - 96px)" : 720 }}>
       {state !== "ready" && (
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-          style={{ background: "#0B1120", zIndex: 2 }}
-        >
+        <div className="frame-overlay">
           {state === "loading" ? (
             <>
-              <Loader2 size={26} color="#5B7BF5" className="animate-spin" />
-              <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Loading VitalClone…</div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 11, ...MONO, opacity: 0.7 }}>{VITALCLONE_URL}</div>
+              <Loader2 size={26} color={ACCENT} className="spin" />
+              <div style={{ color: MUTED, fontSize: 13 }}>Loading VitalClone…</div>
+              <div className="url">{VITALCLONE_URL}</div>
             </>
           ) : (
             <div style={{ textAlign: "center", maxWidth: 460, padding: 24 }}>
-              <TriangleAlert size={26} color="#F6AD55" style={{ margin: "0 auto 12px" }} />
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 8 }}>
+              <TriangleAlert size={26} color={WARN} style={{ margin: "0 auto 12px" }} />
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: TEXT, marginBottom: 8 }}>
                 VitalClone didn't load
               </div>
-              <p style={{ color: "var(--muted-foreground)", fontSize: 12.5, lineHeight: 1.75, marginBottom: 16 }}>
+              <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.75, marginBottom: 16 }}>
                 No response after {LOAD_TIMEOUT_MS / 1000} seconds. The most common cause is VitalClone refusing to be framed
-                (<span style={{ ...MONO }}>X-Frame-Options</span> or a restrictive <span style={{ ...MONO }}>frame-ancestors</span> policy).
+                (<span style={{ fontFamily: "var(--font-mono)" }}>X-Frame-Options</span> or a restrictive <span style={{ fontFamily: "var(--font-mono)" }}>frame-ancestors</span> policy).
                 Open it in a new tab to check whether the site itself is up.
               </p>
               <div className="flex items-center justify-center gap-2">
-                <GhostButton onClick={reload}><RefreshCw size={13} /> Retry</GhostButton>
-                <PrimaryButton onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
+                <button className="btn-sec" onClick={reload}><RefreshCw size={13} /> Retry</button>
+                <button className="btn-primary" onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
                   <ExternalLink size={13} /> Open in new tab
-                </PrimaryButton>
+                </button>
               </div>
             </div>
           )}
@@ -166,38 +224,43 @@ export function VitalClone() {
         referrerPolicy="strict-origin-when-cross-origin"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
         allow="clipboard-write; fullscreen"
-        style={{ width: "100%", height: "100%", border: "none", display: "block", background: "#0B1120" }}
+        style={{ width: "100%", height: "100%", border: "none", display: "block", background: "#0B111D" }}
       />
     </div>
   );
 
   return (
-    <Page width={fullscreen ? 2000 : 1240}>
-      <PageHeader
-        eyebrow="EXTERNAL INTEGRATION · EMBEDDED"
-        icon={<Activity size={13} />}
-        title="VitalClone"
-        description="VitalClone runs inside Final Pass Down as an embedded application. Your session here stays separate from theirs."
-        actions={
-          <>
-            <GhostButton onClick={reload}><RefreshCw size={13} /> Reload</GhostButton>
-            <GhostButton onClick={() => setFullscreen(f => !f)}>
+    <div className="fpd-vital">
+      <style dangerouslySetInnerHTML={{ __html: VITAL_CSS }} />
+      <div className="fpd-vital-grain" />
+      <div className={`wrap${fullscreen ? " wide" : ""}`}>
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Activity size={12} /> External Integration · Embedded</div>
+            <h1 className="pg-h1">VitalClone</h1>
+            <div className="pg-sub">VitalClone runs inside Final Pass Down as an embedded application. Your session here stays separate from theirs.</div>
+          </div>
+          <div className="head-actions">
+            <button className="btn-sec" onClick={reload}><RefreshCw size={13} /> Reload</button>
+            <button className="btn-sec" onClick={() => setFullscreen(f => !f)}>
               {fullscreen ? <><Minimize2 size={13} /> Exit Fullscreen</> : <><Maximize2 size={13} /> Fullscreen</>}
-            </GhostButton>
-            <PrimaryButton onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
+            </button>
+            <button className="btn-primary" onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
               <ExternalLink size={13} /> Open in New Tab
-            </PrimaryButton>
-          </>
-        }
-      />
-      {frame}
-      <div className="flex items-start gap-3 px-5 py-3.5 rounded-2xl" style={{ background: "rgba(58,91,217,0.03)", border: "1px solid rgba(58,91,217,0.1)" }}>
-        <ShieldCheck size={15} color="#5B7BF5" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div style={{ color: "var(--muted-foreground)", fontSize: 12, lineHeight: 1.7 }}>
-          VitalClone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
-          and anything you enter there is governed by VitalClone's own privacy policy.
+            </button>
+          </div>
+        </div>
+
+        <div className="glow-surface" style={{ borderRadius: 15 }}>{frame}</div>
+
+        <div className="note">
+          <ShieldCheck size={15} color={ACCENT} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div>
+            VitalClone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
+            and anything you enter there is governed by VitalClone's own privacy policy.
+          </div>
         </div>
       </div>
-    </Page>
+    </div>
   );
 }

@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Star, Plus, X, Clock, MapPin, Phone, User, ChevronDown, ChevronUp, Calendar, DollarSign, Car } from "lucide-react";
+import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 
-const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 const ACTIVITY_TYPES = ["Soccer","Baseball / Softball","Basketball","Football","Swimming","Tennis","Gymnastics","Dance","Martial Arts","Track & Field","Volleyball","Cheerleading","Music / Band","Piano","Guitar","Violin","Drama / Theater","Art Class","Coding / STEM","Chess","Scouts / Scouting","Religious Education","Tutoring","Language Class","Yoga / Fitness","Other"];
 
@@ -14,14 +21,14 @@ const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
   "Soccer":          {emoji:"⚽",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
   "Baseball / Softball":{emoji:"⚾",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Basketball":      {emoji:"🏀",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Football":        {emoji:"🏈",color:"#6E8BFF",bg:"rgba(110,139,255,0.1)"},
+  "Football":        {emoji:"🏈",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
   "Swimming":        {emoji:"🏊",color:"#4A90D9",bg:"rgba(74,144,217,0.1)"},
   "Gymnastics":      {emoji:"🤸",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
-  "Dance":           {emoji:"💃",color:"#6E8BFF",bg:"rgba(110,139,255,0.1)"},
+  "Dance":           {emoji:"💃",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
   "Martial Arts":    {emoji:"🥋",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
   "Music / Band":    {emoji:"🎵",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
   "Piano":           {emoji:"🎹",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
-  "Guitar":          {emoji:"🎸",color:"#6E8BFF",bg:"rgba(110,139,255,0.1)"},
+  "Guitar":          {emoji:"🎸",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
   "Drama / Theater": {emoji:"🎭",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
   "Art Class":       {emoji:"🎨",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
   "Coding / STEM":   {emoji:"💻",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
@@ -30,7 +37,7 @@ const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
   "Religious Education":{emoji:"⛪",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
   "Tutoring":        {emoji:"📚",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Tennis":          {emoji:"🎾",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Violin":          {emoji:"🎻",color:"#6E8BFF",bg:"rgba(110,139,255,0.1)"},
+  "Violin":          {emoji:"🎻",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
 };
 function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"rgba(255,255,255,0.65)",bg:"rgba(138,154,184,0.1)"}; }
 
@@ -109,6 +116,96 @@ const initActivities: Activity[] = [
   },
 ];
 
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-kids so nothing else in the app is affected. */
+const KIDS_CSS = `
+.fpd-kids{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-kids *{box-sizing:border-box;}
+.fpd-kids-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-kids .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-kids .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-kids .card.pad{padding:22px;}
+.fpd-kids .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-kids .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-kids .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-kids .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
+.fpd-kids .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-kids .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-kids .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* KPI ledger (3 metrics for this page) */
+.fpd-kids .kstrip{display:grid;grid-template-columns:repeat(3,1fr);border-radius:15px;}
+.fpd-kids .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-kids .kcell:first-child{border-left:none;}
+.fpd-kids .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-kids .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-kids .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-kids .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-kids .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-kids .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:700px){.fpd-kids .kstrip{grid-template-columns:1fr;}.fpd-kids .kcell{border-left:none;border-top:1px solid rgba(255,255,255,0.065);}.fpd-kids .kcell:first-child{border-top:none;}}
+
+/* child filter */
+.fpd-kids .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fpd-kids .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
+.fpd-kids .chip.off{opacity:.6;}
+.fpd-kids .chip.off:hover{opacity:.85;}
+
+/* activity cards */
+.fpd-kids .alist{display:flex;flex-direction:column;gap:14px;}
+.fpd-kids .ahead{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;background:none;border:none;cursor:pointer;text-align:left;}
+.fpd-kids .aico{width:50px;height:50px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:23px;}
+.fpd-kids .atitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+.fpd-kids .aname{font-family:var(--font-display);font-size:16.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
+.fpd-kids .aorg{color:${SOFT};font-size:13px;font-weight:500;margin-bottom:6px;}
+.fpd-kids .ameta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.fpd-kids .ameta span{display:flex;align-items:center;gap:5px;color:${MUTED};font-size:11.5px;}
+.fpd-kids .stat-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;}
+.fpd-kids .abody{border-top:1px solid rgba(255,255,255,0.065);padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;}
+
+/* info tile grid */
+.fpd-kids .igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:760px){.fpd-kids .igrid{grid-template-columns:1fr;}}
+.fpd-kids .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-kids .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-kids .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
+
+/* transportation / notes */
+.fpd-kids .infobox{padding:13px 15px;border-radius:11px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);}
+.fpd-kids .infobox .ik{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:${ACCENT2};font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;}
+.fpd-kids .infobox .iv{color:${TEXT};font-size:13px;line-height:1.7;}
+.fpd-kids .notebox{padding:13px 15px;border-radius:11px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);}
+.fpd-kids .notebox .nk{color:${WARN};font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:6px;}
+.fpd-kids .notebox .nv{color:${TEXT};font-size:13px;line-height:1.7;}
+
+/* documents */
+.fpd-kids .doclbl{color:${MUTED};font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;margin-bottom:8px;}
+.fpd-kids .docrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.fpd-kids .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,123,245,0.08);color:${ACCENT2};border:1px solid rgba(91,123,245,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
+.fpd-kids .docchip:hover{background:rgba(91,123,245,0.16);}
+
+/* modal */
+.fpd-kids .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-kids .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.fpd-kids .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-kids .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-kids .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-kids .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-kids .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-kids .field input,.fpd-kids .field select,.fpd-kids .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-kids .field input::placeholder,.fpd-kids .field textarea::placeholder{color:${FAINT};}
+.fpd-kids .field input:focus,.fpd-kids .field select:focus,.fpd-kids .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-kids .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);flex-wrap:wrap;}
+.fpd-kids .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-kids .modal-foot .save:hover{filter:brightness(1.08);}
+`;
+
 export function KidsActivities() {
   const [activities, setActivities] = useState<Activity[]>(initActivities);
   const [expanded, setExpanded] = useState<number|null>(1);
@@ -134,189 +231,204 @@ export function KidsActivities() {
   const children = ["all", ...Array.from(new Set(activities.map(a=>a.childName)))];
   const filtered = activities.filter(a => filterChild==="all" || a.childName===filterChild);
 
-  const statusColors = { active:"#48BB78", inactive:"#8A9AB8", seasonal:"#F6AD55" };
-  const statusBgs   = { active:"rgba(72,187,120,0.12)", inactive:"rgba(138,154,184,0.12)", seasonal:"rgba(246,173,85,0.12)" };
+  const statusColors: Record<string,string> = { active: POS, inactive: MUTED, seasonal: WARN };
+  const statusBgs: Record<string,string>   = { active: "rgba(95,190,145,0.14)", inactive: "rgba(140,151,180,0.14)", seasonal: "rgba(217,165,94,0.14)" };
+
+  const kpis = [
+    { label: "Total Activities", value: String(activities.length), sub: "Across all children", icon: <Star size={14} />, dot: ACCENT2 },
+    { label: "Active", value: String(activities.filter(a=>a.status==="active").length), sub: "Currently enrolled", icon: <Clock size={14} />, dot: POS },
+    { label: "Children", value: String(new Set(activities.map(a=>a.childName)).size), sub: "With tracked activities", icon: <Users size={14} />, dot: ACCENT2 },
+  ];
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Kids' Activities</h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>Track every activity for every child — schedules, coaches, transportation, costs, and important documents.</p>
-        </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>
-          <Plus size={14}/> Add Activity
-        </button>
-      </div>
+    <div className="fpd-kids">
+      <style dangerouslySetInnerHTML={{ __html: KIDS_CSS }} />
+      <div className="fpd-kids-grain" />
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label:"Total Activities", value:activities.length,                                color:"var(--primary)" },
-          { label:"Active",           value:activities.filter(a=>a.status==="active").length,  color:"#48BB78" },
-          { label:"Children",         value:new Set(activities.map(a=>a.childName)).size,      color:"#6E8BFF" },
-        ].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Star size={12} /> Children's Schedules</div>
+            <h1 className="pg-h1">Kids' Activities</h1>
+            <div className="pg-sub">Track every activity for every child — schedules, coaches, transportation, costs, and important documents.</div>
           </div>
-        ))}
-      </div>
-
-      {/* Child filter */}
-      <div className="flex gap-2 flex-wrap">
-        {children.map(child => (
-          <button key={child} onClick={() => setFilterChild(child)}
-            className="px-4 py-1.5 rounded-xl text-sm font-semibold"
-            style={{ background:filterChild===child?"var(--primary)":"rgba(58,91,217,0.06)", color:filterChild===child?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterChild===child?"var(--primary)":"rgba(58,91,217,0.12)"}` }}>
-            {child==="all" ? "👦👧 All Children" : `👧 ${child}`}
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Activity
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Activity cards */}
-      <div className="space-y-4">
-        {filtered.map(act => {
-          const meta = getMeta(act.activityType);
-          return (
-            <div key={act.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
-              <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===act.id ? null : act.id)}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex items-center justify-center rounded-xl text-2xl flex-shrink-0" style={{ width:52, height:52, background:meta.bg }}>
-                      {meta.emoji}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"var(--foreground)" }}>{act.activityType}</span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:statusBgs[act.status], color:statusColors[act.status], ...MONO }}>{act.status.toUpperCase()}</span>
-                      </div>
-                      <div style={{ color:"var(--foreground)", fontSize:13, fontWeight:500 }}>
-                        {act.childName} · {act.organizationName}
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 flex-wrap">
-                        <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Clock size={10}/>{act.schedule}</span>
-                        <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><DollarSign size={10}/>{act.monthlyCost}</span>
-                      </div>
-                    </div>
-                  </div>
-                  {expanded===act.id ? <ChevronUp size={16} color="var(--muted-foreground)"/> : <ChevronDown size={16} color="var(--muted-foreground)"/>}
-                </div>
-              </button>
-
-              {expanded===act.id && (
-                <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"var(--border)" }}>
-                  <div className="grid md:grid-cols-2 gap-3 pt-4">
-                    {[
-                      ["Team / Group",act.teamOrGroup||"—"],
-                      ["Coach / Instructor",act.coachInstructor||"—"],
-                      ["Coach Phone",act.coachPhone||"—"],
-                      ["Location",act.location],
-                      ["Location Phone",act.locationPhone||"—"],
-                      ["Schedule",act.schedule],
-                      ["Season / Dates",act.seasonDates],
-                      ["Cost",act.monthlyCost],
-                      ["Payment Due",act.paymentDue||"—"],
-                      ["Uniform / Equipment",act.uniformRequired||"—"],
-                      ["Emergency Contact",act.emergencyContact],
-                      ["Emergency Phone",act.emergencyPhone],
-                    ].map(([label,value])=>(
-                      <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
-                        <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
-                        <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {act.transportationNotes && (
-                    <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(74,144,217,0.05)", border:"1px solid rgba(74,144,217,0.2)" }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Car size={13} color="#4A90D9"/>
-                        <span style={{ color:"#4A90D9", fontSize:10, ...MONO, fontWeight:700 }}>TRANSPORTATION & PICKUP NOTES</span>
-                      </div>
-                      <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{act.transportationNotes}</div>
-                    </div>
-                  )}
-
-                  {act.notes && (
-                    <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(246,173,85,0.05)", border:"1px solid rgba(246,173,85,0.2)" }}>
-                      <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
-                      <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{act.notes}</div>
-                    </div>
-                  )}
-
-                  <div>
-                    <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:8 }}>DOCUMENTS ({act.documents.length})</div>
-                    <div className="flex flex-wrap gap-2">
-                      {act.documents.map(d => (
-                        <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                          style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
-                          📄 {d}
-                        </button>
-                      ))}
-                      <ScanButton folder="personal" onUpload={doc => { setActivities(p=>p.map(a=>a.id===act.id?{...a,documents:[...a.documents,doc.name]}:a)); toast.success(`"${doc.name}" added`); }} size="sm" label="Add Document"/>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
-            <div className="flex items-center justify-between mb-1">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Activity</h3>
-              <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
-            </div>
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>ACTIVITY TYPE</label>
-              <select value={form.activityType} onChange={F("activityType")} style={INPUT}>
-                {ACTIVITY_TYPES.map(t=><option key={t}>{t}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>STATUS</label>
-              <select value={form.status} onChange={F("status")} style={INPUT}>
-                <option value="active">Active</option>
-                <option value="seasonal">Seasonal</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            {[
-              ["Child's Full Name *","childName","e.g. Emma Doe"],
-              ["Organization / Club Name","organizationName","e.g. Sacramento Youth Soccer League"],
-              ["Team or Group","teamOrGroup","e.g. U6 Ladybugs — Team #14"],
-              ["Location","location","Address or facility name"],
-              ["Location Phone","locationPhone",""],
-              ["Coach / Instructor","coachInstructor",""],
-              ["Coach Phone","coachPhone",""],
-              ["Schedule","schedule","e.g. Saturdays 9:00 AM – 10:30 AM"],
-              ["Season / Dates","seasonDates","e.g. Sep 2025 – Nov 2025"],
-              ["Cost","monthlyCost","e.g. $85/month"],
-              ["Payment Due","paymentDue","e.g. 1st of month"],
-              ["Uniform / Equipment","uniformRequired","What the child needs"],
-              ["Transportation Notes","transportationNotes","Who drops off, picks up, carpool info"],
-              ["Emergency Contact","emergencyContact",""],
-              ["Emergency Phone","emergencyPhone",""],
-              ["Notes","notes","Anything else important"],
-            ].map(([label,key,ph])=>(
-              <div key={key}>
-                <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{label.toUpperCase()}</label>
-                <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} style={INPUT}/>
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
               </div>
-            ))}
-            <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities"/>
-            <div className="flex gap-3 pt-2">
-              <button onClick={addActivity} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>Add Activity</button>
-              <button onClick={()=>setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Child filter ── */}
+        <div className="filters">
+          {children.map(child => {
+            const on = filterChild === child;
+            return (
+              <button
+                key={child}
+                onClick={() => setFilterChild(child)}
+                className={`chip ${on ? "" : "off"}`}
+                style={{
+                  background: on ? "rgba(91,123,245,0.16)" : "rgba(91,123,245,0.05)",
+                  color: on ? ACCENT2 : MUTED,
+                  borderColor: on ? "rgba(91,123,245,0.4)" : "rgba(255,255,255,0.09)",
+                }}
+              >
+                {child === "all" ? "👦👧 All Children" : `👧 ${child}`}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Activity cards ── */}
+        <div className="alist">
+          {filtered.map(act => {
+            const meta = getMeta(act.activityType);
+            return (
+              <div key={act.id} className="card glow-surface">
+                <button className="ahead" onClick={() => setExpanded(expanded === act.id ? null : act.id)}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                    <div className="aico" style={{ background: meta.bg }}>{meta.emoji}</div>
+                    <div>
+                      <div className="atitle">
+                        <span className="aname">{act.activityType}</span>
+                        <span className="stat-badge" style={{ background: statusBgs[act.status], color: statusColors[act.status] }}>{act.status.toUpperCase()}</span>
+                      </div>
+                      <div className="aorg">{act.childName} · {act.organizationName}</div>
+                      <div className="ameta">
+                        <span><Clock size={10} />{act.schedule}</span>
+                        <span><DollarSign size={10} />{act.monthlyCost}</span>
+                      </div>
+                    </div>
+                  </div>
+                  {expanded === act.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+                </button>
+
+                {expanded === act.id && (
+                  <div className="abody">
+                    <div className="igrid">
+                      {[
+                        ["Team / Group",act.teamOrGroup||"—"],
+                        ["Coach / Instructor",act.coachInstructor||"—"],
+                        ["Coach Phone",act.coachPhone||"—"],
+                        ["Location",act.location],
+                        ["Location Phone",act.locationPhone||"—"],
+                        ["Schedule",act.schedule],
+                        ["Season / Dates",act.seasonDates],
+                        ["Cost",act.monthlyCost],
+                        ["Payment Due",act.paymentDue||"—"],
+                        ["Uniform / Equipment",act.uniformRequired||"—"],
+                        ["Emergency Contact",act.emergencyContact],
+                        ["Emergency Phone",act.emergencyPhone],
+                      ].map(([label,value]) => (
+                        <div key={label} className="tile">
+                          <div className="tk">{label}</div>
+                          <div className="tv">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {act.transportationNotes && (
+                      <div className="infobox">
+                        <div className="ik"><Car size={13} color={ACCENT2} />TRANSPORTATION & PICKUP NOTES</div>
+                        <div className="iv">{act.transportationNotes}</div>
+                      </div>
+                    )}
+
+                    {act.notes && (
+                      <div className="notebox">
+                        <div className="nk">NOTES</div>
+                        <div className="nv">{act.notes}</div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="doclbl">DOCUMENTS ({act.documents.length})</div>
+                      <div className="docrow">
+                        {act.documents.map(d => (
+                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
+                            <FileText size={12} /> {d}
+                          </button>
+                        ))}
+                        <ScanButton folder="personal" onUpload={doc => { setActivities(p=>p.map(a=>a.id===act.id?{...a,documents:[...a.documents,doc.name]}:a)); toast.success(`"${doc.name}" added`); }} size="sm" label="Add Document" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Add activity modal ── */}
+        {showAdd && (
+          <div className="backdrop">
+            <div className="card modal glow-surface">
+              <div className="modal-head">
+                <h3>Add Activity</h3>
+                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+              </div>
+              <div className="modal-body">
+                <div className="field">
+                  <label>ACTIVITY TYPE</label>
+                  <select value={form.activityType} onChange={F("activityType")}>
+                    {ACTIVITY_TYPES.map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>STATUS</label>
+                  <select value={form.status} onChange={F("status")}>
+                    <option value="active">Active</option>
+                    <option value="seasonal">Seasonal</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+                {[
+                  ["Child's Full Name *","childName","e.g. Emma Doe"],
+                  ["Organization / Club Name","organizationName","e.g. Sacramento Youth Soccer League"],
+                  ["Team or Group","teamOrGroup","e.g. U6 Ladybugs — Team #14"],
+                  ["Location","location","Address or facility name"],
+                  ["Location Phone","locationPhone",""],
+                  ["Coach / Instructor","coachInstructor",""],
+                  ["Coach Phone","coachPhone",""],
+                  ["Schedule","schedule","e.g. Saturdays 9:00 AM – 10:30 AM"],
+                  ["Season / Dates","seasonDates","e.g. Sep 2025 – Nov 2025"],
+                  ["Cost","monthlyCost","e.g. $85/month"],
+                  ["Payment Due","paymentDue","e.g. 1st of month"],
+                  ["Uniform / Equipment","uniformRequired","What the child needs"],
+                  ["Transportation Notes","transportationNotes","Who drops off, picks up, carpool info"],
+                  ["Emergency Contact","emergencyContact",""],
+                  ["Emergency Phone","emergencyPhone",""],
+                  ["Notes","notes","Anything else important"],
+                ].map(([label,key,ph]) => (
+                  <div className="field" key={key}>
+                    <label>{label.toUpperCase()}</label>
+                    <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
+                  </div>
+                ))}
+                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities" />
+              </div>
+              <div className="modal-foot">
+                <button className="save" onClick={addActivity}>Add Activity</button>
+                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

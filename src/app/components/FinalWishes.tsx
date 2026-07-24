@@ -1,9 +1,20 @@
 import React, { useState } from "react";
 import {
   Heart, Church, HelpCircle, Plus, X,
-  CheckCircle, Edit2, Trash2, ChevronDown
+  CheckCircle, Edit2, Trash2, ChevronDown, ArrowRight, Layers
 } from "lucide-react";
 import { toast } from "sonner";
+
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const LAVENDER= "#A99BE6";
+const POS     = "#5FBE91";
+const NEG     = "#D06B6B";
 
 type Tab = "wishes" | "funeral" | "questionnaire";
 
@@ -63,11 +74,122 @@ const initialWishes: Wish[] = [
   { id: 5, category: "Digital", item: "Photography portfolio (hard drives)", recipient: "Michael Doe (Son)", notes: "Archive and publish the wildlife series." },
 ];
 
-const wills = [
-  { id: 1, type: "Last Will & Testament", attorney: "Linda Torres, Esq.", dateExecuted: "March 15, 2026", lastReviewed: "March 15, 2026", status: "current", location: "Original: Safe deposit box, Copy: Legacy Vault" },
-  { id: 2, type: "Living Will / Advance Directive", attorney: "Linda Torres, Esq.", dateExecuted: "March 15, 2026", lastReviewed: "March 15, 2026", status: "current", location: "On file with Dr. Karen Fields & Legacy Vault" },
-  { id: 3, type: "Durable Power of Attorney", attorney: "Linda Torres, Esq.", dateExecuted: "March 15, 2026", lastReviewed: "March 15, 2026", status: "current", location: "Legacy Vault" },
-];
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-wishes so nothing else in the app is affected. */
+const WISHES_CSS = `
+.fpd-wishes{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-wishes *{box-sizing:border-box;}
+.fpd-wishes-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-wishes .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-wishes .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-wishes .card.pad{padding:22px;}
+.fpd-wishes .sec-title{font-size:14.5px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
+.fpd-wishes .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+.fpd-wishes .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-wishes .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-wishes .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
+.fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-wishes .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-wishes .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-wishes .btn-pos:hover{background:rgba(95,190,145,0.2);}
+.fpd-wishes .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* segmented tabs */
+.fpd-wishes .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);width:fit-content;}
+.fpd-wishes .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-wishes .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+
+.fpd-wishes .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.fpd-wishes .toolbar p{color:${MUTED};font-size:13px;line-height:1.6;}
+
+/* KPI ledger */
+.fpd-wishes .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-wishes .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-wishes .kcell:first-child{border-left:none;}
+.fpd-wishes .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-wishes .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-wishes .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-wishes .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-wishes .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-wishes .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-wishes .kstrip{grid-template-columns:1fr 1fr;}.fpd-wishes .kcell:nth-child(3){border-left:none;}.fpd-wishes .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* wish rows */
+.fpd-wishes .wlist{display:flex;flex-direction:column;gap:10px;}
+.fpd-wishes .wrow{padding:18px 20px;}
+.fpd-wishes .wrow .wtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.fpd-wishes .wcat{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,123,245,0.12);color:${ACCENT2};margin-bottom:9px;}
+.fpd-wishes .witem{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);margin-bottom:5px;}
+.fpd-wishes .wrec{color:${MUTED};font-size:12.5px;display:flex;align-items:center;gap:6px;}
+.fpd-wishes .wnotes{color:${MUTED};font-size:12px;margin-top:7px;font-style:italic;line-height:1.6;}
+.fpd-wishes .wacts{display:flex;gap:4px;flex-shrink:0;}
+.fpd-wishes .wacts button{background:none;border:none;cursor:pointer;padding:6px;display:flex;color:${MUTED};transition:color .16s;}
+.fpd-wishes .wacts button:hover{color:${ACCENT2};}
+.fpd-wishes .wacts button.del:hover{color:${NEG};}
+
+/* empty state */
+.fpd-wishes .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 12px;}
+.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-wishes .empty .et{color:${SOFT};font-size:14px;font-weight:600;font-family:var(--font-display);margin-bottom:4px;}
+.fpd-wishes .empty .ed{color:${MUTED};font-size:12.5px;}
+
+/* funeral grid */
+.fpd-wishes .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.fpd-wishes .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);margin-bottom:10px;}
+.fpd-wishes .tile:last-child{margin-bottom:0;}
+.fpd-wishes .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;}
+.fpd-wishes .tile .tv{color:${TEXT};font-size:13px;line-height:1.55;}
+.fpd-wishes .tags{display:flex;flex-wrap:wrap;gap:7px;}
+.fpd-wishes .tag{padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;}
+.fpd-wishes .tag.music{background:rgba(91,123,245,0.12);color:${ACCENT2};}
+.fpd-wishes .tag.read{background:rgba(169,155,230,0.14);color:${LAVENDER};}
+
+/* obituary */
+.fpd-wishes .obit{padding:16px 18px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);color:${SOFT};font-size:13.5px;line-height:1.85;white-space:pre-wrap;}
+.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:11px;background:#0F1624;border:1px solid rgba(91,123,245,0.35);color:${TEXT};font-size:13.5px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
+.fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
+
+/* questionnaire */
+.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,123,245,0.10);color:${ACCENT2};font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
+.fpd-wishes .qbar{height:7px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
+.fpd-wishes .qbar i{display:block;height:100%;background:linear-gradient(90deg,${ACCENT2},${ACCENT});transition:width .4s cubic-bezier(.4,0,.2,1);}
+.fpd-wishes .qcat{border-radius:14px;overflow:hidden;}
+.fpd-wishes .qcat + .qcat{margin-top:10px;}
+.fpd-wishes .qhead{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:none;border:none;cursor:pointer;text-align:left;}
+.fpd-wishes .qhead .qtitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;}
+.fpd-wishes .qhead .qright{display:flex;align-items:center;gap:12px;}
+.fpd-wishes .qhead .qn{color:${MUTED};font-size:11.5px;font-family:var(--font-mono);}
+.fpd-wishes .qbody{padding:6px 18px 18px;border-top:1px solid rgba(255,255,255,0.065);display:flex;flex-direction:column;gap:16px;}
+.fpd-wishes .qq{color:${TEXT};font-size:13.5px;font-weight:600;margin-bottom:8px;}
+.fpd-wishes .qans{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:border-color .16s;}
+.fpd-wishes .qans:hover{border-color:rgba(91,123,245,0.3);}
+.fpd-wishes .qans .qa-text{flex:1;font-size:13px;line-height:1.6;}
+.fpd-wishes .qans .qa-text.filled{color:${SOFT};}
+.fpd-wishes .qans .qa-text.empty{color:${FAINT};font-style:italic;}
+
+@media (max-width:820px){.fpd-wishes .fgrid{grid-template-columns:1fr;}}
+
+/* modal (shared pattern) */
+.fpd-wishes .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-wishes .modal{width:100%;max-width:520px;}
+.fpd-wishes .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-wishes .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-wishes .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-wishes .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-wishes .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-wishes .field input,.fpd-wishes .field select,.fpd-wishes .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-wishes .field input::placeholder,.fpd-wishes .field textarea::placeholder{color:${FAINT};}
+.fpd-wishes .field input:focus,.fpd-wishes .field select:focus,.fpd-wishes .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-wishes .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);}
+`;
 
 /* ── Add / edit a bequest ── */
 function WishModal({ editing, onClose, onSave }: {
@@ -94,48 +216,39 @@ function WishModal({ editing, onClose, onSave }: {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ background: "rgba(3,6,12,0.75)", backdropFilter: "blur(4px)", zIndex: 100 }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="rounded-2xl" style={{ background: "var(--card)", border: "1px solid rgba(58,91,217,0.3)", width: "100%", maxWidth: 520, boxShadow: "0 30px 80px rgba(0,0,0,0.7)" }}>
-        <div className="flex items-center justify-between" style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>
-            {editing ? "Edit Wish" : "Add a Wish"}
-          </h3>
-          <button onClick={onClose} style={{ color: "var(--muted-foreground)" }}><X size={18} /></button>
+    <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="card modal glow-surface">
+        <div className="modal-head">
+          <h3>{editing ? "Edit Wish" : "Add a Wish"}</h3>
+          <button onClick={onClose}><X size={18} /></button>
         </div>
-        <div className="space-y-4" style={{ padding: 22 }}>
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>CATEGORY</label>
-            <select className="fpd-field" style={{ marginTop: 6 }} value={form.category}
-              onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
+        <div className="modal-body">
+          <div className="field">
+            <label>CATEGORY</label>
+            <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
               {WISH_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>ITEM OR ASSET *</label>
-            <input className="fpd-field" style={{ marginTop: 6 }} value={form.item ?? ""}
-              onChange={e => setForm(p => ({ ...p, item: e.target.value }))}
+          <div className="field">
+            <label>ITEM OR ASSET *</label>
+            <input value={form.item ?? ""} onChange={e => setForm(p => ({ ...p, item: e.target.value }))}
               placeholder="e.g. Grandmother's wedding ring" />
           </div>
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>RECIPIENT *</label>
-            <input className="fpd-field" style={{ marginTop: 6 }} value={form.recipient ?? ""}
-              onChange={e => setForm(p => ({ ...p, recipient: e.target.value }))}
+          <div className="field">
+            <label>RECIPIENT *</label>
+            <input value={form.recipient ?? ""} onChange={e => setForm(p => ({ ...p, recipient: e.target.value }))}
               placeholder="e.g. Emily Doe (Daughter)" />
           </div>
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, fontFamily: "var(--font-mono)" }}>NOTES</label>
-            <textarea className="fpd-field" style={{ marginTop: 6, minHeight: 80 }} value={form.notes ?? ""}
+          <div className="field">
+            <label>NOTES</label>
+            <textarea style={{ minHeight: 80 }} value={form.notes ?? ""}
               onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
               placeholder="Why this matters, or any conditions attached" />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-2" style={{ padding: "16px 22px", borderTop: "1px solid var(--border)" }}>
-          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm"
-            style={{ background: "rgba(138,154,184,0.12)", color: "#8A9AB8", fontWeight: 600 }}>Cancel</button>
-          <button onClick={submit} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-            style={{ background: "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color: "#fff", fontWeight: 600 }}>
+        <div className="modal-foot">
+          <button className="btn-sec" onClick={onClose}>Cancel</button>
+          <button className="btn-primary" onClick={submit}>
             <CheckCircle size={14} /> {editing ? "Save Changes" : "Add Wish"}
           </button>
         </div>
@@ -172,88 +285,103 @@ export function FinalWishes() {
   const [editingObit, setEditingObit] = useState(false);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "wishes",        label: "Final Wishes",    icon: <Heart size={15} /> },
-    { id: "funeral",       label: "Funeral Planning", icon: <Church size={15} /> },
-    { id: "questionnaire", label: "Questionnaire",    icon: <HelpCircle size={15} /> },
+    { id: "wishes",        label: "Final Wishes",     icon: <Heart size={14} /> },
+    { id: "funeral",       label: "Funeral Planning", icon: <Church size={14} /> },
+    { id: "questionnaire", label: "Questionnaire",    icon: <HelpCircle size={14} /> },
   ];
 
   const completedAnswers = Object.values(answers).filter(a => a.trim().length > 0).length;
   const totalQuestions = questionnaireCategories.flatMap(c => c.questions).length;
 
+  const wishCategoryCount = new Set(wishes.map(w => w.category)).size;
+  const kpis = [
+    { label: "Wishes Recorded", value: String(wishes.length), sub: `${wishCategoryCount} categor${wishCategoryCount === 1 ? "y" : "ies"}`, icon: <Heart size={14} />, dot: ACCENT2 },
+    { label: "Categories", value: String(WISH_CATEGORIES.length), sub: "Available to assign", icon: <Layers size={14} />, dot: ACCENT2 },
+    { label: "Funeral Plan", value: funeralPlan.prearranged ? "Prearranged" : "Not Set", sub: funeralPlan.prearranged ? "Contract on file" : "Add your plan", icon: <Church size={14} />, dot: funeralPlan.prearranged ? POS : ACCENT2 },
+    { label: "Questionnaire", value: `${completedAnswers}/${totalQuestions}`, sub: `${Math.round((completedAnswers / totalQuestions) * 100)}% complete`, icon: <HelpCircle size={14} />, dot: ACCENT2 },
+  ];
+
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1240, margin: "0 auto" }}>
-      <div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 4 }}>Final Wishes</h1>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Document your wishes, legal instruments, and funeral preferences in one secure place.</p>
-      </div>
+    <div className="fpd-wishes">
+      <style dangerouslySetInnerHTML={{ __html: WISHES_CSS }} />
+      <div className="fpd-wishes-grain" />
 
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--card)", width: "fit-content" }}>
-        {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all"
-            style={{ background: tab === t.id ? "var(--primary)" : "transparent", color: tab === t.id ? "#070D1A" : "var(--muted-foreground)", fontWeight: tab === t.id ? 600 : 400 }}
-          >
-            {t.icon} {t.label}
-          </button>
-        ))}
-      </div>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div>
+          <div className="eyebrow"><Heart size={12} /> Estate Planning</div>
+          <h1 className="pg-h1">Final Wishes</h1>
+          <div className="pg-sub">Document your wishes, legal instruments, and funeral preferences in one secure place.</div>
+        </div>
 
-      {/* Final Wishes */}
-      {tab === "wishes" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Specific items, property, or bequests you want to leave to individuals or organizations.</p>
-            <button onClick={() => { setEditingWish(null); setWishModal(true); }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#FFFFFF", fontWeight: 600 }}>
-              <Plus size={14} /> Add Wish
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
+              </div>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Tabs ── */}
+        <div className="seg">
+          {tabs.map(t => (
+            <button key={t.id} className={tab === t.id ? "on" : ""} onClick={() => setTab(t.id)}>
+              {t.icon} {t.label}
             </button>
-          </div>
-          <div className="space-y-3">
+          ))}
+        </div>
+
+        {/* ── Final Wishes ── */}
+        {tab === "wishes" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="toolbar">
+              <p>Specific items, property, or bequests you want to leave to individuals or organizations.</p>
+              <button className="btn-primary" onClick={() => { setEditingWish(null); setWishModal(true); }}>
+                <Plus size={14} /> Add Wish
+              </button>
+            </div>
+
             {wishes.length === 0 && (
-              <div className="text-center rounded-2xl" style={{ padding: "40px 20px", border: "1px dashed rgba(58,91,217,0.25)", background: "var(--card)" }}>
-                <Heart size={26} color="rgba(58,91,217,0.35)" style={{ margin: "0 auto 10px" }} />
-                <div style={{ color: "var(--foreground)", fontSize: 15, marginBottom: 4 }}>No wishes recorded yet</div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Add the first item you want passed to someone specific.</div>
+              <div className="card empty glow-surface">
+                <div className="ei"><Heart size={20} /></div>
+                <div className="et">No wishes recorded yet</div>
+                <div className="ed">Add the first item you want passed to someone specific.</div>
               </div>
             )}
-            {wishes.map((wish) => (
-              <div key={wish.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)", fontFamily: "var(--font-mono)" }}>
-                        {wish.category.toUpperCase()}
-                      </span>
+
+            <div className="wlist">
+              {wishes.map((wish) => (
+                <div key={wish.id} className="card wrow glow-surface">
+                  <div className="wtop">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span className="wcat">{wish.category.toUpperCase()}</span>
+                      <div className="witem">{wish.item}</div>
+                      <div className="wrec"><ArrowRight size={12} color={ACCENT2} /> {wish.recipient}</div>
+                      {wish.notes && <div className="wnotes">"{wish.notes}"</div>}
                     </div>
-                    <div style={{ color: "var(--foreground)", fontSize: 15, fontWeight: 500, marginBottom: 4 }}>{wish.item}</div>
-                    <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
-                      <span style={{ color: "var(--primary)" }}>→</span> {wish.recipient}
+                    <div className="wacts">
+                      <button title="Edit wish" onClick={() => { setEditingWish(wish); setWishModal(true); }}><Edit2 size={14} /></button>
+                      <button className="del" title="Delete wish" onClick={() => deleteWish(wish.id)}><Trash2 size={14} /></button>
                     </div>
-                    {wish.notes && <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 6, fontStyle: "italic" }}>"{wish.notes}"</div>}
-                  </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button title="Edit wish" onClick={() => { setEditingWish(wish); setWishModal(true); }}
-                      style={{ color: "var(--muted-foreground)" }}><Edit2 size={14} /></button>
-                    <button title="Delete wish" onClick={() => deleteWish(wish.id)}
-                      style={{ color: "#FC8181" }}><Trash2 size={14} /></button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Funeral Planning */}
-      {tab === "funeral" && (
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Service Details</h3>
-              <div className="space-y-3">
+        {/* ── Funeral Planning ── */}
+        {tab === "funeral" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="fgrid">
+              <div className="card pad glow-surface">
+                <h3 className="sec-title"><span className="tick" />Service Details</h3>
                 {[
                   { label: "Service Type", value: funeralPlan.serviceType },
                   { label: "Location / Funeral Home", value: funeralPlan.location },
@@ -261,153 +389,127 @@ export function FinalWishes() {
                   { label: "Budget Range", value: funeralPlan.budget },
                   { label: "Prearranged Contract", value: funeralPlan.prearranged ? funeralPlan.prearrangedWith : "Not prearranged" },
                 ].map(f => (
-                  <div key={f.label} className="flex flex-col gap-1 px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
-                    <span style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{f.label.toUpperCase()}</span>
-                    <span style={{ color: "var(--foreground)", fontSize: 13 }}>{f.value}</span>
+                  <div key={f.label} className="tile">
+                    <div className="tk">{f.label}</div>
+                    <div className="tv">{f.value}</div>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Service Preferences</h3>
-              <div className="space-y-3">
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 6 }}>MUSIC</div>
-                  <div className="flex flex-wrap gap-2">
-                    {funeralPlan.music.map(m => (
-                      <span key={m} className="px-2 py-1 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)" }}>{m}</span>
-                    ))}
+
+              <div className="card pad glow-surface">
+                <h3 className="sec-title"><span className="tick" />Service Preferences</h3>
+                <div className="tile">
+                  <div className="tk">Music</div>
+                  <div className="tags">
+                    {funeralPlan.music.map(m => <span key={m} className="tag music">{m}</span>)}
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 6 }}>READINGS</div>
-                  <div className="flex flex-wrap gap-2">
-                    {funeralPlan.readings.map(r => (
-                      <span key={r} className="px-2 py-1 rounded text-xs" style={{ background: "rgba(110,139,255,0.1)", color: "#6E8BFF" }}>{r}</span>
-                    ))}
+                <div className="tile">
+                  <div className="tk">Readings</div>
+                  <div className="tags">
+                    {funeralPlan.readings.map(r => <span key={r} className="tag read">{r}</span>)}
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>FLOWERS</div>
-                  <div style={{ color: "var(--foreground)", fontSize: 13 }}>{funeralPlan.flowers}</div>
+                <div className="tile">
+                  <div className="tk">Flowers</div>
+                  <div className="tv">{funeralPlan.flowers}</div>
                 </div>
-                <div className="px-4 py-3 rounded-lg" style={{ background: "#141B2E" }}>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>SPECIAL REQUESTS</div>
-                  <div style={{ color: "var(--foreground)", fontSize: 13 }}>{funeralPlan.specialRequests}</div>
+                <div className="tile">
+                  <div className="tk">Special Requests</div>
+                  <div className="tv">{funeralPlan.specialRequests}</div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 12 }}>Obituary Draft</h3>
-            {editingObit ? (
-              <>
-                <textarea className="fpd-field" style={{ minHeight: 160, lineHeight: 1.8 }} value={obituary}
-                  onChange={e => setObituary(e.target.value)} />
-                <div className="flex gap-2 mt-3">
-                  <button onClick={() => { setEditingObit(false); toast.success("Obituary draft saved."); }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                    style={{ background: "rgba(72,187,120,0.15)", color: "#48BB78", fontWeight: 600 }}>
-                    <CheckCircle size={13} /> Save Draft
-                  </button>
-                  <button onClick={() => { setObituary(funeralPlan.obituaryDraft); setEditingObit(false); }}
-                    className="px-4 py-2 rounded-xl text-sm"
-                    style={{ background: "rgba(138,154,184,0.12)", color: "#8A9AB8", fontWeight: 600 }}>
-                    Revert
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="p-4 rounded-xl glow-surface" style={{ background: "#141B2E", color: "var(--foreground)", fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
-                  {obituary}
-                </div>
-                <button onClick={() => setEditingObit(true)}
-                  className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                  style={{ background: "var(--primary)", color: "#FFFFFF", fontWeight: 600 }}>
-                  <Edit2 size={13} /> Edit Obituary
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Questionnaire */}
-      {tab === "questionnaire" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Answer these questions to help your loved ones understand your wishes and values.</p>
-            <div className="px-3 py-1.5 rounded-lg" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
-              {completedAnswers}/{totalQuestions} Answered
-            </div>
-          </div>
-          <div className="h-2 rounded-full" style={{ background: "var(--secondary)" }}>
-            <div className="h-2 rounded-full transition-all" style={{ width: `${(completedAnswers / totalQuestions) * 100}%`, background: "linear-gradient(90deg, #3A5BD9, #3A5BD9)" }} />
-          </div>
-          {questionnaireCategories.map((cat, ci) => (
-            <div key={ci} className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
-              <button
-                className="w-full flex items-center justify-between px-5 py-4"
-                style={{ background: "var(--card)" }}
-                onClick={() => setExpandedCat(expandedCat === ci ? null : ci)}
-              >
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--foreground)" }}>{cat.title}</span>
-                <div className="flex items-center gap-3">
-                  <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>
-                    {cat.questions.filter(q => answers[q.id]?.trim()).length}/{cat.questions.length} answered
-                  </span>
-                  <ChevronDown size={16} color="var(--muted-foreground)" style={{ transform: expandedCat === ci ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
-                </div>
-              </button>
-              {expandedCat === ci && (
-                <div className="space-y-4 p-5 border-t" style={{ borderColor: "var(--border)", background: "#141B2E" }}>
-                  {cat.questions.map(q => (
-                    <div key={q.id}>
-                      <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500, marginBottom: 8 }}>{q.q}</div>
-                      {editingAnswer === q.id ? (
-                        <div>
-                          <textarea
-                            value={answers[q.id]}
-                            onChange={e => setAnswers({ ...answers, [q.id]: e.target.value })}
-                            rows={3}
-                            className="w-full px-4 py-3 rounded-xl"
-                            style={{ background: "var(--card)", border: "1px solid var(--primary)", color: "var(--foreground)", fontSize: 14, outline: "none", resize: "vertical" }}
-                          />
-                          <div className="flex gap-2 mt-2">
-                            <button onClick={() => setEditingAnswer(null)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm" style={{ background: "rgba(72,187,120,0.15)", color: "#48BB78" }}>
-                              <CheckCircle size={13} /> Save
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          className="flex items-start gap-3 px-4 py-3 rounded-xl cursor-pointer"
-                          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
-                          onClick={() => setEditingAnswer(q.id)}
-                        >
-                          <div style={{ flex: 1, color: answers[q.id] ? "var(--foreground)" : "var(--muted-foreground)", fontSize: 13, fontStyle: answers[q.id] ? "normal" : "italic" }}>
-                            {answers[q.id] || "Click to answer..."}
-                          </div>
-                          <Edit2 size={13} color="var(--muted-foreground)" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+            <div className="card pad glow-surface">
+              <h3 className="sec-title"><span className="tick" />Obituary Draft</h3>
+              {editingObit ? (
+                <>
+                  <textarea style={{ minHeight: 160 }} value={obituary} onChange={e => setObituary(e.target.value)} />
+                  <div className="acts-row">
+                    <button className="btn-pos" onClick={() => { setEditingObit(false); toast.success("Obituary draft saved."); }}>
+                      <CheckCircle size={13} /> Save Draft
+                    </button>
+                    <button className="btn-sec" onClick={() => { setObituary(funeralPlan.obituaryDraft); setEditingObit(false); }}>
+                      Revert
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="obit">{obituary}</div>
+                  <div className="acts-row">
+                    <button className="btn-primary" onClick={() => setEditingObit(true)}>
+                      <Edit2 size={13} /> Edit Obituary
+                    </button>
+                  </div>
+                </>
               )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
 
-      {wishModal && (
-        <WishModal
-          editing={editingWish}
-          onClose={() => { setWishModal(false); setEditingWish(null); }}
-          onSave={saveWish}
-        />
-      )}
+        {/* ── Questionnaire ── */}
+        {tab === "questionnaire" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="toolbar">
+              <p>Answer these questions to help your loved ones understand your wishes and values.</p>
+              <span className="qcount">{completedAnswers}/{totalQuestions} Answered</span>
+            </div>
+            <div className="qbar"><i style={{ width: `${(completedAnswers / totalQuestions) * 100}%` }} /></div>
+
+            {questionnaireCategories.map((cat, ci) => (
+              <div key={ci} className="card qcat glow-surface">
+                <button className="qhead" onClick={() => setExpandedCat(expandedCat === ci ? null : ci)}>
+                  <span className="qtitle">{cat.title}</span>
+                  <div className="qright">
+                    <span className="qn">{cat.questions.filter(q => answers[q.id]?.trim()).length}/{cat.questions.length} answered</span>
+                    <ChevronDown size={16} color={MUTED} style={{ transform: expandedCat === ci ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+                  </div>
+                </button>
+                {expandedCat === ci && (
+                  <div className="qbody">
+                    {cat.questions.map(q => (
+                      <div key={q.id}>
+                        <div className="qq">{q.q}</div>
+                        {editingAnswer === q.id ? (
+                          <div className="qedit">
+                            <textarea
+                              value={answers[q.id]}
+                              onChange={e => setAnswers({ ...answers, [q.id]: e.target.value })}
+                              rows={3}
+                            />
+                            <div className="acts-row">
+                              <button className="btn-pos" onClick={() => setEditingAnswer(null)}>
+                                <CheckCircle size={13} /> Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="qans" onClick={() => setEditingAnswer(q.id)}>
+                            <span className={`qa-text ${answers[q.id] ? "filled" : "empty"}`}>
+                              {answers[q.id] || "Click to answer..."}
+                            </span>
+                            <Edit2 size={13} color={MUTED} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {wishModal && (
+          <WishModal
+            editing={editingWish}
+            onClose={() => { setWishModal(false); setEditingWish(null); }}
+            onSave={saveWish}
+          />
+        )}
+      </div>
     </div>
   );
 }

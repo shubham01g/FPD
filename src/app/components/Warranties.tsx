@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe } from "lucide-react";
+import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 
-const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 const CATEGORIES = ["Electronics","Appliances","HVAC / Plumbing","Roofing / Structure","Vehicles","Furniture","Jewelry","Tools / Power Tools","Lawn & Garden","Sporting Goods","Medical Devices","Other"];
 
@@ -46,12 +53,116 @@ function getDaysUntilExpiry(dateStr: string): number {
 }
 
 function ExpiryBadge({ date }: { date:string }) {
-  if (date.includes("Lifetime") || date === "—") return <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", ...MONO }}>LIFETIME</span>;
+  if (date.includes("Lifetime") || date === "—") return <span className="dbadge pos"><CheckCircle size={11} /> LIFETIME</span>;
   const days = getDaysUntilExpiry(date);
-  if (days < 0) return <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(252,129,129,0.12)", color:"#FC8181", ...MONO }}>EXPIRED</span>;
-  if (days < 90) return <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(246,173,85,0.12)", color:"#F6AD55", ...MONO }}>EXPIRES IN {days}d</span>;
-  return <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", ...MONO }}>ACTIVE</span>;
+  if (days < 0) return <span className="dbadge neg"><XCircle size={11} /> EXPIRED</span>;
+  if (days < 90) return <span className="dbadge warn"><AlertTriangle size={11} /> EXPIRES IN {days}d</span>;
+  return <span className="dbadge pos"><CheckCircle size={11} /> ACTIVE</span>;
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-warr so nothing else in the app is affected. */
+const WARR_CSS = `
+.fpd-warr{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-warr *{box-sizing:border-box;}
+.fpd-warr-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-warr .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-warr .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-warr .card.pad{padding:22px;}
+.fpd-warr .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-warr .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-warr .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-warr .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
+.fpd-warr .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-warr .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-warr .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-warr .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-warr .btn-pos:hover{background:rgba(95,190,145,0.2);}
+
+/* KPI ledger */
+.fpd-warr .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-warr .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-warr .kcell:first-child{border-left:none;}
+.fpd-warr .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-warr .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-warr .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-warr .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-warr .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-warr .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-warr .kstrip{grid-template-columns:1fr 1fr;}.fpd-warr .kcell:nth-child(3){border-left:none;}.fpd-warr .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* filter chips */
+.fpd-warr .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fpd-warr .filters .flabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:${FAINT};margin-right:2px;}
+.fpd-warr .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid rgba(91,123,245,0.32);background:rgba(91,123,245,0.14);color:${ACCENT2};transition:opacity .16s,background .16s,border-color .16s;}
+.fpd-warr .chip.off{opacity:.48;background:transparent;border-color:rgba(255,255,255,0.09);color:${MUTED};}
+.fpd-warr .chip.off:hover{opacity:.72;}
+
+/* record cards */
+.fpd-warr .dlist{display:flex;flex-direction:column;gap:14px;}
+.fpd-warr .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};}
+.fpd-warr .dtype{font-family:var(--font-display);font-size:15.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
+.fpd-warr .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
+.fpd-warr .dbadge.pos{background:rgba(95,190,145,0.14);color:${POS};}
+.fpd-warr .dbadge.warn{background:rgba(217,165,94,0.14);color:${WARN};}
+.fpd-warr .dbadge.neg{background:rgba(208,107,107,0.14);color:${NEG};}
+.fpd-warr .catbadge{display:inline-flex;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,123,245,0.12);color:${ACCENT2};}
+
+/* row header / expand */
+.fpd-warr .wr-head{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;background:none;border:none;cursor:pointer;text-align:left;font-family:var(--font-body);}
+.fpd-warr .wr-left{display:flex;align-items:flex-start;gap:14px;min-width:0;}
+.fpd-warr .wr-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px;}
+.fpd-warr .wr-brand{color:${MUTED};font-size:12.5px;}
+.fpd-warr .wr-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.fpd-warr .wr-meta span{display:inline-flex;align-items:center;gap:5px;color:${MUTED};font-size:12px;}
+.fpd-warr .wr-body{padding:0 22px 22px;border-top:1px solid rgba(255,255,255,0.065);display:flex;flex-direction:column;gap:16px;}
+
+.fpd-warr .dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px;}
+.fpd-warr .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-warr .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-warr .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
+@media (max-width:640px){.fpd-warr .dgrid{grid-template-columns:1fr;}}
+
+/* info notes */
+.fpd-warr .note{padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.7;color:${SOFT};}
+.fpd-warr .note .nk{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.fpd-warr .note.pos{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.22);}
+.fpd-warr .note.pos .nk{color:${POS};}
+.fpd-warr .note.info{background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);}
+.fpd-warr .note.info .nk{color:${ACCENT2};}
+.fpd-warr .note.warn{background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.2);}
+.fpd-warr .note.warn .nk{color:${WARN};}
+
+/* documents */
+.fpd-warr .doclbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:8px;}
+.fpd-warr .docs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.fpd-warr .docchip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;font-size:12px;background:rgba(91,123,245,0.08);color:${ACCENT2};border:1px solid rgba(91,123,245,0.18);cursor:pointer;font-family:var(--font-body);}
+
+/* photo frame */
+.fpd-warr .photo-frame{position:relative;height:160px;background:#0F1624;border-bottom:1px solid rgba(255,255,255,0.065);overflow:hidden;}
+.fpd-warr .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
+
+/* modal */
+.fpd-warr .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-warr .modal{width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.fpd-warr .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-warr .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-warr .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-warr .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-warr .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-warr .field input,.fpd-warr .field select,.fpd-warr .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-warr .field input::placeholder,.fpd-warr .field textarea::placeholder{color:${FAINT};}
+.fpd-warr .field input:focus,.fpd-warr .field select:focus,.fpd-warr .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-warr .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-warr .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-warr .modal-foot .save:hover{filter:brightness(1.08);}
+`;
 
 export function Warranties() {
   const [warranties, setWarranties] = useState<Warranty[]>(initWarranties);
@@ -75,173 +186,194 @@ export function Warranties() {
   const expiringSoon = warranties.filter(w => { const d = getDaysUntilExpiry(w.expiryDate); return d>=0 && d<90; }).length;
   const expired = warranties.filter(w => getDaysUntilExpiry(w.expiryDate) < 0 && !w.expiryDate.includes("Lifetime")).length;
 
+  const kpis = [
+    { label: "Total", value: String(warranties.length), sub: "Warranties on file", icon: <Shield size={14} />, dot: ACCENT2 },
+    { label: "Active", value: String(active), sub: "In good standing", icon: <CheckCircle size={14} />, dot: POS },
+    { label: "Expiring < 90 Days", value: String(expiringSoon), sub: "Renew or replace soon", icon: <AlertTriangle size={14} />, dot: WARN },
+    { label: "Expired", value: String(expired), sub: "No longer covered", icon: <XCircle size={14} />, dot: NEG },
+  ];
+
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Warranties</h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>Track warranties for all products — when they expire, how to claim, and where the documents are stored.</p>
-        </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>
-          <Plus size={14}/> Add Warranty
-        </button>
-      </div>
+    <div className="fpd-warr">
+      <style dangerouslySetInnerHTML={{ __html: WARR_CSS }} />
+      <div className="fpd-warr-grain" />
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        {[{label:"Total",value:warranties.length,color:"var(--primary)"},{label:"Active",value:active,color:"#48BB78"},{label:"Expiring < 90 Days",value:expiringSoon,color:"#F6AD55"},{label:"Expired",value:expired,color:"#FC8181"}].map(s=>(
-          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Shield size={12} /> Coverage Tracker</div>
+            <h1 className="pg-h1">Warranties</h1>
+            <div className="pg-sub">Track warranties for all products — when they expire, how to claim, and where the documents are stored.</div>
           </div>
-        ))}
-      </div>
-
-      {/* Category filter */}
-      <div className="flex flex-wrap gap-1.5">
-        {["all",...CATEGORIES].map(cat=>(
-          <button key={cat} onClick={()=>setFilterCat(cat)}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-            style={{ background:filterCat===cat?"var(--primary)":"rgba(58,91,217,0.05)", color:filterCat===cat?"#070D1A":"var(--muted-foreground)", border:`1px solid ${filterCat===cat?"var(--primary)":"rgba(58,91,217,0.12)"}` }}>
-            {cat==="all" ? "All" : cat}
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Warranty
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Warranty list */}
-      <div className="space-y-3">
-        {filtered.map(w => (
-          <div key={w.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
-            {(w as any).photo && <img src={(w as any).photo} alt={w.product} style={{ width:"100%", height:160, objectFit:"cover" }}/>}
-            <button className="w-full p-5 text-left" onClick={()=>setExpanded(expanded===w.id?null:w.id)}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:44, height:44, background:"rgba(58,91,217,0.08)" }}>
-                    <Shield size={20} color="var(--primary)"/>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"var(--foreground)" }}>{w.product}</span>
-                      <span style={{ color:"var(--muted-foreground)", fontSize:12 }}>{w.brand}</span>
-                      <ExpiryBadge date={w.expiryDate}/>
-                    </div>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Calendar size={10}/> Expires: {w.expiryDate}</span>
-                      <span className="text-xs" style={{ color:"var(--muted-foreground)" }}>{w.warrantyType}</span>
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)" }}>{w.category}</span>
-                    </div>
-                  </div>
-                </div>
-                {expanded===w.id ? <ChevronUp size={16} color="var(--muted-foreground)"/> : <ChevronDown size={16} color="var(--muted-foreground)"/>}
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
               </div>
-            </button>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
+          ))}
+        </div>
 
-            {expanded===w.id && (
-              <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"var(--border)" }}>
-                <div className="grid md:grid-cols-2 gap-3 pt-4">
-                  {[["Brand / Make",w.brand],["Model",w.model],["Serial / Item #",w.serialNum||"—"],["Purchase Date",w.purchaseDate],["Purchased From",w.purchasedFrom],["Purchase Price",w.price],["Warranty Provider",w.provider],["Provider Phone",w.providerPhone||"—"],["Provider Website",w.providerWebsite||"—"],["Expiry Date",w.expiryDate]].map(([label,value])=>(
-                    <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
-                      <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{(label as string).toUpperCase()}</div>
-                      <div style={{ color:"var(--foreground)", fontSize:13 }}>{value||"—"}</div>
+        {/* ── Category filter chips ── */}
+        <div className="card pad glow-surface">
+          <div className="filters">
+            <span className="flabel">FILTER</span>
+            {["all", ...CATEGORIES].map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilterCat(cat)}
+                className={`chip ${filterCat === cat ? "" : "off"}`}
+              >
+                {cat === "all" ? "All" : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Warranty list ── */}
+        <div className="dlist">
+          {filtered.map(w => (
+            <div key={w.id} className="card glow-surface" style={{ overflow: "hidden" }}>
+              {(w as any).photo && (
+                <div className="photo-frame">
+                  <img src={(w as any).photo} alt={w.product} />
+                </div>
+              )}
+              <button className="wr-head" onClick={() => setExpanded(expanded === w.id ? null : w.id)}>
+                <div className="wr-left">
+                  <div className="dico"><Shield size={20} /></div>
+                  <div>
+                    <div className="wr-top">
+                      <span className="dtype">{w.product}</span>
+                      <span className="wr-brand">{w.brand}</span>
+                      <ExpiryBadge date={w.expiryDate} />
                     </div>
-                  ))}
+                    <div className="wr-meta">
+                      <span><Calendar size={10} /> Expires: {w.expiryDate}</span>
+                      <span>{w.warrantyType}</span>
+                      <span className="catbadge">{w.category}</span>
+                    </div>
+                  </div>
                 </div>
+                {expanded === w.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+              </button>
 
-                {w.coverageDetails && (
-                  <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(72,187,120,0.05)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                    <div style={{ color:"#48BB78", fontSize:10, ...MONO, marginBottom:4 }}>WHAT'S COVERED</div>
-                    <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{w.coverageDetails}</div>
-                  </div>
-                )}
-
-                {w.claimInstructions && (
-                  <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-                    <div style={{ color:"var(--primary)", fontSize:10, ...MONO, marginBottom:4 }}>HOW TO CLAIM</div>
-                    <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.7 }}>{w.claimInstructions}</div>
-                  </div>
-                )}
-
-                {w.notes && (
-                  <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(246,173,85,0.05)", border:"1px solid rgba(246,173,85,0.15)" }}>
-                    <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
-                    <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.6 }}>{w.notes}</div>
-                  </div>
-                )}
-
-                {/* Documents */}
-                <div>
-                  <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:8 }}>DOCUMENTS ({w.documents.length})</div>
-                  <div className="flex flex-wrap gap-2">
-                    {w.documents.map(d=>(
-                      <button key={d} onClick={()=>toast.success(`Opening: ${d}`)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                        style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
-                        📄 {d}
-                      </button>
+              {expanded === w.id && (
+                <div className="wr-body">
+                  <div className="dgrid">
+                    {[["Brand / Make", w.brand], ["Model", w.model], ["Serial / Item #", w.serialNum || "—"], ["Purchase Date", w.purchaseDate], ["Purchased From", w.purchasedFrom], ["Purchase Price", w.price], ["Warranty Provider", w.provider], ["Provider Phone", w.providerPhone || "—"], ["Provider Website", w.providerWebsite || "—"], ["Expiry Date", w.expiryDate]].map(([label, value]) => (
+                      <div key={label} className="tile">
+                        <div className="tk">{label}</div>
+                        <div className="tv">{value || "—"}</div>
+                      </div>
                     ))}
-                    <ScanButton folder="personal" onUpload={doc=>{ setWarranties(p=>p.map(x=>x.id===w.id?{...x,documents:[...x.documents,doc.name]}:x)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan Document"/>
                   </div>
-                </div>
 
-                <div className="flex gap-2 flex-wrap">
+                  {w.coverageDetails && (
+                    <div className="note pos">
+                      <div className="nk">What's Covered</div>
+                      <div>{w.coverageDetails}</div>
+                    </div>
+                  )}
+
+                  {w.claimInstructions && (
+                    <div className="note info">
+                      <div className="nk">How To Claim</div>
+                      <div>{w.claimInstructions}</div>
+                    </div>
+                  )}
+
+                  {w.notes && (
+                    <div className="note warn">
+                      <div className="nk">Notes</div>
+                      <div>{w.notes}</div>
+                    </div>
+                  )}
+
+                  {/* Documents */}
+                  <div>
+                    <div className="doclbl">Documents ({w.documents.length})</div>
+                    <div className="docs">
+                      {w.documents.map(d => (
+                        <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
+                          <FileText size={12} /> {d}
+                        </button>
+                      ))}
+                      <ScanButton folder="personal" onUpload={doc => { setWarranties(p => p.map(x => x.id === w.id ? { ...x, documents: [...x.documents, doc.name] } : x)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan Document" />
+                    </div>
+                  </div>
+
                   {w.providerPhone && (
-                    <button onClick={()=>toast.success(`Calling warranty support: ${w.providerPhone}`)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                      style={{ background:"rgba(72,187,120,0.08)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.2)" }}>
-                      <Phone size={11}/> Call Support
-                    </button>
+                    <div>
+                      <button className="btn-pos" onClick={() => toast.success(`Calling warranty support: ${w.providerPhone}`)}>
+                        <Phone size={11} /> Call Support
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Add modal */}
-      {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
-            <div className="flex items-center justify-between mb-1">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Warranty</h3>
-              <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
+              )}
             </div>
-            <PhotoPicker value={form.photo} onChange={url=>setForm(p=>({...p,photo:url}))} label="Product Photo (optional)" aspectRatio="4/3"/>
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>CATEGORY</label>
-              <select value={form.category} onChange={F("category")} style={INPUT}>
-                {CATEGORIES.map(c=><option key={c}>{c}</option>)}
-              </select>
-            </div>
-            {([
-              ["Product Name *","product","e.g. 55\" OLED Smart TV"],
-              ["Brand / Make","brand","e.g. LG, Samsung, Toyota"],
-              ["Model Number","model",""],
-              ["Serial Number","serialNum",""],
-              ["Purchase Date","purchaseDate","e.g. Nov 25, 2023"],
-              ["Purchased From","purchasedFrom","e.g. Best Buy"],
-              ["Purchase Price","price","e.g. $1,299"],
-              ["Warranty Type","warrantyType","e.g. Manufacturer 3-year, Extended Plan"],
-              ["Warranty Provider","provider","e.g. LG, Geek Squad"],
-              ["Provider Phone","providerPhone",""],
-              ["Provider Website","providerWebsite",""],
-              ["Expiry Date","expiryDate","e.g. Nov 25, 2026 or Lifetime"],
-              ["What's Covered","coverageDetails","Describe what is and isn't covered"],
-              ["How to Claim","claimInstructions","Steps to make a warranty claim"],
-              ["Notes","notes",""],
-            ] as [string,string,string][]).map(([label,key,ph])=>(
-              <div key={key}>
-                <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{label.toUpperCase()}</label>
-                <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} style={INPUT}/>
-              </div>
-            ))}
-            <div className="flex gap-3 pt-2">
-              <button onClick={addWarranty} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>Add Warranty</button>
-              <button onClick={()=>setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+
+        {/* ── Add warranty modal ── */}
+        {showAdd && (
+          <div className="backdrop">
+            <div className="card modal glow-surface">
+              <div className="modal-head">
+                <h3>Add Warranty</h3>
+                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+              </div>
+              <div className="modal-body">
+                <PhotoPicker value={form.photo} onChange={url => setForm(p => ({ ...p, photo: url }))} label="Product Photo (optional)" aspectRatio="4/3" />
+                <div className="field">
+                  <label>Category</label>
+                  <select value={form.category} onChange={F("category")}>
+                    {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                {([
+                  ["Product Name *", "product", "e.g. 55\" OLED Smart TV"],
+                  ["Brand / Make", "brand", "e.g. LG, Samsung, Toyota"],
+                  ["Model Number", "model", ""],
+                  ["Serial Number", "serialNum", ""],
+                  ["Purchase Date", "purchaseDate", "e.g. Nov 25, 2023"],
+                  ["Purchased From", "purchasedFrom", "e.g. Best Buy"],
+                  ["Purchase Price", "price", "e.g. $1,299"],
+                  ["Warranty Type", "warrantyType", "e.g. Manufacturer 3-year, Extended Plan"],
+                  ["Warranty Provider", "provider", "e.g. LG, Geek Squad"],
+                  ["Provider Phone", "providerPhone", ""],
+                  ["Provider Website", "providerWebsite", ""],
+                  ["Expiry Date", "expiryDate", "e.g. Nov 25, 2026 or Lifetime"],
+                  ["What's Covered", "coverageDetails", "Describe what is and isn't covered"],
+                  ["How to Claim", "claimInstructions", "Steps to make a warranty claim"],
+                  ["Notes", "notes", ""],
+                ] as [string, string, string][]).map(([label, key, ph]) => (
+                  <div className="field" key={key}>
+                    <label>{label}</label>
+                    <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
+                  </div>
+                ))}
+              </div>
+              <div className="modal-foot">
+                <button className="save" onClick={addWarranty}>Add Warranty</button>
+                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,19 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import { ScanButton } from "./DocumentScanner";
 import {
   BookOpen, Mic, Video, Upload, Plus, Play, Pause, Square,
-  Trash2, Edit2, X, Save, Tag, Lock, Heart, Sun, Cloud,
-  CloudRain, Smile, Meh, Frown, ChevronLeft, ChevronRight,
-  Search, Calendar, Filter, Download, Eye, EyeOff, MicOff
+  Trash2, Edit2, X, Save, Lock, Sun, Cloud,
+  CloudRain, Smile, Meh, Search, Eye
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = {
-  background: "#101728",
-  border: "1px solid rgba(58,91,217,0.1)",
-  boxShadow: "0 2px 12px rgba(58,91,217,0.06)",
-  borderRadius: 16,
-};
-const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 type EntryType = "written" | "audio" | "video" | "photo";
 type Mood = "great" | "good" | "okay" | "sad" | "difficult";
@@ -34,12 +36,12 @@ interface DiaryEntry {
   videoUrl?: string;
 }
 
-const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: string; bg: string }> = {
-  great:     { icon: <Sun size={16}/>,      label: "Great",     color: "#F6AD55", bg: "#FFFBEB" },
-  good:      { icon: <Smile size={16}/>,    label: "Good",      color: "#48BB78", bg: "#F0FFF4" },
-  okay:      { icon: <Meh size={16}/>,      label: "Okay",      color: "#4A90D9", bg: "#EBF8FF" },
-  sad:       { icon: <Cloud size={16}/>,    label: "Sad",       color: "#6E8BFF", bg: "#0C1322" },
-  difficult: { icon: <CloudRain size={16}/>,label: "Difficult", color: "#FC8181", bg: "#FFF5F5" },
+const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: string }> = {
+  great:     { icon: <Sun size={16}/>,      label: "Great",     color: WARN },
+  good:      { icon: <Smile size={16}/>,    label: "Good",      color: POS },
+  okay:      { icon: <Meh size={16}/>,      label: "Okay",      color: ACCENT2 },
+  sad:       { icon: <Cloud size={16}/>,    label: "Sad",       color: SOFT },
+  difficult: { icon: <CloudRain size={16}/>,label: "Difficult", color: NEG },
 };
 
 const sampleEntries: DiaryEntry[] = [
@@ -76,10 +78,10 @@ const sampleEntries: DiaryEntry[] = [
   },
 ];
 
-const TAGS_PALETTE = ["#3A5BD9","#48BB78","#6E8BFF","#F6AD55","#FC8181","#38B2AC","#ED8936","#E53E3E"];
+const TAGS_PALETTE = ["#3A5BD9","#48BB78","#5B7BF5","#F6AD55","#FC8181","#38B2AC","#ED8936","#E53E3E"];
 
 function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
-  const c = color ?? "#3A5BD9";
+  const c = color ?? ACCENT2;
   const configs: Record<EntryType, { icon: React.ReactNode; label: string }> = {
     written: { icon: <BookOpen size={11}/>, label: "Written" },
     audio:   { icon: <Mic size={11}/>,      label: "Audio" },
@@ -88,12 +90,14 @@ function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
   };
   const cfg = configs[type];
   return (
-    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs" style={{ background:`${c}14`, color:c, ...MONO, fontSize:10 }}>
+    <span className="type-badge" style={{ background:`${c}1C`, color:c }}>
       {cfg.icon} {cfg.label}
     </span>
   );
 }
 
+/* Recording logic (getUserMedia / MediaRecorder / interval timers) is untouched below —
+   only the surrounding JSX classNames/styles were restyled to the shared premium chrome. */
 function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -143,33 +147,25 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
   const secs = seconds % 60;
 
   return (
-    <div className="flex flex-col items-center gap-5 py-8">
-      <div className="relative">
-        <div className="w-24 h-24 rounded-full flex items-center justify-center"
-          style={{ background: recording ? "rgba(229,62,62,0.1)" : "rgba(58,91,217,0.1)", border: `3px solid ${recording?"#E53E3E":"#3A5BD9"}`, transition:"all 0.3s" }}>
-          {recording
-            ? <Square size={28} color="#E53E3E" fill="#E53E3E"/>
-            : <Mic size={28} color="#3A5BD9"/>}
-        </div>
-        {recording && (
-          <div className="absolute inset-0 rounded-full animate-ping" style={{ background:"rgba(229,62,62,0.15)" }}/>
-        )}
+    <div className="recorder">
+      <div className="rec-dial" style={{ background: recording ? "rgba(208,107,107,0.12)" : "rgba(91,123,245,0.10)", borderColor: recording ? NEG : ACCENT }}>
+        {recording
+          ? <Square size={28} color={NEG} fill={NEG}/>
+          : <Mic size={28} color={ACCENT2}/>}
+        {recording && <div className="rec-ping" />}
       </div>
-      <div style={{ fontFamily:"var(--font-mono)", fontSize:24, color:"#FFFFFF", fontWeight:700 }}>
-        {`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}
-      </div>
-      <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>
-        {recording ? "Recording… tap to stop" : "Tap to start recording"}
-      </div>
-      <button onClick={recording ? stop : start}
-        className="px-8 py-3 rounded-2xl font-semibold text-sm"
-        style={{ background: recording ? "linear-gradient(135deg,#E53E3E,#FC8181)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:`0 4px 16px ${recording?"rgba(229,62,62,0.35)":"rgba(58,91,217,0.35)"}` }}>
+      <div className="rec-time">{`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}</div>
+      <div className="rec-hint">{recording ? "Recording… tap to stop" : "Tap to start recording"}</div>
+      <button onClick={recording ? stop : start} className="rec-btn"
+        style={{ background: recording ? "linear-gradient(135deg,#D06B6B,#E88)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
         {recording ? "Stop Recording" : "Start Recording"}
       </button>
     </div>
   );
 }
 
+/* Recording logic (getUserMedia / MediaRecorder / preview stream) is untouched below —
+   only the surrounding JSX classNames/styles were restyled to the shared premium chrome. */
 function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -235,13 +231,12 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
 
   if (!preview) {
     return (
-      <div className="flex flex-col items-center gap-5 py-8">
-        <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ background:"rgba(58,91,217,0.1)", border:"3px solid #3A5BD9" }}>
-          <Video size={28} color="#3A5BD9"/>
+      <div className="recorder">
+        <div className="rec-dial" style={{ background:"rgba(91,123,245,0.10)", borderColor: ACCENT }}>
+          <Video size={28} color={ACCENT2}/>
         </div>
-        <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Start your camera to record a video diary entry</div>
-        <button onClick={startPreview} className="px-8 py-3 rounded-2xl font-semibold text-sm"
-          style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 16px rgba(58,91,217,0.35)" }}>
+        <div className="rec-hint">Start your camera to record a video diary entry</div>
+        <button onClick={startPreview} className="rec-btn" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
           Open Camera
         </button>
       </div>
@@ -249,26 +244,166 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-full rounded-2xl overflow-hidden" style={{ background:"#000", maxHeight:280 }}>
-        <video ref={videoRef} muted className="w-full" style={{ maxHeight:280, objectFit:"cover" }}/>
+    <div className="recorder">
+      <div className="rec-video-wrap">
+        <video ref={videoRef} muted className="rec-video"/>
         {recording && (
-          <div className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1 rounded-full" style={{ background:"rgba(229,62,62,0.9)" }}>
-            <div className="w-2 h-2 rounded-full bg-white"/>
-            <span style={{ color:"#fff", fontSize:11, ...MONO }}>{`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}</span>
+          <div className="rec-live">
+            <div className="rec-live-dot"/>
+            <span>{`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}</span>
           </div>
         )}
       </div>
       <div className="flex gap-3">
         {!recording
-          ? <button onClick={startRecording} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"#E53E3E", color:"#fff" }}><div className="w-3 h-3 rounded-full bg-white"/>Record</button>
-          : <button onClick={stopRecording} className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"#374669", color:"#fff" }}><Square size={13} fill="white"/>Stop</button>
+          ? <button onClick={startRecording} className="rec-record-btn"><div className="rec-record-dot"/>Record</button>
+          : <button onClick={stopRecording} className="rec-stop-btn"><Square size={13} fill="white"/>Stop</button>
         }
-        <button onClick={stopAll} className="px-6 py-2.5 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+        <button onClick={stopAll} className="rec-cancel-btn">Cancel</button>
       </div>
     </div>
   );
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-diary so nothing else in the app is affected. */
+const DIARY_CSS = `
+.fpd-diary{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-diary *{box-sizing:border-box;}
+.fpd-diary-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-diary .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-diary .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-diary .card.pad{padding:22px;}
+.fpd-diary .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+.fpd-diary .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-diary .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-diary .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
+.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-diary .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* KPI ledger */
+.fpd-diary .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-diary .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-diary .kcell:first-child{border-left:none;}
+.fpd-diary .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-diary .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-diary .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-diary .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-diary .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-diary .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-diary .kstrip{grid-template-columns:1fr 1fr;}.fpd-diary .kcell:nth-child(3){border-left:none;}.fpd-diary .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* search + filter toolbar */
+.fpd-diary .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
+.fpd-diary .search{display:flex;align-items:center;gap:8px;padding:11px 15px;flex:1;min-width:220px;}
+.fpd-diary .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
+.fpd-diary .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);width:fit-content;}
+.fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-diary .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+
+/* bento layout */
+.fpd-diary .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
+@media (max-width:1000px){.fpd-diary .bento{grid-template-columns:1fr;}}
+.fpd-diary .elist{display:flex;flex-direction:column;gap:12px;}
+
+/* entry cards */
+.fpd-diary .ecard{padding:20px;cursor:pointer;transition:border-color .18s;}
+.fpd-diary .ecard.sel{border-color:rgba(91,123,245,0.5);}
+.fpd-diary .ethumb{border-radius:10px;overflow:hidden;margin-bottom:12px;height:120px;position:relative;}
+.fpd-diary .ethumb img{width:100%;height:100%;object-fit:cover;}
+.fpd-diary .ethumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.32);}
+.fpd-diary .ethumb-play{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
+.fpd-diary .ethumb-dur{position:absolute;bottom:8px;right:8px;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:11px;font-family:var(--font-mono);}
+.fpd-diary .etop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.fpd-diary .edate{color:${MUTED};font-size:11px;font-family:var(--font-mono);}
+.fpd-diary .type-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:10px;font-family:var(--font-mono);}
+.fpd-diary .private-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;background:rgba(208,107,107,0.14);color:${NEG};font-size:9px;font-family:var(--font-mono);}
+.fpd-diary .etitle{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);}
+.fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:11px;flex-shrink:0;font-size:11px;font-weight:500;}
+.fpd-diary .ebody{color:${MUTED};font-size:13px;line-height:1.7;}
+.fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(91,123,245,0.07);}
+.fpd-diary .eaudio-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${ACCENT};color:#fff;border:none;cursor:pointer;flex-shrink:0;}
+.fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,123,245,0.2);}
+.fpd-diary .eaudio-fill{height:4px;border-radius:99px;background:${ACCENT};transition:width .3s;}
+.fpd-diary .etags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:11px;background:#141B2E;color:${ACCENT2};}
+
+/* empty state */
+.fpd-diary .empty{padding:52px 12px;text-align:center;}
+.fpd-diary .empty .ei{width:36px;height:36px;margin:0 auto 12px;color:rgba(91,123,245,0.3);}
+.fpd-diary .empty .et{color:${MUTED};}
+
+/* detail rail */
+.fpd-diary .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.fpd-diary .dacts{display:flex;gap:2px;}
+.fpd-diary .dacts button{background:none;border:none;cursor:pointer;padding:5px;display:flex;color:${MUTED};}
+.fpd-diary .dbadges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.fpd-diary .dtitle{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;margin-bottom:12px;}
+.fpd-diary .dbody{color:${SOFT};font-size:14px;line-height:1.9;white-space:pre-wrap;}
+.fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:12px;text-align:center;background:rgba(91,123,245,0.07);border:1px solid rgba(91,123,245,0.16);}
+.fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-size:13px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .dvideo{margin-top:16px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;}
+.fpd-diary .dvideo img,.fpd-diary .dvideo-placeholder{width:100%;height:140px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.09);}
+.fpd-diary .dvideo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.28);}
+.fpd-diary .dvideo-play{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
+
+/* diary stats mini panel */
+.fpd-diary .stats-hd{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:10px;font-family:var(--font-display);}
+.fpd-diary .stat-row{display:flex;justify-content:space-between;padding:9px 12px;border-radius:9px;background:#0F1624;}
+.fpd-diary .stat-row + .stat-row{margin-top:6px;}
+.fpd-diary .stat-row span:first-child{color:${MUTED};font-size:12px;}
+.fpd-diary .stat-row span:last-child{color:${ACCENT2};font-size:12px;font-weight:600;font-family:var(--font-mono);}
+
+/* recorder panel (used inside modal) */
+.fpd-diary .recorder{display:flex;flex-direction:column;align-items:center;gap:18px;padding:32px 20px;}
+.fpd-diary .rec-dial{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid;position:relative;transition:all .3s;}
+.fpd-diary .rec-ping{position:absolute;inset:0;border-radius:50%;background:rgba(208,107,107,0.16);animation:fpd-diary-ping 1.4s cubic-bezier(0,0,0.2,1) infinite;}
+@keyframes fpd-diary-ping{75%,100%{transform:scale(1.6);opacity:0;}}
+.fpd-diary .rec-time{font-family:var(--font-mono);font-size:24px;color:${TEXT};font-weight:700;}
+.fpd-diary .rec-hint{color:${MUTED};font-size:13px;}
+.fpd-diary .rec-btn{padding:12px 32px;border-radius:16px;font-weight:600;font-size:13px;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);box-shadow:0 4px 16px rgba(58,91,217,0.35);}
+.fpd-diary .rec-video-wrap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#000;max-height:280px;}
+.fpd-diary .rec-video{width:100%;max-height:280px;object-fit:cover;display:block;}
+.fpd-diary .rec-live{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:99px;background:rgba(208,107,107,0.9);}
+.fpd-diary .rec-live-dot{width:8px;height:8px;border-radius:50%;background:#fff;}
+.fpd-diary .rec-live span{color:#fff;font-size:11px;font-family:var(--font-mono);}
+.fpd-diary .rec-record-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;font-weight:600;font-size:13px;background:${NEG};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-record-dot{width:12px;height:12px;border-radius:50%;background:#fff;}
+.fpd-diary .rec-stop-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;font-weight:600;font-size:13px;background:#374669;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-cancel-btn{padding:10px 24px;border-radius:10px;font-size:13px;background:#0F1624;color:${MUTED};border:none;cursor:pointer;font-family:var(--font-body);}
+
+/* modal */
+.fpd-diary .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-diary .modal{width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
+.fpd-diary .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-diary .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-diary .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-diary .modal-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
+.fpd-diary .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-diary .field textarea{resize:none;line-height:1.8;}
+.fpd-diary .field input::placeholder,.fpd-diary .field textarea::placeholder{color:${FAINT};}
+.fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-diary .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:11px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
+.fpd-diary .type-btn.on{background:rgba(91,123,245,0.14);border-color:${ACCENT};color:${ACCENT2};}
+.fpd-diary .type-btn:not(.on){color:${MUTED};}
+.fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,123,245,0.14);}
+.fpd-diary .record-done{padding:26px 0;text-align:center;}
+.fpd-diary .upload-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 0;border-radius:16px;border:2px dashed rgba(91,123,245,0.28);background:#0F1624;cursor:pointer;}
+.fpd-diary .mood-grid{display:flex;gap:8px;}
+.fpd-diary .mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:11px;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);background:#0F1624;}
+.fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-diary .modal-foot .save:hover{filter:brightness(1.08);}
+`;
 
 export function DigitalDiary() {
   const [entries, setEntries] = useState<DiaryEntry[]>(sampleEntries);
@@ -330,108 +465,129 @@ export function DigitalDiary() {
     { id:"photo",   icon:<Upload size={16}/>,   label:"Upload Media" },
   ];
 
+  const filterButtons: { id: EntryType | "all"; label: string }[] = [
+    { id:"all",     label:"All" },
+    { id:"written", label:"📝" },
+    { id:"audio",   label:"🎙️" },
+    { id:"video",   label:"🎥" },
+  ];
+
   const today = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 
-  return (
-    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
-      <div style={{ maxWidth:1200, margin:"0 auto" }} className="space-y-5">
+  const writtenCount = entries.filter(e=>e.type==="written").length;
+  const audioCount = entries.filter(e=>e.type==="audio").length;
+  const videoCount = entries.filter(e=>e.type==="video").length;
+  const privateCount = entries.filter(e=>e.private).length;
 
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Digital Diary</h1>
-            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>{today} · {entries.length} entries · Written, audio & video recordings</p>
+  const kpis = [
+    { label: "Total Entries", value: String(entries.length), sub: `${today.split(",")[0]}, ${today.split(",")[1]}`, icon: <BookOpen size={14} />, dot: ACCENT2 },
+    { label: "Voice Recordings", value: String(audioCount), sub: "Audio entries", icon: <Mic size={14} />, dot: ACCENT2 },
+    { label: "Video Entries", value: String(videoCount), sub: "Video diary clips", icon: <Video size={14} />, dot: ACCENT2 },
+    { label: "Private Entries", value: String(privateCount), sub: "Restricted visibility", icon: <Lock size={14} />, dot: NEG },
+  ];
+
+  return (
+    <div className="fpd-diary">
+      <style dangerouslySetInnerHTML={{ __html: DIARY_CSS }} />
+      <div className="fpd-diary-grain" />
+
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><BookOpen size={12} /> PERSONAL JOURNAL</div>
+            <h1 className="pg-h1">Digital Diary</h1>
+            <div className="pg-sub">{today} · {entries.length} entries · Written, audio & video recordings</div>
           </div>
-          <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
+          <button className="btn-primary" onClick={() => setCreating(true)}>
             <Plus size={15}/> New Entry
           </button>
         </div>
 
-        {/* Search + Filter */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48 glow-surface" style={CARD}>
-            <Search size={13} color="rgba(255,255,255,0.65)"/>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search diary entries..."
-              style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
+              </div>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Search + filter ── */}
+        <div className="toolbar">
+          <div className="card search">
+            <Search size={13} color={MUTED}/>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search diary entries..."/>
           </div>
-          <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
-            {[{id:"all",label:"All"},{id:"written",label:"📝"},{id:"audio",label:"🎙️"},{id:"video",label:"🎥"}].map(f => (
-              <button key={f.id} onClick={() => setFilterType(f.id as any)}
-                className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                style={{ background:filterType===f.id?"#3A5BD9":"transparent", color:filterType===f.id?"#fff":"rgba(255,255,255,0.7)", fontWeight:filterType===f.id?600:400 }}>
+          <div className="seg">
+            {filterButtons.map(f => (
+              <button key={f.id} className={filterType === f.id ? "on" : ""} onClick={() => setFilterType(f.id as any)}>
                 {f.label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
+        <div className="bento">
           {/* Entry list */}
-          <div className="lg:col-span-2 space-y-3">
+          <div className="elist">
             {filtered.length === 0 && (
-              <div className="py-16 text-center rounded-2xl glow-surface" style={CARD}>
-                <BookOpen size={36} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
-                <div style={{ color:"rgba(255,255,255,0.65)" }}>No entries found. Start writing your story.</div>
+              <div className="card empty glow-surface">
+                <BookOpen size={36} className="ei"/>
+                <div className="et">No entries found. Start writing your story.</div>
               </div>
             )}
             {filtered.map(entry => {
               const mood = entry.mood ? moodConfig[entry.mood] : null;
               return (
                 <div key={entry.id}
-                  className="p-5 rounded-2xl cursor-pointer transition-all hover:shadow-md"
-                  style={{ ...CARD, borderColor:selected?.id===entry.id?"#3A5BD9":"rgba(58,91,217,0.1)", borderWidth:selected?.id===entry.id?2:1 }}
+                  className={`card ecard glow-surface ${selected?.id===entry.id ? "sel" : ""}`}
                   onClick={() => setSelected(selected?.id===entry.id ? null : entry)}>
-                  {/* thumbnail for video */}
                   {entry.thumbnail && (
-                    <div style={{ borderRadius:10, overflow:"hidden", marginBottom:12, height:120, position:"relative" }}>
-                      <img src={entry.thumbnail} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.3)" }}>
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background:"rgba(22,22,31,0.9)" }}>
-                          <Play size={18} color="#FFFFFF" fill="#FFFFFF"/>
-                        </div>
+                    <div className="ethumb">
+                      <img src={entry.thumbnail} alt=""/>
+                      <div className="ethumb-overlay">
+                        <div className="ethumb-play"><Play size={18} color="#FFFFFF" fill="#FFFFFF"/></div>
                       </div>
-                      {entry.duration && <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded" style={{ background:"rgba(0,0,0,0.7)", color:"#fff", fontSize:11, ...MONO }}>{entry.duration}</div>}
+                      {entry.duration && <div className="ethumb-dur">{entry.duration}</div>}
                     </div>
                   )}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO }}>{entry.date}</span>
+                  <div className="etop">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
+                        <span className="edate">{entry.date}</span>
                         <TypeBadge type={entry.type}/>
-                        {entry.private && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:"rgba(229,62,62,0.1)", color:"#E53E3E", fontSize:9, ...MONO }}>🔒 PRIVATE</span>}
+                        {entry.private && <span className="private-badge">🔒 PRIVATE</span>}
                       </div>
-                      <div style={{ color:"#FFFFFF", fontSize:15, fontWeight:600 }}>{entry.title}</div>
+                      <div className="etitle">{entry.title}</div>
                     </div>
                     {mood && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-xl flex-shrink-0" style={{ background:mood.bg, color:mood.color }}>
+                      <div className="emood" style={{ background: `${mood.color}1C`, color: mood.color }}>
                         {mood.icon}
-                        <span style={{ fontSize:11, fontWeight:500 }}>{mood.label}</span>
+                        <span>{mood.label}</span>
                       </div>
                     )}
                   </div>
-                  {entry.body && (
-                    <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }} className="line-clamp-2">{entry.body}</p>
-                  )}
+                  {entry.body && <p className="ebody line-clamp-2">{entry.body}</p>}
                   {entry.type === "audio" && entry.duration && (
-                    <div className="flex items-center gap-3 mt-3 px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)" }}>
-                      <button onClick={e => { e.stopPropagation(); setPlayingAudio(playingAudio===entry.id ? null : entry.id); if (playingAudio !== entry.id) toast.success("▶ Playing audio entry — " + entry.duration); }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background:"#3A5BD9", color:"#fff" }}>
+                    <div className="eaudio">
+                      <button onClick={e => { e.stopPropagation(); setPlayingAudio(playingAudio===entry.id ? null : entry.id); if (playingAudio !== entry.id) toast.success("▶ Playing audio entry — " + entry.duration); }} className="eaudio-btn">
                         {playingAudio===entry.id ? <Pause size={14}/> : <Play size={14}/>}
                       </button>
-                      <div style={{ flex:1 }}>
-                        <div className="h-1 rounded-full" style={{ background:"rgba(58,91,217,0.2)" }}>
-                          <div className="h-1 rounded-full" style={{ width:playingAudio===entry.id?"35%":"0%", background:"#3A5BD9", transition:"width 0.3s" }}/>
-                        </div>
+                      <div className="eaudio-track">
+                        <div className="eaudio-fill" style={{ width: playingAudio===entry.id ? "35%" : "0%" }}/>
                       </div>
-                      <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO }}>{entry.duration}</span>
+                      <span className="edate">{entry.duration}</span>
                     </div>
                   )}
                   {entry.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {entry.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#141B2E", color:"#8AA0FF" }}>#{tag}</span>
-                      ))}
+                    <div className="etags">
+                      {entry.tags.map(tag => <span key={tag} className="etag">#{tag}</span>)}
                     </div>
                   )}
                 </div>
@@ -439,13 +595,13 @@ export function DigitalDiary() {
             })}
           </div>
 
-          {/* Selected detail / calendar sidebar */}
-          <div className="space-y-4">
+          {/* Selected detail / stats sidebar */}
+          <div className="flex flex-col gap-4">
             {selected ? (
-              <div className="rounded-2xl p-5 sticky top-4 glow-surface" style={CARD}>
-                <div className="flex items-center justify-between mb-4">
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO }}>{selected.date}</div>
-                  <div className="flex gap-1">
+              <div className="card pad glow-surface" style={{ position: "sticky", top: 16 }}>
+                <div className="dhead">
+                  <div className="edate">{selected.date}</div>
+                  <div className="dacts">
                     <button onClick={() => {
                       const newTitle = prompt("Edit entry title:", selected.title);
                       if (newTitle && newTitle.trim()) {
@@ -453,68 +609,61 @@ export function DigitalDiary() {
                         setSelected(s => s ? { ...s, title: newTitle.trim() } : s);
                         toast.success("Entry updated");
                       }
-                    }} style={{ color:"rgba(255,255,255,0.65)", padding:4 }}><Edit2 size={13}/></button>
-                    <button onClick={() => { handleDelete(selected.id); }} style={{ color:"#FC8181", padding:4 }}><Trash2 size={13}/></button>
-                    <button onClick={() => setSelected(null)} style={{ color:"rgba(255,255,255,0.65)", padding:4 }}><X size={13}/></button>
+                    }}><Edit2 size={13}/></button>
+                    <button onClick={() => { handleDelete(selected.id); }} style={{ color: NEG }}><Trash2 size={13}/></button>
+                    <button onClick={() => setSelected(null)}><X size={13}/></button>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 mb-4 flex-wrap">
+                <div className="dbadges">
                   <TypeBadge type={selected.type}/>
                   {selected.mood && (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs" style={{ background:moodConfig[selected.mood].bg, color:moodConfig[selected.mood].color }}>
+                    <span className="emood" style={{ background: `${moodConfig[selected.mood].color}1C`, color: moodConfig[selected.mood].color }}>
                       {moodConfig[selected.mood].icon} {moodConfig[selected.mood].label}
                     </span>
                   )}
-                  {selected.private && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:"rgba(229,62,62,0.1)", color:"#E53E3E" }}>🔒 Private</span>}
+                  {selected.private && <span className="private-badge">🔒 Private</span>}
                 </div>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF", marginBottom:12, fontWeight:600 }}>{selected.title}</div>
-                {selected.body && (
-                  <div style={{ color:"rgba(255,255,255,0.8)", fontSize:14, lineHeight:1.9, whiteSpace:"pre-wrap" }}>{selected.body}</div>
-                )}
+                <div className="dtitle">{selected.title}</div>
+                {selected.body && <div className="dbody">{selected.body}</div>}
                 {selected.type === "audio" && (
-                  <div className="mt-4 px-4 py-4 rounded-xl text-center" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.15)" }}>
-                    <Mic size={24} color="#3A5BD9" style={{ margin:"0 auto 8px" }}/>
-                    <div style={{ color:"#FFFFFF", fontSize:13 }}>Voice Recording · {selected.duration}</div>
-                    <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="mt-3 flex items-center gap-2 mx-auto px-4 py-2 rounded-xl text-sm" style={{ background:"#3A5BD9", color:"#fff" }}>
+                  <div className="daudio">
+                    <Mic size={24} color={ACCENT2} style={{ margin:"0 auto 8px" }}/>
+                    <div style={{ color: TEXT, fontSize: 13 }}>Voice Recording · {selected.duration}</div>
+                    <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="daudio-btn">
                       <Play size={13}/> Play Recording
                     </button>
                   </div>
                 )}
                 {selected.type === "video" && (
-                  <div className="mt-4 rounded-xl overflow-hidden relative" style={{ cursor:"pointer" }} onClick={() => toast.success("▶ Video playback started — demo mode")}>
+                  <div className="dvideo" onClick={() => toast.success("▶ Video playback started — demo mode")}>
                     {selected.thumbnail
-                      ? <img src={selected.thumbnail} alt="" style={{ width:"100%", height:140, objectFit:"cover" }}/>
-                      : <div className="h-32 flex items-center justify-center" style={{ background:"rgba(58,91,217,0.08)" }}><Video size={28} color="#3A5BD9"/></div>
+                      ? <img src={selected.thumbnail} alt=""/>
+                      : <div className="dvideo-placeholder"><Video size={28} color={ACCENT2}/></div>
                     }
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.25)" }}>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background:"rgba(22,22,31,0.9)" }}>
-                        <Play size={20} color="#FFFFFF" fill="#FFFFFF"/>
-                      </div>
+                    <div className="dvideo-overlay">
+                      <div className="dvideo-play"><Play size={20} color="#FFFFFF" fill="#FFFFFF"/></div>
                     </div>
                   </div>
                 )}
                 {selected.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-4">
-                    {selected.tags.map(t => <span key={t} className="px-2 py-0.5 rounded-full text-xs" style={{ background:"#141B2E", color:"#8AA0FF" }}>#{t}</span>)}
+                  <div className="etags" style={{ marginTop: 16 }}>
+                    {selected.tags.map(t => <span key={t} className="etag">#{t}</span>)}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl p-6 text-center glow-surface" style={CARD}>
-                <BookOpen size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
-                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:13, marginBottom:12 }}>Select an entry to read</div>
-                <div className="space-y-2">
-                  <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600 }}>Your Diary Stats</div>
+              <div className="card pad glow-surface" style={{ textAlign: "center" }}>
+                <BookOpen size={28} color="rgba(91,123,245,0.3)" style={{ margin:"0 auto 12px" }}/>
+                <div style={{ color: MUTED, fontSize: 13, marginBottom: 12 }}>Select an entry to read</div>
+                <div className="stats-hd" style={{ textAlign: "left" }}>Your Diary Stats</div>
+                <div>
                   {[
-                    { label:"Written entries", value:entries.filter(e=>e.type==="written").length },
-                    { label:"Voice recordings", value:entries.filter(e=>e.type==="audio").length },
-                    { label:"Video entries", value:entries.filter(e=>e.type==="video").length },
-                    { label:"Private entries", value:entries.filter(e=>e.private).length },
+                    { label:"Written entries", value: writtenCount },
+                    { label:"Voice recordings", value: audioCount },
+                    { label:"Video entries", value: videoCount },
+                    { label:"Private entries", value: privateCount },
                   ].map(s => (
-                    <div key={s.label} className="flex justify-between px-3 py-2 rounded-lg" style={{ background:"#0F1A33" }}>
-                      <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{s.label}</span>
-                      <span style={{ color:"#8AA0FF", fontSize:12, fontWeight:600 }}>{s.value}</span>
-                    </div>
+                    <div key={s.label} className="stat-row"><span>{s.label}</span><span>{s.value}</span></div>
                   ))}
                 </div>
               </div>
@@ -523,122 +672,100 @@ export function DigitalDiary() {
         </div>
       </div>
 
-      {/* NEW ENTRY MODAL */}
+      {/* ── New entry modal ── */}
       {creating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.4)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-2xl rounded-2xl overflow-hidden glow-surface" style={CARD}>
-            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>New Diary Entry</h3>
-              <button onClick={() => setCreating(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
+        <div className="backdrop">
+          <div className="card modal glow-surface">
+            <div className="modal-head">
+              <h3>New Diary Entry</h3>
+              <button onClick={() => setCreating(false)}><X size={16}/></button>
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight:"80vh" }}>
-              {/* Entry type selector */}
-              <div className="grid grid-cols-4 gap-2">
+            <div className="modal-body">
+              <div className="type-grid">
                 {typeButtons.map(tb => (
-                  <button key={tb.id} onClick={() => setNewType(tb.id)}
-                    className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all text-sm"
-                    style={{ background:newType===tb.id?"rgba(58,91,217,0.12)":"#0F1A33", border:`2px solid ${newType===tb.id?"#3A5BD9":"transparent"}`, color:newType===tb.id?"#3A5BD9":"rgba(255,255,255,0.7)" }}>
+                  <button key={tb.id} onClick={() => setNewType(tb.id)} className={`type-btn ${newType===tb.id ? "on" : ""}`}>
                     {tb.icon}
-                    <span style={{ fontSize:11 }}>{tb.label}</span>
+                    <span>{tb.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* Title */}
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>TITLE</label>
-                <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))} placeholder="What's on your mind today?"
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:15, outline:"none", fontFamily:"var(--font-display)" }}/>
+              <div className="field">
+                <label>TITLE</label>
+                <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))} placeholder="What's on your mind today?" style={{ fontFamily: "var(--font-display)", fontSize: 15 }}/>
               </div>
 
-              {/* Written body */}
               {newType === "written" && (
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR ENTRY</label>
-                  <textarea value={form.body} onChange={e => setForm(p=>({...p,body:e.target.value}))} placeholder="Write freely. This is your space…" rows={8}
-                    className="w-full px-4 py-3 rounded-xl resize-none" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:14, outline:"none", lineHeight:1.8 }}/>
+                <div className="field">
+                  <label>YOUR ENTRY</label>
+                  <textarea value={form.body} onChange={e => setForm(p=>({...p,body:e.target.value}))} placeholder="Write freely. This is your space…" rows={8}/>
                 </div>
               )}
 
-              {/* Audio recorder */}
               {newType === "audio" && (
-                <div className="rounded-2xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)" }}>
+                <div className="record-box">
                   {audioSaved
-                    ? <div className="py-6 text-center"><div className="text-2xl mb-2">✅</div><div style={{ color:"#48BB78", fontWeight:600 }}>Audio recorded successfully</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: POS, fontWeight: 600 }}>Audio recorded successfully</div></div>
                     : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); toast.success(`Recorded ${dur} of audio`); }}/>}
                 </div>
               )}
 
-              {/* Video recorder */}
               {newType === "video" && (
-                <div className="rounded-2xl p-4 glow-surface" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)" }}>
+                <div className="record-box" style={{ padding: 16 }}>
                   {videoDuration
-                    ? <div className="py-6 text-center"><div className="text-2xl mb-2">✅</div><div style={{ color:"#48BB78", fontWeight:600 }}>Video recorded: {videoDuration}</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: POS, fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
                     : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
                 </div>
               )}
 
-              {/* Upload */}
               {newType === "photo" && (
                 <div>
                   <input ref={fileRef} type="file" accept="video/*,image/*,audio/*" className="hidden" onChange={e => {
                     const f = e.target.files?.[0];
                     if (f) { toast.success(`"${f.name}" attached to entry`); }
                   }}/>
-                  <div onClick={() => fileRef.current?.click()}
-                    className="flex flex-col items-center gap-3 py-8 rounded-2xl border-2 border-dashed cursor-pointer"
-                    style={{ borderColor:"rgba(58,91,217,0.25)", background:"#0F1A33" }}>
-                    <Upload size={28} color="#3A5BD9" style={{ opacity:0.6 }}/>
-                    <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Upload video, photo, or audio file</div>
-                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
+                  <div onClick={() => fileRef.current?.click()} className="upload-box">
+                    <Upload size={28} color={ACCENT2} style={{ opacity:0.7 }}/>
+                    <div style={{ color: MUTED, fontSize: 13 }}>Upload video, photo, or audio file</div>
+                    <div style={{ color: FAINT, fontSize: 11 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
                   </div>
-                  <div className="flex justify-center mt-3">
+                  <div className="flex justify-center" style={{ marginTop: 12 }}>
                     <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" attached to diary entry`)} size="sm" label="Or Scan Document"/>
                   </div>
                 </div>
               )}
 
-              {/* Mood */}
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>HOW ARE YOU FEELING?</label>
-                <div className="flex gap-2">
+              <div className="field">
+                <label>HOW ARE YOU FEELING?</label>
+                <div className="mood-grid">
                   {(Object.entries(moodConfig) as [Mood, typeof moodConfig[Mood]][]).map(([k, cfg]) => (
-                    <button key={k} onClick={() => setForm(p=>({...p,mood:k}))}
-                      className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all"
-                      style={{ background:form.mood===k?cfg.bg:"#0F1A33", border:`2px solid ${form.mood===k?cfg.color:"transparent"}`, color:cfg.color }}>
+                    <button key={k} onClick={() => setForm(p=>({...p,mood:k}))} className="mood-btn"
+                      style={{ background: form.mood===k ? `${cfg.color}1C` : "#0F1624", borderColor: form.mood===k ? cfg.color : "transparent", color: cfg.color }}>
                       {cfg.icon}
-                      <span style={{ fontSize:10 }}>{cfg.label}</span>
+                      <span style={{ fontSize: 10 }}>{cfg.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Tags + Privacy */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>TAGS (comma separated)</label>
-                  <input value={form.tags} onChange={e => setForm(p=>({...p,tags:e.target.value}))} placeholder="family, reflection, love"
-                    className="w-full px-4 py-2.5 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.12)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                <div className="field">
+                  <label>TAGS (comma separated)</label>
+                  <input value={form.tags} onChange={e => setForm(p=>({...p,tags:e.target.value}))} placeholder="family, reflection, love"/>
                 </div>
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.65)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>PRIVACY</label>
-                  <button onClick={() => setForm(p=>({...p,private:!p.private}))}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-                    style={{ background:form.private?"rgba(229,62,62,0.08)":"#0F1A33", border:`1px solid ${form.private?"rgba(229,62,62,0.25)":"rgba(58,91,217,0.12)"}`, color:form.private?"#E53E3E":"rgba(255,255,255,0.7)" }}>
+                <div className="field">
+                  <label>PRIVACY</label>
+                  <button onClick={() => setForm(p=>({...p,private:!p.private}))} className="privacy-btn"
+                    style={{ background: form.private ? "rgba(208,107,107,0.10)" : "#0F1624", border: `1px solid ${form.private ? "rgba(208,107,107,0.28)" : "rgba(255,255,255,0.09)"}`, color: form.private ? NEG : MUTED }}>
                     {form.private ? <Lock size={14}/> : <Eye size={14}/>}
                     {form.private ? "Private — restricted" : "Shared with legacy contacts"}
                   </button>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
-                  <Save size={14} style={{ display:"inline", marginRight:6 }}/>Save Entry
-                </button>
-                <button onClick={() => setCreating(false)} className="px-6 py-3 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-              </div>
+            </div>
+            <div className="modal-foot">
+              <button className="save" onClick={handleSave}><Save size={14}/>Save Entry</button>
+              <button className="btn-sec" onClick={() => setCreating(false)}>Cancel</button>
             </div>
           </div>
         </div>

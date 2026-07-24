@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Baby, Plus, X, Phone, MapPin, Clock, User, ChevronDown, ChevronUp, CheckCircle, AlertCircle } from "lucide-react";
+import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 
-const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const INPUT: React.CSSProperties = { background:"rgba(110,139,255,0.05)", border:"1px solid rgba(110,139,255,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 interface AuthorizedPerson {
   name: string;
@@ -108,6 +115,97 @@ const initRecords: DaycareRecord[] = [
   },
 ];
 
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-daycare so nothing else in the app is affected. */
+const DAYCARE_CSS = `
+.fpd-daycare{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-daycare *{box-sizing:border-box;}
+.fpd-daycare-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-daycare .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-daycare .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-daycare .card.pad{padding:22px;}
+.fpd-daycare .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-daycare .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-daycare .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-daycare .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
+.fpd-daycare .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-daycare .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-daycare .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.065);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* segmented sub-tabs (per record) */
+.fpd-daycare .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);width:fit-content;flex-wrap:wrap;}
+.fpd-daycare .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-daycare .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+
+/* record cards */
+.fpd-daycare .rlist{display:flex;flex-direction:column;gap:14px;}
+.fpd-daycare .rhead{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;background:none;border:none;cursor:pointer;text-align:left;}
+.fpd-daycare .rico{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};}
+.fpd-daycare .rtitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+.fpd-daycare .rname{font-family:var(--font-display);font-size:16.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
+.fpd-daycare .rchild{color:${SOFT};font-size:13px;font-weight:500;margin-bottom:6px;}
+.fpd-daycare .rmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.fpd-daycare .rmeta span{display:flex;align-items:center;gap:5px;color:${MUTED};font-size:11.5px;}
+.fpd-daycare .stat-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;}
+.fpd-daycare .rbody{border-top:1px solid rgba(255,255,255,0.065);}
+.fpd-daycare .rtabbar{padding:16px 22px 0;}
+.fpd-daycare .rpanel{padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;}
+
+/* facility info tile grid */
+.fpd-daycare .igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:760px){.fpd-daycare .igrid{grid-template-columns:1fr;}}
+.fpd-daycare .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.05);}
+.fpd-daycare .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-daycare .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
+
+/* alert / notes */
+.fpd-daycare .alert{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border-radius:11px;background:rgba(208,107,107,0.08);border:1px solid rgba(208,107,107,0.28);}
+.fpd-daycare .alert .ak{color:${NEG};font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;margin-bottom:4px;}
+.fpd-daycare .alert .av{color:${TEXT};font-size:13px;}
+.fpd-daycare .alert .am{color:${MUTED};font-size:12px;margin-top:4px;}
+.fpd-daycare .notebox{padding:13px 15px;border-radius:11px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);}
+.fpd-daycare .notebox .nk{color:${WARN};font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:6px;}
+.fpd-daycare .notebox .nv{color:${TEXT};font-size:13px;line-height:1.6;}
+
+/* authorized pickups */
+.fpd-daycare .pickup-intro{color:${MUTED};font-size:12.5px;line-height:1.65;}
+.fpd-daycare .pcard{display:flex;align-items:flex-start;gap:14px;padding:15px 16px;border-radius:12px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);}
+.fpd-daycare .pavatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.14);color:${ACCENT2};font-family:var(--font-display);font-weight:700;font-size:14px;}
+.fpd-daycare .pinfo-name{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;}
+.fpd-daycare .pinfo-name b{color:${TEXT};font-size:14px;font-weight:600;}
+.fpd-daycare .pinfo-name span{color:${MUTED};font-size:12px;}
+.fpd-daycare .pinfo-row{display:flex;align-items:center;gap:6px;color:${MUTED};font-size:11.5px;}
+.fpd-daycare .pinfo-row.ok{color:${POS};margin-top:3px;}
+.fpd-daycare .adddash{width:100%;padding:12px;border-radius:11px;border:1px dashed rgba(91,123,245,0.4);background:rgba(91,123,245,0.04);color:${ACCENT2};font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-daycare .adddash:hover{background:rgba(91,123,245,0.09);}
+
+/* documents */
+.fpd-daycare .docrow{display:flex;flex-wrap:wrap;gap:8px;}
+.fpd-daycare .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,123,245,0.08);color:${ACCENT2};border:1px solid rgba(91,123,245,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
+.fpd-daycare .docchip:hover{background:rgba(91,123,245,0.16);}
+
+/* modal */
+.fpd-daycare .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-daycare .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.fpd-daycare .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.065);}
+.fpd-daycare .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-daycare .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-daycare .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-daycare .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-daycare .field input,.fpd-daycare .field select,.fpd-daycare .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-daycare .field input::placeholder,.fpd-daycare .field textarea::placeholder{color:${FAINT};}
+.fpd-daycare .field input:focus,.fpd-daycare .field select:focus,.fpd-daycare .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-daycare .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.065);flex-wrap:wrap;}
+.fpd-daycare .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-daycare .modal-foot .save:hover{filter:brightness(1.08);}
+`;
+
 export function DaycareInfo() {
   const [records, setRecords] = useState<DaycareRecord[]>(initRecords);
   const [expanded, setExpanded] = useState<number | null>(1);
@@ -125,168 +223,168 @@ export function DaycareInfo() {
     setShowAdd(false);
   }
 
-  const statusColor = { active:"#48BB78", inactive:"#8A9AB8" };
+  const statusColor: Record<string, string> = { active: POS, inactive: MUTED };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Daycare Information</h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>Facility details, authorized pickup persons, allergies, schedules, and important documents for each child.</p>
-        </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>
-          <Plus size={14}/> Add Daycare
-        </button>
-      </div>
+    <div className="fpd-daycare">
+      <style dangerouslySetInnerHTML={{ __html: DAYCARE_CSS }} />
+      <div className="fpd-daycare-grain" />
 
-      <div className="space-y-4">
-        {records.map(rec => (
-          <div key={rec.id} className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
-            {/* Header */}
-            <button className="w-full p-5 text-left" onClick={() => setExpanded(expanded===rec.id ? null : rec.id)}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width:48, height:48, background:"rgba(110,139,255,0.12)" }}>
-                    <Baby size={22} color="#6E8BFF"/>
-                  </div>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Baby size={12} /> Childcare Records</div>
+            <h1 className="pg-h1">Daycare Information</h1>
+            <div className="pg-sub">Facility details, authorized pickup persons, allergies, schedules, and important documents for each child.</div>
+          </div>
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Daycare
+          </button>
+        </div>
+
+        {/* ── Records ── */}
+        <div className="rlist">
+          {records.map(rec => (
+            <div key={rec.id} className="card glow-surface">
+              <button className="rhead" onClick={() => setExpanded(expanded === rec.id ? null : rec.id)}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                  <div className="rico"><Baby size={22} /></div>
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"var(--foreground)" }}>{rec.facilityName}</span>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:rec.status==="active"?"rgba(72,187,120,0.12)":"rgba(107,114,128,0.12)", color:statusColor[rec.status], ...MONO }}>{rec.status.toUpperCase()}</span>
+                    <div className="rtitle">
+                      <span className="rname">{rec.facilityName}</span>
+                      <span className="stat-badge" style={{ background: rec.status === "active" ? "rgba(95,190,145,0.14)" : "rgba(140,151,180,0.14)", color: statusColor[rec.status] }}>{rec.status.toUpperCase()}</span>
                     </div>
-                    <div style={{ color:"var(--foreground)", fontSize:14, fontWeight:500 }}>Child: {rec.childName}</div>
-                    <div className="flex items-center gap-4 mt-1 flex-wrap">
-                      <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Clock size={10}/>{rec.dropoffTime} drop-off · {rec.pickupTime} pickup</span>
-                      <span className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><MapPin size={10}/>{rec.address.split(",")[1]?.trim()}</span>
+                    <div className="rchild">Child: {rec.childName}</div>
+                    <div className="rmeta">
+                      <span><Clock size={10} />{rec.dropoffTime} drop-off · {rec.pickupTime} pickup</span>
+                      <span><MapPin size={10} />{rec.address.split(",")[1]?.trim()}</span>
                     </div>
                   </div>
                 </div>
-                {expanded===rec.id ? <ChevronUp size={16} color="var(--muted-foreground)"/> : <ChevronDown size={16} color="var(--muted-foreground)"/>}
-              </div>
-            </button>
+                {expanded === rec.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+              </button>
 
-            {expanded===rec.id && (
-              <div className="border-t" style={{ borderColor:"var(--border)" }}>
-                {/* Sub tabs */}
-                <div className="flex gap-1 p-2 px-5" style={{ background:"rgba(110,139,255,0.03)" }}>
-                  {[["info","📋 Facility Info"],["pickups","🚗 Authorized Pickups"],["docs","📄 Documents"]].map(([id,label]) => (
-                    <button key={id} onClick={() => setActiveTab(id as any)}
-                      className="px-4 py-1.5 rounded-lg text-xs font-semibold"
-                      style={{ background:activeTab===id?"#6E8BFF":"transparent", color:activeTab===id?"#fff":"var(--muted-foreground)" }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="p-5 space-y-4">
-                  {activeTab === "info" && (
-                    <>
-                      <div className="grid md:grid-cols-2 gap-3">
-                        {[
-                          ["Director",rec.directorName],["Teacher / Caregiver",rec.teacherName],
-                          ["Teacher Phone",rec.teacherPhone||"—"],["Facility Phone",rec.phone],
-                          ["Email",rec.email],["Website",rec.website],
-                          ["Days",rec.days],["Drop-off Time",rec.dropoffTime],
-                          ["Pickup Time",rec.pickupTime],["Tuition",rec.tuition],
-                          ["Tuition Due",rec.tuitionDue],["Payment Method",rec.paymentMethod],
-                          ["Emergency Contact",rec.emergencyContact],["Emergency Phone",rec.emergencyPhone],
-                          ["Enrolled",rec.enrollDate],["Address",rec.address],
-                        ].map(([label,value])=>(
-                          <div key={label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
-                            <div style={{ color:"var(--muted-foreground)", fontSize:10, ...MONO, marginBottom:3 }}>{label.toUpperCase()}</div>
-                            <div style={{ color:"var(--foreground)", fontSize:13 }}>{value}</div>
-                          </div>
-                        ))}
-                      </div>
-                      {rec.allergiesOnFile !== "None known" && (
-                        <div className="flex items-start gap-2 px-4 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.07)", border:"1px solid rgba(252,129,129,0.25)" }}>
-                          <AlertCircle size={14} color="#FC8181" style={{ marginTop:1, flexShrink:0 }}/>
-                          <div>
-                            <div style={{ color:"#FC8181", fontSize:11, fontWeight:700, ...MONO }}>ALLERGIES ON FILE</div>
-                            <div style={{ color:"var(--foreground)", fontSize:13 }}>{rec.allergiesOnFile}</div>
-                            {rec.medicationsOnFile !== "None" && <div style={{ color:"var(--muted-foreground)", fontSize:12, marginTop:2 }}>Medications: {rec.medicationsOnFile}</div>}
-                          </div>
-                        </div>
-                      )}
-                      {rec.notes && (
-                        <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
-                          <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:4 }}>NOTES</div>
-                          <div style={{ color:"var(--foreground)", fontSize:13, lineHeight:1.6 }}>{rec.notes}</div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {activeTab === "pickups" && (
-                    <div className="space-y-3">
-                      <div style={{ color:"var(--muted-foreground)", fontSize:12, lineHeight:1.6 }}>
-                        These individuals are authorized to pick up {rec.childName}. All must present a government-issued photo ID to facility staff.
-                      </div>
-                      {rec.authorizedPickups.map((p,i) => (
-                        <div key={i} className="flex items-start gap-4 p-4 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
-                          <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0" style={{ width:40, height:40, background:"rgba(110,139,255,0.12)", color:"#6E8BFF", fontFamily:"var(--font-display)", fontSize:14 }}>
-                            {p.name.split(" ").map((w:string)=>w[0]).join("").slice(0,2)}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span style={{ color:"var(--foreground)", fontSize:14, fontWeight:600 }}>{p.name}</span>
-                              <span style={{ color:"var(--muted-foreground)", fontSize:12 }}>{p.relationship}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-xs" style={{ color:"var(--muted-foreground)" }}><Phone size={10}/>{p.phone}</div>
-                            <div className="flex items-center gap-1 text-xs mt-0.5" style={{ color:"#48BB78" }}><CheckCircle size={10}/>{p.photoId}</div>
-                          </div>
-                        </div>
+              {expanded === rec.id && (
+                <div className="rbody">
+                  {/* ── Segmented sub-tabs ── */}
+                  <div className="rtabbar">
+                    <div className="seg">
+                      {([["info","📋 Facility Info"],["pickups","🚗 Authorized Pickups"],["docs","📄 Documents"]] as const).map(([id,label]) => (
+                        <button key={id} className={activeTab === id ? "on" : ""} onClick={() => setActiveTab(id)}>
+                          {label}
+                        </button>
                       ))}
-                      <button onClick={() => toast.success("Add authorized pickup — opens form (demo)")}
-                        className="w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2"
-                        style={{ border:"1px dashed rgba(110,139,255,0.4)", color:"#6E8BFF", background:"rgba(110,139,255,0.04)" }}>
-                        <Plus size={13}/> Add Authorized Pickup Person
-                      </button>
                     </div>
-                  )}
+                  </div>
 
-                  {activeTab === "docs" && (
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {rec.documents.map(d => (
-                          <button key={d} onClick={() => toast.success(`Opening: ${d}`)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs"
-                            style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.15)" }}>
-                            📄 {d}
-                          </button>
+                  <div className="rpanel">
+                    {activeTab === "info" && (
+                      <>
+                        <div className="igrid">
+                          {[
+                            ["Director",rec.directorName],["Teacher / Caregiver",rec.teacherName],
+                            ["Teacher Phone",rec.teacherPhone||"—"],["Facility Phone",rec.phone],
+                            ["Email",rec.email],["Website",rec.website],
+                            ["Days",rec.days],["Drop-off Time",rec.dropoffTime],
+                            ["Pickup Time",rec.pickupTime],["Tuition",rec.tuition],
+                            ["Tuition Due",rec.tuitionDue],["Payment Method",rec.paymentMethod],
+                            ["Emergency Contact",rec.emergencyContact],["Emergency Phone",rec.emergencyPhone],
+                            ["Enrolled",rec.enrollDate],["Address",rec.address],
+                          ].map(([label,value]) => (
+                            <div key={label} className="tile">
+                              <div className="tk">{label}</div>
+                              <div className="tv">{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        {rec.allergiesOnFile !== "None known" && (
+                          <div className="alert">
+                            <AlertCircle size={14} color={NEG} style={{ marginTop: 1, flexShrink: 0 }} />
+                            <div>
+                              <div className="ak">ALLERGIES ON FILE</div>
+                              <div className="av">{rec.allergiesOnFile}</div>
+                              {rec.medicationsOnFile !== "None" && <div className="am">Medications: {rec.medicationsOnFile}</div>}
+                            </div>
+                          </div>
+                        )}
+                        {rec.notes && (
+                          <div className="notebox">
+                            <div className="nk">NOTES</div>
+                            <div className="nv">{rec.notes}</div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {activeTab === "pickups" && (
+                      <>
+                        <div className="pickup-intro">
+                          These individuals are authorized to pick up {rec.childName}. All must present a government-issued photo ID to facility staff.
+                        </div>
+                        {rec.authorizedPickups.map((p,i) => (
+                          <div key={i} className="pcard glow-surface">
+                            <div className="pavatar">{p.name.split(" ").map((w:string)=>w[0]).join("").slice(0,2)}</div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div className="pinfo-name">
+                                <b>{p.name}</b>
+                                <span>{p.relationship}</span>
+                              </div>
+                              <div className="pinfo-row"><Phone size={10} />{p.phone}</div>
+                              <div className="pinfo-row ok"><CheckCircle size={10} />{p.photoId}</div>
+                            </div>
+                          </div>
                         ))}
-                      </div>
-                      <ScanButton folder="personal" onUpload={doc => { setRecords(p=>p.map(r=>r.id===rec.id?{...r,documents:[...r.documents,doc.name]}:r)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan or Upload Document"/>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+                        <button className="adddash" onClick={() => toast.success("Add authorized pickup — opens form (demo)")}>
+                          <Plus size={13} /> Add Authorized Pickup Person
+                        </button>
+                      </>
+                    )}
 
-      {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
-            <div className="flex items-center justify-between mb-1">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>Add Daycare / Childcare</h3>
-              <button onClick={()=>setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
+                    {activeTab === "docs" && (
+                      <>
+                        <div className="docrow">
+                          {rec.documents.map(d => (
+                            <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
+                              <FileText size={12} /> {d}
+                            </button>
+                          ))}
+                        </div>
+                        <ScanButton folder="personal" onUpload={doc => { setRecords(p=>p.map(r=>r.id===rec.id?{...r,documents:[...r.documents,doc.name]}:r)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan or Upload Document" />
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            {[["Child's Full Name *","childName",""],["Facility Name *","facilityName",""],["Address","address",""],["Phone","phone",""],["Email","email",""],["Director's Name","directorName",""],["Teacher / Caregiver","teacherName",""],["Drop-off Time","dropoffTime","e.g. 7:30 AM"],["Pickup Time","pickupTime","e.g. 5:30 PM"],["Days Attended","days","e.g. Monday – Friday"],["Monthly Tuition","tuition","e.g. $1,200/month"],["Allergies on File","allergiesOnFile","e.g. Peanuts or None known"],["Emergency Contact","emergencyContact",""],["Emergency Phone","emergencyPhone",""],["Notes","notes",""]].map(([label,key,ph])=>(
-              <div key={key}>
-                <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{label.toUpperCase()}</label>
-                <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} style={INPUT}/>
+          ))}
+        </div>
+
+        {/* ── Add daycare modal ── */}
+        {showAdd && (
+          <div className="backdrop">
+            <div className="card modal glow-surface">
+              <div className="modal-head">
+                <h3>Add Daycare / Childcare</h3>
+                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
               </div>
-            ))}
-            <div className="flex gap-3 pt-2">
-              <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information"/>
-              <button onClick={addRecord} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>Add Daycare</button>
-              <button onClick={()=>setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
+              <div className="modal-body">
+                {[["Child's Full Name *","childName",""],["Facility Name *","facilityName",""],["Address","address",""],["Phone","phone",""],["Email","email",""],["Director's Name","directorName",""],["Teacher / Caregiver","teacherName",""],["Drop-off Time","dropoffTime","e.g. 7:30 AM"],["Pickup Time","pickupTime","e.g. 5:30 PM"],["Days Attended","days","e.g. Monday – Friday"],["Monthly Tuition","tuition","e.g. $1,200/month"],["Allergies on File","allergiesOnFile","e.g. Peanuts or None known"],["Emergency Contact","emergencyContact",""],["Emergency Phone","emergencyPhone",""],["Notes","notes",""]].map(([label,key,ph]) => (
+                  <div className="field" key={key}>
+                    <label>{label.toUpperCase()}</label>
+                    <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
+                  </div>
+                ))}
+                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
+              </div>
+              <div className="modal-foot">
+                <button className="save" onClick={addRecord}>Add Daycare</button>
+                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
