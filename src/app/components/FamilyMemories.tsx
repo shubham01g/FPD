@@ -6,21 +6,36 @@ import { ScanButton } from "./DocumentScanner";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards" | "pets";
 
-const memories = [
-  { id: 1, title: "Family Christmas 2024", date: "Dec 25, 2024", type: "photo", description: "Last Christmas at the Sacramento house. All four kids were home.", tags: ["family", "christmas", "2024"] },
-  { id: 2, title: "Michael's Wedding Day", date: "Jun 12, 2022", type: "photo", description: "Michael married Amanda Torres in Napa Valley. One of the best days of my life.", tags: ["michael", "wedding", "family"] },
-  { id: 3, title: "Big Sur Camping Trip", date: "Aug 8, 2023", type: "video", description: "Three-day camping trip with the grandkids. Tyler caught his first fish.", tags: ["outdoors", "grandkids", "camping"] },
-  { id: 4, title: "Dad's 60th Birthday Celebration", date: "Nov 14, 2021", type: "photo", description: "Surprise party at Mario's. Family flew in from three states.", tags: ["birthday", "family", "milestone"] },
+/* Photo Memories — photos you upload from a device or scan in from prints.
+   Each entry is one moment, holding one or many photos.                     */
+interface PhotoMemory {
+  id: number; title: string; date: string; description: string;
+  tags: string[]; photos: string[]; count: number;
+}
+
+const photoMemories: PhotoMemory[] = [
+  { id: 1, title: "Family Christmas 2024", date: "Dec 25, 2024", description: "Last Christmas at the Sacramento house. All four kids were home.", tags: ["family", "christmas", "2024"], photos: [], count: 42 },
+  { id: 2, title: "Michael's Wedding Day", date: "Jun 12, 2022", description: "Michael married Amanda Torres in Napa Valley. One of the best days of my life.", tags: ["michael", "wedding", "family"], photos: [], count: 168 },
+  { id: 3, title: "Scanned Prints — Summers 1978–1984", date: "Scanned Mar 3, 2026", description: "Shoebox of prints from the Oakland years, scanned in and labeled.", tags: ["scanned", "childhood", "archive"], photos: [], count: 96 },
+  { id: 4, title: "Dad's 60th Birthday Celebration", date: "Nov 14, 2021", description: "Surprise party at Mario's. Family flew in from three states.", tags: ["birthday", "family", "milestone"], photos: [], count: 31 },
 ];
 
-const videoMessages = [
-  { id: 1, title: "Message to Sarah", recipient: "Sarah Johnson (Spouse)", duration: "12:42", recorded: "Apr 10, 2026", description: "Personal message, life advice, and final words of love." },
-  { id: 2, title: "Message to Michael", recipient: "Michael Doe (Son)", duration: "8:17", recorded: "Apr 10, 2026", description: "Career advice, life lessons, and proud father's farewell." },
-  { id: 3, title: "Message to Emily", recipient: "Emily Doe (Daughter)", duration: "9:03", recorded: "Apr 10, 2026", description: "Personal message and encouragement for her future." },
-  { id: 4, title: "Message to Grandchildren", recipient: "Tyler, Lily, & Jack Doe", duration: "6:28", recorded: "Apr 10, 2026", description: "Stories, life wisdom, and grandfather's love for the next generation." },
+/* Video Memories — old home videos you already have, uploaded or digitized.
+   Recording a new message for someone lives in Messages to Loved Ones.       */
+interface VideoMemory {
+  id: number; title: string; filmed: string; duration: string; added: string;
+  description: string; source: string; url?: string;
+}
+
+const videoMemories: VideoMemory[] = [
+  { id: 1, title: "Big Sur Camping Trip", filmed: "Aug 8, 2023", duration: "14:22", added: "Apr 10, 2026", description: "Three-day camping trip with the grandkids. Tyler caught his first fish.", source: "Uploaded from phone" },
+  { id: 2, title: "Michael & Amanda's Wedding — Full Ceremony", filmed: "Jun 12, 2022", duration: "1:04:38", added: "Apr 10, 2026", description: "The full ceremony and reception in Napa Valley, from the videographer's copy.", source: "Uploaded from camcorder" },
+  { id: 3, title: "Christmas Morning 1994", filmed: "Dec 25, 1994", duration: "22:10", added: "Apr 11, 2026", description: "The kids opening presents at the old house. Grandma Rose is on this one.", source: "Digitized VHS tape" },
+  { id: 4, title: "Dad's 60th Birthday Party", filmed: "Nov 14, 2021", duration: "31:47", added: "Apr 11, 2026", description: "Surprise party at Mario's — the toasts and the whole dinner.", source: "Uploaded from phone" },
 ];
 
-const audioMessages = [
+/* Audio Memories — recorded here, in your own voice. */
+const audioMemories: { id:number; title:string; recipient:string; duration:string; recorded:string; description:string; url?:string }[] = [
   { id: 1, title: "Bedtime Story for Emma", recipient: "Emma Doe (Granddaughter)", duration: "7:14", recorded: "Apr 12, 2026", description: "Grandfather reading 'The Velveteen Rabbit' — for her to hear when she's older." },
   { id: 2, title: "Life Advice — 10 Things I Wish I Knew", recipient: "All Children & Grandchildren", duration: "18:32", recorded: "Apr 11, 2026", description: "Ten pieces of wisdom from a lifetime of lessons — work, love, money, health, and happiness." },
   { id: 3, title: "Wedding Anniversary Message for Sarah", recipient: "Sarah Johnson (Spouse)", duration: "4:55", recorded: "Apr 10, 2026", description: "A private anniversary message — to be played on our anniversary each year." },
@@ -132,9 +147,57 @@ const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"
 
 export function FamilyMemories() {
   const [tab, setTab] = useState<Tab>("memories");
-  const [memoriesList, setMemoriesList] = useState(memories);
-  const [messagesList, setMessagesList] = useState(videoMessages);
-  const [audioList, setAudioList] = useState(audioMessages);
+  const [memoriesList, setMemoriesList] = useState(photoMemories);
+  const [videoList, setVideoList] = useState(videoMemories);
+  const [audioList, setAudioList] = useState(audioMemories);
+
+  // ── Photo upload / scan staging ─────────────────────────────────────
+  const [pendingPhotos, setPendingPhotos] = useState<string[]>([]);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  function stagePhotos(files: FileList | null) {
+    const images = Array.from(files || []).filter(f => f.type.startsWith("image/"));
+    if (!images.length) { toast.error("Please choose image files"); return; }
+    setPendingPhotos(p => [...p, ...images.map(f => URL.createObjectURL(f))]);
+    setShowAdd("memories");
+    toast.success(`${images.length} photo${images.length > 1 ? "s" : ""} ready — give this memory a title`);
+  }
+
+  function clearPendingPhotos() {
+    pendingPhotos.forEach(URL.revokeObjectURL);
+    setPendingPhotos([]);
+  }
+
+  // ── Video upload staging ────────────────────────────────────────────
+  const [pendingVideo, setPendingVideo] = useState<{ url:string; name:string } | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  function stageVideo(files: FileList | null) {
+    const file = Array.from(files || []).find(f => f.type.startsWith("video/"));
+    if (!file) { toast.error("Please choose a video file"); return; }
+    if (pendingVideo) URL.revokeObjectURL(pendingVideo.url);
+    const url = URL.createObjectURL(file);
+    setPendingVideo({ url, name: file.name });
+    setForm(p => ({ ...p, title: p.title || file.name.replace(/\.[^.]+$/, "") }));
+    setShowAdd("messages");
+    toast.success(`"${file.name}" ready — add the details to save it`);
+  }
+
+  /* Read the real running time off the file once it is in the list. */
+  function probeDuration(url: string, id: number) {
+    const el = document.createElement("video");
+    el.preload = "metadata";
+    el.onloadedmetadata = () => {
+      const s = Math.round(el.duration || 0);
+      if (!s || !isFinite(s)) return;
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      const dur = h
+        ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`
+        : `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+      setVideoList(p => p.map(v => v.id === id ? { ...v, duration: dur } : v));
+    };
+    el.src = url;
+  }
 
   // ── Audio Recorder state ────────────────────────────────────────────
   const [recState, setRecState] = useState<"idle"|"recording"|"paused"|"done">("idle");
@@ -207,7 +270,7 @@ export function FamilyMemories() {
     mediaRecorderRef.current?.stop();
   }
 
-  function saveAudioMessage() {
+  function saveAudioMemory() {
     if (!recTitle.trim()) { toast.error("Please enter a title for the recording"); return; }
     const duration = formatTime(recSeconds);
     setAudioList(p => [...p, {
@@ -216,11 +279,11 @@ export function FamilyMemories() {
       recipient: recRecipient || "Family",
       duration,
       recorded: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-      description: recDesc || `Audio recording — ${duration}`,
+      description: recDesc || `Audio memory — ${duration}`,
+      url: recUrl || undefined,   // kept so it plays back from the list
     }]);
-    toast.success(`"${recTitle}" saved to Audio Messages`);
-    // cleanup
-    if (recUrl) URL.revokeObjectURL(recUrl);
+    toast.success(`"${recTitle}" saved to Audio Memories`);
+    // cleanup — the blob URL stays alive for playback in the list
     setRecState("idle"); setRecTitle(""); setRecRecipient(""); setRecDesc("");
     setRecBlob(null); setRecUrl(null); setRecSeconds(0);
   }
@@ -238,7 +301,14 @@ export function FamilyMemories() {
   const [showPetForm, setShowPetForm] = useState(false);
   const [expandedPet, setExpandedPet] = useState<number|null>(1);
 
-  useEscapeKey(showAdd !== null || showPetForm, () => { setShowAdd(null); setShowPetForm(false); });
+  /* Closing without saving drops any staged media so blob URLs don't leak. */
+  function closeAddModal() {
+    clearPendingPhotos();
+    if (pendingVideo) { URL.revokeObjectURL(pendingVideo.url); setPendingVideo(null); }
+    setShowAdd(null); setForm({});
+  }
+
+  useEscapeKey(showAdd !== null || showPetForm, () => { closeAddModal(); setShowPetForm(false); });
 
   // Pet form state matching screenshot fields exactly
   const [petPhotos, setPetPhotos] = useState<string[]>([]);
@@ -282,18 +352,28 @@ export function FamilyMemories() {
 
   function quickAdd() {
     switch(showAdd) {
-      case "memories":
+      case "memories": {
         if (!form.title) { toast.error("Title required"); return; }
-        setMemoriesList(p=>[...p,{id:Date.now(),title:form.title,date:form.date||new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),type:form.type||"photo",description:form.desc||"",tags:(form.tags||"").split(",").map(t=>t.trim()).filter(Boolean)}]);
-        toast.success(`"${form.title}" added to Memories`); break;
-      case "messages":
+        setMemoriesList(p=>[...p,{id:Date.now(),title:form.title,date:form.date||new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",tags:(form.tags||"").split(",").map(t=>t.trim()).filter(Boolean),photos:pendingPhotos,count:pendingPhotos.length}]);
+        toast.success(pendingPhotos.length
+          ? `"${form.title}" saved — ${pendingPhotos.length} photo${pendingPhotos.length>1?"s":""}`
+          : `"${form.title}" added to Photo Memories`);
+        setPendingPhotos([]);   // ownership passes to the saved memory
+        break;
+      }
+      case "messages": {
         if (!form.title) { toast.error("Title required"); return; }
-        setMessagesList(p=>[...p,{id:Date.now(),title:form.title,recipient:form.recipient||"Family",duration:"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||""}]);
-        toast.success(`"${form.title}" video message added`); break;
+        const id = Date.now();
+        setVideoList(p=>[...p,{id,title:form.title,filmed:form.filmed||"Unknown",duration:pendingVideo?"…":"—",added:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",source:form.source||(pendingVideo?"Uploaded file":"Added manually"),url:pendingVideo?.url}]);
+        if (pendingVideo) probeDuration(pendingVideo.url, id);
+        toast.success(`"${form.title}" added to Video Memories`);
+        setPendingVideo(null);  // ownership passes to the saved memory
+        break;
+      }
       case "audio":
         if (!form.title) { toast.error("Title required"); return; }
         setAudioList(p=>[...p,{id:Date.now(),title:form.title,recipient:form.recipient||"Family",duration:"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||""}]);
-        toast.success(`"${form.title}" audio message added`); break;
+        toast.success(`"${form.title}" added to Audio Memories`); break;
       case "kids":
         if (!form.name) { toast.error("Name required"); return; }
         setKidsList(p=>[...p,{id:Date.now(),child:form.name,activities:(form.activities||"").split(",").map(t=>t.trim()).filter(Boolean),school:form.school||"",notes:form.notes||""}]);
@@ -319,9 +399,9 @@ export function FamilyMemories() {
   }
 
   const addFields: Record<Tab, {key:string;label:string;ph:string;type?:string}[]> = {
-    memories:  [{key:"title",label:"Title *",ph:"e.g. Christmas 2025"},{key:"date",label:"Date",ph:"e.g. Dec 25, 2025"},{key:"type",label:"Type (photo/video)",ph:"photo"},{key:"desc",label:"Description",ph:"What happened?"},{key:"tags",label:"Tags (comma-separated)",ph:"family, holiday"}],
-    messages:  [{key:"title",label:"Message Title *",ph:"e.g. Message to Sarah"},{key:"recipient",label:"Recipient",ph:"e.g. Sarah Johnson (Spouse)"},{key:"desc",label:"Description",ph:"What this message covers"}],
-    audio:     [{key:"title",label:"Audio Message Title *",ph:"e.g. Life Advice for Michael"},{key:"recipient",label:"Recipient",ph:"e.g. Michael Doe (Son)"},{key:"desc",label:"Description",ph:"What this recording covers"}],
+    memories:  [{key:"title",label:"Title *",ph:"e.g. Christmas 2025"},{key:"date",label:"Date Taken",ph:"e.g. Dec 25, 2025"},{key:"desc",label:"Description",ph:"What happened?"},{key:"tags",label:"Tags (comma-separated)",ph:"family, holiday"}],
+    messages:  [{key:"title",label:"Video Title *",ph:"e.g. Christmas Morning 1994"},{key:"filmed",label:"When It Was Filmed",ph:"e.g. Dec 25, 1994"},{key:"source",label:"Source",ph:"e.g. Digitized VHS tape"},{key:"desc",label:"Description",ph:"What's on this video"}],
+    audio:     [{key:"title",label:"Audio Memory Title *",ph:"e.g. Life Advice for Michael"},{key:"recipient",label:"For",ph:"e.g. Michael Doe (Son)"},{key:"desc",label:"Description",ph:"What this recording covers"}],
     kids:      [{key:"name",label:"Child's Name & Relation *",ph:"e.g. Tyler Doe (Grandson, age 8)"},{key:"school",label:"School",ph:""},{key:"activities",label:"Activities (comma-separated)",ph:"Baseball, Swimming"},{key:"notes",label:"Notes",ph:""}],
     keepsakes: [{key:"item",label:"Item Name *",ph:"e.g. Grandfather's Watch"},{key:"location",label:"Where It Is",ph:""},{key:"value",label:"Value",ph:"e.g. Sentimental / ~$500"},{key:"intendedFor",label:"Intended For",ph:""},{key:"story",label:"Story / Significance",ph:"Why this item matters"}],
     goals:     [{key:"goal",label:"Goal *",ph:"e.g. Pay off mortgage"},{key:"progress",label:"Current Progress (%)",ph:"0"},{key:"notes",label:"Notes",ph:""}],
@@ -330,9 +410,9 @@ export function FamilyMemories() {
   };
 
   const tabs = [
-    { id: "memories" as Tab, label: "Memories", icon: <Camera size={14} /> },
-    { id: "messages" as Tab, label: "Video Messages", icon: <Video size={14} /> },
-    { id: "audio" as Tab,    label: "Audio Messages", icon: <Mic size={14} /> },
+    { id: "memories" as Tab, label: "Photo Memories", icon: <Camera size={14} /> },
+    { id: "messages" as Tab, label: "Video Memories", icon: <Video size={14} /> },
+    { id: "audio" as Tab,    label: "Audio Memories", icon: <Mic size={14} /> },
     { id: "kids" as Tab, label: "Kids & Family", icon: <Heart size={14} /> },
     { id: "keepsakes" as Tab, label: "Keepsakes", icon: <Star size={14} /> },
     { id: "goals" as Tab, label: "Goals", icon: <Target size={14} /> },
@@ -359,45 +439,93 @@ export function FamilyMemories() {
 
       {tab === "memories" && (
         <div className="space-y-4">
-          <div className="flex justify-end"><button onClick={()=>setShowAdd("memories")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Plus size={14} /> Add Memory</button></div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>
+              Upload photos from your phone or computer, or scan in old prints with your camera.
+            </p>
+            <div className="flex items-center gap-2">
+              <input ref={photoInputRef} type="file" accept="image/*" multiple className="hidden"
+                onChange={e => { stagePhotos(e.target.files); e.target.value = ""; }}/>
+              <button onClick={()=>photoInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}>
+                <Upload size={14} /> Upload Photos
+              </button>
+              <ScanButton folder="memories" label="Scan Photo"
+                onUpload={doc => {
+                  setPendingPhotos(p => [...p, doc.previewUrl]);
+                  setForm(p => ({ ...p, title: p.title || doc.name.replace(/\.[^.]+$/, "") }));
+                  setShowAdd("memories");
+                  toast.success("Scan added — give this memory a title");
+                }}/>
+              <button onClick={()=>setShowAdd("memories")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--secondary)", color: "var(--muted-foreground)" }}><Plus size={14} /> Add Memory</button>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-4">
-            {memoriesList.map(m => (
+            {memoriesList.map(m => {
+              const total = m.photos.length || m.count;
+              return (
               <div key={m.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                 <div className="flex items-center gap-2 mb-3">
-                  {m.type === "video" ? <Video size={16} color="var(--primary)" /> : <Camera size={16} color="var(--primary)" />}
+                  <Camera size={16} color="var(--primary)" />
                   <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{m.date}</span>
-                  <span className="px-2 py-0.5 rounded text-xs capitalize ml-auto" style={{ background: "var(--secondary)", color: "var(--muted-foreground)" }}>{m.type}</span>
+                  <span className="px-2 py-0.5 rounded text-xs ml-auto" style={{ background: "var(--secondary)", color: "var(--muted-foreground)" }}>{total} photo{total === 1 ? "" : "s"}</span>
                 </div>
+                {m.photos.length > 0 && (
+                  <div className="flex gap-1.5 mb-3">
+                    {m.photos.slice(0,4).map((src,i) => (
+                      <img key={i} src={src} alt="" style={{ width:56, height:56, objectFit:"cover", borderRadius:8, border:"1px solid var(--border)" }}/>
+                    ))}
+                    {m.photos.length > 4 && (
+                      <div className="flex items-center justify-center" style={{ width:56, height:56, borderRadius:8, background:"var(--secondary)", color:"var(--muted-foreground)", fontSize:12 }}>
+                        +{m.photos.length - 4}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--foreground)", marginBottom: 6 }}>{m.title}</div>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 13, lineHeight: 1.6 }}>{m.description}</div>
                 <div className="flex flex-wrap gap-1 mt-3">
                   {m.tags.map(tag => <span key={tag} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "var(--primary)" }}>#{tag}</span>)}
                 </div>
               </div>
-            ))}
+            );})}
           </div>
         </div>
       )}
 
       {tab === "messages" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Private video messages delivered to designated recipients only after your passing.</p>
-            <button onClick={()=>setShowAdd("messages")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Video size={14} /> Record Message</button>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p style={{ color: "var(--muted-foreground)", fontSize: 14, maxWidth: 620 }}>
+              Upload the videos you already have — home movies, phone clips, digitized VHS and camcorder tapes.
+              To record a new message for someone, use <span style={{ color: "var(--primary)" }}>Messages to Loved Ones</span>.
+            </p>
+            <div className="flex items-center gap-2">
+              <input ref={videoInputRef} type="file" accept="video/*" className="hidden"
+                onChange={e => { stageVideo(e.target.files); e.target.value = ""; }}/>
+              <button onClick={()=>videoInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--primary)", color: "#070D1A", fontWeight: 600 }}><Upload size={14} /> Upload Video</button>
+              <button onClick={()=>setShowAdd("messages")} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "var(--secondary)", color: "var(--muted-foreground)" }}><Plus size={14} /> Add Details Only</button>
+            </div>
           </div>
-          {messagesList.map(msg => (
-            <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          {videoList.map(vid => (
+            <div key={vid.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
               <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center rounded-xl" style={{ width: 52, height: 52, background: "rgba(58,91,217,0.1)", flexShrink: 0 }}>
-                  <Play size={22} color="var(--primary)" />
-                </div>
+                {vid.url ? (
+                  <video src={vid.url} controls preload="metadata"
+                    style={{ width: 168, borderRadius: 12, background: "#000", flexShrink: 0 }}/>
+                ) : (
+                  <button onClick={() => toast.success(`▶ Playing: ${vid.title}`)}
+                    className="flex items-center justify-center rounded-xl" style={{ width: 52, height: 52, background: "rgba(58,91,217,0.1)", flexShrink: 0 }}>
+                    <Play size={22} color="var(--primary)" />
+                  </button>
+                )}
                 <div className="flex-1">
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 2 }}>{msg.title}</div>
-                  <div style={{ color: "var(--primary)", fontSize: 13, marginBottom: 4 }}>For: {msg.recipient}</div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{msg.description}</div>
-                  <div className="flex items-center gap-4 mt-3">
-                    <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>{msg.duration}</span>
-                    <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Recorded {msg.recorded}</span>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 2 }}>{vid.title}</div>
+                  <div style={{ color: "var(--primary)", fontSize: 13, marginBottom: 4 }}>Filmed: {vid.filmed}</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{vid.description}</div>
+                  <div className="flex items-center gap-4 mt-3 flex-wrap">
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>{vid.duration}</span>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{vid.source}</span>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Added {vid.added}</span>
                     <span className="px-2 py-0.5 rounded text-xs ml-auto" style={{ background: "rgba(72,187,120,0.12)", color: "#48BB78", fontFamily: "var(--font-mono)" }}>SECURED</span>
                   </div>
                 </div>
@@ -409,11 +537,11 @@ export function FamilyMemories() {
 
       {tab === "audio" && (
         <div className="space-y-5">
-          <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Record your voice for loved ones — stories, life advice, love letters, songs. Private audio messages delivered after your passing.</p>
+          <p style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Record memories in your own voice — stories, life advice, family history, songs. Kept private in your vault and passed down to the people you choose.</p>
 
           {/* ── Recorder ─────────────────────────────────────────────── */}
           <div className="p-6 rounded-2xl space-y-4 glow-surface" style={{ background:"rgba(110,139,255,0.06)", border:"2px solid rgba(110,139,255,0.2)" }}>
-            <div style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>🎙️ AUDIO RECORDER</div>
+            <div style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>🎙️ AUDIO MEMORY RECORDER</div>
 
             {/* Mic error */}
             {micError && (
@@ -430,7 +558,7 @@ export function FamilyMemories() {
                   <Mic size={36} color="#6E8BFF"/>
                 </div>
                 <div style={{ color:"var(--muted-foreground)", fontSize:13, textAlign:"center" }}>
-                  Press Record to start capturing your audio message.<br/>Your microphone will be activated.
+                  Press Record to start capturing your audio memory.<br/>Your microphone will be activated.
                 </div>
                 <button onClick={startRecording}
                   className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-sm"
@@ -501,8 +629,8 @@ export function FamilyMemories() {
 
                 {/* Title + recipient + desc */}
                 {[
-                  { label:"Message Title *", val:recTitle, setter:setRecTitle, ph:"e.g. Life Advice for Michael" },
-                  { label:"Recipient", val:recRecipient, setter:setRecRecipient, ph:"e.g. Michael Doe (Son)" },
+                  { label:"Memory Title *", val:recTitle, setter:setRecTitle, ph:"e.g. Life Advice for Michael" },
+                  { label:"For", val:recRecipient, setter:setRecRecipient, ph:"e.g. Michael Doe (Son)" },
                   { label:"Description", val:recDesc, setter:setRecDesc, ph:"What this recording is about" },
                 ].map(f => (
                   <div key={f.label}>
@@ -513,10 +641,10 @@ export function FamilyMemories() {
                 ))}
 
                 <div className="flex gap-3">
-                  <button onClick={saveAudioMessage}
+                  <button onClick={saveAudioMemory}
                     className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
                     style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F" }}>
-                    <Volume2 size={14}/> Save Audio Message
+                    <Volume2 size={14}/> Save Audio Memory
                   </button>
                   <button onClick={discardRecording}
                     className="px-4 py-3 rounded-xl text-sm"
@@ -531,7 +659,7 @@ export function FamilyMemories() {
           {/* ── Saved audio messages ──────────────────────────────────── */}
           {audioList.length > 0 && (
             <div>
-              <div style={{ color:"var(--muted-foreground)", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:10 }}>SAVED AUDIO MESSAGES ({audioList.length})</div>
+              <div style={{ color:"var(--muted-foreground)", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:10 }}>SAVED AUDIO MEMORIES ({audioList.length})</div>
               <div className="space-y-3">
                 {audioList.map(msg => (
                   <div key={msg.id} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
@@ -544,16 +672,19 @@ export function FamilyMemories() {
                         <div style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 2 }}>{msg.title}</div>
                         <div style={{ color: "#6E8BFF", fontSize: 13, marginBottom: 4 }}>For: {msg.recipient}</div>
                         <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{msg.description}</div>
+                        {msg.url && <audio src={msg.url} controls style={{ width:"100%", marginTop:10, borderRadius:10 }}/>}
                         <div className="flex items-center gap-4 mt-3">
                           <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>{msg.duration}</span>
                           <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Recorded {msg.recorded}</span>
-                          <button
-                            onClick={() => toast.success(`▶ Playing: ${msg.title}`)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold ml-auto"
-                            style={{ background: "rgba(110,139,255,0.1)", color: "#6E8BFF" }}>
-                            <Play size={11}/> Play
-                          </button>
-                          <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(72,187,120,0.12)", color: "#48BB78", fontFamily: "var(--font-mono)" }}>SECURED</span>
+                          {!msg.url && (
+                            <button
+                              onClick={() => toast.success(`▶ Playing: ${msg.title}`)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                              style={{ background: "rgba(110,139,255,0.1)", color: "#6E8BFF" }}>
+                              <Play size={11}/> Play
+                            </button>
+                          )}
+                          <span className="px-2 py-0.5 rounded text-xs ml-auto" style={{ background: "rgba(72,187,120,0.12)", color: "#48BB78", fontFamily: "var(--font-mono)" }}>SECURED</span>
                         </div>
                       </div>
                     </div>
@@ -943,10 +1074,56 @@ export function FamilyMemories() {
           <div className="w-full max-w-md rounded-2xl p-6 space-y-3 overflow-y-auto glow-surface" style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-2">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>
-                Add {showAdd === "memories" ? "Memory" : showAdd === "messages" ? "Video Message" : showAdd === "audio" ? "Audio Message" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : showAdd === "awards" ? "Award" : "Pet"}
+                Add {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : showAdd === "awards" ? "Award" : "Pet"}
               </h3>
-              <button onClick={()=>{setShowAdd(null);setForm({})}} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
+              <button onClick={closeAddModal} style={{ color:"var(--muted-foreground)" }}><X size={16}/></button>
             </div>
+
+            {/* Staged photos */}
+            {showAdd === "memories" && (
+              <div className="space-y-2">
+                {pendingPhotos.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {pendingPhotos.map((src,i)=>(
+                      <div key={i} className="relative">
+                        <img src={src} alt="" style={{ width:60, height:60, objectFit:"cover", borderRadius:8, border:"1px solid var(--border)" }}/>
+                        <button onClick={()=>{ URL.revokeObjectURL(src); setPendingPhotos(p=>p.filter((_,j)=>j!==i)); }}
+                          className="absolute flex items-center justify-center rounded-full"
+                          style={{ top:-6, right:-6, width:18, height:18, background:"var(--card)", border:"1px solid var(--border)", color:"var(--muted-foreground)" }}>
+                          <X size={10}/>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={()=>photoInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm"
+                  style={{ background:"rgba(58,91,217,0.06)", border:"1px dashed rgba(58,91,217,0.35)", color:"var(--primary)" }}>
+                  <ImageIcon size={14}/> {pendingPhotos.length ? "Add more photos" : "Attach photos"}
+                </button>
+              </div>
+            )}
+
+            {/* Staged video */}
+            {showAdd === "messages" && (
+              pendingVideo ? (
+                <div className="space-y-2">
+                  <video src={pendingVideo.url} controls preload="metadata" style={{ width:"100%", borderRadius:12, background:"#000" }}/>
+                  <div className="flex items-center gap-2">
+                    <span style={{ color:"var(--muted-foreground)", fontSize:12, flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{pendingVideo.name}</span>
+                    <button onClick={()=>{ URL.revokeObjectURL(pendingVideo.url); setPendingVideo(null); }}
+                      className="px-3 py-1.5 rounded-xl text-xs" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Remove</button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={()=>videoInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm"
+                  style={{ background:"rgba(58,91,217,0.06)", border:"1px dashed rgba(58,91,217,0.35)", color:"var(--primary)" }}>
+                  <Upload size={14}/> Attach a video file
+                </button>
+              )
+            )}
+
             {(addFields[showAdd]||[]).map(f=>(
               <div key={f.key}>
                 <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:3 }}>{f.label.toUpperCase()}</label>
@@ -955,7 +1132,7 @@ export function FamilyMemories() {
             ))}
             <div className="flex gap-3 pt-2">
               <button onClick={quickAdd} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background:"var(--primary)", color:"#070D1A" }}>Add</button>
-              <button onClick={()=>{setShowAdd(null);setForm({})}} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
+              <button onClick={closeAddModal} className="px-5 py-3 rounded-xl text-sm" style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>Cancel</button>
             </div>
           </div>
         </div>

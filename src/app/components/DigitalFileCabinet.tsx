@@ -3,21 +3,22 @@ import {
   Folder, FolderOpen, FileText, Image, Film, Archive,
   Upload, Plus, ChevronRight, Search, Grid, List,
   Download, Eye, Trash2, X, ArrowLeft, Lock, Star,
-  Heart, Stethoscope, Wallet, Car, Zap, PawPrint,
-  Gift, Trophy, Target, Shield, FileCheck, Home, Camera
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
 
-const CARD: React.CSSProperties = {
-  background: "#101728",
-  border: "1px solid rgba(58,91,217,0.1)",
-  boxShadow: "0 2px 12px rgba(58,91,217,0.06)",
-  borderRadius: 16,
-};
-const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar & AI assistant) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
+const ACCENT  = "#5B7BF5";
+const ACCENT2 = "#8AA0FF";
+const POS     = "#5FBE91";
+const NEG     = "#D06B6B";
 
 interface FolderFile {
   id: string; name: string;
@@ -312,14 +313,167 @@ const cabinets: Cabinet[] = [
   },
 ];
 
-function getIcon(type: string, color = "#3A5BD9", size = 28) {
+/* Refined per-folder accent — one harmonised family (the same nine hues used
+   in the Calendar's SRC map) instead of the original web-safe rainbow, so the
+   File Cabinet reads as one product with the rest of the redesigned portal.
+   The Secret Vault keeps a dedicated "locked" red since it is the one folder
+   gated behind a PIN. Underlying folder data (files, sub-folders, emoji) is
+   untouched — only the display accent is recoloured here. */
+const RAMP = ["#8AA0FF","#7EB0DC","#A99BE6","#6FB2B4","#82B8A6","#97A2C6","#B7A9DE","#79A6C9","#6E86E8"];
+const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
+  ...c, color: c.id === "secret" ? NEG : RAMP[i % RAMP.length],
+}));
+
+function getIcon(type: string, color = ACCENT2, size = 28) {
   if (type === "folder") return <Folder size={size} color={color} fill={`${color}22`}/>;
-  if (type === "image")  return <Image size={size} color="#F6AD55"/>;
-  if (type === "video")  return <Film  size={size} color="#4A90D9"/>;
-  if (type === "pdf" || type === "doc") return <FileText size={size} color="#3A5BD9"/>;
-  if (type === "other") return <Lock size={size} color="#E53E3E"/>;
-  return <Archive size={size} color="#8A9AB8"/>;
+  if (type === "image")  return <Image size={size} color="#D9A55E"/>;
+  if (type === "video")  return <Film  size={size} color={ACCENT}/>;
+  if (type === "pdf" || type === "doc") return <FileText size={size} color={color}/>;
+  if (type === "other") return <Lock size={size} color={NEG}/>;
+  return <Archive size={size} color={MUTED}/>;
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-cab so nothing else in the app is affected. */
+const CAB_CSS = `
+.fpd-cab{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-cab *{box-sizing:border-box;}
+.fpd-cab-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-cab .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-cab .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-cab .card.pad{padding:22px;}
+.fpd-cab .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
+.fpd-cab .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;}
+.fpd-cab .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+.fpd-cab .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-cab .crumb-btn{background:none;border:none;cursor:pointer;color:${MUTED};font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding:0;}
+.fpd-cab .crumb-btn:hover{color:${ACCENT2};}
+.fpd-cab .crumb-cur{color:${ACCENT2};}
+
+/* header */
+.fpd-cab .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-cab .pg-h1row{display:flex;align-items:flex-start;gap:12px;}
+.fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.065);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
+.fpd-cab .backbtn:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-cab .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-cab .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
+.fpd-cab .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.fpd-cab .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-cab .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-cab .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
+
+/* segmented view toggle */
+.fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);flex-shrink:0;}
+.fpd-cab .seg button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border-radius:7px;color:${MUTED};background:none;border:none;cursor:pointer;transition:color .18s,background .18s;}
+.fpd-cab .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+
+/* search */
+.fpd-cab .search{display:flex;align-items:center;gap:10px;padding:11px 16px;max-width:420px;}
+.fpd-cab .search input{flex:1;background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;font-family:var(--font-body);}
+.fpd-cab .search input::placeholder{color:${FAINT};}
+.fpd-cab .search .x{color:${MUTED};cursor:pointer;display:flex;background:none;border:none;}
+
+/* KPI ledger */
+.fpd-cab .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.065);position:relative;text-align:left;overflow:hidden;}
+.fpd-cab .kcell:first-child{border-left:none;}
+.fpd-cab .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-cab .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.065);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-cab .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-cab .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-cab .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.065);}}
+
+/* drop zone */
+.fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:13px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
+.fpd-cab .drop.on{border-color:rgba(91,123,245,0.5);background:rgba(91,123,245,0.06);}
+.fpd-cab .drop .dtxt{font-size:13px;color:${MUTED};}
+.fpd-cab .drop.on .dtxt{color:${ACCENT2};}
+.fpd-cab .drop .dtag{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${ACCENT2};padding:4px 9px;border-radius:7px;background:rgba(91,123,245,0.12);flex-shrink:0;}
+
+/* chips (sub-folders) */
+.fpd-cab .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
+.fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.065);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
+.fpd-cab .chip:hover{border-color:rgba(91,123,245,0.32);background:rgba(91,123,245,0.06);}
+.fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
+
+/* root folder grid */
+.fpd-cab .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;}
+.fpd-cab .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
+.fpd-cab .fcard:hover{transform:translateY(-2px);border-color:rgba(91,123,245,0.3);}
+.fpd-cab .fcard .bar{height:3px;}
+.fpd-cab .fcard .fbody{padding:18px;}
+.fpd-cab .fcard .ftop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.fpd-cab .fcard .femoji{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-cab .fcard .fcount{font-family:var(--font-mono);font-size:10px;letter-spacing:0.03em;padding:4px 9px;border-radius:7px;flex-shrink:0;}
+.fpd-cab .fcard .ftitle{font-family:var(--font-display);font-size:13.5px;font-weight:600;color:${TEXT};margin-bottom:5px;letter-spacing:-0.005em;}
+.fpd-cab .fcard .fdesc{color:${MUTED};font-size:11.5px;line-height:1.55;}
+
+.fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.05);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
+.fpd-cab .frow:hover{border-color:rgba(91,123,245,0.28);background:rgba(91,123,245,0.05);}
+.fpd-cab .frow .femoji2{font-size:20px;flex-shrink:0;}
+.fpd-cab .frow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;}
+.fpd-cab .frow .rdesc{color:${MUTED};font-size:11.5px;margin-top:1px;}
+.fpd-cab .frow .rcount{font-family:var(--font-mono);font-size:10.5px;padding:4px 9px;border-radius:7px;flex-shrink:0;}
+
+.fpd-cab .newtile{border-radius:15px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
+.fpd-cab .newtile:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+
+/* files */
+.fpd-cab .filegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;}
+.fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.065);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filecard.sel{border-color:${ACCENT2};box-shadow:0 0 0 1px rgba(138,160,255,0.4);}
+.fpd-cab .filecard .thumb{height:92px;display:flex;align-items:center;justify-content:center;position:relative;background:#0F1624;}
+.fpd-cab .filecard .thumb img{width:100%;height:100%;object-fit:cover;}
+.fpd-cab .filecard .badge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.fpd-cab .filecard .fbody{padding:11px 12px;}
+.fpd-cab .filecard .fname{color:${TEXT};font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.fpd-cab .filecard .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:9.5px;}
+
+.fpd-cab .filerow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filerow.sel{border-color:${ACCENT2};}
+.fpd-cab .filerow .ftico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
+.fpd-cab .filerow .ftico img{width:34px;height:34px;object-fit:cover;}
+.fpd-cab .filerow .fname{color:${TEXT};font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fpd-cab .filerow .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:11px;}
+.fpd-cab .filerow .synced{padding:2px 7px;border-radius:6px;font-size:10px;background:rgba(91,123,245,0.10);color:${ACCENT2};display:inline-flex;align-items:center;gap:4px;}
+.fpd-cab .filerow .fdate{color:${MUTED};font-size:11px;flex-shrink:0;}
+.fpd-cab .filerow .facts{display:flex;gap:2px;flex-shrink:0;}
+.fpd-cab .filerow .facts button{color:${MUTED};padding:5px;background:none;border:none;cursor:pointer;transition:color .16s;display:flex;}
+.fpd-cab .filerow .facts button:hover{color:${ACCENT2};}
+.fpd-cab .filerow .facts button.del:hover{color:${NEG};}
+
+.fpd-cab .uploadtile{border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;color:${MUTED};background:rgba(255,255,255,0.008);transition:border-color .18s,color .18s;}
+.fpd-cab .uploadtile.on{border-color:rgba(91,123,245,0.5);background:rgba(91,123,245,0.06);color:${ACCENT2};}
+.fpd-cab .uploadtile:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+
+/* detail panel */
+.fpd-cab .detail{position:fixed;bottom:24px;right:24px;width:290px;z-index:40;padding:18px;}
+.fpd-cab .detail img{width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:12px;}
+.fpd-cab .detail .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+.fpd-cab .detail .dname{color:${TEXT};font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fpd-cab .detail .dclose{color:${MUTED};background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;}
+.fpd-cab .detail .drow{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(255,255,255,0.065);font-size:12px;}
+.fpd-cab .detail .drow:first-of-type{border-top:none;}
+.fpd-cab .detail .dk{color:${MUTED};}
+.fpd-cab .detail .dv{color:${TEXT};font-weight:500;}
+.fpd-cab .detail .dbtns{display:flex;gap:8px;margin-top:14px;}
+.fpd-cab .detail .dbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);}
+.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.065);color:${ACCENT2};}
+.fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;}
+
+/* empty */
+.fpd-cab .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 12px;}
+.fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-cab .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
+
+@media (max-width:640px){.fpd-cab .fgrid{grid-template-columns:repeat(2,1fr);}.fpd-cab .filegrid{grid-template-columns:repeat(2,1fr);}}
+`;
 
 export function DigitalFileCabinet() {
   const { continuationFeePaid } = useDemo();
@@ -358,7 +512,7 @@ export function DigitalFileCabinet() {
     setCurrent(c); setSearch(""); setSelected(null);
   };
 
-  const filteredRoot = cabinets.filter(c => c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()));
+  const filteredRoot = themedCabinets.filter(c => c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()));
   // Convert synced docs into FolderFile shape so the cabinet can render them
   const syncedForCurrent: (FolderFile & { _synced: true; _sourceSection: string; _syncId: string })[] = current
     ? syncedDocs
@@ -373,42 +527,52 @@ export function DigitalFileCabinet() {
   const currentFiles = current ? [...current.files, ...(extras[current.id]??[]), ...syncedForCurrent] : [];
   const filteredFiles = currentFiles.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
 
-  const totalFiles = cabinets.reduce((s,c) => s + c.files.length + (extras[c.id]?.length??0), 0) + syncedDocs.length;
+  const totalFiles = themedCabinets.reduce((s,c) => s + c.files.length + (extras[c.id]?.length??0), 0) + syncedDocs.length;
+  const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
+
+  const kpis = [
+    { label: "Folders", value: String(themedCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={14}/>, dot: ACCENT2 },
+    { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={14}/>, dot: ACCENT2 },
+    { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={14}/>, dot: NEG },
+    { label: "Encryption", value: "AES-256", icon: <Shield size={14}/>, sub: "Client-side, zero-knowledge", dot: POS },
+  ];
 
   return (
-    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
-      <div style={{ maxWidth:1280, margin:"0 auto" }} className="space-y-5">
+    <div className="fpd-cab">
+      <style dangerouslySetInnerHTML={{ __html: CAB_CSS }} />
+      <div className="fpd-cab-grain" />
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div className="pg-h1row">
             {current && (
-              <button onClick={() => { setCurrent(null); setSearch(""); setSelected(null); }}
-                className="flex items-center justify-center rounded-xl flex-shrink-0"
-                style={{ width:36, height:36, ...CARD }}>
-                <ArrowLeft size={16} color="#3A5BD9"/>
+              <button className="backbtn" onClick={() => { setCurrent(null); setSearch(""); setSelected(null); }} title="Back to File Cabinet">
+                <ArrowLeft size={15}/>
               </button>
             )}
-            <div>
-              {current && (
-                <div className="flex items-center gap-2 mb-1">
-                  <span style={{ color:"#8A9AB8", fontSize:12 }}>File Cabinet</span>
-                  <ChevronRight size={12} color="#8A9AB8"/>
-                  <span style={{ color:"#3A5BD9", fontSize:12, fontWeight:600 }}>{current.emoji} {current.label}</span>
-                </div>
-              )}
-              <h1 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#FFFFFF" }}>
-                {current ? current.label : "Digital File Cabinet"}
-              </h1>
-              <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
-                {current ? current.description : `${cabinets.length} folders · ${totalFiles}+ files · AES-256 encrypted`}
-              </p>
+            <div style={{ minWidth: 0 }}>
+              <div className="eyebrow">
+                {current ? (
+                  <>
+                    <button className="crumb-btn" onClick={() => { setCurrent(null); setSearch(""); setSelected(null); }}>File Cabinet</button>
+                    <ChevronRight size={11}/>
+                    <span className="crumb-cur">{current.emoji} {current.label}</span>
+                  </>
+                ) : (
+                  <><Archive size={12}/> Digital File Cabinet · AES-256 Encrypted</>
+                )}
+              </div>
+              <h1 className="pg-h1">{current ? current.label : "Digital File Cabinet"}</h1>
+              <div className="pg-sub">
+                {current ? current.description : `${themedCabinets.length} folders · ${totalFiles}+ files, all encrypted client-side before they leave your device.`}
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1 p-1 rounded-xl glow-surface" style={CARD}>
-              <button onClick={() => setView("grid")} className="p-2 rounded-lg" style={{ background:view==="grid"?"#3A5BD9":"transparent", color:view==="grid"?"#fff":"#8A9AB8" }}><Grid size={13}/></button>
-              <button onClick={() => setView("list")} className="p-2 rounded-lg" style={{ background:view==="list"?"#3A5BD9":"transparent", color:view==="list"?"#fff":"#8A9AB8" }}><List size={13}/></button>
+          <div className="head-r">
+            <div className="seg">
+              <button className={view==="grid" ? "on" : ""} onClick={() => setView("grid")} title="Grid view"><Grid size={13}/></button>
+              <button className={view==="list" ? "on" : ""} onClick={() => setView("list")} title="List view"><List size={13}/></button>
             </div>
             {current && (
               <>
@@ -419,8 +583,7 @@ export function DigitalFileCabinet() {
                   size="md"
                   label="Scan"
                 />
-                <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 12px rgba(58,91,217,0.3)" }}>
+                <button className="btn-primary" disabled={uploading} onClick={() => fileRef.current?.click()}>
                   <Upload size={14}/> {uploading ? "Uploading..." : "Upload Files"}
                 </button>
               </>
@@ -428,29 +591,27 @@ export function DigitalFileCabinet() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ ...CARD, maxWidth:420 }}>
-          <Search size={13} color="#8A9AB8"/>
+        {/* ── Search ── */}
+        <div className="card search">
+          <Search size={13} color={MUTED}/>
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={current ? `Search in ${current.label}...` : "Search all folders..."}
-            style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:13, width:"100%" }}/>
-          {search && <button onClick={() => setSearch("")} style={{ color:"#8A9AB8" }}><X size={13}/></button>}
+            placeholder={current ? `Search in ${current.label}...` : "Search all folders..."}/>
+          {search && <button className="x" onClick={() => setSearch("")}><X size={13}/></button>}
         </div>
 
-        {/* Drop zone when inside a folder */}
+        {/* ── Drop zone (inside a folder) ── */}
         {current && (
           <div
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={e => { e.preventDefault(); setDragging(false); doUpload(current.id, e.dataTransfer.files); }}
-            className="flex items-center gap-3 px-5 py-3 rounded-xl border-2 border-dashed transition-all cursor-pointer"
-            style={{ borderColor:dragging?"#3A5BD9":"rgba(58,91,217,0.2)", background:dragging?"rgba(58,91,217,0.04)":"transparent" }}
+            className={`drop ${dragging ? "on" : ""}`}
             onClick={() => fileRef.current?.click()}>
-            <Upload size={16} color={dragging?"#3A5BD9":"#8A9AB8"}/>
-            <span style={{ color:dragging?"#3A5BD9":"#8A9AB8", fontSize:13 }}>
+            <Upload size={16} color={dragging ? ACCENT2 : MUTED}/>
+            <span className="dtxt">
               {uploading ? "Encrypting and uploading..." : dragging ? "Drop files here" : `Drag & drop ${current.acceptedTypes.includes("image") ? "documents, images or videos" : "files"} here, or click to browse`}
             </span>
-            <span className="ml-auto text-xs px-2 py-0.5 rounded" style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>
+            <span className="dtag">
               {current.acceptedTypes.includes("image/*") && current.acceptedTypes.includes("video/*") ? "PDF · IMG · VIDEO" :
                current.acceptedTypes.includes("image/*") ? "PDF · IMG" :
                current.acceptedTypes.includes("video/*") ? "VIDEO" : "PDF · DOC"}
@@ -458,189 +619,185 @@ export function DigitalFileCabinet() {
           </div>
         )}
 
-        {/* Sub-folders strip (when inside folder) */}
+        {/* ── Sub-folders strip (inside a folder) ── */}
         {current?.subFolders && (
-          <div className="flex flex-wrap gap-2">
+          <div className="chiprow">
             {current.subFolders.map(sf => (
-              <button key={sf} onClick={() => toast.info(`Opening sub-folder: ${sf}`)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all"
-                style={{ background:"#101728", border:"1px solid rgba(58,91,217,0.12)", color:"#B8C8E0" }}>
+              <button key={sf} className="chip" onClick={() => toast.info(`Opening sub-folder: ${sf}`)}>
                 <Folder size={13} color={current.color} fill={`${current.color}22`}/> {sf}
               </button>
             ))}
-            <button onClick={() => toast.info("Create new sub-folder")}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm"
-              style={{ border:"1px dashed rgba(58,91,217,0.2)", color:"#8A9AB8" }}>
+            <button className="chip dash" onClick={() => toast.info("Create new sub-folder")}>
               <Plus size={13}/> New Sub-folder
             </button>
           </div>
         )}
 
-        {/* ROOT OVERVIEW STRIP */}
+        {/* ── KPI ledger (root only) ── */}
         {!current && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { label:"Folders", value:String(cabinets.length), icon:<FolderOpen size={16}/>, color:"#3A5BD9" },
-              { label:"Total Files", value:`${totalFiles}+`, icon:<FileText size={16}/>, color:"#5B7BF5" },
-              { label:"Protected Vaults", value:String(cabinets.filter(c=>c.files.some(f=>f.locked)).length), icon:<Lock size={16}/>, color:"#F6AD55" },
-              { label:"Encryption", value:"AES-256", icon:<Shield size={16}/>, color:"#48BB78" },
-            ].map((s,i) => (
-              <div key={s.label} className="flex items-center gap-3 p-4 fpd-fade-in-up" style={{ ...CARD, animationDelay:`${i*50}ms` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${s.color}1E`, color:s.color }}>{s.icon}</div>
-                <div>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF", lineHeight:1.1 }}>{s.value}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.04em" }}>{s.label}</div>
+          <div className="card kstrip glow-surface">
+            {kpis.map(k => (
+              <div key={k.label} className="kcell">
+                <div className="khead">
+                  <span className="klbl">{k.label}</span>
+                  <span className="kico">{k.icon}</span>
                 </div>
+                <div className="kval">{k.value}</div>
+                <div className="ksub"><span className="dt" style={{ background: k.dot }}/>{k.sub}</div>
               </div>
             ))}
           </div>
         )}
 
-        {/* ROOT FOLDER GRID */}
+        {/* ── ROOT FOLDER GRID ── */}
         {!current && (
-          <div className={view==="grid"
-            ? "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-            : "space-y-2"}>
-            {filteredRoot.map(folder => {
-              const count = folder.files.length + (extras[folder.id]?.length??0) + syncedDocs.filter(d=>d.targetFolderId===folder.id).length;
-              const isLocked = (folder as any).locked || folder.id === "secret";
-              return view==="grid" ? (
-                <button key={folder.id} onClick={() => openFolder(folder)}
-                  className="text-left rounded-2xl overflow-hidden group w-full fpd-hover-lift glow-surface"
-                  style={CARD}>
-                  <div style={{ height:5, background:`linear-gradient(90deg,${folder.color},${folder.color}88)` }}/>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="text-3xl">{folder.emoji}</div>
-                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background:`${folder.color}14`, color:folder.color, ...MONO }}>
-                        {isLocked ? "🔒 PIN" : `${count} files`}
-                      </span>
+          view === "grid" ? (
+            <div className="fgrid">
+              {filteredRoot.map(folder => {
+                const count = folder.files.length + (extras[folder.id]?.length??0) + syncedDocs.filter(d=>d.targetFolderId===folder.id).length;
+                const isLocked = folder.id === "secret";
+                return (
+                  <button key={folder.id} onClick={() => openFolder(folder)} className="fcard glow-surface">
+                    <div className="bar" style={{ background: `linear-gradient(90deg,${folder.color},${folder.color}66)` }}/>
+                    <div className="fbody">
+                      <div className="ftop">
+                        <div className="femoji">{folder.emoji}</div>
+                        <span className="fcount" style={{ background:`${folder.color}1C`, color: folder.color }}>
+                          {isLocked ? "🔒 PIN" : `${count} files`}
+                        </span>
+                      </div>
+                      <div className="ftitle">{folder.label}</div>
+                      <div className="fdesc">{folder.description}</div>
                     </div>
-                    <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", fontWeight:600, marginBottom:6 }}>{folder.label}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:11, lineHeight:1.5 }}>{folder.description}</div>
-                  </div>
-                </button>
-              ) : (
-                <button key={folder.id} onClick={() => openFolder(folder)}
-                  className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left"
-                  style={CARD}>
-                  <div className="text-2xl flex-shrink-0">{folder.emoji}</div>
-                  <div className="flex-1 min-w-0">
-                    <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{folder.label}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:12 }}>{folder.description}</div>
-                  </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{ background:`${folder.color}14`, color:folder.color, ...MONO }}>{isLocked?"🔒":count+" files"}</span>
-                  <ChevronRight size={14} color="#8A9AB8"/>
-                </button>
-              );
-            })}
-            {/* New folder */}
-            <button onClick={() => toast.info("Enter a folder name to create a custom folder")}
-              className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 p-6 transition-all"
-              style={{ borderColor:"rgba(58,91,217,0.2)", minHeight:140, color:"#8A9AB8" }}>
-              <Plus size={22} style={{ opacity:0.5 }}/>
-              <span style={{ fontSize:13 }}>New Custom Folder</span>
-            </button>
-          </div>
+                  </button>
+                );
+              })}
+              <button className="newtile" onClick={() => toast.info("Enter a folder name to create a custom folder")}>
+                <Plus size={20} style={{ opacity:0.6 }}/>
+                <span style={{ fontSize:13 }}>New Custom Folder</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+              {filteredRoot.map(folder => {
+                const count = folder.files.length + (extras[folder.id]?.length??0) + syncedDocs.filter(d=>d.targetFolderId===folder.id).length;
+                const isLocked = folder.id === "secret";
+                return (
+                  <button key={folder.id} onClick={() => openFolder(folder)} className="frow">
+                    <div className="femoji2">{folder.emoji}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div className="rtitle">{folder.label}</div>
+                      <div className="rdesc">{folder.description}</div>
+                    </div>
+                    <span className="rcount" style={{ background:`${folder.color}1C`, color: folder.color }}>{isLocked ? "🔒" : `${count} files`}</span>
+                    <ChevronRight size={14} color={MUTED}/>
+                  </button>
+                );
+              })}
+              <button className="newtile" style={{ minHeight:56, flexDirection:"row" }} onClick={() => toast.info("Enter a folder name to create a custom folder")}>
+                <Plus size={16}/> <span style={{ fontSize:13 }}>New Custom Folder</span>
+              </button>
+            </div>
+          )
         )}
 
-        {/* FOLDER CONTENTS */}
+        {/* ── FOLDER CONTENTS ── */}
         {current && (
-          <div className={view==="grid"
-            ? "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-            : "space-y-2"}>
-            {filteredFiles.map(file => (
-              view==="grid" ? (
-                <div key={file.id}
-                  className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-md"
-                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(58,91,217,0.1)", borderWidth:selected?.id===file.id?2:1 }}
+          view === "grid" ? (
+            <div className="filegrid">
+              {filteredFiles.map(file => (
+                <div key={file.id} className={`filecard ${selected?.id===file.id ? "sel" : ""}`}
                   onClick={() => setSelected(selected?.id===file.id ? null : file)}>
-                  <div className="flex items-center justify-center relative" style={{ height:100, background:`${current.color}08` }}>
+                  <div className="thumb">
                     {file.thumbnail
-                      ? <img src={file.thumbnail} alt={file.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                      : getIcon(file.type, current.color, 32)}
-                    {file.locked && <div className="absolute top-2 right-2 p-1 rounded-lg" style={{ background:"rgba(229,62,62,0.12)" }}><Lock size={12} color="#E53E3E"/></div>}
-                    {file.starred && !file.locked && <Star size={13} fill="#F6AD55" color="#F6AD55" style={{ position:"absolute", top:8, right:8 }}/>}
+                      ? <img src={file.thumbnail} alt={file.name}/>
+                      : getIcon(file.type, current.color, 30)}
+                    {file.locked && <div className="badge" style={{ background:"rgba(208,107,107,0.16)" }}><Lock size={11} color={NEG}/></div>}
+                    {file.starred && !file.locked && <Star size={13} fill="#D9A55E" color="#D9A55E" style={{ position:"absolute", top:8, right:8 }}/>}
                   </div>
-                  <div className="p-3">
-                    <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:500, marginBottom:2 }} className="truncate">{file.name}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{file.count?`${file.count} files`:file.size} · {file.modified}</div>
+                  <div className="fbody">
+                    <div className="fname">{file.name}</div>
+                    <div className="fmeta">{file.count?`${file.count} files`:file.size} · {file.modified}</div>
                   </div>
                 </div>
-              ) : (
-                <div key={file.id}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all"
-                  style={{ ...CARD, borderColor:selected?.id===file.id?current.color:"rgba(58,91,217,0.08)" }}
+              ))}
+              <div
+                onDragOver={e=>{e.preventDefault();setDragging(true);}}
+                onDragLeave={()=>setDragging(false)}
+                onDrop={e=>{e.preventDefault();setDragging(false);doUpload(current.id,e.dataTransfer.files);}}
+                onClick={() => fileRef.current?.click()}
+                className={`uploadtile ${dragging ? "on" : ""}`} style={{ minHeight:140 }}>
+                <Upload size={20}/>
+                <span style={{ fontSize:12 }}>Upload or drop files</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+              {filteredFiles.map(file => (
+                <div key={file.id} className={`filerow ${selected?.id===file.id ? "sel" : ""}`}
                   onClick={() => setSelected(selected?.id===file.id ? null : file)}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background:`${current.color}10` }}>
+                  <div className="ftico">
                     {file.thumbnail
-                      ? <img src={file.thumbnail} alt="" style={{ width:36, height:36, objectFit:"cover", borderRadius:8 }}/>
-                      : <span style={{ transform:"scale(0.65)" }}>{getIcon(file.type, current.color, 28)}</span>}
+                      ? <img src={file.thumbnail} alt=""/>
+                      : <span style={{ transform:"scale(0.7)" }}>{getIcon(file.type, current.color, 26)}</span>}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:500 }} className="truncate">{file.name}</div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{file.count?`${file.count} files`:file.size}</span>
-                      {(file as any)._synced && (
-                        <span className="px-1.5 py-0.5 rounded text-xs inline-flex items-center gap-1"
-                          style={{ background:"rgba(58,91,217,0.07)", color:"#3A5BD9" }}>
-                          🔗 {(file as any)._sourceSection}
-                        </span>
-                      )}
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div className="fname">{file.name}</div>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                      <span className="fmeta">{file.count?`${file.count} files`:file.size}</span>
+                      {(file as any)._synced && <span className="synced">🔗 {(file as any)._sourceSection}</span>}
                     </div>
                   </div>
-                  <div style={{ color:"#8A9AB8", fontSize:11, flexShrink:0 }}>{file.modified}</div>
-                  {file.starred && <Star size={13} fill="#F6AD55" color="#F6AD55"/>}
-                  {file.locked && <Lock size={13} color="#E53E3E"/>}
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.success(`Downloading: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download files");}} style={{color:"#8A9AB8",padding:4}}><Download size={12}/></button>
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.info(`Previewing: ${file.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview files");}} style={{color:"#8A9AB8",padding:4}}><Eye size={12}/></button>
-                    <button onClick={e=>{e.stopPropagation(); if((file as any)._synced){ removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); } else { toast.success(`Deleted: ${file.name}`); }}} style={{color:"#FC8181",padding:4}}><Trash2 size={12}/></button>
+                  <div className="fdate">{file.modified}</div>
+                  {file.starred && <Star size={13} fill="#D9A55E" color="#D9A55E"/>}
+                  {file.locked && <Lock size={13} color={NEG}/>}
+                  <div className="facts">
+                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.success(`Downloading: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.info(`Previewing: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to preview files");}}><Eye size={13}/></button>
+                    <button className="del" onClick={e=>{e.stopPropagation(); if((file as any)._synced){ removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); } else { toast.success(`Deleted: ${file.name}`); }}}><Trash2 size={13}/></button>
                   </div>
                 </div>
-              )
-            ))}
-            {/* Upload tile */}
-            <div
-              onDragOver={e=>{e.preventDefault();setDragging(true);}}
-              onDragLeave={()=>setDragging(false)}
-              onDrop={e=>{e.preventDefault();setDragging(false);doUpload(current.id,e.dataTransfer.files);}}
-              onClick={() => fileRef.current?.click()}
-              className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
-              style={{ borderColor:dragging?"#3A5BD9":"rgba(58,91,217,0.2)", background:dragging?"rgba(58,91,217,0.04)":"transparent", minHeight:view==="grid"?140:56 }}>
-              <Upload size={20} color="#3A5BD9" style={{ opacity:0.6 }}/>
-              <span style={{ color:"#8A9AB8", fontSize:12 }}>Upload or drop files</span>
+              ))}
+              <div
+                onDragOver={e=>{e.preventDefault();setDragging(true);}}
+                onDragLeave={()=>setDragging(false)}
+                onDrop={e=>{e.preventDefault();setDragging(false);doUpload(current.id,e.dataTransfer.files);}}
+                onClick={() => fileRef.current?.click()}
+                className={`uploadtile ${dragging ? "on" : ""}`} style={{ minHeight:56, flexDirection:"row" }}>
+                <Upload size={16}/>
+                <span style={{ fontSize:12 }}>Upload or drop files</span>
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
 
       {/* File detail panel */}
       {selected && (
-        <div className="fixed bottom-20 right-6 w-72 rounded-2xl p-5 z-40" style={{ ...CARD, boxShadow:"0 8px 40px rgba(58,91,217,0.15)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600 }} className="truncate">{selected.name}</div>
-            <button onClick={() => setSelected(null)} style={{ color:"#8A9AB8" }}><X size={14}/></button>
+        <div className="card detail glow-surface">
+          <div className="dhead">
+            <div className="dname">{selected.name}</div>
+            <button className="dclose" onClick={() => setSelected(null)}><X size={14}/></button>
           </div>
-          {selected.thumbnail && <img src={selected.thumbnail} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:12 }}/>}
-          <div className="space-y-2 mb-4">
+          {selected.thumbnail && <img src={selected.thumbnail} alt=""/>}
+          <div>
             {[
               ["Type", selected.type.toUpperCase()],
               ["Size", selected.size ?? `${selected.count} files`],
               ["Modified", selected.modified ?? "—"],
               ["Encrypted", "AES-256"],
             ].map(([l,v]) => (
-              <div key={l as string} className="flex justify-between">
-                <span style={{ color:"#8A9AB8", fontSize:12 }}>{l}</span>
-                <span style={{ color:"#FFFFFF", fontSize:12, fontWeight:500 }}>{v}</span>
+              <div key={l as string} className="drow">
+                <span className="dk">{l}</span>
+                <span className="dv">{v}</span>
               </div>
             ))}
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => continuationFeePaid ? toast.success(`Downloading: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to download")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"#141B2E", color:"#3A5BD9" }}>
+          <div className="dbtns">
+            <button className="dbtn ghost" onClick={() => continuationFeePaid ? toast.success(`Downloading: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
               <Download size={13}/> Download
             </button>
-            <button onClick={() => continuationFeePaid ? toast.info(`Previewing: ${selected.name}`) : toast.error("❌ Pay the $199 Legacy Continuation Fee to preview")} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff" }}>
+            <button className="dbtn solid" onClick={() => continuationFeePaid ? toast.info(`Previewing: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to preview")}>
               <Eye size={13}/> Preview
             </button>
           </div>

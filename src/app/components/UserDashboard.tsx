@@ -10,19 +10,23 @@ interface UserDashboardProps { onNavigate: (page: string) => void; }
 
 /* ── Royal Vault Blue palette (refined estate treatment) ── */
 const TEXT    = "#EFF2F9";
-const SOFT    = "#AFB9CF";
-const MUTED   = "#707C99";
-const FAINT   = "#485068";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#8C97B4";
+const FAINT   = "#6B7690";
 const ACCENT  = "#5B7BF5";
 const ACCENT2 = "#8AA0FF";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-/* Monochrome blue ramp for the storage breakdown — applied dashboard-side only,
-   so the shared STORAGE_BREAKDOWN (and the Usage & Billing page) keep their own
-   category colours untouched. */
-const STORAGE_RAMP = ["#8CA2FF", "#6B84F0", "#5470DE", "#4159C0", "#33469C", "#283878"];
+/* Calm, cool storage palette — applied dashboard-side only, so the shared
+   STORAGE_BREAKDOWN (and the Usage & Billing page) keep their own category
+   colours untouched. Toned to match the Calendar: every slice stays light
+   enough to read on the dark surface and distinct enough to tell apart,
+   without any slice shouting against the theme. */
+const STORAGE_RAMP = ["#8AA0FF", "#6FB2B4", "#A99BE6", "#7EB0DC", "#82B8A6", "#97A2C6"];
+/* Remaining / free space — a quiet slate so "what's left" reads at a glance. */
+const FREE = "#6B7690";
 
 const storageHistory = [
   { month: "Jan", used: 4.2 }, { month: "Feb", used: 6.8 }, { month: "Mar", used: 9.1 },
@@ -120,8 +124,16 @@ const DASH_CSS = `
 .fpd-dash .stor-fig .big{font-family:var(--font-display);font-size:28px;font-weight:600;color:${TEXT};letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-dash .stor-fig .of{color:${MUTED};font-size:13px;}
 .fpd-dash .stor-fig .free{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:${SOFT};padding:4px 10px;border-radius:7px;background:#0F1624;border:1px solid rgba(255,255,255,0.065);}
-.fpd-dash .meter{display:flex;height:8px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,0.05);margin-bottom:20px;gap:1.5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
+.fpd-dash .meter{display:flex;height:9px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,0.05);margin-bottom:12px;gap:1.5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-dash .meter i{display:block;height:100%;}
+/* used / free split — the quick "how much is left" read */
+.fpd-dash .uf{display:flex;gap:20px;margin-bottom:20px;}
+.fpd-dash .uf-i{display:flex;align-items:center;gap:7px;font-size:12px;color:${SOFT};}
+.fpd-dash .uf-i b{font-family:var(--font-mono);color:${TEXT};font-weight:600;font-variant-numeric:tabular-nums;margin-left:1px;}
+.fpd-dash .uf-i i{font-family:var(--font-mono);font-style:normal;color:${MUTED};font-size:11px;}
+.fpd-dash .uf-d{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+.fpd-dash .uf-d.used{background:${ACCENT2};}
+.fpd-dash .uf-d.free{background:transparent;border:1.5px solid ${FREE};}
 .fpd-dash .leg{width:100%;border-collapse:collapse;}
 .fpd-dash .leg td{padding:8.5px 0;border-top:1px solid rgba(255,255,255,0.065);font-size:12.5px;}
 .fpd-dash .leg tr:first-child td{border-top:none;}
@@ -291,7 +303,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         )}
 
         {/* ── Readiness band ── */}
-        <div className="card ready">
+        <div className="card ready glow-surface">
           <div className="ring-wrap">
             <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
               <defs>
@@ -363,7 +375,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           {/* LEFT */}
           <div className="col">
             {/* Storage & Usage */}
-            <div className="card pad">
+            <div className="card pad glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Storage &amp; Usage</h3>
                 <button className="sec-link" onClick={() => onNavigate("storage-usage")}>Manage <ArrowRight size={12} /></button>
@@ -377,7 +389,11 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 {breakdown.map(seg => (
                   <i key={seg.key} title={`${seg.label} · ${seg.pct.toFixed(0)}%`} style={{ width: `${(seg.gb / total) * 100}%`, background: seg.color }} />
                 ))}
-                <i style={{ flex: 1, background: "transparent" }} />
+                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(107,118,144,0.22)" }} />
+              </div>
+              <div className="uf">
+                <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b><i>{pct}%</i></div>
+                <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b><i>{Math.max(0, 100 - pct)}%</i></div>
               </div>
               <table className="leg">
                 <tbody>
@@ -417,7 +433,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             </div>
 
             {/* Recent Documents */}
-            <div className="card pad">
+            <div className="card pad glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Recent Documents</h3>
                 <button className="sec-link" onClick={() => onNavigate("file-cabinet")}>View all <ArrowRight size={12} /></button>
@@ -457,7 +473,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           {/* RIGHT */}
           <div className="col">
             {/* Notifications */}
-            <div className="card pad ncard">
+            <div className="card pad ncard glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Notifications</h3>
                 <span className="sec-link" style={{ cursor: "default", color: unread ? ACCENT2 : MUTED }}>
@@ -479,7 +495,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             </div>
 
             {/* Quick Actions */}
-            <div className="card pad">
+            <div className="card pad glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Quick Actions</h3>
               </div>
