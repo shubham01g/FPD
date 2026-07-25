@@ -9,8 +9,8 @@ import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
-const MUTED   = "#8C97B4";
-const FAINT   = "#808BAA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const PURPLE  = "#7E6BD8";

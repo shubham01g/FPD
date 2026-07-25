@@ -11,8 +11,8 @@ interface UserDashboardProps { onNavigate: (page: string) => void; }
 /* ── Royal Vault Blue palette (refined estate treatment) ── */
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
-const MUTED   = "#8C97B4";
-const FAINT   = "#808BAA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -26,7 +26,7 @@ const NEG     = "#D06B6B";
    without any slice shouting against the theme. */
 const STORAGE_RAMP = ["#5BA7D6", "#6F9E94", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
 /* Remaining / free space — a quiet slate so "what's left" reads at a glance. */
-const FREE = "#808BAA";
+const FREE = "#929CBC";
 
 const storageHistory = [
   { month: "Jan", used: 4.2 }, { month: "Feb", used: 6.8 }, { month: "Mar", used: 9.1 },
@@ -389,7 +389,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 {breakdown.map(seg => (
                   <i key={seg.key} title={`${seg.label} · ${seg.pct.toFixed(0)}%`} style={{ width: `${(seg.gb / total) * 100}%`, background: seg.color }} />
                 ))}
-                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(128,139,170,0.22)" }} />
+                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(146,156,188,0.22)" }} />
               </div>
               <div className="uf">
                 <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b><i>{pct}%</i></div>

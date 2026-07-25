@@ -10,8 +10,8 @@ import { useDemo } from "../context/DemoContext";
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
-const MUTED   = "#8C97B4";
-const FAINT   = "#808BAA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";

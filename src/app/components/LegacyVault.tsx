@@ -22,7 +22,7 @@ import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant & file cabinet) ── */
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
-const MUTED   = "#8C97B4";
+const MUTED   = "#A3ADC9";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";

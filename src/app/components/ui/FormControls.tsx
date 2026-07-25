@@ -10,7 +10,7 @@ export function FieldLabel({ children, hint, required }: { children: React.React
   if (!children && !hint) return null;
   return (
     <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
-      <label style={{ color: "#8A97B8", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", ...MONO }}>
+      <label style={{ color: "#A3ADC9", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", ...MONO }}>
         {children}{required && <span style={{ color: "#FC8181" }}> *</span>}
       </label>
       {hint && <span style={{ color: "#5A6A88", fontSize: 10 }}>{hint}</span>}
@@ -87,7 +87,7 @@ export function TextAreaField({
 export function InfoField({ label, value, icon, mono }: { label: string; value?: string | null; icon?: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex flex-col rounded-xl" style={{ gap: 4, padding: "10px 14px", background: "rgba(91,110,225,0.05)", border: "1px solid rgba(91,110,225,0.10)" }}>
-      <span style={{ color: "#8A97B8", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", ...MONO }}>{label}</span>
+      <span style={{ color: "#A3ADC9", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", ...MONO }}>{label}</span>
       <span className="flex items-center gap-2" style={{ color: value ? "#FFFFFF" : "#5A6A88", fontSize: 13, ...(mono ? MONO : {}) }}>
         {icon}{value || "—"}
       </span>
@@ -104,7 +104,7 @@ export function ToggleChip({ label, active, onToggle }: { label: string; active:
       className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
       style={{
         background: active ? "rgba(72,187,120,0.12)" : "rgba(107,114,128,0.12)",
-        color: active ? "#48BB78" : "#8A97B8",
+        color: active ? "#48BB78" : "#A3ADC9",
         border: `1px solid ${active ? "rgba(72,187,120,0.3)" : "rgba(107,114,128,0.2)"}`,
         cursor: onToggle ? "pointer" : "default",
       }}

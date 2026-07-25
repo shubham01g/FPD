@@ -20,7 +20,7 @@ const ACCENT = "#5B6EE1";
 const HILITE = "#5BA7D6";
 const TEXT = "#F0F0F5";
 const SOFT = "#B8C8E0";
-const MUTED = "#8A97B8";
+const MUTED = "#A3ADC9";
 const FAINT = "#5A6A88";
 /* premium concierge accent — a violet that harmonizes with Royal Vault Blue */
 const VIOLET = "#7E6BD8";
