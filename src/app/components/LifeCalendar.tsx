@@ -29,8 +29,8 @@ const TEXT   = "#EFF2F9";
 const SOFT   = "#BCC5DA";
 const MUTED  = "#8C97B4";
 const FAINT  = "#6B7690";
-const ACCENT = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS    = "#5FBE91";
 const WARN   = "#D9A55E";
 const NEG    = "#D06B6B";
@@ -39,14 +39,14 @@ const NEG    = "#D06B6B";
    web-safe rainbow. Labels still come from SOURCE_META so the data owns them. */
 type IconCmp = React.ComponentType<{ size?: number }>;
 const SRC: Record<EventSource, { color: string; Icon: IconCmp }> = {
-  billing:   { color: "#8AA0FF", Icon: CreditCard },  // periwinkle (theme accent)
-  reminder:  { color: "#7EB0DC", Icon: Bell },        // soft sky blue
-  occasion:  { color: "#A99BE6", Icon: Cake },        // soft lavender
-  warranty:  { color: "#6E86E8", Icon: ShieldCheck }, // royal blue
-  document:  { color: "#79A6C9", Icon: IdCard },      // dusty blue
-  travel:    { color: "#6FB2B4", Icon: Plane },       // calm teal
-  medical:   { color: "#82B8A6", Icon: Pill },        // soft sage
-  concierge: { color: "#B7A9DE", Icon: Star },        // soft lilac
+  billing:   { color: "#5BA7D6", Icon: CreditCard },  // periwinkle (theme accent)
+  reminder:  { color: "#5BA7D6", Icon: Bell },        // soft sky blue
+  occasion:  { color: "#7E6BD8", Icon: Cake },        // soft lavender
+  warranty:  { color: "#5B6EE1", Icon: ShieldCheck }, // royal blue
+  document:  { color: "#5BA7D6", Icon: IdCard },      // dusty blue
+  travel:    { color: "#5A8078", Icon: Plane },       // calm teal
+  medical:   { color: "#6FAE8B", Icon: Pill },        // soft sage
+  concierge: { color: "#7E6BD8", Icon: Star },        // soft lilac
   custom:    { color: "#97A2C6", Icon: Pin },         // slate blue
 };
 
@@ -65,7 +65,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-cal so nothing else in the app is affected. */
 const CAL_CSS = `
-.fpd-cal{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 62% -160px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-cal{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 62% -160px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-cal *{box-sizing:border-box;}
 .fpd-cal-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-cal .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -84,13 +84,13 @@ const CAL_CSS = `
 .fpd-cal .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cal .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-cal .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
-.fpd-cal .btn-today:hover{background:rgba(91,123,245,0.18);}
+.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
+.fpd-cal .btn-today:hover{background:rgba(91,110,225,0.18);}
 
 /* segmented view toggle */
 .fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-cal .seg button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;text-transform:capitalize;}
-.fpd-cal .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-cal .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* KPI ledger */
 .fpd-cal .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
@@ -119,16 +119,16 @@ const CAL_CSS = `
 
 /* month grid */
 .fpd-cal .navbtn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
-.fpd-cal .navbtn:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
 .fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
 .fpd-cal .dow span{text-align:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;color:${FAINT};padding:2px 0;}
 .fpd-cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
 .fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
-.fpd-cal .cell:hover{border-color:rgba(91,123,245,0.32);background:rgba(91,123,245,0.05);}
+.fpd-cal .cell:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.05);}
 .fpd-cal .cell.blank{background:none;border:1px solid transparent;cursor:default;}
 .fpd-cal .cell.today{border-color:rgba(95,190,145,0.5);box-shadow:inset 0 0 0 1px rgba(95,190,145,0.22),0 0 18px -8px rgba(95,190,145,0.5);}
-.fpd-cal .cell.sel{border-color:${ACCENT};background:rgba(91,123,245,0.15);box-shadow:inset 0 0 0 1px rgba(91,123,245,0.5),0 6px 20px -8px rgba(91,123,245,0.55);}
-.fpd-cal .cell.today.sel{box-shadow:inset 0 0 0 1px rgba(91,123,245,0.5),0 6px 20px -8px rgba(91,123,245,0.55);}
+.fpd-cal .cell.sel{border-color:${ACCENT};background:rgba(91,110,225,0.15);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.5),0 6px 20px -8px rgba(91,110,225,0.55);}
+.fpd-cal .cell.today.sel{box-shadow:inset 0 0 0 1px rgba(91,110,225,0.5),0 6px 20px -8px rgba(91,110,225,0.55);}
 .fpd-cal .chead{display:flex;align-items:center;justify-content:space-between;}
 .fpd-cal .dnum{font-family:var(--font-mono);font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT};}
 .fpd-cal .cell.today .dnum{color:${POS};font-weight:700;}
@@ -154,7 +154,7 @@ const CAL_CSS = `
 
 /* empty state */
 .fpd-cal .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 12px;}
-.fpd-cal .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-cal .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
 .fpd-cal .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 .fpd-cal .empty .ed{color:${MUTED};font-size:12px;line-height:1.6;margin-top:5px;max-width:340px;}
 
@@ -167,7 +167,7 @@ const CAL_CSS = `
 .fpd-cal .agtoday{padding:2px 7px;border-radius:6px;background:rgba(95,190,145,0.14);color:${POS};font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;}
 
 /* footnote */
-.fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.16);}
+.fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-cal .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
 .fpd-cal .foot .ft b{color:${SOFT};font-weight:600;}
 .fpd-cal .foot .ft em{color:${ACCENT2};font-style:normal;}

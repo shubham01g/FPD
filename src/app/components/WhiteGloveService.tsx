@@ -11,8 +11,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 
@@ -56,7 +56,7 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="faq-item">
-      <button onClick={() => setOpen(!open)} className="faq-q" style={{ background: open ? "rgba(91,123,245,0.06)" : "transparent" }}>
+      <button onClick={() => setOpen(!open)} className="faq-q" style={{ background: open ? "rgba(91,110,225,0.06)" : "transparent" }}>
         <span>{faq.q}</span>
         {open ? <ChevronUp size={16} color={ACCENT}/> : <ChevronDown size={16} color={MUTED}/>}
       </button>
@@ -118,7 +118,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
         <div className="grid grid-cols-3 gap-2">
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))} className="pick-btn"
-              style={{ background:form.preferredTime===id?"rgba(91,123,245,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?ACCENT2:MUTED }}>
+              style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?ACCENT2:MUTED }}>
               {label}
             </button>
           ))}
@@ -130,7 +130,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
         <div className="grid grid-cols-2 gap-2">
           {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))} className="pick-btn"
-              style={{ background:form.contactedBy===id?"rgba(91,123,245,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?ACCENT2:MUTED }}>
+              style={{ background:form.contactedBy===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?ACCENT2:MUTED }}>
               {label}
             </button>
           ))}
@@ -163,17 +163,17 @@ const WG_CSS = `
 
 /* hero */
 .fpd-wg .hero{position:relative;overflow:hidden;padding:76px 24px 90px;background:linear-gradient(135deg,#060B16,#0A1020);}
-.fpd-wg .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(91,123,245,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,123,245,0.04) 1px,transparent 1px);background-size:50px 50px;}
-.fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,123,245,0.14) 0%,transparent 70%);pointer-events:none;}
-.fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,123,245,0.1) 0%,transparent 70%);pointer-events:none;}
+.fpd-wg .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(91,110,225,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.04) 1px,transparent 1px);background-size:50px 50px;}
+.fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.14) 0%,transparent 70%);pointer-events:none;}
+.fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;}
 .fpd-wg .hero-inner{position:relative;max-width:720px;margin:0 auto;text-align:center;}
-.fpd-wg .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;margin-bottom:22px;background:rgba(91,123,245,0.16);border:1px solid rgba(91,123,245,0.32);}
+.fpd-wg .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;margin-bottom:22px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.32);}
 .fpd-wg .hero-badge span{color:${ACCENT2};font-size:12px;font-family:var(--font-mono);letter-spacing:0.1em;}
 .fpd-wg .hero h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.4rem);color:${TEXT};line-height:1.15;margin-bottom:18px;}
 .fpd-wg .hero h1 em{color:${SOFT};font-style:normal;}
 .fpd-wg .hero p{color:${MUTED};font-size:16px;line-height:1.85;max-width:520px;margin:0 auto 36px;}
 .fpd-wg .hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;}
-.fpd-wg .btn-hero{display:flex;align-items:center;gap:8px;padding:16px 32px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#3A5BD9,#5B7BF5);box-shadow:0 0 40px rgba(58,91,217,0.5);font-family:var(--font-body);}
+.fpd-wg .btn-hero{display:flex;align-items:center;gap:8px;padding:16px 32px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 40px rgba(91,110,225,0.5);font-family:var(--font-body);}
 .fpd-wg .hero-note{display:flex;align-items:center;gap:8px;color:${MUTED};font-size:13px;}
 
 /* body */
@@ -184,14 +184,14 @@ const WG_CSS = `
 .fpd-wg .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 @media (max-width:760px){.fpd-wg .pricing-grid{grid-template-columns:1fr;}}
 .fpd-wg .price-card{padding:32px;text-align:center;}
-.fpd-wg .price-card.featured{border:2px solid rgba(91,123,245,0.4);box-shadow:0 0 48px rgba(58,91,217,0.15),inset 0 1px 0 rgba(255,255,255,0.035);}
+.fpd-wg .price-card.featured{border:2px solid rgba(91,110,225,0.4);box-shadow:0 0 48px rgba(91,110,225,0.15),inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-wg .price-eyebrow{color:${SOFT};font-size:11px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:12px;}
 .fpd-wg .price-big{font-family:var(--font-display);font-size:64px;color:${TEXT};line-height:1;margin-bottom:8px;}
 .fpd-wg .price-sub{color:${MUTED};font-size:14px;margin-bottom:20px;}
 .fpd-wg .price-feat{display:flex;align-items:center;gap:8px;text-align:left;}
 .fpd-wg .price-feat+.price-feat{margin-top:8px;}
 .fpd-wg .price-feat span{color:${SOFT};font-size:13px;}
-.fpd-wg .total-box{margin-top:20px;padding:14px 16px;border-radius:16px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);}
+.fpd-wg .total-box{margin-top:20px;padding:14px 16px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);}
 .fpd-wg .total-box .tb-lbl{color:${ACCENT2};font-size:13px;font-weight:700;}
 .fpd-wg .total-box .tb-val{color:${TEXT};font-size:20px;font-family:var(--font-display);font-weight:700;margin-top:2px;}
 .fpd-wg .total-box .tb-sub{color:${MUTED};font-size:11px;}
@@ -205,20 +205,20 @@ const WG_CSS = `
 .fpd-wg .step-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media (max-width:700px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
 .fpd-wg .step-card{display:flex;align-items:flex-start;gap:16px;padding:20px;}
-.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.10);color:${ACCENT2};}
+.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:${ACCENT2};}
 .fpd-wg .step-num{color:${ACCENT2};font-size:10px;font-weight:700;font-family:var(--font-mono);}
 .fpd-wg .step-title{font-family:var(--font-display);font-size:16px;color:${TEXT};margin:2px 0 4px;}
 .fpd-wg .step-desc{color:${MUTED};font-size:13px;line-height:1.7;}
 
 /* includes */
-.fpd-wg .includes-card{padding:32px;background:rgba(91,123,245,0.04);}
+.fpd-wg .includes-card{padding:32px;background:rgba(91,110,225,0.04);}
 .fpd-wg .includes-title{font-family:var(--font-display);font-size:22px;color:${TEXT};margin-bottom:20px;text-align:center;}
 .fpd-wg .includes-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 @media (max-width:640px){.fpd-wg .includes-grid{grid-template-columns:1fr;}}
 .fpd-wg .includes-row{display:flex;align-items:flex-start;gap:10px;}
 .fpd-wg .includes-row span{color:${SOFT};font-size:13px;line-height:1.6;}
 .fpd-wg .includes-cta{text-align:center;margin-top:28px;}
-.fpd-wg .btn-cta{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:16px;font-weight:700;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#3A5BD9,#5B7BF5);box-shadow:0 0 30px rgba(58,91,217,0.35);font-family:var(--font-body);}
+.fpd-wg .btn-cta{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:16px;font-weight:700;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 30px rgba(91,110,225,0.35);font-family:var(--font-body);}
 
 /* intake card */
 .fpd-wg .intake-card{padding:32px;}
@@ -231,24 +231,24 @@ const WG_CSS = `
 .fpd-wg .field textarea{resize:none;}
 .fpd-wg .field input::placeholder,.fpd-wg .field textarea::placeholder{color:${FAINT};}
 .fpd-wg .pick-btn{padding:10px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:1px solid;}
-.fpd-wg .btn-primary-lg{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#3A5BD9,#5B7BF5);box-shadow:0 0 32px rgba(58,91,217,0.4);font-family:var(--font-body);}
+.fpd-wg .btn-primary-lg{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 32px rgba(91,110,225,0.4);font-family:var(--font-body);}
 .fpd-wg .reassure-line{color:${MUTED};font-size:11px;text-align:center;}
 .fpd-wg .submitted{text-align:center;padding:32px 16px;}
 .fpd-wg .submitted-ico{display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
-.fpd-wg .submitted-ico > *{background:rgba(91,123,245,0.14);border:2px solid rgba(91,123,245,0.32);border-radius:99px;padding:18px;}
+.fpd-wg .submitted-ico > *{background:rgba(91,110,225,0.14);border:2px solid rgba(91,110,225,0.32);border-radius:99px;padding:18px;}
 .fpd-wg .submitted h3{font-family:var(--font-display);font-size:22px;color:${TEXT};margin-bottom:10px;}
 .fpd-wg .submitted p{color:${MUTED};font-size:14px;line-height:1.8;max-width:360px;margin:0 auto 22px;}
-.fpd-wg .ref-box{padding:16px 20px;border-radius:16px;margin-bottom:16px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.22);}
+.fpd-wg .ref-box{padding:16px 20px;border-radius:16px;margin-bottom:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);}
 .fpd-wg .ref-lbl{color:${ACCENT2};font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
 .fpd-wg .ref-val{color:${TEXT};font-size:18px;font-family:var(--font-display);font-weight:700;}
-.fpd-wg .btn-ghost{padding:12px 24px;border-radius:16px;font-weight:700;font-size:13px;background:rgba(91,123,245,0.10);color:${ACCENT2};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-wg .btn-ghost{padding:12px 24px;border-radius:16px;font-weight:700;font-size:13px;background:rgba(91,110,225,0.10);color:${ACCENT2};border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* faq */
 .fpd-wg .faq-list{display:flex;flex-direction:column;gap:12px;}
 .fpd-wg .faq-item{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.22);}
 .fpd-wg .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;text-align:left;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-wg .faq-q span{color:${TEXT};font-size:14px;font-weight:500;}
-.fpd-wg .faq-a{padding:0 20px 18px;background:rgba(91,123,245,0.02);}
+.fpd-wg .faq-a{padding:0 20px 18px;background:rgba(91,110,225,0.02);}
 .fpd-wg .faq-a p{color:${MUTED};font-size:13px;line-height:1.8;}
 
 /* reassurance strip */
@@ -370,7 +370,7 @@ export function WhiteGloveService() {
         {/* Inline form */}
         <div className="card intake-card glow-surface">
           <div className="intake-hd">
-            <Star size={28} color={ACCENT} fill="rgba(91,123,245,0.3)"/>
+            <Star size={28} color={ACCENT} fill="rgba(91,110,225,0.3)"/>
             <h2>Ready to Get Started?</h2>
             <p>Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.</p>
           </div>
@@ -409,7 +409,7 @@ export function WhiteGloveService() {
           <div className="card modal glow-surface">
             <div className="modal-head">
               <div className="flex items-center gap-2">
-                <Star size={16} color={ACCENT} fill="rgba(91,123,245,0.3)"/>
+                <Star size={16} color={ACCENT} fill="rgba(91,110,225,0.3)"/>
                 <h3>White Glove Request</h3>
               </div>
               <button onClick={() => setShowModal(false)}><X size={16}/></button>

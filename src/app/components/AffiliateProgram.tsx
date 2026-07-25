@@ -6,8 +6,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 
@@ -26,7 +26,7 @@ const monthlyEarnings = [
 ];
 
 const tiers = [
-  { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#4A90D9" },
+  { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#5BA7D6" },
   { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: ACCENT },
   { tier: 3, label: "Tier 3", range: "74+ accounts", rate: 30, color: POS },
 ];
@@ -37,7 +37,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-aff so nothing else in the app is affected. */
 const AFF_CSS = `
-.fpd-aff{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-aff{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-aff *{box-sizing:border-box;}
 .fpd-aff-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-aff .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -100,7 +100,7 @@ const AFF_CSS = `
 .fpd-aff .status-pill{padding:4px 10px;border-radius:99px;font-size:11px;font-family:var(--font-mono);}
 
 /* cap notice */
-.fpd-aff .notice{display:flex;gap:12px;padding:16px 20px;border-radius:14px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);}
+.fpd-aff .notice{display:flex;gap:12px;padding:16px 20px;border-radius:14px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
 .fpd-aff .notice p{color:${MUTED};font-size:13px;line-height:1.7;}
 `;
 
@@ -168,7 +168,7 @@ export function AffiliateProgram() {
               <span style={{ color: nextTier.color, fontFamily: "var(--font-mono)", fontSize: 13 }}>{activeReferrals} / {nextTier.tier === 2 ? 25 : 75} active referrals</span>
             </div>
             <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${Math.min(100, (activeReferrals / (nextTier.tier === 2 ? 25 : 75)) * 100)}%`, background: `linear-gradient(90deg, ${currentTier?.color ?? "#4A90D9"}, ${nextTier.color})` }}/>
+              <div className="progress-fill" style={{ width: `${Math.min(100, (activeReferrals / (nextTier.tier === 2 ? 25 : 75)) * 100)}%`, background: `linear-gradient(90deg, ${currentTier?.color ?? "#5BA7D6"}, ${nextTier.color})` }}/>
             </div>
             <div style={{ color: MUTED, fontSize: 12, marginTop: 8 }}>
               {(nextTier.tier === 2 ? 25 : 75) - activeReferrals} more referrals needed to reach {nextTier.label} ({nextTier.rate}% commission)
@@ -199,7 +199,7 @@ export function AffiliateProgram() {
               <span>{affiliateLink}</span>
             </div>
             <button onClick={handleCopy} className="copy-btn"
-              style={{ background: copied ? "rgba(95,190,145,0.16)" : "linear-gradient(180deg,#647FF7,#4A63DE)", color: copied ? POS : "#fff" }}>
+              style={{ background: copied ? "rgba(95,190,145,0.16)" : "linear-gradient(180deg,#7E6BD8,#5B6EE1)", color: copied ? POS : "#fff" }}>
               {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
               {copied ? "Copied!" : "Copy Link"}
             </button>

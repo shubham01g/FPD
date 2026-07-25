@@ -17,11 +17,11 @@ export const STORAGE_USED_GB = 16.9;
 export const STORAGE_LIMIT_GB = 25;
 
 export const STORAGE_BREAKDOWN: StorageCategory[] = [
-  { key: "media",     label: "Video Messages", gb: 5.5, color: "#5B7BF5" },
+  { key: "media",     label: "Video Messages", gb: 5.5, color: "#5B6EE1" },
   { key: "financial", label: "Financial",      gb: 4.7, color: "#48BB78" },
-  { key: "legal",     label: "Legal & Estate", gb: 4.2, color: "#6E8BFF" },
+  { key: "legal",     label: "Legal & Estate", gb: 4.2, color: "#5BA7D6" },
   { key: "photos",    label: "Photos",         gb: 1.3, color: "#FC8181" },
-  { key: "personal",  label: "Personal",       gb: 0.8, color: "#3A5BD9" },
+  { key: "personal",  label: "Personal",       gb: 0.8, color: "#5B6EE1" },
   { key: "digital",   label: "Digital Assets", gb: 0.4, color: "#ED8936" },
 ];
 

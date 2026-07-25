@@ -65,7 +65,7 @@ export function IDVerification() {
           { label: "Pending Review", value: 3, color: "#F6AD55", icon: <Clock size={16} /> },
           { label: "Approved Today", value: 7, color: "#48BB78", icon: <CheckCircle size={16} /> },
           { label: "Rejected Today", value: 1, color: "#FC8181", icon: <XCircle size={16} /> },
-          { label: "Avg Review Time", value: "4.2h", color: "#4A90D9", icon: <Shield size={16} /> },
+          { label: "Avg Review Time", value: "4.2h", color: "#5BA7D6", icon: <Shield size={16} /> },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="rounded-lg p-2 mb-3" style={{ background: `${stat.color}15`, color: stat.color, width: "fit-content" }}>
@@ -124,7 +124,7 @@ export function IDVerification() {
             <div className="flex gap-4 mt-4">
               <div
                 className="flex-1 flex items-center justify-center rounded-xl border h-28 cursor-pointer transition-all"
-                style={{ borderColor: "rgba(58,91,217,0.3)", background: "rgba(58,91,217,0.04)", borderStyle: "dashed" }}
+                style={{ borderColor: "rgba(91,110,225,0.3)", background: "rgba(91,110,225,0.04)", borderStyle: "dashed" }}
                 onClick={() => setSelectedVerif(verif)}
               >
                 <div className="text-center">
@@ -135,7 +135,7 @@ export function IDVerification() {
               {verif.idBack && (
                 <div
                   className="flex-1 flex items-center justify-center rounded-xl border h-28 cursor-pointer"
-                  style={{ borderColor: "rgba(58,91,217,0.3)", background: "rgba(58,91,217,0.04)", borderStyle: "dashed" }}
+                  style={{ borderColor: "rgba(91,110,225,0.3)", background: "rgba(91,110,225,0.04)", borderStyle: "dashed" }}
                   onClick={() => setSelectedVerif(verif)}
                 >
                   <div className="text-center">

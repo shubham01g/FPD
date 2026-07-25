@@ -15,7 +15,7 @@ import { cardsOnFile } from "./WGSessionTimer";
 
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = {
-  background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)",
+  background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)",
   color:"#0D1428", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%",
 };
 
@@ -29,7 +29,7 @@ function detectBrand(num: string): string {
 }
 
 function brandColor(brand: string): string {
-  return { Visa:"#1A1F71", Mastercard:"#EB001B", Amex:"#007BC1", Discover:"#FF6600" }[brand] ?? "#3A5BD9";
+  return { Visa:"#1A1F71", Mastercard:"#EB001B", Amex:"#007BC1", Discover:"#FF6600" }[brand] ?? "#5B6EE1";
 }
 
 function brandEmoji(brand: string): string {
@@ -112,17 +112,17 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={{ border:"1px solid rgba(58,91,217,0.12)" }}>
+    <div className="rounded-2xl overflow-hidden glow-surface" style={{ border:"1px solid rgba(91,110,225,0.12)" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b"
-        style={{ borderColor:"rgba(58,91,217,0.08)", background:"rgba(58,91,217,0.04)" }}>
+        style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
         <div className="flex items-center gap-2">
-          <CreditCard size={14} color="#3A5BD9"/>
-          <span style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
+          <CreditCard size={14} color="#5B6EE1"/>
+          <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
         </div>
         {hasCard && !editing && (
           <button onClick={() => setEditing(true)}
             className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
-            style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
             <Edit2 size={11}/> Update
           </button>
         )}
@@ -132,7 +132,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       {hasCard && !editing && (
         <div className="p-4 space-y-3">
           <div className="flex items-center gap-4 px-4 py-4 rounded-xl"
-            style={{ background:"linear-gradient(135deg,#070A12,#141B2E)", border:"1px solid rgba(58,91,217,0.3)" }}>
+            style={{ background:"linear-gradient(135deg,#070A12,#141B2E)", border:"1px solid rgba(91,110,225,0.3)" }}>
             <div style={{ fontSize:28 }}>💳</div>
             <div className="flex-1">
               <div style={{ color:brandColor(existing.brand), fontSize:12, fontWeight:700, ...MONO }}>
@@ -210,7 +210,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
           </div>
 
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
+            style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <Lock size={11} color="#8A9AB8"/>
             <span style={{ color:"#8A9AB8", fontSize:11 }}>256-bit SSL · Processed by Stripe · Card stored securely</span>
           </div>
@@ -218,13 +218,13 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
           <div className="flex gap-3">
             <button onClick={saveCard} disabled={saving}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA",
-                boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:saving?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
+                boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:saving?0.7:1 }}>
               <CreditCard size={14}/>{saving ? "Saving…" : "Save Payment Method"}
             </button>
             {hasCard && (
               <button onClick={() => setEditing(false)} className="px-4 py-3 rounded-xl text-sm"
-                style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>
+                style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>
                 Cancel
               </button>
             )}

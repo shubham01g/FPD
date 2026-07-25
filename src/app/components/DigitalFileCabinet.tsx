@@ -15,8 +15,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const NEG     = "#D06B6B";
 
@@ -35,7 +35,7 @@ interface Cabinet {
 
 const cabinets: Cabinet[] = [
   {
-    id:"legal", label:"Legal Documents", color:"#3A5BD9", emoji:"⚖️",
+    id:"legal", label:"Legal Documents", color:"#5B6EE1", emoji:"⚖️",
     description:"Wills, trusts, power of attorney, contracts & deeds",
     acceptedTypes:"application/pdf,.pdf,.doc,.docx",
     subFolders:["Wills & Trusts","Power of Attorney","Property Deeds","Contracts","Court Documents"],
@@ -98,7 +98,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"vehicles", label:"Vehicles", color:"#4A90D9", emoji:"🚗",
+    id:"vehicles", label:"Vehicles", color:"#5BA7D6", emoji:"🚗",
     description:"Titles, registration, insurance, loan documents",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Titles & Registration","Insurance","Loan Documents","Service Records"],
@@ -110,7 +110,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"utilities", label:"Utilities & Services", color:"#38B2AC", emoji:"⚡",
+    id:"utilities", label:"Utilities & Services", color:"#5A8078", emoji:"⚡",
     description:"Electric, gas, water, internet, phone, HOA monthly bills",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electric","Natural Gas","Water & Sewer","Internet","HOA","Phone & Cable"],
@@ -122,7 +122,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"insurance", label:"Insurance Policies", color:"#6E8BFF", emoji:"🛡️",
+    id:"insurance", label:"Insurance Policies", color:"#5BA7D6", emoji:"🛡️",
     description:"Life, health, home, auto, umbrella — all policies",
     acceptedTypes:"application/pdf,.pdf",
     subFolders:["Life Insurance","Health Insurance","Home Insurance","Auto Insurance","Umbrella"],
@@ -172,7 +172,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"videos", label:"Video Messages", color:"#4A90D9", emoji:"🎥",
+    id:"videos", label:"Video Messages", color:"#5BA7D6", emoji:"🎥",
     description:"Video messages for loved ones — delivered after passing",
     acceptedTypes:"video/*,.mp4,.mov,.avi",
     subFolders:["Family Messages","Life Story Videos","Funeral Instructions"],
@@ -184,7 +184,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#6E8BFF", emoji:"🏺",
+    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#5BA7D6", emoji:"🏺",
     description:"Photos and records of heirlooms, collectibles, and sentimental items",
     acceptedTypes:"image/*,.jpg,.jpeg,.png,application/pdf",
     subFolders:["Jewelry","Coins & Currency","Art","Military Memorabilia","Family Heirlooms"],
@@ -196,7 +196,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"digital", label:"Digital Assets", color:"#38B2AC", emoji:"₿",
+    id:"digital", label:"Digital Assets", color:"#5A8078", emoji:"₿",
     description:"Cryptocurrency, online accounts, passwords, domains",
     acceptedTypes:"application/pdf,.txt,.pdf",
     subFolders:["Cryptocurrency","Online Accounts","Domains","Social Media","Passwords"],
@@ -253,7 +253,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"warranties", label:"Warranties", color:"#6E8BFF", emoji:"🛡️",
+    id:"warranties", label:"Warranties", color:"#5BA7D6", emoji:"🛡️",
     description:"Product warranties, extended protection plans, and proof of purchase",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electronics","Appliances","Vehicles","Home & HVAC","Other"],
@@ -266,7 +266,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"ids", label:"IDs & Licensing", color:"#4A90D9", emoji:"🪪",
+    id:"ids", label:"IDs & Licensing", color:"#5BA7D6", emoji:"🪪",
     description:"Government IDs, driver's license, passport & professional licenses",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Government IDs","Driver's License & Passport","Professional Licenses","Certifications"],
@@ -319,7 +319,7 @@ const cabinets: Cabinet[] = [
    The Secret Vault keeps a dedicated "locked" red since it is the one folder
    gated behind a PIN. Underlying folder data (files, sub-folders, emoji) is
    untouched — only the display accent is recoloured here. */
-const RAMP = ["#8AA0FF","#7EB0DC","#A99BE6","#6FB2B4","#82B8A6","#97A2C6","#B7A9DE","#79A6C9","#6E86E8"];
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#5A8078","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
   ...c, color: c.id === "secret" ? NEG : RAMP[i % RAMP.length],
 }));
@@ -339,7 +339,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-cab so nothing else in the app is affected. */
 const CAB_CSS = `
-.fpd-cab{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-cab{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-cab *{box-sizing:border-box;}
 .fpd-cab-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-cab .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -358,18 +358,18 @@ const CAB_CSS = `
 .fpd-cab .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-cab .pg-h1row{display:flex;align-items:flex-start;gap:12px;}
 .fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
-.fpd-cab .backbtn:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-cab .backbtn:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
 .fpd-cab .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cab .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
 .fpd-cab .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.fpd-cab .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-cab .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-cab .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-cab .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
 
 /* segmented view toggle */
 .fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);flex-shrink:0;}
 .fpd-cab .seg button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border-radius:7px;color:${MUTED};background:none;border:none;cursor:pointer;transition:color .18s,background .18s;}
-.fpd-cab .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-cab .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* search */
 .fpd-cab .search{display:flex;align-items:center;gap:10px;padding:11px 16px;max-width:420px;}
@@ -391,21 +391,21 @@ const CAB_CSS = `
 
 /* drop zone */
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:13px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
-.fpd-cab .drop.on{border-color:rgba(91,123,245,0.5);background:rgba(91,123,245,0.06);}
+.fpd-cab .drop.on{border-color:rgba(91,110,225,0.5);background:rgba(91,110,225,0.06);}
 .fpd-cab .drop .dtxt{font-size:13px;color:${MUTED};}
 .fpd-cab .drop.on .dtxt{color:${ACCENT2};}
-.fpd-cab .drop .dtag{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${ACCENT2};padding:4px 9px;border-radius:7px;background:rgba(91,123,245,0.12);flex-shrink:0;}
+.fpd-cab .drop .dtag{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${ACCENT2};padding:4px 9px;border-radius:7px;background:rgba(91,110,225,0.12);flex-shrink:0;}
 
 /* chips (sub-folders) */
 .fpd-cab .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
 .fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.22);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
-.fpd-cab .chip:hover{border-color:rgba(91,123,245,0.32);background:rgba(91,123,245,0.06);}
+.fpd-cab .chip:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
 .fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
 
 /* root folder grid */
 .fpd-cab .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;}
 .fpd-cab .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
-.fpd-cab .fcard:hover{transform:translateY(-2px);border-color:rgba(91,123,245,0.3);}
+.fpd-cab .fcard:hover{transform:translateY(-2px);border-color:rgba(91,110,225,0.3);}
 .fpd-cab .fcard .bar{height:3px;}
 .fpd-cab .fcard .fbody{padding:18px;}
 .fpd-cab .fcard .ftop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
@@ -415,19 +415,19 @@ const CAB_CSS = `
 .fpd-cab .fcard .fdesc{color:${MUTED};font-size:11.5px;line-height:1.55;}
 
 .fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
-.fpd-cab .frow:hover{border-color:rgba(91,123,245,0.28);background:rgba(91,123,245,0.05);}
+.fpd-cab .frow:hover{border-color:rgba(91,110,225,0.28);background:rgba(91,110,225,0.05);}
 .fpd-cab .frow .femoji2{font-size:20px;flex-shrink:0;}
 .fpd-cab .frow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;}
 .fpd-cab .frow .rdesc{color:${MUTED};font-size:11.5px;margin-top:1px;}
 .fpd-cab .frow .rcount{font-family:var(--font-mono);font-size:10.5px;padding:4px 9px;border-radius:7px;flex-shrink:0;}
 
 .fpd-cab .newtile{border-radius:15px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
-.fpd-cab .newtile:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-cab .newtile:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
 
 /* files */
 .fpd-cab .filegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;}
 .fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
-.fpd-cab .filecard.sel{border-color:${ACCENT2};box-shadow:0 0 0 1px rgba(138,160,255,0.4);}
+.fpd-cab .filecard.sel{border-color:${ACCENT2};box-shadow:0 0 0 1px rgba(91,167,214,0.4);}
 .fpd-cab .filecard .thumb{height:92px;display:flex;align-items:center;justify-content:center;position:relative;background:#0F1624;}
 .fpd-cab .filecard .thumb img{width:100%;height:100%;object-fit:cover;}
 .fpd-cab .filecard .badge{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
@@ -441,7 +441,7 @@ const CAB_CSS = `
 .fpd-cab .filerow .ftico img{width:34px;height:34px;object-fit:cover;}
 .fpd-cab .filerow .fname{color:${TEXT};font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .filerow .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:11px;}
-.fpd-cab .filerow .synced{padding:2px 7px;border-radius:6px;font-size:10px;background:rgba(91,123,245,0.10);color:${ACCENT2};display:inline-flex;align-items:center;gap:4px;}
+.fpd-cab .filerow .synced{padding:2px 7px;border-radius:6px;font-size:10px;background:rgba(91,110,225,0.10);color:${ACCENT2};display:inline-flex;align-items:center;gap:4px;}
 .fpd-cab .filerow .fdate{color:${MUTED};font-size:11px;flex-shrink:0;}
 .fpd-cab .filerow .facts{display:flex;gap:2px;flex-shrink:0;}
 .fpd-cab .filerow .facts button{color:${MUTED};padding:5px;background:none;border:none;cursor:pointer;transition:color .16s;display:flex;}
@@ -449,8 +449,8 @@ const CAB_CSS = `
 .fpd-cab .filerow .facts button.del:hover{color:${NEG};}
 
 .fpd-cab .uploadtile{border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;color:${MUTED};background:rgba(255,255,255,0.008);transition:border-color .18s,color .18s;}
-.fpd-cab .uploadtile.on{border-color:rgba(91,123,245,0.5);background:rgba(91,123,245,0.06);color:${ACCENT2};}
-.fpd-cab .uploadtile:hover{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-cab .uploadtile.on{border-color:rgba(91,110,225,0.5);background:rgba(91,110,225,0.06);color:${ACCENT2};}
+.fpd-cab .uploadtile:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
 
 /* detail panel */
 .fpd-cab .detail{position:fixed;bottom:24px;right:24px;width:290px;z-index:40;padding:18px;}
@@ -465,11 +465,11 @@ const CAB_CSS = `
 .fpd-cab .detail .dbtns{display:flex;gap:8px;margin-top:14px;}
 .fpd-cab .detail .dbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);}
 .fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${ACCENT2};}
-.fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;}
+.fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;}
 
 /* empty */
 .fpd-cab .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 12px;}
-.fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
 .fpd-cab .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 
 @media (max-width:640px){.fpd-cab .fgrid{grid-template-columns:repeat(2,1fr);}.fpd-cab .filegrid{grid-template-columns:repeat(2,1fr);}}

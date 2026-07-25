@@ -16,7 +16,7 @@ const payouts = [
 
 const statusConfig = {
   pending: { label: "PENDING", color: "#F6AD55", bg: "rgba(246,173,85,0.12)", icon: <Clock size={12} /> },
-  processing: { label: "PROCESSING", color: "#4A90D9", bg: "rgba(74,144,217,0.12)", icon: <TrendingUp size={12} /> },
+  processing: { label: "PROCESSING", color: "#5BA7D6", bg: "rgba(91,167,214,0.12)", icon: <TrendingUp size={12} /> },
   paid: { label: "PAID", color: "#48BB78", bg: "rgba(72,187,120,0.12)", icon: <CheckCircle size={12} /> },
 };
 
@@ -76,10 +76,10 @@ export function PayoutManagement() {
         </div>
         <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp size={16} color="#4A90D9" />
+            <TrendingUp size={16} color="#5BA7D6" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Processing</span>
           </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#4A90D9" }}>${processingTotal.toFixed(2)}</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#5BA7D6" }}>${processingTotal.toFixed(2)}</div>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "processing").length} in transit</div>
         </div>
         <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
@@ -176,8 +176,8 @@ export function PayoutManagement() {
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{payout.email} · {payout.id}</div>
               </div>
               <div className="flex items-center gap-1.5">
-                {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#6E8BFF" />}
-                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#6E8BFF", fontSize: 12, textTransform: "capitalize" }}>{payout.type}</span>
+                {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#5BA7D6" />}
+                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#5BA7D6", fontSize: 12, textTransform: "capitalize" }}>{payout.type}</span>
               </div>
               <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{payout.period}</div>
               <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{payout.rate}%</div>

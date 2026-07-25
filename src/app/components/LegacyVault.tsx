@@ -23,8 +23,8 @@ import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -114,7 +114,7 @@ const PACKAGE_SECTIONS = [
 /* Refined per-section accent — the same nine-hue harmonised family used across
    the Calendar, File Cabinet and AI Assistant, cycled by index so this reads
    as one product with the rest of the redesigned portal. */
-const RAMP = ["#8AA0FF","#7EB0DC","#A99BE6","#6FB2B4","#82B8A6","#97A2C6","#B7A9DE","#79A6C9","#6E86E8"];
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#5A8078","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 const THEMED_SECTIONS = PACKAGE_SECTIONS.map((s, i) => ({ ...s, color: RAMP[i % RAMP.length] }));
 
 /* ── Archive builders ────────────────────────────────────────────────
@@ -190,7 +190,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-vault so nothing else in the app is affected. */
 const VAULT_CSS = `
-.fpd-vault{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-vault{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-vault *{box-sizing:border-box;}
 .fpd-vault-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-vault .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -221,15 +221,15 @@ const VAULT_CSS = `
 .fpd-vault .status-row{display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:12px;}
 .fpd-vault .status-row.ok{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.22);}
 .fpd-vault .status-row.no{background:rgba(208,107,107,0.05);border:1px solid rgba(208,107,107,0.2);}
-.fpd-vault .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:11px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 8px 22px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
+.fpd-vault .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:11px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 8px 22px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
 .fpd-vault .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* section rows */
-.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
-.fpd-vault .btn-link:hover{background:rgba(91,123,245,0.18);}
+.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
+.fpd-vault .btn-link:hover{background:rgba(91,110,225,0.18);}
 .fpd-vault .psgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 .fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);transition:border-color .16s,background .16s;}
-.fpd-vault .psec:hover{border-color:rgba(91,123,245,0.24);background:rgba(91,123,245,0.03);}
+.fpd-vault .psec:hover{border-color:rgba(91,110,225,0.24);background:rgba(91,110,225,0.03);}
 .fpd-vault .psec-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-vault .psec-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px;}
 .fpd-vault .psec-lbl{color:${TEXT};font-size:13px;font-weight:600;}
@@ -239,7 +239,7 @@ const VAULT_CSS = `
 .fpd-vault .psec-acts button{background:none;border:none;padding:5px;cursor:pointer;display:flex;color:${MUTED};transition:color .16s;}
 .fpd-vault .psec-acts button:hover{color:${ACCENT2};}
 .fpd-vault .showmore{width:100%;margin-top:12px;padding:13px;border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.008);color:${MUTED};font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:border-color .18s,color .18s;}
-.fpd-vault .showmore:hover{border-color:rgba(91,123,245,0.35);color:${ACCENT2};}
+.fpd-vault .showmore:hover{border-color:rgba(91,110,225,0.35);color:${ACCENT2};}
 
 /* clone CTA */
 .fpd-vault .cta{text-align:center;padding:36px 30px;}
@@ -249,11 +249,11 @@ const VAULT_CSS = `
 .fpd-vault .cta-btns{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
 .fpd-vault .cta-primary{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:13px;font-size:13.5px;font-weight:700;border:none;font-family:var(--font-body);cursor:pointer;transition:filter .18s,transform .18s;}
 .fpd-vault .cta-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:13px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.3);color:${ACCENT2};font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
-.fpd-vault .cta-secondary:hover{background:rgba(91,123,245,0.18);}
+.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:13px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.3);color:${ACCENT2};font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
+.fpd-vault .cta-secondary:hover{background:rgba(91,110,225,0.18);}
 
 /* footnote */
-.fpd-vault .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.16);}
+.fpd-vault .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-vault .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
 .fpd-vault .foot .ft b{color:${SOFT};font-weight:600;}
 
@@ -421,7 +421,7 @@ export function LegacyVault() {
 
         {/* ── Legacy Vault Clone CTA ── */}
         <div className="card cta glow-surface">
-          <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,123,245,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,123,245,0.26)"}` }}>
+          <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,110,225,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,110,225,0.26)"}` }}>
             {fullyUnlocked ? <Unlock size={26} color={POS}/> : <Lock size={26} color={ACCENT2}/>}
           </div>
           <div className="cta-title">

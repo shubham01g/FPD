@@ -13,8 +13,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -24,7 +24,7 @@ const NEG     = "#D06B6B";
    colours untouched. Toned to match the Calendar: every slice stays light
    enough to read on the dark surface and distinct enough to tell apart,
    without any slice shouting against the theme. */
-const STORAGE_RAMP = ["#8AA0FF", "#6FB2B4", "#A99BE6", "#7EB0DC", "#82B8A6", "#97A2C6"];
+const STORAGE_RAMP = ["#5BA7D6", "#5A8078", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
 /* Remaining / free space — a quiet slate so "what's left" reads at a glance. */
 const FREE = "#6B7690";
 
@@ -40,7 +40,7 @@ const GRAIN =
 /* All redesign styling is scoped under .fpd-dash so nothing else in the app is
    affected. Interactive states (hover, highlight underline) live here as real CSS. */
 const DASH_CSS = `
-.fpd-dash{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-dash{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-dash *{box-sizing:border-box;}
 .fpd-dash-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-dash .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -62,7 +62,7 @@ const DASH_CSS = `
 .fpd-dash .head-meta{text-align:right;line-height:1.35;}
 .fpd-dash .head-meta .a{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:${FAINT};}
 .fpd-dash .head-meta .b{font-size:12px;color:${SOFT};font-family:var(--font-mono);}
-.fpd-dash .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-dash .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* storage alert */
@@ -71,10 +71,10 @@ const DASH_CSS = `
 .fpd-dash .salert button{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;background:rgba(217,165,94,0.16);color:${WARN};font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* readiness band */
-.fpd-dash .ready{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:26px;padding:22px 26px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,123,245,0.16);}
+.fpd-dash .ready{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:26px;padding:22px 26px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.16);}
 .fpd-dash .ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
 .fpd-dash .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.fpd-dash .ring-em{width:30px;height:30px;border-radius:9px;background:rgba(91,123,245,0.12);border:1px solid rgba(91,123,245,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);color:${ACCENT2};}
+.fpd-dash .ring-em{width:30px;height:30px;border-radius:9px;background:rgba(91,110,225,0.12);border:1px solid rgba(91,110,225,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);color:${ACCENT2};}
 .fpd-dash .ring-center b{font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};line-height:1;}
 .fpd-dash .ready-mid{min-width:200px;border-right:1px solid rgba(255,255,255,0.22);padding-right:26px;}
 .fpd-dash .ready-st{display:inline-flex;align-items:center;gap:7px;margin-bottom:9px;}
@@ -82,11 +82,11 @@ const DASH_CSS = `
 .fpd-dash .ready-st span{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.15em;}
 .fpd-dash .ready-mid h2{font-size:19px;font-weight:600;color:${TEXT};margin-bottom:6px;letter-spacing:-0.01em;font-family:var(--font-display);}
 .fpd-dash .ready-mid p{color:${MUTED};font-size:12.5px;max-width:240px;}
-.fpd-dash .finish{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:9px 15px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
+.fpd-dash .finish{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:9px 15px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-dash .finish:hover{filter:brightness(1.08);}
 .fpd-dash .ess-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px;}
 .fpd-dash .ess{display:flex;align-items:center;gap:10px;white-space:nowrap;padding:7px 11px;border-radius:9px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.22);cursor:pointer;text-align:left;width:100%;transition:border-color .18s,background .18s;font-family:var(--font-body);}
-.fpd-dash .ess:hover{border-color:rgba(91,123,245,0.3);background:rgba(91,123,245,0.06);}
+.fpd-dash .ess:hover{border-color:rgba(91,110,225,0.3);background:rgba(91,110,225,0.06);}
 .fpd-dash .ess .ck{width:17px;height:17px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-dash .ess .ck.done{background:rgba(95,190,145,0.15);border:1px solid rgba(95,190,145,0.32);color:${POS};}
 .fpd-dash .ess .ck.todo{background:transparent;border:1px solid ${FAINT};}
@@ -100,14 +100,14 @@ const DASH_CSS = `
 .fpd-dash .kcell:hover{background:rgba(255,255,255,0.02);}
 .fpd-dash .kcell::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,${ACCENT},transparent);transform:scaleX(0);transform-origin:left;transition:transform .18s;}
 .fpd-dash .kcell:hover::after{transform:scaleX(1);}
-.fpd-dash .kcell.hl{background:linear-gradient(180deg,rgba(91,123,245,0.15),rgba(91,123,245,0.04));}
-.fpd-dash .kcell.hl:hover{background:linear-gradient(180deg,rgba(91,123,245,0.19),rgba(91,123,245,0.06));}
+.fpd-dash .kcell.hl{background:linear-gradient(180deg,rgba(91,110,225,0.15),rgba(91,110,225,0.04));}
+.fpd-dash .kcell.hl:hover{background:linear-gradient(180deg,rgba(91,110,225,0.19),rgba(91,110,225,0.06));}
 .fpd-dash .kcell.hl::after{transform:scaleX(1);background:linear-gradient(90deg,${ACCENT2},${ACCENT});}
 .fpd-dash .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-dash .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
 .fpd-dash .kcell.hl .klbl{color:${ACCENT2};}
 .fpd-dash .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-dash .kcell.hl .kico{background:rgba(91,123,245,0.12);border-color:rgba(91,123,245,0.36);color:${ACCENT2};}
+.fpd-dash .kcell.hl .kico{background:rgba(91,110,225,0.12);border-color:rgba(91,110,225,0.36);color:${ACCENT2};}
 .fpd-dash .kcell .kval{font-family:var(--font-display);font-size:27px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-dash .kcell.hl .kval{color:${ACCENT2};}
 .fpd-dash .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
@@ -182,7 +182,7 @@ const DASH_CSS = `
 .fpd-dash .qa-btn:first-child{border-top:none;padding-top:4px;}
 .fpd-dash .qa-btn:hover{padding-left:8px;}
 .fpd-dash .qa-ico{width:33px;height:33px;border-radius:9px;flex-shrink:0;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);transition:border-color .18s,color .18s;}
-.fpd-dash .qa-btn:hover .qa-ico{border-color:rgba(91,123,245,0.4);color:${ACCENT2};}
+.fpd-dash .qa-btn:hover .qa-ico{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
 .fpd-dash .qa-btn .qt{flex:1;}
 .fpd-dash .qa-btn .qt b{display:block;font-size:12.5px;font-weight:600;color:${TEXT};}
 .fpd-dash .qa-btn .qt i{display:block;font-style:normal;font-size:11px;color:${MUTED};margin-top:1px;}
@@ -415,15 +415,15 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 104, display: "block" }}>
                   <defs>
                     <linearGradient id="fpdArea" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(91,123,245,0.30)" />
-                      <stop offset="100%" stopColor="rgba(91,123,245,0)" />
+                      <stop offset="0%" stopColor="rgba(91,110,225,0.30)" />
+                      <stop offset="100%" stopColor="rgba(91,110,225,0)" />
                     </linearGradient>
                   </defs>
                   {gridYs.map((y, i) => (
                     <line key={i} x1="0" y1={y.toFixed(1)} x2={CW} y2={y.toFixed(1)} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
                   ))}
                   <path d={areaPath} fill="url(#fpdArea)" />
-                  <path d={linePath.trim()} fill="none" stroke="#6C89FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+                  <path d={linePath.trim()} fill="none" stroke="#5BA7D6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
                   <circle cx={cx(vals.length - 1).toFixed(1)} cy={cy(vals[vals.length - 1]).toFixed(1)} r="3.4" fill="#0A0F1A" stroke={ACCENT2} strokeWidth="2" vectorEffect="non-scaling-stroke" />
                 </svg>
                 <div className="months">

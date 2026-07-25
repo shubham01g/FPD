@@ -63,7 +63,7 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
         ref={btnRef}
         onClick={openDropdown}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-        style={{ background:"rgba(58,91,217,0.07)", color:"var(--primary)", border:"1px solid rgba(58,91,217,0.18)" }}>
+        style={{ background:"rgba(91,110,225,0.07)", color:"var(--primary)", border:"1px solid rgba(91,110,225,0.18)" }}>
         <FolderOpen size={11}/>
         Sync to File Cabinet
         <ChevronDown size={10} style={{ transform:open?"rotate(180deg)":"none", transition:"transform 0.15s" }}/>
@@ -83,7 +83,7 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
             boxShadow:"0 8px 32px rgba(0,0,0,0.18)",
             overflow:"hidden",
           }}>
-          <div className="px-3 py-2 border-b" style={{ borderColor:"var(--border)", background:"rgba(58,91,217,0.03)" }}>
+          <div className="px-3 py-2 border-b" style={{ borderColor:"var(--border)", background:"rgba(91,110,225,0.03)" }}>
             <div style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)", letterSpacing:"0.08em" }}>SAVE TO FOLDER</div>
             <div style={{ color:"var(--foreground)", fontSize:11, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:200 }}>
               {docName.length > 36 ? docName.slice(0,36)+"…" : docName}
@@ -94,7 +94,7 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
               <button key={f.folderId} onClick={() => handleSync(f.folderId, f.folderLabel)}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm transition-all"
                 style={{ color:"var(--foreground)", background:"transparent" }}
-                onMouseEnter={e => (e.currentTarget.style.background="rgba(58,91,217,0.06)")}
+                onMouseEnter={e => (e.currentTarget.style.background="rgba(91,110,225,0.06)")}
                 onMouseLeave={e => (e.currentTarget.style.background="transparent")}>
                 <FolderOpen size={13} color="var(--primary)"/>
                 <span style={{ fontSize:12 }}>{f.folderLabel}</span>

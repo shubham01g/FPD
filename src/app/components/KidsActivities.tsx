@@ -9,8 +9,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -21,23 +21,23 @@ const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
   "Soccer":          {emoji:"⚽",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
   "Baseball / Softball":{emoji:"⚾",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Basketball":      {emoji:"🏀",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Football":        {emoji:"🏈",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
-  "Swimming":        {emoji:"🏊",color:"#4A90D9",bg:"rgba(74,144,217,0.1)"},
+  "Football":        {emoji:"🏈",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Swimming":        {emoji:"🏊",color:"#5BA7D6",bg:"rgba(91,167,214,0.1)"},
   "Gymnastics":      {emoji:"🤸",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
-  "Dance":           {emoji:"💃",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
+  "Dance":           {emoji:"💃",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
   "Martial Arts":    {emoji:"🥋",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Music / Band":    {emoji:"🎵",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
-  "Piano":           {emoji:"🎹",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
-  "Guitar":          {emoji:"🎸",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
+  "Music / Band":    {emoji:"🎵",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Piano":           {emoji:"🎹",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Guitar":          {emoji:"🎸",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
   "Drama / Theater": {emoji:"🎭",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
   "Art Class":       {emoji:"🎨",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
   "Coding / STEM":   {emoji:"💻",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Chess":           {emoji:"♟️",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
+  "Chess":           {emoji:"♟️",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
   "Scouts / Scouting":{emoji:"🏕️",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Religious Education":{emoji:"⛪",color:"#3A5BD9",bg:"rgba(58,91,217,0.1)"},
+  "Religious Education":{emoji:"⛪",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
   "Tutoring":        {emoji:"📚",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Tennis":          {emoji:"🎾",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Violin":          {emoji:"🎻",color:"#5B7BF5",bg:"rgba(58,91,217,0.1)"},
+  "Violin":          {emoji:"🎻",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
 };
 function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"rgba(255,255,255,0.65)",bg:"rgba(138,154,184,0.1)"}; }
 
@@ -122,7 +122,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-kids so nothing else in the app is affected. */
 const KIDS_CSS = `
-.fpd-kids{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-kids{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-kids *{box-sizing:border-box;}
 .fpd-kids-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-kids .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -135,7 +135,7 @@ const KIDS_CSS = `
 .fpd-kids .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-kids .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-kids .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-kids .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-kids .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-kids .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-kids .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -183,7 +183,7 @@ const KIDS_CSS = `
 .fpd-kids .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
 
 /* transportation / notes */
-.fpd-kids .infobox{padding:13px 15px;border-radius:11px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);}
+.fpd-kids .infobox{padding:13px 15px;border-radius:11px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
 .fpd-kids .infobox .ik{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:${ACCENT2};font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;}
 .fpd-kids .infobox .iv{color:${TEXT};font-size:13px;line-height:1.7;}
 .fpd-kids .notebox{padding:13px 15px;border-radius:11px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);}
@@ -193,8 +193,8 @@ const KIDS_CSS = `
 /* documents */
 .fpd-kids .doclbl{color:${MUTED};font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;margin-bottom:8px;}
 .fpd-kids .docrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-.fpd-kids .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,123,245,0.08);color:${ACCENT2};border:1px solid rgba(91,123,245,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
-.fpd-kids .docchip:hover{background:rgba(91,123,245,0.16);}
+.fpd-kids .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
+.fpd-kids .docchip:hover{background:rgba(91,110,225,0.16);}
 
 /* modal */
 .fpd-kids .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
@@ -206,9 +206,9 @@ const KIDS_CSS = `
 .fpd-kids .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-kids .field input,.fpd-kids .field select,.fpd-kids .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-kids .field input::placeholder,.fpd-kids .field textarea::placeholder{color:${FAINT};}
-.fpd-kids .field input:focus,.fpd-kids .field select:focus,.fpd-kids .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-kids .field input:focus,.fpd-kids .field select:focus,.fpd-kids .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-kids .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);flex-wrap:wrap;}
-.fpd-kids .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-kids .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-kids .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -288,9 +288,9 @@ export function KidsActivities() {
                 onClick={() => setFilterChild(child)}
                 className={`chip ${on ? "" : "off"}`}
                 style={{
-                  background: on ? "rgba(91,123,245,0.16)" : "rgba(91,123,245,0.05)",
+                  background: on ? "rgba(91,110,225,0.16)" : "rgba(91,110,225,0.05)",
                   color: on ? ACCENT2 : MUTED,
-                  borderColor: on ? "rgba(91,123,245,0.4)" : "rgba(255,255,255,0.09)",
+                  borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)",
                 }}
               >
                 {child === "all" ? "👦👧 All Children" : `👧 ${child}`}

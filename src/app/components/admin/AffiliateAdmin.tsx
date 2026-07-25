@@ -15,7 +15,7 @@ const tierDistribution = [
   { tier: "Tier 3 (74+)", affiliates: 9, earn: 22891 },
 ];
 
-const tierColors = { 1: "#4A90D9", 2: "#3A5BD9", 3: "#48BB78" };
+const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3" };
 
 export function AffiliateAdmin() {
@@ -39,10 +39,10 @@ export function AffiliateAdmin() {
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Affiliates", value: 181, sub: "12 joined this month", color: "#4A90D9" },
+          { label: "Total Affiliates", value: 181, sub: "12 joined this month", color: "#5BA7D6" },
           { label: "Active Referrals", value: "4,841", sub: "Within 12-month cap", color: "var(--gold)" },
           { label: "Jun Commission Pool", value: "$76,122", sub: "Unpaid + processing", color: "#48BB78" },
-          { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#6E8BFF" },
+          { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#5BA7D6" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -68,8 +68,8 @@ export function AffiliateAdmin() {
                 </div>
                 <div className="h-3 rounded-full" style={{ background: "var(--secondary)" }}>
                   <div className="h-3 rounded-full" style={{ width: `${(t.affiliates / 181) * 100}%`, background: [
-                    "linear-gradient(90deg, #4A90D9, #6AAFF0)",
-                    "linear-gradient(90deg, #3A5BD9, #3A5BD9)",
+                    "linear-gradient(90deg, #5BA7D6, #5BA7D6)",
+                    "linear-gradient(90deg, #5B6EE1, #5B6EE1)",
                     "linear-gradient(90deg, #48BB78, #68D391)",
                   ][i] }} />
                 </div>
@@ -80,7 +80,7 @@ export function AffiliateAdmin() {
             {tierDistribution.map((t, i) => {
               const maxEarn = Math.max(...tierDistribution.map(x => x.earn));
               const h = Math.round((t.earn / maxEarn) * 120);
-              const colors = ["#4A90D9","#3A5BD9","#48BB78"];
+              const colors = ["#5BA7D6","#5B6EE1","#48BB78"];
               return (
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                   <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${(t.earn/1000).toFixed(1)}k</span>

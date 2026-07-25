@@ -14,9 +14,9 @@ interface PlanConfig {
 
 const initialPlans: PlanConfig[] = [
   { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#48BB78" },
-  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#4A90D9" },
-  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#3A5BD9" },
-  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#6E8BFF" },
+  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#5BA7D6" },
+  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#5B6EE1" },
+  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#5BA7D6" },
   { id: "legacy_vault",   name: "Legacy Vault",   price: 129.99, annualDiscount: 20, storage: 1024, overageRate: 0.40, maxContacts: 999, color: "#ED8936" },
 ];
 
@@ -74,7 +74,7 @@ export function SubscriptionConfig() {
             onClick={handleSave}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all"
             style={{
-              background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #3A5BD9, #3A5BD9)",
+              background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #5B6EE1, #5B6EE1)",
               color: saved ? "#48BB78" : "#070D1A",
               border: saved ? "1px solid rgba(72,187,120,0.3)" : "none",
               fontWeight: 600, fontSize: 14,
@@ -243,7 +243,7 @@ export function SubscriptionConfig() {
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-8 py-3 rounded-xl"
-          style={{ background: "linear-gradient(135deg, #3A5BD9, #3A5BD9)", color: "#070D1A", fontWeight: 700, fontSize: 15 }}
+          style={{ background: "linear-gradient(135deg, #5B6EE1, #5B6EE1)", color: "#070D1A", fontWeight: 700, fontSize: 15 }}
         >
           <Save size={16} /> Save All Configuration
         </button>

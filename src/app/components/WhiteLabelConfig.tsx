@@ -13,36 +13,36 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 
-/* "Royal Purple" and "Heritage Trust Co." intentionally keep their violet values (#6E8BFF/#B8C6F5) —
+/* "Royal Purple" and "Heritage Trust Co." intentionally keep their violet values (#5BA7D6/#5A8078) —
    these are user-selectable brand preset OPTIONS, not leftover app styling debt. Do not recolor them. */
 const PRESET_COLORS = [
-  { name: "Ocean Blue",    primary: "#3A5BD9", accent: "#5B7BF5" },
-  { name: "Royal Purple",  primary: "#6E8BFF", accent: "#B8C6F5" },
+  { name: "Ocean Blue",    primary: "#5B6EE1", accent: "#5B6EE1" },
+  { name: "Royal Purple",  primary: "#5BA7D6", accent: "#5A8078" },
   { name: "Emerald",       primary: "#48BB78", accent: "#68D391" },
   { name: "Amber",         primary: "#F6AD55", accent: "#FBD38D" },
   { name: "Rose",          primary: "#FC8181", accent: "#FEB2B2" },
-  { name: "Indigo",        primary: "#5A67D8", accent: "#7F9CF5" },
-  { name: "Teal",          primary: "#38B2AC", accent: "#4FD1C5" },
+  { name: "Indigo",        primary: "#5B6EE1", accent: "#5BA7D6" },
+  { name: "Teal",          primary: "#5A8078", accent: "#5A8078" },
   { name: "Crimson",       primary: "#E53E3E", accent: "#FC8181" },
 ];
 
 const PRESET_BRANDS = [
-  { name: "Heritage Trust Co.",   tagline: "Protecting Family Legacies Since 1987", primary: "#6E8BFF", accent: "#B8C6F5", logo: "HT" },
+  { name: "Heritage Trust Co.",   tagline: "Protecting Family Legacies Since 1987", primary: "#5BA7D6", accent: "#5A8078", logo: "HT" },
   { name: "LegacyFirst",          tagline: "Your Life Story, Secured Forever",       primary: "#48BB78", accent: "#68D391", logo: "LF" },
   { name: "FutureLock",           tagline: "Lock In Your Legacy",                    primary: "#F6AD55", accent: "#FBD38D", logo: "FL" },
-  { name: "EternalVault Pro",     tagline: "Enterprise Legacy Management",           primary: "#5A67D8", accent: "#7F9CF5", logo: "EV" },
+  { name: "EternalVault Pro",     tagline: "Enterprise Legacy Management",           primary: "#5B6EE1", accent: "#5BA7D6", logo: "EV" },
 ];
 
 type Tab = "brand" | "features" | "plans" | "domain" | "preview";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button onClick={() => onChange(!checked)} className="fpd-wl-toggle" style={{ background: checked ? ACCENT : "rgba(91,123,245,0.14)", borderColor: checked ? ACCENT : "rgba(91,123,245,0.3)", boxShadow: checked ? "0 0 12px rgba(58,91,217,0.35)" : "none" }}>
+    <button onClick={() => onChange(!checked)} className="fpd-wl-toggle" style={{ background: checked ? ACCENT : "rgba(91,110,225,0.14)", borderColor: checked ? ACCENT : "rgba(91,110,225,0.3)", boxShadow: checked ? "0 0 12px rgba(91,110,225,0.35)" : "none" }}>
       <div className="fpd-wl-toggle-knob" style={{ left: checked ? 20 : 2 }} />
     </button>
   );
@@ -124,7 +124,7 @@ function LivePreview({ config }: { config: WhiteLabelConfig }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {["14 Documents", "3 Contacts", "16.9 GB Used", "$284 Earned"].map((stat, i) => (
                 <div key={i} style={{ background: "#FFFFFF", borderRadius: 10, padding: 10, border: `1px solid ${pc}12` }}>
-                  <div style={{ color: [pc, "#48BB78", "#F6AD55", "#8AA0FF"][i], fontSize: 14, fontWeight: 700 }}>{stat.split(" ")[0]}</div>
+                  <div style={{ color: [pc, "#48BB78", "#F6AD55", "#5BA7D6"][i], fontSize: 14, fontWeight: 700 }}>{stat.split(" ")[0]}</div>
                   <div style={{ color: "#5A6A88", fontSize: 10 }}>{stat.split(" ").slice(1).join(" ")}</div>
                 </div>
               ))}
@@ -157,7 +157,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-wl so nothing else in the app is affected. */
 const WL_CSS = `
-.fpd-wl{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-wl{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-wl *{box-sizing:border-box;}
 .fpd-wl-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wl .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -172,26 +172,26 @@ const WL_CSS = `
 .fpd-wl .enable-pill{display:flex;align-items:center;gap:10px;padding:9px 16px;}
 .fpd-wl .enable-pill span{color:${MUTED};font-size:12px;}
 .fpd-wl .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);border:1px solid;background:none;}
-.fpd-wl .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:11px;font-size:13px;font-weight:700;color:#fff;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);box-shadow:0 6px 18px -8px rgba(74,99,222,0.7);font-family:var(--font-body);}
+.fpd-wl .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:11px;font-size:13px;font-weight:700;color:#fff;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);box-shadow:0 6px 18px -8px rgba(91,110,225,0.7);font-family:var(--font-body);}
 
 .fpd-wl-toggle{flex-shrink:0;width:40px;height:22px;border-radius:11px;position:relative;border:1px solid;cursor:pointer;transition:all .18s;}
 .fpd-wl-toggle-knob{position:absolute;top:2px;border-radius:50%;width:16px;height:16px;background:#fff;transition:left .15s;}
 
 /* status banner */
-.fpd-wl .status-banner{display:flex;align-items:center;gap:12px;padding:13px 20px;border-radius:14px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.28);}
+.fpd-wl .status-banner{display:flex;align-items:center;gap:12px;padding:13px 20px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.28);}
 .fpd-wl .status-dot{width:7px;height:7px;border-radius:50%;background:${ACCENT};box-shadow:0 0 8px ${ACCENT};}
 .fpd-wl .status-banner span{color:${SOFT};font-size:13px;}
 
 /* tabs */
 .fpd-wl-seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;flex-wrap:wrap;}
 .fpd-wl-seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-wl-seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-wl-seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* fields */
 .fpd-wl .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-wl .field input{width:100%;padding:11px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
 .fpd-wl .field input::placeholder{color:${FAINT};}
-.fpd-wl .field input:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-wl .field input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-wl .sec-title{font-family:var(--font-display);font-size:15px;color:${TEXT};margin-bottom:4px;}
 
 /* presets */
@@ -203,11 +203,11 @@ const WL_CSS = `
 .fpd-wl .color-preset{display:flex;align-items:center;justify-content:center;border-radius:11px;padding:10px 0;cursor:pointer;border:2px solid transparent;}
 .fpd-wl .color-preset span{color:#F0F4FA;font-size:9px;font-weight:700;}
 .fpd-wl .swatch-preview{padding:14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
-.fpd-wl .upload-box{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:2px dashed rgba(91,123,245,0.3);background:rgba(91,123,245,0.04);cursor:pointer;}
+.fpd-wl .upload-box{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:2px dashed rgba(91,110,225,0.3);background:rgba(91,110,225,0.04);cursor:pointer;}
 .fpd-wl .upload-box span{color:${ACCENT2};font-size:13px;}
 
 /* feature toggles */
-.fpd-wl .info-strip{padding:12px 20px;border-radius:14px;background:rgba(91,123,245,0.06);border:1px solid rgba(91,123,245,0.2);}
+.fpd-wl .info-strip{padding:12px 20px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.2);}
 .fpd-wl .info-strip p{color:${SOFT};font-size:13px;}
 .fpd-wl .feature-row{display:flex;align-items:center;justify-content:space-between;padding:16px;}
 .fpd-wl .feature-row-label{color:${TEXT};font-size:14px;font-weight:500;}
@@ -226,7 +226,7 @@ const WL_CSS = `
 .fpd-wl .dns-box{padding:12px 14px;border-radius:11px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);}
 .fpd-wl .dns-box .dl{color:${MUTED};font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
 .fpd-wl .dns-box .dv{color:${POS};font-size:12px;font-family:var(--font-mono);}
-.fpd-wl .email-preview-box{padding:12px 14px;border-radius:11px;background:rgba(91,123,245,0.06);border:1px solid rgba(91,123,245,0.18);}
+.fpd-wl .email-preview-box{padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.18);}
 .fpd-wl .warn-box{padding:12px 14px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);color:${WARN};font-size:12px;}
 
 /* preview tab summary */
@@ -306,7 +306,7 @@ export function WhiteLabelConfig() {
           <div className="status-banner">
             <div className="status-dot" />
             <span>White label mode is <strong>ACTIVE</strong> — platform displaying as "<strong>{config.companyName}</strong>" on {config.domain}</span>
-            <button className="btn-ghost" style={{ marginLeft: "auto", color: ACCENT2, background: "rgba(91,123,245,0.14)", borderColor: "rgba(91,123,245,0.3)", padding: "6px 12px", fontSize: 11 }}>
+            <button className="btn-ghost" style={{ marginLeft: "auto", color: ACCENT2, background: "rgba(91,110,225,0.14)", borderColor: "rgba(91,110,225,0.3)", padding: "6px 12px", fontSize: 11 }}>
               <ExternalLink size={11} /> Visit Site
             </button>
           </div>
@@ -432,7 +432,7 @@ export function WhiteLabelConfig() {
               <p>Customize plan names to match your brand. Pricing and features are managed separately in Subscription Config.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-5">
-              {([["starter",POS],["essential","#4A90D9"],["premium",ACCENT],["legacyPro",ACCENT2],["enterprise","#ED8936"]] as const).map(([key, color], planIdx) => (
+              {([["starter",POS],["essential","#5BA7D6"],["premium",ACCENT],["legacyPro",ACCENT2],["enterprise","#ED8936"]] as const).map(([key, color], planIdx) => (
                 <div key={key} className="plan-card glow-surface" style={{ borderColor: `${color}40` }}>
                   <div className="plan-badge" style={{ color }}>PLAN {planIdx+1} — {key.toUpperCase()}</div>
                   <input value={config.planNames[key]} onChange={e => updatePlanName(key, e.target.value)}
@@ -446,7 +446,7 @@ export function WhiteLabelConfig() {
               <div className="preset-lbl">HOW PLAN NAMES APPEAR</div>
               <div className="flex gap-4 flex-wrap">
                 {(["essential", "premium", "legacyPro"] as const).map((k, i) => (
-                  <div key={k} className="plan-tag" style={{ background: ["rgba(74,144,217,0.16)","rgba(91,123,245,0.16)","rgba(138,160,255,0.16)"][i], color: ["#4A90D9",ACCENT,ACCENT2][i] }}>
+                  <div key={k} className="plan-tag" style={{ background: ["rgba(91,167,214,0.16)","rgba(91,110,225,0.16)","rgba(91,167,214,0.16)"][i], color: ["#5BA7D6",ACCENT,ACCENT2][i] }}>
                     {config.planNames[k]}
                   </div>
                 ))}
@@ -510,7 +510,7 @@ export function WhiteLabelConfig() {
               <button onClick={handleSave} className="btn-primary">
                 <Save size={14} /> Publish White Label Config
               </button>
-              <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: ACCENT2, background: "rgba(91,123,245,0.10)", borderColor: "rgba(91,123,245,0.3)" }}>
+              <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: ACCENT2, background: "rgba(91,110,225,0.10)", borderColor: "rgba(91,110,225,0.3)" }}>
                 <ExternalLink size={14} /> Open Staging Preview
               </button>
               <button onClick={() => { copyToClipboard(JSON.stringify(config, null, 2)); toast.success("Config JSON copied") }} className="btn-ghost" style={{ color: MUTED, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>

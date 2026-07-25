@@ -9,8 +9,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -18,9 +18,9 @@ const NEG     = "#D06B6B";
 const ID_TYPES = ["Driver's License","Passport","Social Security Card","Birth Certificate","Military ID","Medicare Card","Medicaid Card","Health Insurance Card","Dental Insurance Card","Vision Insurance Card","Work / Employee ID","Student ID","Global Entry / TSA PreCheck","Green Card / Permanent Resident","Voter Registration","Vehicle Registration","Concealed Carry Permit","Professional License","Other"];
 
 const CATEGORIES: Record<string, { color:string; bg:string; emoji:string }> = {
-  "Government ID":   { color:"#3A5BD9", bg:"rgba(58,91,217,0.1)",   emoji:"🪪" },
+  "Government ID":   { color:"#5B6EE1", bg:"rgba(91,110,225,0.1)",   emoji:"🪪" },
   "Insurance":       { color:"#48BB78", bg:"rgba(72,187,120,0.1)",  emoji:"🛡️" },
-  "Professional":    { color:"#5B7BF5", bg:"rgba(58,91,217,0.1)", emoji:"💼" },
+  "Professional":    { color:"#5B6EE1", bg:"rgba(91,110,225,0.1)", emoji:"💼" },
   "Military":        { color:"#ED8936", bg:"rgba(237,137,54,0.1)",  emoji:"🎖️" },
   "Other":           { color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)", emoji:"📋" },
 };
@@ -64,7 +64,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-idk so nothing else in the app is affected. */
 const IDK_CSS = `
-.fpd-idk{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-idk{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-idk *{box-sizing:border-box;}
 .fpd-idk-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-idk .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -76,7 +76,7 @@ const IDK_CSS = `
 .fpd-idk .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-idk .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-idk .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-idk .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-idk .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-idk .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-idk .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -103,7 +103,7 @@ const IDK_CSS = `
 .fpd-idk .itype{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-idk .iholder{color:${MUTED};font-size:12px;margin-top:1px;}
 .fpd-idk .ibadge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:99px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.03em;}
-.fpd-idk .idnum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;margin:14px 0 12px;background:rgba(91,123,245,0.06);border:1px solid rgba(91,123,245,0.16);}
+.fpd-idk .idnum-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;margin:14px 0 12px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.16);}
 .fpd-idk .idnum-lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:3px;}
 .fpd-idk .idnum-val{font-family:var(--font-mono);font-size:14px;font-weight:700;color:${TEXT};}
 .fpd-idk .eye-btn{color:${MUTED};background:none;border:none;cursor:pointer;display:flex;}
@@ -120,14 +120,14 @@ const IDK_CSS = `
 .fpd-idk .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-idk .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-idk .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
-.fpd-idk .scan-box{padding:16px;border-radius:12px;border:2px dashed rgba(91,123,245,0.28);background:rgba(91,123,245,0.03);}
+.fpd-idk .scan-box{padding:16px;border-radius:12px;border:2px dashed rgba(91,110,225,0.28);background:rgba(91,110,225,0.03);}
 .fpd-idk .scan-lbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.06em;color:${MUTED};margin-bottom:10px;font-weight:600;}
 .fpd-idk .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-idk .field input,.fpd-idk .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-idk .field input::placeholder{color:${FAINT};}
-.fpd-idk .field input:focus,.fpd-idk .field select:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-idk .field input:focus,.fpd-idk .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-idk .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-idk .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-idk .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-idk .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Code, Play, Copy, CheckCircle, Key, Zap, Globe, Lock, ChevronDown, ChevronRight, Terminal, Book, Webhook } from "lucide-react";
 
-const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(58,91,217,0.1)", boxShadow: "0 2px 12px rgba(58,91,217,0.06)", borderRadius: 16 };
-const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(58,91,217,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
+const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(91,110,225,0.1)", boxShadow: "0 2px 12px rgba(91,110,225,0.06)", borderRadius: 16 };
+const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
-const methodColor = { GET:"#48BB78", POST:"#3A5BD9", PUT:"#F6AD55", DELETE:"#FC8181", PATCH:"#6E8BFF" };
+const methodColor = { GET:"#48BB78", POST:"#5B6EE1", PUT:"#F6AD55", DELETE:"#FC8181", PATCH:"#5BA7D6" };
 
 interface Endpoint { method:string; path:string; desc:string; body?:string; response:string; }
 interface Group { label:string; endpoints:Endpoint[]; }
@@ -246,8 +246,8 @@ export function EnterpriseAPI() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Code size={15} color="#3A5BD9" />
-            <span style={{ color: "#3A5BD9", fontSize: 11, ...MONO, letterSpacing: "0.12em" }}>ENTERPRISE</span>
+            <Code size={15} color="#5B6EE1" />
+            <span style={{ color: "#5B6EE1", fontSize: 11, ...MONO, letterSpacing: "0.12em" }}>ENTERPRISE</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "#0D1428", marginBottom: 6 }}>API Reference & Developer Hub</h1>
           <p style={{ color: "#5A6A88", fontSize: 14 }}>RESTful API · Laravel Sanctum Auth · JSON responses · Rate limited: 1000 req/min</p>
@@ -263,7 +263,7 @@ export function EnterpriseAPI() {
         {([["endpoints","Endpoints",<Book size={13}/>],["sdk","SDK Examples",<Terminal size={13}/>],["webhooks","Webhooks",<Webhook size={13}/>],["keys","API Keys",<Key size={13}/>]] as const).map(([id,label,icon]) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm transition-all"
-            style={{ background: activeTab===id ? "#3A5BD9" : "transparent", color: activeTab===id ? "#F0F4FA" : "#5A6A88", fontWeight: activeTab===id ? 700 : 400 }}>
+            style={{ background: activeTab===id ? "#5B6EE1" : "transparent", color: activeTab===id ? "#F0F4FA" : "#5A6A88", fontWeight: activeTab===id ? 700 : 400 }}>
             {icon} {label}
           </button>
         ))}
@@ -274,14 +274,14 @@ export function EnterpriseAPI() {
         <div className="grid" style={{ gridTemplateColumns: "260px 1fr", gap: 20, minHeight: 600 }}>
           {/* sidebar */}
           <div className="rounded-2xl overflow-hidden glow-surface" style={GLASS}>
-            <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(58,91,217,0.1)" }}>
+            <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
               <div style={{ color: "#5A6A88", fontSize: 10, ...MONO, letterSpacing: "0.1em" }}>BASE URL</div>
-              <div style={{ color: "#3A5BD9", fontSize: 11, ...MONO, marginTop: 2 }}>https://api.finalpassdown.com</div>
+              <div style={{ color: "#5B6EE1", fontSize: 11, ...MONO, marginTop: 2 }}>https://api.finalpassdown.com</div>
             </div>
             <div className="overflow-y-auto" style={{ maxHeight: 700 }}>
               {apiGroups.map((group, gi) => (
                 <div key={gi}>
-                  <button className="w-full flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(58,91,217,0.06)", background: expandedGroup===gi ? "rgba(58,91,217,0.06)" : "transparent" }}
+                  <button className="w-full flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.06)", background: expandedGroup===gi ? "rgba(91,110,225,0.06)" : "transparent" }}
                     onClick={() => setExpandedGroup(expandedGroup===gi ? null : gi)}>
                     <span style={{ color: "#0D1428", fontSize: 13, fontWeight: 500 }}>{group.label}</span>
                     <div className="flex items-center gap-2">
@@ -291,7 +291,7 @@ export function EnterpriseAPI() {
                   </button>
                   {expandedGroup===gi && group.endpoints.map((ep, ei) => (
                     <button key={ei} className="w-full flex items-start gap-2 px-4 py-2.5 border-b text-left"
-                      style={{ borderColor: "rgba(58,91,217,0.04)", background: activeEndpoint===ep ? "rgba(58,91,217,0.1)" : "transparent" }}
+                      style={{ borderColor: "rgba(91,110,225,0.04)", background: activeEndpoint===ep ? "rgba(91,110,225,0.1)" : "transparent" }}
                       onClick={() => setActiveEndpoint(ep)}>
                       <span style={{ ...MONO, fontSize: 9, fontWeight: 700, color: mc(ep.method), flexShrink:0, marginTop: 3, minWidth: 40 }}>{ep.method}</span>
                       <span style={{ color: "#374669", fontSize: 11, ...MONO, lineHeight: 1.4, wordBreak: "break-all" }}>{ep.path}</span>
@@ -306,7 +306,7 @@ export function EnterpriseAPI() {
           <div className="rounded-2xl p-6 glow-surface" style={GLASS}>
             {!activeEndpoint ? (
               <div className="h-full flex flex-col items-center justify-center text-center">
-                <Code size={40} color="rgba(58,91,217,0.2)" style={{ marginBottom: 16 }} />
+                <Code size={40} color="rgba(91,110,225,0.2)" style={{ marginBottom: 16 }} />
                 <div style={{ color: "#5A6A88", fontSize: 15 }}>Select an endpoint to view details and test it</div>
                 <div style={{ color: "#8A9AB8", fontSize: 13, marginTop: 8 }}>{apiGroups.reduce((s,g)=>s+g.endpoints.length,0)} endpoints across {apiGroups.length} modules</div>
               </div>
@@ -321,8 +321,8 @@ export function EnterpriseAPI() {
                 {activeEndpoint.body && (
                   <div>
                     <div style={{ color: "#5A6A88", fontSize: 11, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>REQUEST BODY</div>
-                    <div className="p-4 rounded-xl overflow-x-auto glow-surface" style={{ background: "#EAF0FC", border: "1px solid rgba(58,91,217,0.15)" }}>
-                      <pre style={{ color: "#5B7BF5", fontSize: 12, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.body}</pre>
+                    <div className="p-4 rounded-xl overflow-x-auto glow-surface" style={{ background: "#EAF0FC", border: "1px solid rgba(91,110,225,0.15)" }}>
+                      <pre style={{ color: "#5B6EE1", fontSize: 12, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.body}</pre>
                     </div>
                   </div>
                 )}
@@ -337,7 +337,7 @@ export function EnterpriseAPI() {
                 <div className="flex items-center gap-3">
                   <button onClick={() => runTest(activeEndpoint)} disabled={testing}
                     className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                    style={{ background: testing ? "rgba(58,91,217,0.1)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)", color: testing ? "#3A5BD9" : "#F0F4FA", boxShadow: testing ? "none" : "0 0 20px rgba(58,91,217,0.3)" }}>
+                    style={{ background: testing ? "rgba(91,110,225,0.1)" : "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: testing ? "#5B6EE1" : "#F0F4FA", boxShadow: testing ? "none" : "0 0 20px rgba(91,110,225,0.3)" }}>
                     <Play size={14} fill="currentColor" />
                     {testing ? "Running..." : "Run Live Test"}
                   </button>
@@ -365,7 +365,7 @@ export function EnterpriseAPI() {
             {Object.keys(sdkExamples).map(lang => (
               <button key={lang} onClick={() => setSdkLang(lang)}
                 className="px-4 py-2 rounded-xl text-sm transition-all capitalize"
-                style={{ background: sdkLang===lang ? "#3A5BD9" : "rgba(58,91,217,0.06)", color: sdkLang===lang ? "#F0F4FA" : "#5A6A88", fontWeight: sdkLang===lang ? 700 : 400, ...MONO }}>
+                style={{ background: sdkLang===lang ? "#5B6EE1" : "rgba(91,110,225,0.06)", color: sdkLang===lang ? "#F0F4FA" : "#5A6A88", fontWeight: sdkLang===lang ? 700 : 400, ...MONO }}>
                 {lang}
               </button>
             ))}
@@ -375,7 +375,7 @@ export function EnterpriseAPI() {
               <div style={{ color: "#5A6A88", fontSize: 11, ...MONO }}>
                 {sdkLang === "javascript" ? "npm install @finalpassdown/sdk" : sdkLang === "python" ? "pip install finalpassdown" : sdkLang === "php" ? "composer require finalpassdown/sdk" : "curl / HTTP"}
               </div>
-              <button style={{ color: "#3A5BD9", fontSize: 12 }}>Copy</button>
+              <button style={{ color: "#5B6EE1", fontSize: 12 }}>Copy</button>
             </div>
             <pre className="overflow-x-auto" style={{ color: "#374669", fontSize: 13, ...MONO, lineHeight: 1.8, whiteSpace: "pre-wrap", margin: 0 }}>
               {sdkExamples[sdkLang]}
@@ -383,9 +383,9 @@ export function EnterpriseAPI() {
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { title:"Rate Limiting", desc:"1,000 requests/minute per API key. 10,000/minute for Enterprise plans.", color:"#3A5BD9" },
+              { title:"Rate Limiting", desc:"1,000 requests/minute per API key. 10,000/minute for Enterprise plans.", color:"#5B6EE1" },
               { title:"Sandbox Mode", desc:"Test with sandbox API keys — all data is isolated and never charged.", color:"#48BB78" },
-              { title:"Versioning", desc:"API version is included in the base URL: /v1/. Breaking changes release on new versions.", color:"#6E8BFF" },
+              { title:"Versioning", desc:"API version is included in the base URL: /v1/. Breaking changes release on new versions.", color:"#5BA7D6" },
             ].map(info => (
               <div key={info.title} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{ color: info.color, fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{info.title}</div>
@@ -403,21 +403,21 @@ export function EnterpriseAPI() {
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "#0D1428", marginBottom: 16 }}>Configured Webhooks</h3>
               <div className="space-y-3">
-                <div className="p-4 rounded-xl glow-surface" style={{ background: "rgba(58,91,217,0.06)", border: "1px solid rgba(58,91,217,0.2)" }}>
+                <div className="p-4 rounded-xl glow-surface" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
                   <div style={{ color: "#0D1428", fontSize: 13, marginBottom: 4 }}>https://yourapp.com/fpd-webhook</div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {["vault.document.uploaded","contact.verified","storage.warning.80"].map(ev => (
-                      <span key={ev} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(58,91,217,0.1)", color: "#3A5BD9", ...MONO, fontSize: 9 }}>{ev}</span>
+                      <span key={ev} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.1)", color: "#5B6EE1", ...MONO, fontSize: 9 }}>{ev}</span>
                     ))}
                   </div>
                   <div style={{ color: "#48BB78", fontSize: 11, marginTop: 8 }}>● Active · 0 failures</div>
                 </div>
-                <button className="w-full py-3 rounded-xl text-sm" style={{ border: "1px dashed rgba(58,91,217,0.3)", color: "#3A5BD9" }}>+ Add Webhook Endpoint</button>
+                <button className="w-full py-3 rounded-xl text-sm" style={{ border: "1px dashed rgba(91,110,225,0.3)", color: "#5B6EE1" }}>+ Add Webhook Endpoint</button>
               </div>
             </div>
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "#0D1428", marginBottom: 16 }}>Webhook Signature Verification</h3>
-              <pre className="p-4 rounded-xl overflow-x-auto text-xs" style={{ background: "#EAF0FC", border: "1px solid rgba(58,91,217,0.15)", color: "#68D391", ...MONO, whiteSpace: "pre-wrap" }}>
+              <pre className="p-4 rounded-xl overflow-x-auto text-xs" style={{ background: "#EAF0FC", border: "1px solid rgba(91,110,225,0.15)", color: "#68D391", ...MONO, whiteSpace: "pre-wrap" }}>
 {`const crypto = require('crypto');
 
 function verifyWebhook(payload, signature, secret) {
@@ -445,10 +445,10 @@ app.post('/fpd-webhook', (req, res) => {
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "#0D1428", marginBottom: 16 }}>Available Events</h3>
             <div className="grid sm:grid-cols-2 gap-2">
               {webhookEvents.map(ev => (
-                <div key={ev.event} className="flex items-start gap-3 p-3 rounded-xl glow-surface" style={{ background: "rgba(58,91,217,0.04)" }}>
-                  <Zap size={13} color="#3A5BD9" style={{ marginTop: 2, flexShrink: 0 }} />
+                <div key={ev.event} className="flex items-start gap-3 p-3 rounded-xl glow-surface" style={{ background: "rgba(91,110,225,0.04)" }}>
+                  <Zap size={13} color="#5B6EE1" style={{ marginTop: 2, flexShrink: 0 }} />
                   <div>
-                    <div style={{ color: "#3A5BD9", fontSize: 12, ...MONO }}>{ev.event}</div>
+                    <div style={{ color: "#5B6EE1", fontSize: 12, ...MONO }}>{ev.event}</div>
                     <div style={{ color: "#5A6A88", fontSize: 11, marginTop: 2 }}>{ev.desc}</div>
                   </div>
                 </div>
@@ -468,10 +468,10 @@ app.post('/fpd-webhook', (req, res) => {
                 {[{ label:"Live Secret Key", key:"fpd_live_sk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }, { label:"Live Publishable Key", key:"fpd_live_pk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }].map(k => (
                   <div key={k.label}>
                     <div style={{ color: "#5A6A88", fontSize: 11, marginBottom: 6 }}>{k.label}</div>
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: "#EAF0FC", border: "1px solid rgba(58,91,217,0.2)" }}>
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: "#EAF0FC", border: "1px solid rgba(91,110,225,0.2)" }}>
                       <Lock size={12} color="#5A6A88" />
                       <span style={{ color: "#8A9AB8", fontSize: 12, ...MONO, flex: 1 }}>{k.key}</span>
-                      <button onClick={copyKey} style={{ color: "#3A5BD9" }}>{keyCopied ? <CheckCircle size={13} /> : <Copy size={13} />}</button>
+                      <button onClick={copyKey} style={{ color: "#5B6EE1" }}>{keyCopied ? <CheckCircle size={13} /> : <Copy size={13} />}</button>
                     </div>
                   </div>
                 ))}
@@ -499,8 +499,8 @@ app.post('/fpd-webhook', (req, res) => {
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "#0D1428", marginBottom: 16 }}>Usage This Month</h3>
             <div className="grid grid-cols-4 gap-4">
-              {[{ label:"API Calls", value:"84,291", limit:"1M included", color:"#3A5BD9" }, { label:"Webhooks Sent", value:"12,841", limit:"Unlimited", color:"#48BB78" }, { label:"Documents Accessed", value:"2,190", limit:"Unlimited", color:"#6E8BFF" }, { label:"Rate Limit Hits", value:"0", limit:"1,000/min", color:"#F6AD55" }].map(stat => (
-                <div key={stat.label} className="p-4 rounded-xl glow-surface" style={{ background: "rgba(58,91,217,0.04)", border: "1px solid rgba(58,91,217,0.1)" }}>
+              {[{ label:"API Calls", value:"84,291", limit:"1M included", color:"#5B6EE1" }, { label:"Webhooks Sent", value:"12,841", limit:"Unlimited", color:"#48BB78" }, { label:"Documents Accessed", value:"2,190", limit:"Unlimited", color:"#5BA7D6" }, { label:"Rate Limit Hits", value:"0", limit:"1,000/min", color:"#F6AD55" }].map(stat => (
+                <div key={stat.label} className="p-4 rounded-xl glow-surface" style={{ background: "rgba(91,110,225,0.04)", border: "1px solid rgba(91,110,225,0.1)" }}>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 22, color: stat.color }}>{stat.value}</div>
                   <div style={{ color: "#0D1428", fontSize: 12, marginTop: 4 }}>{stat.label}</div>
                   <div style={{ color: "#8A9AB8", fontSize: 10, marginTop: 2, ...MONO }}>{stat.limit}</div>

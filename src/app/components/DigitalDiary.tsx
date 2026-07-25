@@ -12,8 +12,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -78,7 +78,7 @@ const sampleEntries: DiaryEntry[] = [
   },
 ];
 
-const TAGS_PALETTE = ["#3A5BD9","#48BB78","#5B7BF5","#F6AD55","#FC8181","#38B2AC","#ED8936","#E53E3E"];
+const TAGS_PALETTE = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#5A8078","#ED8936","#E53E3E"];
 
 function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
   const c = color ?? ACCENT2;
@@ -148,7 +148,7 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
 
   return (
     <div className="recorder">
-      <div className="rec-dial" style={{ background: recording ? "rgba(208,107,107,0.12)" : "rgba(91,123,245,0.10)", borderColor: recording ? NEG : ACCENT }}>
+      <div className="rec-dial" style={{ background: recording ? "rgba(208,107,107,0.12)" : "rgba(91,110,225,0.10)", borderColor: recording ? NEG : ACCENT }}>
         {recording
           ? <Square size={28} color={NEG} fill={NEG}/>
           : <Mic size={28} color={ACCENT2}/>}
@@ -157,7 +157,7 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
       <div className="rec-time">{`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}</div>
       <div className="rec-hint">{recording ? "Recording… tap to stop" : "Tap to start recording"}</div>
       <button onClick={recording ? stop : start} className="rec-btn"
-        style={{ background: recording ? "linear-gradient(135deg,#D06B6B,#E88)" : "linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
+        style={{ background: recording ? "linear-gradient(135deg,#D06B6B,#E88)" : "linear-gradient(135deg,#5B6EE1,#5B6EE1)" }}>
         {recording ? "Stop Recording" : "Start Recording"}
       </button>
     </div>
@@ -232,11 +232,11 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
   if (!preview) {
     return (
       <div className="recorder">
-        <div className="rec-dial" style={{ background:"rgba(91,123,245,0.10)", borderColor: ACCENT }}>
+        <div className="rec-dial" style={{ background:"rgba(91,110,225,0.10)", borderColor: ACCENT }}>
           <Video size={28} color={ACCENT2}/>
         </div>
         <div className="rec-hint">Start your camera to record a video diary entry</div>
-        <button onClick={startPreview} className="rec-btn" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
+        <button onClick={startPreview} className="rec-btn" style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)" }}>
           Open Camera
         </button>
       </div>
@@ -271,7 +271,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-diary so nothing else in the app is affected. */
 const DIARY_CSS = `
-.fpd-diary{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-diary{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-diary *{box-sizing:border-box;}
 .fpd-diary-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-diary .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -283,7 +283,7 @@ const DIARY_CSS = `
 .fpd-diary .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-diary .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-diary .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-diary .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -305,7 +305,7 @@ const DIARY_CSS = `
 .fpd-diary .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
 .fpd-diary .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;}
 .fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
-.fpd-diary .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-diary .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* bento layout */
 .fpd-diary .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
@@ -314,7 +314,7 @@ const DIARY_CSS = `
 
 /* entry cards */
 .fpd-diary .ecard{padding:20px;cursor:pointer;transition:border-color .18s;}
-.fpd-diary .ecard.sel{border-color:rgba(91,123,245,0.5);}
+.fpd-diary .ecard.sel{border-color:rgba(91,110,225,0.5);}
 .fpd-diary .ethumb{border-radius:10px;overflow:hidden;margin-bottom:12px;height:120px;position:relative;}
 .fpd-diary .ethumb img{width:100%;height:100%;object-fit:cover;}
 .fpd-diary .ethumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.32);}
@@ -327,16 +327,16 @@ const DIARY_CSS = `
 .fpd-diary .etitle{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);}
 .fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:11px;flex-shrink:0;font-size:11px;font-weight:500;}
 .fpd-diary .ebody{color:${MUTED};font-size:13px;line-height:1.7;}
-.fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(91,123,245,0.07);}
+.fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.07);}
 .fpd-diary .eaudio-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${ACCENT};color:#fff;border:none;cursor:pointer;flex-shrink:0;}
-.fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,123,245,0.2);}
+.fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,110,225,0.2);}
 .fpd-diary .eaudio-fill{height:4px;border-radius:99px;background:${ACCENT};transition:width .3s;}
 .fpd-diary .etags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
 .fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:11px;background:#141B2E;color:${ACCENT2};}
 
 /* empty state */
 .fpd-diary .empty{padding:52px 12px;text-align:center;}
-.fpd-diary .empty .ei{width:36px;height:36px;margin:0 auto 12px;color:rgba(91,123,245,0.3);}
+.fpd-diary .empty .ei{width:36px;height:36px;margin:0 auto 12px;color:rgba(91,110,225,0.3);}
 .fpd-diary .empty .et{color:${MUTED};}
 
 /* detail rail */
@@ -346,10 +346,10 @@ const DIARY_CSS = `
 .fpd-diary .dbadges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .fpd-diary .dtitle{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;margin-bottom:12px;}
 .fpd-diary .dbody{color:${SOFT};font-size:14px;line-height:1.9;white-space:pre-wrap;}
-.fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:12px;text-align:center;background:rgba(91,123,245,0.07);border:1px solid rgba(91,123,245,0.16);}
+.fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:12px;text-align:center;background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.16);}
 .fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-size:13px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .dvideo{margin-top:16px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;}
-.fpd-diary .dvideo img,.fpd-diary .dvideo-placeholder{width:100%;height:140px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.09);}
+.fpd-diary .dvideo img,.fpd-diary .dvideo-placeholder{width:100%;height:140px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.09);}
 .fpd-diary .dvideo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.28);}
 .fpd-diary .dvideo-play{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
 
@@ -367,7 +367,7 @@ const DIARY_CSS = `
 @keyframes fpd-diary-ping{75%,100%{transform:scale(1.6);opacity:0;}}
 .fpd-diary .rec-time{font-family:var(--font-mono);font-size:24px;color:${TEXT};font-weight:700;}
 .fpd-diary .rec-hint{color:${MUTED};font-size:13px;}
-.fpd-diary .rec-btn{padding:12px 32px;border-radius:16px;font-weight:600;font-size:13px;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);box-shadow:0 4px 16px rgba(58,91,217,0.35);}
+.fpd-diary .rec-btn{padding:12px 32px;border-radius:16px;font-weight:600;font-size:13px;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);box-shadow:0 4px 16px rgba(91,110,225,0.35);}
 .fpd-diary .rec-video-wrap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#000;max-height:280px;}
 .fpd-diary .rec-video{width:100%;max-height:280px;object-fit:cover;display:block;}
 .fpd-diary .rec-live{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:99px;background:rgba(208,107,107,0.9);}
@@ -389,19 +389,19 @@ const DIARY_CSS = `
 .fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-diary .field textarea{resize:none;line-height:1.8;}
 .fpd-diary .field input::placeholder,.fpd-diary .field textarea::placeholder{color:${FAINT};}
-.fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-diary .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:11px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
-.fpd-diary .type-btn.on{background:rgba(91,123,245,0.14);border-color:${ACCENT};color:${ACCENT2};}
+.fpd-diary .type-btn.on{background:rgba(91,110,225,0.14);border-color:${ACCENT};color:${ACCENT2};}
 .fpd-diary .type-btn:not(.on){color:${MUTED};}
-.fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,123,245,0.14);}
+.fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.14);}
 .fpd-diary .record-done{padding:26px 0;text-align:center;}
-.fpd-diary .upload-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 0;border-radius:16px;border:2px dashed rgba(91,123,245,0.28);background:#0F1624;cursor:pointer;}
+.fpd-diary .upload-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 0;border-radius:16px;border:2px dashed rgba(91,110,225,0.28);background:#0F1624;cursor:pointer;}
 .fpd-diary .mood-grid{display:flex;gap:8px;}
 .fpd-diary .mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:11px;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);background:#0F1624;}
 .fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .fpd-diary .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -653,7 +653,7 @@ export function DigitalDiary() {
               </div>
             ) : (
               <div className="card pad glow-surface" style={{ textAlign: "center" }}>
-                <BookOpen size={28} color="rgba(91,123,245,0.3)" style={{ margin:"0 auto 12px" }}/>
+                <BookOpen size={28} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 13, marginBottom: 12 }}>Select an entry to read</div>
                 <div className="stats-hd" style={{ textAlign: "left" }}>Your Diary Stats</div>
                 <div>

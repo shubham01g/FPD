@@ -14,8 +14,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -69,7 +69,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-pwd so nothing else in the app is affected. */
 const PWD_CSS = `
-.fpd-pwd{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-pwd{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-pwd *{box-sizing:border-box;}
 .fpd-pwd-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-pwd .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -82,10 +82,10 @@ const PWD_CSS = `
 .fpd-pwd .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-pwd .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-pwd .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
-.fpd-pwd .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-pwd .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-pwd .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-pwd .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
-.fpd-pwd .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-pwd .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-pwd .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-pwd .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 .fpd-pwd .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-pwd .btn-pos:hover{background:rgba(95,190,145,0.2);}
@@ -119,15 +119,15 @@ const PWD_CSS = `
 /* password list rows */
 .fpd-pwd .plist{display:flex;flex-direction:column;gap:10px;}
 .fpd-pwd .prow{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s;}
-.fpd-pwd .prow.sel{border-color:rgba(91,123,245,0.5);box-shadow:inset 0 0 0 1px rgba(91,123,245,0.4),0 6px 20px -8px rgba(91,123,245,0.45);}
-.fpd-pwd .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};}
+.fpd-pwd .prow.sel{border-color:rgba(91,110,225,0.5);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.4),0 6px 20px -8px rgba(91,110,225,0.45);}
+.fpd-pwd .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
 .fpd-pwd .ptitle-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .fpd-pwd .ptitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
 .fpd-pwd .psub{color:${MUTED};font-size:12px;margin-top:2px;}
 .fpd-pwd .pbadge{padding:2.5px 8px;border-radius:6px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.05em;}
 .fpd-pwd .pacts{display:flex;align-items:center;gap:1px;flex-shrink:0;}
 .fpd-pwd .icon-btn{background:none;border:none;cursor:pointer;padding:7px;border-radius:8px;display:flex;color:${MUTED};transition:color .16s,background .16s;}
-.fpd-pwd .icon-btn:hover{color:${ACCENT2};background:rgba(91,123,245,0.1);}
+.fpd-pwd .icon-btn:hover{color:${ACCENT2};background:rgba(91,110,225,0.1);}
 .fpd-pwd .icon-btn.del:hover{color:${NEG};background:rgba(208,107,107,0.1);}
 
 /* strength meter */
@@ -159,7 +159,7 @@ const PWD_CSS = `
 
 /* empty state */
 .fpd-pwd .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 16px;}
-.fpd-pwd .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-pwd .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
 .fpd-pwd .empty .et{color:${SOFT};font-size:13.5px;}
 
 /* importance picker */
@@ -169,7 +169,7 @@ const PWD_CSS = `
 .fpd-pwd .imp-desc{color:${MUTED};font-size:11px;margin-top:7px;line-height:1.6;}
 .fpd-pwd .check-row{display:flex;align-items:center;gap:9px;cursor:pointer;color:${SOFT};font-size:13px;}
 .fpd-pwd .check-row input{width:15px;height:15px;accent-color:${ACCENT};}
-.fpd-pwd .dropzone{flex:1;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:11px;border:1.5px dashed rgba(91,123,245,0.28);background:rgba(91,123,245,0.03);cursor:pointer;color:${MUTED};font-size:13px;}
+.fpd-pwd .dropzone{flex:1;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:11px;border:1.5px dashed rgba(91,110,225,0.28);background:rgba(91,110,225,0.03);cursor:pointer;color:${MUTED};font-size:13px;}
 
 /* modal */
 .fpd-pwd .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
@@ -181,15 +181,15 @@ const PWD_CSS = `
 .fpd-pwd .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-pwd .field input,.fpd-pwd .field select,.fpd-pwd .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-pwd .field input::placeholder,.fpd-pwd .field textarea::placeholder{color:${FAINT};}
-.fpd-pwd .field input:focus,.fpd-pwd .field select:focus,.fpd-pwd .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-pwd .field input:focus,.fpd-pwd .field select:focus,.fpd-pwd .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-pwd .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .fpd-pwd .pw-wrap{position:relative;}
 .fpd-pwd .pw-wrap input{padding-right:38px;}
 .fpd-pwd .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
-.fpd-pwd .login-box{padding:15px;border-radius:12px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);display:flex;flex-direction:column;gap:12px;}
+.fpd-pwd .login-box{padding:15px;border-radius:12px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);display:flex;flex-direction:column;gap:12px;}
 .fpd-pwd .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT2};font-weight:700;}
 .fpd-pwd .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-pwd .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;opacity:1;}
+.fpd-pwd .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;opacity:1;}
 .fpd-pwd .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-pwd .modal-foot .save[disabled]{opacity:.6;cursor:default;}
 @media (max-width:560px){.fpd-pwd .field-grid{grid-template-columns:1fr;}.fpd-pwd .imp-grid{grid-template-columns:1fr;}}
@@ -392,7 +392,7 @@ export function PasswordManager() {
               const on = category === c;
               return (
                 <button key={c} onClick={() => setCategory(c)} className={`chip ${on ? "" : "off"}`}
-                  style={{ background: on ? "rgba(91,123,245,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,123,245,0.4)" : "rgba(255,255,255,0.09)" }}>
+                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
                   {c}
                 </button>
               );

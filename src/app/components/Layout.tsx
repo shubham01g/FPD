@@ -116,15 +116,15 @@ pageMeta["waiver-sign"] = { group: "Concierge", label: "Sign Authorization Waive
 const BG       = "#070A12";
 const SIDEBAR   = "linear-gradient(180deg,#0A1020 0%,#070A12 100%)";
 const PANEL    = "#101728";
-const BORDER   = "rgba(58,91,217,0.18)";
-const BORDER_S = "rgba(58,91,217,0.26)";
+const BORDER   = "rgba(91,110,225,0.18)";
+const BORDER_S = "rgba(91,110,225,0.26)";
 const TEXT     = "#FFFFFF";
 const SOFT     = "#B8C8E0";
 const MUTED    = "#8A9AB8";
 const FAINT    = "#5A6A88";
-const HILITE   = "#8AA0FF";
-const ACCENT   = "#3A5BD9";
-const ACCENT2  = "#5B7BF5";
+const HILITE   = "#5BA7D6";
+const ACCENT   = "#5B6EE1";
+const ACCENT2  = "#7E6BD8";
 const SUCCESS  = "#48BB78";
 
 const PLAN_LABEL: Record<string, string> = {
@@ -209,20 +209,20 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
           gap: collapsed ? 0 : 11,
           justifyContent: collapsed ? "center" : "flex-start",
           padding: collapsed ? "10px 0" : "8.5px 11px",
-          background: active ? `linear-gradient(135deg, rgba(58,91,217,0.95), rgba(91,123,245,0.72))` : "transparent",
+          background: active ? `linear-gradient(135deg, rgba(91,110,225,0.95), rgba(91,110,225,0.72))` : "transparent",
           color: active ? TEXT : SOFT,
-          boxShadow: active ? "0 6px 18px -6px rgba(58,91,217,0.7)" : "none",
+          boxShadow: active ? "0 6px 18px -6px rgba(91,110,225,0.7)" : "none",
           border: active ? `1px solid ${BORDER_S}` : "1px solid transparent",
           position: "relative",
         }}
-        onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(58,91,217,0.12)"; }}
+        onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(91,110,225,0.12)"; }}
         onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
         <span style={{ flexShrink: 0, color: active ? "#FFFFFF" : HILITE, display: "flex" }}>{item.icon}</span>
         {!collapsed && <span style={{ fontSize: 13, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
         {!collapsed && item.badge && (
           <span style={{
             fontSize: 8.5, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.04em",
-            background: active ? "rgba(255,255,255,0.22)" : "rgba(58,91,217,0.25)",
+            background: active ? "rgba(255,255,255,0.22)" : "rgba(91,110,225,0.25)",
             color: active ? "#FFFFFF" : HILITE, padding: "2px 6px", borderRadius: 99,
           }}>{item.badge}</span>
         )}
@@ -259,9 +259,9 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             /* Collapsed rail — whole logo in a square, never cropped/distorted */
             <div style={{
               width: 42, height: 42, borderRadius: 11, flexShrink: 0,
-              background: "rgba(58,91,217,0.14)", border: `1px solid ${BORDER}`,
+              background: "rgba(91,110,225,0.14)", border: `1px solid ${BORDER}`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 0 18px rgba(58,91,217,0.35)",
+              boxShadow: "0 0 18px rgba(91,110,225,0.35)",
             }}>
               <img src={fpdSquareLogo} alt="Final Pass Down"
                 style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 10 }}/>
@@ -270,7 +270,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             /* Expanded — the full logo lockup (already contains the wordmark) + tagline */
             <div style={{ overflow: "hidden" }}>
               <img src={fpdSquareLogo} alt="Final Pass Down"
-                style={{ height: 38, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(58,91,217,0.35))" }}/>
+                style={{ height: 38, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
               <div style={{ fontSize: 9.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
                 MY LIFE · MY WISHES · MY WAY
               </div>
@@ -282,7 +282,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         {!collapsed && (
           <div className="flex-shrink-0" style={{ padding: "12px 12px 6px" }}>
             <div className="flex items-center gap-2" style={{
-              background: "rgba(58,91,217,0.08)", border: `1px solid ${BORDER}`,
+              background: "rgba(91,110,225,0.08)", border: `1px solid ${BORDER}`,
               borderRadius: 10, padding: "0 10px", height: 36,
             }}>
               <Search size={14} style={{ color: MUTED, flexShrink: 0 }}/>
@@ -321,10 +321,10 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             style={{
               gap: collapsed ? 0 : 10, justifyContent: collapsed ? "center" : "flex-start",
               padding: collapsed ? "10px 0" : "9px 11px", marginBottom: 8,
-              background: "rgba(58,91,217,0.1)", border: `1px solid ${BORDER}`, color: SOFT,
+              background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: SOFT,
             }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(58,91,217,0.2)"}
-            onMouseLeave={e => e.currentTarget.style.background = "rgba(58,91,217,0.1)"}>
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
             <Copy size={16} style={{ color: HILITE, flexShrink: 0 }}/>
             {!collapsed && <span style={{ fontSize: 12.5, fontWeight: 600 }}>Legacy Vault Clone</span>}
           </button>
@@ -337,7 +337,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               </div>
             </button>
           ) : (
-            <div className="flex items-center gap-2.5 rounded-xl" style={{ padding: "8px 9px", background: "rgba(58,91,217,0.07)", border: `1px solid ${BORDER}` }}>
+            <div className="flex items-center gap-2.5 rounded-xl" style={{ padding: "8px 9px", background: "rgba(91,110,225,0.07)", border: `1px solid ${BORDER}` }}>
               <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 12, fontWeight: 700 }}>
                 {user.avatar}
               </div>
@@ -365,7 +365,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             <button onClick={() => isMobile ? setMobileOpen(o => !o) : setCollapsed(c => !c)}
               title={isMobile ? "Menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className="flex items-center justify-center rounded-lg flex-shrink-0"
-              style={{ width: 34, height: 34, background: "rgba(58,91,217,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
+              style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
               {isMobile ? <Menu size={16}/> : collapsed ? <PanelLeft size={16}/> : <PanelLeftClose size={16}/>}
             </button>
             <div style={{ minWidth: 0 }}>
@@ -388,8 +388,8 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             {onGoAdmin && (
               <button onClick={onGoAdmin} title="Admin portal"
                 className="flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(58,91,217,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(58,91,217,0.2)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(58,91,217,0.1)"}>
+                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
                 <ShieldCheck size={16}/>
               </button>
             )}
@@ -397,7 +397,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
               <button onClick={() => setNotifOpen(o => !o)} className="relative flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(58,91,217,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
+                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
                 <Bell size={16}/>
                 {unreadCount > 0 && (
                   <span className="absolute flex items-center justify-center rounded-full" style={{ top: -5, right: -5, minWidth: 16, height: 16, padding: "0 4px", background: "#E53E3E", color: "#fff", fontSize: 9, fontWeight: 700, border: `2px solid ${BG}` }}>
@@ -415,9 +415,9 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                     {notifications.length === 0 && <div style={{ padding: 24, textAlign: "center", color: MUTED, fontSize: 12 }}>You're all caught up.</div>}
                     {notifications.slice(0, 12).map(n => (
                       <button key={n.id} onClick={() => markNotifRead(n.id)} className="w-full flex gap-2.5 text-left transition-colors"
-                        style={{ padding: "11px 15px", borderBottom: `1px solid ${BORDER}`, background: n.read ? "transparent" : "rgba(58,91,217,0.06)" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(58,91,217,0.12)"}
-                        onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "rgba(58,91,217,0.06)"}>
+                        style={{ padding: "11px 15px", borderBottom: `1px solid ${BORDER}`, background: n.read ? "transparent" : "rgba(91,110,225,0.06)" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.12)"}
+                        onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "rgba(91,110,225,0.06)"}>
                         <div style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 5, flexShrink: 0, background: n.read ? "transparent" : ACCENT2 }}/>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12.5, fontWeight: 600, color: TEXT }}>{n.title}</div>
@@ -433,11 +433,11 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
 
             {/* Storage pill */}
             <button onClick={() => onNavigate("storage-usage")} title="Usage & Billing"
-              className="hidden lg:flex items-center gap-2 rounded-lg" style={{ padding: "6px 11px", background: "rgba(58,91,217,0.08)", border: `1px solid ${BORDER}` }}>
+              className="hidden lg:flex items-center gap-2 rounded-lg" style={{ padding: "6px 11px", background: "rgba(91,110,225,0.08)", border: `1px solid ${BORDER}` }}>
               <HardDrive size={14} style={{ color: storagePct >= 90 ? "#F6AD55" : HILITE }}/>
               <div style={{ width: 64 }}>
                 <div style={{ height: 4, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${storagePct}%`, borderRadius: 99, background: storagePct >= 90 ? "linear-gradient(90deg,#5B7BF5,#F6AD55)" : `linear-gradient(90deg,${ACCENT},${ACCENT2})` }}/>
+                  <div style={{ height: "100%", width: `${storagePct}%`, borderRadius: 99, background: storagePct >= 90 ? "linear-gradient(90deg,#5B6EE1,#F6AD55)" : `linear-gradient(90deg,${ACCENT},${ACCENT2})` }}/>
                 </div>
               </div>
               <span style={{ fontSize: 10.5, color: SOFT, fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{storagePct}%</span>

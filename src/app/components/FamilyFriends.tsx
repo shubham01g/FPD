@@ -12,8 +12,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -32,7 +32,7 @@ interface ContactGroup {
   createdAt: string;
 }
 
-const GROUP_COLORS = ["#3A5BD9","#5B7BF5","#48BB78","#F7931A","#FC8181","#4A90D9","#38B2AC","#F6AD55"];
+const GROUP_COLORS = ["#7E6BD8","#5B6EE1","#5BA7D6","#5A8078","#6FAE8B"];
 
 /* ── Blast Email Modal ─────────────────────────────────────────────── */
 function BlastEmailModal({
@@ -106,19 +106,19 @@ function BlastEmailModal({
   );
 }
 
-const COLORS = ["#3A5BD9","#48BB78","#5B7BF5","#F6AD55","#FC8181","#38B2AC","#ED8936","#4A90D9"];
+const COLORS = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#5A8078","#ED8936","#5BA7D6"];
 
 const initContacts: Contact[] = [
-  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#3A5BD9", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
+  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#5B6EE1", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
   { id:"c2", name:"Michael Doe", relationship:"Son", phone:"(415) 555-0871", email:"m.doe@email.com", birthday:"Mar 5", group:"immediate", starred:true, initials:"MD", color:"#48BB78", notes:"Married to Amanda. Has Tyler and Lily." },
-  { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#5B7BF5", notes:"Lives in Sacramento. Loves art and teaching." },
+  { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#5B6EE1", notes:"Lives in Sacramento. Loves art and teaching." },
   { id:"c4", name:"Tyler Doe", relationship:"Grandson", birthday:"Mar 5", group:"immediate", initials:"TD", color:"#F6AD55", notes:"Age 8. Loves dinosaurs and baseball. Peanut allergy." },
   { id:"c5", name:"Lily Doe", relationship:"Granddaughter", birthday:"Jul 19", group:"immediate", initials:"LD", color:"#FC8181", notes:"Age 6. Loves ballet and painting." },
-  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#38B2AC" },
+  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#5A8078" },
   { id:"c7", name:"Linda Torres", relationship:"Sister-in-law", phone:"(916) 555-0821", email:"ltorres@email.com", birthday:"Apr 12", group:"extended", initials:"LT", color:"#ED8936" },
-  { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#4A90D9", notes:"We go back to Army days. Fishing partner." },
-  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#3A5BD9", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
-  { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#5B7BF5", notes:"Grace Community Church. Has conducted family funerals." },
+  { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#5BA7D6", notes:"We go back to Army days. Fishing partner." },
+  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#5B6EE1", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
+  { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#5B6EE1", notes:"Grace Community Church. Has conducted family funerals." },
 ];
 
 const groupConfig = {
@@ -187,8 +187,8 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
 }
 
 const initGroups: ContactGroup[] = [
-  { id:"g1", name:"Estate Team", color:"#3A5BD9", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
-  { id:"g2", name:"Close Family", color:"#5B7BF5", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
+  { id:"g1", name:"Estate Team", color:"#5B6EE1", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
+  { id:"g2", name:"Close Family", color:"#5B6EE1", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
   { id:"g3", name:"Sacramento Neighbors", color:"#48BB78", description:"Local friends and neighbors", memberIds:["c8","c9"], createdAt:"Jun 5, 2026" },
 ];
 
@@ -198,7 +198,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-ff so nothing else in the app is affected. */
 const FF_CSS = `
-.fpd-ff{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-ff{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-ff *{box-sizing:border-box;}
 .fpd-ff-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-ff .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -210,10 +210,10 @@ const FF_CSS = `
 .fpd-ff .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-ff .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-ff .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-ff .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-ff .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-ff .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
-.fpd-ff .btn-ghost.on{background:rgba(91,123,245,0.20);}
+.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-ff .btn-ghost.on{background:rgba(91,110,225,0.20);}
 .fpd-ff .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* group summary — clickable filter tiles */
@@ -226,7 +226,7 @@ const FF_CSS = `
 /* segmented all/starred filter */
 .fpd-ff .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;}
 .fpd-ff .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-ff .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-ff .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* toolbar */
 .fpd-ff .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
@@ -234,15 +234,15 @@ const FF_CSS = `
 .fpd-ff .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
 
 /* groups panel */
-.fpd-ff .gpanel-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.22);background:rgba(91,123,245,0.05);}
+.fpd-ff .gpanel-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.22);background:rgba(91,110,225,0.05);}
 .fpd-ff .gpanel-title{font-family:var(--font-display);font-size:15px;color:${TEXT};}
 .fpd-ff .gpanel-desc{color:${MUTED};font-size:12px;}
 .fpd-ff .grow{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.22);}
 .fpd-ff .gavatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--font-display);}
 .fpd-ff .gname{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-ff .gmeta{color:${MUTED};font-size:11px;}
-.fpd-ff .gmember-chip{padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(91,123,245,0.09);color:${ACCENT2};}
-.fpd-ff .gcreate{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.22);background:rgba(91,123,245,0.03);display:flex;flex-direction:column;gap:12px;}
+.fpd-ff .gmember-chip{padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(91,110,225,0.09);color:${ACCENT2};}
+.fpd-ff .gcreate{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.22);background:rgba(91,110,225,0.03);display:flex;flex-direction:column;gap:12px;}
 .fpd-ff .gcreate-lbl{color:${ACCENT2};font-size:12px;font-weight:700;font-family:var(--font-mono);}
 .fpd-ff .swatch{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);cursor:pointer;}
 .fpd-ff .member-pick{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;}
@@ -255,9 +255,9 @@ const FF_CSS = `
 
 /* contact row */
 .fpd-ff .crow{display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;transition:border-color .18s;}
-.fpd-ff .crow.sel{border-color:rgba(91,123,245,0.5);}
+.fpd-ff .crow.sel{border-color:rgba(91,110,225,0.5);}
 .fpd-ff .cavatar-wrap{position:relative;flex-shrink:0;}
-.fpd-ff .cavatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(91,123,245,0.22);}
+.fpd-ff .cavatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(91,110,225,0.22);}
 .fpd-ff .cavatar-fallback{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:var(--font-display);}
 .fpd-ff .cname{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-ff .crel{padding:2px 8px;border-radius:99px;font-size:10px;font-family:var(--font-mono);}
@@ -293,16 +293,16 @@ const FF_CSS = `
 .fpd-ff .field input,.fpd-ff .field select,.fpd-ff .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-ff .field textarea{resize:none;}
 .fpd-ff .field input::placeholder,.fpd-ff .field textarea::placeholder{color:${FAINT};}
-.fpd-ff .field input:focus,.fpd-ff .field select:focus,.fpd-ff .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
-.fpd-ff .recipients-box{padding:12px;border-radius:11px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.16);}
+.fpd-ff .field input:focus,.fpd-ff .field select:focus,.fpd-ff .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-ff .recipients-box{padding:12px;border-radius:11px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-ff .rec-lbl{font-family:var(--font-mono);font-size:10.5px;color:${MUTED};margin-bottom:8px;}
 .fpd-ff .rec-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;}
-.fpd-ff .rec-chip.on{background:rgba(91,123,245,0.10);color:${ACCENT2};}
+.fpd-ff .rec-chip.on{background:rgba(91,110,225,0.10);color:${ACCENT2};}
 .fpd-ff .rec-chip.off{background:rgba(140,151,180,0.10);color:${MUTED};}
 .fpd-ff .bcc-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.2);}
 .fpd-ff .bcc-note p{color:${POS};font-size:11px;line-height:1.6;}
 .fpd-ff .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-ff .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-ff .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 `;
 
 export function FamilyFriends() {
@@ -506,7 +506,7 @@ export function FamilyFriends() {
           <div className="clist">
             {filtered.length === 0 && (
               <div className="card empty glow-surface">
-                <Users size={32} color="rgba(91,123,245,0.3)" style={{ margin:"0 auto 12px" }}/>
+                <Users size={32} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 14 }}>No contacts found.</div>
               </div>
             )}
@@ -592,7 +592,7 @@ export function FamilyFriends() {
               </div>
             ) : (
               <div className="card pad empty glow-surface">
-                <Heart size={32} color="rgba(91,123,245,0.3)" style={{ margin:"0 auto 12px" }}/>
+                <Heart size={32} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 14 }}>Select a contact to view details</div>
               </div>
             )}

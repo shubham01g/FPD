@@ -9,8 +9,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -44,7 +44,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-storage so nothing else in the app is affected. */
 const STORAGE_CSS = `
-.fpd-storage{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-storage{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-storage *{box-sizing:border-box;}
 .fpd-storage-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-storage .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -108,14 +108,14 @@ const STORAGE_CSS = `
 .fpd-storage .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media (max-width:900px){.fpd-storage .plan-grid{grid-template-columns:1fr;}}
 .fpd-storage .plan-card{padding:20px;border-radius:13px;border:1px solid rgba(255,255,255,0.22);background:#0F1624;}
-.fpd-storage .plan-card.current{background:rgba(91,123,245,0.08);border:2px solid ${ACCENT};}
+.fpd-storage .plan-card.current{background:rgba(91,110,225,0.08);border:2px solid ${ACCENT};}
 .fpd-storage .plan-tag{font-size:10px;font-family:var(--font-mono);color:${ACCENT2};margin-bottom:6px;}
 .fpd-storage .plan-name{font-family:var(--font-display);font-size:17px;color:${TEXT};margin-bottom:6px;}
 .fpd-storage .plan-price{font-size:22px;color:${TEXT};font-weight:700;}
 .fpd-storage .plan-price-sub{color:${MUTED};font-size:12px;}
 .fpd-storage .plan-detail{color:${MUTED};font-size:12.5px;}
 .fpd-storage .plan-btn{width:100%;padding:11px;border-radius:11px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-storage .plan-btn.up{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.7);}
+.fpd-storage .plan-btn.up{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.7);}
 .fpd-storage .plan-btn.down{background:#141B2E;color:${MUTED};}
 .fpd-storage .plan-btn.crypto{padding:9px;font-size:12px;background:rgba(247,147,26,0.1);color:#F7931A;border:1px solid rgba(247,147,26,0.3);}
 .fpd-storage .overage-note{margin-top:16px;padding:12px 16px;border-radius:11px;background:#0F1624;display:flex;align-items:center;gap:10px;}

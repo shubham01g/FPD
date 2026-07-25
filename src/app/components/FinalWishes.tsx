@@ -10,9 +10,9 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
-const LAVENDER= "#A99BE6";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const LAVENDER= "#7E6BD8";
 const POS     = "#5FBE91";
 const NEG     = "#D06B6B";
 
@@ -80,7 +80,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-wishes so nothing else in the app is affected. */
 const WISHES_CSS = `
-.fpd-wishes{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-wishes{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-wishes *{box-sizing:border-box;}
 .fpd-wishes-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wishes .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -94,10 +94,10 @@ const WISHES_CSS = `
 /* header */
 .fpd-wishes .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-wishes .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-wishes .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
-.fpd-wishes .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-wishes .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-wishes .btn-pos:hover{background:rgba(95,190,145,0.2);}
 .fpd-wishes .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
@@ -105,7 +105,7 @@ const WISHES_CSS = `
 /* segmented tabs */
 .fpd-wishes .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;}
 .fpd-wishes .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
-.fpd-wishes .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-wishes .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 .fpd-wishes .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .fpd-wishes .toolbar p{color:${MUTED};font-size:13px;line-height:1.6;}
@@ -126,7 +126,7 @@ const WISHES_CSS = `
 .fpd-wishes .wlist{display:flex;flex-direction:column;gap:10px;}
 .fpd-wishes .wrow{padding:18px 20px;}
 .fpd-wishes .wrow .wtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.fpd-wishes .wcat{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,123,245,0.12);color:${ACCENT2};margin-bottom:9px;}
+.fpd-wishes .wcat{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};margin-bottom:9px;}
 .fpd-wishes .witem{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);margin-bottom:5px;}
 .fpd-wishes .wrec{color:${MUTED};font-size:12.5px;display:flex;align-items:center;gap:6px;}
 .fpd-wishes .wnotes{color:${MUTED};font-size:12px;margin-top:7px;font-style:italic;line-height:1.6;}
@@ -137,7 +137,7 @@ const WISHES_CSS = `
 
 /* empty state */
 .fpd-wishes .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 12px;}
-.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
 .fpd-wishes .empty .et{color:${SOFT};font-size:14px;font-weight:600;font-family:var(--font-display);margin-bottom:4px;}
 .fpd-wishes .empty .ed{color:${MUTED};font-size:12.5px;}
 
@@ -150,16 +150,16 @@ const WISHES_CSS = `
 .fpd-wishes .tile .tv{color:${TEXT};font-size:13px;line-height:1.55;}
 .fpd-wishes .tags{display:flex;flex-wrap:wrap;gap:7px;}
 .fpd-wishes .tag{padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;}
-.fpd-wishes .tag.music{background:rgba(91,123,245,0.12);color:${ACCENT2};}
-.fpd-wishes .tag.read{background:rgba(169,155,230,0.14);color:${LAVENDER};}
+.fpd-wishes .tag.music{background:rgba(91,110,225,0.12);color:${ACCENT2};}
+.fpd-wishes .tag.read{background:rgba(126,107,216,0.14);color:${LAVENDER};}
 
 /* obituary */
 .fpd-wishes .obit{padding:16px 18px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};font-size:13.5px;line-height:1.85;white-space:pre-wrap;}
-.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:11px;background:#0F1624;border:1px solid rgba(91,123,245,0.35);color:${TEXT};font-size:13.5px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
+.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:11px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:13.5px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
 .fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
 
 /* questionnaire */
-.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,123,245,0.10);color:${ACCENT2};font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
+.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,110,225,0.10);color:${ACCENT2};font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
 .fpd-wishes .qbar{height:7px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-wishes .qbar i{display:block;height:100%;background:linear-gradient(90deg,${ACCENT2},${ACCENT});transition:width .4s cubic-bezier(.4,0,.2,1);}
 .fpd-wishes .qcat{border-radius:14px;overflow:hidden;}
@@ -171,7 +171,7 @@ const WISHES_CSS = `
 .fpd-wishes .qbody{padding:6px 18px 18px;border-top:1px solid rgba(255,255,255,0.22);display:flex;flex-direction:column;gap:16px;}
 .fpd-wishes .qq{color:${TEXT};font-size:13.5px;font-weight:600;margin-bottom:8px;}
 .fpd-wishes .qans{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
-.fpd-wishes .qans:hover{border-color:rgba(91,123,245,0.3);}
+.fpd-wishes .qans:hover{border-color:rgba(91,110,225,0.3);}
 .fpd-wishes .qans .qa-text{flex:1;font-size:13px;line-height:1.6;}
 .fpd-wishes .qans .qa-text.filled{color:${SOFT};}
 .fpd-wishes .qans .qa-text.empty{color:${FAINT};font-style:italic;}
@@ -188,7 +188,7 @@ const WISHES_CSS = `
 .fpd-wishes .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-wishes .field input,.fpd-wishes .field select,.fpd-wishes .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-wishes .field input::placeholder,.fpd-wishes .field textarea::placeholder{color:${FAINT};}
-.fpd-wishes .field input:focus,.fpd-wishes .field select:focus,.fpd-wishes .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-wishes .field input:focus,.fpd-wishes .field select:focus,.fpd-wishes .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-wishes .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
 `;
 

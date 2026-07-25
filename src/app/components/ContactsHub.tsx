@@ -14,8 +14,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -67,22 +67,22 @@ const verStyle = {
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
 const FOLDER_CATALOG = [
-  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#3A5BD9" },
+  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#5B6EE1" },
   { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#48BB78" },
   { id:"medical",   label:"Medical Records",         emoji:"🏥",  color:"#FC8181" },
   { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
   { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
-  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#4A90D9" },
-  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#38B2AC" },
-  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#5B7BF5" },
+  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#5BA7D6" },
+  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#5A8078" },
+  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#5B6EE1" },
   { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
   { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },
   { id:"photos",    label:"Photo Albums",            emoji:"📷",  color:"#F6AD55" },
-  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#5B7BF5" },
-  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#3A5BD9" },
+  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#5B6EE1" },
+  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#5B6EE1" },
   { id:"business",  label:"Business Records",        emoji:"📊",  color:"#48BB78" },
   { id:"crypto",    label:"Crypto & NFTs",           emoji:"₿",   color:"#F6AD55" },
-  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#4A90D9" },
+  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#5BA7D6" },
   { id:"military",  label:"Military Records",        emoji:"🎖️",  color:"#ED8936" },
   { id:"other",     label:"Other Documents",         emoji:"📁",  color:MUTED },
 ];
@@ -201,8 +201,8 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
                   const selected = selectedVerifications.includes(vm.id);
                   return (
                     <button key={vm.id} onClick={()=>toggleVerification(vm.id)} disabled={vm.required} className="verif-row"
-                      style={{ background:selected?"rgba(91,123,245,0.07)":"rgba(255,255,255,0.02)", borderColor:selected?"rgba(91,123,245,0.3)":"rgba(255,255,255,0.07)", cursor:vm.required?"not-allowed":"pointer" }}>
-                      <div className="verif-ico" style={{ background:selected?"rgba(91,123,245,0.12)":"rgba(255,255,255,0.04)" }}>{vm.icon}</div>
+                      style={{ background:selected?"rgba(91,110,225,0.07)":"rgba(255,255,255,0.02)", borderColor:selected?"rgba(91,110,225,0.3)":"rgba(255,255,255,0.07)", cursor:vm.required?"not-allowed":"pointer" }}>
+                      <div className="verif-ico" style={{ background:selected?"rgba(91,110,225,0.12)":"rgba(255,255,255,0.04)" }}>{vm.icon}</div>
                       <div className="flex-1" style={{ minWidth: 0 }}>
                         <div className="flex items-center gap-2">
                           <span style={{ color:TEXT, fontSize:12, fontWeight:600 }}>{vm.label}</span>
@@ -316,7 +316,7 @@ function ContactSection({
             <div key={c.id} className="contact-row">
               <div className="flex items-start gap-3">
                 {isLegacy && (
-                  <div className="priority-badge" style={{ background:i===0?"rgba(91,123,245,0.18)":"rgba(91,123,245,0.08)", color:i===0?ACCENT2:MUTED, border:i===0?"2px solid rgba(91,123,245,0.35)":"1px solid rgba(91,123,245,0.14)" }}>
+                  <div className="priority-badge" style={{ background:i===0?"rgba(91,110,225,0.18)":"rgba(91,110,225,0.08)", color:i===0?ACCENT2:MUTED, border:i===0?"2px solid rgba(91,110,225,0.35)":"1px solid rgba(91,110,225,0.14)" }}>
                     {i===0 ? <Crown size={18} color={ACCENT2}/> : `#${i+1}`}
                   </div>
                 )}
@@ -331,7 +331,7 @@ function ContactSection({
                   <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
                     <span style={{ color:TEXT, fontSize:14, fontWeight:600 }}>{c.name}</span>
                     {isLegacy && i === 0 && (
-                      <span className="rank-badge" style={{ background:"rgba(91,123,245,0.14)", color:ACCENT2 }}>
+                      <span className="rank-badge" style={{ background:"rgba(91,110,225,0.14)", color:ACCENT2 }}>
                         <Crown size={9}/> PRIMARY
                       </span>
                     )}
@@ -441,7 +441,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-contacts so nothing else in the app is affected. */
 const CONTACTS_CSS = `
-.fpd-contacts{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-contacts{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-contacts *{box-sizing:border-box;}
 .fpd-contacts-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-contacts .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -461,7 +461,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* chain of authority */
-.fpd-contacts .chain-box{padding:20px;border-radius:15px;background:rgba(91,123,245,0.05);border:2px solid rgba(91,123,245,0.22);}
+.fpd-contacts .chain-box{padding:20px;border-radius:15px;background:rgba(91,110,225,0.05);border:2px solid rgba(91,110,225,0.22);}
 .fpd-contacts .chain-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
 .fpd-contacts .chain-hd span{font-family:var(--font-display);font-size:14px;color:${TEXT};}
 .fpd-contacts .chain-row{display:flex;align-items:center;gap:12px;}
@@ -469,7 +469,7 @@ const CONTACTS_CSS = `
 .fpd-contacts .chain-note{margin-top:12px;padding:10px 12px;border-radius:11px;font-size:12px;display:flex;align-items:flex-start;gap:8px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);color:${MUTED};line-height:1.5;}
 
 /* solo-legacy info banner */
-.fpd-contacts .info-banner{display:flex;align-items:flex-start;gap:10px;padding:16px 20px;border-radius:15px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);}
+.fpd-contacts .info-banner{display:flex;align-items:flex-start;gap:10px;padding:16px 20px;border-radius:15px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
 .fpd-contacts .info-banner p{color:${MUTED};font-size:12px;line-height:1.7;}
 
 /* section */
@@ -502,9 +502,9 @@ const CONTACTS_CSS = `
 .fpd-contacts .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-contacts .field input::placeholder{color:${FAINT};}
-.fpd-contacts .field input:focus,.fpd-contacts .field select:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-contacts .field input:focus,.fpd-contacts .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-contacts .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:11px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(74,99,222,0.7);}
+.fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:11px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(91,110,225,0.7);}
 
 /* folder picker */
 .fpd-contacts .folder-picker{border-radius:14px;overflow:hidden;border:1px solid rgba(95,190,145,0.28);}
@@ -515,8 +515,8 @@ const CONTACTS_CSS = `
 /* verification requirement rows */
 .fpd-contacts .verif-row{width:100%;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:11px;text-align:left;border:1px solid;font-family:var(--font-body);}
 .fpd-contacts .verif-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
-.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,123,245,0.14);color:${ACCENT2};font-family:var(--font-mono);}
-.fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:11px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);}
+.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,110,225,0.14);color:${ACCENT2};font-family:var(--font-mono);}
+.fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:11px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);}
 .fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
 .fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
 .fpd-contacts .sub-hint{color:${MUTED};font-size:10px;margin-top:5px;}
@@ -609,7 +609,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             <div className="space-y-2">
               {legacyContacts.map((c, i) => (
                 <div key={c.id} className="chain-row">
-                  <div className="chain-num" style={{ background:i===0?ACCENT:"rgba(91,123,245,0.14)", color:i===0?"#fff":MUTED }}>
+                  <div className="chain-num" style={{ background:i===0?ACCENT:"rgba(91,110,225,0.14)", color:i===0?"#fff":MUTED }}>
                     {i===0 ? <Crown size={12}/> : `${i+1}`}
                   </div>
                   <div className="flex-1" style={{ fontSize: 13, color: TEXT }}>

@@ -80,10 +80,10 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
       <div>
         {/* Back bar */}
         <div className="flex items-center justify-between px-5 py-2.5 border-b"
-          style={{ background:"#fff", borderColor:"rgba(110,139,255,0.15)" }}>
+          style={{ background:"#fff", borderColor:"rgba(91,167,214,0.15)" }}>
           <button onClick={() => setSelected(null)}
             className="flex items-center gap-2 text-sm font-semibold"
-            style={{ color:"#6E8BFF" }}>
+            style={{ color:"#5BA7D6" }}>
             ← Switch Client
           </button>
           <div style={{ color:"#5A6A88", fontSize:12, ...MONO }}>
@@ -91,7 +91,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           </div>
           <button onClick={() => setMode("concierge")}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-            style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
             View {client.specialist.split(" ")[0]}'s Inbox →
           </button>
         </div>
@@ -105,7 +105,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
       style={{ background:"#F5F8FF", fontFamily:"var(--font-body)" }}>
       <div style={{ maxWidth:520, width:"100%" }}>
         <div className="text-center mb-8">
-          <div style={{ color:"#6E8BFF", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
+          <div style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
             📤 CLIENT DOCUMENT SUBMISSION — DEMO
           </div>
           <h2 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#0D1428", marginBottom:8 }}>
@@ -120,23 +120,23 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           {WG_DEMO_CLIENTS.map(c => (
             <button key={c.token} onClick={() => setSelected(c.token)}
               className="w-full flex items-start gap-4 p-5 rounded-2xl text-left transition-all"
-              style={{ background:"#fff", border:"1.5px solid rgba(110,139,255,0.2)",
-                boxShadow:"0 2px 12px rgba(110,139,255,0.06)" }}>
+              style={{ background:"#fff", border:"1.5px solid rgba(91,167,214,0.2)",
+                boxShadow:"0 2px 12px rgba(91,167,214,0.06)" }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:48, height:48, background:"rgba(110,139,255,0.1)", color:"#6E8BFF", fontFamily:"var(--font-display)", fontSize:18 }}>
+                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#5BA7D6", fontFamily:"var(--font-display)", fontSize:18 }}>
                 {c.name.split(" ").map((w:string) => w[0]).join("").slice(0,2)}
               </div>
               <div className="flex-1">
                 <div style={{ color:"#0D1428", fontSize:15, fontWeight:600, marginBottom:3 }}>{c.name}</div>
                 <div style={{ color:"#8A9AB8", fontSize:12 }}>
-                  Specialist: <strong style={{ color:"#6E8BFF" }}>{c.specialist}</strong>
+                  Specialist: <strong style={{ color:"#5BA7D6" }}>{c.specialist}</strong>
                 </div>
                 <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2, ...MONO }}>
                   Token: {c.token}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl self-center flex-shrink-0"
-                style={{ background:"rgba(110,139,255,0.08)", color:"#6E8BFF", fontSize:12, fontWeight:700 }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6", fontSize:12, fontWeight:700 }}>
                 Open →
               </div>
             </button>
@@ -144,8 +144,8 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
         </div>
 
         <div className="mt-6 p-4 rounded-2xl text-center"
-          style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-          <div style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
+          style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)" }}>
+          <div style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
           <ol style={{ color:"#5A6A88", fontSize:12, lineHeight:2, textAlign:"left" }}>
             <li>1. Select a client above (e.g. Dorothy Henderson)</li>
             <li>2. Submit a document on their page</li>
@@ -167,7 +167,7 @@ type AppMode = "landing" | "user" | "admin-login" | "admin" | "partner-onboardin
 
 const TOASTER_STYLE = {
   background: "rgba(8,15,26,0.98)",
-  border: "1px solid rgba(58,91,217,0.25)",
+  border: "1px solid rgba(91,110,225,0.25)",
   color: "#E8EDF5",
   fontFamily: "var(--font-body)",
   fontSize: 13,
@@ -198,7 +198,7 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
           position:"absolute", bottom:"calc(100% + 8px)", right:0,
           background:"rgba(10,10,15,0.97)", borderRadius:14,
           boxShadow:"0 8px 40px rgba(0,0,0,0.6)", backdropFilter:"blur(20px)",
-          border:"1px solid rgba(58,91,217,0.3)", padding:"8px 6px",
+          border:"1px solid rgba(91,110,225,0.3)", padding:"8px 6px",
           display:"flex", flexDirection:"column", gap:3, minWidth:190,
         }}>
           <div style={{ color:"rgba(255,255,255,0.3)", fontSize:8, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
@@ -207,9 +207,9 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
               style={{
                 padding:"7px 12px", borderRadius:9, fontSize:11, fontWeight:700,
                 cursor:"pointer", textAlign:"left", transition:"all 0.12s",
-                background: mode===t.id ? "#3A5BD9" : "transparent",
+                background: mode===t.id ? "#5B6EE1" : "transparent",
                 color: mode===t.id ? "#fff" : "#8A9AB8",
-                border: mode===t.id ? "1px solid #3A5BD9" : "1px solid transparent",
+                border: mode===t.id ? "1px solid #5B6EE1" : "1px solid transparent",
               }}>
               {t.label}
             </button>
@@ -220,8 +220,8 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
         style={{
           display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
           borderRadius:99, fontSize:10, fontWeight:700, cursor:"pointer",
-          background:"rgba(10,10,15,0.95)", color:"#8AA0FF",
-          border:"1px solid rgba(58,91,217,0.4)",
+          background:"rgba(10,10,15,0.95)", color:"#5BA7D6",
+          border:"1px solid rgba(91,110,225,0.4)",
           boxShadow:"0 4px 20px rgba(0,0,0,0.5)", backdropFilter:"blur(16px)",
           letterSpacing:"0.06em",
         }}>
@@ -389,7 +389,7 @@ function AppShell() {
     })();
     return (
       <div className="size-full overflow-y-auto">
-        <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(58,91,217,0.05)", borderBottom:"1px solid rgba(58,91,217,0.1)" }}>
+        <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(91,110,225,0.05)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
           <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
             📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
           </span>

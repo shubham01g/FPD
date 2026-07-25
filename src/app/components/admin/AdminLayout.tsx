@@ -73,12 +73,12 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       style={{
         padding: open ? "7px 10px" : "9px",
         justifyContent: open ? "flex-start" : "center",
-        background: isActive(item.id) ? "rgba(110,139,255,0.15)" : "transparent",
-        color: isActive(item.id) ? "#B8C6F5" : "rgba(255,255,255,0.65)",
-        borderLeft: isActive(item.id) ? "2px solid #6E8BFF" : "2px solid transparent",
-        boxShadow: isActive(item.id) ? "inset 0 0 20px rgba(110,139,255,0.05)" : "none",
+        background: isActive(item.id) ? "rgba(91,167,214,0.15)" : "transparent",
+        color: isActive(item.id) ? "#5A8078" : "rgba(255,255,255,0.65)",
+        borderLeft: isActive(item.id) ? "2px solid #5BA7D6" : "2px solid transparent",
+        boxShadow: isActive(item.id) ? "inset 0 0 20px rgba(91,167,214,0.05)" : "none",
       }}>
-      <span style={{ flexShrink:0, color: isActive(item.id) ? "#6E8BFF" : "inherit" }}>{item.icon}</span>
+      <span style={{ flexShrink:0, color: isActive(item.id) ? "#5BA7D6" : "inherit" }}>{item.icon}</span>
       {open && (
         <>
           <span style={{ fontSize:12, fontWeight: isActive(item.id) ? 600 : 400, color: isActive(item.id) ? "#FFFFFF" : "inherit", flex:1, textAlign:"left" }}>{item.label}</span>
@@ -96,14 +96,14 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
     <div className="flex overflow-hidden" style={{ background:"#EAF0FC", fontFamily:"var(--font-body)", height:"100vh" }}>
       {/* Admin sidebar – purple-themed */}
       <aside className="flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: open ? 232 : 52, background:"rgba(10,10,15,0.98)", borderRight:"1px solid rgba(110,139,255,0.12)" }}>
+        style={{ width: open ? 232 : 52, background:"rgba(10,10,15,0.98)", borderRight:"1px solid rgba(91,167,214,0.12)" }}>
 
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(110,139,255,0.12)" }}>
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(110,139,255,0.3)" }}/>
+        <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(91,167,214,0.12)" }}>
+          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}/>
           {open && (
             <div className="flex-1 min-w-0">
-              <div style={{ fontFamily:"var(--font-display)", color:"#6E8BFF", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>
+              <div style={{ fontFamily:"var(--font-display)", color:"#5BA7D6", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>
               <div style={{ color:"rgba(255,255,255,0.35)", fontSize:7.5, letterSpacing:"0.15em", marginTop:1, fontFamily:"var(--font-mono)" }}>FINAL PASS DOWN · RESTRICTED</div>
             </div>
           )}
@@ -115,11 +115,11 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         {/* Admin badge */}
         {open && (
           <div className="mx-3 my-2 px-3 py-2 rounded-xl flex items-center gap-2"
-            style={{ background:"rgba(110,139,255,0.1)", border:"1px solid rgba(110,139,255,0.2)" }}>
-            <Crown size={13} color="#6E8BFF"/>
+            style={{ background:"rgba(91,167,214,0.1)", border:"1px solid rgba(91,167,214,0.2)" }}>
+            <Crown size={13} color="#5BA7D6"/>
             <div>
               <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:600 }}>Admin Session</div>
-              <div style={{ color:"#6E8BFF", fontSize:9, fontFamily:"var(--font-mono)" }}>admin@finalpassdown.com</div>
+              <div style={{ color:"#5BA7D6", fontSize:9, fontFamily:"var(--font-mono)" }}>admin@finalpassdown.com</div>
             </div>
           </div>
         )}
@@ -137,7 +137,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         </nav>
 
         {/* Sign out */}
-        <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(110,139,255,0.1)" }}>
+        <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(91,167,214,0.1)" }}>
           <button onClick={onSignOut} className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-all"
             style={{ color:"rgba(255,255,255,0.55)", justifyContent: open ? "flex-start" : "center", background:"rgba(229,62,62,0.06)" }}>
             <LogOut size={13}/>
@@ -150,15 +150,15 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Admin top bar */}
         <header className="flex items-center justify-between px-5 py-2.5 border-b flex-shrink-0"
-          style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(110,139,255,0.1)", backdropFilter:"blur(16px)" }}>
+          style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,167,214,0.1)", backdropFilter:"blur(16px)" }}>
           <div className="flex items-center gap-3">
             <div style={{ color:"rgba(255,255,255,0.35)", fontSize:11, fontFamily:"var(--font-mono)" }}>
               {new Date().toLocaleDateString("en-US",{ weekday:"long", year:"numeric", month:"long", day:"numeric" })}
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full"
-              style={{ background:"rgba(110,139,255,0.1)", border:"1px solid rgba(110,139,255,0.25)" }}>
-              <Activity size={10} color="#6E8BFF"/>
-              <span style={{ color:"#6E8BFF", fontSize:9, fontFamily:"var(--font-mono)", fontWeight:700 }}>ADMIN SESSION ACTIVE</span>
+              style={{ background:"rgba(91,167,214,0.1)", border:"1px solid rgba(91,167,214,0.25)" }}>
+              <Activity size={10} color="#5BA7D6"/>
+              <span style={{ color:"#5BA7D6", fontSize:9, fontFamily:"var(--font-mono)", fontWeight:700 }}>ADMIN SESSION ACTIVE</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
                 style={{ width:13, height:13, background:"#E53E3E", color:"#fff", fontSize:8, fontWeight:700 }}>3</span>
             </button>
             <div className="flex items-center justify-center rounded-full"
-              style={{ width:28, height:28, background:"rgba(110,139,255,0.15)", color:"#6E8BFF", fontSize:11, fontWeight:700 }}>A</div>
+              style={{ width:28, height:28, background:"rgba(91,167,214,0.15)", color:"#5BA7D6", fontSize:11, fontWeight:700 }}>A</div>
           </div>
         </header>
 

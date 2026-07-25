@@ -10,8 +10,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -69,7 +69,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-passets so nothing else in the app is affected. */
 const PASSETS_CSS = `
-.fpd-passets{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-passets{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-passets *{box-sizing:border-box;}
 .fpd-passets-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-passets .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -81,14 +81,14 @@ const PASSETS_CSS = `
 /* header */
 .fpd-passets .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-passets .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-passets .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-passets .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-passets .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-passets .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* segmented tabs */
 .fpd-passets .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;flex-wrap:wrap;}
 .fpd-passets .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
-.fpd-passets .seg button.on{background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;box-shadow:0 6px 16px -8px rgba(74,99,222,0.8);}
+.fpd-passets .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 .fpd-passets .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .fpd-passets .toolbar-end{display:flex;justify-content:flex-end;}
@@ -102,7 +102,7 @@ const PASSETS_CSS = `
 .fpd-passets .dlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-passets .dtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
 .fpd-passets .dleft{display:flex;align-items:flex-start;gap:14px;min-width:0;}
-.fpd-passets .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};}
+.fpd-passets .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
 .fpd-passets .dtype{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
 .fpd-passets .dsub{color:${MUTED};font-size:12.5px;}
 .fpd-passets .dvalue{text-align:right;flex-shrink:0;}
@@ -113,9 +113,9 @@ const PASSETS_CSS = `
 .fpd-passets .damt span{color:${MUTED};font-weight:500;font-size:11px;}
 
 .fpd-passets .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
-.fpd-passets .dbadge.type{background:rgba(91,123,245,0.12);color:${ACCENT2};}
+.fpd-passets .dbadge.type{background:rgba(91,110,225,0.12);color:${ACCENT2};}
 .fpd-passets .dbadge.autopay{background:rgba(95,190,145,0.14);color:${POS};}
-.fpd-passets .catbadge{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,123,245,0.12);color:${ACCENT2};margin-bottom:9px;}
+.fpd-passets .catbadge{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};margin-bottom:9px;}
 
 .fpd-passets .dgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;margin-bottom:4px;}
 .fpd-passets .dgrid.two{grid-template-columns:repeat(2,1fr);}
@@ -134,7 +134,7 @@ const PASSETS_CSS = `
 }
 
 .fpd-passets .notewarn{padding:12px 14px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.22);color:${WARN};font-size:12.5px;line-height:1.6;margin-top:12px;}
-.fpd-passets .noteinfo{padding:12px 14px;border-radius:11px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.22);color:${ACCENT2};font-size:12.5px;line-height:1.6;margin-top:12px;}
+.fpd-passets .noteinfo{padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);color:${ACCENT2};font-size:12.5px;line-height:1.6;margin-top:12px;}
 .fpd-passets .notemuted{color:${MUTED};font-size:12px;margin-top:10px;line-height:1.6;}
 .fpd-passets .noteitalic{color:${MUTED};font-size:12px;margin-top:10px;font-style:italic;line-height:1.6;}
 .fpd-passets .dacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;}
@@ -155,9 +155,9 @@ const PASSETS_CSS = `
 .fpd-passets .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-passets .field input,.fpd-passets .field select,.fpd-passets .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-passets .field input::placeholder,.fpd-passets .field textarea::placeholder{color:${FAINT};}
-.fpd-passets .field input:focus,.fpd-passets .field select:focus,.fpd-passets .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-passets .field input:focus,.fpd-passets .field select:focus,.fpd-passets .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-passets .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-passets .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-passets .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-passets .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -349,7 +349,7 @@ export function PersonalAssets() {
                     <img src={r.photo} alt={r.address} />
                   ) : (
                     <div className="photo-empty">
-                      <Home size={26} color="rgba(91,123,245,0.3)" />
+                      <Home size={26} color="rgba(91,110,225,0.3)" />
                       <span>No photo — add one below</span>
                     </div>
                   )}
@@ -472,7 +472,7 @@ export function PersonalAssets() {
                     <img src={w.photo} alt={`${w.make} ${w.model}`} />
                   ) : (
                     <div className="photo-empty" style={{ flexDirection: "row" }}>
-                      <Image size={18} color="rgba(91,123,245,0.25)" />
+                      <Image size={18} color="rgba(91,110,225,0.25)" />
                       <span>No photo</span>
                     </div>
                   )}

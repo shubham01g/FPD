@@ -86,7 +86,7 @@ export function TextAreaField({
 /* Read-only display of a stored value — the "view mode" counterpart to TextField. */
 export function InfoField({ label, value, icon, mono }: { label: string; value?: string | null; icon?: React.ReactNode; mono?: boolean }) {
   return (
-    <div className="flex flex-col rounded-xl" style={{ gap: 4, padding: "10px 14px", background: "rgba(58,91,217,0.05)", border: "1px solid rgba(58,91,217,0.10)" }}>
+    <div className="flex flex-col rounded-xl" style={{ gap: 4, padding: "10px 14px", background: "rgba(91,110,225,0.05)", border: "1px solid rgba(91,110,225,0.10)" }}>
       <span style={{ color: "#8A97B8", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", ...MONO }}>{label}</span>
       <span className="flex items-center gap-2" style={{ color: value ? "#FFFFFF" : "#5A6A88", fontSize: 13, ...(mono ? MONO : {}) }}>
         {icon}{value || "—"}

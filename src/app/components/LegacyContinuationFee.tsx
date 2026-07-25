@@ -14,8 +14,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -47,7 +47,7 @@ const FULL_COVERAGE = [
   { icon:<Car size={14}/>,         color:ACCENT2, label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
   { icon:<Camera size={14}/>,      color:ACCENT2, label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
   { icon:<BookOpen size={14}/>,    color:WARN,    label:"Digital Diary", desc:"All audio, video, and written diary entries" },
-  { icon:<Key size={14}/>,         color:"#5FB6C4", label:"Password Manager", desc:"All saved credentials and account information" },
+  { icon:<Key size={14}/>,         color:"#5A8078", label:"Password Manager", desc:"All saved credentials and account information" },
   { icon:<Users size={14}/>,       color:POS,     label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
   { icon:<PawPrint size={14}/>,    color:WARN,    label:"Pet Records & Instructions", desc:"Veterinary records and pet care instructions" },
 ];
@@ -58,7 +58,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-lcf so nothing else in the app is affected. */
 const LCF_CSS = `
-.fpd-lcf{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-lcf{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-lcf *{box-sizing:border-box;}
 .fpd-lcf-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-lcf .wrap{max-width:1000px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -72,11 +72,11 @@ const LCF_CSS = `
 .fpd-lcf .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-lcf .pg-sub{color:${MUTED};font-size:13.5px;max-width:700px;line-height:1.75;}
 .fpd-lcf .pg-sub strong{color:${TEXT};}
-.fpd-lcf .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-lcf .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-lcf .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-lcf .btn-primary:disabled{opacity:.7;cursor:default;transform:none;}
-.fpd-lcf .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
-.fpd-lcf .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-lcf .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-lcf .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-lcf .btn-ghost:disabled{opacity:.6;cursor:default;}
 .fpd-lcf .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 .fpd-lcf .btn-crypto{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#EFA13F,#D9781A);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(217,120,26,0.6),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
@@ -84,13 +84,13 @@ const LCF_CSS = `
 .fpd-lcf .btn-reset{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:rgba(208,107,107,0.10);border:1px solid rgba(208,107,107,0.28);color:${NEG};font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* demo banner */
-.fpd-lcf .demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border-radius:14px;background:rgba(91,123,245,0.06);border:1px dashed rgba(91,123,245,0.4);}
+.fpd-lcf .demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px dashed rgba(91,110,225,0.4);}
 .fpd-lcf .demo-tag{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:${ACCENT2};margin-bottom:4px;}
 .fpd-lcf .demo-text{color:${MUTED};font-size:12.5px;line-height:1.6;}
 .fpd-lcf .demo-acts{display:flex;gap:8px;flex-wrap:wrap;}
 
 /* two-condition gate */
-.fpd-lcf .gate{background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.16);border-radius:15px;padding:20px 22px;}
+.fpd-lcf .gate{background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.16);border-radius:15px;padding:20px 22px;}
 .fpd-lcf .gate-head{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.1em;color:${ACCENT2};margin-bottom:14px;}
 .fpd-lcf .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .fpd-lcf .gcard{display:flex;align-items:flex-start;gap:12px;padding:15px 16px;border-radius:13px;border:1px solid;}
@@ -134,7 +134,7 @@ const LCF_CSS = `
 .fpd-lcf .price-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 15px;border-radius:99px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.22);color:${POS};font-size:12px;}
 .fpd-lcf .payer-label{color:${MUTED};font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.08em;margin-bottom:8px;}
 .fpd-lcf .payer{width:100%;display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border-radius:12px;background:#0F1624;border:2px solid transparent;cursor:pointer;text-align:left;transition:border-color .16s,background .16s;margin-bottom:8px;}
-.fpd-lcf .payer.on{background:rgba(91,123,245,0.08);border-color:${ACCENT};}
+.fpd-lcf .payer.on{background:rgba(91,110,225,0.08);border-color:${ACCENT};}
 .fpd-lcf .payer .prad{width:16px;height:16px;border-radius:50%;border:2px solid ${SOFT};flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;}
 .fpd-lcf .payer.on .prad{border-color:${ACCENT};}
 .fpd-lcf .payer .pdot{width:8px;height:8px;border-radius:50%;background:${ACCENT};}
@@ -154,7 +154,7 @@ const LCF_CSS = `
 .fpd-lcf .doc-box{margin-top:14px;padding:13px 15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);text-align:left;}
 .fpd-lcf .doc-box .dk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:6px;}
 .fpd-lcf .doc-box .dv{color:${SOFT};font-size:12px;line-height:1.7;}
-.fpd-lcf .tid-box{margin-top:12px;padding:13px 15px;border-radius:12px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.14);}
+.fpd-lcf .tid-box{margin-top:12px;padding:13px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
 .fpd-lcf .tid-box .tk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:4px;}
 .fpd-lcf .tid-box .tv{color:${ACCENT2};font-family:var(--font-mono);font-size:13px;}
 
@@ -168,21 +168,21 @@ const LCF_CSS = `
 .fpd-lcf .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-lcf .modal{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
 .fpd-lcf .modal-head{display:flex;align-items:center;gap:12px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,0.22);}
-.fpd-lcf .modal-head .mico{width:40px;height:40px;border-radius:11px;background:rgba(91,123,245,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-lcf .modal-head .mico{width:40px;height:40px;border-radius:11px;background:rgba(91,110,225,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .fpd-lcf .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-lcf .modal-head .msub{color:${MUTED};font-size:11.5px;margin-top:2px;}
 .fpd-lcf .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
 .fpd-lcf .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-lcf .field input{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-lcf .field input::placeholder{color:${FAINT};}
-.fpd-lcf .field input:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-lcf .field input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-lcf .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.fpd-lcf .sumbox{padding:14px 15px;border-radius:12px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.14);}
+.fpd-lcf .sumbox{padding:14px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
 .fpd-lcf .sumrow{display:flex;justify-content:space-between;font-size:12.5px;color:${MUTED};margin-bottom:6px;}
-.fpd-lcf .sumrow.total{border-top:1px solid rgba(91,123,245,0.16);margin-top:8px;padding-top:10px;font-size:14px;color:${TEXT};font-weight:700;}
+.fpd-lcf .sumrow.total{border-top:1px solid rgba(91,110,225,0.16);margin-top:8px;padding-top:10px;font-size:14px;color:${TEXT};font-weight:700;}
 .fpd-lcf .sumrow.total span:last-child{color:${ACCENT2};font-family:var(--font-display);font-size:16px;}
 .fpd-lcf .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-lcf .modal-foot .save{flex:1;padding:13px;border-radius:12px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-lcf .modal-foot .save{flex:1;padding:13px;border-radius:12px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-lcf .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-lcf .modal-foot .save:disabled{opacity:.8;cursor:default;}
 .fpd-lcf .ssl-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px;color:${MUTED};font-size:11px;}
@@ -288,8 +288,8 @@ export function LegacyContinuationFee() {
         <div className="gate">
           <div className="gate-head">HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
           <div className="ggrid">
-            <div className="gcard" style={{ background:status.paid?"rgba(95,190,145,0.08)":"rgba(91,123,245,0.04)", borderColor:status.paid?"rgba(95,190,145,0.28)":"rgba(91,123,245,0.14)" }}>
-              <div className="gnum" style={{ background:status.paid?"rgba(95,190,145,0.16)":"rgba(91,123,245,0.1)", color:status.paid?POS:ACCENT }}>
+            <div className="gcard" style={{ background:status.paid?"rgba(95,190,145,0.08)":"rgba(91,110,225,0.04)", borderColor:status.paid?"rgba(95,190,145,0.28)":"rgba(91,110,225,0.14)" }}>
+              <div className="gnum" style={{ background:status.paid?"rgba(95,190,145,0.16)":"rgba(91,110,225,0.1)", color:status.paid?POS:ACCENT }}>
                 {status.paid ? <CheckCircle size={16}/> : "1"}
               </div>
               <div>

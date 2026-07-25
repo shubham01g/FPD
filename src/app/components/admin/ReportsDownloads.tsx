@@ -6,9 +6,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.12)", borderRadius:16, boxShadow:"0 2px 12px rgba(58,91,217,0.06)" };
+const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.12)", borderRadius:16, boxShadow:"0 2px 12px rgba(91,110,225,0.06)" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none" };
+const INPUT: React.CSSProperties = { background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#0D1428", outline:"none" };
 
 /* ── Report catalog ──────────────────────────────────────────────── */
 interface ReportDef {
@@ -89,7 +89,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","XLSX","JSON"],
     icon: <Users size={16}/>,
-    color: "#4A90D9",
+    color: "#5BA7D6",
     fields: ["User ID","Name","Email","Plan","Storage Used GB","Legacy Contacts","Guardian Contacts","Joined","Status","2FA Enabled"],
     estimatedRows: "~51,490 rows",
   },
@@ -100,7 +100,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","PDF","XLSX"],
     icon: <Users size={16}/>,
-    color: "#4A90D9",
+    color: "#5BA7D6",
     fields: ["Date","User ID","Name","Email","Plan","Referral Source","Affiliate ID","Channel","WG Enrolled"],
     estimatedRows: "Varies by date range",
   },
@@ -111,7 +111,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","PDF","XLSX"],
     icon: <Users size={16}/>,
-    color: "#4A90D9",
+    color: "#5BA7D6",
     fields: ["User ID","Name","Plan","Joined","Cancelled","Days Active","LTV","Cancellation Reason","Reactivated"],
     estimatedRows: "~3,200 rows",
   },
@@ -122,7 +122,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","XLSX"],
     icon: <Users size={16}/>,
-    color: "#4A90D9",
+    color: "#5BA7D6",
     fields: ["Account ID","Name","Email","Plan","Waiver Reason","White Glove","Onboarded By","Onboarded At","Notes"],
     estimatedRows: "~420 rows",
   },
@@ -135,7 +135,7 @@ const REPORTS: ReportDef[] = [
     category: "storage",
     formats: ["CSV","XLSX"],
     icon: <HardDrive size={16}/>,
-    color: "#6E8BFF",
+    color: "#5BA7D6",
     fields: ["User ID","Name","Plan","Limit GB","Used GB","Pct Used","Legal Docs GB","Financial GB","Media GB","Other GB","Status"],
     estimatedRows: "~51,490 rows",
   },
@@ -146,7 +146,7 @@ const REPORTS: ReportDef[] = [
     category: "storage",
     formats: ["CSV","PDF"],
     icon: <AlertTriangle size={16}/>,
-    color: "#6E8BFF",
+    color: "#5BA7D6",
     fields: ["Date","User ID","Name","Alert Type","Storage Pct","Email Sent","Action Taken"],
     estimatedRows: "~18,000 rows",
   },
@@ -240,7 +240,7 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF","XLSX"],
     icon: <BarChart3 size={16}/>,
-    color: "#3A5BD9",
+    color: "#5B6EE1",
     fields: ["Notification ID","Title","Type","Target Segment","Sent At","Delivered","Opened","Open Rate %","Scheduled"],
     estimatedRows: "~240 rows",
   },
@@ -251,7 +251,7 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF"],
     icon: <Send size={16}/>,
-    color: "#3A5BD9",
+    color: "#5B6EE1",
     fields: ["Template","Sent","Delivered","Opens","Open Rate %","Bounces","Bounce Rate %","Unsubscribes"],
     estimatedRows: "~16 rows (one per template)",
   },
@@ -259,11 +259,11 @@ const REPORTS: ReportDef[] = [
 
 const CATEGORY_META: Record<ReportDef["category"], { label: string; color: string; icon: React.ReactNode }> = {
   financial:   { label:"Financial",   color:"#48BB78", icon:<DollarSign size={13}/> },
-  users:       { label:"Users",       color:"#4A90D9", icon:<Users size={13}/> },
-  storage:     { label:"Storage",     color:"#6E8BFF", icon:<HardDrive size={13}/> },
+  users:       { label:"Users",       color:"#5BA7D6", icon:<Users size={13}/> },
+  storage:     { label:"Storage",     color:"#5BA7D6", icon:<HardDrive size={13}/> },
   operations:  { label:"Operations",  color:"#ED8936", icon:<Star size={13}/> },
   compliance:  { label:"Compliance",  color:"#FC8181", icon:<Shield size={13}/> },
-  marketing:   { label:"Marketing",   color:"#3A5BD9", icon:<BarChart3 size={13}/> },
+  marketing:   { label:"Marketing",   color:"#5B6EE1", icon:<BarChart3 size={13}/> },
 };
 
 /* ── Recent downloads seed ───────────────────────────────────────── */
@@ -331,7 +331,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
             {report.formats.map(f => (
               <button key={f} onClick={() => setFmt(f)}
                 className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
-                style={{ background:fmt===f?`${report.color}18`:"rgba(58,91,217,0.04)", color:fmt===f?report.color:"#8A9AB8", border:`1px solid ${fmt===f?report.color+"30":"rgba(58,91,217,0.1)"}` }}>
+                style={{ background:fmt===f?`${report.color}18`:"rgba(91,110,225,0.04)", color:fmt===f?report.color:"#8A9AB8", border:`1px solid ${fmt===f?report.color+"30":"rgba(91,110,225,0.1)"}` }}>
                 {f}
               </button>
             ))}
@@ -356,12 +356,12 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
 
       {/* Expanded — field list */}
       {expanded && (
-        <div className="px-5 pb-5 border-t pt-4 space-y-3" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+        <div className="px-5 pb-5 border-t pt-4 space-y-3" style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>INCLUDED FIELDS ({report.fields.length})</div>
           <div className="flex flex-wrap gap-1.5">
             {report.fields.map(f => (
               <span key={f} className="px-2 py-1 rounded-lg text-xs"
-                style={{ background:"rgba(58,91,217,0.04)", color:"#5A6A88", border:"1px solid rgba(58,91,217,0.08)" }}>
+                style={{ background:"rgba(91,110,225,0.04)", color:"#5A6A88", border:"1px solid rgba(91,110,225,0.08)" }}>
                 {f}
               </span>
             ))}
@@ -413,9 +413,9 @@ export function ReportsDownloads() {
   );
 
   const stats = [
-    { label:"Available Reports", value:REPORTS.length,  color:"#3A5BD9" },
+    { label:"Available Reports", value:REPORTS.length,  color:"#5B6EE1" },
     { label:"Generated This Month", value:downloads.length, color:"#48BB78" },
-    { label:"Categories",          value:6,              color:"#6E8BFF" },
+    { label:"Categories",          value:6,              color:"#5BA7D6" },
     { label:"Export Formats",      value:4,              color:"#ED8936" },
   ];
 
@@ -425,8 +425,8 @@ export function ReportsDownloads() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Download size={15} color="#3A5BD9"/>
-          <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
+          <Download size={15} color="#5B6EE1"/>
+          <span style={{ color:"#5B6EE1", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
         </div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Reports & Downloads</h1>
         <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -445,11 +445,11 @@ export function ReportsDownloads() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
         {([["reports","📋 Report Catalog"],["history","📥 Download History"]] as const).map(([id, label]) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className="px-5 py-2 rounded-lg text-sm font-semibold"
-            style={{ background:activeTab===id?"#3A5BD9":"transparent", color:activeTab===id?"#fff":"#5A6A88" }}>
+            style={{ background:activeTab===id?"#5B6EE1":"transparent", color:activeTab===id?"#fff":"#5A6A88" }}>
             {label}
           </button>
         ))}
@@ -465,13 +465,13 @@ export function ReportsDownloads() {
             <div className="flex gap-1 flex-wrap">
               <button onClick={() => setActiveCategory("all")}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background:activeCategory==="all"?"#3A5BD9":"rgba(58,91,217,0.04)", color:activeCategory==="all"?"#fff":"#5A6A88", border:"1px solid rgba(58,91,217,0.1)" }}>
+                style={{ background:activeCategory==="all"?"#5B6EE1":"rgba(91,110,225,0.04)", color:activeCategory==="all"?"#fff":"#5A6A88", border:"1px solid rgba(91,110,225,0.1)" }}>
                 All
               </button>
               {(Object.entries(CATEGORY_META) as [ReportDef["category"], typeof CATEGORY_META[ReportDef["category"]]][]).map(([key, meta]) => (
                 <button key={key} onClick={() => setActiveCategory(key)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background:activeCategory===key?`${meta.color}18`:"rgba(58,91,217,0.04)", color:activeCategory===key?meta.color:"#5A6A88", border:`1px solid ${activeCategory===key?meta.color+"30":"rgba(58,91,217,0.1)"}` }}>
+                  style={{ background:activeCategory===key?`${meta.color}18`:"rgba(91,110,225,0.04)", color:activeCategory===key?meta.color:"#5A6A88", border:`1px solid ${activeCategory===key?meta.color+"30":"rgba(91,110,225,0.1)"}` }}>
                   {meta.icon} {meta.label}
                 </button>
               ))}
@@ -505,7 +505,7 @@ export function ReportsDownloads() {
           <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
             <table className="w-full text-sm" style={{ borderCollapse:"collapse" }}>
               <thead>
-                <tr style={{ background:"rgba(58,91,217,0.04)", borderBottom:"1px solid rgba(58,91,217,0.08)" }}>
+                <tr style={{ background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
                   {["Report","Format","Generated","By","Size","Rows","Action"].map(h => (
                     <th key={h} style={{ padding:"12px 16px", textAlign:"left", color:"#8A9AB8", fontSize:10, ...MONO, fontWeight:600 }}>{h}</th>
                   ))}
@@ -513,10 +513,10 @@ export function ReportsDownloads() {
               </thead>
               <tbody>
                 {downloads.map((dl, i) => {
-                  const fmtColor: Record<string, string> = { CSV:"#48BB78", PDF:"#FC8181", XLSX:"#4A90D9", JSON:"#F6AD55" };
+                  const fmtColor: Record<string, string> = { CSV:"#48BB78", PDF:"#FC8181", XLSX:"#5BA7D6", JSON:"#F6AD55" };
                   const color = fmtColor[dl.format] ?? "#8A9AB8";
                   return (
-                    <tr key={dl.id} style={{ borderBottom: i < downloads.length-1 ? "1px solid rgba(58,91,217,0.06)" : "none" }}>
+                    <tr key={dl.id} style={{ borderBottom: i < downloads.length-1 ? "1px solid rgba(91,110,225,0.06)" : "none" }}>
                       <td style={{ padding:"12px 16px" }}>
                         <div style={{ color:"#0D1428", fontWeight:500, fontSize:13 }}>{dl.reportName}</div>
                         <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{dl.id}</div>
@@ -532,7 +532,7 @@ export function ReportsDownloads() {
                         {dl.status === "ready" ? (
                           <button onClick={() => toast.success(`Downloading ${dl.reportName}.${dl.format.toLowerCase()}…`)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                            style={{ background:"rgba(58,91,217,0.06)", color:"#3A5BD9" }}>
+                            style={{ background:"rgba(91,110,225,0.06)", color:"#5B6EE1" }}>
                             <Download size={11}/> Download
                           </button>
                         ) : dl.status === "generating" ? (
@@ -553,8 +553,8 @@ export function ReportsDownloads() {
           </div>
 
           {/* Info banner */}
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
-            <Shield size={14} color="#3A5BD9" style={{ marginTop:1, flexShrink:0 }}/>
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
+            <Shield size={14} color="#5B6EE1" style={{ marginTop:1, flexShrink:0 }}/>
             <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
               All reports are generated in real time from the live database. Files are retained for 30 days. Reports containing PII are access-logged per your admin audit policy. GDPR data requests are archived separately for 7 years per compliance requirements.
             </div>

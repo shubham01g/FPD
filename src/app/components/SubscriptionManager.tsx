@@ -13,8 +13,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -42,7 +42,7 @@ const initSubs: Subscription[] = [
   { id:"s6", title:"Planet Fitness", amount:24.99, frequency:"Monthly", phone:"(916) 555-0291", website:"https://planetfitness.com", billingAccountNumber:"PF-8821", paymentType:"Checking Account", lastFour:"8821", category:"Health & Fitness", status:"active", nextBilling:"Jun 30, 2026", autoPay:true, cancelInstructions:"Must cancel IN PERSON at the gym or via certified mail." },
 ];
 
-const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#6FB2B4", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
+const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#5A8078", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
 const statusColor: Record<string, { color:string; bg:string }> = {
   active:    { color:POS,  bg:"rgba(95,190,145,0.12)" },
   paused:    { color:WARN, bg:"rgba(217,165,94,0.12)" },
@@ -55,7 +55,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-sub so nothing else in the app is affected. */
 const SUB_CSS = `
-.fpd-sub{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-sub{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-sub *{box-sizing:border-box;}
 .fpd-sub-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-sub .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -68,10 +68,10 @@ const SUB_CSS = `
 .fpd-sub .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-sub .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-sub .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
-.fpd-sub .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-sub .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-sub .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-sub .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
-.fpd-sub .btn-ghost:hover{background:rgba(91,123,245,0.18);}
+.fpd-sub .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-sub .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-sub .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 .fpd-sub .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-sub .btn-pos:hover{background:rgba(95,190,145,0.2);}
@@ -110,7 +110,7 @@ const SUB_CSS = `
 /* subscription list rows */
 .fpd-sub .plist{display:flex;flex-direction:column;gap:10px;}
 .fpd-sub .prow{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s;}
-.fpd-sub .prow.sel{border-color:rgba(91,123,245,0.5);box-shadow:inset 0 0 0 1px rgba(91,123,245,0.4),0 6px 20px -8px rgba(91,123,245,0.45);}
+.fpd-sub .prow.sel{border-color:rgba(91,110,225,0.5);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.4),0 6px 20px -8px rgba(91,110,225,0.45);}
 .fpd-sub .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-sub .ptitle-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
 .fpd-sub .ptitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
@@ -121,7 +121,7 @@ const SUB_CSS = `
 .fpd-sub .pamt .val{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;font-variant-numeric:tabular-nums;}
 .fpd-sub .pamt .freq{font-family:var(--font-mono);font-size:10px;margin-top:2px;}
 .fpd-sub .icon-btn{background:none;border:none;cursor:pointer;padding:7px;border-radius:8px;display:flex;color:${MUTED};transition:color .16s,background .16s;flex-shrink:0;}
-.fpd-sub .icon-btn:hover{color:${ACCENT2};background:rgba(91,123,245,0.1);}
+.fpd-sub .icon-btn:hover{color:${ACCENT2};background:rgba(91,110,225,0.1);}
 .fpd-sub .icon-btn.del:hover{color:${NEG};background:rgba(208,107,107,0.1);}
 
 /* detail panel */
@@ -146,17 +146,17 @@ const SUB_CSS = `
 
 /* empty state */
 .fpd-sub .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 16px;}
-.fpd-sub .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,123,245,0.08);border:1px solid rgba(91,123,245,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-sub .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
 .fpd-sub .empty .et{color:${SOFT};font-size:13.5px;}
 
 /* modal */
 .fpd-sub .check-row{display:flex;align-items:center;gap:9px;cursor:pointer;color:${SOFT};font-size:13px;}
 .fpd-sub .check-row input{width:15px;height:15px;accent-color:${ACCENT};}
-.fpd-sub .dropzone{flex:1;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:11px;border:1.5px dashed rgba(91,123,245,0.28);background:rgba(91,123,245,0.03);cursor:pointer;color:${MUTED};font-size:13px;}
+.fpd-sub .dropzone{flex:1;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:11px;border:1.5px dashed rgba(91,110,225,0.28);background:rgba(91,110,225,0.03);cursor:pointer;color:${MUTED};font-size:13px;}
 .fpd-sub .pw-wrap{position:relative;}
 .fpd-sub .pw-wrap input{padding-right:38px;}
 .fpd-sub .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
-.fpd-sub .login-box{padding:15px;border-radius:12px;background:rgba(91,123,245,0.04);border:1px solid rgba(91,123,245,0.14);display:flex;flex-direction:column;gap:12px;}
+.fpd-sub .login-box{padding:15px;border-radius:12px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);display:flex;flex-direction:column;gap:12px;}
 .fpd-sub .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT2};font-weight:700;}
 .fpd-sub .payment-box{padding:15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-sub .payment-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:10px;}
@@ -169,10 +169,10 @@ const SUB_CSS = `
 .fpd-sub .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
 .fpd-sub .field input,.fpd-sub .field select,.fpd-sub .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-sub .field input::placeholder,.fpd-sub .field textarea::placeholder{color:${FAINT};}
-.fpd-sub .field input:focus,.fpd-sub .field select:focus,.fpd-sub .field textarea:focus{border-color:rgba(91,123,245,0.5);box-shadow:0 0 0 3px rgba(91,123,245,0.12);}
+.fpd-sub .field input:focus,.fpd-sub .field select:focus,.fpd-sub .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-sub .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .fpd-sub .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
-.fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-sub .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-sub .modal-foot .save[disabled]{opacity:.6;cursor:default;}
 @media (max-width:560px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
@@ -374,7 +374,7 @@ export function SubscriptionManager() {
               const on = category === c;
               return (
                 <button key={c} onClick={() => setCategory(c)} className={`chip ${on ? "" : "off"}`}
-                  style={{ background: on ? "rgba(91,123,245,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,123,245,0.4)" : "rgba(255,255,255,0.09)" }}>
+                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
                   {c}
                 </button>
               );

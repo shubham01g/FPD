@@ -17,11 +17,11 @@ const mrrGrowth = [
   { month: "Apr", mrr: 6870 }, { month: "May", mrr: 8920 }, { month: "Jun", mrr: 10333 },
 ];
 
-const tierColors = { 1: "#4A90D9", 2: "#3A5BD9", 3: "#48BB78" };
+const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" };
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
-const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
 
 function SendInviteModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
@@ -68,7 +68,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                  style={{ background:orgType===t.id?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.04)", border:`1px solid ${orgType===t.id?"#3A5BD9":"rgba(58,91,217,0.12)"}`, color:orgType===t.id?"#3A5BD9":"#5A6A88" }}>
+                  style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#5B6EE1":"#5A6A88" }}>
                   {t.label}
                 </button>
               ))}
@@ -83,7 +83,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
               <input type={f.type||"text"} value={f.value} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
                 className="w-full px-4 py-3 rounded-xl"
-                style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
             </div>
           ))}
 
@@ -92,24 +92,24 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
               placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
               className="w-full px-4 py-3 rounded-xl resize-none"
-              style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+              style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
           </div>
 
           {/* Preview link */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.12)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
             <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
-            <span style={{ color:"#3A5BD9", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
+            <span style={{ color:"#5B6EE1", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
             <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
-              style={{ color:"#3A5BD9", flexShrink:0 }}><Copy size={12}/></button>
+              style={{ color:"#5B6EE1", flexShrink:0 }}><Copy size={12}/></button>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending…" : "Send Invite Email"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -133,8 +133,8 @@ export function PartnershipAdmin() {
     <div className="p-6 space-y-6" style={{ maxWidth: 1200 }}>
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Handshake size={16} color="#6E8BFF" />
-          <span style={{ color: "#6E8BFF", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
+          <Handshake size={16} color="#5BA7D6" />
+          <span style={{ color: "#5BA7D6", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
         </div>
         <div className="flex items-start justify-between">
           <div>
@@ -143,7 +143,7 @@ export function PartnershipAdmin() {
           </div>
           <button onClick={() => setShowInvite(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm flex-shrink-0"
-            style={{ background:"linear-gradient(135deg,#6E8BFF,#B794F4)", color:"#04080F", boxShadow:"0 0 20px rgba(110,139,255,0.35)" }}>
+            style={{ background:"linear-gradient(135deg,#5BA7D6,#7E6BD8)", color:"#04080F", boxShadow:"0 0 20px rgba(91,167,214,0.35)" }}>
             <Send size={14}/> Send Onboarding Invite
           </button>
         </div>
@@ -153,10 +153,10 @@ export function PartnershipAdmin() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Partners", value: activePartners, sub: "Organizations", color: "#6E8BFF" },
+          { label: "Active Partners", value: activePartners, sub: "Organizations", color: "#5BA7D6" },
           { label: "Total Referred Accounts", value: totalAccounts.toLocaleString(), sub: "Lifetime active", color: "var(--gold)" },
           { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#48BB78" },
-          { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#4A90D9" },
+          { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#5BA7D6" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -185,7 +185,7 @@ export function PartnershipAdmin() {
                     <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
                       <div style={{
                         width:"100%", height:barH,
-                        background: isLast ? "#6E8BFF" : "rgba(110,139,255,0.4)",
+                        background: isLast ? "#5BA7D6" : "rgba(91,167,214,0.4)",
                         borderRadius:"4px 4px 0 0",
                         transition:"height 0.3s",
                       }}/>
@@ -228,8 +228,8 @@ export function PartnershipAdmin() {
           >
             <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg p-1.5" style={{ background: "rgba(110,139,255,0.1)" }}>
-                <Building size={13} color="#6E8BFF" />
+              <div className="rounded-lg p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
+                <Building size={13} color="#5BA7D6" />
               </div>
               <div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{partner.name}</div>
@@ -241,7 +241,7 @@ export function PartnershipAdmin() {
               <span style={{ color: (tierColors as any)[partner.tier], fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[partner.tier]}</span>
             </div>
             <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{partner.accounts}</span>
-            <span style={{ color: "#6E8BFF", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.monthlyEarn.toFixed(2)}</span>
+            <span style={{ color: "#5BA7D6", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.monthlyEarn.toFixed(2)}</span>
             <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.totalEarned.toLocaleString()}</span>
             <div
               className="px-2 py-1 rounded"
@@ -254,7 +254,7 @@ export function PartnershipAdmin() {
               {partner.status.toUpperCase()}
             </div>
             <div className="flex items-center gap-2">
-              <button style={{ color: "#6E8BFF" }}><Eye size={14} /></button>
+              <button style={{ color: "#5BA7D6" }}><Eye size={14} /></button>
               <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
               {partner.status === "active"
                 ? <button style={{ color: "#FC8181" }}><XCircle size={14} /></button>

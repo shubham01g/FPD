@@ -200,21 +200,21 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
   if (!open) return null;
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", borderRadius:16 };
+  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center"
       style={{ background:"rgba(0,0,0,0.85)", backdropFilter:"blur(12px)" }}>
 
       <div className="w-full max-w-2xl mx-4 rounded-3xl overflow-hidden flex flex-col"
-        style={{ background:"#0A0F1E", border:"1px solid rgba(58,91,217,0.2)", maxHeight:"96vh" }}>
+        style={{ background:"#0A0F1E", border:"1px solid rgba(91,110,225,0.2)", maxHeight:"96vh" }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"
-          style={{ borderColor:"rgba(58,91,217,0.2)" }}>
+          style={{ borderColor:"rgba(91,110,225,0.2)" }}>
           <div className="flex items-center gap-3">
-            <div className="rounded-xl p-2" style={{ background:"rgba(58,91,217,0.15)" }}>
-              <Scan size={18} color="#8AA0FF"/>
+            <div className="rounded-xl p-2" style={{ background:"rgba(91,110,225,0.15)" }}>
+              <Scan size={18} color="#5BA7D6"/>
             </div>
             <div>
               <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600 }}>Document Scanner</div>
@@ -239,7 +239,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                   <div style={{ color:"#FC8181", fontSize:14, lineHeight:1.7 }}>{cameraError}</div>
                   <button onClick={() => fileRef.current?.click()}
                     className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm"
-                    style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+                    style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                     <Upload size={15}/> Upload Photo Instead
                   </button>
                   <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileSelect}/>
@@ -250,14 +250,14 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                     style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
                   {/* Scan frame overlay */}
                   <div className="absolute inset-6 pointer-events-none"
-                    style={{ border:"2px solid rgba(58,91,217,0.7)", borderRadius:8, boxShadow:"0 0 0 4000px rgba(0,0,0,0.35)" }}>
+                    style={{ border:"2px solid rgba(91,110,225,0.7)", borderRadius:8, boxShadow:"0 0 0 4000px rgba(0,0,0,0.35)" }}>
                     {/* Corner marks */}
                     {[["top-0 left-0","border-t-2 border-l-2"],["top-0 right-0","border-t-2 border-r-2"],["bottom-0 left-0","border-b-2 border-l-2"],["bottom-0 right-0","border-b-2 border-r-2"]].map(([pos,border],i) => (
                       <div key={i} className={`absolute ${pos} w-6 h-6 ${border} border-blue-400`}
-                        style={{ borderColor:"#3A5BD9" }}/>
+                        style={{ borderColor:"#5B6EE1" }}/>
                     ))}
                     {/* Scan line animation */}
-                    <div style={{ position:"absolute", left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(58,91,217,0.8),transparent)", animation:"scanLine 2s linear infinite", top:"50%" }}/>
+                    <div style={{ position:"absolute", left:0, right:0, height:2, background:"linear-gradient(90deg,transparent,rgba(91,110,225,0.8),transparent)", animation:"scanLine 2s linear infinite", top:"50%" }}/>
                   </div>
                   {/* Flash overlay */}
                   {flashActive && <div className="absolute inset-0" style={{ background:"rgba(255,255,255,0.8)" }}/>}
@@ -286,7 +286,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                 <button onClick={capture}
                   className="flex items-center justify-center rounded-full transition-transform active:scale-95"
                   style={{ width:68, height:68, background:"#fff", boxShadow:"0 0 0 4px rgba(255,255,255,0.2)" }}>
-                  <div style={{ width:56, height:56, borderRadius:"50%", background:"#3A5BD9" }}/>
+                  <div style={{ width:56, height:56, borderRadius:"50%", background:"#5B6EE1" }}/>
                 </button>
 
                 <button onClick={() => setFacing(f => f === "user" ? "environment" : "user")}
@@ -316,9 +316,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                 {(Object.entries(SCAN_FILTERS) as [ScanMode, typeof SCAN_FILTERS[ScanMode]][]).map(([id, cfg]) => (
                   <button key={id} onClick={() => applyFilter(id)}
                     className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
-                    style={{ background:scanMode===id?"rgba(58,91,217,0.25)":"rgba(255,255,255,0.04)",
-                      border:`1px solid ${scanMode===id?"#3A5BD9":"rgba(255,255,255,0.08)"}` }}>
-                    <span style={{ fontSize:10, fontWeight:700, color:scanMode===id?"#8AA0FF":"#4A5A7A" }}>{cfg.label}</span>
+                    style={{ background:scanMode===id?"rgba(91,110,225,0.25)":"rgba(255,255,255,0.04)",
+                      border:`1px solid ${scanMode===id?"#5B6EE1":"rgba(255,255,255,0.08)"}` }}>
+                    <span style={{ fontSize:10, fontWeight:700, color:scanMode===id?"#5BA7D6":"#4A5A7A" }}>{cfg.label}</span>
                     <span style={{ fontSize:8, color:"#2A3A5A", textAlign:"center", lineHeight:1.3 }}>{cfg.desc}</span>
                   </button>
                 ))}
@@ -332,7 +332,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                 <input value={docName} onChange={e => setDocName(e.target.value)}
                   placeholder="e.g. Last Will and Testament"
                   className="w-full px-4 py-3 rounded-xl"
-                  style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(58,91,217,0.3)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
+                  style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
               </div>
               <div>
                 <label style={{ color:"#4A5A7A", fontSize:10, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>SAVE TO FOLDER</label>
@@ -340,10 +340,10 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                   {FOLDERS.map(f => (
                     <button key={f.id} onClick={() => setDocFolder(f.id)}
                       className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-center transition-all"
-                      style={{ background:docFolder===f.id?"rgba(58,91,217,0.2)":"rgba(255,255,255,0.04)",
-                        border:`1px solid ${docFolder===f.id?"rgba(58,91,217,0.5)":"rgba(255,255,255,0.06)"}` }}>
+                      style={{ background:docFolder===f.id?"rgba(91,110,225,0.2)":"rgba(255,255,255,0.04)",
+                        border:`1px solid ${docFolder===f.id?"rgba(91,110,225,0.5)":"rgba(255,255,255,0.06)"}` }}>
                       <span style={{ fontSize:14 }}>{f.emoji}</span>
-                      <span style={{ fontSize:8, color:docFolder===f.id?"#8AA0FF":"#4A5A7A", lineHeight:1.2 }}>{f.label.split(" ")[0]}</span>
+                      <span style={{ fontSize:8, color:docFolder===f.id?"#5BA7D6":"#4A5A7A", lineHeight:1.2 }}>{f.label.split(" ")[0]}</span>
                     </button>
                   ))}
                 </div>
@@ -359,8 +359,8 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
               </button>
               <button onClick={confirm} disabled={uploading || !docName.trim()}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
-                style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA",
-                  boxShadow:"0 0 24px rgba(58,91,217,0.4)", opacity:uploading||!docName.trim()?0.6:1 }}>
+                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
+                  boxShadow:"0 0 24px rgba(91,110,225,0.4)", opacity:uploading||!docName.trim()?0.6:1 }}>
                 {uploading ? (
                   <><RotateCcw size={15} style={{ animation:"spin 1s linear infinite" }}/> Uploading…</>
                 ) : (
@@ -413,7 +413,7 @@ export function ScanButton({
     <>
       <button onClick={() => setOpen(true)}
         className="flex items-center font-semibold transition-all hover:scale-105"
-        style={{ ...styles[size], background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
+        style={{ ...styles[size], background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
         <Camera size={iconSize}/> {label}
       </button>
       <DocumentScanner

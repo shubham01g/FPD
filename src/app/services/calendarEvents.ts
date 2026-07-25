@@ -34,15 +34,15 @@ export interface CalendarEvent {
 }
 
 export const SOURCE_META: Record<EventSource, { label: string; color: string; icon: string }> = {
-  billing:   { label: "Auto Pay & Billing",  color: "#3A5BD9", icon: "💳" },
+  billing:   { label: "Auto Pay & Billing",  color: "#5B6EE1", icon: "💳" },
   reminder:  { label: "Reminders",           color: "#F6AD55", icon: "🔔" },
   occasion:  { label: "Occasions",           color: "#FC8181", icon: "🎂" },
-  warranty:  { label: "Warranties",          color: "#6E8BFF", icon: "🛡️" },
+  warranty:  { label: "Warranties",          color: "#5BA7D6", icon: "🛡️" },
   document:  { label: "Document Expiry",     color: "#ED8936", icon: "🪪" },
-  travel:    { label: "Travel",              color: "#38B2AC", icon: "✈️" },
+  travel:    { label: "Travel",              color: "#5A8078", icon: "✈️" },
   medical:   { label: "Medical",             color: "#48BB78", icon: "💊" },
   concierge: { label: "White Glove Session", color: "#F6C453", icon: "⭐" },
-  custom:    { label: "Personal",            color: "#8AA0FF", icon: "📌" },
+  custom:    { label: "Personal",            color: "#5BA7D6", icon: "📌" },
 };
 
 /* ── Seed data, mirroring what each section already shows ───────────── */

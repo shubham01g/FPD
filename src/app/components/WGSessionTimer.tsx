@@ -160,17 +160,17 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
     setNotes("");
   }
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", borderRadius:16 };
+  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
   const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   // ── Idle state ──
   if (state === "idle") {
     return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.12)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.12)" }}>
         <div className="px-4 py-3 border-b flex items-center gap-2"
-          style={{ borderColor:"rgba(58,91,217,0.08)", background:"rgba(58,91,217,0.04)" }}>
-          <Clock size={14} color="#3A5BD9"/>
-          <span style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO }}>SESSION TIMER & BILLING</span>
+          style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
+          <Clock size={14} color="#5B6EE1"/>
+          <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO }}>SESSION TIMER & BILLING</span>
           {hasCard
             ? <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
                 style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", ...MONO }}>
@@ -190,18 +190,18 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             {[["phone","📞 Phone Call"],["video","📹 Video Call"]].map(([t,label]) => (
               <button key={t} onClick={() => setSessionType(t as "phone"|"video")}
                 className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
-                style={{ background:sessionType===t?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.04)",
-                  border:`1.5px solid ${sessionType===t?"#3A5BD9":"rgba(58,91,217,0.1)"}`,
-                  color:sessionType===t?"#3A5BD9":"#5A6A88" }}>
+                style={{ background:sessionType===t?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
+                  border:`1.5px solid ${sessionType===t?"#5B6EE1":"rgba(91,110,225,0.1)"}`,
+                  color:sessionType===t?"#5B6EE1":"#5A6A88" }}>
                 {label}
               </button>
             ))}
           </div>
           <button onClick={startSession} disabled={!hasCard}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-            style={{ background:hasCard?"linear-gradient(135deg,#3A5BD9,#5B7BF5)":"rgba(58,91,217,0.15)",
+            style={{ background:hasCard?"linear-gradient(135deg,#5B6EE1,#5B6EE1)":"rgba(91,110,225,0.15)",
               color:hasCard?"#F0F4FA":"#8A9AB8",
-              boxShadow:hasCard?"0 0 20px rgba(58,91,217,0.3)":"none" }}>
+              boxShadow:hasCard?"0 0 20px rgba(91,110,225,0.3)":"none" }}>
             <Play size={14}/> Start Session Timer
           </button>
           {!hasCard && (
@@ -226,7 +226,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
     const progressToNext = ((elapsed % (BLOCK_MINUTES * 60)) / (BLOCK_MINUTES * 60)) * 100;
 
     return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:state==="running"?"rgba(58,91,217,0.04)":"rgba(246,173,85,0.04)", border:`2px solid ${state==="running"?"rgba(58,91,217,0.25)":"rgba(246,173,85,0.35)"}` }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background:state==="running"?"rgba(91,110,225,0.04)":"rgba(246,173,85,0.04)", border:`2px solid ${state==="running"?"rgba(91,110,225,0.25)":"rgba(246,173,85,0.35)"}` }}>
         {/* Timer display */}
         <div className="px-5 pt-5 pb-3 text-center">
           <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>
@@ -241,10 +241,10 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         </div>
 
         {/* Billing meter */}
-        <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.12)" }}>
+        <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color:"#5A6A88", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
-            <span style={{ color:"#3A5BD9", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
+            <span style={{ color:"#5B6EE1", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
               ${currentAmount.toFixed(2)}
             </span>
           </div>
@@ -252,7 +252,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             {Array.from({length: Math.max(currentBlocks, 1)}).map((_, i) => (
               <div key={i} className="flex items-center gap-1">
                 <div className="flex items-center justify-center rounded-lg text-xs font-bold"
-                  style={{ width:44, height:28, background:i < currentBlocks?"#3A5BD9":"rgba(58,91,217,0.1)", color:i < currentBlocks?"#fff":"#8A9AB8", fontFamily:"var(--font-mono)", fontSize:10 }}>
+                  style={{ width:44, height:28, background:i < currentBlocks?"#5B6EE1":"rgba(91,110,225,0.1)", color:i < currentBlocks?"#fff":"#8A9AB8", fontFamily:"var(--font-mono)", fontSize:10 }}>
                   {i < currentBlocks ? `$${RATE_PER_BLOCK}` : `$${RATE_PER_BLOCK}`}
                 </div>
                 {i < Math.max(currentBlocks,1) - 1 && <ChevronRight size={10} color="#C0CCD8"/>}
@@ -263,8 +263,8 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             </div>
           </div>
           {/* Progress to next block */}
-          <div className="h-1.5 rounded-full" style={{ background:"rgba(58,91,217,0.12)" }}>
-            <div className="h-1.5 rounded-full transition-all" style={{ width:`${progressToNext}%`, background:"#3A5BD9" }}/>
+          <div className="h-1.5 rounded-full" style={{ background:"rgba(91,110,225,0.12)" }}>
+            <div className="h-1.5 rounded-full transition-all" style={{ width:`${progressToNext}%`, background:"#5B6EE1" }}/>
           </div>
           <div style={{ color:"#8A9AB8", fontSize:10, marginTop:3, ...MONO }}>
             {Math.ceil(elapsed / 60)} min used · Next block at {(currentBlocks) * BLOCK_MINUTES} min
@@ -290,7 +290,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           ) : (
             <button onClick={resumeSession}
               className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
               <Play size={13}/> Resume
             </button>
           )}
@@ -307,10 +307,10 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
   // ── Billing confirmation ──
   if (state === "billing") {
     return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(58,91,217,0.03)", border:"2px solid rgba(58,91,217,0.25)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"2px solid rgba(91,110,225,0.25)" }}>
         <div className="px-5 py-4 border-b text-center"
-          style={{ borderColor:"rgba(58,91,217,0.1)", background:"rgba(58,91,217,0.05)" }}>
-          <div style={{ color:"#3A5BD9", fontSize:13, fontWeight:700 }}>Confirm Session Billing</div>
+          style={{ borderColor:"rgba(91,110,225,0.1)", background:"rgba(91,110,225,0.05)" }}>
+          <div style={{ color:"#5B6EE1", fontSize:13, fontWeight:700 }}>Confirm Session Billing</div>
         </div>
         <div className="p-5 space-y-4">
           {/* Summary */}
@@ -322,14 +322,14 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
               ["Blocks",       `${blocks} × 30 min block${blocks !== 1 ? "s" : ""} ($${RATE_PER_BLOCK} each)`],
               ["Card",         `${card.brand} ****${card.last4} (${card.expiry})`],
             ].map(([k,v]) => (
-              <div key={k} className="flex justify-between py-2 border-b" style={{ borderColor:"rgba(58,91,217,0.07)" }}>
+              <div key={k} className="flex justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.07)" }}>
                 <span style={{ color:"#5A6A88", fontSize:13 }}>{k}</span>
                 <span style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{v}</span>
               </div>
             ))}
             <div className="flex justify-between py-2">
               <span style={{ color:"#0D1428", fontSize:15, fontWeight:700 }}>Total Charge</span>
-              <span style={{ color:"#3A5BD9", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
+              <span style={{ color:"#5B6EE1", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
             </div>
           </div>
 
@@ -341,18 +341,18 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
               placeholder="Brief notes about what was accomplished this session..."
               className="w-full resize-none px-3 py-2.5 rounded-xl"
-              style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.15)", color:"#0D1428", fontSize:12, outline:"none" }}/>
+              style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)", color:"#0D1428", fontSize:12, outline:"none" }}/>
           </div>
 
           <div className="flex gap-3">
             <button onClick={confirmBilling}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(91,110,225,0.3)" }}>
               <CreditCard size={14}/> Charge ${amount.toFixed(2)} to Card
             </button>
             <button onClick={() => setState("running")}
               className="px-4 py-3 rounded-xl text-sm"
-              style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>
+              style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>
               Back
             </button>
           </div>
@@ -384,7 +384,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
       </div>
       <button onClick={resetTimer}
         className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
-        style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.15)" }}>
+        style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.15)" }}>
         <RefreshCw size={12}/> Start New Session
       </button>
     </div>
@@ -400,8 +400,8 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
 
   if (records.length === 0) {
     return (
-      <div className="py-6 text-center rounded-xl" style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.1)" }}>
-        <DollarSign size={24} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 8px" }}/>
+      <div className="py-6 text-center rounded-xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
+        <DollarSign size={24} color="rgba(91,110,225,0.2)" style={{ margin:"0 auto 8px" }}/>
         <div style={{ color:"#8A9AB8", fontSize:13 }}>No billing records yet.</div>
       </div>
     );
@@ -413,16 +413,16 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div style={{ color:"#5A6A88", fontSize:11, ...MONO }}>BILLING HISTORY</div>
-        <div style={{ color:"#3A5BD9", fontSize:13, fontWeight:700 }}>
+        <div style={{ color:"#5B6EE1", fontSize:13, fontWeight:700 }}>
           Total: ${total.toFixed(2)}
           <span style={{ color:"#8A9AB8", fontSize:11, fontWeight:400, marginLeft:4 }}>
             (incl. $99 setup)
           </span>
         </div>
       </div>
-      <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(58,91,217,0.1)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
         <div className="grid px-4 py-2.5 border-b"
-          style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"#EAF0FC", borderColor:"rgba(58,91,217,0.1)", alignItems:"center" }}>
+          style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"#EAF0FC", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
           {["Date","Client","Type","Duration","Blocks","Charged"].map(h => (
             <div key={h} style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
           ))}
@@ -430,7 +430,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
         {records.map((r, i) => (
           <div key={r.id} className="grid px-4 py-3 border-b items-center"
             style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12,
-              background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(58,91,217,0.06)" }}>
+              background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.06)" }}>
             <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{r.startedAt.split(" · ")[0]}</span>
             <div>
               <div style={{ color:"#0D1428", fontSize:12, fontWeight:500 }}>{r.clientName}</div>

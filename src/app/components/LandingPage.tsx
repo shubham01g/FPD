@@ -15,16 +15,16 @@ import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
 const CARD = "#101728";
-const PRIMARY = "#3A5BD9";
-const ACCENT = "#5B7BF5";
-const HILITE = "#8AA0FF";
+const PRIMARY = "#7E6BD8";
+const ACCENT = "#5B6EE1";
+const HILITE = "#5BA7D6";
 const TEXT = "#F0F0F5";
 const SOFT = "#B8C8E0";
 const MUTED = "#8A97B8";
 const FAINT = "#5A6A88";
 /* premium concierge accent — a violet that harmonizes with Royal Vault Blue */
-const VIOLET = "#9B8CF5";
-const VIOLET_SOFT = "#C4B9FB";
+const VIOLET = "#7E6BD8";
+const VIOLET_SOFT = "#7E6BD8";
 
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -38,9 +38,9 @@ const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = false, eager = false }:
   { src?: string; poster?: string; tone?: "blue" | "deep" | "warm"; overlay?: number; showPlay?: boolean; eager?: boolean }) {
   const gradients: Record<string, string> = {
-    blue: "radial-gradient(120% 130% at 25% 15%, rgba(58,91,217,0.38), transparent 58%), radial-gradient(100% 110% at 85% 90%, rgba(91,123,245,0.26), transparent 55%), linear-gradient(160deg,#0C1630,#070A12)",
-    deep: "radial-gradient(120% 130% at 80% 10%, rgba(46,75,176,0.42), transparent 60%), radial-gradient(90% 90% at 10% 100%, rgba(58,91,217,0.20), transparent 55%), linear-gradient(160deg,#080D1C,#05070E)",
-    warm: "radial-gradient(120% 120% at 30% 20%, rgba(138,160,255,0.28), transparent 55%), radial-gradient(100% 100% at 90% 80%, rgba(58,91,217,0.30), transparent 55%), linear-gradient(160deg,#0B1226,#070A12)",
+    blue: "radial-gradient(120% 130% at 25% 15%, rgba(91,110,225,0.38), transparent 58%), radial-gradient(100% 110% at 85% 90%, rgba(91,110,225,0.26), transparent 55%), linear-gradient(160deg,#0C1630,#070A12)",
+    deep: "radial-gradient(120% 130% at 80% 10%, rgba(46,75,176,0.42), transparent 60%), radial-gradient(90% 90% at 10% 100%, rgba(91,110,225,0.20), transparent 55%), linear-gradient(160deg,#080D1C,#05070E)",
+    warm: "radial-gradient(120% 120% at 30% 20%, rgba(91,167,214,0.28), transparent 55%), radial-gradient(100% 100% at 90% 80%, rgba(91,110,225,0.30), transparent 55%), linear-gradient(160deg,#0B1226,#070A12)",
   };
   const effPoster = poster ?? (src && /\.mp4$/.test(src) ? src.replace(/\.mp4$/, ".jpg") : undefined);
   const ref = useRef<HTMLDivElement>(null);
@@ -57,13 +57,13 @@ function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = 
   }, [active, src]);
   return (
     <div ref={ref} style={{ position: "absolute", inset: 0, overflow: "hidden", background: gradients[tone] }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(58,91,217,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.06) 1px,transparent 1px)", backgroundSize: "44px 44px", opacity: 0.5 }} />
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(91,110,225,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.06) 1px,transparent 1px)", backgroundSize: "44px 44px", opacity: 0.5 }} />
       {effPoster && (
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${effPoster})`, backgroundSize: "cover", backgroundPosition: "center" }} />
       )}
       {showPlay && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div className="flex items-center justify-center rounded-full" style={{ width: 72, height: 72, background: "rgba(58,91,217,0.22)", border: "1px solid rgba(138,160,255,0.4)", backdropFilter: "blur(4px)" }}>
+          <div className="flex items-center justify-center rounded-full" style={{ width: 72, height: 72, background: "rgba(91,110,225,0.22)", border: "1px solid rgba(91,167,214,0.4)", backdropFilter: "blur(4px)" }}>
             <Play size={26} color={HILITE} style={{ marginLeft: 4 }} />
           </div>
         </div>
@@ -85,7 +85,7 @@ function Kicker({ children, tone = "blue" }: { children: React.ReactNode; tone?:
   const t = tone === "violet" ? VIOLET_SOFT : HILITE;
   return (
     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full"
-      style={{ background: tone === "violet" ? "rgba(155,140,245,0.10)" : "rgba(58,91,217,0.10)", border: `1px solid ${tone === "violet" ? "rgba(155,140,245,0.28)" : "rgba(58,91,217,0.28)"}` }}>
+      style={{ background: tone === "violet" ? "rgba(126,107,216,0.10)" : "rgba(91,110,225,0.10)", border: `1px solid ${tone === "violet" ? "rgba(126,107,216,0.28)" : "rgba(91,110,225,0.28)"}` }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: c, boxShadow: `0 0 8px ${c}` }} />
       <span style={{ color: t, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", ...MONO }}>{children}</span>
     </div>
@@ -105,7 +105,7 @@ function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: Reac
 function PrimaryBtn({ children, onClick, large }: { children: React.ReactNode; onClick?: () => void; large?: boolean }) {
   return (
     <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl fpd-btn-lift"
-      style={{ padding: large ? "15px 30px" : "12px 24px", fontSize: large ? 16 : 14, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(58,91,217,0.45)" }}>
+      style={{ padding: large ? "15px 30px" : "12px 24px", fontSize: large ? 16 : 14, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)" }}>
       {children}
     </button>
   );
@@ -113,7 +113,7 @@ function PrimaryBtn({ children, onClick, large }: { children: React.ReactNode; o
 function GhostBtn({ children, onClick, large }: { children: React.ReactNode; onClick?: () => void; large?: boolean }) {
   return (
     <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl transition-colors"
-      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 16 : 14, fontWeight: 600, color: SOFT, background: "rgba(58,91,217,0.08)", border: "1px solid rgba(58,91,217,0.28)" }}>
+      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 16 : 14, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)" }}>
       {children}
     </button>
   );
@@ -142,7 +142,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
   const go = (id: string) => { setOpen(false); scrollToId(id); };
   return (
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
-      style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(58,91,217,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
+      style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
         <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2.5">
           <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain" }} />
@@ -164,7 +164,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
         </div>
       </div>
       {open && (
-        <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(58,91,217,0.14)" }}>
+        <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(91,110,225,0.14)" }}>
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg" style={{ color: SOFT, fontSize: 14 }}>{l}</button>
           ))}
@@ -207,7 +207,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         {/* stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-12">
           {stats.map(([val, label]) => (
-            <div key={label} className="p-5 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
+            <div key={label} className="p-5 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 800, color: HILITE }}>{val}</div>
               <div style={{ color: MUTED, fontSize: 12, marginTop: 4, ...MONO }}>{label}</div>
             </div>
@@ -218,9 +218,9 @@ function Hero({ onStart }: { onStart: () => void }) {
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center">
             {["AR", "MT", "JW", "LK", "DP", "RH"].map((ini, i) => (
-              <div key={ini} className="flex items-center justify-center" style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(58,91,217,0.4)", marginLeft: i > 0 ? -10 : 0, background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 11, fontWeight: 700, ...MONO }}>{ini}</div>
+              <div key={ini} className="flex items-center justify-center" style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: i > 0 ? -10 : 0, background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 11, fontWeight: 700, ...MONO }}>{ini}</div>
             ))}
-            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(58,91,217,0.4)", marginLeft: -10, background: "rgba(58,91,217,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: HILITE, fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: -10, background: "rgba(91,110,225,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: HILITE, fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
           </div>
           <div style={{ color: MUTED, fontSize: 13 }}>Joined by 50,000+ families protecting their legacy</div>
         </div>
@@ -263,9 +263,9 @@ function About({ onStart }: { onStart: () => void }) {
           </div>
           <GhostBtn onClick={onStart}>Start your vault <ChevronRight size={16} /></GhostBtn>
         </div>
-        <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(58,91,217,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+        <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-vault.mp4" tone="deep" overlay={0.35} showPlay />
-          <div className="absolute top-4 right-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(58,91,217,0.25)", backdropFilter: "blur(10px)" }}>
+          <div className="absolute top-4 right-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
             <div style={{ ...MONO, color: HILITE, fontSize: 11, marginBottom: 4, letterSpacing: "0.08em" }}>PLATFORM COVERAGE</div>
             <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>30+</div>
             <div style={{ color: MUTED, fontSize: 13 }}>Life Categories</div>
@@ -291,9 +291,9 @@ function HowItWorks() {
         <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
         <div className="grid md:grid-cols-4 gap-5">
           {STEPS.map(s => (
-            <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
-              <div style={{ ...DISPLAY, fontSize: 44, fontWeight: 800, color: "rgba(138,160,255,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(58,91,217,0.14)", color: HILITE }}>{s.icon}</div>
+            <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div style={{ ...DISPLAY, fontSize: 44, fontWeight: 800, color: "rgba(91,167,214,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.14)", color: HILITE }}>{s.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 17, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</h3>
               <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.65 }}>{s.desc}</p>
             </div>
@@ -351,15 +351,15 @@ function Features() {
         <div className="flex flex-wrap justify-center gap-2 mb-12">
           {cats.map(c => (
             <button key={c} onClick={() => setActive(c)} className="px-5 py-2 rounded-full text-sm transition-all"
-              style={{ background: active === c ? `linear-gradient(135deg,${PRIMARY},${ACCENT})` : "rgba(58,91,217,0.06)", color: active === c ? "#fff" : MUTED, border: `1px solid ${active === c ? "transparent" : "rgba(58,91,217,0.18)"}`, fontWeight: active === c ? 700 : 500, ...MONO }}>
+              style={{ background: active === c ? `linear-gradient(135deg,${PRIMARY},${ACCENT})` : "rgba(91,110,225,0.06)", color: active === c ? "#fff" : MUTED, border: `1px solid ${active === c ? "transparent" : "rgba(91,110,225,0.18)"}`, fontWeight: active === c ? 700 : 500, ...MONO }}>
               {CAT_LABELS[c]}
             </button>
           ))}
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {filtered.map(f => (
-            <div key={f.title} className="p-5 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 40, height: 40, background: "rgba(58,91,217,0.12)", color: HILITE }}>{f.icon}</div>
+            <div key={f.title} className="p-5 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: HILITE }}>{f.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 6 }}>{f.title}</div>
               <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
@@ -388,14 +388,14 @@ function Security() {
         <SectionHead kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           {SEC_ITEMS.map(item => (
-            <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(58,91,217,0.14)", color: HILITE, boxShadow: "0 0 20px rgba(58,91,217,0.15)" }}>{item.icon}</div>
+            <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(91,110,225,0.14)", color: HILITE, boxShadow: "0 0 20px rgba(91,110,225,0.15)" }}>{item.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 10 }}>{item.title}</h3>
               <p style={{ color: MUTED, fontSize: 13.5, lineHeight: 1.7 }}>{item.desc}</p>
             </div>
           ))}
         </div>
-        <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(58,91,217,0.06)", border: "1px solid rgba(58,91,217,0.2)" }}>
+        <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
           <div style={{ ...MONO, color: HILITE, fontSize: 12, letterSpacing: "0.1em", marginBottom: 14 }}>SECURITY CERTIFICATION</div>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {SEC_BADGES.map(b => (
@@ -429,7 +429,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
         <SectionHead kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>} sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
         <div className="flex items-center justify-center gap-3 mb-12">
           <span style={{ color: MUTED, fontSize: 14 }}>Monthly</span>
-          <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(58,91,217,0.3)", boxShadow: annual ? "0 0 20px rgba(58,91,217,0.4)" : "none" }}>
+          <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(91,110,225,0.3)", boxShadow: annual ? "0 0 20px rgba(91,110,225,0.4)" : "none" }}>
             <div className="absolute top-1 rounded-full transition-all" style={{ width: 18, height: 18, background: "#fff", left: annual ? 26 : 4 }} />
           </button>
           <span style={{ color: annual ? HILITE : MUTED, fontSize: 14 }}>Annual <span style={{ color: "#48BB78", fontSize: 12 }}>Save 20%</span></span>
@@ -437,7 +437,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch">
           {PLANS.map(plan => (
             <div key={plan.name} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
-              style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(58,91,217,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(58,91,217,0.25)" : "none" }}>
+              style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none" }}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap" }}>MOST POPULAR</div>
               )}
@@ -456,7 +456,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
                 ))}
               </ul>
               <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold text-sm fpd-btn-lift"
-                style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(58,91,217,0.4)" } : { background: "rgba(58,91,217,0.08)", color: HILITE, border: "1px solid rgba(58,91,217,0.25)" }}>
+                style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: HILITE, border: "1px solid rgba(91,110,225,0.25)" }}>
                 Get Started
               </button>
             </div>
@@ -504,7 +504,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
         </div>
         <div className="flex flex-col gap-4">
           {tiers.map(t => (
-            <div key={t.tier} className="p-6 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.18)" }}>
+            <div key={t.tier} className="p-6 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div className="flex items-center justify-between">
                 <div>
                   <div style={{ ...MONO, color: HILITE, fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{t.tier.toUpperCase()}</div>
@@ -515,7 +515,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
               </div>
             </div>
           ))}
-          <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(58,91,217,0.06)", border: "1px solid rgba(58,91,217,0.2)" }}>
+          <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
             <div style={{ color: MUTED, fontSize: 13 }}>Example: 30 referrals on Legacy Archive ($24.99/mo) =</div>
             <div style={{ ...DISPLAY, fontSize: 28, fontWeight: 800, color: HILITE, marginTop: 4 }}>$187.43 / month</div>
             <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>at Tier 2 (25%) for 12 months</div>
@@ -547,7 +547,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: HILITE }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
         <div className="grid md:grid-cols-3 gap-5 mb-12">
           {tiers.map(t => (
-            <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.18)" }}>
+            <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div style={{ ...DISPLAY, fontSize: 52, fontWeight: 800, color: HILITE, lineHeight: 1 }}>{t.rate}</div>
               <div style={{ ...MONO, color: ACCENT, fontSize: 11, letterSpacing: "0.1em", margin: "8px 0 4px" }}>{t.tier.toUpperCase()}</div>
               <div style={{ color: MUTED, fontSize: 13 }}>{t.range}</div>
@@ -559,8 +559,8 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           {partners.map(p => (
-            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(58,91,217,0.12)", color: HILITE }}>{p.icon}</div>
+            <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: HILITE }}>{p.icon}</div>
               <div>
                 <div style={{ color: TEXT, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{p.label}</div>
                 <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.7 }}>{p.desc}</div>
@@ -578,7 +578,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
 
 /* ── WHITE GLOVE CONCIERGE ────────────────────────────────────── */
 function WhiteGlove({ onStart }: { onStart: () => void }) {
-  const vBorder = "rgba(155,140,245,0.25)";
+  const vBorder = "rgba(126,107,216,0.25)";
   const steps = [
     { icon: <Phone size={20} />, num: "01", title: "We Call You", desc: "A dedicated Final Pass Down specialist calls you personally. No forms to fill out online. Just a phone call." },
     { icon: <FileText size={20} />, num: "02", title: "We Handle Everything", desc: "Your specialist uploads every document, sets up your legacy contacts, and records your final wishes — exactly as you describe them." },
@@ -624,8 +624,8 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         {/* 4 steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {steps.map(s => (
-            <div key={s.num} className="relative p-6 rounded-2xl" style={{ background: "rgba(155,140,245,0.05)", border: `1px solid ${vBorder}`, borderTop: `3px solid rgba(155,140,245,0.5)` }}>
-              <div style={{ ...DISPLAY, color: "rgba(155,140,245,0.28)", fontSize: 52, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
+            <div key={s.num} className="relative p-6 rounded-2xl" style={{ background: "rgba(126,107,216,0.05)", border: `1px solid ${vBorder}`, borderTop: `3px solid rgba(126,107,216,0.5)` }}>
+              <div style={{ ...DISPLAY, color: "rgba(126,107,216,0.28)", fontSize: 52, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
               <div style={{ color: VIOLET_SOFT, marginBottom: 10 }}>{s.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</div>
               <div style={{ color: MUTED, fontSize: 13, lineHeight: 1.75 }}>{s.desc}</div>
@@ -635,7 +635,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
 
         {/* Pricing — two cards */}
         <div className="grid md:grid-cols-2 gap-5 mb-14">
-          <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(155,140,245,0.4)`, boxShadow: "0 0 48px rgba(155,140,245,0.15)" }}>
+          <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(126,107,216,0.4)`, boxShadow: "0 0 48px rgba(126,107,216,0.15)" }}>
             <div style={{ color: VIOLET_SOFT, fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize: 72, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$99</div>
             <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>Paid once · Gets you started with your dedicated specialist</div>
@@ -648,7 +648,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               ))}
             </div>
           </div>
-          <div className="rounded-3xl p-8 text-center" style={{ background: "rgba(155,140,245,0.06)", border: `2px solid ${vBorder}` }}>
+          <div className="rounded-3xl p-8 text-center" style={{ background: "rgba(126,107,216,0.06)", border: `2px solid ${vBorder}` }}>
             <div style={{ color: VIOLET, fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>SESSION RATE</div>
             <div style={{ ...DISPLAY, fontSize: 72, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$25</div>
             <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>per 30 minutes · Only pay for time you use</div>
@@ -660,7 +660,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
                 </div>
               ))}
             </div>
-            <div className="px-4 py-3 rounded-2xl" style={{ background: "rgba(155,140,245,0.1)", border: `1px solid ${vBorder}` }}>
+            <div className="px-4 py-3 rounded-2xl" style={{ background: "rgba(126,107,216,0.1)", border: `1px solid ${vBorder}` }}>
               <div style={{ color: VIOLET_SOFT, fontSize: 12, fontWeight: 600 }}>Typical Total: $199–$249</div>
               <div style={{ color: MUTED, fontSize: 11 }}>$99 setup + 2–3 hours of sessions</div>
             </div>
@@ -680,7 +680,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               ))}
             </ul>
           </div>
-          <div className="rounded-3xl overflow-hidden" style={{ background: "rgba(155,140,245,0.08)", border: `2px solid ${vBorder}`, boxShadow: "0 0 60px rgba(155,140,245,0.1)" }}>
+          <div className="rounded-3xl overflow-hidden" style={{ background: "rgba(126,107,216,0.08)", border: `2px solid ${vBorder}`, boxShadow: "0 0 60px rgba(126,107,216,0.1)" }}>
             <div style={{ position: "relative", height: 200 }}>
               <MediaBackdrop tone="deep" overlay={0.5} />
               <div style={{ position: "absolute", bottom: 16, left: 20 }}>
@@ -696,17 +696,17 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               <div style={{ ...DISPLAY, color: VIOLET_SOFT, fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
               <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>A specialist calls within 1 business day. No apps. No computers. Just a phone call.</div>
               <div className="flex justify-center gap-4 mb-5">
-                <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(155,140,245,0.12)", border: `1px solid ${vBorder}` }}>
+                <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
                   <div style={{ ...DISPLAY, color: TEXT, fontSize: 18, fontWeight: 700 }}>$99</div>
                   <div style={{ color: MUTED, fontSize: 10, ...MONO }}>SETUP FEE</div>
                 </div>
                 <div style={{ color: FAINT, fontSize: 20, display: "flex", alignItems: "center" }}>+</div>
-                <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(155,140,245,0.12)", border: `1px solid ${vBorder}` }}>
+                <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
                   <div style={{ ...DISPLAY, color: TEXT, fontSize: 18, fontWeight: 700 }}>$25</div>
                   <div style={{ color: MUTED, fontSize: 10, ...MONO }}>PER 30 MIN</div>
                 </div>
               </div>
-              <button onClick={onStart} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base fpd-btn-lift" style={{ background: `linear-gradient(135deg,${VIOLET},${VIOLET_SOFT})`, color: "#0A0820", boxShadow: "0 0 32px rgba(155,140,245,0.4)" }}>
+              <button onClick={onStart} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base fpd-btn-lift" style={{ background: `linear-gradient(135deg,${VIOLET},${VIOLET_SOFT})`, color: "#0A0820", boxShadow: "0 0 32px rgba(126,107,216,0.4)" }}>
                 <Phone size={18} /> Request My White Glove Call
               </button>
               <div style={{ color: FAINT, fontSize: 11, marginTop: 12 }}>No obligation · Available Mon–Fri 9AM–7PM</div>
@@ -717,7 +717,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         {/* trust strip */}
         <div className="grid md:grid-cols-3 gap-4">
           {trust.map(t => (
-            <div key={t.title} className="p-5 rounded-2xl text-center" style={{ background: "rgba(155,140,245,0.04)", border: "1px solid rgba(155,140,245,0.12)" }}>
+            <div key={t.title} className="p-5 rounded-2xl text-center" style={{ background: "rgba(126,107,216,0.04)", border: "1px solid rgba(126,107,216,0.12)" }}>
               <div style={{ color: VIOLET, margin: "0 auto 10px", display: "flex", justifyContent: "center" }}>{t.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 4 }}>{t.title}</div>
               <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.7 }}>{t.desc}</div>
@@ -755,7 +755,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
               const monthly = getMonthlyPrice(p);
               return (
                 <div key={p.id} className="rounded-2xl p-7 relative flex flex-col glow-surface fpd-hover-lift"
-                  style={{ background: CARD, border: `1px solid ${p.badge ? p.color : "rgba(58,91,217,0.16)"}`, boxShadow: p.badge ? `0 0 40px ${p.color}30` : "none" }}>
+                  style={{ background: CARD, border: `1px solid ${p.badge ? p.color : "rgba(91,110,225,0.16)"}`, boxShadow: p.badge ? `0 0 40px ${p.color}30` : "none" }}>
                   {p.badge && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold" style={{ background: p.color, color: "#04080F", ...MONO, whiteSpace: "nowrap" }}>{p.badge}</div>
                   )}
@@ -790,7 +790,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
         )}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {perks.map(f => (
-            <div key={f.title} className="flex gap-3 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
+            <div key={f.title} className="flex gap-3 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ color: HILITE, flexShrink: 0 }}>{f.icon}</div>
               <div>
                 <div style={{ color: TEXT, fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{f.title}</div>
@@ -817,12 +817,12 @@ function Testimonials() {
         <SectionHead kicker="Testimonials" title={<>Trusted by Thousands<br />Across America</>} />
         <div className="grid md:grid-cols-3 gap-6">
           {quotes.map(q => (
-            <div key={q.name} className="p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
+            <div key={q.name} className="p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: q.rating }).map((_, i) => <Star key={i} size={13} fill={HILITE} color={HILITE} />)}
               </div>
               <p style={{ color: SOFT, fontSize: 14.5, lineHeight: 1.85, flex: 1, marginBottom: 20 }}>"{q.quote}"</p>
-              <div className="flex items-center gap-3 pt-4" style={{ borderTop: "1px solid rgba(58,91,217,0.12)" }}>
+              <div className="flex items-center gap-3 pt-4" style={{ borderTop: "1px solid rgba(91,110,225,0.12)" }}>
                 <div className="flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, borderRadius: "50%", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 14, fontWeight: 700, ...MONO }}>{q.initials}</div>
                 <div>
                   <div style={{ color: TEXT, fontSize: 14, fontWeight: 600 }}>{q.name}</div>
@@ -856,19 +856,19 @@ function Help() {
         <SectionHead kicker="Help & advice" title={<>Frequently Asked<br />Questions</>} sub="Everything you need to know about Final Pass Down." />
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(58,91,217,0.16)" }}>
+            <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(91,110,225,0.16)" }}>
               <button className="w-full flex items-center justify-between px-6 py-5" onClick={() => setOpen(open === i ? null : i)}
-                style={{ background: open === i ? "rgba(58,91,217,0.08)" : CARD, textAlign: "left" }}>
+                style={{ background: open === i ? "rgba(91,110,225,0.08)" : CARD, textAlign: "left" }}>
                 <span style={{ color: TEXT, fontSize: 15, fontWeight: 500 }}>{faq.q}</span>
                 <ChevronDown size={16} color={HILITE} style={{ transform: open === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0 }} />
               </button>
               {open === i && (
-                <div className="px-6 pb-5 pt-1" style={{ background: "rgba(58,91,217,0.04)", color: SOFT, fontSize: 14, lineHeight: 1.85 }}>{faq.a}</div>
+                <div className="px-6 pb-5 pt-1" style={{ background: "rgba(91,110,225,0.04)", color: SOFT, fontSize: 14, lineHeight: 1.85 }}>{faq.a}</div>
               )}
             </div>
           ))}
         </div>
-        <div className="mt-12 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(58,91,217,0.16)" }}>
+        <div className="mt-12 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div style={{ ...DISPLAY, fontSize: 20, fontWeight: 700, color: TEXT, marginBottom: 8 }}>Still have questions?</div>
           <p style={{ color: MUTED, fontSize: 14, marginBottom: 20 }}>Our team is available 7 days a week. Average response time: under 2 hours.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -885,10 +885,10 @@ function Help() {
 function CTA({ onStart }: { onStart: () => void }) {
   return (
     <section className="relative py-28 px-6">
-      <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-20" style={{ border: "1px solid rgba(58,91,217,0.24)" }}>
+      <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-20" style={{ border: "1px solid rgba(91,110,225,0.24)" }}>
         <MediaBackdrop src="/media/cta.mp4" tone="blue" overlay={0.6} />
         <div className="relative flex flex-col items-center">
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 72, height: 72, borderRadius: 16, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(58,91,217,0.3)" }} />
+          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 72, height: 72, borderRadius: 16, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(91,110,225,0.3)" }} />
           <Kicker>Start today</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2.2rem,5vw,3.8rem)", fontWeight: 800, color: TEXT, margin: "18px 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 680 }}>
             Start Your Legacy Today
@@ -924,7 +924,7 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
     "About Us": "about", "Contact": "help",
   };
   return (
-    <footer className="relative px-6 pt-16 pb-8" style={{ background: "#050810", borderTop: "1px solid rgba(58,91,217,0.14)" }}>
+    <footer className="relative px-6 pt-16 pb-8" style={{ background: "#050810", borderTop: "1px solid rgba(91,110,225,0.14)" }}>
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
           <div className="lg:col-span-2">
@@ -950,11 +950,11 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
             </div>
           ))}
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: "1px solid rgba(58,91,217,0.1)" }}>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: "1px solid rgba(91,110,225,0.1)" }}>
           <span style={{ color: FAINT, fontSize: 13 }}>© {new Date().getFullYear()} Final Pass Down Inc. All rights reserved.</span>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {["App Store", "Google Play", "PWA"].map(p => (
-              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(58,91,217,0.08)", color: HILITE, border: "1px solid rgba(58,91,217,0.2)", ...MONO }}>{p}</span>
+              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(91,110,225,0.08)", color: HILITE, border: "1px solid rgba(91,110,225,0.2)", ...MONO }}>{p}</span>
             ))}
             {onPartnerPortal && (
               <button onClick={onPartnerPortal} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(72,187,120,0.1)", color: "#48BB78", border: "1px solid rgba(72,187,120,0.3)", ...MONO, letterSpacing: "0.06em" }}>
@@ -962,12 +962,12 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
               </button>
             )}
             {onConciergeLogin && (
-              <button onClick={onConciergeLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(155,140,245,0.1)", color: VIOLET_SOFT, border: "1px solid rgba(155,140,245,0.3)", ...MONO, letterSpacing: "0.06em" }}>
+              <button onClick={onConciergeLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(126,107,216,0.1)", color: VIOLET_SOFT, border: "1px solid rgba(126,107,216,0.3)", ...MONO, letterSpacing: "0.06em" }}>
                 <Star size={11} /> CONCIERGE STAFF
               </button>
             )}
             {onAdminLogin && (
-              <button onClick={onAdminLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(58,91,217,0.12)", color: HILITE, border: "1px solid rgba(58,91,217,0.35)", ...MONO, letterSpacing: "0.06em" }}>
+              <button onClick={onAdminLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(91,110,225,0.12)", color: HILITE, border: "1px solid rgba(91,110,225,0.35)", ...MONO, letterSpacing: "0.06em" }}>
                 <Lock size={11} /> MASTER ADMIN LOGIN
               </button>
             )}

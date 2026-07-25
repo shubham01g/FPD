@@ -32,8 +32,8 @@ const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
-const ACCENT  = "#5B7BF5";
-const ACCENT2 = "#8AA0FF";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
@@ -52,7 +52,7 @@ const GRAIN =
 
 /* All styling scoped under .fpd-vital so nothing else in the app is affected. */
 const VITAL_CSS = `
-.fpd-vital{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,123,245,0.10),transparent 70%);}
+.fpd-vital{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-vital *{box-sizing:border-box;}
 .fpd-vital-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-vital .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
@@ -69,14 +69,14 @@ const VITAL_CSS = `
 .fpd-vital .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-vital .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-vital .head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#647FF7,#4A63DE);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(74,99,222,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
-.fpd-vital .btn-sec:hover{background:rgba(91,123,245,0.1);color:${ACCENT2};}
+.fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:${ACCENT2};}
 
 /* empty state */
 .fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
-.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,123,245,0.10);border:1px solid rgba(91,123,245,0.24);color:${ACCENT2};display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .fpd-vital .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
 .fpd-vital .empty-desc{color:${MUTED};font-size:12.5px;max-width:440px;line-height:1.6;}
 
@@ -96,7 +96,7 @@ const VITAL_CSS = `
 @keyframes fpdvitalspin{to{transform:rotate(360deg);}}
 
 /* footer note */
-.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(91,123,245,0.05);border:1px solid rgba(91,123,245,0.18);color:${MUTED};font-size:12px;line-height:1.7;}
+.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:12px;line-height:1.7;}
 `;
 
 export function VitalClone() {
