@@ -131,11 +131,6 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
   transition: width .25s ease, top .25s ease, bottom .25s ease, box-shadow .25s ease;
 }
 .kstrip .kcell:first-child::before { display: none; }
-.kstrip .kcell:hover::before {
-  top: 0; bottom: 0; width: 2px;
-  background: linear-gradient(180deg, transparent, var(--klaser) 50%, transparent);
-  box-shadow: 0 0 16px 1px var(--klaser);
-}
 .kstrip .kcell:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--klaser) 7%, transparent), transparent 55%); }
 .kstrip .kcell .klbl { transition: color .2s; }
 .kstrip .kcell:hover .klbl { color: color-mix(in srgb, var(--klaser) 65%, #BCC5DA); }
@@ -143,9 +138,18 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
 .kstrip .kcell:hover .kico { border-color: color-mix(in srgb, var(--klaser) 45%, transparent); color: var(--klaser); background: color-mix(in srgb, var(--klaser) 12%, #0F1624); }
 .kstrip .kcell .kval { transition: color .2s; }
 .kstrip .kcell:hover .kval { color: var(--klaser); }
+/* Underline reveal, grows in from the left on hover — same mechanic as the
+   .dgrid .tile treatment below, so every top-of-page data column and every
+   dense spec-sheet tile share one hover language. */
+.kstrip .kcell::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; pointer-events: none;
+  background: var(--klaser); transform: scaleX(0); transform-origin: left;
+  transition: transform .25s ease; box-shadow: 0 0 8px 0 color-mix(in srgb, var(--klaser) 65%, transparent);
+}
+.kstrip .kcell:hover::after { transform: scaleX(1); }
 @media (max-width: 880px) { .kstrip .kcell:nth-child(3)::before { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .kstrip .kcell::before, .kstrip .kcell .klbl, .kstrip .kcell .kico, .kstrip .kcell .kval { transition: none !important; }
+  .kstrip .kcell::before, .kstrip .kcell::after, .kstrip .kcell .klbl, .kstrip .kcell .kico, .kstrip .kcell .kval { transition: none !important; }
 }
 
 /* ── Sitewide tab-strip laser underline ──

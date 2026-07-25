@@ -42,9 +42,9 @@ const ALL_CONTENTS = [
 const VCLONE_CSS = `
 .fpd-vclone{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,6,12,0.86);backdrop-filter:blur(8px);}
 .fpd-vclone *{box-sizing:border-box;}
-.fpd-vclone .modal{width:100%;max-width:560px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 30px 80px rgba(0,0,0,0.6);}
+.fpd-vclone .modal{width:100%;max-width:560px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 30px 80px rgba(0,0,0,0.6);}
 .fpd-vclone .close-btn{position:absolute;top:20px;right:20px;z-index:10;color:${MUTED};background:none;border:none;cursor:pointer;display:flex;}
-.fpd-vclone .modal-head{padding:28px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;gap:12px;}
+.fpd-vclone .modal-head{padding:28px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;gap:12px;}
 .fpd-vclone .head-ico{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.16);color:#FFFFFF;}
 .fpd-vclone .head-title{font-family:var(--font-display);font-size:18px;color:${TEXT};}
 .fpd-vclone .head-sub{color:${MUTED};font-size:12px;margin-top:2px;}
@@ -69,7 +69,7 @@ const VCLONE_CSS = `
 .fpd-vclone .panel-unlocked p{color:${MUTED};font-size:12px;line-height:1.6;}
 
 .fpd-vclone .contents-lbl{color:${MUTED};font-size:11px;font-family:var(--font-mono);margin-bottom:10px;}
-.fpd-vclone .content-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.22);}
+.fpd-vclone .content-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.34);}
 .fpd-vclone .content-row + .content-row{margin-top:6px;}
 .fpd-vclone .content-label{color:${SOFT};font-size:12px;font-weight:500;}
 .fpd-vclone .content-desc{color:${MUTED};font-size:11px;margin-left:6px;}
@@ -82,7 +82,7 @@ const VCLONE_CSS = `
 .fpd-vclone .btn-primary{width:100%;padding:15px;border-radius:13px;font-weight:700;font-size:14.5px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 26px -8px rgba(91,110,225,0.55);font-family:var(--font-body);}
 
 .fpd-vclone .summary-panel{background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.18);}
-.fpd-vclone .summary-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.22);}
+.fpd-vclone .summary-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.34);}
 .fpd-vclone .summary-row span:first-child{color:${MUTED};font-size:12px;}
 .fpd-vclone .summary-row span:last-child{color:${SOFT};font-size:12px;}
 .fpd-vclone .btn-back{flex:1;padding:13px;border-radius:12px;font-size:13px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.22);cursor:pointer;font-family:var(--font-body);}

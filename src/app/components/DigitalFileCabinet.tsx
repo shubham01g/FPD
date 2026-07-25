@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   Folder, FolderOpen, FileText, Image, Film, Archive,
-  Upload, Plus, ChevronRight, Search, Grid, List,
+  Upload, Plus, ChevronRight, ChevronDown, Search, Grid, List,
   Download, Eye, Trash2, X, ArrowLeft, Lock, Star,
   Shield,
 } from "lucide-react";
@@ -324,6 +324,17 @@ const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
   ...c, color: c.id === "secret" ? NEG : RAMP[i % RAMP.length],
 }));
 
+/* Five meaning-grouped "drawers" replacing the old flat 23-folder grid —
+   grouped by what they're for, with one accent per drawer (rather than the
+   RAMP's per-folder cycling) so folders that belong together read together. */
+const SECTIONS: { id: string; label: string; laser: string; ids: string[] }[] = [
+  { id: "legal",    label: "Legal & Financial",     laser: "#5B6EE1", ids: ["legal", "financial", "taxes", "insurance", "goals"] },
+  { id: "property", label: "Property & Belongings", laser: "#D99A6B", ids: ["property", "vehicles", "utilities", "warranties", "keepsakes", "weapons_locker"] },
+  { id: "health",   label: "Health & Family",       laser: "#6FAE8B", ids: ["medical", "pets", "daycare", "ids"] },
+  { id: "memories", label: "Memories & Messages",   laser: "#D68FA8", ids: ["personal", "photos", "videos", "awards", "places"] },
+  { id: "security", label: "Security & Access",     laser: "#C9AC6E", ids: ["digital", "firearms", "secret"] },
+];
+
 function getIcon(type: string, color = ACCENT2, size = 28) {
   if (type === "folder") return <Folder size={size} color={color} fill={`${color}22`}/>;
   if (type === "image")  return <Image size={size} color="#D9A55E"/>;
@@ -344,7 +355,7 @@ const CAB_CSS = `
 .fpd-cab-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-cab .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-cab .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-cab .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-cab .card.pad{padding:22px;}
 .fpd-cab .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
 .fpd-cab .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;}
@@ -357,7 +368,7 @@ const CAB_CSS = `
 /* header */
 .fpd-cab .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-cab .pg-h1row{display:flex;align-items:flex-start;gap:12px;}
-.fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
+.fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
 .fpd-cab .backbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-cab .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cab .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
@@ -367,7 +378,7 @@ const CAB_CSS = `
 .fpd-cab .btn-primary:disabled{opacity:.6;cursor:default;transform:none;}
 
 /* segmented view toggle */
-.fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);flex-shrink:0;}
+.fpd-cab .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);flex-shrink:0;}
 .fpd-cab .seg button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border-radius:7px;color:${MUTED};background:none;border:none;cursor:pointer;transition:color .18s,background .18s;}
 .fpd-cab .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
@@ -379,15 +390,15 @@ const CAB_CSS = `
 
 /* KPI ledger */
 .fpd-cab .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.22);position:relative;text-align:left;overflow:hidden;}
+.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
 .fpd-cab .kcell:first-child{border-left:none;}
 .fpd-cab .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-cab .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-cab .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-cab .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-cab .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}}
+@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
 
 /* drop zone */
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:13px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
@@ -398,23 +409,38 @@ const CAB_CSS = `
 
 /* chips (sub-folders) */
 .fpd-cab .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.22);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
+.fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;font-size:12.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.34);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
 .fpd-cab .chip:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
 .fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
 
-/* root folder grid */
-.fpd-cab .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;}
-.fpd-cab .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
-.fpd-cab .fcard:hover{transform:translateY(-2px);border-color:rgba(91,110,225,0.3);}
-.fpd-cab .fcard .bar{height:3px;}
-.fpd-cab .fcard .fbody{padding:18px;}
-.fpd-cab .fcard .ftop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
-.fpd-cab .fcard .femoji{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
-.fpd-cab .fcard .fcount{font-family:var(--font-mono);font-size:10px;letter-spacing:0.03em;padding:4px 9px;border-radius:7px;flex-shrink:0;}
-.fpd-cab .fcard .ftitle{font-family:var(--font-display);font-size:13.5px;font-weight:600;color:${TEXT};margin-bottom:5px;letter-spacing:-0.005em;}
-.fpd-cab .fcard .fdesc{color:${MUTED};font-size:11.5px;line-height:1.55;}
+/* ── Drawer cabinet (replaces the old flat folder grid) ── */
+.fpd-cab .cab-drawers{display:flex;flex-direction:column;gap:12px;}
+.fpd-cab details.cab-drawer{border-radius:15px;overflow:hidden;border:1.5px solid color-mix(in srgb, var(--dlaser) 40%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--dlaser) 10%, transparent), 0 0 18px -8px color-mix(in srgb, var(--dlaser) 40%, transparent);transition:border-color .18s ease,box-shadow .18s ease;}
+.fpd-cab details.cab-drawer:hover,.fpd-cab details.cab-drawer[open]{border-color:color-mix(in srgb, var(--dlaser) 60%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--dlaser) 14%, transparent), 0 0 26px -6px color-mix(in srgb, var(--dlaser) 50%, transparent);}
+.fpd-cab details.cab-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:15px 20px;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border-bottom:1px solid color-mix(in srgb, var(--dlaser) 30%, transparent);}
+.fpd-cab details.cab-drawer summary::-webkit-details-marker{display:none;}
+.fpd-cab .cab-pull{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--dlaser) 14%, transparent);border:1px solid color-mix(in srgb, var(--dlaser) 34%, transparent);transition:box-shadow .2s;}
+.fpd-cab .cab-pull i{display:block;width:14px;height:2px;border-radius:2px;background:var(--dlaser);}
+.fpd-cab details.cab-drawer[open] .cab-pull{box-shadow:0 0 0 1px rgba(201,172,110,0.55), inset 0 1px 0 rgba(255,255,255,.08);}
+.fpd-cab .cab-dtitle{font-family:var(--font-display);font-size:15px;font-weight:600;letter-spacing:-0.005em;color:${TEXT};}
+.fpd-cab .cab-dsub{font-family:var(--font-mono);font-size:10px;color:${FAINT};margin-top:2px;letter-spacing:0.02em;}
+.fpd-cab .cab-chev{margin-left:auto;color:${FAINT};transition:transform .2s ease;flex-shrink:0;}
+.fpd-cab details.cab-drawer[open] .cab-chev{transform:rotate(180deg);}
 
-.fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
+.fpd-cab .cab-drawer-body{background:#070A12;box-shadow:inset 0 8px 14px -12px rgba(0,0,0,0.8);}
+.fpd-cab .cab-drawer-body-in{padding:20px 18px;}
+.fpd-cab .cab-tabrow{display:flex;flex-wrap:wrap;gap:16px;}
+
+.fpd-cab .cab-tab{position:relative;margin-top:15px;width:196px;flex:0 0 auto;}
+.fpd-cab .cab-tabflag{position:absolute;top:-15px;left:15px;height:22px;padding:0 9px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:5px;font-size:12px;border-bottom:none;z-index:1;}
+.fpd-cab .cab-tabbody{position:relative;text-align:left;width:100%;padding:16px 14px 13px;border-radius:12px;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;font-family:var(--font-body);}
+.fpd-cab .cab-tabbody:hover{transform:translateY(-2px);box-shadow:0 14px 24px -18px rgba(0,0,0,.7);}
+.fpd-cab .cab-lockbadge{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.fpd-cab .cab-tabbody .ftitle{font-family:var(--font-display);font-size:12.5px;font-weight:600;line-height:1.3;color:${TEXT};}
+.fpd-cab .cab-tabbody .fdesc{font-size:10.5px;color:${MUTED};line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.fpd-cab .cab-tabbody .ffoot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:9px;border-top:1px solid rgba(255,255,255,0.1);font-family:var(--font-mono);font-size:9px;color:${FAINT};}
+.fpd-cab .cab-tabbody .fcount{padding:3px 7px;border-radius:6px;font-weight:600;}
+.fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
 .fpd-cab .frow:hover{border-color:rgba(91,110,225,0.28);background:rgba(91,110,225,0.05);}
 .fpd-cab .frow .femoji2{font-size:20px;flex-shrink:0;}
 .fpd-cab .frow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;}
@@ -426,7 +452,7 @@ const CAB_CSS = `
 
 /* files */
 .fpd-cab .filegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;}
-.fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filecard{border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);cursor:pointer;transition:border-color .16s;}
 .fpd-cab .filecard.sel{border-color:${ACCENT2};box-shadow:0 0 0 1px rgba(91,167,214,0.4);}
 .fpd-cab .filecard .thumb{height:92px;display:flex;align-items:center;justify-content:center;position:relative;background:#0F1624;}
 .fpd-cab .filecard .thumb img{width:100%;height:100%;object-fit:cover;}
@@ -435,9 +461,9 @@ const CAB_CSS = `
 .fpd-cab .filecard .fname{color:${TEXT};font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
 .fpd-cab .filecard .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:9.5px;}
 
-.fpd-cab .filerow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;transition:border-color .16s;}
+.fpd-cab .filerow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);cursor:pointer;transition:border-color .16s;}
 .fpd-cab .filerow.sel{border-color:${ACCENT2};}
-.fpd-cab .filerow .ftico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
+.fpd-cab .filerow .ftico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
 .fpd-cab .filerow .ftico img{width:34px;height:34px;object-fit:cover;}
 .fpd-cab .filerow .fname{color:${TEXT};font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .filerow .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:11px;}
@@ -458,13 +484,13 @@ const CAB_CSS = `
 .fpd-cab .detail .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .fpd-cab .detail .dname{color:${TEXT};font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .detail .dclose{color:${MUTED};background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;}
-.fpd-cab .detail .drow{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(255,255,255,0.22);font-size:12px;}
+.fpd-cab .detail .drow{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(255,255,255,0.34);font-size:12px;}
 .fpd-cab .detail .drow:first-of-type{border-top:none;}
 .fpd-cab .detail .dk{color:${MUTED};}
 .fpd-cab .detail .dv{color:${TEXT};font-weight:500;}
 .fpd-cab .detail .dbtns{display:flex;gap:8px;margin-top:14px;}
 .fpd-cab .detail .dbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);}
-.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:#6FAE8B;}
+.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:#6FAE8B;}
 .fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;}
 
 /* empty */
@@ -472,7 +498,7 @@ const CAB_CSS = `
 .fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-cab .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 
-@media (max-width:640px){.fpd-cab .fgrid{grid-template-columns:repeat(2,1fr);}.fpd-cab .filegrid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.fpd-cab .filegrid{grid-template-columns:repeat(2,1fr);}}
 `;
 
 export function DigitalFileCabinet() {
@@ -485,9 +511,24 @@ export function DigitalFileCabinet() {
   const [extras, setExtras]   = useState<Record<string, FolderFile[]>>({});
   const [selected, setSelected] = useState<FolderFile | null>(null);
   const [syncedDocs, setSyncedDocs] = useState<SyncedDoc[]>([]);
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(["legal", "property"]));
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => subscribeToSyncedDocs(setSyncedDocs), []);
+
+  const matchesSearch = useCallback((c: Cabinet) =>
+    c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()),
+  [search]);
+
+  // Typing a query auto-opens any drawer that has a match, without closing ones already open by hand.
+  useEffect(() => {
+    if (!search) return;
+    setOpenSections(s => {
+      const n = new Set(s);
+      SECTIONS.forEach(sec => { if (themedCabinets.some(c => sec.ids.includes(c.id) && matchesSearch(c))) n.add(sec.id); });
+      return n;
+    });
+  }, [search, matchesSearch]);
 
   const doUpload = useCallback((folderId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -512,7 +553,9 @@ export function DigitalFileCabinet() {
     setCurrent(c); setSearch(""); setSelected(null);
   };
 
-  const filteredRoot = themedCabinets.filter(c => c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()));
+  const folderCount = (folder: Cabinet) =>
+    folder.files.length + (extras[folder.id]?.length ?? 0) + syncedDocs.filter(d => d.targetFolderId === folder.id).length;
+
   // Convert synced docs into FolderFile shape so the cabinet can render them
   const syncedForCurrent: (FolderFile & { _synced: true; _sourceSection: string; _syncId: string })[] = current
     ? syncedDocs
@@ -649,56 +692,85 @@ export function DigitalFileCabinet() {
           </div>
         )}
 
-        {/* ── ROOT FOLDER GRID ── */}
+        {/* ── DRAWER CABINET (root only) ── */}
         {!current && (
-          view === "grid" ? (
-            <div className="fgrid">
-              {filteredRoot.map(folder => {
-                const count = folder.files.length + (extras[folder.id]?.length??0) + syncedDocs.filter(d=>d.targetFolderId===folder.id).length;
-                const isLocked = folder.id === "secret";
+          <div className="cab-drawers">
+            {SECTIONS.map(sec => {
+                const folders = themedCabinets.filter(c => sec.ids.includes(c.id));
+                const visible = folders.filter(matchesSearch);
+                if (search && visible.length === 0) return null;
+                const fileTotal = folders.reduce((s, f) => s + folderCount(f), 0);
                 return (
-                  <button key={folder.id} onClick={() => openFolder(folder)} className="fcard glow-surface">
-                    <div className="bar" style={{ background: `linear-gradient(90deg,${folder.color},${folder.color}66)` }}/>
-                    <div className="fbody">
-                      <div className="ftop">
-                        <div className="femoji">{folder.emoji}</div>
-                        <span className="fcount" style={{ background:`${folder.color}1C`, color: folder.color }}>
-                          {isLocked ? "🔒 PIN" : `${count} files`}
-                        </span>
-                      </div>
-                      <div className="ftitle">{folder.label}</div>
-                      <div className="fdesc">{folder.description}</div>
-                    </div>
-                  </button>
+                  <details key={sec.id} className="cab-drawer" open={openSections.has(sec.id)}
+                    onToggle={e => {
+                      const nowOpen = (e.currentTarget as HTMLDetailsElement).open;
+                      setOpenSections(s => { const n = new Set(s); nowOpen ? n.add(sec.id) : n.delete(sec.id); return n; });
+                    }}
+                    style={{ ["--dlaser" as any]: sec.laser }}>
+                    <summary>
+                      <span className="cab-pull"><i/></span>
+                      <span>
+                        <span className="cab-dtitle">{sec.label}</span>
+                        <div className="cab-dsub">{folders.length} folders · {fileTotal} files</div>
+                      </span>
+                      <ChevronDown size={13} className="cab-chev"/>
+                    </summary>
+                    <div className="cab-drawer-body"><div className="cab-drawer-body-in">
+                      {view === "grid" ? (
+                        <div className="cab-tabrow">
+                          {visible.map(folder => {
+                            const count = folderCount(folder);
+                            const isLocked = folder.id === "secret";
+                            const restricted = folder.files.some(f => f.locked);
+                            return (
+                              <div key={folder.id} className="cab-tab">
+                                <span className="cab-tabflag" style={{ background:`${sec.laser}2E`, border:`1px solid ${sec.laser}66` }}>{folder.emoji}</span>
+                                <button onClick={() => openFolder(folder)} className="cab-tabbody glow-surface">
+                                  {restricted && (
+                                    <span className="cab-lockbadge" style={{ background:`${sec.laser}22`, border:`1px solid ${sec.laser}66`, color: sec.laser }}>
+                                      <Lock size={10}/>
+                                    </span>
+                                  )}
+                                  <div className="ftitle">{folder.label}</div>
+                                  <div className="fdesc">{folder.description}</div>
+                                  <div className="ffoot">
+                                    <span className="fcount" style={{ background:`${sec.laser}29`, color: sec.laser }}>
+                                      {isLocked ? "🔒 PIN" : `${count} files`}
+                                    </span>
+                                  </div>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                          {visible.map(folder => {
+                            const count = folderCount(folder);
+                            const isLocked = folder.id === "secret";
+                            return (
+                              <button key={folder.id} onClick={() => openFolder(folder)} className="frow">
+                                <div className="femoji2">{folder.emoji}</div>
+                                <div style={{ flex:1, minWidth:0 }}>
+                                  <div className="rtitle">{folder.label}</div>
+                                  <div className="rdesc">{folder.description}</div>
+                                </div>
+                                <span className="rcount" style={{ background:`${sec.laser}29`, color: sec.laser }}>{isLocked ? "🔒" : `${count} files`}</span>
+                                <ChevronRight size={14} color={MUTED}/>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div></div>
+                  </details>
                 );
               })}
-              <button className="newtile" onClick={() => toast.info("Enter a folder name to create a custom folder")}>
-                <Plus size={20} style={{ opacity:0.6 }}/>
-                <span style={{ fontSize:13 }}>New Custom Folder</span>
-              </button>
-            </div>
-          ) : (
-            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-              {filteredRoot.map(folder => {
-                const count = folder.files.length + (extras[folder.id]?.length??0) + syncedDocs.filter(d=>d.targetFolderId===folder.id).length;
-                const isLocked = folder.id === "secret";
-                return (
-                  <button key={folder.id} onClick={() => openFolder(folder)} className="frow">
-                    <div className="femoji2">{folder.emoji}</div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div className="rtitle">{folder.label}</div>
-                      <div className="rdesc">{folder.description}</div>
-                    </div>
-                    <span className="rcount" style={{ background:`${folder.color}1C`, color: folder.color }}>{isLocked ? "🔒" : `${count} files`}</span>
-                    <ChevronRight size={14} color={MUTED}/>
-                  </button>
-                );
-              })}
-              <button className="newtile" style={{ minHeight:56, flexDirection:"row" }} onClick={() => toast.info("Enter a folder name to create a custom folder")}>
-                <Plus size={16}/> <span style={{ fontSize:13 }}>New Custom Folder</span>
-              </button>
-            </div>
-          )
+
+            <button className="newtile" style={{ minHeight:56, flexDirection:"row" }} onClick={() => toast.info("Enter a folder name to create a custom folder")}>
+              <Plus size={16}/> <span style={{ fontSize:13 }}>New Custom Folder</span>
+            </button>
+          </div>
         )}
 
         {/* ── FOLDER CONTENTS ── */}

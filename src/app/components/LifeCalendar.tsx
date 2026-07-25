@@ -71,7 +71,7 @@ const CAL_CSS = `
 .fpd-cal .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
 /* cards */
-.fpd-cal .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-cal .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-cal .card.pad{padding:22px;}
 .fpd-cal .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
 .fpd-cal .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
@@ -88,21 +88,21 @@ const CAL_CSS = `
 .fpd-cal .btn-today:hover{background:rgba(91,110,225,0.18);}
 
 /* segmented view toggle */
-.fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
+.fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
 .fpd-cal .seg button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;text-transform:capitalize;}
 .fpd-cal .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* KPI ledger */
 .fpd-cal .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-cal .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.22);position:relative;text-align:left;overflow:hidden;}
+.fpd-cal .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
 .fpd-cal .kcell:first-child{border-left:none;}
 .fpd-cal .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-cal .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-cal .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-cal .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-cal .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-cal .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-cal .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cal .kstrip{grid-template-columns:1fr 1fr;}.fpd-cal .kcell:nth-child(3){border-left:none;}.fpd-cal .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}}
+@media (max-width:880px){.fpd-cal .kstrip{grid-template-columns:1fr 1fr;}.fpd-cal .kcell:nth-child(3){border-left:none;}.fpd-cal .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
 
 /* filters */
 .fpd-cal .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -118,12 +118,12 @@ const CAL_CSS = `
 @media (max-width:1080px){.fpd-cal .bento{grid-template-columns:1fr;}}
 
 /* month grid */
-.fpd-cal .navbtn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
+.fpd-cal .navbtn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
 .fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
 .fpd-cal .dow span{text-align:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;color:${FAINT};padding:2px 0;}
 .fpd-cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
+.fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.34);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
 .fpd-cal .cell:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.05);}
 .fpd-cal .cell.blank{background:none;border:1px solid transparent;cursor:default;}
 .fpd-cal .cell.today{border-color:rgba(95,190,145,0.5);box-shadow:inset 0 0 0 1px rgba(95,190,145,0.22),0 0 18px -8px rgba(95,190,145,0.5);}
@@ -141,7 +141,7 @@ const CAL_CSS = `
 
 /* event rows */
 .fpd-cal .evlist{display:flex;flex-direction:column;gap:9px;}
-.fpd-cal .evrow{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);}
+.fpd-cal .evrow{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);}
 .fpd-cal .evico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-cal .evbody{flex:1;min-width:0;}
 .fpd-cal .evtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}

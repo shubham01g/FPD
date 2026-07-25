@@ -54,7 +54,7 @@ const ORG_CSS = `
 .fpd-org-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-org .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-org .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-org .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-org .card.pad{padding:22px;}
 .fpd-org .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
@@ -66,7 +66,7 @@ const ORG_CSS = `
 .fpd-org .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* segmented tabs */
-.fpd-org .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;}
+.fpd-org .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
 .fpd-org .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-org .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
@@ -74,7 +74,7 @@ const ORG_CSS = `
 
 /* folder grid */
 .fpd-org .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
-.fpd-org .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
+.fpd-org .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
 .fpd-org .fcard:hover{transform:translateY(-2px);border-color:rgba(91,110,225,0.3);}
 .fpd-org .fcard .bar{height:3px;}
 .fpd-org .fcard .fbody{padding:18px;}
@@ -87,7 +87,8 @@ const ORG_CSS = `
 
 /* reminders */
 .fpd-org .rlist{display:flex;flex-direction:column;gap:10px;}
-.fpd-org .rrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 18px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);}
+.fpd-org .rrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 18px;border-radius:14px;background:rgba(255,255,255,0.018);border:1.5px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 0 16px -8px rgba(91,110,225,0.35);transition:border-color .18s ease,box-shadow .18s ease;}
+.fpd-org .rrow:hover{border-color:rgba(91,110,225,0.6);box-shadow:0 0 0 1px rgba(91,110,225,0.14),0 0 22px -6px rgba(91,110,225,0.45);}
 .fpd-org .rrow .rtop{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
 .fpd-org .rrow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;font-family:var(--font-display);}
 .fpd-org .rrow .rmeta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:4px;}
@@ -125,14 +126,14 @@ const ORG_CSS = `
 .fpd-org .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-org .field{margin-bottom:12px;}
 .fpd-org .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-org .field input,.fpd-org .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-org .field input,.fpd-org .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-org .field input::placeholder{color:${FAINT};}
 .fpd-org .field input:focus,.fpd-org .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-org .modal-acts{display:flex;gap:10px;margin-top:6px;}
 .fpd-org .modal-acts .save{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-org .modal-acts .save:hover{filter:brightness(1.08);}
 .fpd-org .modal-acts .save:disabled{opacity:.6;cursor:default;}
-.fpd-org .modal-acts .cancel{padding:11px 16px;border-radius:10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};cursor:pointer;font-family:var(--font-body);}
+.fpd-org .modal-acts .cancel{padding:11px 16px;border-radius:10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};cursor:pointer;font-family:var(--font-body);}
 
 @media (max-width:640px){.fpd-org .fgrid,.fpd-org .ogrid{grid-template-columns:1fr;}}
 `;
@@ -324,7 +325,7 @@ export function OrganizeHub() {
               {reminders.map(r=>{
                 const s = remStatus[r.status];
                 return (
-                  <div key={r.id} className="card rrow glow-surface">
+                  <div key={r.id} className="card rrow">
                     <div style={{ flex:1, minWidth:0 }}>
                       <div className="rtop">
                         <Bell size={13} color="#FFFFFF"/>

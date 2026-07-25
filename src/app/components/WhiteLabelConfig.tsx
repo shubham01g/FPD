@@ -162,7 +162,7 @@ const WL_CSS = `
 .fpd-wl-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wl .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-wl .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-wl .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-wl .card.pad{padding:22px;}
 .fpd-wl .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 .fpd-wl .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
@@ -183,13 +183,13 @@ const WL_CSS = `
 .fpd-wl .status-banner span{color:${SOFT};font-size:13px;}
 
 /* tabs */
-.fpd-wl-seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);width:fit-content;flex-wrap:wrap;}
+.fpd-wl-seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;flex-wrap:wrap;}
 .fpd-wl-seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-wl-seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* fields */
 .fpd-wl .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-wl .field input{width:100%;padding:11px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
+.fpd-wl .field input{width:100%;padding:11px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
 .fpd-wl .field input::placeholder{color:${FAINT};}
 .fpd-wl .field input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-wl .sec-title{font-family:var(--font-display);font-size:15px;color:${TEXT};margin-bottom:4px;}
@@ -202,7 +202,7 @@ const WL_CSS = `
 .fpd-wl .brand-preset-tag{color:${MUTED};font-size:11px;}
 .fpd-wl .color-preset{display:flex;align-items:center;justify-content:center;border-radius:11px;padding:10px 0;cursor:pointer;border:2px solid transparent;}
 .fpd-wl .color-preset span{color:#F0F4FA;font-size:9px;font-weight:700;}
-.fpd-wl .swatch-preview{padding:14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
+.fpd-wl .swatch-preview{padding:14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
 .fpd-wl .upload-box{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:2px dashed rgba(91,110,225,0.3);background:rgba(91,110,225,0.04);cursor:pointer;}
 .fpd-wl .upload-box span{color:#6FAE8B;font-size:13px;}
 

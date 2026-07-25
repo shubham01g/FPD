@@ -195,7 +195,7 @@ const VAULT_CSS = `
 .fpd-vault-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-vault .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-vault .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-vault .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
 .fpd-vault .card.pad{padding:22px;}
 .fpd-vault .sec-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
 .fpd-vault .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
@@ -228,7 +228,7 @@ const VAULT_CSS = `
 .fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
 .fpd-vault .btn-link:hover{background:rgba(91,110,225,0.18);}
 .fpd-vault .psgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-.fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);transition:border-color .16s,background .16s;}
+.fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);transition:border-color .16s,background .16s;}
 .fpd-vault .psec:hover{border-color:rgba(91,110,225,0.24);background:rgba(91,110,225,0.03);}
 .fpd-vault .psec-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-vault .psec-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px;}

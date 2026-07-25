@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
+import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal";
 import { SystemHealth } from "./SystemHealth";
 import { AdminAIAgent } from "../AdminAIAgent";
 import {
@@ -45,16 +46,7 @@ const storageByPlan = [
   { plan:"Legacy Pro", avgUsed:38.8, limit:1000 },
 ];
 
-const mockUsers = [
-  { id:"USR-8821", name:"James Doe", email:"james.doe@email.com", plan:"Legacy Archive", storage:16.9, joined:"Apr 8, 2026", status:"active", contacts:3, referrals:6 },
-  { id:"USR-8812", name:"Sarah Chen", email:"s.chen@email.com", plan:"Legacy Archive", storage:22.1, joined:"Nov 15, 2024", status:"active", contacts:8, referrals:32 },
-  { id:"USR-8805", name:"Marcus Johnson", email:"m.johnson@email.com", plan:"Foundation", storage:4.8, joined:"Jan 20, 2025", status:"active", contacts:2, referrals:14 },
-  { id:"USR-8798", name:"Patricia Wells", email:"p.wells@email.com", plan:"Legacy Pro", storage:84.2, joined:"Sep 3, 2024", status:"active", contacts:12, referrals:81 },
-  { id:"USR-8791", name:"Robert Kim", email:"r.kim@email.com", plan:"Foundation", storage:2.1, joined:"May 22, 2026", status:"active", contacts:1, referrals:0 },
-  { id:"USR-8784", name:"Amanda Torres", email:"a.torres@email.com", plan:"Legacy Archive", storage:18.4, joined:"Mar 1, 2026", status:"active", contacts:5, referrals:7 },
-  { id:"USR-8777", name:"Derek Mills", email:"d.mills@email.com", plan:"Legacy Archive", storage:12.0, joined:"Jul 12, 2024", status:"suspended", contacts:4, referrals:12 },
-  { id:"USR-8770", name:"Grace Nakamura", email:"g.nakamura@email.com", plan:"Legacy Pro", storage:51.3, joined:"Feb 28, 2025", status:"active", contacts:9, referrals:0 },
-];
+/* Users data is now in UserDetailModal.tsx as ADMIN_USERS */
 
 const auditLogs = [
   { id:"LOG-9912", user:"admin@fpd.com", action:"Approved ID verification", target:"VER-2026-0841", time:"2 min ago", severity:"info" },
@@ -908,14 +900,14 @@ function PushNotificationCenter() {
 export function MasterAdmin() {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
   const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
 
-  const filteredUsers = mockUsers.filter(u =>
+  const filteredUsers = ADMIN_USERS.filter(u =>
     u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.email.includes(userSearch) ||
-    u.id.includes(userSearch)
+    u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.id.toLowerCase().includes(userSearch.toLowerCase())
   );
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; badge?: string }[] = [
@@ -1501,28 +1493,9 @@ export function MasterAdmin() {
           </div>
           <div style={{color:"#5A6A88",fontSize:12,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
 
-          {/* User detail modal */}
+          {/* User detail modal — Overview / Edit Account / Billing / Security */}
           {selectedUser && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:"rgba(0,0,0,0.8)",backdropFilter:"blur(8px)"}}>
-              <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 style={{fontFamily:"var(--font-display)",fontSize:18,color:"#0D1428"}}>{selectedUser.name}</h3>
-                  <button onClick={()=>setSelectedUser(null)} style={{color:"#5A6A88"}}>✕</button>
-                </div>
-                <div className="space-y-3">
-                  {[["User ID",selectedUser.id],["Email",selectedUser.email],["Plan",selectedUser.plan],["Storage",`${selectedUser.storage} GB`],["Legacy Contacts",selectedUser.contacts],["Referrals",selectedUser.referrals],["Member Since",selectedUser.joined],["Status",selectedUser.status]].map(([label,val])=>(
-                    <div key={label as string} className="flex items-center justify-between px-4 py-2.5 rounded-xl" style={{background:"rgba(91,110,225,0.04)"}}>
-                      <span style={{color:"#5A6A88",fontSize:13}}>{label}</span>
-                      <span style={{color:"#0D1428",fontSize:13,...MONO}}>{val}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(252,129,129,0.12)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.25)"}}>Suspend Account</button>
-                  <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#F0F4FA",boxShadow:"0 0 20px rgba(91,110,225,0.3)"}}>Edit User</button>
-                </div>
-              </div>
-            </div>
+            <UserDetailModal user={selectedUser} onClose={() => setSelectedUser(null)} />
           )}
         </div>
       )}
