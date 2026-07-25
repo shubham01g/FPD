@@ -21,7 +21,7 @@ const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" };
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
-const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
 
 function SendInviteModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
@@ -55,20 +55,20 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#0D1428" }}>Send Onboarding Invite</h3>
-            <p style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>Client receives a unique link to start their white label partner application.</p>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
+            <p style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>Client receives a unique link to start their white label partner application.</p>
           </div>
-          <button onClick={onClose} style={{ color:"#5A6A88" }}><X size={16}/></button>
+          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ORGANIZATION TYPE</label>
+            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ORGANIZATION TYPE</label>
             <div className="flex flex-wrap gap-2">
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                  style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#6E90C9":"#5A6A88" }}>
+                  style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#6E90C9":"#8A9AB8" }}>
                   {t.label}
                 </button>
               ))}
@@ -80,19 +80,19 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             { label:"RECIPIENT EMAIL",   value:email,   set:setEmail,   ph:"contact@organization.com", type:"email" },
           ].map(f => (
             <div key={f.label}>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
               <input type={f.type||"text"} value={f.value} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
                 className="w-full px-4 py-3 rounded-xl"
-                style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+                style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
 
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
+            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
               placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
               className="w-full px-4 py-3 rounded-xl resize-none"
-              style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#0D1428", fontSize:13, outline:"none" }}/>
+              style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
 
           {/* Preview link */}
@@ -109,7 +109,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending…" : "Send Invite Email"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@ export function PartnershipAdmin() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
-          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "#EAF0FC", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
+          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
           {["ID", "Organization", "Tier", "Accounts", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
             <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
@@ -224,7 +224,7 @@ export function PartnershipAdmin() {
           <div
             key={partner.id}
             className="grid px-5 py-3 items-center border-b"
-            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
+            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
             <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
             <div className="flex items-center gap-3">

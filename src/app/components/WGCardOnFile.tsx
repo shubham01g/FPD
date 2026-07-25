@@ -15,8 +15,8 @@ import { cardsOnFile } from "./WGSessionTimer";
 
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = {
-  background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)",
-  color:"#0D1428", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%",
+  background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)",
+  color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%",
 };
 
 function detectBrand(num: string): string {
@@ -176,12 +176,12 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
           )}
 
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
+            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Name on card" style={INPUT}/>
           </div>
 
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>
+            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>
               CARD NUMBER
               {cardNum && <span style={{ color:brandColor(brand), marginLeft:8, fontSize:10 }}>{brand}</span>}
             </label>
@@ -191,12 +191,12 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
               <input value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))}
                 placeholder="MM/YY" maxLength={5} style={{ ...INPUT, fontFamily:"var(--font-mono)" }}/>
             </div>
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
               <div className="relative">
                 <input type={showCvv?"text":"password"} value={cvv}
                   onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))}
@@ -224,7 +224,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
             </button>
             {hasCard && (
               <button onClick={() => setEditing(false)} className="px-4 py-3 rounded-xl text-sm"
-                style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>
+                style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                 Cancel
               </button>
             )}

@@ -157,7 +157,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
             <Phone size={20} color="#FFFFFF"/>
           </div>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428" }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>
               Start a Session with {clientName}
             </div>
             <div style={{ color:"#8A9AB8", fontSize:11 }}>
@@ -186,7 +186,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
               <Video size={22} color="#FFFFFF"/>
             </div>
             <div className="text-center">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#0D1428", fontWeight:700 }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#E8EDF5", fontWeight:700 }}>
                 Video Call
               </div>
               <div style={{ color:"#8A9AB8", fontSize:10, marginTop:3, lineHeight:1.5 }}>
@@ -215,7 +215,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
               <Phone size={22} color="#FFFFFF"/>
             </div>
             <div className="text-center">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#0D1428", fontWeight:700 }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#E8EDF5", fontWeight:700 }}>
                 Phone Call
               </div>
               <div style={{ color:"#8A9AB8", fontSize:10, marginTop:3, lineHeight:1.5 }}>
@@ -260,7 +260,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         <div style={{ color:"#E8EDF5", fontFamily:"var(--font-display)", fontSize:16 }}>
           {isVideo ? "Starting video call…" : "Connecting phone call…"}
         </div>
-        <div style={{ color:"#5A6A88", fontSize:12, textAlign:"center" }}>
+        <div style={{ color:"#8A9AB8", fontSize:12, textAlign:"center" }}>
           {isVideo
             ? `Requesting camera · connecting to ${clientName}`
             : `Dialing ${clientName} · please have them pick up`}
@@ -283,10 +283,10 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         <div className="flex items-center gap-3">
           <CheckCircle size={20} color="#FFFFFF"/>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428" }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>
               {callMode === "video" ? "Video Session" : "Phone Call"} Complete
             </div>
-            <div style={{ color:"#5A6A88", fontSize:12 }}>Duration: {formatTime(elapsed)} · ${charge} billed to card on file</div>
+            <div style={{ color:"#8A9AB8", fontSize:12 }}>Duration: {formatTime(elapsed)} · ${charge} billed to card on file</div>
           </div>
         </div>
         {docsUploaded.length > 0 && (
@@ -294,7 +294,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
             <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>UPLOADED THIS SESSION</div>
             <div className="space-y-1">
               {docsUploaded.map(d => (
-                <div key={d} className="flex items-center gap-2 text-xs" style={{ color:"#5A6A88" }}>
+                <div key={d} className="flex items-center gap-2 text-xs" style={{ color:"#8A9AB8" }}>
                   <CheckCircle size={10} color="#FFFFFF"/>{d}
                 </div>
               ))}

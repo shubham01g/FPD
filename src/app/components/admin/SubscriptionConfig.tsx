@@ -102,7 +102,7 @@ export function SubscriptionConfig() {
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-lg w-3 h-3 rounded-full" style={{ background: plan.color }} />
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>{plan.name}</h3>
-              <div className="ml-auto text-sm px-3 py-1 rounded-lg" style={{ background: "#EAF0FC", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
+              <div className="ml-auto text-sm px-3 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
                 ID: {plan.id}
               </div>
             </div>
@@ -110,7 +110,7 @@ export function SubscriptionConfig() {
               {/* Monthly price */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MONTHLY PRICE ($)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="var(--gold)" />
                   <input
                     type="number"
@@ -128,7 +128,7 @@ export function SubscriptionConfig() {
               {/* Annual discount */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>ANNUAL DISCOUNT (%)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
                     step="1"
@@ -145,7 +145,7 @@ export function SubscriptionConfig() {
               {/* Storage */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>STORAGE ALLOWANCE (GB)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <HardDrive size={14} color="var(--gold)" />
                   <input
                     type="number"
@@ -162,7 +162,7 @@ export function SubscriptionConfig() {
               {/* Overage rate */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>OVERAGE RATE ($/GB)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="#FC8181" />
                   <input
                     type="number"
@@ -180,7 +180,7 @@ export function SubscriptionConfig() {
               {/* Max contacts */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MAX LEGACY CONTACTS</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
                     step="1"
@@ -220,7 +220,7 @@ export function SubscriptionConfig() {
           ].map((t) => (
             <div key={t.key}>
               <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>{t.label.toUpperCase()}</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl border mb-2" style={{ background: "#EAF0FC", borderColor: `${t.color}40` }}>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl border mb-2" style={{ background: "rgba(255,255,255,0.08)", borderColor: `${t.color}40` }}>
                 <Bell size={14} color={t.color} />
                 <input
                   type="number"

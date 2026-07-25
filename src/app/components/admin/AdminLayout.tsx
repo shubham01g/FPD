@@ -73,10 +73,10 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       style={{
         padding: open ? "7px 10px" : "9px",
         justifyContent: open ? "flex-start" : "center",
-        background: isActive(item.id) ? "rgba(91,167,214,0.15)" : "transparent",
+        background: isActive(item.id) ? "rgba(91,110,225,0.18)" : "transparent",
         color: isActive(item.id) ? "#FFFFFF" : "rgba(255,255,255,0.65)",
-        borderLeft: isActive(item.id) ? "2px solid #5BA7D6" : "2px solid transparent",
-        boxShadow: isActive(item.id) ? "inset 0 0 20px rgba(91,167,214,0.05)" : "none",
+        borderLeft: isActive(item.id) ? "2px solid #5B6EE1" : "2px solid transparent",
+        boxShadow: isActive(item.id) ? "inset 0 0 20px rgba(91,110,225,0.08)" : "none",
       }}>
       <span style={{ flexShrink:0, color: isActive(item.id) ? "#FFFFFF" : "inherit" }}>{item.icon}</span>
       {open && (
@@ -93,14 +93,14 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
   );
 
   return (
-    <div className="flex overflow-hidden" style={{ background:"#EAF0FC", fontFamily:"var(--font-body)", height:"100vh" }}>
-      {/* Admin sidebar – purple-themed */}
+    <div className="flex overflow-hidden" style={{ background:"#070A12", fontFamily:"var(--font-body)", height:"100vh" }}>
+      {/* Admin sidebar – Royal Vault Blue */}
       <aside className="flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: open ? 232 : 52, background:"rgba(10,10,15,0.98)", borderRight:"1px solid rgba(91,167,214,0.12)" }}>
+        style={{ width: open ? 232 : 52, background:"rgba(10,10,15,0.98)", borderRight:"1px solid rgba(91,110,225,0.16)" }}>
 
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(91,167,214,0.12)" }}>
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}/>
+        <div className="flex items-center gap-2.5 px-3 py-3 border-b" style={{ borderColor:"rgba(91,110,225,0.16)" }}>
+          <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(91,110,225,0.35)" }}/>
           {open && (
             <div className="flex-1 min-w-0">
               <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>
@@ -115,7 +115,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         {/* Admin badge */}
         {open && (
           <div className="mx-3 my-2 px-3 py-2 rounded-xl flex items-center gap-2"
-            style={{ background:"rgba(91,167,214,0.1)", border:"1px solid rgba(91,167,214,0.2)" }}>
+            style={{ background:"rgba(91,110,225,0.12)", border:"1px solid rgba(91,110,225,0.3)" }}>
             <Crown size={13} color="#FFFFFF"/>
             <div>
               <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:600 }}>Admin Session</div>
@@ -137,7 +137,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         </nav>
 
         {/* Sign out */}
-        <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(91,167,214,0.1)" }}>
+        <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(91,110,225,0.16)" }}>
           <button onClick={onSignOut} className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-all"
             style={{ color:"rgba(255,255,255,0.55)", justifyContent: open ? "flex-start" : "center", background:"rgba(229,62,62,0.06)" }}>
             <LogOut size={13}/>
@@ -150,13 +150,13 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Admin top bar */}
         <header className="flex items-center justify-between px-5 py-2.5 border-b flex-shrink-0"
-          style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,167,214,0.1)", backdropFilter:"blur(16px)" }}>
+          style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,110,225,0.16)", backdropFilter:"blur(16px)" }}>
           <div className="flex items-center gap-3">
             <div style={{ color:"rgba(255,255,255,0.35)", fontSize:11, fontFamily:"var(--font-mono)" }}>
               {new Date().toLocaleDateString("en-US",{ weekday:"long", year:"numeric", month:"long", day:"numeric" })}
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full"
-              style={{ background:"rgba(91,167,214,0.1)", border:"1px solid rgba(91,167,214,0.25)" }}>
+              style={{ background:"rgba(91,110,225,0.12)", border:"1px solid rgba(91,110,225,0.3)" }}>
               <Activity size={10} color="#FFFFFF"/>
               <span style={{ color:"#6FAE8B", fontSize:9, fontFamily:"var(--font-mono)", fontWeight:700 }}>ADMIN SESSION ACTIVE</span>
             </div>
@@ -167,18 +167,18 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
               <Shield size={11} color="#FC8181"/>
               <span style={{ color:"#FC8181", fontSize:10, fontFamily:"var(--font-mono)", fontWeight:700 }}>RESTRICTED ACCESS</span>
             </div>
-            <button className="relative" style={{ color:"#6B5A8A" }}>
+            <button className="relative" style={{ color:"#8A9AB8" }}>
               <Bell size={15}/>
               <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full"
                 style={{ width:13, height:13, background:"#E53E3E", color:"#fff", fontSize:8, fontWeight:700 }}>3</span>
             </button>
             <div className="flex items-center justify-center rounded-full"
-              style={{ width:28, height:28, background:"rgba(91,167,214,0.15)", color:"#6FAE8B", fontSize:11, fontWeight:700 }}>A</div>
+              style={{ width:28, height:28, background:"rgba(91,110,225,0.18)", color:"#6FAE8B", fontSize:11, fontWeight:700 }}>A</div>
           </div>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto" style={{ background:"#F0F4FA" }}>
+        <main className="flex-1 overflow-y-auto fpd-scroll" style={{ background:"#070A12" }}>
           {children}
         </main>
       </div>

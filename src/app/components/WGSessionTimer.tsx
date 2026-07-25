@@ -160,7 +160,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
     setNotes("");
   }
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
+  const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
   const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   // ── Idle state ──
@@ -183,7 +183,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           }
         </div>
         <div className="p-4 space-y-3">
-          <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
+          <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.6 }}>
             Start the timer when the session begins. Any time used bills as a full 30-min block ($25). The client's card is charged automatically when you end the session.
           </div>
           <div className="flex gap-2">
@@ -192,7 +192,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
                 className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
                 style={{ background:sessionType===t?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${sessionType===t?"#5B6EE1":"rgba(91,110,225,0.1)"}`,
-                  color:sessionType===t?"#6E90C9":"#5A6A88" }}>
+                  color:sessionType===t?"#6E90C9":"#8A9AB8" }}>
                 {label}
               </button>
             ))}
@@ -232,7 +232,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>
             {state === "running" ? "● SESSION IN PROGRESS" : "⏸ PAUSED"}
           </div>
-          <div style={{ fontFamily:"var(--font-mono)", fontSize:52, fontWeight:700, color:state==="running"?"#0D1428":"#F6AD55", lineHeight:1 }}>
+          <div style={{ fontFamily:"var(--font-mono)", fontSize:52, fontWeight:700, color:state==="running"?"#E8EDF5":"#F6AD55", lineHeight:1 }}>
             {formatTime(elapsed)}
           </div>
           <div style={{ color:"#8A9AB8", fontSize:12, marginTop:4 }}>
@@ -243,7 +243,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         {/* Billing meter */}
         <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
           <div className="flex items-center justify-between mb-2">
-            <span style={{ color:"#5A6A88", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
+            <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
             <span style={{ color:"#6E90C9", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
               ${currentAmount.toFixed(2)}
             </span>
@@ -323,25 +323,25 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
               ["Card",         `${card.brand} ****${card.last4} (${card.expiry})`],
             ].map(([k,v]) => (
               <div key={k} className="flex justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.07)" }}>
-                <span style={{ color:"#5A6A88", fontSize:13 }}>{k}</span>
-                <span style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{v}</span>
+                <span style={{ color:"#8A9AB8", fontSize:13 }}>{k}</span>
+                <span style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>{v}</span>
               </div>
             ))}
             <div className="flex justify-between py-2">
-              <span style={{ color:"#0D1428", fontSize:15, fontWeight:700 }}>Total Charge</span>
+              <span style={{ color:"#E8EDF5", fontSize:15, fontWeight:700 }}>Total Charge</span>
               <span style={{ color:"#6E90C9", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <label style={{ color:"#5A6A88", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>
+            <label style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>
               SESSION NOTES (optional)
             </label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
               placeholder="Brief notes about what was accomplished this session..."
               className="w-full resize-none px-3 py-2.5 rounded-xl"
-              style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)", color:"#0D1428", fontSize:12, outline:"none" }}/>
+              style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:12, outline:"none" }}/>
           </div>
 
           <div className="flex gap-3">
@@ -352,7 +352,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             </button>
             <button onClick={() => setState("running")}
               className="px-4 py-3 rounded-xl text-sm"
-              style={{ background:"rgba(91,110,225,0.06)", color:"#5A6A88" }}>
+              style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
               Back
             </button>
           </div>
@@ -365,8 +365,8 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
   return (
     <div className="rounded-2xl p-5 text-center glow-surface" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
       <CheckCircle size={36} color="#FFFFFF" style={{ margin:"0 auto 12px" }}/>
-      <div style={{ color:"#0D1428", fontSize:15, fontWeight:700, marginBottom:4 }}>Session Complete</div>
-      <div style={{ color:"#5A6A88", fontSize:13, marginBottom:12 }}>
+      <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:700, marginBottom:4 }}>Session Complete</div>
+      <div style={{ color:"#8A9AB8", fontSize:13, marginBottom:12 }}>
         ${amount.toFixed(2)} charged to {card.brand} ****{card.last4}
       </div>
       <div className="grid grid-cols-3 gap-2 mb-4">
@@ -412,7 +412,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div style={{ color:"#5A6A88", fontSize:11, ...MONO }}>BILLING HISTORY</div>
+        <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>BILLING HISTORY</div>
         <div style={{ color:"#6E90C9", fontSize:13, fontWeight:700 }}>
           Total: ${total.toFixed(2)}
           <span style={{ color:"#8A9AB8", fontSize:11, fontWeight:400, marginLeft:4 }}>
@@ -422,23 +422,23 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
       </div>
       <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
         <div className="grid px-4 py-2.5 border-b"
-          style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"#EAF0FC", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
+          style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"rgba(255,255,255,0.06)", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
           {["Date","Client","Type","Duration","Blocks","Charged"].map(h => (
-            <div key={h} style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
+            <div key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</div>
           ))}
         </div>
         {records.map((r, i) => (
           <div key={r.id} className="grid px-4 py-3 border-b items-center"
             style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12,
-              background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.06)" }}>
+              background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>
             <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{r.startedAt.split(" · ")[0]}</span>
             <div>
-              <div style={{ color:"#0D1428", fontSize:12, fontWeight:500 }}>{r.clientName}</div>
+              <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:500 }}>{r.clientName}</div>
               <div style={{ color:"#8A9AB8", fontSize:10 }}>****{r.cardLast4}</div>
             </div>
             <span style={{ fontSize:14 }}>{r.sessionType === "phone" ? "📞" : "📹"}</span>
-            <span style={{ color:"#5A6A88", fontSize:12, ...MONO }}>{r.durationMinutes} min</span>
-            <span style={{ color:"#5A6A88", fontSize:12, ...MONO }}>{r.blocksCharged} × $25</span>
+            <span style={{ color:"#8A9AB8", fontSize:12, ...MONO }}>{r.durationMinutes} min</span>
+            <span style={{ color:"#8A9AB8", fontSize:12, ...MONO }}>{r.blocksCharged} × $25</span>
             <span style={{ color:"#D99A6B", fontSize:13, fontWeight:700, ...MONO }}>${r.amountCharged.toFixed(2)}</span>
           </div>
         ))}

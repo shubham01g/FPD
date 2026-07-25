@@ -150,7 +150,7 @@ export function PayoutManagement() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
-          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: "#EAF0FC", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
+          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
           <div />
           {["Recipient", "Type", "Period", "Rate", "Amount", "Status"].map((h) => (
@@ -163,7 +163,7 @@ export function PayoutManagement() {
             <div
               key={payout.id}
               className="grid px-5 py-3 items-center border-b"
-              style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
+              style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
             >
               <input
                 type="checkbox"

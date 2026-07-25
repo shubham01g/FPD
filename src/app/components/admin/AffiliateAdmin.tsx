@@ -110,7 +110,7 @@ export function AffiliateAdmin() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
-          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "#EAF0FC", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
+          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
           {["ID", "Affiliate", "Tier", "Active Refs", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
             <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
@@ -120,7 +120,7 @@ export function AffiliateAdmin() {
           <div
             key={aff.id}
             className="grid px-5 py-3 items-center border-b"
-            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
+            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
             <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{aff.id}</span>
             <div>

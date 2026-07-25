@@ -200,7 +200,12 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
   if (!open) return null;
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(91,110,225,0.1)", borderRadius:16 };
+  const CARD: React.CSSProperties = {
+    background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)",
+    border:"1.5px solid rgba(91,167,214,0.35)",
+    boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)",
+    borderRadius:16,
+  };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center"

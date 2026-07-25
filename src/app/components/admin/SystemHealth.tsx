@@ -11,15 +11,15 @@ import { toast } from "sonner";
 
 /* ── Design tokens ─────────────────────────────────────────────── */
 const T = {
-  bg:       "#F0F4FA",
-  card:     "#FFFFFF",
-  card2:    "#F8FAFF",
-  card3:    "#EAF0FC",
+  bg:       "rgba(255,255,255,0.05)",
+  card:     "linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)",
+  card2:    "rgba(255,255,255,0.06)",
+  card3:    "rgba(255,255,255,0.08)",
   primary:  "#5B6EE1",
   primBg:   "rgba(91,110,225,0.08)",
   primBd:   "rgba(91,110,225,0.2)",
-  text:     "#0D1428",
-  sub:      "#5A6A88",
+  text:     "#E8EDF5",
+  sub:      "#8A9AB8",
   muted:    "#8A9AB8",
   border:   "rgba(91,110,225,0.1)",
   green:    "#48BB78",
@@ -37,11 +37,11 @@ const T = {
 const MONO:    React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily:"var(--font-display)" };
 const CARD:    React.CSSProperties = {
-  background: T.card, border:`1px solid ${T.border}`,
-  boxShadow:"0 2px 12px rgba(91,110,225,0.06)", borderRadius:16, padding:22,
+  background: T.card, border:"1.5px solid rgba(91,110,225,0.35)",
+  boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16, padding:22,
 };
 const INPUT:   React.CSSProperties = {
-  background:"rgba(91,110,225,0.04)", border:`1px solid rgba(91,110,225,0.18)`,
+  background:"#141B2E", border:`1px solid rgba(91,110,225,0.3)`,
   color:T.text, outline:"none", borderRadius:10, padding:"9px 13px", width:"100%", fontSize:13,
 };
 
@@ -454,7 +454,7 @@ export function SystemHealth() {
       </div>
 
       {/* ── Tab bar ─────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"rgba(255,255,255,0.95)", border:T.border, width:"fit-content" }}>
+      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)", width:"fit-content" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
@@ -1375,7 +1375,7 @@ function AlertRecipientsPanel({
         {recipients.map((r, i) => (
           <div key={r.id} className="grid items-center px-5 py-4 border-b"
             style={{ gridTemplateColumns:"1fr auto auto auto auto", gap:16,
-              background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.05)" }}>
+              background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.05)" }}>
             {/* Recipient */}
             <div>
               <div style={{ color:T.text, fontSize:13, fontWeight:500 }}>{r.name}</div>
@@ -1723,7 +1723,7 @@ function ApiMonitorPanel() {
                   onClick={() => setSelected(isSelected ? null : ep.id)}
                   style={{
                     gridTemplateColumns:"56px 1fr 80px 80px 90px 70px 80px", gap:12,
-                    background: isSelected ? T.primBg : i%2===0 ? "#fff" : "#F8FAFF",
+                    background: isSelected ? T.primBg : i%2===0 ? "transparent" : "rgba(255,255,255,0.025)",
                     borderColor:"rgba(91,110,225,0.05)",
                     borderLeft: isSelected ? `3px solid ${T.primary}` : "3px solid transparent",
                     opacity: ep.enabled ? 1 : 0.5,
@@ -1980,7 +1980,7 @@ function ApiMonitorPanel() {
         <SLabel>Rate Limits — Per Plan</SLabel>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { tier:"Starter",        rps:10,   burst:50,    daily:1000,   color:"#5A6A88" },
+            { tier:"Starter",        rps:10,   burst:50,    daily:1000,   color:"#8A9AB8" },
             { tier:"Foundation",     rps:30,   burst:150,   daily:5000,   color:"#6FAE8B" },
             { tier:"Legacy Archive", rps:100,  burst:500,   daily:20000,  color:"#6E90C9" },
             { tier:"Legacy Pro",     rps:300,  burst:1500,  daily:100000, color:"#6FAE8B" },

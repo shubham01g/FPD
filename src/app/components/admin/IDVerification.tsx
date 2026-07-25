@@ -102,19 +102,19 @@ export function IDVerification() {
             </div>
 
             <div className="grid md:grid-cols-4 gap-4 mt-5">
-              <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+              <div className="px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID TYPE</div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.idType}</div>
               </div>
-              <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+              <div className="px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>DATE OF BIRTH</div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.dob}</div>
               </div>
-              <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+              <div className="px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID EXPIRY</div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.expiryDate}</div>
               </div>
-              <div className="px-4 py-3 rounded-lg" style={{ background: "#EAF0FC" }}>
+              <div className="px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID NUMBER (MASKED)</div>
                 <div style={{ color: "var(--foreground)", fontSize: 13, fontFamily: "var(--font-mono)" }}>{verif.idNumber}</div>
               </div>
@@ -181,7 +181,7 @@ export function IDVerification() {
           <div
             key={i}
             className="flex items-center justify-between px-5 py-3 border-b"
-            style={{ background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)" }}
+            style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)" }}
           >
             <div>
               <div style={{ color: "var(--foreground)", fontSize: 13 }}>{r.name}</div>
@@ -213,7 +213,7 @@ export function IDVerification() {
                   onClick={() => setRejectionReason(reason)}
                   className="w-full text-left px-4 py-3 rounded-lg border transition-all"
                   style={{
-                    background: rejectionReason === reason ? "rgba(252,129,129,0.1)" : "#EAF0FC",
+                    background: rejectionReason === reason ? "rgba(252,129,129,0.1)" : "rgba(255,255,255,0.08)",
                     borderColor: rejectionReason === reason ? "rgba(252,129,129,0.4)" : "var(--border)",
                     color: rejectionReason === reason ? "#FC8181" : "var(--foreground)",
                     fontSize: 13,

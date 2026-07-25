@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Mail, Edit2, Save, CheckCircle, Eye, X, Search, Tag, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(91,110,225,0.1)", boxShadow: "0 2px 12px rgba(91,110,225,0.06)", borderRadius: 16 };
+const GLASS: React.CSSProperties = { background: "linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border: "1.5px solid rgba(91,110,225,0.35)", boxShadow: "0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius: 16 };
 const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.03) 1px,transparent 1px)", backgroundSize: "50px 50px" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
@@ -555,8 +555,8 @@ export function EmailTemplates() {
             <Mail size={15} color="#FFFFFF" />
             <span style={{ color: "#6E90C9", fontSize: 11, ...MONO, letterSpacing: "0.12em" }}>ADMIN · EMAIL TEMPLATES</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#0D1428" }}>Email Template Manager</h1>
-          <p style={{ color: "#5A6A88", fontSize: 13, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#E8EDF5" }}>Email Template Manager</h1>
+          <p style={{ color: "#8A9AB8", fontSize: 13, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
@@ -569,16 +569,16 @@ export function EmailTemplates() {
         <div className="rounded-2xl overflow-hidden flex flex-col glow-surface" style={GLASS}>
           {/* Search + filter */}
           <div className="p-3 border-b space-y-2" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.15)" }}>
-              <Search size={12} color="#5A6A88" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)" }}>
+              <Search size={12} color="#8A9AB8" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search templates..."
-                style={{ background: "transparent", border: "none", outline: "none", color: "#0D1428", fontSize: 12, width: "100%" }} />
+                style={{ background: "transparent", border: "none", outline: "none", color: "#FFFFFF", fontSize: 12, width: "100%" }} />
             </div>
             <div className="flex flex-wrap gap-1">
               {categories.map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)}
                   className="px-2.5 py-1 rounded-lg text-xs transition-all"
-                  style={{ background: activeCategory === cat ? "#5B6EE1" : "rgba(91,110,225,0.06)", color: activeCategory === cat ? "#F0F4FA" : "#5A6A88", fontWeight: activeCategory === cat ? 700 : 400 }}>
+                  style={{ background: activeCategory === cat ? "#5B6EE1" : "rgba(91,110,225,0.06)", color: activeCategory === cat ? "#F0F4FA" : "#8A9AB8", fontWeight: activeCategory === cat ? 700 : 400 }}>
                   {cat}
                 </button>
               ))}
@@ -593,7 +593,7 @@ export function EmailTemplates() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 9, ...MONO }}>{t.category.toUpperCase()}</span>
                 </div>
-                <div style={{ color: selected?.id === t.id ? "#0D1428" : "#374669", fontSize: 13, fontWeight: 500 }}>{t.name}</div>
+                <div style={{ color: selected?.id === t.id ? "#E8EDF5" : "#8A9AB8", fontSize: 13, fontWeight: 500 }}>{t.name}</div>
                 <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 2 }}>{t.trigger}</div>
               </button>
             ))}
@@ -606,13 +606,13 @@ export function EmailTemplates() {
             {/* Toolbar */}
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)", background: "rgba(3,7,16,0.6)" }}>
               <div>
-                <div style={{ color: "#0D1428", fontSize: 15, fontWeight: 600 }}>{selected.name}</div>
-                <div style={{ color: "#5A6A88", fontSize: 11, marginTop: 2 }}>Trigger: {selected.trigger}</div>
+                <div style={{ color: "#E8EDF5", fontSize: 15, fontWeight: 600 }}>{selected.name}</div>
+                <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 2 }}>Trigger: {selected.trigger}</div>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => setPreviewMode(!previewMode)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
-                  style={{ background: previewMode ? "rgba(91,110,225,0.15)" : "rgba(91,110,225,0.06)", color: previewMode ? "#6E90C9" : "#5A6A88", border: `1px solid ${previewMode ? "rgba(91,110,225,0.4)" : "rgba(91,110,225,0.15)"}` }}>
+                  style={{ background: previewMode ? "rgba(91,110,225,0.15)" : "rgba(91,110,225,0.06)", color: previewMode ? "#6E90C9" : "#8A9AB8", border: `1px solid ${previewMode ? "rgba(91,110,225,0.4)" : "rgba(91,110,225,0.15)"}` }}>
                   <Eye size={13} /> {previewMode ? "Edit" : "Preview"}
                 </button>
                 {!editing ? (
@@ -634,7 +634,7 @@ export function EmailTemplates() {
                   </>
                 )}
                 <button onClick={() => { copyToClipboard(editBody); toast.success("HTML copied to clipboard") }}
-                  style={{ color: "#5A6A88" }}><Copy size={14} /></button>
+                  style={{ color: "#8A9AB8" }}><Copy size={14} /></button>
               </div>
             </div>
 
@@ -654,9 +654,9 @@ export function EmailTemplates() {
               <div style={{ color: "#8A9AB8", fontSize: 10, ...MONO, marginBottom: 6 }}>SUBJECT LINE</div>
               {editing ? (
                 <input value={editSubject} onChange={e => setEditSubject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.25)", color: "#0D1428", fontSize: 14, outline: "none" }} />
+                  className="w-full px-3 py-2 rounded-xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 14, outline: "none" }} />
               ) : (
-                <div style={{ color: "#0D1428", fontSize: 14 }}>{editSubject}</div>
+                <div style={{ color: "#E8EDF5", fontSize: 14 }}>{editSubject}</div>
               )}
             </div>
 
@@ -676,7 +676,7 @@ export function EmailTemplates() {
                   value={editBody}
                   onChange={e => setEditBody(e.target.value)}
                   className="w-full h-full p-5"
-                  style={{ background: "#EAF0FC", border: "none", color: "#68D391", fontSize: 12, ...MONO, outline: "none", resize: "none", lineHeight: 1.7 }}
+                  style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "#68D391", fontSize: 12, ...MONO, outline: "none", resize: "none", lineHeight: 1.7 }}
                 />
               ) : (
                 <div className="overflow-y-auto h-full p-5">
