@@ -115,11 +115,14 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
 /* ── Sitewide KPI-column laser ──
    Every stat-ledger across the app (Dashboard, Calendar, File Cabinet,
    Warranties, Personal Assets, …) shares the same kstrip/kcell/khead/klbl/
-   kico/kval/ksub markup, so this one rule set gives every column the
-   ignite-on-hover divider + traveling sweep + colour-tinted icon/value
-   treatment without touching each file. A page that needs distinct
-   per-column colours (see AIAgent.tsx's .c-purple/.c-indigo/etc.) defines
-   its own .kcell::before/::after locally, which wins by source order. */
+   kico/kval/ksub markup, so this one rule set gives every column an
+   ignite-on-hover divider + colour-tinted icon/value treatment without
+   touching each file. A page that needs distinct per-column colours (see
+   AIAgent.tsx's .c-purple/.c-indigo/etc.) defines its own .kcell::before
+   locally, which wins by source order.
+   Note: an earlier version added a repeating animated "sweep" beam here —
+   removed per feedback, it read as a distracting blinking/scanning light
+   rather than a subtle hover cue. Keep this static. */
 .kstrip .kcell { --klaser: #7E6BD8; position: relative; }
 .kstrip .kcell::before {
   content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 1px;
@@ -133,18 +136,6 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
   background: linear-gradient(180deg, transparent, var(--klaser) 50%, transparent);
   box-shadow: 0 0 16px 1px var(--klaser);
 }
-.kstrip .kcell::after {
-  content: ""; position: absolute; left: -1px; top: -40%; width: 2px; height: 40%;
-  pointer-events: none; opacity: 0; filter: blur(.5px);
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--klaser) 90%, white 10%), transparent);
-}
-.kstrip .kcell:hover::after { opacity: 1; animation: fpd-klaser-sweep 1.3s ease-in-out infinite; }
-@keyframes fpd-klaser-sweep {
-  0%   { top: -40%; opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
 .kstrip .kcell:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--klaser) 7%, transparent), transparent 55%); }
 .kstrip .kcell .klbl { transition: color .2s; }
 .kstrip .kcell:hover .klbl { color: color-mix(in srgb, var(--klaser) 65%, #BCC5DA); }
@@ -154,7 +145,6 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
 .kstrip .kcell:hover .kval { color: var(--klaser); }
 @media (max-width: 880px) { .kstrip .kcell:nth-child(3)::before { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .kstrip .kcell::after { animation: none !important; }
   .kstrip .kcell::before, .kstrip .kcell .klbl, .kstrip .kcell .kico, .kstrip .kcell .kval { transition: none !important; }
 }
 
