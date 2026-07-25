@@ -138,7 +138,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
             <span style={{ color:"#5BA7D6", fontSize:11, fontWeight:700 }}>{client.completionPct}%</span>
           </div>
           <div className="h-2 rounded-full" style={{ background:"rgba(91,167,214,0.1)" }}>
-            <div className="h-2 rounded-full" style={{ width:`${client.completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#5A8078)" }}/>
+            <div className="h-2 rounded-full" style={{ width:`${client.completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#6F9E94)" }}/>
           </div>
         </div>
 
@@ -323,7 +323,7 @@ export function WhiteGloveAdmin() {
         </div>
         <button onClick={() => setShowAdd(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
-          style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", boxShadow:"0 0 20px rgba(91,167,214,0.35)" }}>
+          style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 20px rgba(91,167,214,0.35)" }}>
           <Plus size={14}/> Add WG Client
         </button>
       </div>
@@ -507,7 +507,7 @@ export function WhiteGloveAdmin() {
               <div className="flex gap-3">
                 <button onClick={addClient} disabled={adding}
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", opacity:adding?0.7:1 }}>
+                  style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:adding?0.7:1 }}>
                   <Star size={14}/>{adding ? "Adding…" : "Add to White Glove Program"}
                 </button>
                 <button onClick={() => setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm"

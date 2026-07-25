@@ -138,7 +138,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                   </div>
                 </div>
                 <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-sm mt-2"
-                  style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#5A8078)", color: loading ? "#5BA7D6" : "#04080F", fontSize:15, boxShadow: loading ? "none" : "0 0 30px rgba(91,167,214,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>
+                  style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: loading ? "#5BA7D6" : "#04080F", fontSize:15, boxShadow: loading ? "none" : "0 0 30px rgba(91,167,214,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>
                   {loading ? "Authenticating..." : "Sign In to Admin Portal"}
                 </button>
               </form>
@@ -165,7 +165,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                   className="w-full px-6 py-5 rounded-xl text-center mb-5"
                   style={{ background:"rgba(91,167,214,0.06)", border:"2px solid rgba(91,167,214,0.3)", color:"#5BA7D6", fontSize:32, outline:"none", letterSpacing:"0.5em", ...MONO }}/>
                 <button type="submit" disabled={loading || mfaCode.length < 6} className="w-full py-4 rounded-xl font-bold text-sm"
-                  style={{ background: (loading || mfaCode.length < 6) ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#5A8078)", color:(loading || mfaCode.length < 6)?"#5BA7D6":"#04080F", fontSize:15, boxShadow:(loading || mfaCode.length < 6)?"none":"0 0 30px rgba(91,167,214,0.35)" }}>
+                  style={{ background: (loading || mfaCode.length < 6) ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color:(loading || mfaCode.length < 6)?"#5BA7D6":"#04080F", fontSize:15, boxShadow:(loading || mfaCode.length < 6)?"none":"0 0 30px rgba(91,167,214,0.35)" }}>
                   {loading ? "Verifying..." : "Verify & Enter Admin Portal"}
                 </button>
               </form>

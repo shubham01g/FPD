@@ -12,27 +12,27 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 
-/* "Royal Purple" and "Heritage Trust Co." intentionally keep their violet values (#5BA7D6/#5A8078) —
+/* "Royal Purple" and "Heritage Trust Co." intentionally keep their violet values (#5BA7D6/#6F9E94) —
    these are user-selectable brand preset OPTIONS, not leftover app styling debt. Do not recolor them. */
 const PRESET_COLORS = [
   { name: "Ocean Blue",    primary: "#5B6EE1", accent: "#5B6EE1" },
-  { name: "Royal Purple",  primary: "#5BA7D6", accent: "#5A8078" },
+  { name: "Royal Purple",  primary: "#5BA7D6", accent: "#6F9E94" },
   { name: "Emerald",       primary: "#48BB78", accent: "#68D391" },
   { name: "Amber",         primary: "#F6AD55", accent: "#FBD38D" },
   { name: "Rose",          primary: "#FC8181", accent: "#FEB2B2" },
   { name: "Indigo",        primary: "#5B6EE1", accent: "#5BA7D6" },
-  { name: "Teal",          primary: "#5A8078", accent: "#5A8078" },
+  { name: "Teal",          primary: "#6F9E94", accent: "#6F9E94" },
   { name: "Crimson",       primary: "#E53E3E", accent: "#FC8181" },
 ];
 
 const PRESET_BRANDS = [
-  { name: "Heritage Trust Co.",   tagline: "Protecting Family Legacies Since 1987", primary: "#5BA7D6", accent: "#5A8078", logo: "HT" },
+  { name: "Heritage Trust Co.",   tagline: "Protecting Family Legacies Since 1987", primary: "#5BA7D6", accent: "#6F9E94", logo: "HT" },
   { name: "LegacyFirst",          tagline: "Your Life Story, Secured Forever",       primary: "#48BB78", accent: "#68D391", logo: "LF" },
   { name: "FutureLock",           tagline: "Lock In Your Legacy",                    primary: "#F6AD55", accent: "#FBD38D", logo: "FL" },
   { name: "EternalVault Pro",     tagline: "Enterprise Legacy Management",           primary: "#5B6EE1", accent: "#5BA7D6", logo: "EV" },

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -42,7 +42,7 @@ const initSubs: Subscription[] = [
   { id:"s6", title:"Planet Fitness", amount:24.99, frequency:"Monthly", phone:"(916) 555-0291", website:"https://planetfitness.com", billingAccountNumber:"PF-8821", paymentType:"Checking Account", lastFour:"8821", category:"Health & Fitness", status:"active", nextBilling:"Jun 30, 2026", autoPay:true, cancelInstructions:"Must cancel IN PERSON at the gym or via certified mail." },
 ];
 
-const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#5A8078", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
+const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#6F9E94", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
 const statusColor: Record<string, { color:string; bg:string }> = {
   active:    { color:POS,  bg:"rgba(95,190,145,0.12)" },
   paused:    { color:WARN, bg:"rgba(217,165,94,0.12)" },

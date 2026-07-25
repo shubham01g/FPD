@@ -114,7 +114,7 @@ const PACKAGE_SECTIONS = [
 /* Refined per-section accent — the same nine-hue harmonised family used across
    the Calendar, File Cabinet and AI Assistant, cycled by index so this reads
    as one product with the rest of the redesigned portal. */
-const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#5A8078","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 const THEMED_SECTIONS = PACKAGE_SECTIONS.map((s, i) => ({ ...s, color: RAMP[i % RAMP.length] }));
 
 /* ── Archive builders ────────────────────────────────────────────────

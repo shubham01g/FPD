@@ -191,7 +191,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                     </div>
                     <div className="flex justify-center my-4">
                       <div className="px-6 py-2.5 rounded-xl text-sm font-bold"
-                        style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", display:"inline-block" }}>
+                        style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", display:"inline-block" }}>
                         Choose Your Callback Time →
                       </div>
                     </div>
@@ -368,7 +368,7 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
             <span style={{ color:"#5BA7D6", fontSize:11, fontWeight:700 }}>{completionPct}%</span>
           </div>
           <div className="h-2 rounded-full" style={{ background:"rgba(91,167,214,0.1)" }}>
-            <div className="h-2 rounded-full" style={{ width:`${completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#5A8078)" }}/>
+            <div className="h-2 rounded-full" style={{ width:`${completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#6F9E94)" }}/>
           </div>
         </div>
 
@@ -582,7 +582,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           <div className="flex items-center gap-2.5">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:30, height:30, borderRadius:7, objectFit:"contain" }}/>
             <div>
-              <div style={{ ...DISPLAY, color:"#5A8078", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ ...DISPLAY, color:"#6F9E94", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#34456A", fontSize:7, letterSpacing:"0.12em", ...MONO }}>CONCIERGE PORTAL</div>
             </div>
           </div>
@@ -616,11 +616,11 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
               style={{ background:tab===item.id?"rgba(91,167,214,0.15)":"transparent",
                 color:tab===item.id?"#FFFFFF":"#B0C0DC",
                 borderLeft:`2px solid ${tab===item.id?"#5BA7D6":"transparent"}` }}>
-              <span style={{ color:tab===item.id?"#5A8078":"inherit" }}>{item.icon}</span>
+              <span style={{ color:tab===item.id?"#6F9E94":"inherit" }}>{item.icon}</span>
               <span style={{ fontSize:12, fontWeight:tab===item.id?600:400, flex:1 }}>{item.label}</span>
               {item.badge !== undefined && (
                 <span className="px-1.5 py-0.5 rounded-full text-xs font-bold"
-                  style={{ background:tab===item.id?"rgba(255,255,255,0.15)":"rgba(91,167,214,0.2)", color:tab===item.id?"#fff":"#5A8078", ...MONO, fontSize:9 }}>
+                  style={{ background:tab===item.id?"rgba(255,255,255,0.15)":"rgba(91,167,214,0.2)", color:tab===item.id?"#fff":"#6F9E94", ...MONO, fontSize:9 }}>
                   {item.badge}
                 </span>
               )}

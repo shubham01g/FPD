@@ -74,7 +74,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         padding: open ? "7px 10px" : "9px",
         justifyContent: open ? "flex-start" : "center",
         background: isActive(item.id) ? "rgba(91,167,214,0.15)" : "transparent",
-        color: isActive(item.id) ? "#5A8078" : "rgba(255,255,255,0.65)",
+        color: isActive(item.id) ? "#6F9E94" : "rgba(255,255,255,0.65)",
         borderLeft: isActive(item.id) ? "2px solid #5BA7D6" : "2px solid transparent",
         boxShadow: isActive(item.id) ? "inset 0 0 20px rgba(91,167,214,0.05)" : "none",
       }}>

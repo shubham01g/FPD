@@ -14,7 +14,7 @@ import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../servi
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -110,7 +110,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"utilities", label:"Utilities & Services", color:"#5A8078", emoji:"⚡",
+    id:"utilities", label:"Utilities & Services", color:"#6F9E94", emoji:"⚡",
     description:"Electric, gas, water, internet, phone, HOA monthly bills",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electric","Natural Gas","Water & Sewer","Internet","HOA","Phone & Cable"],
@@ -196,7 +196,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"digital", label:"Digital Assets", color:"#5A8078", emoji:"₿",
+    id:"digital", label:"Digital Assets", color:"#6F9E94", emoji:"₿",
     description:"Cryptocurrency, online accounts, passwords, domains",
     acceptedTypes:"application/pdf,.txt,.pdf",
     subFolders:["Cryptocurrency","Online Accounts","Domains","Social Media","Passwords"],
@@ -319,7 +319,7 @@ const cabinets: Cabinet[] = [
    The Secret Vault keeps a dedicated "locked" red since it is the one folder
    gated behind a PIN. Underlying folder data (files, sub-folders, emoji) is
    untouched — only the display accent is recoloured here. */
-const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#5A8078","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
   ...c, color: c.id === "secret" ? NEG : RAMP[i % RAMP.length],
 }));

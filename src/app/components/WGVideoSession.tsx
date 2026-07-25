@@ -201,7 +201,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
               ))}
             </div>
             <div className="w-full py-2 rounded-xl text-xs font-bold text-center"
-              style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F" }}>
+              style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F" }}>
               Start Video Call
             </div>
           </button>
@@ -336,14 +336,14 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
             <span style={{ fontSize:14, fontWeight:700, ...MONO }}>{formatTime(elapsed)}</span>
           </div>
           {/* Billing */}
-          <div className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(91,167,214,0.15)", color:"#5A8078", ...MONO }}>
+          <div className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(91,167,214,0.15)", color:"#6F9E94", ...MONO }}>
             ${charge} · {blocks} block{blocks !== 1 ? "s" : ""}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowTools(t => !t)}
             className="px-3 py-1.5 rounded-lg text-xs"
-            style={{ background:showTools?"rgba(91,167,214,0.2)":"rgba(255,255,255,0.06)", color:showTools?"#5A8078":"#8A9AB8" }}>
+            style={{ background:showTools?"rgba(91,167,214,0.2)":"rgba(255,255,255,0.06)", color:showTools?"#6F9E94":"#8A9AB8" }}>
             <Folder size={11} style={{ display:"inline", marginRight:4 }}/>Tools
           </button>
           <button onClick={() => setMinimized(m => !m)} style={{ color:"#8A9AB8" }}>
@@ -366,7 +366,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
                     style={{ background:"linear-gradient(135deg,#1a1f36,#0f1626)" }}>
                     <div className="flex items-center justify-center rounded-full font-bold"
-                      style={{ width:72, height:72, background:"rgba(91,167,214,0.2)", color:"#5A8078", fontSize:28, fontFamily:"var(--font-display)" }}>
+                      style={{ width:72, height:72, background:"rgba(91,167,214,0.2)", color:"#6F9E94", fontSize:28, fontFamily:"var(--font-display)" }}>
                       {clientName.split(" ").map(w=>w[0]).join("").slice(0,2)}
                     </div>
                     <div style={{ color:"#E8EDF5", fontSize:14, fontFamily:"var(--font-display)" }}>{clientName}</div>
@@ -457,7 +457,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                 <div>
                   <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:6 }}>UPLOAD DURING CALL</div>
                   <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
-                    style={{ background:"rgba(91,167,214,0.15)", color:"#5A8078", border:"1px dashed rgba(91,167,214,0.4)" }}>
+                    style={{ background:"rgba(91,167,214,0.15)", color:"#6F9E94", border:"1px dashed rgba(91,167,214,0.4)" }}>
                     <Upload size={12}/> Upload Document
                     <input type="file" className="hidden" onChange={e => {
                       const file = e.target.files?.[0];
@@ -482,7 +482,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                         className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left text-xs transition-all"
                         style={{
                           background: activeSection===sec.id ? "rgba(91,167,214,0.2)" : "rgba(255,255,255,0.03)",
-                          color: activeSection===sec.id ? "#5A8078" : "#9CA3AF",
+                          color: activeSection===sec.id ? "#6F9E94" : "#9CA3AF",
                           border: `1px solid ${activeSection===sec.id ? "rgba(91,167,214,0.4)" : "transparent"}`,
                         }}>
                         <span style={{ fontSize:14 }}>{sec.icon}</span>
@@ -546,7 +546,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         {/* Invite / notify client */}
         <button onClick={() => toast.success(`${isVideo ? "Video join link" : "Call reminder"} sent to ${clientName} via SMS`)}
           className="flex items-center justify-center rounded-full"
-          style={{ width:44, height:44, background:`rgba(${isVideo?"58,91,217":"74,144,217"},0.15)`, border:`1px solid rgba(${isVideo?"58,91,217":"74,144,217"},0.35)`, color:isVideo?"#5A8078":"#5BA7D6" }}>
+          style={{ width:44, height:44, background:`rgba(${isVideo?"58,91,217":"74,144,217"},0.15)`, border:`1px solid rgba(${isVideo?"58,91,217":"74,144,217"},0.35)`, color:isVideo?"#6F9E94":"#5BA7D6" }}>
           <Users size={18}/>
         </button>
 

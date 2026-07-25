@@ -13,7 +13,7 @@ import { CryptoPayment } from "./CryptoPayment";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -47,7 +47,7 @@ const FULL_COVERAGE = [
   { icon:<Car size={14}/>,         color:ACCENT2, label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
   { icon:<Camera size={14}/>,      color:ACCENT2, label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
   { icon:<BookOpen size={14}/>,    color:WARN,    label:"Digital Diary", desc:"All audio, video, and written diary entries" },
-  { icon:<Key size={14}/>,         color:"#5A8078", label:"Password Manager", desc:"All saved credentials and account information" },
+  { icon:<Key size={14}/>,         color:"#6F9E94", label:"Password Manager", desc:"All saved credentials and account information" },
   { icon:<Users size={14}/>,       color:POS,     label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
   { icon:<PawPrint size={14}/>,    color:WARN,    label:"Pet Records & Instructions", desc:"Veterinary records and pet care instructions" },
 ];

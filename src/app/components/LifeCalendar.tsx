@@ -28,7 +28,7 @@ import {
 const TEXT   = "#EFF2F9";
 const SOFT   = "#BCC5DA";
 const MUTED  = "#8C97B4";
-const FAINT  = "#6B7690";
+const FAINT  = "#808BAA";
 const ACCENT = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS    = "#5FBE91";
@@ -44,7 +44,7 @@ const SRC: Record<EventSource, { color: string; Icon: IconCmp }> = {
   occasion:  { color: "#7E6BD8", Icon: Cake },        // soft lavender
   warranty:  { color: "#5B6EE1", Icon: ShieldCheck }, // royal blue
   document:  { color: "#5BA7D6", Icon: IdCard },      // dusty blue
-  travel:    { color: "#5A8078", Icon: Plane },       // calm teal
+  travel:    { color: "#6F9E94", Icon: Plane },       // calm teal
   medical:   { color: "#6FAE8B", Icon: Pill },        // soft sage
   concierge: { color: "#7E6BD8", Icon: Star },        // soft lilac
   custom:    { color: "#97A2C6", Icon: Pin },         // slate blue

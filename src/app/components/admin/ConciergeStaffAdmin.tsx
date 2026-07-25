@@ -137,7 +137,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", opacity:sending?0.7:1 }}>
+              style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending Invite…" : "Send Concierge Invite"}
             </button>
             <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
@@ -300,7 +300,7 @@ export function ConciergeStaffAdmin() {
         </div>
         <button onClick={() => setShowInvite(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
-          style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}>
+          style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}>
           <Plus size={14}/> Invite Employee
         </button>
       </div>

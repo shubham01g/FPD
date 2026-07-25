@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -18,7 +18,7 @@ type Tab = "folders"|"reminders"|"occasions";
 
 /* Refined per-folder accent — the same nine-hue harmonised family used across
    the Calendar, File Cabinet and Legacy Vault. */
-const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#5A8078","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 
 const folders = [
   { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:RAMP[0], desc:"Wills, trusts, power of attorney" },

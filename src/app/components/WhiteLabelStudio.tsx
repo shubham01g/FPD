@@ -30,7 +30,7 @@ const PRESET_COLORS = [
   { name: "Emerald", primary: "#2F9E6E", accent: "#48BB78" },
   { name: "Amber", primary: "#D98A2B", accent: "#F6AD55" },
   { name: "Rose", primary: "#D9536B", accent: "#FC8181" },
-  { name: "Teal", primary: "#5A8078", accent: "#5A8078" },
+  { name: "Teal", primary: "#6F9E94", accent: "#6F9E94" },
   { name: "Violet", primary: "#7E6BD8", accent: "#7E6BD8" },
   { name: "Slate", primary: "#48566E", accent: "#7688A8" },
 ];

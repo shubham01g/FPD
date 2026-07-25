@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -78,7 +78,7 @@ const sampleEntries: DiaryEntry[] = [
   },
 ];
 
-const TAGS_PALETTE = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#5A8078","#ED8936","#E53E3E"];
+const TAGS_PALETTE = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#6F9E94","#ED8936","#E53E3E"];
 
 function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
   const c = color ?? ACCENT2;

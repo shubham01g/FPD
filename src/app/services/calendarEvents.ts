@@ -39,7 +39,7 @@ export const SOURCE_META: Record<EventSource, { label: string; color: string; ic
   occasion:  { label: "Occasions",           color: "#FC8181", icon: "🎂" },
   warranty:  { label: "Warranties",          color: "#5BA7D6", icon: "🛡️" },
   document:  { label: "Document Expiry",     color: "#ED8936", icon: "🪪" },
-  travel:    { label: "Travel",              color: "#5A8078", icon: "✈️" },
+  travel:    { label: "Travel",              color: "#6F9E94", icon: "✈️" },
   medical:   { label: "Medical",             color: "#48BB78", icon: "💊" },
   concierge: { label: "White Glove Session", color: "#F6C453", icon: "⭐" },
   custom:    { label: "Personal",            color: "#5BA7D6", icon: "📌" },

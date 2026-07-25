@@ -493,7 +493,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
           {assignedClientIds.map(id => (
             <button key={id} onClick={() => setLinkModal(id)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F" }}>
+              style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F" }}>
               <Link size={13}/> Send Link to {CLIENT_NAMES[id]?.split(" ")[0] ?? id}
             </button>
           ))}

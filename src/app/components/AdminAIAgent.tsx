@@ -187,7 +187,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
   if (!open && !inline) return (
     <button onClick={() => setOpen(true)}
       className="fixed bottom-24 left-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl"
-      style={{ background:"linear-gradient(135deg,#5BA7D6,#5A8078)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
+      style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
       <Crown size={16}/> Admin Assistant
     </button>
   );
@@ -250,7 +250,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
               style={{ flex:1, border:"1px solid rgba(91,167,214,0.25)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(91,167,214,0.03)" }}/>
             <button onClick={()=>send(input)} disabled={!input.trim()}
               className="flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#5A8078" }}>
+              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#6F9E94" }}>
               <Send size={16}/>
             </button>
           </div>

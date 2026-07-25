@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -32,7 +32,7 @@ interface ContactGroup {
   createdAt: string;
 }
 
-const GROUP_COLORS = ["#7E6BD8","#5B6EE1","#5BA7D6","#5A8078","#6FAE8B"];
+const GROUP_COLORS = ["#7E6BD8","#5B6EE1","#5BA7D6","#6F9E94","#6FAE8B"];
 
 /* ── Blast Email Modal ─────────────────────────────────────────────── */
 function BlastEmailModal({
@@ -106,7 +106,7 @@ function BlastEmailModal({
   );
 }
 
-const COLORS = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#5A8078","#ED8936","#5BA7D6"];
+const COLORS = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#6F9E94","#ED8936","#5BA7D6"];
 
 const initContacts: Contact[] = [
   { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#5B6EE1", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
@@ -114,7 +114,7 @@ const initContacts: Contact[] = [
   { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#5B6EE1", notes:"Lives in Sacramento. Loves art and teaching." },
   { id:"c4", name:"Tyler Doe", relationship:"Grandson", birthday:"Mar 5", group:"immediate", initials:"TD", color:"#F6AD55", notes:"Age 8. Loves dinosaurs and baseball. Peanut allergy." },
   { id:"c5", name:"Lily Doe", relationship:"Granddaughter", birthday:"Jul 19", group:"immediate", initials:"LD", color:"#FC8181", notes:"Age 6. Loves ballet and painting." },
-  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#5A8078" },
+  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#6F9E94" },
   { id:"c7", name:"Linda Torres", relationship:"Sister-in-law", phone:"(916) 555-0821", email:"ltorres@email.com", birthday:"Apr 12", group:"extended", initials:"LT", color:"#ED8936" },
   { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#5BA7D6", notes:"We go back to Army days. Fishing partner." },
   { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#5B6EE1", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },

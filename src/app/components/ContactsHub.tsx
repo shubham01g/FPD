@@ -13,7 +13,7 @@ import { ScanButton } from "./DocumentScanner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -73,7 +73,7 @@ const FOLDER_CATALOG = [
   { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
   { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
   { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#5BA7D6" },
-  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#5A8078" },
+  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#6F9E94" },
   { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#5B6EE1" },
   { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
   { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },

@@ -362,7 +362,7 @@ const templates: EmailTemplate[] = [
       </div>
     </div>
     <div style="text-align:center">
-      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#5A8078);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px;box-shadow:0 0 20px rgba(91,167,214,0.3)">Access Partner Dashboard →</a>
+      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px;box-shadow:0 0 20px rgba(91,167,214,0.3)">Access Partner Dashboard →</a>
     </div>
   </div>
 </div>`,
@@ -393,7 +393,7 @@ const templates: EmailTemplate[] = [
       <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Staff training session</p>
     </div>
     <div style="text-align:center">
-      <a href="{{setup_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#5A8078);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">Begin Setup Portal →</a>
+      <a href="{{setup_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">Begin Setup Portal →</a>
     </div>
   </div>
 </div>`,

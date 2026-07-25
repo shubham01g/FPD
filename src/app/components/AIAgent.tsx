@@ -10,7 +10,7 @@ import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const PURPLE  = "#7E6BD8";

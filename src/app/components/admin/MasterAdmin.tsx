@@ -160,7 +160,7 @@ const featureAdoption = [
   { feature:"Medical Info",         adopted:58.1, total:51490, color:"#5BA7D6" },
   { feature:"Financial Records",    adopted:52.4, total:51490, color:"#F6AD55" },
   { feature:"Digital Diary",        adopted:41.8, total:51490, color:"#ED8936" },
-  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#5A8078" },
+  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#6F9E94" },
   { feature:"Affiliate Program",    adopted:29.4, total:51490, color:"#FC8181" },
   { feature:"$199 Continuation Fee",adopted:18.7, total:51490, color:"#E53E3E" },
 ];

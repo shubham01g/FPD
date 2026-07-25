@@ -12,7 +12,7 @@ interface UserDashboardProps { onNavigate: (page: string) => void; }
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -24,9 +24,9 @@ const NEG     = "#D06B6B";
    colours untouched. Toned to match the Calendar: every slice stays light
    enough to read on the dark surface and distinct enough to tell apart,
    without any slice shouting against the theme. */
-const STORAGE_RAMP = ["#5BA7D6", "#5A8078", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
+const STORAGE_RAMP = ["#5BA7D6", "#6F9E94", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
 /* Remaining / free space — a quiet slate so "what's left" reads at a glance. */
-const FREE = "#6B7690";
+const FREE = "#808BAA";
 
 const storageHistory = [
   { month: "Jan", used: 4.2 }, { month: "Feb", used: 6.8 }, { month: "Mar", used: 9.1 },
@@ -389,7 +389,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 {breakdown.map(seg => (
                   <i key={seg.key} title={`${seg.label} · ${seg.pct.toFixed(0)}%`} style={{ width: `${(seg.gb / total) * 100}%`, background: seg.color }} />
                 ))}
-                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(107,118,144,0.22)" }} />
+                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(128,139,170,0.22)" }} />
               </div>
               <div className="uf">
                 <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b><i>{pct}%</i></div>

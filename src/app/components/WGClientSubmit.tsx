@@ -215,8 +215,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
         <div className="p-5 rounded-2xl glow-surface"
           style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", border:"1px solid rgba(91,167,214,0.3)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <Star size={16} color="#5A8078" fill="rgba(90,128,120,0.3)"/>
-            <span style={{ color:"#5A8078", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+            <Star size={16} color="#6F9E94" fill="rgba(111,158,148,0.3)"/>
+            <span style={{ color:"#6F9E94", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
               WHITE GLOVE CONCIERGE
             </span>
           </div>
@@ -224,7 +224,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             Hello, {clientName.split(" ")[0]}! 👋
           </div>
           <p style={{ color:"#8AA3C8", fontSize:13, lineHeight:1.7 }}>
-            Your specialist <strong style={{ color:"#5A8078" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
+            Your specialist <strong style={{ color:"#6F9E94" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
           </p>
           <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl"
             style={{ background:"rgba(72,187,120,0.1)", border:"1px solid rgba(72,187,120,0.2)" }}>
@@ -365,7 +365,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               className="w-full flex items-center justify-center gap-3 py-5 rounded-2xl font-bold text-base"
               style={{ background:uploading || !selectedFile || !category
                   ? "rgba(91,167,214,0.3)"
-                  : "linear-gradient(135deg,#5BA7D6,#5A8078)",
+                  : "linear-gradient(135deg,#5BA7D6,#6F9E94)",
                 color: uploading || !selectedFile || !category ? "#8A9AB8" : "#04080F",
                 boxShadow: uploading || !selectedFile || !category ? "none" : "0 0 32px rgba(91,167,214,0.4)",
                 fontSize:16 }}>

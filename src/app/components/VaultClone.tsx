@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#8C97B4";
-const FAINT   = "#6B7690";
+const FAINT   = "#808BAA";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
@@ -32,7 +32,7 @@ const ALL_CONTENTS = [
   { icon:<Car size={13}/>,         color:ACCENT2,   label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
   { icon:<Camera size={13}/>,      color:"#5B6EE1", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
   { icon:<BookOpen size={13}/>,    color:"#ED8936", label:"Digital Diary",         count:"12 entries", desc:"Audio, video, and text entries" },
-  { icon:<Key size={13}/>,         color:"#5A8078", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
+  { icon:<Key size={13}/>,         color:"#6F9E94", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
   { icon:<Users size={13}/>,       color:"#68D391", label:"Contacts & Designations",count:"6 contacts",desc:"Legacy, guardian, emergency contacts" },
   { icon:<PawPrint size={13}/>,    color:"#F6AD55", label:"Pet Records",           count:"5 records",  desc:"Vet records, instructions" },
   { icon:<Lock size={13}/>,        color:"#FC8181", label:"Secret Vault",          count:"3 items",    desc:"Most sensitive items (opt-in)" },
