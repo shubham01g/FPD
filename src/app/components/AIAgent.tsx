@@ -13,6 +13,10 @@ const MUTED   = "#8C97B4";
 const FAINT   = "#6B7690";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
+const PURPLE  = "#7E6BD8";
+const INDIGO  = "#5B6EE1";
+const CYAN    = ACCENT2;
+const GREEN   = "#6FAE8B";
 
 interface Message { id: string; role: "user"|"agent"; text: string; time: string; }
 
@@ -260,12 +264,15 @@ const POPULAR: { q: string; Icon: IconCmp }[] = [
   { q: "How does White Glove work?",             Icon: Star },
 ];
 
-/* ── Page-mode KPI ledger (mirrors the dashboard / calendar stat strip) ─── */
-const STATS: { label: string; value: string; sub: string; Icon: IconCmp; dot: string }[] = [
-  { label: "Topics Covered",   value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   dot: ACCENT2 },
-  { label: "Platform Sections",value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, dot: ACCENT2 },
-  { label: "Response Time",    value: "<1s",  sub: "Instant answers",          Icon: Zap,        dot: POS },
-  { label: "Availability",     value: "24/7", sub: "Always on",                Icon: Clock,      dot: POS },
+/* ── Page-mode KPI ledger (mirrors the dashboard / calendar stat strip) ───
+   Each column is assigned one of the site's 5 accent colors, giving the
+   ledger the same colored-column identity used across the rest of the
+   portal instead of one flat repeated tint. */
+const STATS: { label: string; value: string; sub: string; Icon: IconCmp; color: string }[] = [
+  { label: "Topics Covered",   value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   color: "purple" },
+  { label: "Platform Sections",value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, color: "indigo" },
+  { label: "Response Time",    value: "<1s",  sub: "Instant answers",          Icon: Zap,        color: "cyan"   },
+  { label: "Availability",     value: "24/7", sub: "Always on",                Icon: Clock,      color: "green"  },
 ];
 
 /* ── Markdown renderer — styled through the scoped .fpd-ai classes ───
@@ -390,16 +397,31 @@ const AI_CSS = `
 .fpd-ai .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-ai .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},#5B6EE1);}
 
-/* KPI ledger */
+/* KPI ledger — each column carries one of the 5 site accent colors and
+   ignites into a glowing "laser" divider with a traveling sweep on hover. */
 .fpd-ai .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;flex-shrink:0;overflow:hidden;}
-.fpd-ai .kcell{padding:18px 20px;border-left:1px solid rgba(255,255,255,0.22);}
-.fpd-ai .kcell:first-child{border-left:none;}
-.fpd-ai .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.fpd-ai .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-ai .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-ai .kcell .kval{font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-ai .kcell .ksub{font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;}
-.fpd-ai .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.fpd-ai .kcell{--c:${INDIGO};position:relative;padding:18px 20px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 7%,transparent),transparent 55%);}
+.fpd-ai .kcell.c-purple{--c:${PURPLE};}
+.fpd-ai .kcell.c-indigo{--c:${INDIGO};}
+.fpd-ai .kcell.c-cyan{--c:${CYAN};}
+.fpd-ai .kcell.c-green{--c:${GREEN};}
+.fpd-ai .kcell::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--c) 65%,transparent) 50%,transparent);transition:width .25s ease,top .25s ease,bottom .25s ease,box-shadow .25s ease;}
+.fpd-ai .kcell:first-child::before{display:none;}
+.fpd-ai .kcell:hover::before{top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,var(--c) 50%,transparent);box-shadow:0 0 16px 1px var(--c);}
+.fpd-ai .kcell::after{content:"";position:absolute;left:-1px;top:-40%;width:2px;height:40%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--c) 90%,white 10%),transparent);opacity:0;filter:blur(0.5px);}
+.fpd-ai .kcell:hover::after{opacity:1;animation:fpd-ai-laser-sweep 1.3s ease-in-out infinite;}
+@keyframes fpd-ai-laser-sweep{0%{top:-40%;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
+.fpd-ai .kcell .kbar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,var(--c),transparent);transform:scaleX(0);transform-origin:left;transition:transform .22s ease;}
+.fpd-ai .kcell:hover .kbar{transform:scaleX(1);}
+.fpd-ai .kcell .khead{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.fpd-ai .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};transition:color .2s;}
+.fpd-ai .kcell:hover .klbl{color:color-mix(in srgb,var(--c) 70%,${SOFT});}
+.fpd-ai .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};transition:border-color .2s,color .2s,background .2s;}
+.fpd-ai .kcell:hover .kico{border-color:color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#0F1624);}
+.fpd-ai .kcell .kval{position:relative;z-index:1;font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;transition:color .2s;}
+.fpd-ai .kcell:hover .kval{color:var(--c);}
+.fpd-ai .kcell .ksub{position:relative;z-index:1;font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;}
+.fpd-ai .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--c);box-shadow:0 0 6px color-mix(in srgb,var(--c) 70%,transparent);}
 
 /* bento */
 .fpd-ai .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;flex:1;min-height:0;}
@@ -485,11 +507,13 @@ const AI_CSS = `
   .fpd-ai .chatcard{height:600px;}
   .fpd-ai .col{overflow:visible;}
   .fpd-ai .kstrip{grid-template-columns:1fr 1fr;}
-  .fpd-ai .kcell:nth-child(3){border-left:none;}
+  .fpd-ai .kcell:nth-child(3)::before{display:none;}
   .fpd-ai .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}
 }
 @media (prefers-reduced-motion:reduce){
   .fpd-ai .typing .dot,.fpd-ai .hd-status .d,.fpd-ai .chat-status .d,.fpd-ai-launch,.fpd-ai .send.on{animation:none!important;transition:none!important;}
+  .fpd-ai .kcell::after{animation:none!important;}
+  .fpd-ai .kcell::before,.fpd-ai .kcell .kbar,.fpd-ai .kcell .klbl,.fpd-ai .kcell .kico,.fpd-ai .kcell .kval{transition:none!important;}
 }
 `;
 
@@ -584,13 +608,14 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
           {/* KPI ledger */}
           <div className="card kstrip glow-surface">
             {STATS.map(s => (
-              <div key={s.label} className="kcell">
+              <div key={s.label} className={`kcell c-${s.color}`}>
                 <div className="khead">
                   <span className="klbl">{s.label}</span>
                   <span className="kico"><s.Icon size={14}/></span>
                 </div>
                 <div className="kval">{s.value}</div>
-                <div className="ksub"><span className="dt" style={{ background:s.dot }}/>{s.sub}</div>
+                <div className="ksub"><span className="dt"/>{s.sub}</div>
+                <span className="kbar"/>
               </div>
             ))}
           </div>
