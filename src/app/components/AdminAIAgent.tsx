@@ -123,18 +123,18 @@ function renderMarkdown(text: string) {
       if (line.includes("---")) return null;
       return (
         <div key={i} className="flex gap-2 text-xs py-0.5 flex-wrap">
-          {cells.map((cell,j) => <span key={j} style={{ color:j===0?"#0D1428":"#5A6A88", minWidth:70, fontWeight:j===0?600:400 }}>{cell.trim().replace(/\*\*/g,"")}</span>)}
+          {cells.map((cell,j) => <span key={j} style={{ color:j===0?"#E8EDF5":"#8A9AB8", minWidth:70, fontWeight:j===0?600:400 }}>{cell.trim().replace(/\*\*/g,"")}</span>)}
         </div>
       );
     }
     if (line.startsWith("• ") || line.startsWith("* ")) {
       const content = line.slice(2).replace(/\*\*([^*]+)\*\*/g,"$1");
-      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#374669" }}><span style={{ color:"#3A5BD9", flexShrink:0 }}>•</span><span>{content}</span></div>;
+      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#8A9AB8" }}><span style={{ color:"#6E90C9", flexShrink:0 }}>•</span><span>{content}</span></div>;
     }
     const parts = line.split(/\*\*([^*]+)\*\*/g);
     return (
-      <p key={i} style={{ color:"#374669", fontSize:13, lineHeight:1.7, margin:"2px 0" }}>
-        {parts.map((p,j) => j%2===1 ? <strong key={j} style={{ color:"#0D1428" }}>{p}</strong> : p)}
+      <p key={i} style={{ color:"#8A9AB8", fontSize:13, lineHeight:1.7, margin:"2px 0" }}>
+        {parts.map((p,j) => j%2===1 ? <strong key={j} style={{ color:"#E8EDF5" }}>{p}</strong> : p)}
       </p>
     );
   }).filter(Boolean);
@@ -144,7 +144,7 @@ function TypingIndicator() {
   return (
     <div className="flex gap-1 items-center px-4 py-3">
       {[0,1,2].map(i => (
-        <div key={i} style={{ width:7, height:7, borderRadius:"50%", background:"#6E8BFF", animation:`pulse 1.4s ease-in-out ${i*0.2}s infinite`, opacity:0.6 }}/>
+        <div key={i} style={{ width:7, height:7, borderRadius:"50%", background:"#5BA7D6", animation:`pulse 1.4s ease-in-out ${i*0.2}s infinite`, opacity:0.6 }}/>
       ))}
     </div>
   );
@@ -181,13 +181,13 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
   };
 
   const wrapStyle: React.CSSProperties = inline
-    ? { display:"flex", flexDirection:"column", height:"calc(100vh - 120px)", borderRadius:16, overflow:"hidden", border:"1px solid rgba(110,139,255,0.25)", background:"#FFFFFF", boxShadow:"0 4px 20px rgba(110,139,255,0.1)" }
-    : { position:"fixed", bottom:24, left:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:16, overflow:"hidden", boxShadow:"0 20px 60px rgba(110,139,255,0.3)", width:390, height:minimized?"auto":580, background:"#FFFFFF", border:"1px solid rgba(110,139,255,0.25)" };
+    ? { display:"flex", flexDirection:"column", height:"calc(100vh - 120px)", borderRadius:16, overflow:"hidden", border:"1.5px solid rgba(91,167,214,0.35)", background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)" }
+    : { position:"fixed", bottom:24, left:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:16, overflow:"hidden", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 20px 60px rgba(0,0,0,0.5)", width:390, height:minimized?"auto":580, background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)" };
 
   if (!open && !inline) return (
     <button onClick={() => setOpen(true)}
       className="fixed bottom-24 left-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl"
-      style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 8px 32px rgba(110,139,255,0.45)" }}>
+      style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
       <Crown size={16}/> Admin Assistant
     </button>
   );
@@ -195,7 +195,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
   return (
     <div style={wrapStyle}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#6E8BFF,#2E4BC7)" }}>
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#5BA7D6,#5B6EE1)" }}>
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center rounded-xl" style={{ width:32, height:32, background:"rgba(255,255,255,0.15)" }}>
             <Crown size={18} color="#fff"/>
@@ -218,39 +218,39 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
       {!minimized && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background:"#FAF5FF" }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background:"#070A12" }}>
             {messages.map(msg => (
               <div key={msg.id} className={`flex ${msg.role==="user"?"justify-end":"justify-start"}`}>
-                <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#6E8BFF,#2E4BC7)":"#FFFFFF", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(110,139,255,0.1)":undefined, border:msg.role==="agent"?"1px solid rgba(110,139,255,0.15)":undefined }}>
+                <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"#141B2E", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(0,0,0,0.3)":undefined, border:msg.role==="agent"?"1px solid rgba(91,167,214,0.25)":undefined }}>
                   {msg.role==="agent" ? <div className="space-y-1">{renderMarkdown(msg.text)}</div> : <p style={{ fontSize:13, lineHeight:1.5 }}>{msg.text}</p>}
                   <div style={{ fontSize:10, opacity:0.5, marginTop:4, textAlign:"right", ...MONO }}>{msg.time}</div>
                 </div>
               </div>
             ))}
-            {typing && <div style={{ background:"#fff", borderRadius:16, border:"1px solid rgba(110,139,255,0.15)", width:"fit-content" }}><TypingIndicator/></div>}
+            {typing && <div style={{ background:"#141B2E", borderRadius:16, border:"1px solid rgba(91,167,214,0.25)", width:"fit-content" }}><TypingIndicator/></div>}
             <div ref={endRef}/>
           </div>
 
           {/* Suggestions */}
-          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ borderTop:"1px solid rgba(110,139,255,0.1)" }}>
+          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ borderTop:"1px solid rgba(91,167,214,0.1)" }}>
             {ADMIN_SUGGESTIONS.map(s => (
               <button key={s} onClick={()=>send(s)}
                 className="text-xs px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background:"rgba(110,139,255,0.08)", color:"#6E8BFF", border:"1px solid rgba(110,139,255,0.2)" }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", border:"1px solid rgba(91,167,214,0.2)" }}>
                 {s}
               </button>
             ))}
           </div>
 
           {/* Input */}
-          <div className="flex gap-2 p-3 flex-shrink-0" style={{ borderTop:"1px solid rgba(110,139,255,0.1)", background:"#fff" }}>
+          <div className="flex gap-2 p-3 flex-shrink-0" style={{ borderTop:"1px solid rgba(91,167,214,0.2)", background:"#0A0F1A" }}>
             <input value={input} onChange={e=>setInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&send(input)}
               placeholder="Ask anything about the Command Center…"
-              style={{ flex:1, border:"1px solid rgba(110,139,255,0.25)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(110,139,255,0.03)" }}/>
+              style={{ flex:1, border:"1px solid rgba(91,167,214,0.3)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"#141B2E", color:"#FFFFFF" }}/>
             <button onClick={()=>send(input)} disabled={!input.trim()}
               className="flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#6E8BFF,#2E4BC7)":"rgba(110,139,255,0.15)", color:input.trim()?"#fff":"#B8C6F5" }}>
+              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#D68FA8" }}>
               <Send size={16}/>
             </button>
           </div>

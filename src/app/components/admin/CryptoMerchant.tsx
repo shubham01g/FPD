@@ -8,9 +8,9 @@ import {
 import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
 
-const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
 type Tab = "processors" | "transactions" | "wallets" | "settings";
 
@@ -155,7 +155,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>{proc.name}</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>{proc.name}</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{ background:statusBg, color:statusColor, ...MONO }}>
                   {proc.status.toUpperCase()}
@@ -172,23 +172,23 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           <div className="flex items-center gap-2">
             <button onClick={() => setExpanded(!expanded)}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               {expanded ? "Hide" : "Configure"}
             </button>
             <button onClick={connect}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:proc.status==="connected"?"rgba(252,129,129,0.1)":"rgba(72,187,120,0.1)", color:proc.status==="connected"?"#FC8181":"#48BB78" }}>
+              style={{ background:proc.status==="connected"?"rgba(252,129,129,0.1)":"rgba(72,187,120,0.1)", color:proc.status==="connected"?"#FC8181":"#D99A6B" }}>
               {proc.status === "connected" ? "Disconnect" : "Connect"}
             </button>
           </div>
         </div>
 
-        <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7, marginTop:10 }}>{proc.description}</p>
+        <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7, marginTop:10 }}>{proc.description}</p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           {proc.features.map(f => (
             <span key={f} className="px-2 py-0.5 rounded-full text-xs"
-              style={{ background:`${proc.color}08`, border:`1px solid ${proc.color}20`, color:"#5A6A88" }}>
+              style={{ background:`${proc.color}08`, border:`1px solid ${proc.color}20`, color:"#8A9AB8" }}>
               {f}
             </span>
           ))}
@@ -196,9 +196,9 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
       </div>
 
       {expanded && (
-        <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+        <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div className="pt-4">
-            <div style={{ color:"#5A6A88", fontSize:10, ...MONO, marginBottom:10 }}>API CREDENTIALS</div>
+            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:10 }}>API CREDENTIALS</div>
             <div className="space-y-3">
               {Object.entries(localConfig).map(([key, val]) => (
                 <div key={key}>
@@ -225,11 +225,11 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           </div>
 
           <div>
-            <div style={{ color:"#5A6A88", fontSize:10, ...MONO, marginBottom:6 }}>SETTLEMENT OPTIONS</div>
+            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>SETTLEMENT OPTIONS</div>
             <div className="flex flex-wrap gap-2">
               {proc.settlementOptions.map(s => (
                 <span key={s} className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                  style={{ background:`${proc.color}10`, border:`1px solid ${proc.color}25`, color:"#0D1428" }}>
+                  style={{ background:`${proc.color}10`, border:`1px solid ${proc.color}25`, color:"#E8EDF5" }}>
                   {s}
                 </span>
               ))}
@@ -239,12 +239,12 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           <div className="flex gap-2">
             <button onClick={() => { onUpdate(proc.id, { config: localConfig }); toast.success("Settings saved"); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Credentials
             </button>
             <button onClick={() => { copyToClipboard(`https://api.finalpassdown.com/webhooks/${proc.id}`); toast.success("Webhook URL copied"); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Copy size={11}/> Copy Webhook URL
             </button>
           </div>
@@ -283,8 +283,8 @@ export function CryptoMerchant() {
           <span style={{ fontSize:18 }}>₿</span>
           <span style={{ color:"#F7931A", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · CRYPTO MERCHANT CENTER</span>
         </div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Crypto Payment Merchant</h1>
-        <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
+        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#E8EDF5" }}>Crypto Payment Merchant</h1>
+        <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
           Configure crypto payment processors, manage merchant accounts, track all crypto transactions, and set up settlement preferences.
         </p>
       </div>
@@ -292,14 +292,14 @@ export function CryptoMerchant() {
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label:"Connected Processors", value:connected.length,                            color:"#48BB78" },
+          { label:"Connected Processors", value:connected.length,                            color:"#D99A6B" },
           { label:"Crypto Revenue (Jun)",  value:`$${totalCryptoRevenue.toLocaleString()}`,  color:"#F7931A" },
-          { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#3A5BD9" },
+          { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#6E90C9" },
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -310,7 +310,7 @@ export function CryptoMerchant() {
         <div className="flex flex-wrap gap-2 flex-1">
           {["BTC","ETH","USDC","USDT","SOL","BNB","XRP","LTC"].map(coin => (
             <span key={coin} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-              style={{ background:`${COIN_COLORS[coin] ?? "#5A6A88"}15`, color:COIN_COLORS[coin] ?? "#5A6A88", border:`1px solid ${COIN_COLORS[coin] ?? "#5A6A88"}30` }}>
+              style={{ background:`${COIN_COLORS[coin] ?? "#8A9AB8"}15`, color:COIN_COLORS[coin] ?? "#8A9AB8", border:`1px solid ${COIN_COLORS[coin] ?? "#8A9AB8"}30` }}>
               {COIN_LOGOS[coin] ?? "●"} {coin}
             </span>
           ))}
@@ -319,11 +319,11 @@ export function CryptoMerchant() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(255,255,255,0.9)", border:"1px solid rgba(58,91,217,0.1)" }}>
+      <div className="flex flex-wrap gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{ background:tab===t.id?"#3A5BD9":"transparent", color:tab===t.id?"#fff":"#5A6A88" }}>
+            style={{ background:tab===t.id?"#5B6EE1":"transparent", color:tab===t.id?"#fff":"#8A9AB8" }}>
             {t.label}
           </button>
         ))}
@@ -333,11 +333,11 @@ export function CryptoMerchant() {
       {tab === "processors" && (
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
-            style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
-            <Shield size={14} color="#3A5BD9" style={{ marginTop:1, flexShrink:0 }}/>
+            style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
+            <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div>
-              <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
-                <strong style={{ color:"#0D1428" }}>Become a crypto merchant:</strong> Connect one or more processors below. Each processor handles payment routing, fraud screening, and automatic USD settlement so you never hold volatile crypto. We recommend Coinbase Commerce + BitPay for maximum coin coverage.
+              <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
+                <strong style={{ color:"#E8EDF5" }}>Become a crypto merchant:</strong> Connect one or more processors below. Each processor handles payment routing, fraud screening, and automatic USD settlement so you never hold volatile crypto. We recommend Coinbase Commerce + BitPay for maximum coin coverage.
               </p>
             </div>
           </div>
@@ -350,7 +350,7 @@ export function CryptoMerchant() {
         <div className="space-y-4">
           {/* Volume by coin */}
           <div className="p-5 rounded-2xl glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:14 }}>Volume by Cryptocurrency</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Volume by Cryptocurrency</div>
             <div className="space-y-2.5">
               {(["BTC","ETH","USDC","USDT","SOL"] as const).map(coin => {
                 const vol = MOCK_TXS.filter(t=>t.coin===coin&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0);
@@ -361,11 +361,11 @@ export function CryptoMerchant() {
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <span style={{ color:COIN_COLORS[coin], fontWeight:700 }}>{COIN_LOGOS[coin]}</span>
-                        <span style={{ color:"#0D1428", fontSize:13 }}>{coin}</span>
+                        <span style={{ color:"#E8EDF5", fontSize:13 }}>{coin}</span>
                       </div>
                       <span style={{ color:COIN_COLORS[coin], fontSize:12, fontWeight:700, ...MONO }}>${vol.toLocaleString()}</span>
                     </div>
-                    <div className="h-2 rounded-full" style={{ background:"#EAF0FC" }}>
+                    <div className="h-2 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                       <div className="h-2 rounded-full" style={{ width:`${(vol/max)*100}%`, background:COIN_COLORS[coin] }}/>
                     </div>
                   </div>
@@ -375,34 +375,34 @@ export function CryptoMerchant() {
           </div>
 
           {/* Transaction table */}
-          <div className="rounded-2xl overflow-auto" style={{ border:"1px solid rgba(58,91,217,0.1)" }}>
+          <div className="rounded-2xl overflow-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background:"#EAF0FC", borderBottom:"1px solid rgba(58,91,217,0.1)" }}>
+                <tr style={{ background:"rgba(255,255,255,0.08)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
                   {["TXN ID","User","Type","Coin","Amount (Crypto)","USD Value","Processor","Date","Status"].map(h => (
-                    <th key={h} className="px-4 py-3 text-left whitespace-nowrap" style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{h}</th>
+                    <th key={h} className="px-4 py-3 text-left whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {MOCK_TXS.map((tx, i) => (
-                  <tr key={tx.id} style={{ background:i%2===0?"#fff":"#F8FAFF", borderBottom:"1px solid rgba(58,91,217,0.06)" }}>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#3A5BD9", fontSize:10, ...MONO }}>{tx.id}</td>
-                    <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:12, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
-                    <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:11, whiteSpace:"nowrap" }}>{tx.type}</td>
+                  <tr key={tx.id} style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{tx.id}</td>
+                    <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:12, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
+                    <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:11, whiteSpace:"nowrap" }}>{tx.type}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#5A6A88", fontWeight:700 }}>{COIN_LOGOS[tx.coin] ?? "●"}</span>
-                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#5A6A88", fontSize:11, fontWeight:700, ...MONO }}>{tx.coin}</span>
+                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#8A9AB8", fontWeight:700 }}>{COIN_LOGOS[tx.coin] ?? "●"}</span>
+                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#8A9AB8", fontSize:11, fontWeight:700, ...MONO }}>{tx.coin}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#0D1428", fontSize:11, ...MONO }}>{tx.amount}</td>
-                    <td className="px-4 py-3" style={{ color:"#48BB78", fontSize:12, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#5A6A88", fontSize:11 }}>{tx.processor}</td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#5A6A88", fontSize:11 }}>{tx.date}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#E8EDF5", fontSize:11, ...MONO }}>{tx.amount}</td>
+                    <td className="px-4 py-3" style={{ color:"#D99A6B", fontSize:12, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:11 }}>{tx.processor}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:11 }}>{tx.date}</td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded text-xs font-bold"
-                        style={{ background:tx.status==="confirmed"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:tx.status==="confirmed"?"#48BB78":"#F6AD55", ...MONO }}>
+                        style={{ background:tx.status==="confirmed"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:tx.status==="confirmed"?"#D99A6B":"#F6AD55", ...MONO }}>
                         {tx.status.toUpperCase()}
                       </span>
                     </td>
@@ -420,8 +420,8 @@ export function CryptoMerchant() {
           <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
             style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
             <span style={{ fontSize:16 }}>🔐</span>
-            <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
-              <strong style={{ color:"#0D1428" }}>Merchant wallets</strong> are managed by your connected payment processors — you never need to manage private keys directly. If you choose to hold crypto instead of auto-converting to USD, processor custodial wallets are used. For self-custody, configure your own wallet addresses below.
+            <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
+              <strong style={{ color:"#E8EDF5" }}>Merchant wallets</strong> are managed by your connected payment processors — you never need to manage private keys directly. If you choose to hold crypto instead of auto-converting to USD, processor custodial wallets are used. For self-custody, configure your own wallet addresses below.
             </p>
           </div>
 
@@ -438,7 +438,7 @@ export function CryptoMerchant() {
                     {w.emoji}
                   </div>
                   <div>
-                    <div style={{ color:"#0D1428", fontSize:15, fontWeight:600 }}>{w.coin} Merchant Wallet</div>
+                    <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600 }}>{w.coin} Merchant Wallet</div>
                     <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Custodied by {w.custody}</div>
                   </div>
                 </div>
@@ -448,18 +448,18 @@ export function CryptoMerchant() {
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-xl"
-                style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.1)" }}>
+                style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>ADDRESS:</span>
-                <code style={{ color:"#5A6A88", fontSize:11, flex:1 }} className="truncate">{w.address}</code>
+                <code style={{ color:"#8A9AB8", fontSize:11, flex:1 }} className="truncate">{w.address}</code>
                 <button onClick={() => { copyToClipboard(w.address); toast.success(`${w.coin} address copied`); }}
-                  style={{ color:"#3A5BD9", flexShrink:0 }}><Copy size={13}/></button>
+                  style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={13}/></button>
               </div>
             </div>
           ))}
 
           <button onClick={() => toast.success("Manual wallet setup — contact integrations@finalpassdown.com")}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold"
-            style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
             <Plus size={14}/> Add Self-Custody Wallet Address
           </button>
         </div>
@@ -469,7 +469,7 @@ export function CryptoMerchant() {
       {tab === "settings" && (
         <div className="space-y-5 max-w-lg">
           <div className="p-5 rounded-2xl space-y-4 glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:4 }}>Payment Preferences</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:4 }}>Payment Preferences</div>
 
             {[
               { label:"Default processor for new payments", value:"Coinbase Commerce", type:"select", options:["Coinbase Commerce","BitPay","NOWPayments"] },
@@ -480,7 +480,7 @@ export function CryptoMerchant() {
               { label:"Maximum crypto payment (USD)", value:"9999.00", type:"input" },
             ].map(f => (
               <div key={f.label}>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>
+                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>
                   {f.label.toUpperCase()}
                 </label>
                 {f.type === "select" ? (
@@ -495,15 +495,15 @@ export function CryptoMerchant() {
 
             <div className="flex items-center justify-between pt-2">
               <div>
-                <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Show crypto payment option to all users</div>
+                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Show crypto payment option to all users</div>
                 <div style={{ color:"#8A9AB8", fontSize:11 }}>When off, crypto is only shown for $199 continuation fee</div>
               </div>
-              <ToggleRight size={28} color="#3A5BD9"/>
+              <ToggleRight size={28} color="#FFFFFF"/>
             </div>
 
             <button onClick={() => toast.success("Crypto payment settings saved")}
               className="w-full py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Settings
             </button>
           </div>
@@ -512,24 +512,24 @@ export function CryptoMerchant() {
           <div className="p-5 rounded-2xl glow-surface" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
             <div className="flex items-center gap-2 mb-3">
               <span style={{ fontSize:20 }}>₿</span>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>Merchant Business Verification</span>
+              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>Merchant Business Verification</span>
             </div>
-            <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7, marginBottom:12 }}>
+            <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7, marginBottom:12 }}>
               To unlock higher transaction limits and lower fees, complete business verification with each processor. Required for: transactions over $10,000/day, international payments, and institutional settlement.
             </p>
             {[
-              { name:"Coinbase Commerce",  status:"Verified ✓",      color:"#48BB78" },
-              { name:"BitPay",             status:"Verified ✓",      color:"#48BB78" },
+              { name:"Coinbase Commerce",  status:"Verified ✓",      color:"#D99A6B" },
+              { name:"BitPay",             status:"Verified ✓",      color:"#D99A6B" },
               { name:"NOWPayments",        status:"Not started",     color:"#8A9AB8" },
             ].map(v => (
-              <div key={v.name} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(58,91,217,0.06)" }}>
-                <span style={{ color:"#0D1428", fontSize:13 }}>{v.name}</span>
+              <div key={v.name} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
+                <span style={{ color:"#E8EDF5", fontSize:13 }}>{v.name}</span>
                 <span style={{ color:v.color, fontSize:12, fontWeight:600 }}>{v.status}</span>
               </div>
             ))}
             <button onClick={() => toast.success("Business verification — complete at nowpayments.io/merchant")}
               className="flex items-center gap-1.5 mt-3 text-sm px-4 py-2 rounded-xl font-semibold"
-              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <ExternalLink size={12}/> Complete NOWPayments Verification
             </button>
           </div>

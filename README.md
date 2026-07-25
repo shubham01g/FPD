@@ -288,7 +288,7 @@ All plans include every core platform feature. Storage meters per billing cycle 
 
 **Personal Assets** — 4 tabs: Vehicles (VIN, title, bequest instructions), Utilities (autopay status, account numbers), Digital assets (crypto, domains, social media), Firearms (serial, state registration, transfer plan).
 
-**Family & Memories** — 8 tabs: Memories (photo/video cards), Video Messages, **Audio Messages** (live recorder — Record/Pause/Stop + playback before saving), Kids & Family, Keepsakes, Goals, Awards & Achievements, Pets.
+**Family & Memories** — 8 tabs: **Photo Memories** (upload photos or scan in old prints), **Video Memories** (upload home videos you already have — phone clips, camcorder footage, digitized VHS), **Audio Memories** (live recorder — Record/Pause/Stop + playback before saving), Kids & Family, Keepsakes, Goals, Awards & Achievements, Pets. Recording a *new* message addressed to a person lives in Messages to Loved Ones, not here.
 
 **Family & Friends** — Personal contact book with groups and email blast. Guardian contacts get immediate view-only folder access. See Section 13.
 

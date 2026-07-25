@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import {
-  Star, Phone, Video, CheckCircle, ArrowRight, Clock,
-  Shield, Heart, Users, FileText, MessageSquare, Calendar,
+  Star, Phone, CheckCircle, Clock,
+  Shield, Heart, Users, FileText,
   ChevronDown, ChevronUp, X
 } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(110,139,255,0.15)", boxShadow:"0 4px 24px rgba(110,139,255,0.08)", borderRadius:20 };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"rgba(110,139,255,0.05)", border:"1px solid rgba(110,139,255,0.2)", color:"#FFFFFF", fontSize:14, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
 
 const STEPS = [
   { icon:<Phone size={20}/>,    title:"Intake Call",          desc:"A specialist calls you personally to understand what you need and what documents you have." },
@@ -49,16 +55,14 @@ const FAQS = [
 function FaqItem({ faq }: { faq: { q: string; a: string } }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(110,139,255,0.15)" }}>
-      <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left"
-        style={{ background:open?"rgba(110,139,255,0.04)":"#101728" }}>
-        <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{faq.q}</span>
-        {open ? <ChevronUp size={16} color="#6E8BFF"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
+    <div className="faq-item">
+      <button onClick={() => setOpen(!open)} className="faq-q" style={{ background: open ? "rgba(91,110,225,0.06)" : "transparent" }}>
+        <span>{faq.q}</span>
+        {open ? <ChevronUp size={16} color="#FFFFFF"/> : <ChevronDown size={16} color={MUTED}/>}
       </button>
       {open && (
-        <div className="px-5 pb-4" style={{ background:"rgba(110,139,255,0.02)" }}>
-          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.8 }}>{faq.a}</p>
+        <div className="faq-a">
+          <p>{faq.a}</p>
         </div>
       )}
     </div>
@@ -79,207 +83,269 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
 
   if (submitted) {
     return (
-      <div className="text-center py-8 px-4">
-        <div className="flex items-center justify-center mb-6">
-          <div className="rounded-full p-5" style={{ background:"rgba(110,139,255,0.12)", border:"2px solid rgba(110,139,255,0.3)" }}>
-            <CheckCircle size={40} color="#6E8BFF"/>
-          </div>
+      <div className="submitted">
+        <div className="submitted-ico"><CheckCircle size={40} color="#FFFFFF"/></div>
+        <h3>We'll Call You Soon!</h3>
+        <p>Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.</p>
+        <div className="ref-box">
+          <div className="ref-lbl">YOUR REFERENCE NUMBER</div>
+          <div className="ref-val">WG-{Math.random().toString(36).slice(2,7).toUpperCase()}</div>
         </div>
-        <h3 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>We'll Call You Soon!</h3>
-        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, maxWidth:360, margin:"0 auto 24px" }}>
-          Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.
-        </p>
-        <div className="px-5 py-4 rounded-2xl mb-4" style={{ background:"rgba(110,139,255,0.08)", border:"1px solid rgba(110,139,255,0.2)" }}>
-          <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, marginBottom:4 }}>YOUR REFERENCE NUMBER</div>
-          <div style={{ color:"#FFFFFF", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
-            WG-{Math.random().toString(36).slice(2,7).toUpperCase()}
-          </div>
-        </div>
-        {onClose && (
-          <button onClick={onClose} className="px-6 py-3 rounded-2xl font-bold text-sm"
-            style={{ background:"rgba(110,139,255,0.1)", color:"#6E8BFF" }}>
-            Close
-          </button>
-        )}
+        {onClose && <button onClick={onClose} className="btn-ghost">Close</button>}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="intake-form">
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>YOUR FULL NAME *</label>
-          <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} placeholder="As it appears on your ID" style={INPUT}/>
+        <div className="field col-span-2">
+          <label>YOUR FULL NAME *</label>
+          <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} placeholder="As it appears on your ID"/>
         </div>
-        <div>
-          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>PHONE NUMBER *</label>
-          <input type="tel" value={form.phone} onChange={e => setForm(p=>({...p,phone:e.target.value}))} placeholder="+1 (555) 000-0000" style={INPUT}/>
+        <div className="field">
+          <label>PHONE NUMBER *</label>
+          <input type="tel" value={form.phone} onChange={e => setForm(p=>({...p,phone:e.target.value}))} placeholder="+1 (555) 000-0000"/>
         </div>
-        <div>
-          <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EMAIL (optional)</label>
-          <input type="email" value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} placeholder="your@email.com" style={INPUT}/>
+        <div className="field">
+          <label>EMAIL (optional)</label>
+          <input type="email" value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} placeholder="your@email.com"/>
         </div>
       </div>
 
-      <div>
-        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>BEST TIME TO CALL</label>
+      <div className="field">
+        <label>BEST TIME TO CALL</label>
         <div className="grid grid-cols-3 gap-2">
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
-            <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.preferredTime===id?"rgba(110,139,255,0.12)":"rgba(58,91,217,0.04)",
-                border:`1px solid ${form.preferredTime===id?"#6E8BFF":"rgba(58,91,217,0.12)"}`,
-                color:form.preferredTime===id?"#6E8BFF":"rgba(255,255,255,0.7)" }}>
+            <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))} className="pick-btn"
+              style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?"#6FAE8B":MUTED }}>
               {label}
             </button>
           ))}
         </div>
       </div>
 
-      <div>
-        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>WHO IS CONTACTING US?</label>
+      <div className="field">
+        <label>WHO IS CONTACTING US?</label>
         <div className="grid grid-cols-2 gap-2">
           {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
-            <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))}
-              className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
-              style={{ background:form.contactedBy===id?"rgba(110,139,255,0.12)":"rgba(58,91,217,0.04)",
-                border:`1px solid ${form.contactedBy===id?"#6E8BFF":"rgba(58,91,217,0.12)"}`,
-                color:form.contactedBy===id?"#6E8BFF":"rgba(255,255,255,0.7)" }}>
+            <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))} className="pick-btn"
+              style={{ background:form.contactedBy===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?"#6FAE8B":MUTED }}>
               {label}
             </button>
           ))}
         </div>
       </div>
 
-      <div>
-        <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>ANYTHING ELSE WE SHOULD KNOW? (optional)</label>
+      <div className="field">
+        <label>ANYTHING ELSE WE SHOULD KNOW? (optional)</label>
         <textarea value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} rows={2}
-          placeholder="e.g. I have a will and some insurance documents ready. My daughter may join the call."
-          className="w-full resize-none" style={INPUT}/>
+          placeholder="e.g. I have a will and some insurance documents ready. My daughter may join the call."/>
       </div>
 
-      <button onClick={submit} disabled={sending}
-        className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base"
-        style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F",
-          boxShadow:"0 0 32px rgba(110,139,255,0.4)", opacity:sending?0.7:1 }}>
+      <button onClick={submit} disabled={sending} className="btn-primary-lg" style={{ opacity: sending ? 0.7 : 1 }}>
         <Phone size={16}/>{sending ? "Sending Request…" : "Request My White Glove Call"}
       </button>
-      <p style={{ color:"rgba(255,255,255,0.65)", fontSize:11, textAlign:"center" }}>
-        No tech skills required. A real person will call you. No automated systems.
-      </p>
+      <p className="reassure-line">No tech skills required. A real person will call you. No automated systems.</p>
     </div>
   );
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-wg so nothing else in the app is affected. */
+const WG_CSS = `
+.fpd-wg{position:relative;min-height:100%;background:#070A12;}
+.fpd-wg *{box-sizing:border-box;}
+.fpd-wg .grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+
+/* hero */
+.fpd-wg .hero{position:relative;overflow:hidden;padding:76px 24px 90px;background:linear-gradient(135deg,#060B16,#0A1020);}
+.fpd-wg .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(91,110,225,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.04) 1px,transparent 1px);background-size:50px 50px;}
+.fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.14) 0%,transparent 70%);pointer-events:none;}
+.fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;}
+.fpd-wg .hero-inner{position:relative;max-width:720px;margin:0 auto;text-align:center;}
+.fpd-wg .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;margin-bottom:22px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.32);}
+.fpd-wg .hero-badge span{color:#6FAE8B;font-size:12px;font-family:var(--font-mono);letter-spacing:0.1em;}
+.fpd-wg .hero h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.4rem);color:${TEXT};line-height:1.15;margin-bottom:18px;}
+.fpd-wg .hero h1 em{color:${SOFT};font-style:normal;}
+.fpd-wg .hero p{color:${MUTED};font-size:16px;line-height:1.85;max-width:520px;margin:0 auto 36px;}
+.fpd-wg .hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;}
+.fpd-wg .btn-hero{display:flex;align-items:center;gap:8px;padding:16px 32px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 40px rgba(91,110,225,0.5);font-family:var(--font-body);}
+.fpd-wg .hero-note{display:flex;align-items:center;gap:8px;color:${MUTED};font-size:13px;}
+
+/* body */
+.fpd-wg .body{position:relative;max-width:900px;margin:0 auto;padding:64px 24px;display:flex;flex-direction:column;gap:60px;z-index:1;}
+.fpd-wg .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 14px 40px -20px rgba(0,0,0,0.7);}
+
+/* pricing */
+.fpd-wg .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media (max-width:760px){.fpd-wg .pricing-grid{grid-template-columns:1fr;}}
+.fpd-wg .price-card{padding:32px;text-align:center;}
+.fpd-wg .price-card.featured{border:2px solid rgba(91,110,225,0.4);box-shadow:0 0 48px rgba(91,110,225,0.15),inset 0 1px 0 rgba(255,255,255,0.035);}
+.fpd-wg .price-eyebrow{color:${SOFT};font-size:11px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:12px;}
+.fpd-wg .price-big{font-family:var(--font-display);font-size:64px;color:${TEXT};line-height:1;margin-bottom:8px;}
+.fpd-wg .price-sub{color:${MUTED};font-size:14px;margin-bottom:20px;}
+.fpd-wg .price-feat{display:flex;align-items:center;gap:8px;text-align:left;}
+.fpd-wg .price-feat+.price-feat{margin-top:8px;}
+.fpd-wg .price-feat span{color:${SOFT};font-size:13px;}
+.fpd-wg .total-box{margin-top:20px;padding:14px 16px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);}
+.fpd-wg .total-box .tb-lbl{color:#6FAE8B;font-size:13px;font-weight:700;}
+.fpd-wg .total-box .tb-val{color:${TEXT};font-size:20px;font-family:var(--font-display);font-weight:700;margin-top:2px;}
+.fpd-wg .total-box .tb-sub{color:${MUTED};font-size:11px;}
+
+/* section heading */
+.fpd-wg .sec-head{text-align:center;margin-bottom:36px;}
+.fpd-wg .sec-eyebrow{color:#6FAE8B;font-size:11px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:8px;}
+.fpd-wg .sec-h2{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.2rem);color:${TEXT};line-height:1.2;}
+
+/* steps */
+.fpd-wg .step-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media (max-width:700px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
+.fpd-wg .step-card{display:flex;align-items:flex-start;gap:16px;padding:20px;}
+.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:#FFFFFF;}
+.fpd-wg .step-num{color:#6FAE8B;font-size:10px;font-weight:700;font-family:var(--font-mono);}
+.fpd-wg .step-title{font-family:var(--font-display);font-size:16px;color:${TEXT};margin:2px 0 4px;}
+.fpd-wg .step-desc{color:${MUTED};font-size:13px;line-height:1.7;}
+
+/* includes */
+.fpd-wg .includes-card{padding:32px;background:rgba(91,110,225,0.04);}
+.fpd-wg .includes-title{font-family:var(--font-display);font-size:22px;color:${TEXT};margin-bottom:20px;text-align:center;}
+.fpd-wg .includes-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:640px){.fpd-wg .includes-grid{grid-template-columns:1fr;}}
+.fpd-wg .includes-row{display:flex;align-items:flex-start;gap:10px;}
+.fpd-wg .includes-row span{color:${SOFT};font-size:13px;line-height:1.6;}
+.fpd-wg .includes-cta{text-align:center;margin-top:28px;}
+.fpd-wg .btn-cta{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:16px;font-weight:700;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 30px rgba(91,110,225,0.35);font-family:var(--font-body);}
+
+/* intake card */
+.fpd-wg .intake-card{padding:32px;}
+.fpd-wg .intake-hd{text-align:center;margin-bottom:28px;}
+.fpd-wg .intake-hd h2{font-family:var(--font-display);font-size:22px;color:${TEXT};margin:12px 0 8px;}
+.fpd-wg .intake-hd p{color:${MUTED};font-size:14px;max-width:400px;margin:0 auto;}
+.fpd-wg .intake-form{display:flex;flex-direction:column;gap:16px;}
+.fpd-wg .field label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:${MUTED};}
+.fpd-wg .field input,.fpd-wg .field textarea{width:100%;padding:10px 14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
+.fpd-wg .field textarea{resize:none;}
+.fpd-wg .field input::placeholder,.fpd-wg .field textarea::placeholder{color:${FAINT};}
+.fpd-wg .pick-btn{padding:10px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:1px solid;}
+.fpd-wg .btn-primary-lg{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 32px rgba(91,110,225,0.4);font-family:var(--font-body);}
+.fpd-wg .reassure-line{color:${MUTED};font-size:11px;text-align:center;}
+.fpd-wg .submitted{text-align:center;padding:32px 16px;}
+.fpd-wg .submitted-ico{display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.fpd-wg .submitted-ico > *{background:rgba(91,110,225,0.14);border:2px solid rgba(91,110,225,0.32);border-radius:99px;padding:18px;}
+.fpd-wg .submitted h3{font-family:var(--font-display);font-size:22px;color:${TEXT};margin-bottom:10px;}
+.fpd-wg .submitted p{color:${MUTED};font-size:14px;line-height:1.8;max-width:360px;margin:0 auto 22px;}
+.fpd-wg .ref-box{padding:16px 20px;border-radius:16px;margin-bottom:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);}
+.fpd-wg .ref-lbl{color:#6FAE8B;font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
+.fpd-wg .ref-val{color:${TEXT};font-size:18px;font-family:var(--font-display);font-weight:700;}
+.fpd-wg .btn-ghost{padding:12px 24px;border-radius:16px;font-weight:700;font-size:13px;background:rgba(91,110,225,0.10);color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
+
+/* faq */
+.fpd-wg .faq-list{display:flex;flex-direction:column;gap:12px;}
+.fpd-wg .faq-item{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.34);}
+.fpd-wg .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;text-align:left;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-wg .faq-q span{color:${TEXT};font-size:14px;font-weight:500;}
+.fpd-wg .faq-a{padding:0 20px 18px;background:rgba(91,110,225,0.02);}
+.fpd-wg .faq-a p{color:${MUTED};font-size:13px;line-height:1.8;}
+
+/* reassurance strip */
+.fpd-wg .reassure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media (max-width:700px){.fpd-wg .reassure-grid{grid-template-columns:1fr;}}
+.fpd-wg .reassure-card{padding:20px;text-align:center;}
+.fpd-wg .reassure-card .ri{color:#6E90C9;margin:0 auto 10px;display:flex;justify-content:center;}
+.fpd-wg .reassure-card .rt{font-family:var(--font-display);font-size:14px;color:${TEXT};margin-bottom:4px;}
+.fpd-wg .reassure-card .rd{color:${MUTED};font-size:12px;line-height:1.6;}
+
+/* modal */
+.fpd-wg .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,6,12,0.75);backdrop-filter:blur(8px);}
+.fpd-wg .modal{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
+.fpd-wg .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-wg .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};}
+.fpd-wg .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-wg .modal-body{padding:22px;}
+`;
 
 /* ── Main page ───────────────────────────────────────────────────── */
 export function WhiteGloveService() {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div style={{ fontFamily:"var(--font-body)", background:"#0C1322", minHeight:"100vh" }}>
+    <div className="fpd-wg fpd-fade-in-up">
+      <style dangerouslySetInnerHTML={{ __html: WG_CSS }} />
 
       {/* Hero */}
-      <div className="relative overflow-hidden" style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", padding:"80px 24px 100px" }}>
-        <div style={{ position:"absolute", inset:0, backgroundImage:"linear-gradient(rgba(110,139,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(110,139,255,0.04) 1px,transparent 1px)", backgroundSize:"50px 50px" }}/>
-        <div style={{ position:"absolute", top:"20%", left:"10%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(110,139,255,0.12) 0%,transparent 70%)", pointerEvents:"none" }}/>
-        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(58,91,217,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
-
-        <div className="relative max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{ background:"rgba(110,139,255,0.15)", border:"1px solid rgba(110,139,255,0.3)" }}>
-            <Star size={13} color="#6E8BFF" fill="#6E8BFF"/>
-            <span style={{ color:"#B8C6F5", fontSize:12, ...MONO, letterSpacing:"0.1em" }}>WHITE GLOVE SERVICE</span>
+      <div className="hero">
+        <div className="hero-grid"/>
+        <div className="hero-glow-a"/>
+        <div className="hero-glow-b"/>
+        <div className="hero-inner">
+          <div className="hero-badge">
+            <Star size={13} color="#FFFFFF" fill={ACCENT}/>
+            <span>WHITE GLOVE SERVICE</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(2rem,5vw,3.5rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:20 }}>
-            We Set Everything Up<br/><span style={{ color:"#B8C6F5" }}>For You.</span>
-          </h1>
-          <p style={{ color:"#A0B0D0", fontSize:17, lineHeight:1.9, maxWidth:520, margin:"0 auto 40px" }}>
-            Not comfortable with technology? No problem. A dedicated Final Pass Down specialist will call you, walk you through everything, and upload all your important documents on your behalf.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <button onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base"
-              style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 0 40px rgba(110,139,255,0.5)" }}>
+          <h1>We Set Everything Up<br/><em>For You.</em></h1>
+          <p>Not comfortable with technology? No problem. A dedicated Final Pass Down specialist will call you, walk you through everything, and upload all your important documents on your behalf.</p>
+          <div className="hero-cta-row">
+            <button onClick={() => setShowModal(true)} className="btn-hero">
               <Phone size={18}/> Request a Call
             </button>
-            <div className="flex items-center gap-2" style={{ color:"rgba(255,255,255,0.65)", fontSize:13 }}>
+            <div className="hero-note">
               <Clock size={14}/> We call within 1 business day
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
+      <div className="body">
+        <div className="grain"/>
 
-        {/* Pricing — shown prominently at top */}
-        <div className="grid md:grid-cols-2 gap-5">
-          {/* Setup fee card */}
-          <div className="rounded-3xl p-8 text-center glow-surface"
-            style={{ background:"linear-gradient(135deg,#0A1020,#060B16)", border:"2px solid rgba(110,139,255,0.4)", boxShadow:"0 0 48px rgba(110,139,255,0.15)" }}>
-            <div style={{ color:"#B8C6F5", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>ONE-TIME SETUP FEE</div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#E8EDF5", lineHeight:1, marginBottom:8 }}>
-              ${PRICING.setupFee}
-            </div>
-            <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14, marginBottom:20 }}>Paid once · Gets you started</div>
-            <div className="space-y-2 text-left">
+        {/* Pricing */}
+        <div className="pricing-grid">
+          <div className="card price-card featured glow-surface">
+            <div className="price-eyebrow">ONE-TIME SETUP FEE</div>
+            <div className="price-big">${PRICING.setupFee}</div>
+            <div className="price-sub">Paid once · Gets you started</div>
+            <div>
               {["Specialist assigned to your account","Intake call to understand your needs","Secure document upload link sent to you","Complete onboarding plan created"].map(f => (
-                <div key={f} className="flex items-center gap-2">
-                  <CheckCircle size={13} color="#6E8BFF"/>
-                  <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
-                </div>
+                <div key={f} className="price-feat"><CheckCircle size={13} color="#FFFFFF"/><span>{f}</span></div>
               ))}
             </div>
           </div>
 
-          {/* Per-session card */}
-          <div className="rounded-3xl p-8 text-center glow-surface"
-            style={{ background:"rgba(110,139,255,0.06)", border:"2px solid rgba(110,139,255,0.25)" }}>
-            <div style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.14em", marginBottom:12 }}>SESSION RATE</div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:72, color:"#FFFFFF", lineHeight:1, marginBottom:4 }}>
-              ${PRICING.sessionRate}
-            </div>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, marginBottom:20 }}>per {PRICING.sessionLength} minutes · Only pay for what you use</div>
-            <div className="space-y-2 text-left">
+          <div className="card price-card glow-surface">
+            <div className="price-eyebrow" style={{ color: "#6FAE8B" }}>SESSION RATE</div>
+            <div className="price-big">${PRICING.sessionRate}</div>
+            <div className="price-sub">per {PRICING.sessionLength} minutes · Only pay for what you use</div>
+            <div>
               {["Phone or video call with your specialist","Specialist uploads documents during the session","Session notes and progress tracking","Typical setup: 2–4 sessions total"].map(f => (
-                <div key={f} className="flex items-center gap-2">
-                  <CheckCircle size={13} color="#6E8BFF"/>
-                  <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13 }}>{f}</span>
-                </div>
+                <div key={f} className="price-feat"><CheckCircle size={13} color="#FFFFFF"/><span>{f}</span></div>
               ))}
             </div>
-            <div className="mt-5 px-4 py-3 rounded-2xl"
-              style={{ background:"rgba(110,139,255,0.08)", border:"1px solid rgba(110,139,255,0.2)" }}>
-              <div style={{ color:"#6E8BFF", fontSize:13, fontWeight:700 }}>Typical Total Cost</div>
-              <div style={{ color:"#FFFFFF", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700, marginTop:2 }}>
-                ${PRICING.setupFee + PRICING.sessionRate * 4}–${PRICING.setupFee + PRICING.sessionRate * 6}
-              </div>
-              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>$99 setup + 2–3 hours of sessions</div>
+            <div className="total-box">
+              <div className="tb-lbl">Typical Total Cost</div>
+              <div className="tb-val">${PRICING.setupFee + PRICING.sessionRate * 4}–${PRICING.setupFee + PRICING.sessionRate * 6}</div>
+              <div className="tb-sub">$99 setup + 2–3 hours of sessions</div>
             </div>
           </div>
         </div>
 
         {/* How it works */}
         <div>
-          <div className="text-center mb-10">
-            <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, letterSpacing:"0.14em", marginBottom:8 }}>HOW IT WORKS</div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(1.6rem,3vw,2.4rem)", color:"#FFFFFF", lineHeight:1.2 }}>
-              Four Simple Steps.<br/>All Done By Phone.
-            </h2>
+          <div className="sec-head">
+            <div className="sec-eyebrow">HOW IT WORKS</div>
+            <h2 className="sec-h2">Four Simple Steps.<br/>All Done By Phone.</h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="step-grid">
             {STEPS.map((s, i) => (
-              <div key={i} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={GLASS}>
-                <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
-                  style={{ width:48, height:48, background:"rgba(110,139,255,0.1)", color:"#6E8BFF" }}>
-                  {s.icon}
-                </div>
+              <div key={i} className="card step-card glow-surface">
+                <div className="step-ico">{s.icon}</div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span style={{ color:"#6E8BFF", fontSize:10, fontWeight:700, ...MONO }}>STEP {i+1}</span>
-                  </div>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:4 }}>{s.title}</div>
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>{s.desc}</div>
+                  <div className="step-num">STEP {i+1}</div>
+                  <div className="step-title">{s.title}</div>
+                  <div className="step-desc">{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -287,60 +353,51 @@ export function WhiteGloveService() {
         </div>
 
         {/* What's included */}
-        <div className="p-8 rounded-3xl glow-surface" style={{ ...GLASS, background:"rgba(110,139,255,0.04)" }}>
-          <div style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:20, textAlign:"center" }}>
-            Everything Is Included
-          </div>
-          <div className="grid md:grid-cols-2 gap-3">
+        <div className="card includes-card glow-surface">
+          <div className="includes-title">Everything Is Included</div>
+          <div className="includes-grid">
             {INCLUDES.map(f => (
-              <div key={f} className="flex items-start gap-3">
-                <CheckCircle size={14} color="#6E8BFF" style={{ marginTop:2, flexShrink:0 }}/>
-                <span style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.6 }}>{f}</span>
-              </div>
+              <div key={f} className="includes-row"><CheckCircle size={14} color="#FFFFFF" style={{ marginTop:2, flexShrink:0 }}/><span>{f}</span></div>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <button onClick={() => setShowModal(true)}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold"
-              style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F", boxShadow:"0 0 30px rgba(110,139,255,0.35)" }}>
+          <div className="includes-cta">
+            <button onClick={() => setShowModal(true)} className="btn-cta">
               <Phone size={16}/> Request Your White Glove Call
             </button>
           </div>
         </div>
 
         {/* Inline form */}
-        <div className="p-8 rounded-3xl glow-surface" style={GLASS}>
-          <div className="text-center mb-8">
-            <Star size={28} color="#6E8BFF" fill="rgba(110,139,255,0.3)" style={{ margin:"0 auto 12px" }}/>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:8 }}>Ready to Get Started?</h2>
-            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, maxWidth:400, margin:"0 auto" }}>
-              Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.
-            </p>
+        <div className="card intake-card glow-surface">
+          <div className="intake-hd">
+            <Star size={28} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
+            <h2>Ready to Get Started?</h2>
+            <p>Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.</p>
           </div>
           <IntakeForm/>
         </div>
 
         {/* FAQ */}
         <div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#FFFFFF", marginBottom:16, textAlign:"center" }}>
-            Common Questions
-          </h2>
-          <div className="space-y-3">
+          <div className="sec-head" style={{ marginBottom: 20 }}>
+            <h2 className="sec-h2">Common Questions</h2>
+          </div>
+          <div className="faq-list">
             {FAQS.map((faq, i) => <FaqItem key={i} faq={faq}/>)}
           </div>
         </div>
 
         {/* Reassurance strip */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="reassure-grid">
           {[
             { icon:<Shield size={20}/>,  title:"Your Data Is Safe",   desc:"AES-256 encryption. Specialists cannot access your vault after sessions end." },
             { icon:<Heart size={20}/>,   title:"Real People, Always", desc:"No bots, no automated systems. A real FPD specialist handles your account." },
             { icon:<Clock size={20}/>,   title:"Your Pace, Always",   desc:"Sessions happen when you're ready. We never rush. Most complete in 1–2 weeks." },
           ].map(r => (
-            <div key={r.title} className="p-5 rounded-2xl text-center glow-surface" style={GLASS}>
-              <div style={{ color:"#6E8BFF", margin:"0 auto 10px" }}>{r.icon}</div>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF", marginBottom:4 }}>{r.title}</div>
-              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{r.desc}</div>
+            <div key={r.title} className="card reassure-card glow-surface">
+              <div className="ri">{r.icon}</div>
+              <div className="rt">{r.title}</div>
+              <div className="rd">{r.desc}</div>
             </div>
           ))}
         </div>
@@ -348,18 +405,16 @@ export function WhiteGloveService() {
 
       {/* Request modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-md rounded-3xl overflow-hidden" style={{ ...GLASS, maxHeight:"90vh", overflowY:"auto" }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b"
-              style={{ borderColor:"rgba(110,139,255,0.12)" }}>
+        <div className="backdrop">
+          <div className="card modal glow-surface">
+            <div className="modal-head">
               <div className="flex items-center gap-2">
-                <Star size={16} color="#6E8BFF" fill="rgba(110,139,255,0.3)"/>
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>White Glove Request</span>
+                <Star size={16} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
+                <h3>White Glove Request</h3>
               </div>
-              <button onClick={() => setShowModal(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
+              <button onClick={() => setShowModal(false)}><X size={16}/></button>
             </div>
-            <div className="p-6">
+            <div className="modal-body">
               <IntakeForm onClose={() => setShowModal(false)}/>
             </div>
           </div>

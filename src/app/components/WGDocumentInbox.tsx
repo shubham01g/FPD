@@ -16,13 +16,13 @@ import { copyToClipboard } from "../utils/clipboard";
 import { submissionStore, subscribeToSubmissions, notifyListeners, type SubmittedDocument } from "./WGClientSubmit";
 import { type ConciergeEmployee } from "../services/conciergeStaff";
 
-const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 /* ── Every platform destination a document can go ───────────────── */
 const PLATFORM_SECTIONS = [
   {
-    section:"file_cabinet", label:"Digital File Cabinet", emoji:"📁", color:"#3A5BD9",
+    section:"file_cabinet", label:"Digital File Cabinet", emoji:"📁", color:"#6E90C9",
     desc:"Document stored in one of 18 encrypted vault folders",
     subOptions:[
       { id:"legal",     label:"Legal Documents",        emoji:"⚖️" },
@@ -79,7 +79,7 @@ const PLATFORM_SECTIONS = [
     ],
   },
   {
-    section:"memories", label:"Memories & Media", emoji:"📷", color:"#5B7BF5",
+    section:"memories", label:"Memories & Media", emoji:"📷", color:"#6E90C9",
     desc:"Photo, video, or written memory to add to the family memories section",
     subOptions:[
       { id:"photo",  label:"Family Photo",          emoji:"📷" },
@@ -88,7 +88,7 @@ const PLATFORM_SECTIONS = [
     ],
   },
   {
-    section:"diary", label:"Digital Diary Entry", emoji:"📖", color:"#6E8BFF",
+    section:"diary", label:"Digital Diary Entry", emoji:"📖", color:"#6FAE8B",
     desc:"Photo, audio, or video to attach to a new diary entry",
     subOptions:[
       { id:"photo", label:"Photo Entry",         emoji:"📷" },
@@ -107,7 +107,7 @@ const PLATFORM_SECTIONS = [
     ],
   },
   {
-    section:"contacts", label:"Contact ID Verification", emoji:"🪪", color:"#48BB78",
+    section:"contacts", label:"Contact ID Verification", emoji:"🪪", color:"#D99A6B",
     desc:"Government-issued photo ID for a legacy or guardian contact",
     subOptions:[
       { id:"drivers_license", label:"Driver's License",    emoji:"🪪" },
@@ -117,7 +117,7 @@ const PLATFORM_SECTIONS = [
     ],
   },
   {
-    section:"profile_photo", label:"Profile Photo", emoji:"🤳", color:"#6E8BFF",
+    section:"profile_photo", label:"Profile Photo", emoji:"🤳", color:"#6FAE8B",
     desc:"Set as the client's profile picture in their account",
     subOptions:[{ id:"headshot", label:"Profile / Headshot Photo", emoji:"🤳" }],
   },
@@ -196,11 +196,11 @@ function UploadToAccountModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={{ ...GLASS, maxHeight:"90vh" }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10"
-          style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10"
+          style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
           <div className="flex items-center gap-2">
-            <Upload size={16} color="#3A5BD9"/>
-            <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>
+            <Upload size={16} color="#FFFFFF"/>
+            <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>
               Add to {clientName}'s Account
             </span>
           </div>
@@ -210,10 +210,10 @@ function UploadToAccountModal({
         <div className="p-6 space-y-5 overflow-y-auto" style={{ maxHeight:"calc(90vh - 70px)" }}>
           {/* Document summary */}
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
-            style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
-            {doc.fileType === "image" ? <Image size={18} color="#6E8BFF"/> : <FileText size={18} color="#3A5BD9"/>}
+            style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
+            {doc.fileType === "image" ? <Image size={18} color="#FFFFFF"/> : <FileText size={18} color="#FFFFFF"/>}
             <div className="flex-1">
-              <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{doc.category}</div>
+              <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>{doc.category}</div>
               <div style={{ color:"#8A9AB8", fontSize:11 }}>{doc.fileName} · {doc.fileSizeMB} MB</div>
             </div>
           </div>
@@ -221,23 +221,23 @@ function UploadToAccountModal({
           {doc.notes && (
             <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
               <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:2 }}>CLIENT NOTE</div>
-              <div style={{ color:"#5A6A88", fontSize:12 }}>"{doc.notes}"</div>
+              <div style={{ color:"#8A9AB8", fontSize:12 }}>"{doc.notes}"</div>
             </div>
           )}
 
           {/* Step 1: Choose platform section */}
           <div>
-            <div style={{ color:"#5A6A88", fontSize:11, ...MONO, marginBottom:10 }}>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:10 }}>
               STEP 1 — WHERE DOES THIS GO IN THE ACCOUNT?
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {PLATFORM_SECTIONS.map(s => (
                 <button key={s.section} onClick={() => { setSelectedSection(s.section); setSelectedSub(s.subOptions[0]?.id ?? ""); }}
                   className="flex flex-col items-start gap-1 px-3 py-3 rounded-xl text-left transition-all"
-                  style={{ background:selectedSection===s.section?`${s.color}12`:"rgba(58,91,217,0.03)",
-                    border:`1.5px solid ${selectedSection===s.section?s.color:"rgba(58,91,217,0.1)"}` }}>
+                  style={{ background:selectedSection===s.section?`${s.color}12`:"rgba(91,110,225,0.03)",
+                    border:`1.5px solid ${selectedSection===s.section?s.color:"rgba(91,110,225,0.1)"}` }}>
                   <div style={{ fontSize:20 }}>{s.emoji}</div>
-                  <div style={{ color:selectedSection===s.section?s.color:"#0D1428", fontSize:11, fontWeight:600, lineHeight:1.3 }}>{s.label}</div>
+                  <div style={{ color:selectedSection===s.section?s.color:"#E8EDF5", fontSize:11, fontWeight:600, lineHeight:1.3 }}>{s.label}</div>
                   <div style={{ color:"#8A9AB8", fontSize:9, lineHeight:1.3 }}>{s.desc}</div>
                 </button>
               ))}
@@ -247,17 +247,17 @@ function UploadToAccountModal({
           {/* Step 2: Sub-section */}
           {activeSection && activeSection.subOptions.length > 1 && (
             <div>
-              <div style={{ color:"#5A6A88", fontSize:11, ...MONO, marginBottom:8 }}>
+              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:8 }}>
                 STEP 2 — WHICH PART OF {activeSection.label.toUpperCase()}?
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {activeSection.subOptions.map(sub => (
                   <button key={sub.id} onClick={() => setSelectedSub(sub.id)}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all"
-                    style={{ background:selectedSub===sub.id?`${activeSection.color}12`:"rgba(58,91,217,0.03)",
-                      border:`1.5px solid ${selectedSub===sub.id?activeSection.color:"rgba(58,91,217,0.1)"}` }}>
+                    style={{ background:selectedSub===sub.id?`${activeSection.color}12`:"rgba(91,110,225,0.03)",
+                      border:`1.5px solid ${selectedSub===sub.id?activeSection.color:"rgba(91,110,225,0.1)"}` }}>
                     <span style={{ fontSize:16 }}>{sub.emoji}</span>
-                    <span style={{ color:selectedSub===sub.id?activeSection.color:"#5A6A88", fontSize:11, fontWeight:selectedSub===sub.id?700:400 }}>
+                    <span style={{ color:selectedSub===sub.id?activeSection.color:"#8A9AB8", fontSize:11, fontWeight:selectedSub===sub.id?700:400 }}>
                       {sub.label}
                     </span>
                     {selectedSub===sub.id && <CheckCircle size={11} color={activeSection.color} style={{ marginLeft:"auto" }}/>}
@@ -271,10 +271,10 @@ function UploadToAccountModal({
           {destination && (
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
               style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-              <CheckCircle size={14} color="#48BB78"/>
+              <CheckCircle size={14} color="#FFFFFF"/>
               <div>
-                <span style={{ color:"#5A6A88", fontSize:12 }}>Will be saved to: </span>
-                <strong style={{ color:"#0D1428", fontSize:12 }}>{destination}</strong>
+                <span style={{ color:"#8A9AB8", fontSize:12 }}>Will be saved to: </span>
+                <strong style={{ color:"#E8EDF5", fontSize:12 }}>{destination}</strong>
               </div>
             </div>
           )}
@@ -282,15 +282,15 @@ function UploadToAccountModal({
           <div className="flex gap-3">
             <button onClick={doUpload} disabled={uploading || !destination}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA",
-                boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:uploading||!destination?0.5:1 }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
+                boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:uploading||!destination?0.5:1 }}>
               {uploading
                 ? <><RefreshCw size={14} style={{ animation:"spin 0.8s linear infinite" }}/> Saving to Account…</>
                 : <><Upload size={14}/> Save to {clientName.split(" ")[0]}'s Account</>
               }
             </button>
             <button onClick={onClose} className="px-4 py-3 rounded-xl text-sm"
-              style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>
+              style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
               Cancel
             </button>
           </div>
@@ -324,42 +324,42 @@ function SendLinkModal({
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
       <div className="w-full max-w-md rounded-2xl overflow-hidden glow-surface" style={GLASS}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+          style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div className="flex items-center gap-2">
-            <Link size={16} color="#6E8BFF"/>
-            <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>
+            <Link size={16} color="#FFFFFF"/>
+            <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>
               Send Upload Link to {clientName.split(" ")[0]}
             </span>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
         </div>
         <div className="p-6 space-y-4">
-          <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>
+          <p style={{ color:"#8A9AB8", fontSize:13, lineHeight:1.7 }}>
             Share this link with {clientName} so they can easily upload documents from their phone. No login required — they just open the link, take a photo or upload a file, and it goes straight to your inbox.
           </p>
 
           {/* The link */}
           <div className="flex items-center gap-2 px-3 py-3 rounded-xl"
-            style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.15)" }}>
+            style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
             <ExternalLink size={12} color="#8A9AB8" style={{ flexShrink:0 }}/>
-            <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, flex:1 }} className="truncate">{link}</span>
+            <span style={{ color:"#6E90C9", fontSize:11, ...MONO, flex:1 }} className="truncate">{link}</span>
             <button onClick={() => { copyToClipboard(link); toast.success("Link copied!"); }}
-              style={{ color:"#3A5BD9", flexShrink:0 }}>
+              style={{ color:"#6E90C9", flexShrink:0 }}>
               <Copy size={14}/>
             </button>
           </div>
 
           <div className="space-y-2">
-            <div style={{ color:"#5A6A88", fontSize:11, ...MONO, marginBottom:4 }}>SEND TO CLIENT VIA</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:4 }}>SEND TO CLIENT VIA</div>
             <button onClick={sendViaEmail} disabled={sent}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               <Send size={14}/>
               {sent ? "Sending…" : `Email to ${clientEmail}`}
             </button>
             <button onClick={() => { window.open(`sms:?body=Here is your secure document upload link: ${link}`); onClose(); }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"rgba(72,187,120,0.08)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.25)" }}>
+              style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.25)" }}>
               💬 Send via SMS Text Message
             </button>
           </div>
@@ -465,10 +465,10 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>
+          <div style={{ color:"#6FAE8B", fontSize:11, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>
             DOCUMENT INBOX
           </div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#0D1428" }}>
+          <h2 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>
             Client Document Inbox
             {pendingCount > 0 && (
               <span className="ml-2 px-2 py-0.5 rounded-full text-sm font-bold"
@@ -477,23 +477,23 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
               </span>
             )}
           </h2>
-          <p style={{ color:"#5A6A88", fontSize:12, marginTop:4 }}>
+          <p style={{ color:"#8A9AB8", fontSize:12, marginTop:4 }}>
             Documents submitted by your clients. Review, then upload to their vault.
           </p>
         </div>
       </div>
 
       {/* Send link buttons per client */}
-      <div className="p-4 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(110,139,255,0.04)", border:"1px solid rgba(110,139,255,0.15)" }}>
-        <div style={{ color:"#6E8BFF", fontSize:11, fontWeight:700, ...MONO }}>SEND UPLOAD LINK TO CLIENT</div>
-        <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
+      <div className="p-4 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.15)" }}>
+        <div style={{ color:"#6FAE8B", fontSize:11, fontWeight:700, ...MONO }}>SEND UPLOAD LINK TO CLIENT</div>
+        <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
           Send each client a simple link they can open on their phone to photograph and upload their documents. No app or login required.
         </p>
         <div className="flex flex-wrap gap-2">
           {assignedClientIds.map(id => (
             <button key={id} onClick={() => setLinkModal(id)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background:"linear-gradient(135deg,#6E8BFF,#B8C6F5)", color:"#04080F" }}>
+              style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F" }}>
               <Link size={13}/> Send Link to {CLIENT_NAMES[id]?.split(" ")[0] ?? id}
             </button>
           ))}
@@ -501,7 +501,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(255,255,255,0.9)", border:"1px solid rgba(58,91,217,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
         {[
           { id:"all",      label:`All (${allDocs.length})` },
           { id:"pending",  label:`Pending (${allDocs.filter(d=>d.status==="pending").length})` },
@@ -510,7 +510,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id as any)}
             className="px-3 py-2 rounded-lg text-xs font-semibold transition-all"
-            style={{ background:filter===f.id?"#3A5BD9":"transparent", color:filter===f.id?"#fff":"#5A6A88" }}>
+            style={{ background:filter===f.id?"#5B6EE1":"transparent", color:filter===f.id?"#fff":"#8A9AB8" }}>
             {f.label}
           </button>
         ))}
@@ -519,7 +519,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       {/* Document list */}
       {filtered.length === 0 ? (
         <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}>
-          <Inbox size={36} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
+          <Inbox size={36} color="rgba(91,110,225,0.2)" style={{ margin:"0 auto 12px" }}/>
           <div style={{ color:"#8A9AB8", fontSize:14 }}>
             {filter === "all" ? "No documents submitted yet." : `No ${filter} documents.`}
           </div>
@@ -533,8 +533,8 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
             const clientName = CLIENT_NAMES[doc.clientId] ?? doc.clientId;
             const statusColors = {
               pending:            { color:"#F6AD55", bg:"rgba(246,173,85,0.1)",   label:"Pending" },
-              received:           { color:"#3A5BD9", bg:"rgba(58,91,217,0.1)",    label:"Received" },
-              uploaded_to_vault:  { color:"#48BB78", bg:"rgba(72,187,120,0.1)",   label:"Saved to Account ✓" },
+              received:           { color:"#6E90C9", bg:"rgba(91,110,225,0.1)",    label:"Received" },
+              uploaded_to_vault:  { color:"#D99A6B", bg:"rgba(72,187,120,0.1)",   label:"Saved to Account ✓" },
               needs_resubmit:     { color:"#FC8181", bg:"rgba(252,129,129,0.1)",  label:"Needs Resubmit" },
             }[doc.status];
 
@@ -543,19 +543,19 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
                 <div className="flex items-start gap-4">
                   {/* Thumbnail or icon */}
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                    style={{ width:56, height:56, background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.1)", overflow:"hidden" }}>
+                    style={{ width:56, height:56, background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.1)", overflow:"hidden" }}>
                     {doc.previewUrl && doc.fileType === "image"
                       ? <img src={doc.previewUrl} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                      : <FileText size={24} color="#3A5BD9"/>
+                      : <FileText size={24} color="#FFFFFF"/>
                     }
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between flex-wrap gap-2">
                       <div>
-                        <div style={{ color:"#0D1428", fontSize:14, fontWeight:600 }}>{doc.category}</div>
+                        <div style={{ color:"#E8EDF5", fontSize:14, fontWeight:600 }}>{doc.category}</div>
                         <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>
-                          From: <strong style={{ color:"#5A6A88" }}>{clientName}</strong> · {doc.submittedAt}
+                          From: <strong style={{ color:"#8A9AB8" }}>{clientName}</strong> · {doc.submittedAt}
                         </div>
                         <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1 }}>
                           {doc.fileName} · {doc.fileSizeMB} MB
@@ -571,7 +571,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
                       <div className="mt-2 px-3 py-2 rounded-xl"
                         style={{ background:"rgba(246,173,85,0.05)", border:"1px solid rgba(246,173,85,0.15)" }}>
                         <span style={{ color:"#F6AD55", fontSize:10, ...MONO }}>CLIENT NOTE: </span>
-                        <span style={{ color:"#5A6A88", fontSize:12 }}>"{doc.notes}"</span>
+                        <span style={{ color:"#8A9AB8", fontSize:12 }}>"{doc.notes}"</span>
                       </div>
                     )}
 
@@ -579,13 +579,13 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
                       <div className="flex gap-2 mt-3 flex-wrap">
                         <button onClick={() => setUploadModal({ doc, clientId: doc.clientId })}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold"
-                          style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+                          style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                           <Upload size={11}/> Save to Account
                         </button>
                         {doc.fileType === "image" && doc.previewUrl && (
                           <button onClick={() => window.open(doc.previewUrl!)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
-                            style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+                            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                             <Eye size={11}/> Preview
                           </button>
                         )}
@@ -599,8 +599,8 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
 
                     {doc.status === "uploaded_to_vault" && (
                       <div className="flex items-center gap-2 mt-2">
-                        <CheckCircle size={13} color="#48BB78"/>
-                        <span style={{ color:"#48BB78", fontSize:12 }}>
+                        <CheckCircle size={13} color="#FFFFFF"/>
+                        <span style={{ color:"#D99A6B", fontSize:12 }}>
                           Saved to account
                         </span>
                       </div>

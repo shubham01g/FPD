@@ -3,21 +3,32 @@ import {
   Users, Shield, AlertCircle, PawPrint, Plus, Phone, Mail,
   CheckCircle, Clock, X, Trash2, FolderOpen, Eye,
   ChevronDown, ChevronUp, Info, Crown, ArrowDown,
-  FileText, Lock, Star, AlertTriangle, Upload, RefreshCw, UserCheck
+  AlertTriangle, Upload, RefreshCw, UserCheck
 } from "lucide-react";
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
+
 // Extended verification status — richer than DemoContext's 3-state
 type VerifStatus = "not_sent" | "pending" | "id_submitted" | "verified" | "rejected";
 
-const verifConfig: Record<VerifStatus, { label:string; color:string; bg:string; icon:React.ReactNode }> = {
-  not_sent:     { label:"NOT SENT",     color:"#8A9AB8", bg:"rgba(138,154,184,0.1)", icon:<X size={11}/> },
-  pending:      { label:"INVITE SENT",  color:"#F6AD55", bg:"rgba(246,173,85,0.12)", icon:<Clock size={11}/> },
-  id_submitted: { label:"ID SUBMITTED", color:"#4A90D9", bg:"rgba(74,144,217,0.12)", icon:<Upload size={11}/> },
-  verified:     { label:"VERIFIED",     color:"#48BB78", bg:"rgba(72,187,120,0.12)", icon:<CheckCircle size={11}/> },
-  rejected:     { label:"REJECTED",     color:"#FC8181", bg:"rgba(252,129,129,0.12)",icon:<AlertTriangle size={11}/> },
+const verifConfig: Record<VerifStatus, { label:string; color:string; icon:React.ReactNode }> = {
+  not_sent:     { label:"NOT SENT",     color:MUTED, icon:<X size={11}/> },
+  pending:      { label:"INVITE SENT",  color:WARN,  icon:<Clock size={11}/> },
+  id_submitted: { label:"ID SUBMITTED", color:"#6FAE8B", icon:<Upload size={11}/> },
+  verified:     { label:"VERIFIED",     color:"#D99A6B",   icon:<CheckCircle size={11}/> },
+  rejected:     { label:"REJECTED",     color:NEG,   icon:<AlertTriangle size={11}/> },
 };
 
 // Map DemoContext status → VerifStatus
@@ -27,17 +38,13 @@ function toVerifStatus(s: string): VerifStatus {
   return "not_sent";
 }
 
-const GLASS: React.CSSProperties = { background:"rgba(16,23,40,0.96)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
-const GRID:  React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
-const MONO:  React.CSSProperties = { fontFamily:"var(--font-mono)" };
-
 type ContactType = "legacy"|"guardian"|"emergency"|"pet_emergency";
 
 const typeConfig = {
-  legacy:       { label:"Legacy Contact",        color:"#3A5BD9", bg:"rgba(58,91,217,0.1)",    icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
-  guardian:     { label:"Guardian Contact",      color:"#48BB78", bg:"rgba(72,187,120,0.1)",   icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
-  emergency:    { label:"Emergency Contact",     color:"#F6AD55", bg:"rgba(246,173,85,0.1)",   icon:<AlertCircle size={13}/>,  desc:"Notified by first responders in an emergency." },
-  pet_emergency:{ label:"Pet Emergency Contact", color:"#6E8BFF", bg:"rgba(110,139,255,0.1)", icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
+  legacy:       { label:"Legacy Contact",        color:"#6FAE8B", icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
+  guardian:     { label:"Guardian Contact",      color:"#D99A6B",     icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
+  emergency:    { label:"Emergency Contact",     color:WARN,    icon:<AlertCircle size={13}/>,  desc:"Notified by first responders in an emergency." },
+  pet_emergency:{ label:"Pet Emergency Contact", color:"#6E90C9",  icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
 };
 
 /* ── Verification methods a user can configure per Legacy Contact ─── */
@@ -53,31 +60,31 @@ const VERIFICATION_METHODS = [
 ];
 
 const verStyle = {
-  verified: { color:"#48BB78", bg:"rgba(72,187,120,0.12)",  label:"VERIFIED",  icon:<CheckCircle size={11}/> },
-  pending:  { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",  label:"PENDING",   icon:<Clock size={11}/> },
-  not_sent: { color:"#8A9AB8", bg:"rgba(90,106,136,0.14)", label:"NOT SENT",  icon:<X size={11}/> },
+  verified: { color:"#D99A6B",  label:"VERIFIED", icon:<CheckCircle size={11}/> },
+  pending:  { color:WARN, label:"PENDING",  icon:<Clock size={11}/> },
+  not_sent: { color:MUTED,label:"NOT SENT", icon:<X size={11}/> },
 };
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
 const FOLDER_CATALOG = [
-  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#3A5BD9" },
-  { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#48BB78" },
+  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#6E90C9" },
+  { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#D99A6B" },
   { id:"medical",   label:"Medical Records",         emoji:"🏥",  color:"#FC8181" },
   { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
   { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
-  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#4A90D9" },
-  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#38B2AC" },
-  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#6E8BFF" },
+  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#6FAE8B" },
+  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#D68FA8" },
+  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#6E90C9" },
   { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
   { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },
   { id:"photos",    label:"Photo Albums",            emoji:"📷",  color:"#F6AD55" },
-  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#6E8BFF" },
-  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#3A5BD9" },
-  { id:"business",  label:"Business Records",        emoji:"📊",  color:"#48BB78" },
+  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#6E90C9" },
+  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#6E90C9" },
+  { id:"business",  label:"Business Records",        emoji:"📊",  color:"#D99A6B" },
   { id:"crypto",    label:"Crypto & NFTs",           emoji:"₿",   color:"#F6AD55" },
-  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#4A90D9" },
+  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#6FAE8B" },
   { id:"military",  label:"Military Records",        emoji:"🎖️",  color:"#ED8936" },
-  { id:"other",     label:"Other Documents",         emoji:"📁",  color:"#8A9AB8" },
+  { id:"other",     label:"Other Documents",         emoji:"📁",  color:MUTED },
 ];
 
 /* ── Folder selector ─────────────────────────────────────────────── */
@@ -85,25 +92,23 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
   const toggle = (id:string) => onChange(selected.includes(id) ? selected.filter(x=>x!==id) : [...selected,id]);
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
-        style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-        <Eye size={12} color="#48BB78"/>
-        <span style={{ color:"#48BB78", fontSize:11, fontWeight:700 }}>VIEW ONLY — Guardian contacts cannot download files</span>
+      <div className="view-only-note">
+        <Eye size={12} color="#FFFFFF"/>
+        <span>VIEW ONLY — Guardian contacts cannot download files</span>
       </div>
       <div className="flex items-center justify-between">
-        <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
+        <span style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
         <div className="flex gap-2">
-          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color:"#3A5BD9", fontSize:10, ...MONO, fontWeight:700 }}>All</button>
-          <button onClick={()=>onChange([])} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>Clear</button>
+          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+          <button onClick={()=>onChange([])} style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-1.5" style={{ maxHeight:200, overflowY:"auto" }}>
+      <div className="folder-grid">
         {FOLDER_CATALOG.map(f=>{
           const active = selected.includes(f.id);
           return (
-            <button key={f.id} onClick={()=>toggle(f.id)}
-              className="flex items-center gap-1.5 px-2 py-2 rounded-lg text-left transition-all"
-              style={{ background:active?`${f.color}15`:"rgba(58,91,217,0.03)", border:`1px solid ${active?f.color+"50":"rgba(58,91,217,0.1)"}`, color:active?f.color:"#8A9AB8" }}>
+            <button key={f.id} onClick={()=>toggle(f.id)} className="folder-chip"
+              style={{ background:active?`${f.color}1E`:"rgba(255,255,255,0.03)", border:`1px solid ${active?f.color+"55":"rgba(255,255,255,0.08)"}`, color:active?f.color:MUTED }}>
               <span style={{ fontSize:12 }}>{f.emoji}</span>
               <span style={{ fontSize:9, fontWeight:active?700:400, lineHeight:1.3 }}>{f.label}</span>
               {active && <CheckCircle size={9} color={f.color} style={{ marginLeft:"auto" }}/>}
@@ -148,126 +153,103 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-lg rounded-2xl p-7 overflow-y-auto" style={{ ...GLASS, maxHeight:"90vh" }}>
-        <div className="flex items-center justify-between mb-5">
+    <div className="backdrop">
+      <div className="card modal glow-surface">
+        <div className="modal-head">
           <div>
-            <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>
-              Add {typeConfig[form.type].label}
-            </h3>
-            <p style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{typeConfig[form.type].desc}</p>
+            <h3>Add {typeConfig[form.type].label}</h3>
+            <p className="modal-sub">{typeConfig[form.type].desc}</p>
           </div>
-          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+          <button onClick={onClose}><X size={16}/></button>
         </div>
 
-        <div className="space-y-4">
-          {/* Basic fields */}
+        <div className="modal-body">
           {[
             { key:"name",         label:"FULL LEGAL NAME",  ph:"As on government ID" },
             { key:"email",        label:"EMAIL ADDRESS",    ph:"contact@email.com" },
             { key:"phone",        label:"PHONE NUMBER",     ph:"+1 (555) 000-0000" },
             { key:"relationship", label:"RELATIONSHIP",     ph:"e.g. Spouse, Attorney, Daughter" },
           ].map(f=>(
-            <div key={f.key}>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>{f.label}</label>
-              <input value={(form as any)[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+            <div className="field" key={f.key}>
+              <label>{f.label}</label>
+              <input value={(form as any)[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} placeholder={f.ph}/>
             </div>
           ))}
 
-          {/* Guardian folder picker */}
           {isGuardian && (
-            <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(72,187,120,0.25)" }}>
-              <button onClick={()=>setShowFolders(!showFolders)}
-                className="w-full flex items-center justify-between px-4 py-3"
-                style={{ background:"rgba(72,187,120,0.06)", color:"#48BB78" }}>
+            <div className="folder-picker">
+              <button onClick={()=>setShowFolders(!showFolders)} className="folder-picker-hd">
                 <div className="flex items-center gap-2">
                   <FolderOpen size={14}/>
-                  <span style={{ fontSize:12, fontWeight:700, ...MONO }}>
+                  <span style={{ fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
                     FOLDER ACCESS {guardianFolders.length > 0 ? `· ${guardianFolders.length} assigned` : "— required"}
                   </span>
                 </div>
                 {showFolders ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
               </button>
-              {showFolders && <div className="p-4"><FolderSelector selected={guardianFolders} onChange={setGuardianFolders}/></div>}
+              {showFolders && <div style={{ padding: 16 }}><FolderSelector selected={guardianFolders} onChange={setGuardianFolders}/></div>}
             </div>
           )}
 
-          {/* Legacy — verification requirements */}
           {isLegacy && (
             <div>
-              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:6 }}>
+              <div style={{ color:MUTED, fontSize:11, fontFamily:"var(--font-mono)", marginBottom:8 }}>
                 VERIFICATION REQUIREMENTS (choose what your legacy contact must provide)
               </div>
               <div className="space-y-2">
                 {VERIFICATION_METHODS.map(vm => {
                   const selected = selectedVerifications.includes(vm.id);
                   return (
-                    <button key={vm.id} onClick={()=>toggleVerification(vm.id)} disabled={vm.required}
-                      className="w-full flex items-start gap-3 px-3 py-3 rounded-xl text-left transition-all"
-                      style={{ background:selected?"rgba(58,91,217,0.06)":"rgba(58,91,217,0.02)", border:`1px solid ${selected?"rgba(58,91,217,0.25)":"rgba(58,91,217,0.08)"}`, cursor:vm.required?"not-allowed":"pointer" }}>
-                      <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                        style={{ width:32, height:32, background:selected?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.04)", fontSize:16 }}>
-                        {vm.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
+                    <button key={vm.id} onClick={()=>toggleVerification(vm.id)} disabled={vm.required} className="verif-row"
+                      style={{ background:selected?"rgba(91,110,225,0.07)":"rgba(255,255,255,0.02)", borderColor:selected?"rgba(91,110,225,0.3)":"rgba(255,255,255,0.07)", cursor:vm.required?"not-allowed":"pointer" }}>
+                      <div className="verif-ico" style={{ background:selected?"rgba(91,110,225,0.12)":"rgba(255,255,255,0.04)" }}>{vm.icon}</div>
+                      <div className="flex-1" style={{ minWidth: 0 }}>
                         <div className="flex items-center gap-2">
-                          <span style={{ color:"#FFFFFF", fontSize:12, fontWeight:600 }}>{vm.label}</span>
-                          {vm.required && <span className="px-1.5 py-0.5 rounded text-xs" style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>REQUIRED</span>}
+                          <span style={{ color:TEXT, fontSize:12, fontWeight:600 }}>{vm.label}</span>
+                          {vm.required && <span className="req-tag">REQUIRED</span>}
                         </div>
-                        <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
+                        <div style={{ color:MUTED, fontSize:11, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
                       </div>
-                      <div className="flex-shrink-0 mt-0.5">
-                        {selected ? <CheckCircle size={15} color="#3A5BD9"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid #C0CDE0" }}/>}
+                      <div className="flex-shrink-0" style={{ marginTop: 2 }}>
+                        {selected ? <CheckCircle size={15} color="#FFFFFF"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Security word / Q&A fields */}
               {selectedVerifications.includes("security_word") && (
-                <div className="mt-3 p-4 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SHARED SECRET WORD</label>
-                  <input value={securityWord} onChange={e=>setSecurityWord(e.target.value)}
-                    placeholder="A word only you and your contact know — e.g. a childhood memory"
-                    className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-                  <p style={{ color:"#8A9AB8", fontSize:10, marginTop:4 }}>Keep this private. Your contact must provide this word exactly to gain access.</p>
+                <div className="sub-panel">
+                  <label>YOUR SHARED SECRET WORD</label>
+                  <input value={securityWord} onChange={e=>setSecurityWord(e.target.value)} placeholder="A word only you and your contact know — e.g. a childhood memory"/>
+                  <p className="sub-hint">Keep this private. Your contact must provide this word exactly to gain access.</p>
                 </div>
               )}
               {selectedVerifications.includes("security_qa") && (
-                <div className="mt-3 p-4 rounded-xl space-y-3 glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
+                <div className="sub-panel space-y-3">
                   <div>
-                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>YOUR SECURITY QUESTION</label>
-                    <input value={securityQ} onChange={e=>setSecurityQ(e.target.value)}
-                      placeholder="e.g. What is the name of the street I grew up on?"
-                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                    <label>YOUR SECURITY QUESTION</label>
+                    <input value={securityQ} onChange={e=>setSecurityQ(e.target.value)} placeholder="e.g. What is the name of the street I grew up on?"/>
                   </div>
                   <div>
-                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>ANSWER</label>
-                    <input value={securityA} onChange={e=>setSecurityA(e.target.value)} placeholder="The exact answer your contact must provide"
-                      className="w-full px-3 py-2.5 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                    <label>ANSWER</label>
+                    <input value={securityA} onChange={e=>setSecurityA(e.target.value)} placeholder="The exact answer your contact must provide"/>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* Notes */}
-          <div>
-            <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>NOTES (optional)</label>
-            <input value={form.notes} onChange={e=>setForm(p=>({...p,notes:e.target.value}))} placeholder="Any additional instructions or context"
-              className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+          <div className="field">
+            <label>NOTES (optional)</label>
+            <input value={form.notes} onChange={e=>setForm(p=>({...p,notes:e.target.value}))} placeholder="Any additional instructions or context"/>
           </div>
-
-          <div className="flex gap-3 pt-2">
-            <button onClick={submit} disabled={loading}
-              className="flex-1 py-3 rounded-xl font-semibold text-sm"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:loading?0.7:1 }}>
-              {loading ? "Sending Invite…" : "Send Verification Invite"}
-            </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"#8A9AB8" }}>Cancel</button>
-          </div>
+        </div>
+        <div className="modal-foot">
+          <button onClick={submit} disabled={loading} className="save" style={{ opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Sending Invite…" : "Send Verification Invite"}
+          </button>
+          <button onClick={onClose} className="btn-sec">Cancel</button>
         </div>
       </div>
     </div>
@@ -294,171 +276,143 @@ function ContactSection({
   const isGuardian = type === "guardian";
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border:`2px solid ${cfg.color}25` }}>
-      {/* Section header */}
-      <div className="flex items-center justify-between px-5 py-4"
-        style={{ background:`${cfg.color}08`, borderBottom:`1px solid ${cfg.color}20` }}>
+    <div className="card glow-surface" style={{ overflow: "hidden", borderColor: `${cfg.color}30` }}>
+      <div className="section-hd" style={{ background:`${cfg.color}0C` }}>
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center rounded-xl"
-            style={{ width:38, height:38, background:`${cfg.color}18`, color:cfg.color }}>
+          <div className="section-ico" style={{ background:`${cfg.color}20`, color:cfg.color }}>
             {type === "legacy" ? <Shield size={18}/> : type === "guardian" ? <Users size={18}/> : type === "emergency" ? <AlertCircle size={18}/> : <PawPrint size={18}/>}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#FFFFFF" }}>{cfg.label}s</span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:`${cfg.color}15`, color:cfg.color, ...MONO }}>{contacts.length}</span>
+              <span className="section-title">{cfg.label}s</span>
+              <span className="section-count" style={{ background:`${cfg.color}1E`, color:cfg.color }}>{contacts.length}</span>
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1 }}>{cfg.desc}</div>
+            <div className="section-desc">{cfg.desc}</div>
           </div>
         </div>
-        <button onClick={onAdd}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold"
-          style={{ background:`${cfg.color}18`, color:cfg.color, border:`1px solid ${cfg.color}40` }}>
+        <button onClick={onAdd} className="btn-ghost" style={{ color: cfg.color, background:`${cfg.color}1E`, borderColor:`${cfg.color}55` }}>
           <Plus size={12}/> Add {cfg.label}
         </button>
       </div>
 
-      {/* Guardian view-only reminder */}
       {isGuardian && contacts.length > 0 && (
-        <div className="px-5 py-2.5 border-b flex items-center gap-2"
-          style={{ background:"rgba(72,187,120,0.04)", borderColor:"rgba(72,187,120,0.15)" }}>
-          <Eye size={12} color="#48BB78"/>
-          <span style={{ color:"#48BB78", fontSize:11 }}>Guardian contacts can <strong>view</strong> their assigned folders but <strong style={{ color:"#E53E3E" }}>cannot download</strong> any files.</span>
+        <div className="view-only-strip">
+          <Eye size={12} color="#FFFFFF"/>
+          <span>Guardian contacts can <strong>view</strong> their assigned folders but <strong style={{ color: NEG }}>cannot download</strong> any files.</span>
         </div>
       )}
 
-      {/* Contact list */}
-      <div className="divide-y" style={{ borderColor:`${cfg.color}12` }}>
+      <div>
         {contacts.length === 0 && (
-          <div className="py-8 text-center">
-            <div style={{ color:"#B8C8E0", fontSize:13 }}>No {cfg.label.toLowerCase()}s added yet.</div>
-            <button onClick={onAdd} className="mt-2 text-xs underline" style={{ color:cfg.color }}>Add one now</button>
+          <div style={{ padding: "32px 0", textAlign: "center" }}>
+            <div style={{ color: SOFT, fontSize: 13 }}>No {cfg.label.toLowerCase()}s added yet.</div>
+            <button onClick={onAdd} className="add-one-link" style={{ color: cfg.color }}>Add one now</button>
           </div>
         )}
 
         {contacts.map((c, i) => {
           const vs = verStyle[c.verificationStatus];
           return (
-            <div key={c.id} className="p-5">
+            <div key={c.id} className="contact-row">
               <div className="flex items-start gap-3">
-                {/* Priority number for Legacy */}
                 {isLegacy && (
-                  <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0 relative"
-                    style={{ width:42, height:42, background:i===0?"rgba(58,91,217,0.15)":"rgba(58,91,217,0.06)", color:i===0?"#3A5BD9":"#8A9AB8", fontSize:14, fontFamily:"var(--font-display)", border:i===0?"2px solid rgba(58,91,217,0.3)":"1px solid rgba(58,91,217,0.1)" }}>
-                    {i===0 ? <Crown size={18} color="#3A5BD9"/> : `#${i+1}`}
+                  <div className="priority-badge" style={{ background:i===0?"rgba(91,110,225,0.18)":"rgba(91,110,225,0.08)", color:i===0?"#6FAE8B":MUTED, border:i===0?"2px solid rgba(91,110,225,0.35)":"1px solid rgba(91,110,225,0.14)" }}>
+                    {i===0 ? <Crown size={18} color="#FFFFFF"/> : `#${i+1}`}
                   </div>
                 )}
 
-                {/* Avatar for non-legacy */}
                 {!isLegacy && (
-                  <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                    style={{ width:42, height:42, background:cfg.bg, color:cfg.color, fontSize:14, fontFamily:"var(--font-display)" }}>
+                  <div className="priority-badge" style={{ background:`${cfg.color}1E`, color:cfg.color }}>
                     {c.avatar}
                   </div>
                 )}
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:600 }}>{c.name}</span>
+                <div className="flex-1" style={{ minWidth: 0 }}>
+                  <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
+                    <span style={{ color:TEXT, fontSize:14, fontWeight:600 }}>{c.name}</span>
                     {isLegacy && i === 0 && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-                        style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", ...MONO }}>
+                      <span className="rank-badge" style={{ background:"rgba(91,110,225,0.14)", color:"#6FAE8B" }}>
                         <Crown size={9}/> PRIMARY
                       </span>
                     )}
                     {isLegacy && i > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                        style={{ background:"rgba(90,106,136,0.14)", color:"#8A9AB8", ...MONO }}>
+                      <span className="rank-badge" style={{ background:"rgba(140,151,180,0.14)", color:MUTED }}>
                         CONTINGENT #{i+1}
                       </span>
                     )}
-                    <span style={{ color:"#8A9AB8", fontSize:12 }}>{c.relationship}</span>
+                    <span style={{ color:MUTED, fontSize:12 }}>{c.relationship}</span>
                   </div>
 
                   <div className="flex items-center gap-3 flex-wrap">
-                    {c.phone && <span className="flex items-center gap-1 text-xs" style={{ color:"#8A9AB8" }}><Phone size={10}/>{c.phone}</span>}
-                    {c.email && <span className="flex items-center gap-1 text-xs" style={{ color:"#8A9AB8" }}><Mail size={10}/>{c.email}</span>}
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs" style={{ background:vs.bg, color:vs.color }}>
-                      {vs.icon}<span style={{ ...MONO, marginLeft:3 }}>{vs.label}</span>
+                    {c.phone && <span className="meta-item"><Phone size={10}/>{c.phone}</span>}
+                    {c.email && <span className="meta-item"><Mail size={10}/>{c.email}</span>}
+                    <div className="status-chip" style={{ background:`${vs.color}1E`, color:vs.color }}>
+                      {vs.icon}<span style={{ fontFamily:"var(--font-mono)", marginLeft:3 }}>{vs.label}</span>
                     </div>
                   </div>
 
-                  {/* Guardian folder badge */}
                   {isGuardian && c.accessLevel && (
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <FolderOpen size={10} color="#48BB78"/>
-                      <span style={{ color:"#8A9AB8", fontSize:10 }}>{c.accessLevel}</span>
+                    <div className="flex items-center gap-1.5" style={{ marginTop: 6 }}>
+                      <FolderOpen size={10} color="#FFFFFF"/>
+                      <span style={{ color:MUTED, fontSize:10 }}>{c.accessLevel}</span>
                     </div>
                   )}
 
-                  {/* Legacy priority note */}
                   {isLegacy && (
-                    <div className="mt-1.5 text-xs" style={{ color:"#8A9AB8" }}>
+                    <div style={{ marginTop: 6, fontSize: 12, color: MUTED }}>
                       {i === 0
                         ? "Has primary authority — notified first and assumes full control of the vault."
                         : `Backup #${i+1} — assumes control only if all contacts ranked above are unable to act.`}
                     </div>
                   )}
 
-                  {/* ID Verification status — inline on legacy contacts */}
                   {isLegacy && getVerifStatus && (() => {
-                    const vs = getVerifStatus(c.id);
-                    const vc = verifConfig[vs];
+                    const vs2 = getVerifStatus(c.id);
+                    const vc = verifConfig[vs2];
                     return (
-                      <div className="mt-3 space-y-2">
+                      <div className="space-y-2" style={{ marginTop: 12 }}>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background:vc.bg, color:vc.color }}>
+                          <div className="status-chip lg" style={{ background:`${vc.color}1E`, color:vc.color }}>
                             {vc.icon}<span style={{ fontFamily:"var(--font-mono)", marginLeft:3 }}>{vc.label}</span>
                           </div>
-                          <span style={{ color:"#8A9AB8", fontSize:11 }}>
-                            {vs==="not_sent" && "ID verification invite not yet sent"}
-                            {vs==="pending" && "Invite sent — awaiting ID submission"}
-                            {vs==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
-                            {vs==="verified" && "Government ID verified by compliance team ✓"}
-                            {vs==="rejected" && "ID rejected — please resubmit"}
+                          <span style={{ color:MUTED, fontSize:11 }}>
+                            {vs2==="not_sent" && "ID verification invite not yet sent"}
+                            {vs2==="pending" && "Invite sent — awaiting ID submission"}
+                            {vs2==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
+                            {vs2==="verified" && "Government ID verified by compliance team ✓"}
+                            {vs2==="rejected" && "ID rejected — please resubmit"}
                           </span>
                         </div>
 
-                        {/* Action buttons */}
                         <div className="flex gap-2 flex-wrap">
-                          {vs === "not_sent" && (
-                            <button onClick={()=>advanceStatus(c.id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.2)" }}>
+                          {vs2 === "not_sent" && (
+                            <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
                               <Mail size={10}/> Send Verification Invite
                             </button>
                           )}
-                          {vs === "pending" && (
+                          {vs2 === "pending" && (
                             <>
-                              <button onClick={()=>advanceStatus(c.id)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                                style={{ background:"rgba(74,144,217,0.08)", color:"#4A90D9", border:"1px solid rgba(74,144,217,0.2)" }}>
+                              <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
                                 <Upload size={10}/> Simulate ID Submission
                               </button>
-                              <button onClick={()=>toast.success(`Invite resent to ${c.email}`)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs"
-                                style={{ background:"rgba(58,91,217,0.05)", color:"#8A9AB8" }}>
+                              <button onClick={()=>toast.success(`Invite resent to ${c.email}`)} className="btn-sec">
                                 Resend Invite
                               </button>
                             </>
                           )}
-                          {vs === "id_submitted" && (
-                            <button onClick={()=>simulateVerify(c.id)} disabled={verifying===c.id}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                              style={{ background:"rgba(72,187,120,0.08)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.2)" }}>
+                          {vs2 === "id_submitted" && (
+                            <button onClick={()=>simulateVerify?.(c.id)} disabled={verifying===c.id} className="btn-ghost" style={{ color: "#D99A6B", background: "rgba(95,190,145,0.10)", borderColor: "rgba(95,190,145,0.3)" }}>
                               {verifying===c.id
                                 ? <><RefreshCw size={10} style={{ animation:"spin 1s linear infinite" }}/> Verifying…</>
                                 : <><CheckCircle size={10}/> Simulate Verify</>}
                             </button>
                           )}
-                          {vs === "verified" && (
-                            <div className="flex items-center gap-1.5 text-xs" style={{ color:"#48BB78" }}>
+                          {vs2 === "verified" && (
+                            <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: "#D99A6B" }}>
                               <UserCheck size={11}/> Vault access activates upon verified passing
                             </div>
                           )}
-                          {/* Scan ID option */}
-                          {(vs === "not_sent" || vs === "pending") && (
+                          {(vs2 === "not_sent" || vs2 === "pending") && (
                             <ScanButton folder="legal" onUpload={() => onScanId?.(c.id, c.name)} size="sm" label="Scan ID"/>
                           )}
                         </div>
@@ -468,8 +422,7 @@ function ContactSection({
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={()=>{ if(window.confirm(`Remove ${c.name}?`)) onRemove(c.id); }}
-                    className="p-1.5 rounded-lg" style={{ color:"#FC8181" }}>
+                  <button onClick={()=>{ if(window.confirm(`Remove ${c.name}?`)) onRemove(c.id); }} style={{ color: NEG, background: "none", border: "none", cursor: "pointer", padding: 6 }}>
                     <Trash2 size={13}/>
                   </button>
                 </div>
@@ -481,6 +434,93 @@ function ContactSection({
     </div>
   );
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-contacts so nothing else in the app is affected. */
+const CONTACTS_CSS = `
+.fpd-contacts{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-contacts *{box-sizing:border-box;}
+.fpd-contacts-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-contacts .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-contacts .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-contacts .card.pad{padding:22px;}
+.fpd-contacts .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+.fpd-contacts .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.fpd-contacts .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin-bottom:4px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-contacts .pg-sub{color:${MUTED};font-size:13px;max-width:52ch;line-height:1.6;}
+.fpd-contacts .head-ico{width:52px;height:52px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-contacts .access-pill{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:11px;flex-shrink:0;}
+.fpd-contacts .access-dot{width:6px;height:6px;border-radius:50%;}
+
+.fpd-contacts .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;background:none;}
+.fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* chain of authority */
+.fpd-contacts .chain-box{padding:20px;border-radius:15px;background:rgba(91,110,225,0.05);border:2px solid rgba(91,110,225,0.22);}
+.fpd-contacts .chain-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.fpd-contacts .chain-hd span{font-family:var(--font-display);font-size:14px;color:${TEXT};}
+.fpd-contacts .chain-row{display:flex;align-items:center;gap:12px;}
+.fpd-contacts .chain-num{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.fpd-contacts .chain-note{margin-top:12px;padding:10px 12px;border-radius:11px;font-size:12px;display:flex;align-items:flex-start;gap:8px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);color:${MUTED};line-height:1.5;}
+
+/* solo-legacy info banner */
+.fpd-contacts .info-banner{display:flex;align-items:flex-start;gap:10px;padding:16px 20px;border-radius:15px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
+.fpd-contacts .info-banner p{color:${MUTED};font-size:12px;line-height:1.7;}
+
+/* section */
+.fpd-contacts .section-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-contacts .section-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-contacts .section-title{font-family:var(--font-display);font-size:15px;color:${TEXT};}
+.fpd-contacts .section-count{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--font-mono);}
+.fpd-contacts .section-desc{color:${MUTED};font-size:11px;margin-top:2px;}
+.fpd-contacts .view-only-strip{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(95,190,145,0.16);background:rgba(95,190,145,0.05);color:#D99A6B;font-size:11px;}
+.fpd-contacts .view-only-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:11px;font-weight:700;}
+.fpd-contacts .add-one-link{margin-top:6px;font-size:11px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+
+/* contact row */
+.fpd-contacts .contact-row{padding:18px 20px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-contacts .contact-row:first-child{border-top:none;}
+.fpd-contacts .priority-badge{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:var(--font-display);}
+.fpd-contacts .rank-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;font-family:var(--font-mono);}
+.fpd-contacts .meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:${MUTED};}
+.fpd-contacts .status-chip{display:flex;align-items:center;gap:0;padding:2px 6px;border-radius:6px;font-size:11px;}
+.fpd-contacts .status-chip.lg{padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;}
+
+/* modal */
+.fpd-contacts .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.8);backdrop-filter:blur(8px);}
+.fpd-contacts .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.fpd-contacts .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-contacts .modal-head h3{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;}
+.fpd-contacts .modal-sub{color:${MUTED};font-size:12px;margin-top:3px;}
+.fpd-contacts .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-contacts .modal-body{padding:22px 24px;display:flex;flex-direction:column;gap:14px;}
+.fpd-contacts .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-contacts .field input::placeholder{color:${FAINT};}
+.fpd-contacts .field input:focus,.fpd-contacts .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-contacts .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:11px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(91,110,225,0.7);}
+
+/* folder picker */
+.fpd-contacts .folder-picker{border-radius:14px;overflow:hidden;border:1px solid rgba(95,190,145,0.28);}
+.fpd-contacts .folder-picker-hd{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(95,190,145,0.06);color:#D99A6B;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:200px;overflow-y:auto;}
+.fpd-contacts .folder-chip{display:flex;align-items:center;gap:6px;padding:8px;border-radius:9px;text-align:left;cursor:pointer;font-family:var(--font-body);}
+
+/* verification requirement rows */
+.fpd-contacts .verif-row{width:100%;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:11px;text-align:left;border:1px solid;font-family:var(--font-body);}
+.fpd-contacts .verif-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,110,225,0.14);color:#6FAE8B;font-family:var(--font-mono);}
+.fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:11px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);}
+.fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
+.fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
+.fpd-contacts .sub-hint{color:${MUTED};font-size:10px;margin-top:5px;}
+`;
 
 /* ── Main Component ──────────────────────────────────────────────── */
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
@@ -527,105 +567,96 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   const visibleContacts = contacts.filter(c => c.type === activeType);
   const legacyContacts = contacts.filter(c => c.type === "legacy");
 
+  const cfg = typeConfig[activeType];
+  const access: Record<ContactType, { label:string; color:string }> = {
+    legacy:        { label:"Full vault download — after verified passing", color:"#6FAE8B" },
+    guardian:      { label:"View-only assigned folders — never downloads", color:"#D99A6B" },
+    emergency:     { label:"Informational only — no vault access", color:WARN },
+    pet_emergency: { label:"Informational only — pet care details", color:"#6E90C9" },
+  };
+  const Icon = activeType === "legacy" ? Shield : activeType === "guardian" ? Users : activeType === "emergency" ? AlertCircle : PawPrint;
+
   return (
-    <div className="p-6 space-y-6 relative" style={{ maxWidth:1240, margin:"0 auto", ...GRID }}>
-      {/* Page header */}
-      {(() => {
-        const cfg = typeConfig[activeType];
-        const access: Record<ContactType, { label:string; color:string }> = {
-          legacy:        { label:"Full vault download — after verified passing", color:"#3A5BD9" },
-          guardian:      { label:"View-only assigned folders — never downloads", color:"#48BB78" },
-          emergency:     { label:"Informational only — no vault access", color:"#F6AD55" },
-          pet_emergency: { label:"Informational only — pet care details", color:"#6E8BFF" },
-        };
-        const Icon = activeType === "legacy" ? Shield : activeType === "guardian" ? Users : activeType === "emergency" ? AlertCircle : PawPrint;
-        return (
-          <div className="flex items-start justify-between gap-4 fpd-fade-in-up">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center rounded-2xl flex-shrink-0" style={{ width:52, height:52, background:`${cfg.color}18`, color:cfg.color, boxShadow:`0 8px 24px -10px ${cfg.color}` }}>
-                <Icon size={24}/>
-              </div>
-              <div>
-                <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4, letterSpacing:"-0.01em" }}>
-                  {cfg.label}s
-                </h1>
-                <p style={{ color:"#8A9AB8", fontSize:13, maxWidth:"52ch", lineHeight:1.6 }}>{cfg.desc}</p>
-              </div>
+    <div className="fpd-contacts">
+      <style dangerouslySetInnerHTML={{ __html: CONTACTS_CSS }} />
+      <div className="fpd-contacts-grain" />
+
+      <div className="wrap fpd-fade-in-up">
+        {/* ── Page header ── */}
+        <div className="pg-head">
+          <div className="flex items-start gap-4">
+            <div className="head-ico" style={{ background:`${cfg.color}20`, color:cfg.color, boxShadow:`0 8px 24px -10px ${cfg.color}` }}>
+              <Icon size={24}/>
             </div>
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl flex-shrink-0" style={{ background:`${access[activeType].color}12`, border:`1px solid ${access[activeType].color}30` }}>
-              <div style={{ width:6, height:6, borderRadius:"50%", background:access[activeType].color, boxShadow:`0 0 6px ${access[activeType].color}` }}/>
-              <span style={{ color:access[activeType].color, fontSize:11, fontWeight:600 }}>{access[activeType].label}</span>
+            <div>
+              <h1 className="pg-h1">{cfg.label}s</h1>
+              <p className="pg-sub">{cfg.desc}</p>
             </div>
           </div>
-        );
-      })()}
-
-      {/* Chain of authority — Legacy only, multiple contacts */}
-      {activeType === "legacy" && legacyContacts.length > 1 && (
-        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"2px solid rgba(58,91,217,0.2)" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Crown size={16} color="#3A5BD9"/>
-            <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#FFFFFF" }}>Chain of Authority</span>
-          </div>
-          <div className="space-y-2">
-            {legacyContacts.map((c, i) => (
-              <div key={c.id} className="flex items-center gap-3">
-                <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                  style={{ width:28, height:28, background:i===0?"#3A5BD9":"rgba(58,91,217,0.1)", color:i===0?"#fff":"#8A9AB8", fontSize:11, fontWeight:700 }}>
-                  {i===0 ? <Crown size={12}/> : `${i+1}`}
-                </div>
-                <div className="flex-1 text-sm" style={{ color:"#FFFFFF" }}>
-                  <strong>{c.name}</strong>
-                  <span style={{ color:"#8A9AB8", marginLeft:8 }}>
-                    {i===0 ? "Primary — notified first, assumes full vault authority" : `Contingent #${i+1} — activates only if contacts above cannot act`}
-                  </span>
-                </div>
-                {i < legacyContacts.length-1 && <ArrowDown size={14} color="#B8C8E0"/>}
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 px-3 py-2 rounded-xl text-xs flex items-start gap-2"
-            style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
-            <AlertTriangle size={11} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
-            <span style={{ color:"#8A9AB8", lineHeight:1.5 }}>
-              Authority passes automatically down the list if a contact above is deceased, incapacitated, or formally declines.
-            </span>
+          <div className="access-pill" style={{ background:`${access[activeType].color}1A`, border:`1px solid ${access[activeType].color}44` }}>
+            <div className="access-dot" style={{ background:access[activeType].color, boxShadow:`0 0 6px ${access[activeType].color}` }}/>
+            <span style={{ color:access[activeType].color, fontSize:11, fontWeight:600 }}>{access[activeType].label}</span>
           </div>
         </div>
-      )}
 
-      {/* Single legacy contact — suggest adding a backup */}
-      {activeType === "legacy" && legacyContacts.length === 1 && (
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-          style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
-          <Info size={16} color="#3A5BD9" style={{ marginTop:1, flexShrink:0 }}/>
-          <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
-            You have one Legacy Contact. Consider adding a <strong style={{ color:"#FFFFFF" }}>contingent backup</strong> — if your primary contact is also deceased or unable to act, there would be no one to claim your vault.
+        {/* ── Chain of authority ── */}
+        {activeType === "legacy" && legacyContacts.length > 1 && (
+          <div className="chain-box">
+            <div className="chain-hd">
+              <Crown size={16} color="#FFFFFF"/>
+              <span>Chain of Authority</span>
+            </div>
+            <div className="space-y-2">
+              {legacyContacts.map((c, i) => (
+                <div key={c.id} className="chain-row">
+                  <div className="chain-num" style={{ background:i===0?ACCENT:"rgba(91,110,225,0.14)", color:i===0?"#fff":MUTED }}>
+                    {i===0 ? <Crown size={12}/> : `${i+1}`}
+                  </div>
+                  <div className="flex-1" style={{ fontSize: 13, color: TEXT }}>
+                    <strong>{c.name}</strong>
+                    <span style={{ color:MUTED, marginLeft:8 }}>
+                      {i===0 ? "Primary — notified first, assumes full vault authority" : `Contingent #${i+1} — activates only if contacts above cannot act`}
+                    </span>
+                  </div>
+                  {i < legacyContacts.length-1 && <ArrowDown size={14} color={FAINT}/>}
+                </div>
+              ))}
+            </div>
+            <div className="chain-note">
+              <AlertTriangle size={11} color={WARN} style={{ marginTop:1, flexShrink:0 }}/>
+              <span>Authority passes automatically down the list if a contact above is deceased, incapacitated, or formally declines.</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Only this contact type — nothing else */}
-      <ContactSection
-        type={activeType}
-        contacts={visibleContacts}
-        onAdd={() => setAddingType(activeType)}
-        onRemove={id => removeContact(id)}
-        getVerifStatus={getVerifStatus}
-        advanceStatus={advanceStatus}
-        simulateVerify={simulateVerify}
-        verifying={verifying}
-        onScanId={(id, name) => { setVerifStatus(p => ({ ...p, [id]: "id_submitted" })); toast.success(`ID scanned for ${name}`); }}
-      />
+        {activeType === "legacy" && legacyContacts.length === 1 && (
+          <div className="info-banner">
+            <Info size={16} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
+            <p>You have one Legacy Contact. Consider adding a <strong style={{ color: TEXT }}>contingent backup</strong> — if your primary contact is also deceased or unable to act, there would be no one to claim your vault.</p>
+          </div>
+        )}
 
-      {/* Add modal — locked to the active type */}
-      {addingType && (
-        <AddContactModal
-          defaultType={addingType}
-          onClose={() => setAddingType(null)}
-          onAdd={async c => { await addContact(c); setAddingType(null); toast.success(`${typeConfig[c.type].label} added`); }}
+        {/* ── Section (single contact type) ── */}
+        <ContactSection
+          type={activeType}
+          contacts={visibleContacts}
+          onAdd={() => setAddingType(activeType)}
+          onRemove={id => removeContact(id)}
+          getVerifStatus={getVerifStatus}
+          advanceStatus={advanceStatus}
+          simulateVerify={simulateVerify}
+          verifying={verifying}
+          onScanId={(id, name) => { setVerifStatus(p => ({ ...p, [id]: "id_submitted" })); toast.success(`ID scanned for ${name}`); }}
         />
-      )}
+
+        {addingType && (
+          <AddContactModal
+            defaultType={addingType}
+            onClose={() => setAddingType(null)}
+            onAdd={async c => { await addContact(c); setAddingType(null); toast.success(`${typeConfig[c.type].label} added`); }}
+          />
+        )}
+      </div>
     </div>
   );
 }

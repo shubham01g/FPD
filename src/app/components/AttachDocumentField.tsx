@@ -66,7 +66,7 @@ export function AttachDocumentField({
         <div className="flex items-center justify-between px-4 py-3 rounded-xl"
           style={{ background:"rgba(72,187,120,0.07)", border:"1px solid rgba(72,187,120,0.25)" }}>
           <div className="flex items-center gap-2">
-            <CheckCircle size={14} color="#48BB78"/>
+            <CheckCircle size={14} color="#FFFFFF"/>
             <span style={{ color:"var(--foreground)", fontSize:13 }}>{value}</span>
           </div>
           <button onClick={() => onChange(null)} style={{ color:"#FC8181" }}><X size={13}/></button>
@@ -77,7 +77,7 @@ export function AttachDocumentField({
             type="button"
             onClick={() => fileRef.current?.click()}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold"
-            style={{ border:"1px dashed rgba(58,91,217,0.3)", background:"rgba(58,91,217,0.03)", color:"var(--primary)" }}>
+            style={{ border:"1px dashed rgba(91,110,225,0.3)", background:"rgba(91,110,225,0.03)", color:"var(--primary)" }}>
             <Upload size={13}/> Upload File
           </button>
           <ScanButton

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import { Toaster } from "sonner";
 import { DemoProvider } from "./context/DemoContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
@@ -62,6 +63,14 @@ import { AccountSettings } from "./components/AccountSettings";
 import { WGClientSubmit } from "./components/WGClientSubmit";
 import { WGSchedulePage } from "./components/WGSchedulePage";
 import { createScheduleToken } from "./services/wgClientStore";
+import { CryptoMerchant } from "./components/admin/CryptoMerchant";
+import { ConciergeLogin } from "./components/ConciergeLogin";
+import { ConciergePortal } from "./components/ConciergePortal";
+import { conciergeEmployees, getEmployee } from "./services/conciergeStaff";
+import {
+  isAdminAuthed, setAdminAuthed, clearAdminAuthed,
+  getConciergeEmployeeId, setConciergeEmployeeId, clearConciergeEmployeeId,
+} from "./services/authSession";
 
 /* ── Demo wrapper: pick which client to simulate ────────────────── */
 const WG_DEMO_CLIENTS = [
@@ -70,28 +79,36 @@ const WG_DEMO_CLIENTS = [
   { token:"TOKEN_JAMES_003",  name:"Margaret Thompson",      specialist:"James Rivera",    clientId:"WG-003" },
 ];
 
-function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
+function WGClientSubmitDemo() {
+  const navigate = useNavigate();
   const [selected, setSelected] = React.useState<string | null>(null);
   const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   if (selected) {
     const client = WG_DEMO_CLIENTS.find(c => c.token === selected)!;
+    const goToSpecialistInbox = () => {
+      // Demo-only cross-link straight from the public doc-submit page into the
+      // Concierge Portal — establish the session on the fly so it's frictionless.
+      const emp = conciergeEmployees.find(e => e.name === client.specialist);
+      if (emp) setConciergeEmployeeId(emp.id);
+      navigate("/concierge");
+    };
     return (
       <div>
         {/* Back bar */}
         <div className="flex items-center justify-between px-5 py-2.5 border-b"
-          style={{ background:"#fff", borderColor:"rgba(110,139,255,0.15)" }}>
+          style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
           <button onClick={() => setSelected(null)}
             className="flex items-center gap-2 text-sm font-semibold"
-            style={{ color:"#6E8BFF" }}>
+            style={{ color:"#6FAE8B" }}>
             ← Switch Client
           </button>
-          <div style={{ color:"#5A6A88", fontSize:12, ...MONO }}>
+          <div style={{ color:"#8A9AB8", fontSize:12, ...MONO }}>
             Simulating: {client.name} · Specialist: {client.specialist}
           </div>
-          <button onClick={() => setMode("concierge")}
+          <button onClick={goToSpecialistInbox}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-            style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
             View {client.specialist.split(" ")[0]}'s Inbox →
           </button>
         </div>
@@ -102,16 +119,16 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6"
-      style={{ background:"#F5F8FF", fontFamily:"var(--font-body)" }}>
+      style={{ background:"#070A12", fontFamily:"var(--font-body)" }}>
       <div style={{ maxWidth:520, width:"100%" }}>
         <div className="text-center mb-8">
-          <div style={{ color:"#6E8BFF", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
+          <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
             📤 CLIENT DOCUMENT SUBMISSION — DEMO
           </div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#0D1428", marginBottom:8 }}>
+          <h2 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#E8EDF5", marginBottom:8 }}>
             Which client are you simulating?
           </h2>
-          <p style={{ color:"#5A6A88", fontSize:13, lineHeight:1.7 }}>
+          <p style={{ color:"#8A9AB8", fontSize:13, lineHeight:1.7 }}>
             Each client has a unique secure link. Select a client to see their submission page — then switch to the Concierge Portal to see the document appear live in their specialist's inbox.
           </p>
         </div>
@@ -120,23 +137,23 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           {WG_DEMO_CLIENTS.map(c => (
             <button key={c.token} onClick={() => setSelected(c.token)}
               className="w-full flex items-start gap-4 p-5 rounded-2xl text-left transition-all"
-              style={{ background:"#fff", border:"1.5px solid rgba(110,139,255,0.2)",
-                boxShadow:"0 2px 12px rgba(110,139,255,0.06)" }}>
+              style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)",
+                boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:48, height:48, background:"rgba(110,139,255,0.1)", color:"#6E8BFF", fontFamily:"var(--font-display)", fontSize:18 }}>
+                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-display)", fontSize:18 }}>
                 {c.name.split(" ").map((w:string) => w[0]).join("").slice(0,2)}
               </div>
               <div className="flex-1">
-                <div style={{ color:"#0D1428", fontSize:15, fontWeight:600, marginBottom:3 }}>{c.name}</div>
+                <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600, marginBottom:3 }}>{c.name}</div>
                 <div style={{ color:"#8A9AB8", fontSize:12 }}>
-                  Specialist: <strong style={{ color:"#6E8BFF" }}>{c.specialist}</strong>
+                  Specialist: <strong style={{ color:"#6FAE8B" }}>{c.specialist}</strong>
                 </div>
-                <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2, ...MONO }}>
+                <div style={{ color:"#4A5A7A", fontSize:11, marginTop:2, ...MONO }}>
                   Token: {c.token}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl self-center flex-shrink-0"
-                style={{ background:"rgba(110,139,255,0.08)", color:"#6E8BFF", fontSize:12, fontWeight:700 }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", fontSize:12, fontWeight:700 }}>
                 Open →
               </div>
             </button>
@@ -144,9 +161,9 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
         </div>
 
         <div className="mt-6 p-4 rounded-2xl text-center"
-          style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-          <div style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
-          <ol style={{ color:"#5A6A88", fontSize:12, lineHeight:2, textAlign:"left" }}>
+          style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.2)" }}>
+          <div style={{ color:"#6E90C9", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
+          <ol style={{ color:"#8A9AB8", fontSize:12, lineHeight:2, textAlign:"left" }}>
             <li>1. Select a client above (e.g. Dorothy Henderson)</li>
             <li>2. Submit a document on their page</li>
             <li>3. Switch Demo Mode → ⭐ Concierge Portal</li>
@@ -158,16 +175,40 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
     </div>
   );
 }
-import { CryptoMerchant } from "./components/admin/CryptoMerchant";
-import { ConciergeLogin } from "./components/ConciergeLogin";
-import { ConciergePortal } from "./components/ConciergePortal";
-import { type ConciergeEmployee, conciergeEmployees } from "./services/conciergeStaff";
 
-type AppMode = "landing" | "user" | "admin-login" | "admin" | "partner-onboarding" | "concierge-login" | "concierge" | "wg-submit" | "wg-schedule";
+/* ── Client scheduling demo wrapper — creates a live token once per visit ── */
+function WGScheduleDemo() {
+  const [demoToken] = useState(() => {
+    const today = new Date();
+    const fmt = (d: Date, t: string) =>
+      d.toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric" }) + " · " + t;
+    const d1 = new Date(today); d1.setDate(today.getDate() + 1);
+    const d2 = new Date(today); d2.setDate(today.getDate() + 1);
+    const d3 = new Date(today); d3.setDate(today.getDate() + 2);
+    const d4 = new Date(today); d4.setDate(today.getDate() + 3);
+    const token = createScheduleToken(
+      "WG-001", "Dorothy Henderson", "Marcus Williams",
+      [fmt(d1,"10:00 AM"), fmt(d2,"2:00 PM"), fmt(d3,"11:00 AM"), fmt(d4,"3:00 PM")]
+    );
+    return token.token;
+  });
+
+  return (
+    <div className="size-full overflow-y-auto">
+      <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(91,110,225,0.05)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
+        <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
+          📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
+        </span>
+      </div>
+      <WGSchedulePage token={demoToken}/>
+      <DemoBar/>
+    </div>
+  );
+}
 
 const TOASTER_STYLE = {
   background: "rgba(8,15,26,0.98)",
-  border: "1px solid rgba(58,91,217,0.25)",
+  border: "1px solid rgba(91,110,225,0.25)",
   color: "#E8EDF5",
   fontFamily: "var(--font-body)",
   fontSize: 13,
@@ -176,56 +217,71 @@ const TOASTER_STYLE = {
 };
 
 /* ── Floating demo nav — bottom-right, sits just below the AI Assistant ── */
-function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => void }) {
+type DemoTab = { path: string; label: string };
+
+const DEMO_TABS: DemoTab[] = [
+  { path: "/",                  label: "🏠 Landing" },
+  { path: "/dashboard",         label: "👤 User Portal" },
+  { path: "/admin/login",       label: "🔐 Admin Login" },
+  { path: "/admin",             label: "👑 Admin Portal" },
+  { path: "/partner",           label: "🤝 Partner Portal" },
+  { path: "/concierge/login",   label: "⭐ Concierge Login" },
+  { path: "/concierge",         label: "⭐ Concierge Portal" },
+  { path: "/documents/submit",  label: "📤 Client Doc Submit" },
+  { path: "/schedule",          label: "📅 Client Schedule Page" },
+];
+
+function DemoBar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
-  const tabs: { id: AppMode; label: string }[] = [
-    { id: "landing",            label: "🏠 Landing" },
-    { id: "user",               label: "👤 User Portal" },
-    { id: "admin-login",        label: "🔐 Admin Login" },
-    { id: "admin",              label: "👑 Admin Portal" },
-    { id: "partner-onboarding", label: "🤝 Partner Portal" },
-    { id: "concierge-login",    label: "⭐ Concierge Login" },
-    { id: "concierge",          label: "⭐ Concierge Portal" },
-    { id: "wg-submit",          label: "📤 Client Doc Submit" },
-    { id: "wg-schedule",        label: "📅 Client Schedule Page" },
-  ];
-  const current = tabs.find(t => t.id === mode);
+  const current = DEMO_TABS.find(t => t.path === location.pathname) ?? DEMO_TABS[0];
+
+  function goTo(tab: DemoTab) {
+    // The demo switcher stays frictionless: jumping straight into a gated
+    // portal establishes the session on the fly instead of bouncing to login.
+    if (tab.path === "/admin") setAdminAuthed();
+    if (tab.path === "/concierge") setConciergeEmployeeId(conciergeEmployees[0].id);
+    navigate(tab.path);
+    setOpen(false);
+  }
+
   return (
     /* right:24 aligns with AI Assistant (right-6 = 24px). top of this pill sits ~8px below the AI button. */
-    <div style={{ position:"fixed", bottom:24, right:24, zIndex:9999, fontFamily:"var(--font-mono)" }}>
+    <div className="fpd-demo" style={{ position:"fixed", bottom:24, right:24, zIndex:9999, fontFamily:"var(--font-mono)" }}>
+      <style>{`
+        .fpd-demo .demo-panel{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1.5px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 8px 40px rgba(0,0,0,0.6),0 0 18px -8px rgba(91,110,225,0.35);backdrop-filter:blur(20px);}
+        .fpd-demo .demo-tab{color:#8A9AB8;background:transparent;border:1px solid transparent;transition:background .16s ease,color .16s ease,box-shadow .16s ease;}
+        .fpd-demo .demo-tab:hover{background:rgba(91,110,225,0.14);color:#C7CEE8;}
+        .fpd-demo .demo-tab.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
+        .fpd-demo .demo-tab.on:hover{filter:brightness(1.08);}
+        .fpd-demo .demo-toggle{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 4px 20px rgba(0,0,0,0.5);transition:border-color .18s ease,box-shadow .18s ease;}
+        .fpd-demo .demo-toggle:hover{border-color:rgba(91,110,225,0.6);box-shadow:0 0 0 1px rgba(91,110,225,0.14),0 4px 20px rgba(0,0,0,0.5),0 0 22px -6px rgba(91,110,225,0.45);}
+      `}</style>
       {open && (
-        <div style={{
+        <div className="demo-panel" style={{
           position:"absolute", bottom:"calc(100% + 8px)", right:0,
-          background:"rgba(10,10,15,0.97)", borderRadius:14,
-          boxShadow:"0 8px 40px rgba(0,0,0,0.6)", backdropFilter:"blur(20px)",
-          border:"1px solid rgba(58,91,217,0.3)", padding:"8px 6px",
+          borderRadius:14, padding:"8px 6px",
           display:"flex", flexDirection:"column", gap:3, minWidth:190,
         }}>
-          <div style={{ color:"rgba(255,255,255,0.3)", fontSize:8, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => { setMode(t.id); setOpen(false); }}
-              style={{
-                padding:"7px 12px", borderRadius:9, fontSize:11, fontWeight:700,
-                cursor:"pointer", textAlign:"left", transition:"all 0.12s",
-                background: mode===t.id ? "#3A5BD9" : "transparent",
-                color: mode===t.id ? "#fff" : "#8A9AB8",
-                border: mode===t.id ? "1px solid #3A5BD9" : "1px solid transparent",
-              }}>
+          <div style={{ color:"rgba(255,255,255,0.34)", fontSize:8, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
+          {DEMO_TABS.map(t => (
+            <button key={t.path} onClick={() => goTo(t)}
+              className={`demo-tab${location.pathname===t.path ? " on" : ""}`}
+              style={{ padding:"7px 12px", borderRadius:9, fontSize:11, fontWeight:700, cursor:"pointer", textAlign:"left" }}>
               {t.label}
             </button>
           ))}
         </div>
       )}
       <button onClick={() => setOpen(!open)}
+        className="demo-toggle"
         style={{
           display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
           borderRadius:99, fontSize:10, fontWeight:700, cursor:"pointer",
-          background:"rgba(10,10,15,0.95)", color:"#8AA0FF",
-          border:"1px solid rgba(58,91,217,0.4)",
-          boxShadow:"0 4px 20px rgba(0,0,0,0.5)", backdropFilter:"blur(16px)",
-          letterSpacing:"0.06em",
+          color:"#6FAE8B", backdropFilter:"blur(16px)", letterSpacing:"0.06em",
         }}>
-        <span style={{ fontSize:14 }}>{current?.label.split(" ")[0]}</span>
+        <span style={{ fontSize:14 }}>{current.label.split(" ")[0]}</span>
         <span>DEMO</span>
         <span style={{ fontSize:8, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
       </button>
@@ -233,14 +289,27 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
   );
 }
 
-function AppShell() {
-  /* Default to the public landing page; "Sign In" / "Get Started" route to the dashboard */
-  const [mode, setMode] = useState<AppMode>("landing");
-  const [userPage, setUserPage] = useState<PageId>("dashboard");
-  const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
-  const [conciergeEmployee, setConciergeEmployee] = useState<ConciergeEmployee | null>(null);
+/* ── Landing ─────────────────────────────────────────────────────── */
+function LandingRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
+      <LandingPage
+        onGetStarted={() => navigate("/dashboard")}
+        onAdminLogin={() => navigate("/admin/login")}
+        onPartnerPortal={() => navigate("/partner")}
+        onConciergeLogin={() => navigate("/concierge/login")}
+      />
+      <DemoBar/>
+    </div>
+  );
+}
 
-  /* ── User page renderer ── */
+/* ── User portal ─────────────────────────────────────────────────── */
+function UserRoute() {
+  const navigate = useNavigate();
+  const [userPage, setUserPage] = useState<PageId>("dashboard");
+
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
     switch (userPage) {
@@ -278,7 +347,7 @@ function AppShell() {
       case "white-glove":         return <WhiteGloveService/>;
       // Always reachable — the Studio renders its own locked state until the
       // partner package is paid for, and routes here to the purchase flow.
-      case "white-label":         return <WhiteLabelStudio onPurchase={() => setMode("partner-onboarding")}/>;
+      case "white-label":         return <WhiteLabelStudio onPurchase={() => navigate("/partner")}/>;
       case "waiver-sign":         return <div className="p-6"><WaiverSignPage onBack={() => nav("dashboard")}/></div>;
       case "account-settings":    return <AccountSettings/>;
       case "fpd-ai":              return <AIAgent pageMode={true}/>;
@@ -286,7 +355,42 @@ function AppShell() {
     }
   };
 
-  /* ── Admin page renderer ── */
+  return (
+    <div className="size-full" style={{ fontFamily:"var(--font-body)" }}>
+      <Layout
+        currentPage={userPage}
+        onNavigate={setUserPage}
+        onGoAdmin={() => navigate("/admin/login")}
+        onSignOut={() => navigate("/")}
+      >
+        {renderUserPage()}
+      </Layout>
+      <DemoBar/>
+    </div>
+  );
+}
+
+/* ── Admin login ─────────────────────────────────────────────────── */
+function AdminLoginRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="size-full">
+      <AdminLogin
+        onLogin={() => { setAdminAuthed(); navigate("/admin"); }}
+        onBackToSite={() => navigate("/")}
+      />
+      <DemoBar/>
+    </div>
+  );
+}
+
+/* ── Admin portal (gated — redirects to /admin/login without a session) ── */
+function AdminRoute() {
+  const navigate = useNavigate();
+  const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
+
+  if (!isAdminAuthed()) return <Navigate to="/admin/login" replace/>;
+
   const renderAdminPage = () => {
     switch (adminPage) {
       case "master-admin":        return <MasterAdmin/>;
@@ -306,142 +410,87 @@ function AppShell() {
     }
   };
 
-  /* ── Landing ── */
-  if (mode === "landing") {
-    return (
-      <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
-        <LandingPage
-          onGetStarted={() => setMode("user")}
-          onAdminLogin={() => setMode("admin-login")}
-          onPartnerPortal={() => setMode("partner-onboarding")}
-          onConciergeLogin={() => setMode("concierge-login")}
-        />
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── Admin login ── */
-  if (mode === "admin-login") {
-    return (
-      <div className="size-full">
-        <AdminLogin
-          onLogin={() => setMode("admin")}
-          onBackToSite={() => setMode("landing")}
-        />
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── Admin portal ── */
-  if (mode === "admin") {
-    return (
-      <div className="size-full" style={{ fontFamily:"var(--font-body)" }}>
-        <AdminLayout
-          currentPage={adminPage}
-          onNavigate={setAdminPage}
-          onSignOut={() => setMode("landing")}
-        >
-          {renderAdminPage()}
-        </AdminLayout>
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── Partner onboarding (public standalone page) ── */
-  if (mode === "partner-onboarding") {
-    return (
-      <div className="size-full overflow-y-auto">
-        <PartnerOnboarding />
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── White Glove client document submission (token-based, no login) ── */
-  if (mode === "wg-submit") {
-    return (
-      <div className="size-full overflow-y-auto">
-        <WGClientSubmitDemo setMode={setMode}/>
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── White Glove client scheduling page (token-based, no login) ── */
-  if (mode === "wg-schedule") {
-    // Create a live demo token for Dorothy so the flow is interactive
-    const demoToken = (() => {
-      const today = new Date();
-      const fmt = (d: Date, t: string) =>
-        d.toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric" }) + " · " + t;
-      const d1 = new Date(today); d1.setDate(today.getDate() + 1);
-      const d2 = new Date(today); d2.setDate(today.getDate() + 1);
-      const d3 = new Date(today); d3.setDate(today.getDate() + 2);
-      const d4 = new Date(today); d4.setDate(today.getDate() + 3);
-      const token = createScheduleToken(
-        "WG-001", "Dorothy Henderson", "Marcus Williams",
-        [fmt(d1,"10:00 AM"), fmt(d2,"2:00 PM"), fmt(d3,"11:00 AM"), fmt(d4,"3:00 PM")]
-      );
-      return token.token;
-    })();
-    return (
-      <div className="size-full overflow-y-auto">
-        <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(58,91,217,0.05)", borderBottom:"1px solid rgba(58,91,217,0.1)" }}>
-          <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
-            📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
-          </span>
-        </div>
-        <WGSchedulePage token={demoToken}/>
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── Concierge staff login ── */
-  if (mode === "concierge-login") {
-    return (
-      <div className="size-full">
-        <ConciergeLogin
-          onLogin={emp => { setConciergeEmployee(emp); setMode("concierge"); }}
-          onBackToSite={() => setMode("landing")}
-        />
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── Concierge staff portal ── */
-  if (mode === "concierge") {
-    // If no one has logged in (e.g. jumped here from DemoBar), use first demo employee
-    const portalEmployee = conciergeEmployee ?? conciergeEmployees[0];
-    if (!portalEmployee) { setMode("concierge-login"); return null; }
-    return (
-      <div className="size-full">
-        <ConciergePortal
-          employee={portalEmployee}
-          onSignOut={() => { setConciergeEmployee(null); setMode("concierge-login"); }}
-        />
-        <DemoBar mode={mode} setMode={setMode}/>
-      </div>
-    );
-  }
-
-  /* ── User portal ── */
   return (
     <div className="size-full" style={{ fontFamily:"var(--font-body)" }}>
-      <Layout
-        currentPage={userPage}
-        onNavigate={setUserPage}
-        onGoAdmin={() => setMode("admin-login")}
-        onSignOut={() => setMode("landing")}
+      <AdminLayout
+        currentPage={adminPage}
+        onNavigate={setAdminPage}
+        onSignOut={() => { clearAdminAuthed(); navigate("/"); }}
       >
-        {renderUserPage()}
-      </Layout>
-      <DemoBar mode={mode} setMode={setMode}/>
+        {renderAdminPage()}
+      </AdminLayout>
+      <DemoBar/>
     </div>
+  );
+}
+
+/* ── Partner onboarding (public standalone page) ── */
+function PartnerRoute() {
+  return (
+    <div className="size-full overflow-y-auto">
+      <PartnerOnboarding />
+      <DemoBar/>
+    </div>
+  );
+}
+
+/* ── Concierge staff login ── */
+function ConciergeLoginRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="size-full">
+      <ConciergeLogin
+        onLogin={emp => { setConciergeEmployeeId(emp.id); navigate("/concierge"); }}
+        onBackToSite={() => navigate("/")}
+      />
+      <DemoBar/>
+    </div>
+  );
+}
+
+/* ── Concierge staff portal (gated — redirects to /concierge/login without a session) ── */
+function ConciergeRoute() {
+  const navigate = useNavigate();
+  const id = getConciergeEmployeeId();
+  const employee = id ? getEmployee(id) : undefined;
+
+  if (!employee) return <Navigate to="/concierge/login" replace/>;
+
+  return (
+    <div className="size-full">
+      <ConciergePortal
+        employee={employee}
+        onSignOut={() => { clearConciergeEmployeeId(); navigate("/concierge/login"); }}
+      />
+      <DemoBar/>
+    </div>
+  );
+}
+
+/* ── White Glove client document submission (token-based, no login) ── */
+function DocSubmitRoute() {
+  return (
+    <div className="size-full overflow-y-auto">
+      <WGClientSubmitDemo/>
+      <DemoBar/>
+    </div>
+  );
+}
+
+function AppShell() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingRoute/>}/>
+      <Route path="/dashboard" element={<UserRoute/>}/>
+      <Route path="/admin/login" element={<AdminLoginRoute/>}/>
+      <Route path="/admin" element={<AdminRoute/>}/>
+      <Route path="/partner" element={<PartnerRoute/>}/>
+      <Route path="/concierge/login" element={<ConciergeLoginRoute/>}/>
+      <Route path="/concierge" element={<ConciergeRoute/>}/>
+      <Route path="/documents/submit" element={<DocSubmitRoute/>}/>
+      <Route path="/schedule" element={<WGScheduleDemo/>}/>
+      <Route path="*" element={<Navigate to="/" replace/>}/>
+    </Routes>
   );
 }
 
@@ -451,12 +500,13 @@ export default function App() {
       <WhiteLabelProvider>
         <WLEntitlementProvider>
         <DemoProvider>
-          <Toaster position="bottom-right" toastOptions={{ style: TOASTER_STYLE }} theme="dark"/>
-          <AppShell/>
+          <BrowserRouter>
+            <Toaster position="bottom-right" toastOptions={{ style: TOASTER_STYLE }} theme="dark"/>
+            <AppShell/>
+          </BrowserRouter>
         </DemoProvider>
         </WLEntitlementProvider>
       </WhiteLabelProvider>
     </WLPackagesProvider>
   );
 }
-

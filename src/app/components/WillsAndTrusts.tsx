@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { FileText, Plus, Edit2, CheckCircle, Upload, Shield } from "lucide-react";
+import { FileText, Plus, Edit2, CheckCircle, Shield, X, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 
-const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:16 };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
 
 const DOCUMENT_TYPES = [
   "Last Will & Testament",
@@ -25,6 +31,90 @@ const initWills = [
   { id:2, type:"Living Will / Advance Directive", attorney:"Linda Torres, Esq.", dateExecuted:"March 15, 2026", lastReviewed:"March 15, 2026", status:"current", location:"On file with Dr. Karen Fields & Legacy Vault" },
   { id:3, type:"Durable Power of Attorney",       attorney:"Linda Torres, Esq.", dateExecuted:"March 15, 2026", lastReviewed:"March 15, 2026", status:"current", location:"Legacy Vault" },
 ];
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-wills so nothing else in the app is affected. */
+const WILLS_CSS = `
+.fpd-wills{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-wills *{box-sizing:border-box;}
+.fpd-wills-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-wills .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-wills .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-wills .card.pad{padding:22px;}
+.fpd-wills .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-wills .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-wills .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-wills .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
+.fpd-wills .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-wills .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-wills .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-wills .btn-ghost:hover{background:rgba(91,110,225,0.18);}
+.fpd-wills .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* KPI ledger */
+.fpd-wills .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-wills .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-wills .kcell:first-child{border-left:none;}
+.fpd-wills .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-wills .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-wills .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-wills .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-wills .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-wills .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-wills .kstrip{grid-template-columns:1fr 1fr;}.fpd-wills .kcell:nth-child(3){border-left:none;}.fpd-wills .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+
+/* info banner */
+.fpd-wills .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
+.fpd-wills .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
+.fpd-wills .foot .ft b{color:${SOFT};font-weight:600;}
+
+/* document cards */
+.fpd-wills .dlist{display:flex;flex-direction:column;gap:14px;}
+.fpd-wills .dtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
+.fpd-wills .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
+.fpd-wills .dtype{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
+.fpd-wills .dattorney{color:${MUTED};font-size:12.5px;}
+.fpd-wills .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;background:rgba(95,190,145,0.14);color:#D99A6B;flex-shrink:0;}
+.fpd-wills .dgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);overflow:hidden;margin-bottom:16px;}
+.fpd-wills .dgrid .tile:nth-child(3n+2),.fpd-wills .dgrid .tile:nth-child(3n){border-left:1px solid rgba(255,255,255,0.34);}
+.fpd-wills .dgrid .tile:nth-child(n+4){border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-wills .tile{padding:12px 14px;}
+.fpd-wills .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-wills .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
+.fpd-wills .dacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+@media (max-width:760px){
+.fpd-wills .dgrid{grid-template-columns:1fr;}
+.fpd-wills .dgrid .tile:nth-child(3n+2),.fpd-wills .dgrid .tile:nth-child(3n){border-left:none;}
+.fpd-wills .dgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.34);}
+}
+
+/* empty state */
+.fpd-wills .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 12px;}
+.fpd-wills .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:14px;}
+.fpd-wills .empty .et{color:${SOFT};font-size:14px;margin-bottom:8px;}
+.fpd-wills .empty .elink{background:none;border:none;color:#6FAE8B;font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);}
+
+/* modal */
+.fpd-wills .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-wills .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.fpd-wills .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-wills .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-wills .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-wills .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-wills .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-wills .field input,.fpd-wills .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-wills .field input::placeholder{color:${FAINT};}
+.fpd-wills .field input:focus,.fpd-wills .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-wills .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-wills .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-wills .modal-foot .save:hover{filter:brightness(1.08);}
+`;
 
 export function WillsAndTrusts() {
   const [wills, setWills] = useState(initWills);
@@ -50,189 +140,161 @@ export function WillsAndTrusts() {
     setShowAdd(false);
   }
 
-  const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"var(--foreground)", outline:"none", width:"100%" };
+  const currentCount = wills.filter(w => w.status === "current").length;
+  const attorneyCount = new Set(wills.map(w => w.attorney)).size;
+  const kpis = [
+    { label: "Documents on File", value: String(wills.length), sub: "Legal instruments on record", icon: <FileText size={14} />, dot: ACCENT2 },
+    { label: "Status", value: `${currentCount}/${wills.length}`, sub: "Verified current", icon: <CheckCircle size={14} />, dot: POS },
+    { label: "Attorneys of Record", value: String(attorneyCount), sub: attorneyCount === 1 ? "Law firm on file" : "Law firms on file", icon: <Users size={14} />, dot: ACCENT2 },
+    { label: "Last Reviewed", value: wills[0]?.lastReviewed?.split(",")[0] ?? "—", sub: "Most recent record", icon: <Clock size={14} />, dot: ACCENT2 },
+  ];
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1240, margin:"0 auto" }}>
+    <div className="fpd-wills">
+      <style dangerouslySetInnerHTML={{ __html: WILLS_CSS }} />
+      <div className="fpd-wills-grain" />
 
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>
-            Wills and Living Trusts
-          </h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>
-            Legal documents executed with your attorney. All originals should be stored securely — keep certified copies in your Legacy Vault.
-          </p>
-        </div>
-        <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
-          style={{ background:"var(--primary)", color:"#070D1A" }}>
-          <Plus size={14}/> Add Document
-        </button>
-      </div>
-
-      {/* Info banner */}
-      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
-        <Shield size={16} color="var(--primary)" style={{ marginTop:2, flexShrink:0 }}/>
-        <div style={{ color:"var(--muted-foreground)", fontSize:13, lineHeight:1.7 }}>
-          <strong style={{ color:"var(--foreground)" }}>Important:</strong> Your legal documents should be prepared and executed by a licensed estate attorney.
-          Store the original in a fireproof safe or safe deposit box, and upload a certified copy to your Legacy Vault so your legacy contacts can access it when needed.
-        </div>
-      </div>
-
-      {/* Document list */}
-      {wills.length === 0 && (
-        <div className="py-16 text-center rounded-2xl glow-surface" style={CARD}>
-          <FileText size={40} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/>
-          <div style={{ color:"var(--muted-foreground)", fontSize:14 }}>No legal documents added yet.</div>
-          <button onClick={() => setShowAdd(true)} className="mt-3 text-sm underline" style={{ color:"var(--primary)" }}>
-            Add your first document
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><FileText size={12} /> Legal Documents</div>
+            <h1 className="pg-h1">Wills and Living Trusts</h1>
+            <div className="pg-sub">
+              Legal documents executed with your attorney. All originals should be stored securely — keep certified
+              copies in your Legacy Vault.
+            </div>
+          </div>
+          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+            <Plus size={14} /> Add Document
           </button>
         </div>
-      )}
 
-      <div className="space-y-4">
-        {wills.map(will => (
-          <div key={will.id} className="p-6 rounded-2xl glow-surface" style={CARD}>
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                  style={{ width:44, height:44, background:"rgba(58,91,217,0.08)" }}>
-                  <FileText size={20} color="var(--primary)"/>
-                </div>
-                <div>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)", marginBottom:3 }}>
-                    {will.type}
-                  </div>
-                  <div style={{ color:"var(--muted-foreground)", fontSize:13 }}>
-                    Prepared by {will.attorney}
-                  </div>
-                </div>
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", ...MONO }}>
-                  <CheckCircle size={10}/> CURRENT
-                </span>
-              </div>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
             </div>
+          ))}
+        </div>
 
-            <div className="grid md:grid-cols-3 gap-4 mb-5">
-              {[
-                { label:"Date Executed",    value:will.dateExecuted },
-                { label:"Last Reviewed",    value:will.lastReviewed },
-                { label:"Document Location",value:will.location },
-              ].map(f => (
-                <div key={f.label} className="px-4 py-3 rounded-xl" style={{ background:"#141B2E" }}>
-                  <div style={{ color:"var(--muted-foreground)", fontSize:10, marginBottom:4, ...MONO }}>
-                    {f.label.toUpperCase()}
-                  </div>
-                  <div style={{ color:"var(--foreground)", fontSize:13 }}>{f.value}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap mt-1">
-              <button onClick={() => toast.success(`Opening ${will.type} in Legacy Vault`)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                style={{ background:"rgba(58,91,217,0.1)", color:"var(--primary)" }}>
-                <FileText size={13}/> View in Vault
-              </button>
-              <button onClick={() => toast.success("Update record — opens edit form")}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                style={{ background:"var(--secondary)", color:"var(--foreground)" }}>
-                <Edit2 size={13}/> Update Record
-              </button>
-              <ScanButton
-                folder="legal"
-                onUpload={doc => toast.success(`"${doc.name}" uploaded and linked to ${will.type}`)}
-                size="sm"
-                label="Scan & Upload Copy"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add document modal */}
-      {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background:"rgba(0,0,0,0.7)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-lg rounded-2xl p-7 space-y-4 overflow-y-auto glow-surface"
-            style={{ background:"var(--card)", boxShadow:"0 32px 80px rgba(7,13,26,0.3)", maxHeight:"90vh" }}>
-            <div className="flex items-center justify-between">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)" }}>
-                Add Legal Document
-              </h3>
-              <button onClick={() => setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}>✕</button>
-            </div>
-
-            {/* Document type */}
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>
-                DOCUMENT TYPE
-              </label>
-              <select value={newDoc.type} onChange={e => setNewDoc(p=>({...p,type:e.target.value}))} style={INPUT}>
-                {DOCUMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-
-            {/* Attorney */}
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>
-                ATTORNEY / LAW FIRM *
-              </label>
-              <input value={newDoc.attorney} onChange={e => setNewDoc(p=>({...p,attorney:e.target.value}))}
-                placeholder="e.g. Jane Smith, Esq. / Smith & Associates" style={INPUT}/>
-            </div>
-
-            {/* Date */}
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>
-                DATE EXECUTED
-              </label>
-              <input type="date" value={newDoc.dateExecuted} onChange={e => setNewDoc(p=>({...p,dateExecuted:e.target.value}))} style={INPUT}/>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>
-                ORIGINAL DOCUMENT LOCATION
-              </label>
-              <input value={newDoc.location} onChange={e => setNewDoc(p=>({...p,location:e.target.value}))}
-                placeholder="e.g. Safe deposit box at First National Bank" style={INPUT}/>
-            </div>
-
-            {/* Upload */}
-            <div>
-              <label style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>
-                UPLOAD CERTIFIED COPY (optional)
-              </label>
-              <ScanButton
-                folder="legal"
-                onUpload={doc => toast.success(`"${doc.name}" will be linked to this document`)}
-                size="sm"
-                label="Scan or Upload Document"
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button onClick={addDocument}
-                className="flex-1 py-3 rounded-xl font-bold text-sm"
-                style={{ background:"var(--primary)", color:"#070D1A" }}>
-                Add Document
-              </button>
-              <button onClick={() => setShowAdd(false)}
-                className="px-5 py-3 rounded-xl text-sm"
-                style={{ background:"var(--secondary)", color:"var(--muted-foreground)" }}>
-                Cancel
-              </button>
-            </div>
+        {/* ── Info banner ── */}
+        <div className="foot">
+          <Shield size={16} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
+          <div className="ft">
+            <b>Important:</b> Your legal documents should be prepared and executed by a licensed estate attorney.
+            Store the original in a fireproof safe or safe deposit box, and upload a certified copy to your Legacy
+            Vault so your legacy contacts can access it when needed.
           </div>
         </div>
-      )}
+
+        {/* ── Document list ── */}
+        {wills.length === 0 && (
+          <div className="card empty glow-surface">
+            <div className="ei"><FileText size={24} /></div>
+            <div className="et">No legal documents added yet.</div>
+            <button className="elink" onClick={() => setShowAdd(true)}>Add your first document</button>
+          </div>
+        )}
+
+        <div className="dlist">
+          {wills.map(will => (
+            <div key={will.id} className="card pad glow-surface">
+              <div className="dtop">
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                  <div className="dico"><FileText size={20} /></div>
+                  <div>
+                    <div className="dtype">{will.type}</div>
+                    <div className="dattorney">Prepared by {will.attorney}</div>
+                  </div>
+                </div>
+                <span className="dbadge"><CheckCircle size={11} /> CURRENT</span>
+              </div>
+
+              <div className="dgrid">
+                {[
+                  { label: "Date Executed", value: will.dateExecuted },
+                  { label: "Last Reviewed", value: will.lastReviewed },
+                  { label: "Document Location", value: will.location },
+                ].map(f => (
+                  <div key={f.label} className="tile">
+                    <div className="tk">{f.label}</div>
+                    <div className="tv">{f.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="dacts">
+                <button className="btn-ghost" onClick={() => toast.success(`Opening ${will.type} in Legacy Vault`)}>
+                  <FileText size={13} /> View in Vault
+                </button>
+                <button className="btn-sec" onClick={() => toast.success("Update record — opens edit form")}>
+                  <Edit2 size={13} /> Update Record
+                </button>
+                <ScanButton
+                  folder="legal"
+                  onUpload={doc => toast.success(`"${doc.name}" uploaded and linked to ${will.type}`)}
+                  size="sm"
+                  label="Scan & Upload Copy"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Add document modal ── */}
+        {showAdd && (
+          <div className="backdrop">
+            <div className="card modal glow-surface">
+              <div className="modal-head">
+                <h3>Add Legal Document</h3>
+                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+              </div>
+              <div className="modal-body">
+                <div className="field">
+                  <label>DOCUMENT TYPE</label>
+                  <select value={newDoc.type} onChange={e => setNewDoc(p=>({...p,type:e.target.value}))}>
+                    {DOCUMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>ATTORNEY / LAW FIRM *</label>
+                  <input value={newDoc.attorney} onChange={e => setNewDoc(p=>({...p,attorney:e.target.value}))}
+                    placeholder="e.g. Jane Smith, Esq. / Smith & Associates" />
+                </div>
+                <div className="field">
+                  <label>DATE EXECUTED</label>
+                  <input type="date" value={newDoc.dateExecuted} onChange={e => setNewDoc(p=>({...p,dateExecuted:e.target.value}))} />
+                </div>
+                <div className="field">
+                  <label>ORIGINAL DOCUMENT LOCATION</label>
+                  <input value={newDoc.location} onChange={e => setNewDoc(p=>({...p,location:e.target.value}))}
+                    placeholder="e.g. Safe deposit box at First National Bank" />
+                </div>
+                <div className="field">
+                  <label>UPLOAD CERTIFIED COPY (optional)</label>
+                  <ScanButton
+                    folder="legal"
+                    onUpload={doc => toast.success(`"${doc.name}" will be linked to this document`)}
+                    size="sm"
+                    label="Scan or Upload Document"
+                  />
+                </div>
+              </div>
+              <div className="modal-foot">
+                <button className="save" onClick={addDocument}>Add Document</button>
+                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

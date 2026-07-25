@@ -30,8 +30,8 @@ export const ROLE_LABELS: Record<StaffRole, string> = {
 };
 
 export const ROLE_COLORS: Record<StaffRole, string> = {
-  junior_concierge: "#4A90D9",
-  senior_concierge: "#6E8BFF",
+  junior_concierge: "#5BA7D6",
+  senior_concierge: "#5BA7D6",
   lead_concierge:   "#F7931A",
 };
 

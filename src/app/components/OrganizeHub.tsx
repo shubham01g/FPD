@@ -1,35 +1,142 @@
 import React, { useState } from "react";
-import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, Clock, X } from "lucide-react";
+import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"rgba(22,22,31,0.95)", border:"1px solid rgba(58,91,217,0.14)", backdropFilter:"blur(12px)" };
-const GRID: React.CSSProperties = { backgroundImage:"linear-gradient(rgba(58,91,217,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.03) 1px,transparent 1px)", backgroundSize:"50px 50px" };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet & legacy vault) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
+
 type Tab = "folders"|"reminders"|"occasions";
 
+/* Refined per-folder accent — the same nine-hue harmonised family used across
+   the Calendar, File Cabinet and Legacy Vault. */
+const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
+
 const folders = [
-  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:"#3A5BD9", desc:"Wills, trusts, power of attorney" },
-  { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:"#48BB78", desc:"Bank statements, tax returns" },
-  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:"#6E8BFF", desc:"Test results, prescriptions" },
-  { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:"#ED8936", desc:"Deeds, mortgage statements" },
-  { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:"#FC8181", desc:"Life, home, auto policies" },
-  { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:"#F6AD55", desc:"Letters to family" },
-  { id:7, name:"Photo Archive",    files:847, size:"4.2 GB",  color:"#4A90D9", desc:"Scanned family photos" },
-  { id:8, name:"🔒 Secret Vault", files:3,   size:"0.8 MB",  color:"#E53E3E", desc:"Encrypted — seed phrases, combinations", locked:true },
+  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:RAMP[0], desc:"Wills, trusts, power of attorney" },
+  { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:RAMP[1], desc:"Bank statements, tax returns" },
+  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:RAMP[2], desc:"Test results, prescriptions" },
+  { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:RAMP[3], desc:"Deeds, mortgage statements" },
+  { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:RAMP[4], desc:"Life, home, auto policies" },
+  { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:RAMP[5], desc:"Letters to family" },
+  { id:7, name:"Photo Archive",    files:847, size:"4.2 GB",  color:RAMP[6], desc:"Scanned family photos" },
+  { id:8, name:"Secret Vault", files:3,   size:"0.8 MB",  color:NEG, desc:"Encrypted — seed phrases, combinations", locked:true },
 ];
 
 const remStatus = {
-  overdue:  { color:"#FC8181", bg:"rgba(252,129,129,0.12)", label:"OVERDUE" },
-  due_soon: { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",  label:"DUE SOON" },
-  upcoming: { color:"#48BB78", bg:"rgba(72,187,120,0.12)",  label:"UPCOMING" },
-  completed:{ color:"rgba(255,255,255,0.7)", bg:"rgba(107,114,128,0.12)", label:"DONE" },
+  overdue:  { color:NEG,  label:"OVERDUE" },
+  due_soon: { color:WARN, label:"DUE SOON" },
+  upcoming: { color:"#D99A6B",  label:"UPCOMING" },
+  completed:{ color:FAINT,label:"DONE" },
 };
 const occType = {
-  birthday:    { color:"#6E8BFF", bg:"rgba(110,139,255,0.12)", icon:"🎂" },
-  anniversary: { color:"#3A5BD9", bg:"rgba(58,91,217,0.12)",   icon:"💍" },
-  holiday:     { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",  icon:"🎄" },
+  birthday:    { color:"#6FAE8B",    Icon:Cake },
+  anniversary: { color:"#A98CC7",  Icon:Heart },
+  holiday:     { color:WARN,       Icon:PartyPopper },
 };
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-org so nothing else in the app is affected. */
+const ORG_CSS = `
+.fpd-org{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-org *{box-sizing:border-box;}
+.fpd-org-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-org .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-org .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-org .card.pad{padding:22px;}
+.fpd-org .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-org .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-org .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-org .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
+.fpd-org .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-org .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+
+/* segmented tabs */
+.fpd-org .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
+.fpd-org .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-org .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
+
+.fpd-org .toolbar{display:flex;justify-content:flex-end;}
+
+/* folder grid */
+.fpd-org .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.fpd-org .fcard{position:relative;text-align:left;border-radius:15px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
+.fpd-org .fcard:hover{transform:translateY(-2px);border-color:rgba(91,110,225,0.3);}
+.fpd-org .fcard .bar{height:3px;}
+.fpd-org .fcard .fbody{padding:18px;}
+.fpd-org .fcard .ftop{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.fpd-org .fcard .fico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-org .fcard .ftitle{color:${TEXT};font-size:13.5px;font-weight:600;font-family:var(--font-display);}
+.fpd-org .fcard .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:10px;margin-top:2px;}
+.fpd-org .fcard .flocked{margin-left:auto;color:${NEG};font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
+.fpd-org .fcard .fdesc{color:${MUTED};font-size:11.5px;line-height:1.55;}
+
+/* reminders */
+.fpd-org .rlist{display:flex;flex-direction:column;gap:10px;}
+.fpd-org .rrow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 18px;border-radius:14px;background:rgba(255,255,255,0.018);border:1.5px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 0 16px -8px rgba(91,110,225,0.35);transition:border-color .18s ease,box-shadow .18s ease;}
+.fpd-org .rrow:hover{border-color:rgba(91,110,225,0.6);box-shadow:0 0 0 1px rgba(91,110,225,0.14),0 0 22px -6px rgba(91,110,225,0.45);}
+.fpd-org .rrow .rtop{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.fpd-org .rrow .rtitle{color:${TEXT};font-size:13.5px;font-weight:600;font-family:var(--font-display);}
+.fpd-org .rrow .rmeta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:4px;}
+.fpd-org .rrow .rmeta span{color:${MUTED};font-size:12px;}
+.fpd-org .rrow .rmeta strong{color:${TEXT};font-weight:600;}
+.fpd-org .rrow .rcat{padding:2px 8px;border-radius:6px;font-size:10.5px;background:rgba(255,255,255,0.04);color:${SOFT};}
+.fpd-org .rrow .rnotes{color:${MUTED};font-size:11.5px;margin-top:3px;}
+.fpd-org .rrow .racts{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.fpd-org .rrow .rbadge{padding:4px 9px;border-radius:7px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.05em;flex-shrink:0;}
+.fpd-org .rrow .racts button{background:none;border:none;cursor:pointer;padding:5px;display:flex;transition:filter .16s;}
+
+/* occasions */
+.fpd-org .ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.fpd-org .ocard{padding:18px;border-radius:15px;}
+.fpd-org .ocard .otop{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.fpd-org .ocard .oico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-org .ocard .oname{color:${TEXT};font-size:13.5px;font-weight:600;font-family:var(--font-display);}
+.fpd-org .ocard .odate{font-family:var(--font-mono);font-size:11.5px;margin-top:2px;}
+.fpd-org .ocard .orec{color:${MUTED};font-size:12px;margin-bottom:4px;}
+.fpd-org .ocard .onotes{color:${MUTED};font-size:11.5px;font-style:italic;}
+.fpd-org .ocard .oannual{margin-left:auto;color:#D99A6B;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
+
+/* new-tile / empty */
+.fpd-org .newtile{border-radius:15px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
+.fpd-org .newtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
+.fpd-org .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 12px;}
+.fpd-org .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
+.fpd-org .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
+
+/* modal */
+.fpd-org .backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-org .modal{width:100%;max-width:380px;padding:24px;}
+.fpd-org .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.fpd-org .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-org .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-org .field{margin-bottom:12px;}
+.fpd-org .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-org .field input,.fpd-org .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-org .field input::placeholder{color:${FAINT};}
+.fpd-org .field input:focus,.fpd-org .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-org .modal-acts{display:flex;gap:10px;margin-top:6px;}
+.fpd-org .modal-acts .save{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-org .modal-acts .save:hover{filter:brightness(1.08);}
+.fpd-org .modal-acts .save:disabled{opacity:.6;cursor:default;}
+.fpd-org .modal-acts .cancel{padding:11px 16px;border-radius:10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};cursor:pointer;font-family:var(--font-body);}
+
+@media (max-width:640px){.fpd-org .fgrid,.fpd-org .ogrid{grid-template-columns:1fr;}}
+`;
 
 function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<Reminder,"id">)=>Promise<void> }) {
   const [form, setForm] = useState({ title:"", dueDate:"", frequency:"Annual", category:"Legal", status:"upcoming" as Reminder["status"], notes:"" });
@@ -41,30 +148,30 @@ function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<
     onClose();
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
-        <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Reminder</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
-        <div className="space-y-3">
-          {[{key:"title",label:"REMINDER TITLE",ph:"e.g. Update Will"},{key:"dueDate",label:"DUE DATE",ph:"e.g. Sep 15, 2026"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
-            <div key={f.key}><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
-              <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-            </div>
-          ))}
-          <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>FREQUENCY</label>
-            <select value={form.frequency} onChange={e=>setForm(f=>({...f,frequency:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
-              <option>Annual</option><option>Quarterly</option><option>Monthly</option><option>6 months</option><option>One-time</option>
-            </select>
+    <div className="backdrop">
+      <div className="card modal glow-surface">
+        <div className="modal-head"><h3>Add Reminder</h3><button onClick={onClose}><X size={15}/></button></div>
+        {[{key:"title",label:"REMINDER TITLE",ph:"e.g. Update Will"},{key:"dueDate",label:"DUE DATE",ph:"e.g. Sep 15, 2026"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
+          <div className="field" key={f.key}>
+            <label>{f.label}</label>
+            <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}/>
           </div>
-          <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>CATEGORY</label>
-            <select value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
-              <option>Legal</option><option>Financial</option><option>Medical</option><option>Legacy</option><option>Vehicles</option><option>Pets</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-1">
-            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Create Reminder"}</button>
-            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-          </div>
+        ))}
+        <div className="field">
+          <label>FREQUENCY</label>
+          <select value={form.frequency} onChange={e=>setForm(f=>({...f,frequency:e.target.value}))}>
+            <option>Annual</option><option>Quarterly</option><option>Monthly</option><option>6 months</option><option>One-time</option>
+          </select>
+        </div>
+        <div className="field">
+          <label>CATEGORY</label>
+          <select value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>
+            <option>Legal</option><option>Financial</option><option>Medical</option><option>Legacy</option><option>Vehicles</option><option>Pets</option>
+          </select>
+        </div>
+        <div className="modal-acts">
+          <button className="save" onClick={submit} disabled={loading}>{loading?"Saving...":"Create Reminder"}</button>
+          <button className="cancel" onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>
@@ -81,25 +188,46 @@ function AddOccasionModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(o:Omit<
     onClose();
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.8)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-6 glow-surface" style={GLASS}>
-        <div className="flex items-center justify-between mb-5"><h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Add Occasion</h3><button onClick={onClose} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button></div>
-        <div className="space-y-3">
-          {[{key:"name",label:"OCCASION NAME",ph:"e.g. Sarah's Birthday"},{key:"date",label:"DATE",ph:"e.g. Aug 14"},{key:"recipient",label:"RECIPIENT",ph:"e.g. Sarah Johnson"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
-            <div key={f.key}><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
-              <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-            </div>
-          ))}
-          <div><label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>TYPE</label>
-            <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value as any}))} className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}>
-              <option value="birthday">Birthday</option><option value="anniversary">Anniversary</option><option value="holiday">Holiday</option>
-            </select>
+    <div className="backdrop">
+      <div className="card modal glow-surface">
+        <div className="modal-head"><h3>Add Occasion</h3><button onClick={onClose}><X size={15}/></button></div>
+        {[{key:"name",label:"OCCASION NAME",ph:"e.g. Sarah's Birthday"},{key:"date",label:"DATE",ph:"e.g. Aug 14"},{key:"recipient",label:"RECIPIENT",ph:"e.g. Sarah Johnson"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
+          <div className="field" key={f.key}>
+            <label>{f.label}</label>
+            <input value={(form as any)[f.key]} onChange={e=>setForm(prev=>({...prev,[f.key]:e.target.value}))} placeholder={f.ph}/>
           </div>
-          <div className="flex gap-3 pt-1">
-            <button onClick={submit} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", opacity:loading?0.7:1 }}>{loading?"Saving...":"Save Occasion"}</button>
-            <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-          </div>
+        ))}
+        <div className="field">
+          <label>TYPE</label>
+          <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value as any}))}>
+            <option value="birthday">Birthday</option><option value="anniversary">Anniversary</option><option value="holiday">Holiday</option>
+          </select>
+        </div>
+        <div className="modal-acts">
+          <button className="save" onClick={submit} disabled={loading}>{loading?"Saving...":"Save Occasion"}</button>
+          <button className="cancel" onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddFolderModal({ onClose, onAdd, form, setForm }: { onClose:()=>void; onAdd:()=>void; form:{name:string;desc:string}; setForm:(f:{name:string;desc:string})=>void }) {
+  return (
+    <div className="backdrop">
+      <div className="card modal glow-surface">
+        <div className="modal-head"><h3>Create New Folder</h3><button onClick={onClose}><X size={15}/></button></div>
+        <div className="field">
+          <label>FOLDER NAME *</label>
+          <input value={form.name} onChange={e=>setForm({ ...form, name:e.target.value })} placeholder="e.g. Medical Directives"/>
+        </div>
+        <div className="field">
+          <label>DESCRIPTION (optional)</label>
+          <input value={form.desc} onChange={e=>setForm({ ...form, desc:e.target.value })} placeholder="What this folder is for"/>
+        </div>
+        <div className="modal-acts">
+          <button className="save" onClick={onAdd}>Create Folder</button>
+          <button className="cancel" onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>
@@ -114,11 +242,10 @@ export function OrganizeHub() {
   const [showAddFolder, setShowAddFolder] = useState(false);
   const [folderList, setFolderList] = useState(folders);
   const [newFolder, setNewFolder] = useState({ name:"", desc:"" });
-  const FOLDER_COLORS = ["#3A5BD9","#48BB78","#6E8BFF","#ED8936","#FC8181","#F6AD55","#4A90D9","#38B2AC"];
 
   function addFolder() {
     if (!newFolder.name.trim()) { toast.error("Folder name required"); return; }
-    const color = FOLDER_COLORS[folderList.length % FOLDER_COLORS.length];
+    const color = RAMP[folderList.length % RAMP.length];
     setFolderList(prev => [...prev, { id: Date.now(), name: newFolder.name, files: 0, size: "0 MB", color, desc: newFolder.desc }]);
     toast.success(`"${newFolder.name}" folder created`);
     setNewFolder({ name:"", desc:"" });
@@ -132,152 +259,143 @@ export function OrganizeHub() {
   ];
 
   return (
-    <div className="p-6 space-y-5 relative" style={{ maxWidth:1240, margin:"0 auto", ...GRID }}>
-      <div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:4 }}>Organize</h1>
-        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Personal folders, reminders, and important family occasions — fully interactive in demo mode.</p>
-      </div>
-      <div className="flex gap-1 p-1 rounded-2xl" style={{ background:"rgba(22,22,31,0.95)", width:"fit-content" }}>
-        {tabs.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
-            style={{ background:tab===t.id?"#3A5BD9":"transparent", color:tab===t.id?"#FFFFFF":"rgba(255,255,255,0.7)", fontWeight:tab===t.id?700:400 }}>
-            {t.icon} {t.label}
-          </button>
-        ))}
-      </div>
+    <div className="fpd-org">
+      <style dangerouslySetInnerHTML={{ __html: ORG_CSS }} />
+      <div className="fpd-org-grain" />
 
-      {tab==="folders" && (
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <button onClick={()=>setShowAddFolder(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
-              <Plus size={14}/> Create New Folder
-            </button>
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth:0 }}>
+            <div className="eyebrow"><Folder size={12}/> Personal Organization</div>
+            <h1 className="pg-h1">Folders &amp; Reminders</h1>
+            <div className="pg-sub">Personal folders, recurring reminders, and important family occasions — fully interactive in demo mode.</div>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {folderList.map(f=>(
-              <button key={f.id} onClick={()=>toast.success(`Opened: ${f.name}`)}
-                className="p-5 rounded-2xl text-left transition-all hover:scale-[1.01]" style={GLASS}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="rounded-xl p-2.5" style={{ background:`${f.color}14` }}>
-                    <Folder size={20} color={f.color} fill={`${f.color}22`}/>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{f.name}</div>
-                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO }}>{f.files} files · {f.size}</div>
-                  </div>
-                  {(f as any).locked && <span style={{ color:"#E53E3E", fontSize:9, ...MONO, fontWeight:700 }}>LOCKED</span>}
-                </div>
-                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>{f.desc}</div>
+          <div className="seg">
+            {tabs.map(t=>(
+              <button key={t.id} className={tab===t.id ? "on" : ""} onClick={()=>setTab(t.id)}>
+                {t.icon} {t.label}
               </button>
             ))}
           </div>
-          {/* Add folder modal */}
-          {showAddFolder && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.7)", backdropFilter:"blur(6px)" }}>
-              <div className="w-full max-w-sm rounded-2xl p-6 space-y-4 glow-surface" style={GLASS}>
-                <div className="flex items-center justify-between">
-                  <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#FFFFFF" }}>Create New Folder</h3>
-                  <button onClick={()=>setShowAddFolder(false)} style={{ color:"rgba(255,255,255,0.7)" }}><X size={15}/></button>
-                </div>
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>FOLDER NAME *</label>
-                  <input value={newFolder.name} onChange={e=>setNewFolder(p=>({...p,name:e.target.value}))}
-                    placeholder="e.g. Medical Directives"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-                </div>
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION (optional)</label>
-                  <input value={newFolder.desc} onChange={e=>setNewFolder(p=>({...p,desc:e.target.value}))}
-                    placeholder="What this folder is for"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.06)", border:"1px solid rgba(58,91,217,0.2)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
-                </div>
-                <div className="flex gap-3 pt-1">
-                  <button onClick={addFolder} className="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF" }}>
-                    Create Folder
-                  </button>
-                  <button onClick={()=>setShowAddFolder(false)} className="px-4 py-3 rounded-xl text-sm"
-                    style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-                </div>
+        </div>
+
+        {tab==="folders" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div className="toolbar">
+              <button className="btn-primary" onClick={()=>setShowAddFolder(true)}><Plus size={14}/> Create New Folder</button>
+            </div>
+            <div className="fgrid">
+              {folderList.map(f=>(
+                <button key={f.id} className="fcard glow-surface" onClick={()=>toast.success(`Opened: ${f.name}`)}>
+                  <div className="bar" style={{ background:`linear-gradient(90deg,${f.color},${f.color}66)` }}/>
+                  <div className="fbody">
+                    <div className="ftop">
+                      <div className="fico" style={{ background:`${f.color}1C`, color:f.color }}><Folder size={18} fill={`${f.color}33`}/></div>
+                      <div>
+                        <div className="ftitle">{f.name}</div>
+                        <div className="fmeta">{f.files} files · {f.size}</div>
+                      </div>
+                      {(f as any).locked && <span className="flocked">LOCKED</span>}
+                    </div>
+                    <div className="fdesc">{f.desc}</div>
+                  </div>
+                </button>
+              ))}
+              <div className="newtile" onClick={()=>setShowAddFolder(true)}>
+                <Plus size={20} style={{ opacity:0.6 }}/>
+                <span style={{ fontSize:13 }}>New Custom Folder</span>
               </div>
             </div>
-          )}
-        </div>
-      )}
-
-      {tab==="reminders" && (
-        <div className="space-y-3">
-          <div className="flex justify-end">
-            <button onClick={()=>setShowAddRem(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
-              <Plus size={14}/> Add Reminder
-            </button>
           </div>
-          {reminders.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Bell size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No reminders yet.</div></div>}
-          {reminders.map(r=>{
-            const s = remStatus[r.status];
-            return (
-              <div key={r.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Bell size={13} color="#3A5BD9"/>
-                      <span style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{r.title}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-4 mb-1">
-                      <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Due: <strong style={{ color:"#FFFFFF" }}>{r.dueDate}</strong></span>
-                      <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Repeats: {r.frequency}</span>
-                      <span className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(58,91,217,0.06)", color:"rgba(255,255,255,0.7)" }}>{r.category}</span>
-                    </div>
-                    {r.notes && <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>{r.notes}</div>}
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:s.bg, color:s.color, ...MONO, fontSize:9 }}>{s.label}</span>
-                    {r.status!=="completed" && (
-                      <button onClick={()=>completeReminder(r.id)} style={{ color:"#48BB78" }}><CheckCircle size={14}/></button>
-                    )}
-                    <button onClick={()=>removeReminder(r.id)} style={{ color:"#FC8181" }}><Trash2 size={13}/></button>
-                  </div>
-                </div>
+        )}
+
+        {tab==="reminders" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div className="toolbar">
+              <button className="btn-primary" onClick={()=>setShowAddRem(true)}><Plus size={14}/> Add Reminder</button>
+            </div>
+            {reminders.length===0 && (
+              <div className="card empty glow-surface">
+                <div className="ei"><Bell size={20}/></div>
+                <div className="et">No reminders yet</div>
               </div>
-            );
-          })}
-          {showAddRem && <AddReminderModal onClose={()=>setShowAddRem(false)} onAdd={addReminder}/>}
-        </div>
-      )}
-
-      {tab==="occasions" && (
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <button onClick={()=>setShowAddOcc(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-              style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#FFFFFF", fontWeight:700, fontSize:13, boxShadow:"0 0 20px rgba(58,91,217,0.3)" }}>
-              <Plus size={14}/> Add Occasion
-            </button>
-          </div>
-          {occasions.length===0 && <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}><Calendar size={28} color="rgba(58,91,217,0.2)" style={{ margin:"0 auto 12px" }}/><div style={{ color:"rgba(255,255,255,0.65)" }}>No occasions yet.</div></div>}
-          <div className="grid md:grid-cols-2 gap-4">
-            {occasions.map(o=>{
-              const ot = occType[o.type];
-              return (
-                <div key={o.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex items-center justify-center rounded-xl text-lg" style={{ width:40, height:40, background:ot.bg }}>{ot.icon}</div>
-                    <div className="flex-1">
-                      <div style={{ color:"#FFFFFF", fontSize:14, fontWeight:500 }}>{o.name}</div>
-                      <div style={{ color:ot.color, ...MONO, fontSize:12 }}>{o.date}</div>
+            )}
+            <div className="rlist">
+              {reminders.map(r=>{
+                const s = remStatus[r.status];
+                return (
+                  <div key={r.id} className="card rrow">
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div className="rtop">
+                        <Bell size={13} color="#FFFFFF"/>
+                        <span className="rtitle">{r.title}</span>
+                      </div>
+                      <div className="rmeta">
+                        <span>Due: <strong>{r.dueDate}</strong></span>
+                        <span>Repeats: {r.frequency}</span>
+                        <span className="rcat">{r.category}</span>
+                      </div>
+                      {r.notes && <div className="rnotes">{r.notes}</div>}
                     </div>
-                    {o.recurring && <span style={{ color:"#48BB78", fontSize:9, ...MONO, fontWeight:700 }}>ANNUAL</span>}
+                    <div className="racts">
+                      <span className="rbadge" style={{ background:`${s.color}22`, color:s.color }}>{s.label}</span>
+                      {r.status!=="completed" && (
+                        <button onClick={()=>completeReminder(r.id)} style={{ color:"#D99A6B" }}><CheckCircle size={15}/></button>
+                      )}
+                      <button onClick={()=>removeReminder(r.id)} style={{ color:NEG }}><Trash2 size={14}/></button>
+                    </div>
                   </div>
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginBottom:4 }}>{o.recipient}</div>
-                  {o.notes && <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, fontStyle:"italic" }}>{o.notes}</div>}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            {showAddRem && <AddReminderModal onClose={()=>setShowAddRem(false)} onAdd={addReminder}/>}
           </div>
-          {showAddOcc && <AddOccasionModal onClose={()=>setShowAddOcc(false)} onAdd={addOccasion}/>}
-        </div>
-      )}
+        )}
+
+        {tab==="occasions" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div className="toolbar">
+              <button className="btn-primary" onClick={()=>setShowAddOcc(true)}><Plus size={14}/> Add Occasion</button>
+            </div>
+            {occasions.length===0 && (
+              <div className="card empty glow-surface">
+                <div className="ei"><Calendar size={20}/></div>
+                <div className="et">No occasions yet</div>
+              </div>
+            )}
+            <div className="ogrid">
+              {occasions.map(o=>{
+                const ot = occType[o.type];
+                return (
+                  <div key={o.id} className="card ocard glow-surface">
+                    <div className="otop">
+                      <div className="oico" style={{ background:`${ot.color}1C`, color:ot.color }}><ot.Icon size={18}/></div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div className="oname">{o.name}</div>
+                        <div className="odate" style={{ color:ot.color }}>{o.date}</div>
+                      </div>
+                      {o.recurring && <span className="oannual">ANNUAL</span>}
+                    </div>
+                    <div className="orec">{o.recipient}</div>
+                    {o.notes && <div className="onotes">{o.notes}</div>}
+                  </div>
+                );
+              })}
+            </div>
+            {showAddOcc && <AddOccasionModal onClose={()=>setShowAddOcc(false)} onAdd={addOccasion}/>}
+          </div>
+        )}
+
+        {showAddFolder && (
+          <AddFolderModal
+            onClose={()=>setShowAddFolder(false)}
+            onAdd={addFolder}
+            form={newFolder}
+            setForm={setNewFolder}
+          />
+        )}
+      </div>
     </div>
   );
 }

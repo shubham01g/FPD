@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
+import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal";
 import { SystemHealth } from "./SystemHealth";
 import { AdminAIAgent } from "../AdminAIAgent";
 import {
@@ -13,8 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background: "#FFFFFF", border: "1px solid rgba(58,91,217,0.1)", boxShadow: "0 2px 12px rgba(58,91,217,0.06)", borderRadius: 16 };
-const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(58,91,217,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(58,91,217,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
+const GLASS: React.CSSProperties = { background: "linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border: "1.5px solid rgba(91,110,225,0.35)", boxShadow: "0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius: 16 };
+const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 /* ── mock data ──────────────────────────────────────────────────── */
@@ -34,9 +35,9 @@ const userGrowth = [
 ];
 
 const planDist = [
-  { name:"Foundation", value:18420, color:"#4A90D9" },
-  { name:"Legacy Archive", value:24180, color:"#3A5BD9" },
-  { name:"Legacy Pro", value:7890, color:"#6E8BFF" },
+  { name:"Foundation", value:18420, color:"#6FAE8B" },
+  { name:"Legacy Archive", value:24180, color:"#6E90C9" },
+  { name:"Legacy Pro", value:7890, color:"#6FAE8B" },
 ];
 
 const storageByPlan = [
@@ -45,16 +46,7 @@ const storageByPlan = [
   { plan:"Legacy Pro", avgUsed:38.8, limit:1000 },
 ];
 
-const mockUsers = [
-  { id:"USR-8821", name:"James Doe", email:"james.doe@email.com", plan:"Legacy Archive", storage:16.9, joined:"Apr 8, 2026", status:"active", contacts:3, referrals:6 },
-  { id:"USR-8812", name:"Sarah Chen", email:"s.chen@email.com", plan:"Legacy Archive", storage:22.1, joined:"Nov 15, 2024", status:"active", contacts:8, referrals:32 },
-  { id:"USR-8805", name:"Marcus Johnson", email:"m.johnson@email.com", plan:"Foundation", storage:4.8, joined:"Jan 20, 2025", status:"active", contacts:2, referrals:14 },
-  { id:"USR-8798", name:"Patricia Wells", email:"p.wells@email.com", plan:"Legacy Pro", storage:84.2, joined:"Sep 3, 2024", status:"active", contacts:12, referrals:81 },
-  { id:"USR-8791", name:"Robert Kim", email:"r.kim@email.com", plan:"Foundation", storage:2.1, joined:"May 22, 2026", status:"active", contacts:1, referrals:0 },
-  { id:"USR-8784", name:"Amanda Torres", email:"a.torres@email.com", plan:"Legacy Archive", storage:18.4, joined:"Mar 1, 2026", status:"active", contacts:5, referrals:7 },
-  { id:"USR-8777", name:"Derek Mills", email:"d.mills@email.com", plan:"Legacy Archive", storage:12.0, joined:"Jul 12, 2024", status:"suspended", contacts:4, referrals:12 },
-  { id:"USR-8770", name:"Grace Nakamura", email:"g.nakamura@email.com", plan:"Legacy Pro", storage:51.3, joined:"Feb 28, 2025", status:"active", contacts:9, referrals:0 },
-];
+/* Users data is now in UserDetailModal.tsx as ADMIN_USERS */
 
 const auditLogs = [
   { id:"LOG-9912", user:"admin@fpd.com", action:"Approved ID verification", target:"VER-2026-0841", time:"2 min ago", severity:"info" },
@@ -79,33 +71,33 @@ type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|
 
 // Gender
 const genderData = [
-  { label:"Female",          pct:54.2, count:27_894, color:"#6E8BFF" },
-  { label:"Male",            pct:40.1, count:20_647, color:"#3A5BD9" },
-  { label:"Non-binary",      pct:3.8,  count:1_957,  color:"#48BB78" },
-  { label:"Prefer not to say",pct:1.9, count:992,    color:"#5A6A88" },
+  { label:"Female",          pct:54.2, count:27_894, color:"#6FAE8B" },
+  { label:"Male",            pct:40.1, count:20_647, color:"#6E90C9" },
+  { label:"Non-binary",      pct:3.8,  count:1_957,  color:"#D99A6B" },
+  { label:"Prefer not to say",pct:1.9, count:992,    color:"#8A9AB8" },
 ];
 
 // Age cohorts
 const ageData = [
-  { range:"18 – 24", count:2_841,  pct:5.5,  color:"#4A90D9", avgPlan:"Foundation" },
-  { range:"25 – 34", count:7_284,  pct:14.1, color:"#3A5BD9", avgPlan:"Legacy Archive" },
-  { range:"35 – 44", count:11_492, pct:22.3, color:"#3A5BD9", avgPlan:"Legacy Archive" },
-  { range:"45 – 54", count:13_840, pct:26.9, color:"#6E8BFF", avgPlan:"Legacy Pro" },
-  { range:"55 – 64", count:10_284, pct:20.0, color:"#48BB78", avgPlan:"Legacy Pro" },
+  { range:"18 – 24", count:2_841,  pct:5.5,  color:"#6FAE8B", avgPlan:"Foundation" },
+  { range:"25 – 34", count:7_284,  pct:14.1, color:"#6E90C9", avgPlan:"Legacy Archive" },
+  { range:"35 – 44", count:11_492, pct:22.3, color:"#6E90C9", avgPlan:"Legacy Archive" },
+  { range:"45 – 54", count:13_840, pct:26.9, color:"#6FAE8B", avgPlan:"Legacy Pro" },
+  { range:"55 – 64", count:10_284, pct:20.0, color:"#D99A6B", avgPlan:"Legacy Pro" },
   { range:"65 – 74", count:4_821,  pct:9.4,  color:"#F6AD55", avgPlan:"Legacy Archive" },
   { range:"75+",     count:928,    pct:1.8,  color:"#FC8181", avgPlan:"Foundation" },
 ];
 
 // Top US states
 const stateData = [
-  { state:"California",    abbr:"CA", users:9_284,  pct:18.0, mrr:232_100, color:"#3A5BD9" },
-  { state:"Texas",         abbr:"TX", users:6_841,  pct:13.3, mrr:171_025, color:"#3A5BD9" },
-  { state:"Florida",       abbr:"FL", users:5_492,  pct:10.7, mrr:137_300, color:"#4A90D9" },
-  { state:"New York",      abbr:"NY", users:4_821,  pct:9.4,  mrr:120_525, color:"#4A90D9" },
-  { state:"Georgia",       abbr:"GA", users:3_284,  pct:6.4,  mrr:82_100,  color:"#6E8BFF" },
-  { state:"Illinois",      abbr:"IL", users:2_948,  pct:5.7,  mrr:73_700,  color:"#6E8BFF" },
-  { state:"North Carolina",abbr:"NC", users:2_491,  pct:4.8,  mrr:62_275,  color:"#48BB78" },
-  { state:"Pennsylvania",  abbr:"PA", users:2_284,  pct:4.4,  mrr:57_100,  color:"#48BB78" },
+  { state:"California",    abbr:"CA", users:9_284,  pct:18.0, mrr:232_100, color:"#6E90C9" },
+  { state:"Texas",         abbr:"TX", users:6_841,  pct:13.3, mrr:171_025, color:"#6E90C9" },
+  { state:"Florida",       abbr:"FL", users:5_492,  pct:10.7, mrr:137_300, color:"#6FAE8B" },
+  { state:"New York",      abbr:"NY", users:4_821,  pct:9.4,  mrr:120_525, color:"#6FAE8B" },
+  { state:"Georgia",       abbr:"GA", users:3_284,  pct:6.4,  mrr:82_100,  color:"#6FAE8B" },
+  { state:"Illinois",      abbr:"IL", users:2_948,  pct:5.7,  mrr:73_700,  color:"#6FAE8B" },
+  { state:"North Carolina",abbr:"NC", users:2_491,  pct:4.8,  mrr:62_275,  color:"#D99A6B" },
+  { state:"Pennsylvania",  abbr:"PA", users:2_284,  pct:4.4,  mrr:57_100,  color:"#D99A6B" },
   { state:"Ohio",          abbr:"OH", users:1_941,  pct:3.8,  mrr:48_525,  color:"#F6AD55" },
   { state:"Arizona",       abbr:"AZ", users:1_724,  pct:3.3,  mrr:43_100,  color:"#F6AD55" },
 ];
@@ -126,41 +118,41 @@ const cityData = [
 
 // Country distribution
 const countryData = [
-  { country:"United States",  users:48_241, pct:93.7, color:"#3A5BD9" },
-  { country:"Canada",         users:1_284,  pct:2.5,  color:"#6E8BFF" },
-  { country:"United Kingdom", users:841,    pct:1.6,  color:"#48BB78" },
-  { country:"Australia",      users:492,    pct:1.0,  color:"#4A90D9" },
+  { country:"United States",  users:48_241, pct:93.7, color:"#6E90C9" },
+  { country:"Canada",         users:1_284,  pct:2.5,  color:"#6FAE8B" },
+  { country:"United Kingdom", users:841,    pct:1.6,  color:"#D99A6B" },
+  { country:"Australia",      users:492,    pct:1.0,  color:"#6FAE8B" },
   { country:"Germany",        users:241,    pct:0.5,  color:"#F6AD55" },
-  { country:"Other",          users:391,    pct:0.7,  color:"#5A6A88" },
+  { country:"Other",          users:391,    pct:0.7,  color:"#8A9AB8" },
 ];
 
 // Device / platform
 const deviceData = [
-  { label:"Mobile (iOS)",     pct:41.2, color:"#3A5BD9" },
-  { label:"Mobile (Android)", pct:28.4, color:"#48BB78" },
-  { label:"Desktop (Mac)",    pct:18.1, color:"#6E8BFF" },
-  { label:"Desktop (Windows)",pct:10.8, color:"#4A90D9" },
+  { label:"Mobile (iOS)",     pct:41.2, color:"#6E90C9" },
+  { label:"Mobile (Android)", pct:28.4, color:"#D99A6B" },
+  { label:"Desktop (Mac)",    pct:18.1, color:"#6FAE8B" },
+  { label:"Desktop (Windows)",pct:10.8, color:"#6FAE8B" },
   { label:"Tablet",           pct:1.5,  color:"#F6AD55" },
 ];
 
 // Relationship status
 const relationshipData = [
-  { label:"Married / Partnered", pct:58.4, color:"#3A5BD9" },
-  { label:"Single",              pct:21.2, color:"#6E8BFF" },
+  { label:"Married / Partnered", pct:58.4, color:"#6E90C9" },
+  { label:"Single",              pct:21.2, color:"#6FAE8B" },
   { label:"Divorced / Separated",pct:12.8, color:"#F6AD55" },
   { label:"Widowed",             pct:6.1,  color:"#FC8181" },
-  { label:"Prefer not to say",   pct:1.5,  color:"#5A6A88" },
+  { label:"Prefer not to say",   pct:1.5,  color:"#8A9AB8" },
 ];
 
 // Feature adoption
 const featureAdoption = [
-  { feature:"Digital File Cabinet", adopted:87.4, total:51490, color:"#3A5BD9" },
-  { feature:"Legacy Contacts",      adopted:74.2, total:51490, color:"#6E8BFF" },
-  { feature:"Final Wishes",         adopted:62.8, total:51490, color:"#48BB78" },
-  { feature:"Medical Info",         adopted:58.1, total:51490, color:"#4A90D9" },
+  { feature:"Digital File Cabinet", adopted:87.4, total:51490, color:"#6E90C9" },
+  { feature:"Legacy Contacts",      adopted:74.2, total:51490, color:"#6FAE8B" },
+  { feature:"Final Wishes",         adopted:62.8, total:51490, color:"#D99A6B" },
+  { feature:"Medical Info",         adopted:58.1, total:51490, color:"#6FAE8B" },
   { feature:"Financial Records",    adopted:52.4, total:51490, color:"#F6AD55" },
   { feature:"Digital Diary",        adopted:41.8, total:51490, color:"#ED8936" },
-  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#38B2AC" },
+  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#D68FA8" },
   { feature:"Affiliate Program",    adopted:29.4, total:51490, color:"#FC8181" },
   { feature:"$199 Continuation Fee",adopted:18.7, total:51490, color:"#E53E3E" },
 ];
@@ -169,9 +161,9 @@ const featureAdoption = [
 const completionBuckets = [
   { range:"0 – 20%  (Just started)",  count:8_241,  color:"#FC8181" },
   { range:"21 – 40% (In progress)",   count:11_284, color:"#F6AD55" },
-  { range:"41 – 60% (Halfway)",       count:13_841, color:"#4A90D9" },
-  { range:"61 – 80% (Nearly done)",   count:12_492, color:"#6E8BFF" },
-  { range:"81 – 100% (Complete)",     count:5_632,  color:"#48BB78" },
+  { range:"41 – 60% (Halfway)",       count:13_841, color:"#6FAE8B" },
+  { range:"61 – 80% (Nearly done)",   count:12_492, color:"#6FAE8B" },
+  { range:"81 – 100% (Complete)",     count:5_632,  color:"#D99A6B" },
 ];
 
 // Engagement
@@ -186,20 +178,20 @@ const engagementData = [
 
 // Signup sources
 const acquisitionData = [
-  { source:"Organic Search (Google)", pct:38.4, color:"#3A5BD9" },
-  { source:"Affiliate Referral",      pct:22.1, color:"#6E8BFF" },
-  { source:"Social Media",            pct:14.8, color:"#48BB78" },
+  { source:"Organic Search (Google)", pct:38.4, color:"#6E90C9" },
+  { source:"Affiliate Referral",      pct:22.1, color:"#6FAE8B" },
+  { source:"Social Media",            pct:14.8, color:"#D99A6B" },
   { source:"Partner Referral",        pct:12.4, color:"#F6AD55" },
-  { source:"Direct / Typed URL",      pct:8.2,  color:"#4A90D9" },
+  { source:"Direct / Typed URL",      pct:8.2,  color:"#6FAE8B" },
   { source:"Paid Ads",                pct:4.1,  color:"#FC8181" },
 ];
 
 // Health / retention
 const retentionData = [
-  { month:"Month 1", retained:91.2, color:"#48BB78" },
-  { month:"Month 2", retained:84.8, color:"#48BB78" },
-  { month:"Month 3", retained:80.1, color:"#4A90D9" },
-  { month:"Month 6", retained:74.4, color:"#6E8BFF" },
+  { month:"Month 1", retained:91.2, color:"#D99A6B" },
+  { month:"Month 2", retained:84.8, color:"#D99A6B" },
+  { month:"Month 3", retained:80.1, color:"#6FAE8B" },
+  { month:"Month 6", retained:74.4, color:"#6FAE8B" },
   { month:"Month 12",retained:68.2, color:"#F6AD55" },
 ];
 
@@ -213,14 +205,14 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
     <div>
       <div className="flex items-center justify-between mb-1">
         <div>
-          <span style={{ color:"#0D1428", fontSize:13 }}>{label}</span>
+          <span style={{ color:"#E8EDF5", fontSize:13 }}>{label}</span>
           {subtext && <span style={{ color:"#8A9AB8", fontSize:11, marginLeft:6 }}>{subtext}</span>}
         </div>
         <span style={{ color, fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
           {value !== undefined ? value : `${pct}%`}
         </span>
       </div>
-      <div className="h-2 rounded-full" style={{ background:"#EAF0FC" }}>
+      <div className="h-2 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
         <div className="h-2 rounded-full transition-all" style={{ width:`${Math.min(maxW,100)}%`, background:color }}/>
       </div>
     </div>
@@ -229,9 +221,9 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
 
 function StatChip({ label, value, sub, color }: { label:string; value:string|number; sub?:string; color:string }) {
   return (
-    <div className="p-4 rounded-2xl glow-surface" style={{ background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)" }}>
+    <div className="p-4 rounded-2xl glow-surface" style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)" }}>
       <div style={{ fontFamily:"var(--font-display)", fontSize:26, color, lineHeight:1 }}>{value}</div>
-      <div style={{ color:"#0D1428", fontSize:12, fontWeight:500, marginTop:4 }}>{label}</div>
+      <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:500, marginTop:4 }}>{label}</div>
       {sub && <div style={{ color:"#8A9AB8", fontSize:10, marginTop:2 }}>{sub}</div>}
     </div>
   );
@@ -240,7 +232,7 @@ function StatChip({ label, value, sub, color }: { label:string; value:string|num
 function SectionHead({ title, sub }: { title:string; sub?:string }) {
   return (
     <div className="flex items-baseline gap-3 mb-4">
-      <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#0D1428" }}>{title}</div>
+      <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>{title}</div>
       {sub && <div style={{ color:"#8A9AB8", fontSize:12 }}>{sub}</div>}
     </div>
   );
@@ -249,7 +241,7 @@ function SectionHead({ title, sub }: { title:string; sub?:string }) {
 function Card({ children, className = "" }: { children:React.ReactNode; className?:string }) {
   return (
     <div className={`p-5 rounded-2xl ${className}`}
-      style={{ background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)" }}>
+      style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)" }}>
       {children}
     </div>
   );
@@ -259,7 +251,7 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
   const h = Math.round((pct / 100) * 120);
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-      {topLabel && <span style={{ color:"#5A6A88", fontSize:9, fontFamily:"var(--font-mono)" }}>{topLabel}</span>}
+      {topLabel && <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{topLabel}</span>}
       <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
         <div style={{ width:"100%", height:h, background:color, borderRadius:"4px 4px 0 0" }}/>
       </div>
@@ -269,11 +261,11 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
 }
 
 const PLANS = [
-  { id:"starter",    name:"Starter",    price:1.99,  storage:"1 GB",   color:"#5A6A88" },
-  { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#4A90D9" },
-  { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#3A5BD9" },
-  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"1 TB", color:"#6E8BFF" },
-  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"5 TB", color:"#48BB78" },
+  { id:"starter",    name:"Starter",    price:1.99,  storage:"1 GB",   color:"#8A9AB8" },
+  { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#6FAE8B" },
+  { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#6E90C9" },
+  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"1 TB", color:"#6FAE8B" },
+  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"5 TB", color:"#D99A6B" },
 ];
 
 const WAIVE_REASONS = [
@@ -330,8 +322,8 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
     }, 900);
   }
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", borderRadius:16 };
-  const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+  const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   return (
@@ -339,13 +331,13 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
       <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ ...CARD, maxHeight:"92vh", overflowY:"auto" }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10" style={{ borderColor:"rgba(58,91,217,0.08)" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ background:"#0A0F1A", borderColor:"rgba(91,110,225,0.2)" }}>
           <div className="flex items-center gap-3">
-            <div className="rounded-xl p-2" style={{ background:"rgba(58,91,217,0.08)" }}>
-              <UserPlus size={16} color="#3A5BD9"/>
+            <div className="rounded-xl p-2" style={{ background:"rgba(91,110,225,0.08)" }}>
+              <UserPlus size={16} color="#FFFFFF"/>
             </div>
             <div>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Manually Onboard User</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Manually Onboard User</div>
               <div style={{ color:"#8A9AB8", fontSize:11, ...MONO_S }}>
                 {step === "info" ? "1 · Contact Information" : step === "plan" ? "2 · Package & Billing" : "3 · Review & Create"}
               </div>
@@ -365,29 +357,29 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 { label:"PHONE NUMBER",   key:"phone", ph:"+1 (555) 000-0000",         type:"tel" },
               ].map(f => (
                 <div key={f.key}>
-                  <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>{f.label}</label>
+                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>{f.label}</label>
                   <input type={f.type} value={(form as any)[f.key]} placeholder={f.ph}
                     onChange={e => setForm(p => ({ ...p, [f.key]:e.target.value }))} style={INPUT}/>
                 </div>
               ))}
 
               {/* White Glove toggle */}
-              <div className="flex items-center justify-between p-4 rounded-xl glow-surface" style={{ background:"rgba(110,139,255,0.06)", border:"1px solid rgba(110,139,255,0.25)" }}>
+              <div className="flex items-center justify-between p-4 rounded-xl glow-surface" style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)" }}>
                 <div>
                   <div className="flex items-center gap-2">
-                    <Star size={14} color="#6E8BFF"/>
-                    <span style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>White Glove Service</span>
+                    <Star size={14} color="#FFFFFF"/>
+                    <span style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>White Glove Service</span>
                   </div>
                   <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Assign a dedicated FPD concierge to assist this user</div>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, whiteGlove:!p.whiteGlove, subscriptionWaived: !p.whiteGlove || p.subscriptionWaived }))}
-                  style={{ color:form.whiteGlove?"#6E8BFF":"#8A9AB8" }}>
+                  style={{ color:form.whiteGlove?"#6FAE8B":"#8A9AB8" }}>
                   {form.whiteGlove ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
                 </button>
               </div>
 
               <div>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>ADMIN NOTES (optional)</label>
+                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>ADMIN NOTES (optional)</label>
                 <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes:e.target.value }))} rows={2}
                   placeholder="e.g. Client's daughter called on their behalf. Needs full setup assistance."
                   className="w-full resize-none" style={INPUT}/>
@@ -397,7 +389,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 if (!form.name.trim() || !form.email.trim()) { toast.error("Name and email are required"); return; }
                 setStep("plan");
               }} className="w-full py-3 rounded-xl font-bold text-sm"
-                style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                 Continue to Package Selection →
               </button>
             </>
@@ -407,17 +399,17 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
           {step === "plan" && (
             <>
               <div>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:10 }}>SELECT SUBSCRIPTION PACKAGE</label>
+                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:10 }}>SELECT SUBSCRIPTION PACKAGE</label>
                 <div className="space-y-2">
                   {PLANS.map(plan => (
                     <button key={plan.id} onClick={() => setForm(p => ({ ...p, plan:plan.id }))}
                       className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
-                      style={{ background:form.plan===plan.id?`${plan.color}10`:"rgba(58,91,217,0.03)",
-                        border:`1.5px solid ${form.plan===plan.id?plan.color:"rgba(58,91,217,0.12)"}` }}>
+                      style={{ background:form.plan===plan.id?`${plan.color}10`:"rgba(91,110,225,0.03)",
+                        border:`1.5px solid ${form.plan===plan.id?plan.color:"rgba(91,110,225,0.12)"}` }}>
                       <div className="flex items-center gap-3">
                         <div style={{ width:10, height:10, borderRadius:"50%", background:plan.color, flexShrink:0 }}/>
                         <div className="text-left">
-                          <div style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>{plan.name}</div>
+                          <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{plan.name}</div>
                           <div style={{ color:"#8A9AB8", fontSize:11 }}>{plan.storage} storage</div>
                         </div>
                       </div>
@@ -433,31 +425,31 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               </div>
 
               {/* Subscription waiver */}
-              <div className="rounded-xl overflow-hidden" style={{ border:`2px solid ${form.subscriptionWaived?"rgba(72,187,120,0.4)":"rgba(58,91,217,0.15)"}` }}>
+              <div className="rounded-xl overflow-hidden" style={{ border:`2px solid ${form.subscriptionWaived?"rgba(72,187,120,0.4)":"rgba(91,110,225,0.15)"}` }}>
                 <div className="flex items-center justify-between px-4 py-3"
-                  style={{ background:form.subscriptionWaived?"rgba(72,187,120,0.08)":"rgba(58,91,217,0.04)" }}>
+                  style={{ background:form.subscriptionWaived?"rgba(72,187,120,0.08)":"rgba(91,110,225,0.04)" }}>
                   <div className="flex items-center gap-2">
-                    <Gift size={15} color={form.subscriptionWaived?"#48BB78":"#3A5BD9"}/>
+                    <Gift size={15} color={form.subscriptionWaived?"#48BB78":"#5B6EE1"}/>
                     <div>
-                      <div style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>Waive Subscription Fee</div>
+                      <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>Waive Subscription Fee</div>
                       <div style={{ color:"#8A9AB8", fontSize:11 }}>User gets full access at $0/mo</div>
                     </div>
                   </div>
                   <button onClick={() => setForm(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
-                    style={{ color:form.subscriptionWaived?"#48BB78":"#8A9AB8" }}>
+                    style={{ color:form.subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
                     {form.subscriptionWaived ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
                   </button>
                 </div>
                 {form.subscriptionWaived && (
                   <div className="px-4 py-3 border-t" style={{ borderColor:"rgba(72,187,120,0.2)" }}>
-                    <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:6 }}>WAIVER REASON</label>
+                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:6 }}>WAIVER REASON</label>
                     <div className="grid grid-cols-2 gap-2">
                       {WAIVE_REASONS.map(r => (
                         <button key={r.id} onClick={() => setForm(p => ({ ...p, waiveReason:r.id }))}
                           className="px-3 py-2 rounded-lg text-xs text-left transition-all"
-                          style={{ background:form.waiveReason===r.id?"rgba(72,187,120,0.1)":"rgba(58,91,217,0.04)",
-                            border:`1px solid ${form.waiveReason===r.id?"#48BB78":"rgba(58,91,217,0.1)"}`,
-                            color:form.waiveReason===r.id?"#48BB78":"#5A6A88", fontWeight:form.waiveReason===r.id?600:400 }}>
+                          style={{ background:form.waiveReason===r.id?"rgba(72,187,120,0.1)":"rgba(91,110,225,0.04)",
+                            border:`1px solid ${form.waiveReason===r.id?"#48BB78":"rgba(91,110,225,0.1)"}`,
+                            color:form.waiveReason===r.id?"#D99A6B":"#8A9AB8", fontWeight:form.waiveReason===r.id?600:400 }}>
                           {r.label}
                         </button>
                       ))}
@@ -467,22 +459,22 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               </div>
 
               {/* Send welcome email toggle */}
-              <div className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
+              <div className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <div className="flex items-center gap-2">
-                  <Send size={13} color="#3A5BD9"/>
-                  <span style={{ color:"#0D1428", fontSize:13 }}>Send welcome email to user</span>
+                  <Send size={13} color="#FFFFFF"/>
+                  <span style={{ color:"#E8EDF5", fontSize:13 }}>Send welcome email to user</span>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, sendWelcome:!p.sendWelcome }))}
-                  style={{ color:form.sendWelcome?"#3A5BD9":"#8A9AB8" }}>
+                  style={{ color:form.sendWelcome?"#6E90C9":"#8A9AB8" }}>
                   {form.sendWelcome ? <ToggleRight size={26}/> : <ToggleLeft size={26}/>}
                 </button>
               </div>
 
               <div className="flex gap-3">
                 <button onClick={() => setStep("info")} className="px-5 py-3 rounded-xl text-sm"
-                  style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>← Back</button>
+                  style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>← Back</button>
                 <button onClick={() => setStep("review")} className="flex-1 py-3 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA" }}>
+                  style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                   Review & Create Account →
                 </button>
               </div>
@@ -492,7 +484,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
           {/* ── Step 3: Review ── */}
           {step === "review" && (
             <>
-              <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(58,91,217,0.15)" }}>
+              <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.15)" }}>
                 {[
                   { label:"Name",    value:form.name },
                   { label:"Email",   value:form.email },
@@ -504,24 +496,24 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   { label:"Welcome Email", value:form.sendWelcome ? "Will be sent" : "Skip" },
                 ].map((row, i) => (
                   <div key={row.label} className="flex items-center px-4 py-3"
-                    style={{ background:i%2===0?"#fff":"#F8FAFF", borderBottom:"1px solid rgba(58,91,217,0.06)" }}>
+                    style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
                     <span style={{ color:"#8A9AB8", fontSize:11, width:120, flexShrink:0, ...MONO_S }}>{row.label.toUpperCase()}</span>
-                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#48BB78":row.label==="White Glove"&&form.whiteGlove?"#6E8BFF":"#0D1428", fontSize:13, fontWeight:500 }}>{row.value}</span>
+                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#D99A6B":row.label==="White Glove"&&form.whiteGlove?"#6FAE8B":"#E8EDF5", fontSize:13, fontWeight:500 }}>{row.value}</span>
                   </div>
                 ))}
               </div>
 
               {form.notes && (
-                <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.1)" }}>
+                <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <div style={{ color:"#8A9AB8", fontSize:10, ...MONO_S, marginBottom:4 }}>ADMIN NOTES</div>
-                  <div style={{ color:"#5A6A88", fontSize:12 }}>{form.notes}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12 }}>{form.notes}</div>
                 </div>
               )}
 
               {form.subscriptionWaived && (
                 <div className="flex items-start gap-2 px-4 py-3 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                  <Gift size={13} color="#48BB78" style={{ marginTop:1 }}/>
-                  <p style={{ color:"#48BB78", fontSize:12 }}>
+                  <Gift size={13} color="#FFFFFF" style={{ marginTop:1 }}/>
+                  <p style={{ color:"#D99A6B", fontSize:12 }}>
                     <strong>Subscription waived.</strong> This account will be created with full {selectedPlan.name} access at $0/mo. The waiver and reason are logged in the audit trail.
                   </p>
                 </div>
@@ -529,10 +521,10 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 
               <div className="flex gap-3">
                 <button onClick={() => setStep("plan")} className="px-5 py-3 rounded-xl text-sm"
-                  style={{ background:"rgba(58,91,217,0.06)", color:"#5A6A88" }}>← Back</button>
+                  style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>← Back</button>
                 <button onClick={submit} disabled={saving}
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA", opacity:saving?0.7:1 }}>
+                  style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:saving?0.7:1 }}>
                   <UserPlus size={15}/>{saving ? "Creating Account…" : "Create Account"}
                 </button>
               </div>
@@ -545,11 +537,11 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 }
 
 const topMetrics = [
-  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#3A5BD9" },
-  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#48BB78" },
-  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#6E8BFF" },
+  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#6E90C9" },
+  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#D99A6B" },
+  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#6FAE8B" },
   { label:"Affiliate Payouts (Jun)", value:"$23,040", change:+14.2, color:"#F6AD55" },
-  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#5B7BF5" },
+  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#6E90C9" },
   { label:"Churn Rate (Jun)", value:"2.3%", change:-0.4, color:"#FC8181", lowerBetter:true },
 ];
 
@@ -574,7 +566,7 @@ const NOTIF_HISTORY: SentNotification[] = [
 ];
 
 const NOTIF_TYPE_COLORS: Record<NotifType, string> = {
-  marketing:"#F7931A", feature:"#3A5BD9", update:"#6E8BFF",
+  marketing:"#F7931A", feature:"#5B6EE1", update:"#5BA7D6",
   alert:"#FC8181", reminder:"#48BB78",
 };
 const TARGET_LABELS: Record<NotifTarget, string> = {
@@ -598,8 +590,8 @@ function PushNotificationCenter() {
   const [preview, setPreview] = useState(false);
   const [channel, setChannel] = useState<"push"|"email"|"both">("push");
 
-  const CARD: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
-  const INPUT: React.CSSProperties = { background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+  const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   const recipientCount = TARGET_COUNTS[target];
@@ -634,24 +626,24 @@ function PushNotificationCenter() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label:"Notifications Sent",   value:history.length,                  color:"#3A5BD9" },
-          { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#48BB78" },
-          { label:"Avg Open Rate",         value:`${avgOpenRate}%`,               color:"#6E8BFF" },
+          { label:"Notifications Sent",   value:history.length,                  color:"#6E90C9" },
+          { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#D99A6B" },
+          { label:"Avg Open Rate",         value:`${avgOpenRate}%`,               color:"#6FAE8B" },
           { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(255,255,255,0.9)", border:"1px solid rgba(58,91,217,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
         {[["compose","✏️ Compose"],["history","📋 Sent History"]].map(([id,label]) => (
           <button key={id} onClick={() => setView(id as any)}
             className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{ background:view===id?"#3A5BD9":"transparent", color:view===id?"#fff":"#5A6A88" }}>
+            style={{ background:view===id?"#5B6EE1":"transparent", color:view===id?"#fff":"#8A9AB8" }}>
             {label}
           </button>
         ))}
@@ -662,18 +654,18 @@ function PushNotificationCenter() {
         <div className="grid md:grid-cols-2 gap-5">
           {/* Form */}
           <div className="p-6 rounded-2xl space-y-4 glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Compose Push Notification</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Compose Push Notification</div>
 
             {/* Type */}
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>NOTIFICATION TYPE</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>NOTIFICATION TYPE</label>
               <div className="flex flex-wrap gap-2">
                 {(Object.entries(NOTIF_TYPE_COLORS) as [NotifType,string][]).map(([id, color]) => (
                   <button key={id} onClick={() => setType(id)}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-all"
-                    style={{ background:type===id?`${color}15`:"rgba(58,91,217,0.04)",
-                      border:`1px solid ${type===id?color:"rgba(58,91,217,0.12)"}`,
-                      color:type===id?color:"#5A6A88" }}>
+                    style={{ background:type===id?`${color}15`:"rgba(91,110,225,0.04)",
+                      border:`1px solid ${type===id?color:"rgba(91,110,225,0.12)"}`,
+                      color:type===id?color:"#8A9AB8" }}>
                     {id}
                   </button>
                 ))}
@@ -682,26 +674,26 @@ function PushNotificationCenter() {
 
             {/* Target audience */}
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>TARGET AUDIENCE</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>TARGET AUDIENCE</label>
               <div className="flex flex-wrap gap-2">
                 {(Object.entries(TARGET_LABELS) as [NotifTarget,string][]).map(([id, label]) => (
                   <button key={id} onClick={() => setTarget(id)}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                    style={{ background:target===id?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.04)",
-                      border:`1px solid ${target===id?"#3A5BD9":"rgba(58,91,217,0.12)"}`,
-                      color:target===id?"#3A5BD9":"#5A6A88" }}>
+                    style={{ background:target===id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
+                      border:`1px solid ${target===id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
+                      color:target===id?"#6E90C9":"#8A9AB8" }}>
                     {label}
                   </button>
                 ))}
               </div>
-              <div style={{ color:"#48BB78", fontSize:11, marginTop:6 }}>
+              <div style={{ color:"#D99A6B", fontSize:11, marginTop:6 }}>
                 📣 Will reach <strong>{TARGET_COUNTS[target].toLocaleString()}</strong> users
               </div>
             </div>
 
             {/* Delivery channel */}
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { id:"push",  label:"Push Only",  icon:"🔔", desc:"In-app + device notification" },
@@ -710,17 +702,17 @@ function PushNotificationCenter() {
                 ] as const).map(ch => (
                   <button key={ch.id} onClick={() => setChannel(ch.id)}
                     className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl text-center transition-all"
-                    style={{ background:channel===ch.id?"rgba(58,91,217,0.1)":"rgba(58,91,217,0.03)", border:`1px solid ${channel===ch.id?"#3A5BD9":"rgba(58,91,217,0.12)"}` }}>
+                    style={{ background:channel===ch.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.03)", border:`1px solid ${channel===ch.id?"#5B6EE1":"rgba(91,110,225,0.12)"}` }}>
                     <span style={{ fontSize:18 }}>{ch.icon}</span>
-                    <span style={{ fontSize:11, fontWeight:700, color:channel===ch.id?"#3A5BD9":"#5A6A88" }}>{ch.label}</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:channel===ch.id?"#6E90C9":"#8A9AB8" }}>{ch.label}</span>
                     <span style={{ fontSize:9, color:"#8A9AB8", lineHeight:1.3 }}>{ch.desc}</span>
                   </button>
                 ))}
               </div>
               {channel === "both" && (
                 <div className="mt-2 px-3 py-2 rounded-xl text-xs flex items-center gap-1.5"
-                  style={{ background:"rgba(58,91,217,0.04)", color:"#5A6A88" }}>
-                  <Bell size={10} color="#3A5BD9"/>
+                  style={{ background:"rgba(91,110,225,0.04)", color:"#8A9AB8" }}>
+                  <Bell size={10} color="#FFFFFF"/>
                   Push & Email will be sent simultaneously. Email recipients must have email notifications enabled.
                 </div>
               )}
@@ -728,7 +720,7 @@ function PushNotificationCenter() {
 
             {/* Title */}
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
                 NOTIFICATION TITLE * <span style={{ color:"#8A9AB8" }}>({title.length}/65 chars)</span>
               </label>
               <input value={title} onChange={e => setTitle(e.target.value.slice(0,65))}
@@ -737,7 +729,7 @@ function PushNotificationCenter() {
 
             {/* Body */}
             <div>
-              <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
+              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
                 MESSAGE * <span style={{ color:"#8A9AB8" }}>({body.length}/240 chars)</span>
               </label>
               <textarea value={body} onChange={e => setBody(e.target.value.slice(0,240))} rows={4}
@@ -747,19 +739,19 @@ function PushNotificationCenter() {
 
             {/* Schedule toggle */}
             <div className="flex items-center justify-between p-3 rounded-xl glow-surface"
-              style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
+              style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
               <div>
-                <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Schedule for later</div>
+                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Schedule for later</div>
                 <div style={{ color:"#8A9AB8", fontSize:11 }}>Send at a specific date and time</div>
               </div>
               <button onClick={() => setScheduleMode(!scheduleMode)}
-                style={{ color:scheduleMode?"#3A5BD9":"#8A9AB8" }}>
+                style={{ color:scheduleMode?"#6E90C9":"#8A9AB8" }}>
                 {scheduleMode ? <ToggleRight size={26}/> : <ToggleLeft size={26}/>}
               </button>
             </div>
             {scheduleMode && (
               <div>
-                <label style={{ color:"#5A6A88", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>SCHEDULE DATE & TIME</label>
+                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>SCHEDULE DATE & TIME</label>
                 <input type="datetime-local" value={scheduleDate}
                   onChange={e => setScheduleDate(e.target.value)} style={INPUT}/>
               </div>
@@ -768,13 +760,13 @@ function PushNotificationCenter() {
             <div className="flex gap-3">
               <button onClick={() => setPreview(!preview)}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-semibold"
-                style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+                style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 {preview ? "Hide Preview" : "Preview"}
               </button>
               <button onClick={send} disabled={sending}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-                style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#F0F4FA",
-                  boxShadow:"0 0 20px rgba(58,91,217,0.3)", opacity:sending?0.7:1 }}>
+                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
+                  boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:sending?0.7:1 }}>
                 <Bell size={15}/>
                 {sending ? "Sending…" : scheduleMode
                   ? `Schedule ${channel==="both"?"Push + Email":channel==="email"?"Email":"Push"} to ${TARGET_COUNTS[target].toLocaleString()} Users`
@@ -786,7 +778,7 @@ function PushNotificationCenter() {
           {/* Live preview */}
           <div className="space-y-4">
             <div className="p-5 rounded-2xl glow-surface" style={CARD}>
-              <div style={{ color:"#5A6A88", fontSize:12, fontFamily:"var(--font-mono)", marginBottom:12 }}>LIVE PREVIEW</div>
+              <div style={{ color:"#8A9AB8", fontSize:12, fontFamily:"var(--font-mono)", marginBottom:12 }}>LIVE PREVIEW</div>
 
               {/* Mobile push notification mockup */}
               <div className="rounded-2xl p-4 space-y-3 glow-surface" style={{ background:"#1A1A2E", border:"1px solid rgba(255,255,255,0.1)" }}>
@@ -794,7 +786,7 @@ function PushNotificationCenter() {
                 <div className="flex items-start gap-3 p-3 rounded-xl glow-surface"
                   style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(10px)" }}>
                   <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-                    style={{ width:36, height:36, background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
+                    style={{ width:36, height:36, background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)" }}>
                     <Bell size={18} color="#fff"/>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -812,15 +804,15 @@ function PushNotificationCenter() {
               </div>
 
               {/* In-app notification preview */}
-              <div className="mt-4 rounded-2xl p-4 space-y-3 glow-surface" style={{ background:"#F0F4FA", border:"1px solid rgba(58,91,217,0.1)" }}>
-                <div style={{ color:"#5A6A88", fontSize:10, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
+              <div className="mt-4 rounded-2xl p-4 space-y-3 glow-surface" style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(91,110,225,0.25)" }}>
+                <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
                 <div className="flex items-start gap-3 px-4 py-3 rounded-xl"
-                  style={{ background:"#fff", border:"1px solid rgba(58,91,217,0.1)" }}>
+                  style={{ background:"#fff", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <div className="rounded-full flex-shrink-0"
                     style={{ width:8, height:8, marginTop:5, background:NOTIF_TYPE_COLORS[type], boxShadow:`0 0 8px ${NOTIF_TYPE_COLORS[type]}` }}/>
                   <div>
-                    <div style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>{title || "Notification Title"}</div>
-                    <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{body || "Message preview…"}</div>
+                    <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{title || "Notification Title"}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{body || "Message preview…"}</div>
                     <div style={{ color:"#8A9AB8", fontSize:10, marginTop:4 }}>just now</div>
                   </div>
                 </div>
@@ -828,8 +820,8 @@ function PushNotificationCenter() {
             </div>
 
             {/* Tips */}
-            <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-              <div style={{ color:"#3A5BD9", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
+            <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)" }}>
+              <div style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
               <ul className="space-y-1.5">
                 {[
                   "Keep titles under 50 characters for full display on all devices",
@@ -839,8 +831,8 @@ function PushNotificationCenter() {
                   "Tuesday and Thursday have the highest open rates",
                 ].map(tip => (
                   <li key={tip} className="flex items-start gap-2">
-                    <div style={{ width:4, height:4, borderRadius:"50%", background:"#3A5BD9", marginTop:6, flexShrink:0 }}/>
-                    <span style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>{tip}</span>
+                    <div style={{ width:4, height:4, borderRadius:"50%", background:"#5B6EE1", marginTop:6, flexShrink:0 }}/>
+                    <span style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.6 }}>{tip}</span>
                   </li>
                 ))}
               </ul>
@@ -862,7 +854,7 @@ function PushNotificationCenter() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>{n.title}</span>
+                      <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>{n.title}</span>
                       <span className="px-2 py-0.5 rounded-full text-xs font-bold capitalize"
                         style={{ background:`${NOTIF_TYPE_COLORS[n.type]}15`, color:NOTIF_TYPE_COLORS[n.type], fontFamily:"var(--font-mono)" }}>
                         {n.type}
@@ -874,7 +866,7 @@ function PushNotificationCenter() {
                         </span>
                       )}
                     </div>
-                    <div style={{ color:"#5A6A88", fontSize:12, marginTop:3, lineHeight:1.5 }}>{n.body}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:12, marginTop:3, lineHeight:1.5 }}>{n.body}</div>
                     <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>
                       Sent: {n.sentAt} · Target: {TARGET_LABELS[n.target]}
                     </div>
@@ -882,17 +874,17 @@ function PushNotificationCenter() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
+                <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>DELIVERED</div>
-                  <div style={{ color:"#3A5BD9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
+                  <div style={{ color:"#6E90C9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
                 </div>
-                <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
+                <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPENED</div>
-                  <div style={{ color:"#48BB78", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
+                  <div style={{ color:"#D99A6B", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
                 </div>
-                <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
+                <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPEN RATE</div>
-                  <div style={{ color:n.openRate > 50 ? "#48BB78" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>
+                  <div style={{ color:n.openRate > 50 ? "#D99A6B" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>
                     {n.openRate}%
                   </div>
                 </div>
@@ -908,14 +900,14 @@ function PushNotificationCenter() {
 export function MasterAdmin() {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
   const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
 
-  const filteredUsers = mockUsers.filter(u =>
+  const filteredUsers = ADMIN_USERS.filter(u =>
     u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.email.includes(userSearch) ||
-    u.id.includes(userSearch)
+    u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.id.toLowerCase().includes(userSearch.toLowerCase())
   );
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; badge?: string }[] = [
@@ -941,42 +933,42 @@ export function MasterAdmin() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Crown size={15} color="#3A5BD9" />
-            <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
+            <Crown size={15} color="#FFFFFF" />
+            <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Platform Command Center</h1>
-          <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#E8EDF5" }}>Platform Command Center</h1>
+          <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowOnboard(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm"
-            style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 16px rgba(58,91,217,0.35)" }}>
+            style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff", boxShadow:"0 4px 16px rgba(91,110,225,0.35)" }}>
             <UserPlus size={14}/> Onboard User
           </button>
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
-            <Activity size={13} color="#48BB78" />
-            <span style={{ color:"#48BB78", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
+            <Activity size={13} color="#FFFFFF" />
+            <span style={{ color:"#D99A6B", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
           </div>
         </div>
       </div>
 
       {/* Manually onboarded users strip */}
       {manualUsers.length > 0 && (
-        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.15)" }}>
-          <UserPlus size={14} color="#3A5BD9"/>
-          <span style={{ color:"#3A5BD9", fontSize:12, fontWeight:600 }}>Manually Onboarded:</span>
+        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
+          <UserPlus size={14} color="#FFFFFF"/>
+          <span style={{ color:"#6E90C9", fontSize:12, fontWeight:600 }}>Manually Onboarded:</span>
           <div className="flex flex-wrap gap-2 flex-1">
             {manualUsers.slice(0,4).map(u => (
               <span key={u.id} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
-                style={{ background:`rgba(58,91,217,0.1)`, color:"#3A5BD9", fontWeight:500 }}>
-                {u.whiteGlove && <Star size={9} color="#6E8BFF"/>}
+                style={{ background:`rgba(91,110,225,0.1)`, color:"#6E90C9", fontWeight:500 }}>
+                {u.whiteGlove && <Star size={9} color="#FFFFFF"/>}
                 {u.name}
-                {u.subscriptionWaived && <Gift size={9} color="#48BB78"/>}
+                {u.subscriptionWaived && <Gift size={9} color="#FFFFFF"/>}
               </span>
             ))}
             {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:12 }}>+{manualUsers.length-4} more</span>}
           </div>
-          <button onClick={() => setTab("users")} style={{ color:"#3A5BD9", fontSize:11, fontWeight:600 }}>View all →</button>
+          <button onClick={() => setTab("users")} style={{ color:"#6E90C9", fontSize:11, fontWeight:600 }}>View all →</button>
         </div>
       )}
 
@@ -985,10 +977,10 @@ export function MasterAdmin() {
         {topMetrics.map(m => (
           <div key={m.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center justify-between mb-2">
-              <div style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
+              <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
                 style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
-                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#48BB78" : "#FC8181", fontSize:9, ...MONO }}>
+                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#D99A6B" : "#FC8181", fontSize:9, ...MONO }}>
                 {m.change>0 ? <ArrowUp size={8}/> : <ArrowDown size={8}/>}
                 {Math.abs(m.change)}%
               </div>
@@ -999,11 +991,11 @@ export function MasterAdmin() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"rgba(255,255,255,0.95)", width:"fit-content" }}>
+      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.2)", width:"fit-content" }}>
         {tabs.map(t => (
           <button key={t.id} onClick={()=>setTab(t.id)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all"
-            style={{ background:tab===t.id?"#3A5BD9":"transparent", color:tab===t.id?"#F0F4FA":"#5A6A88", fontWeight:tab===t.id?700:400 }}>
+            style={{ background:tab===t.id?"#5B6EE1":"transparent", color:tab===t.id?"#F0F4FA":"#8A9AB8", fontWeight:tab===t.id?700:400 }}>
             {t.icon} {t.label}
           </button>
         ))}
@@ -1017,11 +1009,11 @@ export function MasterAdmin() {
 
           {/* ── Top KPIs ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <StatChip label="Total Users" value="51,490" sub="All time" color="#3A5BD9"/>
-            <StatChip label="Female Users" value="54.2%" sub="27,894 accounts" color="#6E8BFF"/>
-            <StatChip label="Male Users" value="40.1%" sub="20,647 accounts" color="#3A5BD9"/>
-            <StatChip label="Median Age" value="47" sub="Years old" color="#48BB78"/>
-            <StatChip label="US Users" value="93.7%" sub="48,241 accounts" color="#4A90D9"/>
+            <StatChip label="Total Users" value="51,490" sub="All time" color="#FFFFFF"/>
+            <StatChip label="Female Users" value="54.2%" sub="27,894 accounts" color="#FFFFFF"/>
+            <StatChip label="Male Users" value="40.1%" sub="20,647 accounts" color="#FFFFFF"/>
+            <StatChip label="Median Age" value="47" sub="Years old" color="#FFFFFF"/>
+            <StatChip label="US Users" value="93.7%" sub="48,241 accounts" color="#FFFFFF"/>
             <StatChip label="NPS Score" value={npsData.score} sub="Net Promoter Score" color="#F6AD55"/>
           </div>
 
@@ -1064,7 +1056,7 @@ export function MasterAdmin() {
                     const h = Math.round((a.count/maxCount)*120);
                     return (
                       <div key={a.range} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-                        <span style={{ color:"#5A6A88", fontSize:9, fontFamily:"var(--font-mono)" }}>{a.pct}%</span>
+                        <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{a.pct}%</span>
                         <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
                           <div style={{ width:"100%", height:h, background:a.color, borderRadius:"4px 4px 0 0", opacity:0.85 }}/>
                         </div>
@@ -1077,14 +1069,14 @@ export function MasterAdmin() {
               {/* Table */}
               <div className="space-y-2">
                 {ageData.map(a => (
-                  <div key={a.range} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(58,91,217,0.06)" }}>
+                  <div key={a.range} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
                     <div className="flex items-center gap-2">
                       <div style={{ width:8, height:8, borderRadius:"50%", background:a.color, flexShrink:0 }}/>
-                      <span style={{ color:"#0D1428", fontSize:12 }}>{a.range}</span>
+                      <span style={{ color:"#E8EDF5", fontSize:12 }}>{a.range}</span>
                     </div>
                     <div className="flex items-center gap-4 text-right">
                       <span style={{ color:a.color, fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700 }}>{a.pct}%</span>
-                      <span style={{ color:"#5A6A88", fontSize:11 }}>{a.count.toLocaleString()} users</span>
+                      <span style={{ color:"#8A9AB8", fontSize:11 }}>{a.count.toLocaleString()} users</span>
                       <span style={{ color:"#8A9AB8", fontSize:10, fontStyle:"italic" }}>avg: {a.avgPlan}</span>
                     </div>
                   </div>
@@ -1105,15 +1097,15 @@ export function MasterAdmin() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)", width:16, textAlign:"right" }}>{i+1}</span>
-                          <span style={{ color:"#0D1428", fontSize:13 }}>{s.state}</span>
+                          <span style={{ color:"#E8EDF5", fontSize:13 }}>{s.state}</span>
                           <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>({s.abbr})</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span style={{ color:"#5A6A88", fontSize:11 }}>{s.users.toLocaleString()}</span>
+                          <span style={{ color:"#8A9AB8", fontSize:11 }}>{s.users.toLocaleString()}</span>
                           <span style={{ color:s.color, fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{s.pct}%</span>
                         </div>
                       </div>
-                      <div className="h-1.5 rounded-full" style={{ background:"#EAF0FC" }}>
+                      <div className="h-1.5 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                         <div className="h-1.5 rounded-full" style={{ width:`${(s.users/maxU)*100}%`, background:s.color }}/>
                       </div>
                     </div>
@@ -1142,14 +1134,14 @@ export function MasterAdmin() {
                 <SectionHead title="Top 10 Cities"/>
                 <div className="space-y-1.5">
                   {cityData.map((c, i) => (
-                    <div key={c.city} className="flex items-center justify-between py-1.5 border-b" style={{ borderColor:"rgba(58,91,217,0.06)" }}>
+                    <div key={c.city} className="flex items-center justify-between py-1.5 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
                       <div className="flex items-center gap-2">
                         <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)", width:14, textAlign:"right" }}>{i+1}</span>
-                        <span style={{ color:"#0D1428", fontSize:12 }}>{c.city}</span>
+                        <span style={{ color:"#E8EDF5", fontSize:12 }}>{c.city}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span style={{ color:"#5A6A88", fontSize:11 }}>{c.users.toLocaleString()}</span>
-                        <span style={{ color:"#3A5BD9", fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
+                        <span style={{ color:"#8A9AB8", fontSize:11 }}>{c.users.toLocaleString()}</span>
+                        <span style={{ color:"#6E90C9", fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
                       </div>
                     </div>
                   ))}
@@ -1174,11 +1166,11 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-3 gap-2 mt-4">
                 {[
-                  { label:"Mobile Total", value:"69.6%", color:"#3A5BD9" },
-                  { label:"Desktop Total", value:"28.9%", color:"#6E8BFF" },
-                  { label:"PWA Installed", value:"34.2%", color:"#48BB78" },
+                  { label:"Mobile Total", value:"69.6%", color:"#6E90C9" },
+                  { label:"Desktop Total", value:"28.9%", color:"#6FAE8B" },
+                  { label:"PWA Installed", value:"34.2%", color:"#D99A6B" },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(58,91,217,0.05)" }}>
+                  <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
                     <div style={{ color:s.color, fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
                     <div style={{ color:"#8A9AB8", fontSize:10 }}>{s.label}</div>
                   </div>
@@ -1234,12 +1226,12 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                  <div style={{ color:"#48BB78", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
-                  <div style={{ color:"#5A6A88", fontSize:11 }}>Fully complete vaults</div>
+                  <div style={{ color:"#D99A6B", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11 }}>Fully complete vaults</div>
                 </div>
                 <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.15)" }}>
                   <div style={{ color:"#F6AD55", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>16.0%</div>
-                  <div style={{ color:"#5A6A88", fontSize:11 }}>Just started (drop-off risk)</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11 }}>Just started (drop-off risk)</div>
                 </div>
               </div>
             </Card>
@@ -1252,9 +1244,9 @@ export function MasterAdmin() {
                   const h = Math.round((d.dau/maxDAU)*110);
                   return (
                     <div key={d.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-                      <span style={{ color:"#5A6A88", fontSize:9, fontFamily:"var(--font-mono)" }}>{(d.dau/1000).toFixed(1)}k</span>
+                      <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{(d.dau/1000).toFixed(1)}k</span>
                       <div style={{ width:"100%", height:110, display:"flex", alignItems:"flex-end" }}>
-                        <div style={{ width:"100%", height:h, background:"#3A5BD9", borderRadius:"4px 4px 0 0", opacity:d.month==="Jun"?1:0.6 }}/>
+                        <div style={{ width:"100%", height:h, background:"#5B6EE1", borderRadius:"4px 4px 0 0", opacity:d.month==="Jun"?1:0.6 }}/>
                       </div>
                       <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                     </div>
@@ -1263,11 +1255,11 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {[
-                  { label:"Avg DAU",         value:"9,284",    color:"#3A5BD9" },
-                  { label:"DAU/MAU Ratio",   value:"18.0%",    color:"#6E8BFF" },
-                  { label:"Avg Session",     value:"10.2 min", color:"#48BB78" },
+                  { label:"Avg DAU",         value:"9,284",    color:"#6E90C9" },
+                  { label:"DAU/MAU Ratio",   value:"18.0%",    color:"#6FAE8B" },
+                  { label:"Avg Session",     value:"10.2 min", color:"#D99A6B" },
                 ].map(s => (
-                  <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(58,91,217,0.05)" }}>
+                  <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
                     <div style={{ color:s.color, fontSize:15, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
                     <div style={{ color:"#8A9AB8", fontSize:10 }}>{s.label}</div>
                   </div>
@@ -1284,17 +1276,17 @@ export function MasterAdmin() {
                 {retentionData.map(r => (
                   <div key={r.month}>
                     <div className="flex items-center justify-between mb-1">
-                      <span style={{ color:"#0D1428", fontSize:13 }}>{r.month}</span>
+                      <span style={{ color:"#E8EDF5", fontSize:13 }}>{r.month}</span>
                       <span style={{ color:r.color, fontSize:13, fontWeight:700, fontFamily:"var(--font-mono)" }}>{r.retained}%</span>
                     </div>
-                    <div className="h-3 rounded-full" style={{ background:"#EAF0FC" }}>
+                    <div className="h-3 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                       <div className="h-3 rounded-full" style={{ width:`${r.retained}%`, background:r.color }}/>
                     </div>
                   </div>
                 ))}
-                <div className="px-3 py-2 rounded-xl mt-2" style={{ background:"rgba(58,91,217,0.05)" }}>
-                  <span style={{ color:"#5A6A88", fontSize:12 }}>
-                    Industry benchmark (legacy planning): 58–65% at Month 12. FPD at <strong style={{ color:"#48BB78" }}>68.2%</strong> — above average.
+                <div className="px-3 py-2 rounded-xl mt-2" style={{ background:"rgba(91,110,225,0.05)" }}>
+                  <span style={{ color:"#8A9AB8", fontSize:12 }}>
+                    Industry benchmark (legacy planning): 58–65% at Month 12. FPD at <strong style={{ color:"#D99A6B" }}>68.2%</strong> — above average.
                   </span>
                 </div>
               </div>
@@ -1305,16 +1297,16 @@ export function MasterAdmin() {
               {/* NPS gauge */}
               <div className="text-center py-4">
                 <div style={{ fontFamily:"var(--font-display)", fontSize:64, lineHeight:1,
-                  color: npsData.score >= 50 ? "#48BB78" : npsData.score >= 30 ? "#F6AD55" : "#FC8181" }}>
+                  color: npsData.score >= 50 ? "#D99A6B" : npsData.score >= 30 ? "#F6AD55" : "#FC8181" }}>
                   {npsData.score}
                 </div>
-                <div style={{ color:"#48BB78", fontSize:14, fontWeight:600, marginTop:4 }}>
+                <div style={{ color:"#D99A6B", fontSize:14, fontWeight:600, marginTop:4 }}>
                   {npsData.score >= 50 ? "Excellent" : npsData.score >= 30 ? "Good" : "Needs Improvement"}
                 </div>
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label:"Promoters (9–10)", pct:npsData.promoters, color:"#48BB78", desc:"Would recommend" },
+                  { label:"Promoters (9–10)", pct:npsData.promoters, color:"#D99A6B", desc:"Would recommend" },
                   { label:"Passives (7–8)",   pct:npsData.passives,  color:"#F6AD55", desc:"Neutral" },
                   { label:"Detractors (0–6)", pct:npsData.detractors,color:"#FC8181", desc:"At churn risk" },
                 ].map(n => (
@@ -1334,22 +1326,22 @@ export function MasterAdmin() {
             <SectionHead title="Platform Health Metrics"/>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {[
-                { label:"Monthly Churn Rate",      value:"2.3%",      sub:"↓ 0.4% from last mo", color:"#48BB78" },
-                { label:"Annual Churn Rate",        value:"15.8%",     sub:"Industry avg: 24%",    color:"#48BB78" },
-                { label:"Avg Revenue per User",     value:"$27.40",    sub:"ARPU monthly",          color:"#3A5BD9" },
-                { label:"Customer Lifetime Value",  value:"$1,942",    sub:"At 12% annual churn",   color:"#6E8BFF" },
+                { label:"Monthly Churn Rate",      value:"2.3%",      sub:"↓ 0.4% from last mo", color:"#D99A6B" },
+                { label:"Annual Churn Rate",        value:"15.8%",     sub:"Industry avg: 24%",    color:"#D99A6B" },
+                { label:"Avg Revenue per User",     value:"$27.40",    sub:"ARPU monthly",          color:"#6E90C9" },
+                { label:"Customer Lifetime Value",  value:"$1,942",    sub:"At 12% annual churn",   color:"#6FAE8B" },
                 { label:"$199 Fee Adoption",        value:"18.7%",     sub:"Of total users",        color:"#F6AD55" },
-                { label:"Support Tickets (Jun)",    value:"284",       sub:"Avg 9.4/day",           color:"#4A90D9" },
-                { label:"Avg Resolution Time",      value:"4.2 hrs",   sub:"Ticket-to-close",       color:"#48BB78" },
-                { label:"White Glove Clients",      value:"3",         sub:"Active concierge",      color:"#6E8BFF" },
-                { label:"Verified ID Contacts",     value:"12,841",    sub:"23.5% of contact pool", color:"#3A5BD9" },
-                { label:"Avg Vault Documents",      value:"11.4",      sub:"Per active user",       color:"#4A90D9" },
+                { label:"Support Tickets (Jun)",    value:"284",       sub:"Avg 9.4/day",           color:"#6FAE8B" },
+                { label:"Avg Resolution Time",      value:"4.2 hrs",   sub:"Ticket-to-close",       color:"#D99A6B" },
+                { label:"White Glove Clients",      value:"3",         sub:"Active concierge",      color:"#6FAE8B" },
+                { label:"Verified ID Contacts",     value:"12,841",    sub:"23.5% of contact pool", color:"#6E90C9" },
+                { label:"Avg Vault Documents",      value:"11.4",      sub:"Per active user",       color:"#6FAE8B" },
                 { label:"Storage Overage Rate",     value:"8.4%",      sub:"Users over plan limit", color:"#F6AD55" },
-                { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#48BB78" },
+                { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#D99A6B" },
               ].map(m => (
-                <div key={m.label} className="p-3 rounded-xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.08)" }}>
+                <div key={m.label} className="p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
                   <div style={{ color:m.color, fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>{m.value}</div>
-                  <div style={{ color:"#0D1428", fontSize:11, fontWeight:500, marginTop:2 }}>{m.label}</div>
+                  <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:500, marginTop:2 }}>{m.label}</div>
                   <div style={{ color:"#8A9AB8", fontSize:10, marginTop:1 }}>{m.sub}</div>
                 </div>
               ))}
@@ -1364,10 +1356,10 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div className="grid lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 p-6 rounded-2xl glow-surface" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
               <div className="flex items-center gap-4 mb-4">
-                {[{color:"#3A5BD9",label:"MRR"},{color:"#6E8BFF",label:"Overage"}].map(l=>(
-                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
+                {[{color:"#6E90C9",label:"MRR"},{color:"#6FAE8B",label:"Overage"}].map(l=>(
+                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
                 ))}
               </div>
               <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180 }}>
@@ -1378,8 +1370,8 @@ export function MasterAdmin() {
                   return (
                     <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
                       <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140,width:"100%"}}>
-                        <div style={{flex:1,background:"#3A5BD9",borderRadius:"3px 3px 0 0",height:mrrH,opacity:0.85}}/>
-                        <div style={{flex:1,background:"#6E8BFF",borderRadius:"3px 3px 0 0",height:ovH,opacity:0.85}}/>
+                        <div style={{flex:1,background:"#5B6EE1",borderRadius:"3px 3px 0 0",height:mrrH,opacity:0.85}}/>
+                        <div style={{flex:1,background:"#5BA7D6",borderRadius:"3px 3px 0 0",height:ovH,opacity:0.85}}/>
                       </div>
                       <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
                     </div>
@@ -1388,7 +1380,7 @@ export function MasterAdmin() {
               </div>
             </div>
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:16 }}>Plan Distribution</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:16 }}>Plan Distribution</h3>
               <div className="space-y-3">
                 {planDist.map(p => {
                   const total = planDist.reduce((s,x)=>s+x.value,0);
@@ -1396,10 +1388,10 @@ export function MasterAdmin() {
                   return (
                     <div key={p.name}>
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2"><div style={{width:8,height:8,borderRadius:2,background:p.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{p.name}</span></div>
-                        <span style={{color:"#0D1428",fontSize:12,...MONO}}>{p.value.toLocaleString()} · {pct}%</span>
+                        <div className="flex items-center gap-2"><div style={{width:8,height:8,borderRadius:2,background:p.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{p.name}</span></div>
+                        <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{p.value.toLocaleString()} · {pct}%</span>
                       </div>
-                      <div className="h-2 rounded-full" style={{background:"#EAF0FC"}}>
+                      <div className="h-2 rounded-full" style={{background:"rgba(255,255,255,0.08)"}}>
                         <div className="h-2 rounded-full" style={{width:`${pct}%`,background:p.color}}/>
                       </div>
                     </div>
@@ -1410,10 +1402,10 @@ export function MasterAdmin() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>User Growth vs Churn</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:8 }}>User Growth vs Churn</h3>
               <div className="flex items-center gap-4 mb-4">
-                {[{color:"#3A5BD9",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
-                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
+                {[{color:"#6E90C9",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
+                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
                 ))}
               </div>
               <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:160 }}>
@@ -1422,7 +1414,7 @@ export function MasterAdmin() {
                   return (
                     <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
                       <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140,width:"100%"}}>
-                        <div style={{flex:1,background:"#3A5BD9",borderRadius:"3px 3px 0 0",height:Math.round((d.new/maxNew)*130),opacity:0.85}}/>
+                        <div style={{flex:1,background:"#5B6EE1",borderRadius:"3px 3px 0 0",height:Math.round((d.new/maxNew)*130),opacity:0.85}}/>
                         <div style={{flex:1,background:"#FC8181",borderRadius:"3px 3px 0 0",height:Math.round((d.churn/maxNew)*130),opacity:0.85}}/>
                       </div>
                       <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
@@ -1432,7 +1424,7 @@ export function MasterAdmin() {
               </div>
             </div>
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:16 }}>ID Verification Queue</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:16 }}>ID Verification Queue</h3>
               {pendingVerifications.length > 0 && (
                 <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl" style={{background:"rgba(246,173,85,0.08)",border:"1px solid rgba(246,173,85,0.25)"}}>
                   <Clock size={13} color="#F6AD55"/>
@@ -1441,13 +1433,13 @@ export function MasterAdmin() {
               )}
               <div className="space-y-2">
                 {pendingVerifications.map(v=>(
-                  <div key={v.id} className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{background:"rgba(58,91,217,0.04)",border:"1px solid rgba(58,91,217,0.1)"}}>
+                  <div key={v.id} className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                     <div>
-                      <div style={{color:"#0D1428",fontSize:13}}>{v.contact}</div>
-                      <div style={{color:"#5A6A88",fontSize:11}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
+                      <div style={{color:"#E8EDF5",fontSize:13}}>{v.contact}</div>
+                      <div style={{color:"#8A9AB8",fontSize:11}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(72,187,120,0.15)",color:"#48BB78",fontWeight:700}}>Approve</button>
+                      <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B",fontWeight:700}}>Approve</button>
                       <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(252,129,129,0.12)",color:"#FC8181"}}>Reject</button>
                     </div>
                   </div>
@@ -1463,66 +1455,47 @@ export function MasterAdmin() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 glow-surface" style={GLASS}>
-              <Search size={13} color="#5A6A88"/>
-              <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:13,width:"100%"}}/>
+              <Search size={13} color="#8A9AB8"/>
+              <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:13,width:"100%"}}/>
             </div>
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={GLASS}>
-              <Filter size={13} color="#5A6A88"/><span style={{color:"#5A6A88"}}>Filter</span>
+              <Filter size={13} color="#8A9AB8"/><span style={{color:"#8A9AB8"}}>Filter</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{...GLASS}}>
-              <Download size={13} color="#3A5BD9"/><span style={{color:"#3A5BD9"}}>Export CSV</span>
+              <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
             </button>
           </div>
-          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(58,91,217,0.14)"}}>
-            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(58,91,217,0.1)",gap:12,alignItems:"center"}}>
+          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
+            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
               {["ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map(h=>(
                 <div key={h} style={{color:"#8A9AB8",fontSize:10,...MONO}}>{h.toUpperCase()}</div>
               ))}
             </div>
             {filteredUsers.map((user,i)=>(
-              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:i%2===0?"rgba(255,255,255,0.95)":"rgba(240,244,250,0.8)",borderColor:"rgba(58,91,217,0.06)",gap:12}}>
+              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
                 <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{user.id}</span>
                 <div>
-                  <div style={{color:"#0D1428",fontSize:13}}>{user.name}</div>
-                  <div style={{color:"#5A6A88",fontSize:11}}>{user.email}</div>
+                  <div style={{color:"#E8EDF5",fontSize:13}}>{user.name}</div>
+                  <div style={{color:"#8A9AB8",fontSize:11}}>{user.email}</div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(58,91,217,0.1)",color:"#3A5BD9",...MONO,fontSize:10}}>{user.plan}</span>
-                <span style={{color:"#0D1428",fontSize:12,...MONO}}>{user.storage} GB</span>
-                <span style={{color:"#0D1428",fontSize:12,...MONO}}>{user.contacts}</span>
-                <span style={{color:"#3A5BD9",fontSize:12,...MONO}}>{user.referrals}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#48BB78":"#FC8181",...MONO,fontSize:9}}>{user.status.toUpperCase()}</span>
+                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:10}}>{user.plan}</span>
+                <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{user.storage} GB</span>
+                <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{user.contacts}</span>
+                <span style={{color:"#6E90C9",fontSize:12,...MONO}}>{user.referrals}</span>
+                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#D99A6B":"#FC8181",...MONO,fontSize:9}}>{user.status.toUpperCase()}</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={()=>setSelectedUser(user)} style={{color:"#3A5BD9"}}><Eye size={13}/></button>
-                  <button style={{color:"#5A6A88"}}><Edit size={13}/></button>
+                  <button onClick={()=>setSelectedUser(user)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
+                  <button style={{color:"#8A9AB8"}}><Edit size={13}/></button>
                   <button style={{color:"#FC8181"}}><XCircle size={13}/></button>
                 </div>
               </div>
             ))}
           </div>
-          <div style={{color:"#5A6A88",fontSize:12,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
+          <div style={{color:"#8A9AB8",fontSize:12,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
 
-          {/* User detail modal */}
+          {/* User detail modal — Overview / Edit Account / Billing / Security */}
           {selectedUser && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{background:"rgba(0,0,0,0.8)",backdropFilter:"blur(8px)"}}>
-              <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 style={{fontFamily:"var(--font-display)",fontSize:18,color:"#0D1428"}}>{selectedUser.name}</h3>
-                  <button onClick={()=>setSelectedUser(null)} style={{color:"#5A6A88"}}>✕</button>
-                </div>
-                <div className="space-y-3">
-                  {[["User ID",selectedUser.id],["Email",selectedUser.email],["Plan",selectedUser.plan],["Storage",`${selectedUser.storage} GB`],["Legacy Contacts",selectedUser.contacts],["Referrals",selectedUser.referrals],["Member Since",selectedUser.joined],["Status",selectedUser.status]].map(([label,val])=>(
-                    <div key={label as string} className="flex items-center justify-between px-4 py-2.5 rounded-xl" style={{background:"rgba(58,91,217,0.04)"}}>
-                      <span style={{color:"#5A6A88",fontSize:13}}>{label}</span>
-                      <span style={{color:"#0D1428",fontSize:13,...MONO}}>{val}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-3 mt-6">
-                  <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(252,129,129,0.12)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.25)"}}>Suspend Account</button>
-                  <button className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)",color:"#F0F4FA",boxShadow:"0 0 20px rgba(58,91,217,0.3)"}}>Edit User</button>
-                </div>
-              </div>
-            </div>
+            <UserDetailModal user={selectedUser} onClose={() => setSelectedUser(null)} />
           )}
         </div>
       )}
@@ -1531,19 +1504,19 @@ export function MasterAdmin() {
       {tab === "revenue" && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#3A5BD9"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#6E8BFF"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#48BB78"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
+            {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#6E90C9"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#6FAE8B"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#D99A6B"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
-                <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
-                <div style={{color:"#5A6A88",fontSize:11,marginTop:2,...MONO}}>{s.sub}</div>
+                <div style={{color:"#E8EDF5",fontSize:13,marginTop:4}}>{s.label}</div>
+                <div style={{color:"#8A9AB8",fontSize:11,marginTop:2,...MONO}}>{s.sub}</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
             <div className="flex items-center gap-4 mb-4">
-              {[{color:"#3A5BD9",label:"Subscriptions"},{color:"#6E8BFF",label:"Overage"},{color:"#48BB78",label:"Affiliates"}].map(l=>(
-                <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
+              {[{color:"#6E90C9",label:"Subscriptions"},{color:"#6FAE8B",label:"Overage"},{color:"#D99A6B",label:"Affiliates"}].map(l=>(
+                <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
               ))}
             </div>
             <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:200 }}>
@@ -1552,8 +1525,8 @@ export function MasterAdmin() {
                 return (
                   <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
                     <div style={{display:"flex",alignItems:"flex-end",gap:2,height:170,width:"100%"}}>
-                      <div style={{flex:2,background:"#3A5BD9",borderRadius:"3px 3px 0 0",height:Math.round((d.mrr/maxV)*160),opacity:0.85}}/>
-                      <div style={{flex:1,background:"#6E8BFF",borderRadius:"3px 3px 0 0",height:Math.round((d.overage/maxV)*160),opacity:0.85}}/>
+                      <div style={{flex:2,background:"#5B6EE1",borderRadius:"3px 3px 0 0",height:Math.round((d.mrr/maxV)*160),opacity:0.85}}/>
+                      <div style={{flex:1,background:"#5BA7D6",borderRadius:"3px 3px 0 0",height:Math.round((d.overage/maxV)*160),opacity:0.85}}/>
                       <div style={{flex:1,background:"#48BB78",borderRadius:"3px 3px 0 0",height:Math.round((d.affiliates/maxV)*160),opacity:0.85}}/>
                     </div>
                     <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
@@ -1571,23 +1544,23 @@ export function MasterAdmin() {
           <div className="grid md:grid-cols-3 gap-5">
             {storageByPlan.map(s=>(
               <div key={s.plan} className="p-6 rounded-2xl glow-surface" style={GLASS}>
-                <div style={{color:"#3A5BD9",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
-                <div style={{fontFamily:"var(--font-display)",fontSize:28,color:"#0D1428"}}>{s.avgUsed} GB</div>
-                <div style={{color:"#5A6A88",fontSize:13,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
-                <div className="h-2 rounded-full" style={{background:"rgba(58,91,217,0.1)"}}>
-                  <div className="h-2 rounded-full" style={{width:`${(s.avgUsed/s.limit)*100}%`,background:"linear-gradient(90deg,#3A5BD9,#5B7BF5)",boxShadow:"0 0 8px rgba(58,91,217,0.4)"}}/>
+                <div style={{color:"#6E90C9",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:28,color:"#E8EDF5"}}>{s.avgUsed} GB</div>
+                <div style={{color:"#8A9AB8",fontSize:13,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
+                <div className="h-2 rounded-full" style={{background:"rgba(91,110,225,0.1)"}}>
+                  <div className="h-2 rounded-full" style={{width:`${(s.avgUsed/s.limit)*100}%`,background:"linear-gradient(90deg,#5B6EE1,#5B6EE1)",boxShadow:"0 0 8px rgba(91,110,225,0.4)"}}/>
                 </div>
-                <div style={{color:"#5A6A88",fontSize:11,marginTop:6,...MONO}}>{Math.round((s.avgUsed/s.limit)*100)}% average utilization</div>
+                <div style={{color:"#8A9AB8",fontSize:11,marginTop:6,...MONO}}>{Math.round((s.avgUsed/s.limit)*100)}% average utilization</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:16}}>Platform Storage Totals</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals</h3>
             <div className="grid grid-cols-4 gap-4">
-              {[{label:"Total Data Stored",value:"428.4 TB",color:"#3A5BD9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6E8BFF"},{label:"Avg per User",value:"12.4 GB",color:"#48BB78"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
-                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"rgba(58,91,217,0.04)",border:"1px solid rgba(58,91,217,0.1)"}}>
+              {[{label:"Total Data Stored",value:"428.4 TB",color:"#6E90C9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6FAE8B"},{label:"Avg per User",value:"12.4 GB",color:"#D99A6B"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
+                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
-                  <div style={{color:"#5A6A88",fontSize:12,marginTop:4}}>{s.label}</div>
+                  <div style={{color:"#8A9AB8",fontSize:12,marginTop:4}}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -1599,10 +1572,10 @@ export function MasterAdmin() {
       {tab === "verification" && (
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
-            {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#48BB78"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#3A5BD9"}].map(s=>(
+            {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#D99A6B"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#6E90C9"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:28,color:s.color}}>{s.value}</div>
-                <div style={{color:"#5A6A88",fontSize:13,marginTop:4}}>{s.label}</div>
+                <div style={{color:"#8A9AB8",fontSize:13,marginTop:4}}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -1610,22 +1583,22 @@ export function MasterAdmin() {
             <div key={v.id} className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <div style={{fontFamily:"var(--font-display)",fontSize:16,color:"#0D1428",marginBottom:2}}>{v.contact}</div>
-                  <div style={{color:"#5A6A88",fontSize:13}}>Submitted for: <strong style={{color:"#0D1428"}}>{v.forUser}</strong> · {v.type} · Submitted {v.submitted}</div>
+                  <div style={{fontFamily:"var(--font-display)",fontSize:16,color:"#E8EDF5",marginBottom:2}}>{v.contact}</div>
+                  <div style={{color:"#8A9AB8",fontSize:13}}>Submitted for: <strong style={{color:"#E8EDF5"}}>{v.forUser}</strong> · {v.type} · Submitted {v.submitted}</div>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs" style={{background:"rgba(246,173,85,0.12)",color:"#F6AD55",...MONO,fontWeight:700}}>PENDING REVIEW</span>
               </div>
-              <div className="flex items-center gap-2 mb-4 p-4 rounded-xl glow-surface" style={{background:"rgba(58,91,217,0.04)",border:"1px solid rgba(58,91,217,0.1)"}}>
-                <div style={{color:"#5A6A88",fontSize:13}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
+              <div className="flex items-center gap-2 mb-4 p-4 rounded-xl glow-surface" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
+                <div style={{color:"#8A9AB8",fontSize:13}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
               </div>
               <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(72,187,120,0.12)",color:"#48BB78",border:"1px solid rgba(72,187,120,0.25)"}}>
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",border:"1px solid rgba(72,187,120,0.25)"}}>
                   <CheckCircle size={14}/> Approve
                 </button>
                 <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(252,129,129,0.1)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)"}}>
                   <XCircle size={14}/> Reject
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{background:"rgba(58,91,217,0.08)",color:"#3A5BD9"}}>
+                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{background:"rgba(91,110,225,0.08)",color:"#6E90C9"}}>
                   <Eye size={14}/> View Document
                 </button>
               </div>
@@ -1638,28 +1611,28 @@ export function MasterAdmin() {
       {tab === "payouts" && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#3A5BD9"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#48BB78"}].map(s=>(
+            {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#6E90C9"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#D99A6B"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
-                <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
-                <div style={{color:"#5A6A88",fontSize:11,marginTop:2,...MONO}}>{s.n} recipients</div>
+                <div style={{color:"#E8EDF5",fontSize:13,marginTop:4}}>{s.label}</div>
+                <div style={{color:"#8A9AB8",fontSize:11,marginTop:2,...MONO}}>{s.n} recipients</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center justify-between mb-4">
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428"}}>Pending Payouts</h3>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(58,91,217,0.3)"}}>Process All Pending</button>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>Pending Payouts</h3>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(91,110,225,0.3)"}}>Process All Pending</button>
             </div>
             {[{id:"PAY-0912",name:"James Doe",type:"Affiliate",amount:189.50,method:"ACH"},{id:"PAY-0911",name:"Sarah Chen",type:"Affiliate",amount:847.20,method:"ACH"},{id:"PAY-0910",name:"Greenfield Law Offices",type:"Partnership",amount:3359.88,method:"Wire"}].map((p,i)=>(
-              <div key={p.id} className="flex items-center justify-between p-4 rounded-xl mb-2 glow-surface" style={{background:"rgba(58,91,217,0.04)",border:"1px solid rgba(58,91,217,0.08)"}}>
+              <div key={p.id} className="flex items-center justify-between p-4 rounded-xl mb-2 glow-surface" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.08)"}}>
                 <div>
-                  <div style={{color:"#0D1428",fontSize:13}}>{p.name}</div>
-                  <div style={{color:"#5A6A88",fontSize:11,...MONO}}>{p.id} · {p.type} · {p.method}</div>
+                  <div style={{color:"#E8EDF5",fontSize:13}}>{p.name}</div>
+                  <div style={{color:"#8A9AB8",fontSize:11,...MONO}}>{p.id} · {p.type} · {p.method}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{fontFamily:"var(--font-display)",fontSize:18,color:"#3A5BD9"}}>${p.amount.toFixed(2)}</span>
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#48BB78"}}>Process</button>
+                  <span style={{fontFamily:"var(--font-display)",fontSize:18,color:"#6E90C9"}}>${p.amount.toFixed(2)}</span>
+                  <button className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B"}}>Process</button>
                 </div>
               </div>
             ))}
@@ -1669,19 +1642,19 @@ export function MasterAdmin() {
 
       {/* AUDIT LOG */}
       {tab === "audit" && (
-        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(58,91,217,0.14)"}}>
-          <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(58,91,217,0.1)"}}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428"}}>System Audit Log</h3>
-            <button className="flex items-center gap-2 text-sm" style={{color:"#3A5BD9",...MONO,fontSize:12}}><Download size={13}/> Export</button>
+        <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
+          <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(91,110,225,0.1)"}}>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>System Audit Log</h3>
+            <button className="flex items-center gap-2 text-sm" style={{color:"#6E90C9",...MONO,fontSize:12}}><Download size={13}/> Export</button>
           </div>
           {auditLogs.map((log,i)=>{
-            const sc = {info:"#5A6A88",warning:"#F6AD55",critical:"#FC8181"}[log.severity] ?? "#5A6A88";
+            const sc = {info:"#8A9AB8",warning:"#F6AD55",critical:"#FC8181"}[log.severity] ?? "#8A9AB8";
             return (
-              <div key={log.id} className="flex items-center gap-4 px-5 py-3.5 border-b" style={{background:i%2===0?"rgba(255,255,255,0.95)":"rgba(240,244,250,0.8)",borderColor:"rgba(58,91,217,0.06)"}}>
+              <div key={log.id} className="flex items-center gap-4 px-5 py-3.5 border-b" style={{background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:sc,boxShadow:`0 0 6px ${sc}`,flexShrink:0}}/>
                 <div style={{color:"#8A9AB8",fontSize:10,...MONO,flexShrink:0,minWidth:80}}>{log.id}</div>
-                <div style={{color:"#5A6A88",fontSize:12,flexShrink:0,minWidth:140,...MONO}}>{log.user}</div>
-                <div style={{color:"#0D1428",fontSize:13,flex:1}}>{log.action}</div>
+                <div style={{color:"#8A9AB8",fontSize:12,flexShrink:0,minWidth:140,...MONO}}>{log.user}</div>
+                <div style={{color:"#E8EDF5",fontSize:13,flex:1}}>{log.action}</div>
                 <div style={{color:"#8A9AB8",fontSize:12,...MONO,flexShrink:0}}>{log.target}</div>
                 <div style={{color:"#8A9AB8",fontSize:11,...MONO,flexShrink:0}}>{log.time}</div>
               </div>
@@ -1696,47 +1669,47 @@ export function MasterAdmin() {
           {/* Admin config */}
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center gap-2 mb-5">
-              <DollarSign size={16} color="#3A5BD9"/>
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:16,color:"#0D1428"}}>Legacy Continuation Fee Configuration</h3>
+              <DollarSign size={16} color="#FFFFFF"/>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:16,color:"#E8EDF5"}}>Legacy Continuation Fee Configuration</h3>
               <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{background:"rgba(246,173,85,0.1)",color:"#F6AD55",border:"1px solid rgba(246,173,85,0.25)",...MONO,fontSize:9}}>REAL-TIME — UPDATES VIA SUPABASE</span>
             </div>
             <div className="grid md:grid-cols-3 gap-5 mb-5">
-              {[{label:"Current Fee Amount",value:"$199.00",color:"#3A5BD9"},{label:"Activation Window",value:"24 Months",color:"#48BB78"},{label:"Total Revenue Collected",value:"$597.00",color:"#6E8BFF"}].map(s=>(
-                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"#F5F8FE",border:"1px solid rgba(58,91,217,0.1)"}}>
+              {[{label:"Current Fee Amount",value:"$199.00",color:"#6E90C9"},{label:"Activation Window",value:"24 Months",color:"#D99A6B"},{label:"Total Revenue Collected",value:"$597.00",color:"#6FAE8B"}].map(s=>(
+                <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
-                  <div style={{color:"#5A6A88",fontSize:12,marginTop:2}}>{s.label}</div>
+                  <div style={{color:"#8A9AB8",fontSize:12,marginTop:2}}>{s.label}</div>
                 </div>
               ))}
             </div>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>FEE AMOUNT ($) — Shown to users on payment page</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"#F5F8FE",border:"2px solid rgba(58,91,217,0.2)"}}>
-                  <DollarSign size={14} color="#3A5BD9"/>
-                  <input defaultValue="199.00" type="number" step="0.01" style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update fee amount in Supabase")}/>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"rgba(255,255,255,0.06)",border:"2px solid rgba(91,110,225,0.2)"}}>
+                  <DollarSign size={14} color="#FFFFFF"/>
+                  <input defaultValue="199.00" type="number" step="0.01" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update fee amount in Supabase")}/>
                 </div>
               </div>
               <div>
                 <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>ACTIVATION WINDOW (MONTHS) — After death certification</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"#F5F8FE",border:"2px solid rgba(58,91,217,0.2)"}}>
-                  <Clock size={14} color="#3A5BD9"/>
-                  <input defaultValue="24" type="number" step="1" min="1" max="120" style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update period in Supabase")}/>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"rgba(255,255,255,0.06)",border:"2px solid rgba(91,110,225,0.2)"}}>
+                  <Clock size={14} color="#FFFFFF"/>
+                  <input defaultValue="24" type="number" step="1" min="1" max="120" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update period in Supabase")}/>
                 </div>
               </div>
             </div>
             <button onClick={() => toast.success("Legacy Continuation Fee settings saved to Supabase admin_settings")}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm"
-              style={{background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)",color:"#fff",boxShadow:"0 4px 12px rgba(58,91,217,0.3)"}}>
+              style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#fff",boxShadow:"0 4px 12px rgba(91,110,225,0.3)"}}>
               Save Configuration to Supabase
             </button>
           </div>
 
           {/* Paid fees table */}
-          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(58,91,217,0.1)"}}>
-            <div className="px-5 py-3 border-b" style={{background:"#EAF0FC",borderColor:"rgba(58,91,217,0.08)"}}>
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428"}}>All Legacy Continuation Fee Payments</h3>
+          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.1)"}}>
+            <div className="px-5 py-3 border-b" style={{background:"rgba(255,255,255,0.08)",borderColor:"rgba(91,110,225,0.08)"}}>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>All Legacy Continuation Fee Payments</h3>
             </div>
-            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:"#F5F8FE",borderBottom:"1px solid rgba(58,91,217,0.08)",gap:16,alignItems:"center"}}>
+            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:"rgba(255,255,255,0.06)",borderBottom:"1px solid rgba(91,110,225,0.2)",gap:16,alignItems:"center"}}>
               {["ID","User","Paid By","Date","Amount","Status","Action"].map(h=>(
                 <div key={h} style={{color:"#8A9AB8",fontSize:10,...MONO}}>{h.toUpperCase()}</div>
               ))}
@@ -1746,25 +1719,25 @@ export function MasterAdmin() {
               {id:"LCF-0011",user:"Patricia Wells",email:"p.wells@email.com",plan:"Legacy Pro",paidBy:"Legacy Contact",date:"May 22, 2026",amount:"$199",status:"paid",activated:false},
               {id:"LCF-0010",user:"Robert Kim",email:"r.kim@email.com",plan:"Foundation",paidBy:"Account Owner",date:"Apr 10, 2026",amount:"$199",status:"activated",activated:true,expires:"Apr 10, 2028"},
             ].map((fee,i) => (
-              <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:i%2===0?"#FFFFFF":"#F8FAFF",borderColor:"rgba(58,91,217,0.06)",gap:16}}>
+              <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:16}}>
                 <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{fee.id}</span>
                 <div>
-                  <div style={{color:"#0D1428",fontSize:13,fontWeight:500}}>{fee.user}</div>
-                  <div style={{color:"#5A6A88",fontSize:11}}>{fee.email} · {fee.plan}</div>
+                  <div style={{color:"#E8EDF5",fontSize:13,fontWeight:500}}>{fee.user}</div>
+                  <div style={{color:"#8A9AB8",fontSize:11}}>{fee.email} · {fee.plan}</div>
                 </div>
-                <span style={{color:"#374669",fontSize:12}}>{fee.paidBy}</span>
-                <span style={{color:"#5A6A88",fontSize:12}}>{fee.date}</span>
-                <span style={{color:"#3A5BD9",fontSize:13,fontWeight:700,...MONO}}>{fee.amount}</span>
+                <span style={{color:"#8A9AB8",fontSize:12}}>{fee.paidBy}</span>
+                <span style={{color:"#8A9AB8",fontSize:12}}>{fee.date}</span>
+                <span style={{color:"#6E90C9",fontSize:13,fontWeight:700,...MONO}}>{fee.amount}</span>
                 <div>
                   {fee.activated
-                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(110,139,255,0.12)",color:"#6E8BFF",...MONO,fontSize:9}}>ACTIVATED · Expires {fee.expires}</span>
-                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#48BB78",...MONO,fontSize:9}}>PAID · AWAITING ACTIVATION</span>
+                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",...MONO,fontSize:9}}>ACTIVATED · Expires {fee.expires}</span>
+                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",...MONO,fontSize:9}}>PAID · AWAITING ACTIVATION</span>
                   }
                 </div>
                 {!fee.activated
                   ? <button onClick={() => toast.success(`Activated for ${fee.user} — 24-month window started`)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                      style={{background:"rgba(110,139,255,0.12)",color:"#6E8BFF",border:"1px solid rgba(110,139,255,0.25)"}}>
+                      style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",border:"1px solid rgba(91,167,214,0.25)"}}>
                       🛡 Activate
                     </button>
                   : <span style={{color:"#8A9AB8",fontSize:11}}>Active ✓</span>
@@ -1772,9 +1745,9 @@ export function MasterAdmin() {
               </div>
             ))}
           </div>
-          <div className="px-4 py-3 rounded-xl border" style={{background:"rgba(58,91,217,0.03)",borderColor:"rgba(58,91,217,0.12)"}}>
-            <div style={{color:"#3A5BD9",fontSize:11,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
-            <div style={{color:"#5A6A88",fontSize:12,lineHeight:1.8}}>1. User or legacy contact pays the $199 fee via Stripe. 2. Admin receives notification. 3. When a death certificate is submitted and verified, admin clicks "Activate" above. 4. The vault stays fully accessible to all verified legacy contacts for the configured period. 5. Stripe webhook updates the Supabase <code>legacy_continuation_fees</code> table automatically.</div>
+          <div className="px-4 py-3 rounded-xl border" style={{background:"rgba(91,110,225,0.03)",borderColor:"rgba(91,110,225,0.12)"}}>
+            <div style={{color:"#6E90C9",fontSize:11,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
+            <div style={{color:"#8A9AB8",fontSize:12,lineHeight:1.8}}>1. User or legacy contact pays the $199 fee via Stripe. 2. Admin receives notification. 3. When a death certificate is submitted and verified, admin clicks "Activate" above. 4. The vault stays fully accessible to all verified legacy contacts for the configured period. 5. Stripe webhook updates the Supabase <code>legacy_continuation_fees</code> table automatically.</div>
           </div>
         </div>
       )}
@@ -1784,11 +1757,11 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Bell size={16} color="#3A5BD9"/>
-              <span style={{ color:"#3A5BD9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
+              <Bell size={16} color="#FFFFFF"/>
+              <span style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
             </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428" }}>Push Notification Center</h2>
-            <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#E8EDF5" }}>Push Notification Center</h2>
+            <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
               Send in-app and device push notifications to all users or specific plan segments. Track delivery and open rates.
             </p>
           </div>
@@ -1804,11 +1777,11 @@ export function MasterAdmin() {
         <div className="p-6" style={{ maxWidth:900 }}>
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-2">
-              <Bot size={16} color="#6E8BFF"/>
-              <span style={{ color:"#6E8BFF", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
+              <Bot size={16} color="#FFFFFF"/>
+              <span style={{ color:"#6FAE8B", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
             </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428" }}>Admin AI Assistant</h2>
-            <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#E8EDF5" }}>Admin AI Assistant</h2>
+            <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
               Your Command Center expert. Ask anything about tabs, workflows, reports, ID verification, vault activation, team roles, White Glove billing, or getting started as a new hire.
             </p>
           </div>
@@ -1818,18 +1791,18 @@ export function MasterAdmin() {
 
       {/* Manually Onboarded Users — shown in Users tab */}
       {tab === "users" && manualUsers.length > 0 && (
-        <div className="rounded-2xl overflow-hidden" style={{ border:"2px solid rgba(58,91,217,0.2)" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ border:"2px solid rgba(91,110,225,0.2)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b"
-            style={{ background:"rgba(58,91,217,0.05)", borderColor:"rgba(58,91,217,0.12)" }}>
+            style={{ background:"rgba(91,110,225,0.05)", borderColor:"rgba(91,110,225,0.12)" }}>
             <div className="flex items-center gap-2">
-              <UserPlus size={15} color="#3A5BD9"/>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428" }}>Manually Onboarded Accounts</span>
+              <UserPlus size={15} color="#FFFFFF"/>
+              <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>Manually Onboarded Accounts</span>
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
+                style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
             </div>
             <button onClick={() => setShowOnboard(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:"rgba(58,91,217,0.08)", color:"#3A5BD9" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <UserPlus size={11}/> Onboard Another
             </button>
           </div>
@@ -1837,12 +1810,12 @@ export function MasterAdmin() {
             const plan = PLANS.find(p => p.id === u.plan) ?? PLANS[2];
             return (
               <div key={u.id} className="flex items-center gap-4 px-5 py-4 border-b"
-                style={{ background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(58,91,217,0.06)" }}>
-                <span style={{ color:"#3A5BD9", fontSize:10, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
+                style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>
+                <span style={{ color:"#6E90C9", fontSize:10, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{u.name}</span>
-                    {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(110,139,255,0.1)", color:"#6E8BFF", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
+                    <span style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>{u.name}</span>
+                    {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
                   </div>
                   <div style={{ color:"#8A9AB8", fontSize:11 }}>{u.email} · {u.onboardedAt}</div>
                 </div>
@@ -1853,24 +1826,24 @@ export function MasterAdmin() {
                 <div className="text-center">
                   {u.subscriptionWaived ? (
                     <div>
-                      <div style={{ color:"#48BB78", fontSize:12, fontWeight:700 }}>$0.00/mo</div>
-                      <div style={{ color:"#48BB78", fontSize:9, fontFamily:"var(--font-mono)" }}>WAIVED</div>
+                      <div style={{ color:"#D99A6B", fontSize:12, fontWeight:700 }}>$0.00/mo</div>
+                      <div style={{ color:"#D99A6B", fontSize:9, fontFamily:"var(--font-mono)" }}>WAIVED</div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ color:"#0D1428", fontSize:12, fontWeight:700 }}>${plan.price}/mo</div>
+                      <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:700 }}>${plan.price}/mo</div>
                       <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>BILLING</div>
                     </div>
                   )}
                 </div>
                 {u.subscriptionWaived && (
                   <span className="px-2 py-1 rounded-lg text-xs font-bold"
-                    style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", fontFamily:"var(--font-mono)" }}>
+                    style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
                     {WAIVE_REASONS.find(r=>r.id===u.waiveReason)?.label ?? "Waived"}
                   </span>
                 )}
                 <span className="px-2 py-0.5 rounded text-xs font-bold"
-                  style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", fontFamily:"var(--font-mono)" }}>
+                  style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
                   ACTIVE
                 </span>
               </div>
