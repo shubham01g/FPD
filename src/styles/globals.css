@@ -32,7 +32,7 @@
   mask-composite: intersect;
   -webkit-mask-composite: source-out;
   opacity: 0;
-  transition: opacity 300ms ease;
+  transition: opacity 300ms ease, background-image 300ms ease;
 }
 
 .glow-surface:hover::before,
@@ -40,13 +40,27 @@
   opacity: 1;
 }
 
+/* Ambient corner light — every card carries a faint glow at all four
+   corners at rest (no hover needed), so the "laser" reads as a built-in
+   part of the card, not something you only discover by hovering. */
 .glow-surface::before {
+  opacity: .5;
+  background-image:
+    radial-gradient(64px 64px at 0 0,     hsl(var(--glow-hue, 227) 85% 62% / 1), transparent 100%),
+    radial-gradient(64px 64px at 100% 0,  hsl(var(--glow-hue, 227) 85% 62% / 1), transparent 100%),
+    radial-gradient(64px 64px at 0 100%,  hsl(var(--glow-hue, 227) 85% 62% / 1), transparent 100%),
+    radial-gradient(64px 64px at 100% 100%, hsl(var(--glow-hue, 227) 85% 62% / 1), transparent 100%);
+  background-attachment: scroll;
+  filter: brightness(1.6);
+}
+
+.glow-surface:hover::before {
   background-image: radial-gradient(
     180px 180px at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
     hsl(var(--glow-hue, 227) 85% 62% / 1),
     transparent 100%
   );
-  filter: brightness(1.6);
+  background-attachment: fixed;
 }
 
 .glow-surface::after {
