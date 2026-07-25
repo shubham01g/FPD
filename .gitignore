@@ -4,6 +4,7 @@ dist-ssr/
 *.local
 .DS_Store
 FPD.zip
+.vercel
 
 # Internal engagement / working notes — not for the client repo
 memory/

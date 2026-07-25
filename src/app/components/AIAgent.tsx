@@ -1,8 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, X, Minimize2, Maximize2, Sparkles, RefreshCw } from "lucide-react";
+import {
+  Send, X, Minimize2, Maximize2, Sparkles, RefreshCw, Plus, Info, ArrowUpRight,
+  Compass, Users, DollarSign, Shield, Layers, Star,
+  BookOpen, LayoutGrid, Zap, Clock,
+} from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
-const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const PURPLE  = "#7E6BD8";
+const INDIGO  = "#5B6EE1";
+const CYAN    = ACCENT2;
+const GREEN   = "#6FAE8B";
 
 interface Message { id: string; role: "user"|"agent"; text: string; time: string; }
 
@@ -239,40 +253,266 @@ const SUGGESTIONS = [
   "How do Pet Records work?",
 ];
 
-/* ── Markdown renderer ──────────────────────────────────────────── */
+/* ── Page-mode side rail: popular questions (each fires the matcher) ─── */
+type IconCmp = React.ComponentType<{ size?: number; className?: string }>;
+const POPULAR: { q: string; Icon: IconCmp }[] = [
+  { q: "How do I navigate the platform?",        Icon: Compass },
+  { q: "What is a Legacy Contact?",              Icon: Users },
+  { q: "How does the $199 fee work?",            Icon: DollarSign },
+  { q: "How do I set up 2FA?",                   Icon: Shield },
+  { q: "What's the difference between plans?",   Icon: Layers },
+  { q: "How does White Glove work?",             Icon: Star },
+];
+
+/* ── Page-mode KPI ledger (mirrors the dashboard / calendar stat strip) ───
+   Each column is assigned one of the site's 5 accent colors, giving the
+   ledger the same colored-column identity used across the rest of the
+   portal instead of one flat repeated tint. */
+const STATS: { label: string; value: string; sub: string; Icon: IconCmp; color: string }[] = [
+  { label: "Topics Covered",   value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   color: "purple" },
+  { label: "Platform Sections",value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, color: "indigo" },
+  { label: "Response Time",    value: "<1s",  sub: "Instant answers",          Icon: Zap,        color: "cyan"   },
+  { label: "Availability",     value: "24/7", sub: "Always on",                Icon: Clock,      color: "green"  },
+];
+
+/* ── Markdown renderer — styled through the scoped .fpd-ai classes ───
+   The knowledge base is authored with decorative emoji + markdown. To keep the
+   assistant reading as one professional product with the rest of the portal,
+   the renderer (presentation only — KB text is never mutated) strips the
+   emoji and re-expresses each line in the design system's vocabulary:
+   mono section eyebrows, accent-marker feature rows, and clean body copy. */
+const EMOJI_RE = /[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}‍️]/gu;
+const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s{2,}/g, " ").trim();
+
+/** Strip emoji, then render **bold** spans inside a line of copy. */
+function renderInline(raw: string): React.ReactNode {
+  const parts = stripEmoji(raw).split(/\*\*([^*]+)\*\*/g);
+  return parts.map((p, j) => (j % 2 === 1 ? <strong key={j}>{p}</strong> : p));
+}
+
 function renderMarkdown(text: string) {
   return text.split("\n").map((line, i) => {
+    // Table rows
     if (line.startsWith("| ")) {
-      const cells = line.split("|").filter(c => c.trim());
       if (line.includes("---")) return null;
+      const cells = line.split("|").filter(c => c.trim());
       return (
-        <div key={i} className="flex gap-2 text-xs py-0.5 flex-wrap">
-          {cells.map((cell,j) => <span key={j} style={{ color:j===0?"#FFFFFF":"rgba(255,255,255,0.7)", minWidth:70, fontWeight:j===0?600:400 }}>{cell.trim().replace(/\*\*/g,"")}</span>)}
+        <div key={i} className="md-tr">
+          {cells.map((cell,j) => (
+            <span key={j} style={{ color: j===0 ? TEXT : MUTED, fontWeight: j===0 ? 600 : 400 }}>
+              {stripEmoji(cell.trim().replace(/\*\*/g,""))}
+            </span>
+          ))}
         </div>
       );
     }
-    if (line.startsWith("• ") || line.startsWith("* ")) {
-      const content = line.slice(2).replace(/\*\*([^*]+)\*\*/g,"$1");
-      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"rgba(255,255,255,0.8)" }}><span style={{ color:"#3A5BD9", flexShrink:0 }}>•</span><span>{content}</span></div>;
+
+    // Feature rows:  <emoji> **Term** — description
+    const feat = line.match(/^\s*[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}‍️]+\s*\*\*(.+?)\*\*\s*[—–:-]?\s*(.*)$/u);
+    if (feat) {
+      const term = stripEmoji(feat[1]);
+      const rest = stripEmoji(feat[2]);
+      return (
+        <div key={i} className="md-feat">
+          <span className="fdot" />
+          <span className="ftext">
+            <span className="fterm">{term}</span>
+            {rest ? <span className="fdesc"> — {rest}</span> : null}
+          </span>
+        </div>
+      );
     }
-    const parts = line.split(/\*\*([^*]+)\*\*/g);
-    return (
-      <p key={i} style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.7, margin:"2px 0" }}>
-        {parts.map((p,j) => j%2===1 ? <strong key={j} style={{ color:"#FFFFFF" }}>{p}</strong> : p)}
-      </p>
-    );
+
+    // Bullets
+    if (line.startsWith("• ") || line.startsWith("* ")) {
+      return <div key={i} className="md-li"><span className="b" />{<span>{renderInline(line.slice(2))}</span>}</div>;
+    }
+
+    // Section eyebrow:  a line that is only **Bold**
+    const head = line.match(/^\s*\*\*(.+?)\*\*\s*$/);
+    if (head) return <div key={i} className="md-eyebrow">{stripEmoji(head[1])}</div>;
+
+    // Blank lines collapse into spacing handled by the flex gap
+    if (line.trim() === "") return null;
+
+    // Body copy
+    return <p key={i} className="md-p">{renderInline(line)}</p>;
   }).filter(Boolean);
 }
 
 function TypingIndicator() {
   return (
-    <div className="flex gap-1 items-center px-4 py-3">
-      {[0,1,2].map(i => (
-        <div key={i} style={{ width:7, height:7, borderRadius:"50%", background:"#3A5BD9", animation:`pulse 1.4s ease-in-out ${i*0.2}s infinite`, opacity:0.6 }}/>
-      ))}
+    <div className="typing">
+      {[0,1,2].map(i => <span key={i} className="dot" style={{ animationDelay:`${i*0.18}s` }} />)}
     </div>
   );
 }
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-ai so nothing else in the app is affected. */
+const AI_CSS = `
+.fpd-ai *{box-sizing:border-box;}
+.fpd-ai.page{position:relative;height:100%;padding:22px;box-sizing:border-box;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-ai .grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+
+/* launcher pill */
+.fpd-ai-launch{position:fixed;bottom:96px;right:24px;z-index:50;display:inline-flex;align-items:center;gap:9px;padding:13px 19px;border-radius:14px;border:1px solid rgba(255,255,255,0.34);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 14px 34px -12px rgba(91,110,225,0.8),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform .18s,filter .18s;}
+.fpd-ai-launch:hover{transform:translateY(-2px);filter:brightness(1.06);}
+
+/* panel shell */
+.fpd-ai .panel{position:relative;z-index:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 24px 60px -24px rgba(0,0,0,0.85);}
+.fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;border-radius:16px;}
+
+/* header */
+.fpd-ai .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;flex-shrink:0;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-bottom:1px solid rgba(91,110,225,0.16);}
+.fpd-ai .hd-l{display:flex;align-items:center;gap:11px;min-width:0;}
+.fpd-ai .hd-logo{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.12);border:1px solid rgba(91,110,225,0.3);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);}
+.fpd-ai .hd-logo img{width:22px;height:22px;border-radius:5px;object-fit:contain;}
+.fpd-ai .hd-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:${MUTED};}
+.fpd-ai .hd-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};letter-spacing:-0.01em;line-height:1.1;margin-top:2px;}
+.fpd-ai .hd-status{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.fpd-ai .hd-status .d{width:6px;height:6px;border-radius:50%;background:${POS};box-shadow:0 0 8px ${POS};animation:fpd-ai-pulse 2.2s ease-in-out infinite;}
+.fpd-ai .hd-status span{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};letter-spacing:0.02em;}
+.fpd-ai .hd-r{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.fpd-ai .icon-btn{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.34);color:${MUTED};cursor:pointer;transition:color .18s,border-color .18s,background .18s;}
+.fpd-ai .icon-btn:hover{color:#FFFFFF;border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.08);}
+
+/* ── Page chrome (mirrors the Dashboard / Calendar layout) ── */
+.fpd-ai .wrap{max-width:1320px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
+.fpd-ai .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;flex-shrink:0;}
+.fpd-ai .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-ai .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-ai .pg-sub{color:${MUTED};font-size:13px;max-width:680px;line-height:1.6;}
+.fpd-ai .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.fpd-ai .btn-new{display:inline-flex;align-items:center;gap:7px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s,transform .18s;}
+.fpd-ai .btn-new:hover{filter:brightness(1.08);transform:translateY(-1px);}
+
+/* page cards */
+.fpd-ai .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-ai .card.pad{padding:20px;}
+.fpd-ai .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.fpd-ai .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
+.fpd-ai .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},#5B6EE1);}
+
+/* KPI ledger — each column carries one of the 5 site accent colors and
+   ignites into a glowing "laser" divider on hover. (A repeating animated
+   sweep beam used to run through this divider — removed per feedback,
+   it read as a distracting blinking light rather than a hover cue.) */
+.fpd-ai .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;flex-shrink:0;overflow:hidden;}
+.fpd-ai .kcell{--c:${INDIGO};position:relative;padding:18px 20px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 7%,transparent),transparent 55%);}
+.fpd-ai .kcell.c-purple{--c:${PURPLE};}
+.fpd-ai .kcell.c-indigo{--c:${INDIGO};}
+.fpd-ai .kcell.c-cyan{--c:${CYAN};}
+.fpd-ai .kcell.c-green{--c:${GREEN};}
+.fpd-ai .kcell::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 80%,transparent) 50%,color-mix(in srgb,var(--c) 22%,transparent));transition:width .25s ease,top .25s ease,bottom .25s ease,box-shadow .25s ease;}
+.fpd-ai .kcell:first-child::before{display:none;}
+.fpd-ai .kcell .kbar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,var(--c),transparent);transform:scaleX(0);transform-origin:left;transition:transform .22s ease;}
+.fpd-ai .kcell:hover .kbar{transform:scaleX(1);}
+.fpd-ai .kcell .khead{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.fpd-ai .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};transition:color .2s;}
+.fpd-ai .kcell:hover .klbl{color:color-mix(in srgb,var(--c) 70%,${SOFT});}
+.fpd-ai .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};transition:border-color .2s,color .2s,background .2s;}
+.fpd-ai .kcell:hover .kico{border-color:color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#0F1624);}
+.fpd-ai .kcell .kval{position:relative;z-index:1;font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;transition:color .2s;}
+.fpd-ai .kcell:hover .kval{color:var(--c);}
+.fpd-ai .kcell .ksub{position:relative;z-index:1;font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;}
+.fpd-ai .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--c);box-shadow:0 0 6px color-mix(in srgb,var(--c) 70%,transparent);}
+
+/* bento */
+.fpd-ai .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;flex:1;min-height:0;}
+.fpd-ai .col{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow-y:auto;}
+
+/* chat card (page mode) */
+.fpd-ai .chatcard{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden;}
+.fpd-ai .chat-hd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.34);flex-shrink:0;}
+.fpd-ai .chat-status{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
+.fpd-ai .chat-status .d{width:6px;height:6px;border-radius:50%;background:${POS};box-shadow:0 0 8px ${POS};animation:fpd-ai-pulse 2.2s ease-in-out infinite;}
+
+/* topic rows */
+.fpd-ai .qrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;margin-bottom:8px;}
+.fpd-ai .qrow:last-child{margin-bottom:0;}
+.fpd-ai .qrow:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
+.fpd-ai .qrow .qico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.22);color:#FFFFFF;}
+.fpd-ai .qrow .qtxt{flex:1;font-size:12.5px;color:${SOFT};font-weight:500;line-height:1.4;}
+.fpd-ai .qrow .qarr{color:${FAINT};flex-shrink:0;}
+.fpd-ai .qrow:hover .qarr{color:#6FAE8B;}
+
+/* footnote */
+.fpd-ai .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
+.fpd-ai .foot .ft{color:${MUTED};font-size:12px;line-height:1.7;}
+.fpd-ai .foot .ft b{color:${SOFT};font-weight:600;}
+
+/* message stream */
+.fpd-ai .msgs{flex:1;min-height:0;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(900px 300px at 50% -60px,rgba(91,110,225,0.05),transparent 70%);}
+.fpd-ai .row{display:flex;}
+.fpd-ai .row.user{justify-content:flex-end;}
+.fpd-ai .row.agent{justify-content:flex-start;}
+.fpd-ai .bubble{max-width:88%;padding:11px 14px;border-radius:14px;}
+.fpd-ai .bubble.agent{background:linear-gradient(180deg,#111A2C,#0C1322);border:1px solid rgba(255,255,255,0.34);border-top-left-radius:5px;box-shadow:0 6px 20px -12px rgba(0,0,0,0.7);}
+.fpd-ai .bubble.agent > div{display:flex;flex-direction:column;gap:0;}
+.fpd-ai .bubble.user{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);border-top-right-radius:5px;box-shadow:0 8px 20px -10px rgba(91,110,225,0.7);}
+.fpd-ai .bubble.user p{color:#fff;font-size:13px;line-height:1.55;}
+.fpd-ai .btime{font-family:var(--font-mono);font-size:9px;margin-top:6px;text-align:right;}
+.fpd-ai .bubble.user .btime{color:rgba(255,255,255,0.75);}
+.fpd-ai .bubble.agent .btime{color:${FAINT};}
+
+/* markdown atoms */
+.fpd-ai .md-p{color:${SOFT};font-size:13px;line-height:1.7;margin:2px 0;font-family:var(--font-body);}
+.fpd-ai .md-p strong{color:${TEXT};font-weight:600;}
+.fpd-ai .md-eyebrow{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;color:${MUTED};margin:15px 0 7px;}
+.fpd-ai .md-eyebrow:first-child{margin-top:0;}
+.fpd-ai .md-feat{display:flex;gap:10px;align-items:flex-start;margin:6px 0;font-family:var(--font-body);}
+.fpd-ai .md-feat .fdot{width:6px;height:6px;border-radius:2px;margin-top:6px;flex-shrink:0;background:linear-gradient(180deg,${ACCENT2},#5B6EE1);}
+.fpd-ai .md-feat .ftext{font-size:13px;line-height:1.6;}
+.fpd-ai .md-feat .fterm{color:${TEXT};font-weight:600;}
+.fpd-ai .md-feat .fdesc{color:${MUTED};}
+.fpd-ai .md-li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:${SOFT};line-height:1.6;margin:2px 0;font-family:var(--font-body);}
+.fpd-ai .md-li .b{width:5px;height:5px;border-radius:50%;margin-top:7px;flex-shrink:0;background:${ACCENT2};}
+.fpd-ai .md-li strong{color:${TEXT};font-weight:600;}
+.fpd-ai .md-tr{display:flex;gap:10px;flex-wrap:wrap;padding:2px 0;}
+.fpd-ai .md-tr span{font-family:var(--font-mono);font-size:11px;min-width:64px;}
+
+/* typing */
+.fpd-ai .typing{display:inline-flex;gap:5px;align-items:center;padding:13px 16px;background:linear-gradient(180deg,#111A2C,#0C1322);border:1px solid rgba(255,255,255,0.34);border-radius:14px;border-top-left-radius:5px;width:fit-content;}
+.fpd-ai .typing .dot{width:7px;height:7px;border-radius:50%;background:${ACCENT2};animation:fpd-ai-bounce 1.4s ease-in-out infinite;}
+@keyframes fpd-ai-bounce{0%,60%,100%{opacity:.35;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}
+@keyframes fpd-ai-pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* suggestion rail */
+.fpd-ai .sugg{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.34);scrollbar-width:none;}
+.fpd-ai .sugg::-webkit-scrollbar{display:none;}
+.fpd-ai .sugg .flabel{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:${FAINT};align-self:center;flex-shrink:0;text-transform:uppercase;}
+.fpd-ai .chip{white-space:nowrap;flex-shrink:0;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;color:#6FAE8B;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);transition:background .16s,border-color .16s;}
+.fpd-ai .chip:hover{background:rgba(91,110,225,0.18);border-color:rgba(91,110,225,0.45);}
+
+/* input bar */
+.fpd-ai .inbar{display:flex;gap:9px;padding:14px 16px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.34);background:linear-gradient(180deg,#0C1322,#0A0F1A);}
+.fpd-ai .inbar input{flex:1;background:#0F1624;border:1px solid rgba(255,255,255,0.34);border-radius:11px;padding:10px 14px;font-size:13px;color:${TEXT};outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-ai .inbar input::placeholder{color:${FAINT};}
+.fpd-ai .inbar input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-ai .send{width:40px;height:40px;flex-shrink:0;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;border:none;transition:filter .18s,transform .18s;}
+.fpd-ai .send.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;cursor:pointer;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7);}
+.fpd-ai .send.on:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-ai .send.off{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${FAINT};cursor:default;}
+
+@media (max-width:1080px){
+  .fpd-ai.page{height:auto;min-height:100%;overflow-y:auto;}
+  .fpd-ai .wrap{height:auto;}
+  .fpd-ai .bento{grid-template-columns:1fr;flex:none;}
+  .fpd-ai .chatcard{height:600px;}
+  .fpd-ai .col{overflow:visible;}
+  .fpd-ai .kstrip{grid-template-columns:1fr 1fr;}
+  .fpd-ai .kcell:nth-child(3)::before{display:none;}
+  .fpd-ai .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}
+}
+@media (prefers-reduced-motion:reduce){
+  .fpd-ai .typing .dot,.fpd-ai .hd-status .d,.fpd-ai .chat-status .d,.fpd-ai-launch,.fpd-ai .send.on{animation:none!important;transition:none!important;}
+  .fpd-ai .kcell::before,.fpd-ai .kcell .kbar,.fpd-ai .kcell .klbl,.fpd-ai .kcell .kico,.fpd-ai .kcell .kval{transition:none!important;}
+}
+`;
 
 /* ═══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
@@ -308,80 +548,163 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
     }, 700 + Math.random()*500);
   };
 
-  if (!open && !pageMode) return (
-    <button onClick={() => setOpen(true)}
-      className="fixed bottom-24 right-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl transition-all hover:scale-105"
-      style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 8px 32px rgba(58,91,217,0.45)" }}>
-      <Sparkles size={16}/> FPD Assistant
-    </button>
+  /* ── Shared conversation pieces (used by both page and floating modes) ── */
+  const messagesEl = (
+    <div className="msgs">
+      {messages.map(msg => (
+        <div key={msg.id} className={`row ${msg.role}`}>
+          <div className={`bubble ${msg.role}`}>
+            {msg.role==="agent"
+              ? <div>{renderMarkdown(msg.text)}</div>
+              : <p>{msg.text}</p>}
+            <div className="btime">{msg.time}</div>
+          </div>
+        </div>
+      ))}
+      {typing && <div className="row agent"><TypingIndicator/></div>}
+      <div ref={endRef}/>
+    </div>
   );
 
-  const wrapStyle: React.CSSProperties = pageMode
-    ? { display:"flex", flexDirection:"column", height:"calc(100vh - 48px)", maxWidth:800, margin:"24px auto", borderRadius:20, overflow:"hidden", border:"1px solid rgba(58,91,217,0.15)", boxShadow:"0 8px 32px rgba(58,91,217,0.12)", background:"#101728" }
-    : { position:"fixed", bottom:96, right:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:16, overflow:"hidden", boxShadow:"0 20px 60px rgba(58,91,217,0.25)", width:400, height:minimized?"auto":600, background:"#101728", border:"1px solid rgba(58,91,217,0.15)" };
+  const inputEl = (
+    <div className="inbar">
+      <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
+        onKeyDown={e=>e.key==="Enter"&&send(input)}
+        placeholder="Ask anything about Final Pass Down…"/>
+      <button onClick={()=>send(input)} disabled={!input.trim()}
+        className={`send ${input.trim() ? "on" : "off"}`}>
+        <Send size={16}/>
+      </button>
+    </div>
+  );
 
-  return (
-    <div style={wrapStyle}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)" }}>
-        <div className="flex items-center gap-2.5">
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:6, objectFit:"contain" }}/>
-          <div>
-            <div style={{ color:"#fff", fontSize:13, fontWeight:700 }}>FPD AI Assistant</div>
-            <div className="flex items-center gap-1">
-              <div style={{ width:6, height:6, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 6px #48BB78" }}/>
-              <span style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO }}>Trained on all FPD features</span>
+  /* ═══ Page mode — full estate-platform page, matched to Dashboard & Calendar ═══ */
+  if (pageMode) {
+    return (
+      <div className="fpd-ai page">
+        <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
+        <div className="grain" />
+
+        <div className="wrap">
+          {/* Header */}
+          <div className="pg-head">
+            <div style={{ minWidth:0 }}>
+              <div className="eyebrow"><Sparkles size={12}/> AI Concierge · Trained on Every Feature</div>
+              <h1 className="pg-h1">FPD AI Assistant</h1>
+              <div className="pg-sub">
+                Your always-on guide to Final Pass Down. Ask about any section, contact type, the Activate
+                Legacy Access fee, security, plans, or how to get something done — answers are instant and
+                specific to the platform.
+              </div>
+            </div>
+            <div className="head-r">
+              <button className="btn-new" onClick={reset}><Plus size={14}/> New conversation</button>
+            </div>
+          </div>
+
+          {/* KPI ledger */}
+          <div className="card kstrip glow-surface">
+            {STATS.map(s => (
+              <div key={s.label} className={`kcell c-${s.color}`}>
+                <div className="khead">
+                  <span className="klbl">{s.label}</span>
+                  <span className="kico"><s.Icon size={14}/></span>
+                </div>
+                <div className="kval">{s.value}</div>
+                <div className="ksub"><span className="dt"/>{s.sub}</div>
+                <span className="kbar"/>
+              </div>
+            ))}
+          </div>
+
+          {/* Bento — conversation + side rail */}
+          <div className="bento">
+            <div className="card glow-surface chatcard">
+              <div className="chat-hd">
+                <h3 className="sec-title"><span className="tick"/>Conversation</h3>
+                <div className="chat-status"><span className="d"/> Online</div>
+              </div>
+              {messagesEl}
+              {inputEl}
+            </div>
+
+            <div className="col">
+              <div className="card pad glow-surface">
+                <div className="sec-head">
+                  <h3 className="sec-title"><span className="tick"/>Popular Questions</h3>
+                </div>
+                {POPULAR.map(p => (
+                  <button key={p.q} className="qrow" onClick={() => send(p.q)}>
+                    <span className="qico"><p.Icon size={15}/></span>
+                    <span className="qtxt">{p.q}</span>
+                    <ArrowUpRight size={15} className="qarr"/>
+                  </button>
+                ))}
+              </div>
+
+              <div className="foot">
+                <Info size={16} color="#FFFFFF" style={{ flexShrink:0, marginTop:1 }}/>
+                <div className="ft">
+                  <b>This assistant knows the whole platform.</b> It only explains features and points you to the
+                  right section — it never touches your data. For account-specific help, contact{" "}
+                  <b>support@finalpassdown.com</b>.
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={reset} title="Reset" style={{ color:"rgba(255,255,255,0.6)", padding:4 }}><RefreshCw size={13}/></button>
-          {!pageMode && <button onClick={() => setMinimized(m=>!m)} style={{ color:"rgba(255,255,255,0.6)", padding:4 }}>{minimized ? <Maximize2 size={13}/> : <Minimize2 size={13}/>}</button>}
-          {!pageMode && <button onClick={() => setOpen(false)} style={{ color:"rgba(255,255,255,0.6)", padding:4 }}><X size={14}/></button>}
-        </div>
       </div>
+    );
+  }
 
-      {!minimized && (
-        <>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background:"#0F1A33" }}>
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex ${msg.role==="user"?"justify-end":"justify-start"}`}>
-                <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#3A5BD9,#5B7BF5)":"#101728", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(58,91,217,0.08)":undefined, border:msg.role==="agent"?"1px solid rgba(58,91,217,0.1)":undefined }}>
-                  {msg.role==="agent" ? <div className="space-y-1">{renderMarkdown(msg.text)}</div> : <p style={{ fontSize:13, lineHeight:1.5 }}>{msg.text}</p>}
-                  <div style={{ fontSize:10, opacity:0.5, marginTop:4, textAlign:"right", ...MONO }}>{msg.time}</div>
-                </div>
+  /* ═══ Floating widget mode ═══ */
+  if (!open) return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
+      <button className="fpd-ai-launch" onClick={() => setOpen(true)}>
+        <Sparkles size={16}/> FPD Assistant
+      </button>
+    </>
+  );
+
+  return (
+    <div className="fpd-ai">
+      <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
+
+      <div className="panel floating" style={minimized ? { height:"auto" } : undefined}>
+        {/* Header */}
+        <div className="hd">
+          <div className="hd-l">
+            <div className="hd-logo"><img src={fpdSquareLogo} alt="FPD"/></div>
+            <div style={{ minWidth:0 }}>
+              <div className="hd-eyebrow">Final Pass Down</div>
+              <div className="hd-title">AI Assistant</div>
+              <div className="hd-status">
+                <span className="d"/>
+                <span>Trained on every FPD feature</span>
               </div>
-            ))}
-            {typing && <div style={{ background:"#101728", borderRadius:16, border:"1px solid rgba(58,91,217,0.1)", width:"fit-content" }}><TypingIndicator/></div>}
-            <div ref={endRef}/>
+            </div>
           </div>
+          <div className="hd-r">
+            <button className="icon-btn" onClick={reset} title="Reset conversation"><RefreshCw size={13}/></button>
+            <button className="icon-btn" onClick={() => setMinimized(m=>!m)} title={minimized ? "Expand" : "Minimize"}>{minimized ? <Maximize2 size={13}/> : <Minimize2 size={13}/>}</button>
+            <button className="icon-btn" onClick={() => setOpen(false)} title="Close"><X size={14}/></button>
+          </div>
+        </div>
 
-          {/* Suggestions */}
-          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0" style={{ borderTop:"1px solid rgba(58,91,217,0.08)" }}>
-            {SUGGESTIONS.map(s => (
-              <button key={s} onClick={() => send(s)}
-                className="text-xs px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background:"rgba(58,91,217,0.07)", color:"#3A5BD9", border:"1px solid rgba(58,91,217,0.15)" }}>
-                {s}
-              </button>
-            ))}
-          </div>
-
-          {/* Input */}
-          <div className="flex gap-2 p-3 flex-shrink-0" style={{ borderTop:"1px solid rgba(58,91,217,0.08)", background:"#101728" }}>
-            <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&send(input)}
-              placeholder="Ask anything about Final Pass Down…"
-              style={{ flex:1, border:"1px solid rgba(58,91,217,0.2)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(58,91,217,0.03)" }}/>
-            <button onClick={()=>send(input)} disabled={!input.trim()}
-              className="flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#3A5BD9,#5B7BF5)":"rgba(58,91,217,0.1)", color:input.trim()?"#fff":"rgba(255,255,255,0.65)" }}>
-              <Send size={16}/>
-            </button>
-          </div>
-        </>
-      )}
+        {!minimized && (
+          <>
+            {messagesEl}
+            <div className="sugg">
+              <span className="flabel">Try</span>
+              {SUGGESTIONS.map(s => (
+                <button key={s} className="chip" onClick={() => send(s)}>{s}</button>
+              ))}
+            </div>
+            {inputEl}
+          </>
+        )}
+      </div>
     </div>
   );
 }

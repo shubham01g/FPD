@@ -15,9 +15,9 @@ const recurringHistory = [
 ];
 
 const tiers = [
-  { tier: 1, range: "0–50 accounts", rate: 20, color: "#4A90D9" },
-  { tier: 2, range: "51–100 accounts", rate: 25, color: "#3A5BD9" },
-  { tier: 3, range: "101+ accounts", rate: 30, color: "#48BB78" },
+  { tier: 1, range: "0–50 accounts", rate: 20, color: "#6FAE8B" },
+  { tier: 2, range: "51–100 accounts", rate: 25, color: "#6E90C9" },
+  { tier: 3, range: "101+ accounts", rate: 30, color: "#D99A6B" },
 ];
 
 export function PartnershipProgram() {
@@ -39,9 +39,9 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partnership badge */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(58,91,217,0.06), rgba(110,139,255,0.04))", borderColor: "var(--gold)" }}>
+      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(91,110,225,0.06), rgba(91,167,214,0.04))", borderColor: "var(--gold)" }}>
         <div className="flex items-center gap-4">
-          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(58,91,217,0.15)" }}>
+          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(91,110,225,0.15)" }}>
             <Star size={28} color="var(--gold)" />
           </div>
           <div>
@@ -75,7 +75,7 @@ export function PartnershipProgram() {
             <div style={{ color: t.color, fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{t.rate}%</div>
             <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500 }}>Tier {t.tier}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 13, marginTop: 2 }}>{t.range}</div>
-            <div className="flex items-center gap-1 mt-3" style={{ color: "#48BB78", fontSize: 12 }}>
+            <div className="flex items-center gap-1 mt-3" style={{ color: "#D99A6B", fontSize: 12 }}>
               <CheckCircle size={12} /> Recurring · Lifetime · No cap
             </div>
           </div>
@@ -85,10 +85,10 @@ export function PartnershipProgram() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Partner Organizations", value: partnerReferrals.length, sub: "Active partnerships", color: "#4A90D9" },
+          { label: "Partner Organizations", value: partnerReferrals.length, sub: "Active partnerships", color: "#6FAE8B" },
           { label: "Total Accounts", value: totalAccounts, sub: "Across all partners", color: "var(--gold)" },
-          { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#48BB78" },
-          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#6E8BFF" },
+          { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#D99A6B" },
+          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -109,7 +109,7 @@ export function PartnershipProgram() {
           <button
             onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}
             className="flex items-center gap-2 px-5 py-3 rounded-xl"
-            style={{ background: copied ? "rgba(72, 187, 120, 0.15)" : "var(--gold)", color: copied ? "#48BB78" : "#070D1A", fontWeight: 600, fontSize: 14 }}
+            style={{ background: copied ? "rgba(72, 187, 120, 0.15)" : "var(--gold)", color: copied ? "#D99A6B" : "#070D1A", fontWeight: 600, fontSize: 14 }}
           >
             {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
             {copied ? "Copied!" : "Copy Link"}
@@ -121,7 +121,7 @@ export function PartnershipProgram() {
       <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Monthly Recurring Revenue</h3>
-          <div className="flex items-center gap-1" style={{ color: "#48BB78", fontSize: 13 }}>
+          <div className="flex items-center gap-1" style={{ color: "#D99A6B", fontSize: 13 }}>
             <TrendingUp size={14} /> +24% from last month
           </div>
         </div>
@@ -135,7 +135,7 @@ export function PartnershipProgram() {
                   <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${d.earned.toFixed(0)}</span>
                     <div style={{ width:"100%", height:140, display:"flex", alignItems:"flex-end" }}>
-                      <div style={{ width:"100%", height:h, background:"linear-gradient(180deg,#3A5BD9,#5B7BF5)", borderRadius:"4px 4px 0 0", opacity: i === recurringHistory.length-1 ? 1 : 0.55 }}/>
+                      <div style={{ width:"100%", height:h, background:"linear-gradient(180deg,#5B6EE1,#5B6EE1)", borderRadius:"4px 4px 0 0", opacity: i === recurringHistory.length-1 ? 1 : 0.55 }}/>
                     </div>
                     <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                   </div>
@@ -166,7 +166,7 @@ export function PartnershipProgram() {
             style={{ gridTemplateColumns: "1fr auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg p-2" style={{ background: "rgba(58,91,217,0.1)" }}>
+              <div className="rounded-lg p-2" style={{ background: "rgba(91,110,225,0.1)" }}>
                 <Building size={14} color="var(--gold)" />
               </div>
               <div>
@@ -180,14 +180,14 @@ export function PartnershipProgram() {
               ${(partner.revenue / 12).toFixed(2)}/mo
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle size={13} color="#48BB78" />
-              <span style={{ color: "#48BB78", fontSize: 12, fontFamily: "var(--font-mono)" }}>ACTIVE</span>
+              <CheckCircle size={13} color="#FFFFFF" />
+              <span style={{ color: "#D99A6B", fontSize: 12, fontFamily: "var(--font-mono)" }}>ACTIVE</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-3 px-5 py-4 rounded-xl border" style={{ background: "rgba(58,91,217,0.05)", borderColor: "rgba(58,91,217,0.2)" }}>
+      <div className="flex gap-3 px-5 py-4 rounded-xl border" style={{ background: "rgba(91,110,225,0.05)", borderColor: "rgba(91,110,225,0.2)" }}>
         <Info size={15} color="var(--gold)" style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ color: "var(--muted-foreground)", fontSize: 13, lineHeight: 1.7 }}>
           <strong style={{ color: "var(--foreground)" }}>Lifetime Recurring Commissions:</strong> Partnership commissions are paid every billing cycle for the lifetime of each referred account — no 12-month cap. As you grow your total account count, your tier upgrades automatically and applies to all existing accounts.

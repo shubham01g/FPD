@@ -10,12 +10,20 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Heart, Plus, X, Mic, Video, FileText, Play, Pause, Square, Trash2,
   Clock, CalendarDays, Send, Lock, CheckCircle2, Pencil, Search,
+  ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Page, PageHeader, Card, CardTitle, StatGrid, TabBar, EmptyState,
-  PrimaryButton, GhostButton, Pill, MONO, type TabDef,
-} from "./ui/PageShell";
+
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 type Medium = "letter" | "voice" | "video";
 type Trigger = "on_passing" | "on_date" | "birthday" | "anniversary";
@@ -40,13 +48,13 @@ interface Message {
 }
 
 const MEDIUM_META: Record<Medium, { label: string; icon: React.ReactNode; color: string }> = {
-  letter: { label: "Letter", icon: <FileText size={14} />, color: "#3A5BD9" },
-  voice:  { label: "Voice",  icon: <Mic size={14} />,      color: "#48BB78" },
+  letter: { label: "Letter", icon: <FileText size={14} />, color: "#6E90C9" },
+  voice:  { label: "Voice",  icon: <Mic size={14} />,      color: "#D99A6B" },
   video:  { label: "Video",  icon: <Video size={14} />,    color: "#FC8181" },
 };
 
 const TRIGGER_META: Record<Trigger, { label: string; short: string; color: string }> = {
-  on_passing:  { label: "Delivered after my passing",     short: "On passing",   color: "#8AA0FF" },
+  on_passing:  { label: "Delivered after my passing",     short: "On passing",   color: "#6FAE8B" },
   on_date:     { label: "Delivered on a specific date",   short: "On date",      color: "#F6AD55" },
   birthday:    { label: "Delivered each birthday",        short: "Birthday",     color: "#FC8181" },
   anniversary: { label: "Delivered each anniversary",     short: "Anniversary",  color: "#ED8936" },
@@ -54,8 +62,8 @@ const TRIGGER_META: Record<Trigger, { label: string; short: string; color: strin
 
 const STATUS_META: Record<Status, { label: string; color: string }> = {
   draft:     { label: "Draft",     color: "#8A9AB8" },
-  sealed:    { label: "Sealed",    color: "#48BB78" },
-  delivered: { label: "Delivered", color: "#5B7BF5" },
+  sealed:    { label: "Sealed",    color: "#D99A6B" },
+  delivered: { label: "Delivered", color: "#6E90C9" },
 };
 
 /** Trigger dates are stored as ISO (what <input type="date"> gives us) but
@@ -106,6 +114,129 @@ const INITIAL: Message[] = [
     body: "In case I don't make it to forty — a message to play on the day.",
   },
 ];
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-msg so nothing else in the app is affected. */
+const MSG_CSS = `
+.fpd-msg{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-msg *{box-sizing:border-box;}
+.fpd-msg-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-msg .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-msg .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-msg .card.pad{padding:22px;}
+.fpd-msg .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-msg .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};margin-bottom:16px;}
+.fpd-msg .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+
+/* header */
+.fpd-msg .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-msg .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-msg .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
+.fpd-msg .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-msg .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-msg .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* KPI ledger */
+.fpd-msg .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
+.fpd-msg .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-msg .kcell:first-child{border-left:none;}
+.fpd-msg .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-msg .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
+.fpd-msg .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-msg .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-msg .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-msg .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:880px){.fpd-msg .kstrip{grid-template-columns:1fr 1fr;}.fpd-msg .kcell:nth-child(3){border-left:none;}.fpd-msg .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+
+/* segmented tabs + search */
+.fpd-msg .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
+.fpd-msg .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-msg .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
+.fpd-msg .seg .segcount{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:rgba(255,255,255,0.1);font-family:var(--font-mono);font-size:10px;}
+.fpd-msg .seg button.on .segcount{background:rgba(255,255,255,0.25);}
+.fpd-msg .searchbar{display:flex;align-items:center;gap:9px;padding:0 13px;height:40px;min-width:240px;border-radius:9px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${FAINT};transition:border-color .18s,box-shadow .18s;}
+.fpd-msg .searchbar:focus-within{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-msg .searchbar input{flex:1;background:transparent;border:none;outline:none;color:${TEXT};font-size:12.5px;font-family:var(--font-body);}
+.fpd-msg .searchbar input::placeholder{color:${FAINT};}
+.fpd-msg .searchbar button{background:none;border:none;color:${MUTED};display:flex;cursor:pointer;}
+
+/* recipient groups + tags */
+.fpd-msg .rgroup-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.fpd-msg .ravatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,${ACCENT},${ACCENT2});color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
+.fpd-msg .rname{font-family:var(--font-display);font-size:15px;font-weight:600;color:${TEXT};}
+.fpd-msg .rrel{color:${MUTED};font-size:12px;}
+.fpd-msg .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
+
+/* message rows */
+.fpd-msg .mrows{display:flex;flex-direction:column;gap:10px;}
+.fpd-msg .mrow{border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);transition:border-color .18s;}
+.fpd-msg .mrow-head{width:100%;display:flex;align-items:flex-start;gap:12px;padding:16px;background:none;border:none;cursor:pointer;text-align:left;font-family:var(--font-body);}
+.fpd-msg .mrow-ico{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-msg .mrow-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px;}
+.fpd-msg .mrow-title span.t{color:${TEXT};font-size:14px;font-weight:600;}
+.fpd-msg .mrow-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.fpd-msg .mrow-preview{color:${MUTED};font-size:12px;margin-top:8px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.fpd-msg .mrow-date{color:${FAINT};font-family:var(--font-mono);font-size:10.5px;flex-shrink:0;white-space:nowrap;}
+.fpd-msg .mrow-body{padding:0 16px 16px;border-top:1px solid rgba(255,255,255,0.34);margin-top:2px;padding-top:14px;}
+.fpd-msg .mrow-media{padding:12px 14px;border-radius:10px;background:#0B111D;border:1px solid rgba(255,255,255,0.34);margin-bottom:12px;}
+.fpd-msg .mrow-text{padding:12px 14px;border-radius:10px;background:#0B111D;border:1px solid rgba(255,255,255,0.34);color:${SOFT};font-size:13px;line-height:1.85;white-space:pre-wrap;}
+.fpd-msg .mrow-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.fpd-msg .mrow-when{display:flex;align-items:center;gap:6px;color:${MUTED};font-size:11.5px;}
+.fpd-msg .mrow-actions{display:flex;align-items:center;gap:8px;}
+.fpd-msg .btn-ghost-sm{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);}
+.fpd-msg .btn-del{width:36px;height:36px;border-radius:10px;background:rgba(208,107,107,0.1);color:${NEG};border:1px solid rgba(208,107,107,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.fpd-msg .sample-tag{font-family:var(--font-mono);font-size:10px;color:${MUTED};margin-top:3px;letter-spacing:0.04em;}
+
+/* empty state */
+.fpd-msg .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
+.fpd-msg .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-msg .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
+.fpd-msg .empty-desc{color:${MUTED};font-size:12.5px;max-width:360px;line-height:1.6;margin-bottom:6px;}
+
+/* delivery-works notes */
+.fpd-msg .dgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:720px){.fpd-msg .dgrid2{grid-template-columns:1fr;}}
+.fpd-msg .note{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
+.fpd-msg .note .nt-title{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:3px;}
+.fpd-msg .note .nt-desc{color:${MUTED};font-size:11.5px;line-height:1.6;}
+
+/* recorder panel */
+.fpd-msg .rec-panel{border-radius:14px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);padding:20px;text-align:center;}
+.fpd-msg .rec-video{width:100%;max-height:200px;border-radius:12px;background:#0B111D;margin-bottom:12px;object-fit:cover;}
+.fpd-msg .rec-dot{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:box-shadow .3s;}
+.fpd-msg .rec-time{font-family:var(--font-mono);font-size:24px;font-weight:700;margin-bottom:4px;}
+.fpd-msg .rec-status{color:${MUTED};font-size:11.5px;margin-bottom:14px;}
+.fpd-msg .rec-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-msg .rec-hint{font-family:var(--font-mono);font-size:10.5px;margin-top:12px;}
+.fpd-msg .rec-saved{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:#0F1624;border:1px solid rgba(95,190,145,0.3);}
+.fpd-msg .rerecord{color:${NEG};font-size:12px;font-weight:600;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+
+/* medium picker in compose modal */
+.fpd-msg .medium-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.fpd-msg .medium-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:13px 8px;border-radius:12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${MUTED};transition:all .16s;}
+.fpd-msg .word-count{font-family:var(--font-mono);font-size:10.5px;color:${FAINT};margin-top:5px;}
+
+/* modal */
+.fpd-msg .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-msg .modal{width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
+.fpd-msg .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-msg .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-msg .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-msg .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-msg .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-msg .field input,.fpd-msg .field select,.fpd-msg .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-msg .field input::placeholder,.fpd-msg .field textarea::placeholder{color:${FAINT};}
+.fpd-msg .field input:focus,.fpd-msg .field select:focus,.fpd-msg .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-msg .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:520px){.fpd-msg .field-row{grid-template-columns:1fr;}}
+.fpd-msg .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-msg .save{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-msg .save:hover{filter:brightness(1.08);}
+`;
 
 /* ── Recorder — real capture via getUserMedia + MediaRecorder.
    This must genuinely record: a user leaving a goodbye video has no way to
@@ -195,72 +326,61 @@ function RecorderPanel({ medium, onCapture }: { medium: Medium; onCapture: (dur:
   const color = MEDIUM_META[medium].color;
 
   return (
-    <div className="rounded-xl" style={{ background: "#141B2E", border: `1px solid ${color}33`, padding: 20, textAlign: "center" }}>
+    <div className="rec-panel" style={{ borderColor: `${color}33` }}>
       {/* Live camera preview — so the user can see they are actually on camera */}
       {medium === "video" && (
         <video
           ref={preview}
           muted
           playsInline
-          style={{
-            width: "100%", maxHeight: 200, borderRadius: 12, background: "#0B1120",
-            marginBottom: 12, objectFit: "cover",
-            display: state === "idle" ? "none" : "block",
-            transform: "scaleX(-1)",
-          }}
+          className="rec-video"
+          style={{ display: state === "idle" ? "none" : "block", transform: "scaleX(-1)" }}
         />
       )}
-      <div className="flex items-center justify-center rounded-full" style={{
-        width: 64, height: 64, margin: "0 auto 12px",
+      <div className="rec-dot" style={{
         background: `${color}1A`, color,
         boxShadow: state === "recording" ? `0 0 0 6px ${color}18` : "none",
-        transition: "box-shadow .3s",
         display: medium === "video" && state !== "idle" ? "none" : "flex",
       }}>
         {medium === "voice" ? <Mic size={26} /> : <Video size={26} />}
       </div>
 
-      <div style={{ fontSize: 24, ...MONO, color: state === "recording" ? color : "var(--foreground)", fontWeight: 700, marginBottom: 4 }}>
+      <div className="rec-time" style={{ color: state === "recording" ? color : TEXT }}>
         {mm}
       </div>
-      <div style={{ color: "var(--muted-foreground)", fontSize: 11.5, marginBottom: 14 }}>
+      <div className="rec-status">
         {state === "idle" ? `Ready to record your ${MEDIUM_META[medium].label.toLowerCase()} message`
           : state === "recording" ? "Recording…" : "Paused"}
       </div>
 
       <div className="flex items-center justify-center gap-2">
         {state === "idle" && (
-          <button onClick={start} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm"
-            style={{ background: color, color: "#fff", fontWeight: 600 }}>
+          <button onClick={start} className="rec-btn" style={{ background: color, color: "#fff" }}>
             <Play size={14} /> Start Recording
           </button>
         )}
         {state === "recording" && (
           <>
-            <button onClick={pause} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-              style={{ background: "rgba(246,173,85,0.15)", color: "#F6AD55", fontWeight: 600 }}>
+            <button onClick={pause} className="rec-btn" style={{ background: `${WARN}26`, color: WARN }}>
               <Pause size={14} /> Pause
             </button>
-            <button onClick={stop} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-              style={{ background: "rgba(229,62,62,0.15)", color: "#FC8181", fontWeight: 600 }}>
-              <Square size={13} /> Stop & Save
+            <button onClick={stop} className="rec-btn" style={{ background: `${NEG}26`, color: NEG }}>
+              <Square size={13} /> Stop &amp; Save
             </button>
           </>
         )}
         {state === "paused" && (
           <>
-            <button onClick={resume} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-              style={{ background: `${color}26`, color, fontWeight: 600 }}>
+            <button onClick={resume} className="rec-btn" style={{ background: `${color}26`, color }}>
               <Play size={14} /> Resume
             </button>
-            <button onClick={stop} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm"
-              style={{ background: "rgba(229,62,62,0.15)", color: "#FC8181", fontWeight: 600 }}>
-              <Square size={13} /> Stop & Save
+            <button onClick={stop} className="rec-btn" style={{ background: `${NEG}26`, color: NEG }}>
+              <Square size={13} /> Stop &amp; Save
             </button>
           </>
         )}
       </div>
-      <div style={{ color: denied ? "#FC8181" : "var(--muted-foreground)", fontSize: 10.5, marginTop: 12, ...MONO }}>
+      <div className="rec-hint" style={{ color: denied ? NEG : FAINT }}>
         {denied
           ? `${medium === "voice" ? "MICROPHONE" : "CAMERA"} BLOCKED — ENABLE IT IN YOUR BROWSER AND RETRY`
           : "RECORDED LOCALLY IN YOUR BROWSER · NOT UPLOADED IN THIS DEMO"}
@@ -315,38 +435,27 @@ function ComposeModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ background: "rgba(3,6,12,0.75)", backdropFilter: "blur(4px)", zIndex: 100 }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="rounded-2xl fpd-scroll" style={{
-        background: "var(--card)", border: "1px solid rgba(58,91,217,0.3)",
-        width: "100%", maxWidth: 620, maxHeight: "90vh", overflowY: "auto",
-        boxShadow: "0 30px 80px rgba(0,0,0,0.7)",
-      }}>
-        <div className="flex items-center justify-between" style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>
-            {editing ? "Edit Message" : "New Message"}
-          </h3>
-          <button onClick={onClose} style={{ color: "var(--muted-foreground)" }}><X size={18} /></button>
+    <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="card modal glow-surface">
+        <div className="modal-head">
+          <h3>{editing ? "Edit Message" : "New Message"}</h3>
+          <button onClick={onClose}><X size={18} /></button>
         </div>
 
-        <div className="space-y-4" style={{ padding: 22 }}>
+        <div className="modal-body">
           {/* Medium picker */}
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>FORMAT</label>
-            <div className="grid grid-cols-3 gap-2" style={{ marginTop: 6 }}>
+          <div className="field">
+            <label>Format</label>
+            <div className="medium-grid">
               {(Object.keys(MEDIUM_META) as Medium[]).map(m => {
                 const meta = MEDIUM_META[m];
                 const on = form.medium === m;
                 return (
-                  <button key={m} onClick={() => setF("medium", m)}
-                    className="flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all"
+                  <button key={m} onClick={() => setF("medium", m)} className="medium-btn"
                     style={{
-                      background: on ? `${meta.color}1F` : "#141B2E",
-                      border: `1px solid ${on ? meta.color : "var(--border)"}`,
-                      color: on ? meta.color : "var(--muted-foreground)", fontWeight: 600, fontSize: 12.5,
+                      background: on ? `${meta.color}1F` : "#0F1624",
+                      borderColor: on ? meta.color : "rgba(255,255,255,0.09)",
+                      color: on ? meta.color : MUTED,
                     }}>
                     {meta.icon} {meta.label}
                   </button>
@@ -355,26 +464,24 @@ function ComposeModal({
             </div>
           </div>
 
-          <div>
-            <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>TITLE *</label>
-            <input className="fpd-field" style={{ marginTop: 6 }} value={form.title ?? ""}
+          <div className="field">
+            <label>Title *</label>
+            <input value={form.title ?? ""}
               onChange={e => setF("title", e.target.value)}
               placeholder="e.g. To my daughter on her wedding day" />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-3">
-            <div>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>RECIPIENT *</label>
-              <select className="fpd-field" style={{ marginTop: 6 }} value={form.recipient ?? ""}
-                onChange={e => setF("recipient", e.target.value)}>
+          <div className="field-row">
+            <div className="field">
+              <label>Recipient *</label>
+              <select value={form.recipient ?? ""} onChange={e => setF("recipient", e.target.value)}>
                 <option value="">Select a person…</option>
                 {RECIPIENTS.map(r => <option key={r.name} value={r.name}>{r.name} — {r.relationship}</option>)}
               </select>
             </div>
-            <div>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>DELIVERY TRIGGER</label>
-              <select className="fpd-field" style={{ marginTop: 6 }} value={form.trigger ?? "on_passing"}
-                onChange={e => setF("trigger", e.target.value as Trigger)}>
+            <div className="field">
+              <label>Delivery Trigger</label>
+              <select value={form.trigger ?? "on_passing"} onChange={e => setF("trigger", e.target.value as Trigger)}>
                 {(Object.keys(TRIGGER_META) as Trigger[]).map(t => (
                   <option key={t} value={t}>{TRIGGER_META[t].label}</option>
                 ))}
@@ -383,57 +490,50 @@ function ComposeModal({
           </div>
 
           {form.trigger !== "on_passing" && (
-            <div>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>DELIVERY DATE *</label>
-              <input type="date" className="fpd-field" style={{ marginTop: 6 }} value={form.triggerDate ?? ""}
-                onChange={e => setF("triggerDate", e.target.value)} />
+            <div className="field">
+              <label>Delivery Date *</label>
+              <input type="date" value={form.triggerDate ?? ""} onChange={e => setF("triggerDate", e.target.value)} />
             </div>
           )}
 
           {/* Body or recorder */}
           {form.medium === "letter" ? (
-            <div>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>MESSAGE *</label>
-              <textarea className="fpd-field" style={{ marginTop: 6, minHeight: 160 }} value={form.body ?? ""}
+            <div className="field">
+              <label>Message *</label>
+              <textarea style={{ minHeight: 160 }} value={form.body ?? ""}
                 onChange={e => setF("body", e.target.value)}
                 placeholder="Write what you'd want them to read…" />
-              <div style={{ color: "var(--muted-foreground)", fontSize: 10.5, marginTop: 4, ...MONO }}>
-                {(form.body ?? "").trim().split(/\s+/).filter(Boolean).length} words
-              </div>
+              <div className="word-count">{(form.body ?? "").trim().split(/\s+/).filter(Boolean).length} words</div>
             </div>
           ) : (
-            <div>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, letterSpacing: "0.08em" }}>RECORDING *</label>
-              <div style={{ marginTop: 6 }}>
-                {form.duration ? (
-                  <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#141B2E", border: "1px solid rgba(72,187,120,0.3)" }}>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={15} color="#48BB78" />
-                      <span style={{ color: "var(--foreground)", fontSize: 13 }}>Recording captured — {form.duration}</span>
-                    </div>
-                    <button onClick={() => setF("duration", undefined as never)} style={{ color: "#FC8181", fontSize: 12, fontWeight: 600 }}>
-                      Re-record
-                    </button>
+            <div className="field">
+              <label>Recording *</label>
+              {form.duration ? (
+                <div className="rec-saved">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={15} color="#FFFFFF" />
+                    <span style={{ color: TEXT, fontSize: 13 }}>Recording captured — {form.duration}</span>
                   </div>
-                ) : (
-                  <RecorderPanel
-                    medium={form.medium as Medium}
-                    onCapture={(d, _blob, url) => { setF("duration", d); setF("mediaUrl", url); }}
-                  />
-                )}
-              </div>
-              <textarea className="fpd-field" style={{ marginTop: 10, minHeight: 70 }} value={form.body ?? ""}
+                  <button className="rerecord" onClick={() => setF("duration", undefined as never)}>Re-record</button>
+                </div>
+              ) : (
+                <RecorderPanel
+                  medium={form.medium as Medium}
+                  onCapture={(d, _blob, url) => { setF("duration", d); setF("mediaUrl", url); }}
+                />
+              )}
+              <textarea style={{ marginTop: 10, minHeight: 70 }} value={form.body ?? ""}
                 onChange={e => setF("body", e.target.value)}
                 placeholder="Optional description — what this recording covers" />
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2" style={{ padding: "16px 22px", borderTop: "1px solid var(--border)" }}>
-          <GhostButton onClick={onClose} tone="#8A9AB8">Cancel</GhostButton>
-          <PrimaryButton onClick={submit}>
+        <div className="modal-foot">
+          <button className="btn-sec" onClick={onClose}>Cancel</button>
+          <button className="save" onClick={submit}>
             <Send size={14} /> {editing ? "Save Changes" : "Save Message"}
-          </PrimaryButton>
+          </button>
         </div>
       </div>
     </div>
@@ -492,206 +592,221 @@ export function MessagesToLovedOnes() {
     toast.success("Message deleted.");
   };
 
-  const tabs: TabDef<"all" | Medium>[] = [
+  const tabs: { id: "all" | Medium; label: string; icon: React.ReactNode; count: number }[] = [
     { id: "all",    label: "All Messages", icon: <Heart size={14} />,    count: messages.length },
     { id: "letter", label: "Letters",      icon: <FileText size={14} />, count: messages.filter(m => m.medium === "letter").length },
     { id: "voice",  label: "Voice",        icon: <Mic size={14} />,      count: messages.filter(m => m.medium === "voice").length },
     { id: "video",  label: "Video",        icon: <Video size={14} />,    count: messages.filter(m => m.medium === "video").length },
   ];
 
+  const kpis = [
+    { label: "Total Messages", value: String(messages.length), sub: `For ${new Set(messages.map(m => m.recipient)).size} people`, icon: <Heart size={14} />, dot: ACCENT2 },
+    { label: "Sealed", value: String(messages.filter(m => m.status === "sealed").length), sub: "Locked & ready", icon: <Lock size={14} />, dot: POS },
+    { label: "Drafts", value: String(messages.filter(m => m.status === "draft").length), sub: "Not yet sealed", icon: <Pencil size={14} />, dot: WARN },
+    { label: "Recordings", value: String(messages.filter(m => m.medium !== "letter").length), sub: "Voice & video", icon: <Video size={14} />, dot: NEG },
+  ];
+
   return (
-    <Page>
-      <PageHeader
-        eyebrow="HELD IN ESCROW · RELEASED ON TRIGGER"
-        icon={<Heart size={13} />}
-        title="Messages to Loved Ones"
-        description="Letters, voice notes and videos addressed to specific people, delivered only when their trigger fires — after your passing, on a chosen date, or every birthday. Sealing a message locks it from edits so it reads exactly as you left it."
-        actions={
-          <PrimaryButton onClick={() => { setEditing(null); setComposing(true); }}>
+    <div className="fpd-msg">
+      <style dangerouslySetInnerHTML={{ __html: MSG_CSS }} />
+      <div className="fpd-msg-grain" />
+
+      <div className="wrap">
+        {/* ── Header ── */}
+        <div className="pg-head">
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow"><Heart size={12} /> Held In Escrow · Released On Trigger</div>
+            <h1 className="pg-h1">Messages to Loved Ones</h1>
+            <div className="pg-sub">Letters, voice notes and videos addressed to specific people, delivered only when their trigger fires — after your passing, on a chosen date, or every birthday. Sealing a message locks it from edits so it reads exactly as you left it.</div>
+          </div>
+          <button className="btn-primary" onClick={() => { setEditing(null); setComposing(true); }}>
             <Plus size={15} /> New Message
-          </PrimaryButton>
-        }
-      />
-
-      <StatGrid
-        stats={[
-          { label: "Total Messages", value: messages.length, sub: `For ${new Set(messages.map(m => m.recipient)).size} people`, color: "#3A5BD9" },
-          { label: "Sealed", value: messages.filter(m => m.status === "sealed").length, sub: "Locked & ready", color: "#48BB78" },
-          { label: "Drafts", value: messages.filter(m => m.status === "draft").length, sub: "Not yet sealed", color: "#F6AD55" },
-          { label: "Recordings", value: messages.filter(m => m.medium !== "letter").length, sub: "Voice & video", color: "#FC8181" },
-        ]}
-      />
-
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <TabBar tabs={tabs} active={tab} onChange={setTab} />
-        <div className="flex items-center gap-2 px-3 rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)", height: 40, minWidth: 240 }}>
-          <Search size={14} style={{ color: "var(--muted-foreground)", flexShrink: 0 }} />
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search messages…"
-            style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 13, width: "100%" }} />
-          {query && <button onClick={() => setQuery("")} style={{ color: "var(--muted-foreground)", display: "flex" }}><X size={13} /></button>}
+          </button>
         </div>
-      </div>
 
-      {byRecipient.length === 0 ? (
-        <EmptyState
-          icon={<Heart size={22} />}
-          title={query ? "No messages match your search" : "No messages yet"}
-          description={query
-            ? `Nothing found for "${query}". Try a different name or phrase.`
-            : "Start with one letter to one person. You can seal it later — nothing is delivered until its trigger fires."}
-          action={!query && <PrimaryButton onClick={() => setComposing(true)}><Plus size={15} /> Write your first message</PrimaryButton>}
-        />
-      ) : (
-        <div className="space-y-6">
-          {byRecipient.map(([recipient, msgs]) => (
-            <Card key={recipient} padding={20}>
-              <CardTitle right={<Pill color="#5B7BF5">{msgs.length} message{msgs.length === 1 ? "" : "s"}</Pill>}>
-                <span className="flex items-center gap-2.5">
-                  <span className="flex items-center justify-center rounded-full" style={{
-                    width: 30, height: 30, background: "linear-gradient(135deg,#3A5BD9,#5B7BF5)",
-                    color: "#fff", fontSize: 11, fontWeight: 700,
-                  }}>
-                    {recipient.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                  </span>
-                  {recipient}
-                  <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontWeight: 400 }}>
-                    {msgs[0].relationship}
-                  </span>
-                </span>
-              </CardTitle>
-
-              <div className="space-y-3">
-                {msgs.map(m => {
-                  const mm = MEDIUM_META[m.medium];
-                  const tm = TRIGGER_META[m.trigger];
-                  const sm = STATUS_META[m.status];
-                  const open = expanded === m.id;
-                  return (
-                    <div key={m.id} className="rounded-xl" style={{ background: "#141B2E", border: `1px solid ${open ? mm.color + "55" : "var(--border)"}` }}>
-                      <button onClick={() => setExpanded(open ? null : m.id)} className="w-full flex items-start gap-3 text-left" style={{ padding: 16 }}>
-                        <div className="flex items-center justify-center rounded-lg flex-shrink-0" style={{ width: 36, height: 36, background: `${mm.color}1A`, color: mm.color }}>
-                          {mm.icon}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 5 }}>
-                            <span style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 600 }}>{m.title}</span>
-                            {m.status === "sealed" && <Lock size={11} color="#48BB78" />}
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <Pill color={mm.color}>{mm.label}{m.duration ? ` · ${m.duration}` : ""}</Pill>
-                            <Pill color={tm.color}>{tm.short}{m.triggerDate ? ` · ${fmtTriggerDate(m.triggerDate)}` : ""}</Pill>
-                            <Pill color={sm.color}>{sm.label}</Pill>
-                          </div>
-                          {!open && (
-                            <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 7, lineHeight: 1.6, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                              {m.body}
-                            </div>
-                          )}
-                        </div>
-                        <span style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, flexShrink: 0 }}>{m.created}</span>
-                      </button>
-
-                      {open && (
-                        <div style={{ padding: "0 16px 16px" }}>
-                          {m.medium !== "letter" && (
-                            <div className="px-4 py-3 rounded-xl" style={{ background: "var(--card)", border: `1px solid ${mm.color}33`, marginBottom: 12 }}>
-                              {m.mediaUrl ? (
-                                /* A real recording from this session — play the actual media */
-                                m.medium === "video" ? (
-                                  <video src={m.mediaUrl} controls playsInline
-                                    style={{ width: "100%", maxHeight: 300, borderRadius: 10, background: "#0B1120" }} />
-                                ) : (
-                                  <audio src={m.mediaUrl} controls style={{ width: "100%" }} />
-                                )
-                              ) : (
-                                /* Seeded demo entry — no media file behind it, so say so */
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                                    style={{ width: 38, height: 38, background: `${mm.color}26`, color: mm.color }}>
-                                    <Play size={15} />
-                                  </div>
-                                  <div style={{ flex: 1 }}>
-                                    <div style={{ color: "var(--foreground)", fontSize: 12.5 }}>
-                                      {mm.label} message · {m.duration}
-                                    </div>
-                                    <div style={{ color: "var(--muted-foreground)", fontSize: 10.5, ...MONO, marginTop: 3 }}>
-                                      SAMPLE ENTRY — NO MEDIA FILE ATTACHED
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="px-4 py-3 rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)", fontSize: 13.5, lineHeight: 1.85, whiteSpace: "pre-wrap" }}>
-                            {m.body}
-                          </div>
-
-                          <div className="flex items-center justify-between gap-2 flex-wrap" style={{ marginTop: 12 }}>
-                            <div className="flex items-center gap-1.5" style={{ color: "var(--muted-foreground)", fontSize: 11.5 }}>
-                              <Clock size={12} />
-                              {m.status === "sealed"
-                                ? <>Sealed on {m.sealedOn} · {tm.label.toLowerCase()}</>
-                                : <>Draft — not sealed, will not be delivered</>}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {m.status === "draft" ? (
-                                <>
-                                  <GhostButton onClick={() => { setEditing(m); setComposing(true); }}>
-                                    <Pencil size={13} /> Edit
-                                  </GhostButton>
-                                  <GhostButton onClick={() => seal(m.id)} tone="#48BB78">
-                                    <Lock size={13} /> Seal
-                                  </GhostButton>
-                                </>
-                              ) : (
-                                <GhostButton onClick={() => unseal(m.id)} tone="#F6AD55">
-                                  <Pencil size={13} /> Unseal to Edit
-                                </GhostButton>
-                              )}
-                              <button onClick={() => remove(m.id)} title="Delete"
-                                className="flex items-center justify-center rounded-xl"
-                                style={{ width: 38, height: 38, background: "rgba(229,62,62,0.1)", color: "#FC8181", border: "1px solid rgba(229,62,62,0.2)" }}>
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+        {/* ── KPI ledger ── */}
+        <div className="card kstrip glow-surface">
+          {kpis.map(k => (
+            <div key={k.label} className="kcell">
+              <div className="khead">
+                <span className="klbl">{k.label}</span>
+                <span className="kico">{k.icon}</span>
               </div>
-            </Card>
+              <div className="kval">{k.value}</div>
+              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+            </div>
           ))}
         </div>
-      )}
 
-      {/* How delivery works */}
-      <Card padding={20}>
-        <CardTitle>How Delivery Works</CardTitle>
-        <div className="grid md:grid-cols-2 gap-3">
-          {(Object.keys(TRIGGER_META) as Trigger[]).map(t => {
-            const meta = TRIGGER_META[t];
-            const n = messages.filter(m => m.trigger === t).length;
-            return (
-              <div key={t} className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: "#141B2E", border: `1px solid ${meta.color}22` }}>
-                <CalendarDays size={16} color={meta.color} style={{ flexShrink: 0, marginTop: 2 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{meta.label}</div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 11.5, lineHeight: 1.6 }}>
-                    {t === "on_passing" && "Released to the named recipient once your passing is verified by FPD and the Legacy Continuation Fee is settled."}
-                    {t === "on_date" && "Sent by email on the exact date you choose, whether or not anything has happened to you."}
-                    {t === "birthday" && "Sent every year on the recipient's birthday, starting from the year you pick."}
-                    {t === "anniversary" && "Sent every year on the anniversary date you set."}
-                  </div>
-                </div>
-                <Pill color={meta.color}>{n}</Pill>
-              </div>
-            );
-          })}
+        {/* ── Tabs + search ── */}
+        <div className="card pad glow-surface" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+          <div className="seg">
+            {tabs.map(t => (
+              <button key={t.id} className={tab === t.id ? "on" : ""} onClick={() => setTab(t.id)}>
+                {t.icon} {t.label} <span className="segcount">{t.count}</span>
+              </button>
+            ))}
+          </div>
+          <div className="searchbar">
+            <Search size={14} />
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search messages…" />
+            {query && <button onClick={() => setQuery("")}><X size={13} /></button>}
+          </div>
         </div>
-      </Card>
+
+        {/* ── Messages grouped by recipient ── */}
+        {byRecipient.length === 0 ? (
+          <div className="card pad glow-surface empty">
+            <div className="empty-ico"><Heart size={22} /></div>
+            <div className="empty-title">{query ? "No messages match your search" : "No messages yet"}</div>
+            <div className="empty-desc">
+              {query
+                ? `Nothing found for "${query}". Try a different name or phrase.`
+                : "Start with one letter to one person. You can seal it later — nothing is delivered until its trigger fires."}
+            </div>
+            {!query && (
+              <button className="btn-primary" onClick={() => setComposing(true)}>
+                <Plus size={15} /> Write your first message
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="dlist" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {byRecipient.map(([recipient, msgs]) => (
+              <div key={recipient} className="card pad glow-surface">
+                <div className="rgroup-head">
+                  <span className="ravatar">{recipient.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                  <span className="rname">{recipient}</span>
+                  <span className="rrel">{msgs[0].relationship}</span>
+                  <span className="tag" style={{ background: `${ACCENT2}1A`, color: "#6FAE8B", marginLeft: "auto" }}>
+                    {msgs.length} message{msgs.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <div className="mrows">
+                  {msgs.map(m => {
+                    const mm = MEDIUM_META[m.medium];
+                    const tm = TRIGGER_META[m.trigger];
+                    const sm = STATUS_META[m.status];
+                    const open = expanded === m.id;
+                    return (
+                      <div key={m.id} className="mrow" style={{ borderColor: open ? `${mm.color}55` : "rgba(255,255,255,0.065)" }}>
+                        <button className="mrow-head" onClick={() => setExpanded(open ? null : m.id)}>
+                          <div className="mrow-ico" style={{ background: `${mm.color}1A`, color: mm.color }}>
+                            {mm.icon}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div className="mrow-title">
+                              <span className="t">{m.title}</span>
+                              {m.status === "sealed" && <Lock size={11} color="#FFFFFF" />}
+                            </div>
+                            <div className="mrow-tags">
+                              <span className="tag" style={{ background: `${mm.color}1A`, color: mm.color }}>{mm.label}{m.duration ? ` · ${m.duration}` : ""}</span>
+                              <span className="tag" style={{ background: `${tm.color}1A`, color: tm.color }}>{tm.short}{m.triggerDate ? ` · ${fmtTriggerDate(m.triggerDate)}` : ""}</span>
+                              <span className="tag" style={{ background: `${sm.color}1A`, color: sm.color }}>{sm.label}</span>
+                            </div>
+                            {!open && <div className="mrow-preview">{m.body}</div>}
+                          </div>
+                          <span className="mrow-date">{m.created}</span>
+                          {open ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+                        </button>
+
+                        {open && (
+                          <div className="mrow-body">
+                            {m.medium !== "letter" && (
+                              <div className="mrow-media" style={{ borderColor: `${mm.color}33` }}>
+                                {m.mediaUrl ? (
+                                  /* A real recording from this session — play the actual media */
+                                  m.medium === "video" ? (
+                                    <video src={m.mediaUrl} controls playsInline
+                                      style={{ width: "100%", maxHeight: 300, borderRadius: 10, background: "#0B1120" }} />
+                                  ) : (
+                                    <audio src={m.mediaUrl} controls style={{ width: "100%" }} />
+                                  )
+                                ) : (
+                                  /* Seeded demo entry — no media file behind it, so say so */
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center rounded-full flex-shrink-0"
+                                      style={{ width: 38, height: 38, background: `${mm.color}26`, color: mm.color }}>
+                                      <Play size={15} />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ color: TEXT, fontSize: 12.5 }}>
+                                        {mm.label} message · {m.duration}
+                                      </div>
+                                      <div className="sample-tag">SAMPLE ENTRY — NO MEDIA FILE ATTACHED</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="mrow-text">{m.body}</div>
+
+                            <div className="mrow-foot">
+                              <div className="mrow-when">
+                                <Clock size={12} />
+                                {m.status === "sealed"
+                                  ? <>Sealed on {m.sealedOn} · {tm.label.toLowerCase()}</>
+                                  : <>Draft — not sealed, will not be delivered</>}
+                              </div>
+                              <div className="mrow-actions">
+                                {m.status === "draft" ? (
+                                  <>
+                                    <button className="btn-ghost-sm" style={{ color: MUTED }} onClick={() => { setEditing(m); setComposing(true); }}>
+                                      <Pencil size={13} /> Edit
+                                    </button>
+                                    <button className="btn-ghost-sm" style={{ color: "#D99A6B", background: "rgba(95,190,145,0.1)", borderColor: "rgba(95,190,145,0.2)" }} onClick={() => seal(m.id)}>
+                                      <Lock size={13} /> Seal
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button className="btn-ghost-sm" style={{ color: WARN, background: "rgba(217,165,94,0.1)", borderColor: "rgba(217,165,94,0.2)" }} onClick={() => unseal(m.id)}>
+                                    <Pencil size={13} /> Unseal to Edit
+                                  </button>
+                                )}
+                                <button className="btn-del" title="Delete" onClick={() => remove(m.id)}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── How delivery works ── */}
+        <div className="card pad glow-surface">
+          <div className="sec-title"><span className="tick" />How Delivery Works</div>
+          <div className="dgrid2">
+            {(Object.keys(TRIGGER_META) as Trigger[]).map(t => {
+              const meta = TRIGGER_META[t];
+              const n = messages.filter(m => m.trigger === t).length;
+              return (
+                <div key={t} className="note" style={{ borderColor: `${meta.color}22` }}>
+                  <CalendarDays size={16} color={meta.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="nt-title">{meta.label}</div>
+                    <div className="nt-desc">
+                      {t === "on_passing" && "Released to the named recipient once your passing is verified by FPD and the Legacy Continuation Fee is settled."}
+                      {t === "on_date" && "Sent by email on the exact date you choose, whether or not anything has happened to you."}
+                      {t === "birthday" && "Sent every year on the recipient's birthday, starting from the year you pick."}
+                      {t === "anniversary" && "Sent every year on the anniversary date you set."}
+                    </div>
+                  </div>
+                  <span className="tag" style={{ background: `${meta.color}1A`, color: meta.color }}>{n}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {composing && (
         <ComposeModal
@@ -700,6 +815,6 @@ export function MessagesToLovedOnes() {
           onSave={save}
         />
       )}
-    </Page>
+    </div>
   );
 }

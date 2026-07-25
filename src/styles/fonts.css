@@ -12,5 +12,5 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; }
 /* scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: #101728; }
-::-webkit-scrollbar-thumb { background: rgba(58,91,217,0.25); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(58,91,217,0.45); }
+::-webkit-scrollbar-thumb { background: rgba(91,110,225,0.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(91,110,225,0.45); }

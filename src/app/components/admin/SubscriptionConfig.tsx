@@ -13,10 +13,10 @@ interface PlanConfig {
 }
 
 const initialPlans: PlanConfig[] = [
-  { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#48BB78" },
-  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#4A90D9" },
-  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#3A5BD9" },
-  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#6E8BFF" },
+  { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#D99A6B" },
+  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#6FAE8B" },
+  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#6E90C9" },
+  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#6FAE8B" },
   { id: "legacy_vault",   name: "Legacy Vault",   price: 129.99, annualDiscount: 20, storage: 1024, overageRate: 0.40, maxContacts: 999, color: "#ED8936" },
 ];
 
@@ -74,8 +74,8 @@ export function SubscriptionConfig() {
             onClick={handleSave}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all"
             style={{
-              background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #3A5BD9, #3A5BD9)",
-              color: saved ? "#48BB78" : "#070D1A",
+              background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #5B6EE1, #5B6EE1)",
+              color: saved ? "#D99A6B" : "#070D1A",
               border: saved ? "1px solid rgba(72,187,120,0.3)" : "none",
               fontWeight: 600, fontSize: 14,
             }}
@@ -88,7 +88,7 @@ export function SubscriptionConfig() {
 
       {/* Live preview notice */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-xl border" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
-        <RefreshCw size={14} color="#48BB78" />
+        <RefreshCw size={14} color="#FFFFFF" />
         <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
           Pricing changes propagate to the public pricing page in real time via API. No deployment required.
         </span>
@@ -102,7 +102,7 @@ export function SubscriptionConfig() {
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-lg w-3 h-3 rounded-full" style={{ background: plan.color }} />
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>{plan.name}</h3>
-              <div className="ml-auto text-sm px-3 py-1 rounded-lg" style={{ background: "#EAF0FC", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
+              <div className="ml-auto text-sm px-3 py-1 rounded-lg" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
                 ID: {plan.id}
               </div>
             </div>
@@ -110,7 +110,7 @@ export function SubscriptionConfig() {
               {/* Monthly price */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MONTHLY PRICE ($)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="var(--gold)" />
                   <input
                     type="number"
@@ -128,7 +128,7 @@ export function SubscriptionConfig() {
               {/* Annual discount */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>ANNUAL DISCOUNT (%)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
                     step="1"
@@ -145,7 +145,7 @@ export function SubscriptionConfig() {
               {/* Storage */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>STORAGE ALLOWANCE (GB)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <HardDrive size={14} color="var(--gold)" />
                   <input
                     type="number"
@@ -162,7 +162,7 @@ export function SubscriptionConfig() {
               {/* Overage rate */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>OVERAGE RATE ($/GB)</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="#FC8181" />
                   <input
                     type="number"
@@ -180,7 +180,7 @@ export function SubscriptionConfig() {
               {/* Max contacts */}
               <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MAX LEGACY CONTACTS</label>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
                     step="1"
@@ -190,7 +190,7 @@ export function SubscriptionConfig() {
                     style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                 </div>
-                {plan.maxContacts === 999 && <div style={{ color: "#48BB78", fontSize: 11, marginTop: 4 }}>Unlimited contacts</div>}
+                {plan.maxContacts === 999 && <div style={{ color: "#D99A6B", fontSize: 11, marginTop: 4 }}>Unlimited contacts</div>}
               </div>
 
               {/* Preview */}
@@ -220,7 +220,7 @@ export function SubscriptionConfig() {
           ].map((t) => (
             <div key={t.key}>
               <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>{t.label.toUpperCase()}</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl border mb-2" style={{ background: "#EAF0FC", borderColor: `${t.color}40` }}>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl border mb-2" style={{ background: "rgba(255,255,255,0.08)", borderColor: `${t.color}40` }}>
                 <Bell size={14} color={t.color} />
                 <input
                   type="number"
@@ -243,7 +243,7 @@ export function SubscriptionConfig() {
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-8 py-3 rounded-xl"
-          style={{ background: "linear-gradient(135deg, #3A5BD9, #3A5BD9)", color: "#070D1A", fontWeight: 700, fontSize: 15 }}
+          style={{ background: "linear-gradient(135deg, #5B6EE1, #5B6EE1)", color: "#070D1A", fontWeight: 700, fontSize: 15 }}
         >
           <Save size={16} /> Save All Configuration
         </button>

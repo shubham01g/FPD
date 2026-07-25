@@ -9,8 +9,16 @@ import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { CryptoPayment } from "./CryptoPayment";
 
-const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(58,91,217,0.1)", boxShadow:"0 2px 12px rgba(58,91,217,0.06)", borderRadius:16 };
-const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
+const TEXT    = "#EFF2F9";
+const SOFT    = "#BCC5DA";
+const MUTED   = "#A3ADC9";
+const FAINT   = "#929CBC";
+const ACCENT  = "#5B6EE1";
+const ACCENT2 = "#5BA7D6";
+const POS     = "#5FBE91";
+const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
 interface ContinuationStatus {
   paid: boolean;
@@ -32,17 +40,153 @@ const initStatus: ContinuationStatus = {
 
 // Everything the legacy contact receives when fully unlocked
 const FULL_COVERAGE = [
-  { icon:<FileText size={14}/>,    color:"#3A5BD9", label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
-  { icon:<Heart size={14}/>,       color:"#FC8181", label:"Final Wishes & Wills", desc:"Complete estate instructions and bequests" },
-  { icon:<Stethoscope size={14}/>, color:"#48BB78", label:"Medical Records", desc:"Allergies, medications, healthcare directives" },
-  { icon:<Wallet size={14}/>,      color:"#F6AD55", label:"Financial Records", desc:"Insurance, investments, real estate, retirement" },
-  { icon:<Car size={14}/>,         color:"#6E8BFF", label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
-  { icon:<Camera size={14}/>,      color:"#5B7BF5", label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
-  { icon:<BookOpen size={14}/>,    color:"#ED8936", label:"Digital Diary", desc:"All audio, video, and written diary entries" },
-  { icon:<Key size={14}/>,         color:"#38B2AC", label:"Password Manager", desc:"All saved credentials and account information" },
-  { icon:<Users size={14}/>,       color:"#68D391", label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
-  { icon:<PawPrint size={14}/>,    color:"#F6AD55", label:"Pet Records & Instructions", desc:"Veterinary records and pet care instructions" },
+  { icon:<FileText size={14}/>,    color:"#6E90C9",  label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
+  { icon:<Heart size={14}/>,       color:NEG,     label:"Final Wishes & Wills", desc:"Complete estate instructions and bequests" },
+  { icon:<Stethoscope size={14}/>, color:"#D99A6B",     label:"Medical Records", desc:"Allergies, medications, healthcare directives" },
+  { icon:<Wallet size={14}/>,      color:WARN,    label:"Financial Records", desc:"Insurance, investments, real estate, retirement" },
+  { icon:<Car size={14}/>,         color:"#6FAE8B", label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
+  { icon:<Camera size={14}/>,      color:"#6FAE8B", label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
+  { icon:<BookOpen size={14}/>,    color:WARN,    label:"Digital Diary", desc:"All audio, video, and written diary entries" },
+  { icon:<Key size={14}/>,         color:"#D68FA8", label:"Password Manager", desc:"All saved credentials and account information" },
+  { icon:<Users size={14}/>,       color:"#D99A6B",     label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
+  { icon:<PawPrint size={14}/>,    color:WARN,    label:"Pet Records & Instructions", desc:"Veterinary records and pet care instructions" },
 ];
+
+/* Whisper-fine matte grain (data-URI so nothing loads over the network). */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/* All styling scoped under .fpd-lcf so nothing else in the app is affected. */
+const LCF_CSS = `
+.fpd-lcf{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-lcf *{box-sizing:border-box;}
+.fpd-lcf-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-lcf .wrap{max-width:1000px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+.fpd-lcf .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
+.fpd-lcf .card.pad{padding:22px;}
+.fpd-lcf .sec-title{font-size:16px;font-weight:600;color:${TEXT};font-family:var(--font-display);letter-spacing:-0.01em;display:flex;align-items:center;gap:9px;}
+.fpd-lcf .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+
+/* header */
+.fpd-lcf .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-lcf .pg-sub{color:${MUTED};font-size:13.5px;max-width:700px;line-height:1.75;}
+.fpd-lcf .pg-sub strong{color:${TEXT};}
+.fpd-lcf .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-lcf .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-lcf .btn-primary:disabled{opacity:.7;cursor:default;transform:none;}
+.fpd-lcf .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-lcf .btn-ghost:hover{background:rgba(91,110,225,0.18);}
+.fpd-lcf .btn-ghost:disabled{opacity:.6;cursor:default;}
+.fpd-lcf .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-lcf .btn-crypto{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#EFA13F,#D9781A);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(217,120,26,0.6),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-lcf .btn-crypto:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-lcf .btn-reset{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:rgba(208,107,107,0.10);border:1px solid rgba(208,107,107,0.28);color:${NEG};font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+
+/* demo banner */
+.fpd-lcf .demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px dashed rgba(91,110,225,0.4);}
+.fpd-lcf .demo-tag{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:#6FAE8B;margin-bottom:4px;}
+.fpd-lcf .demo-text{color:${MUTED};font-size:12.5px;line-height:1.6;}
+.fpd-lcf .demo-acts{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* two-condition gate */
+.fpd-lcf .gate{background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.16);border-radius:15px;padding:20px 22px;}
+.fpd-lcf .gate-head{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.1em;color:#6FAE8B;margin-bottom:14px;}
+.fpd-lcf .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fpd-lcf .gcard{display:flex;align-items:flex-start;gap:12px;padding:15px 16px;border-radius:13px;border:1px solid;}
+.fpd-lcf .gcard .gnum{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;}
+.fpd-lcf .gcard .gtitle{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:4px;}
+.fpd-lcf .gcard .gdesc{color:${MUTED};font-size:12px;line-height:1.65;}
+.fpd-lcf .gate-status{margin-top:14px;display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:11px;border:1px solid;}
+@media (max-width:760px){.fpd-lcf .ggrid{grid-template-columns:1fr;}}
+
+/* coverage disclosure */
+.fpd-lcf .cov-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;}
+.fpd-lcf .cov-desc{color:${MUTED};font-size:13px;margin-top:8px;line-height:1.7;}
+.fpd-lcf .cov-desc strong{color:${TEXT};}
+.fpd-lcf .cov-desc em{color:#6FAE8B;font-style:normal;font-weight:600;}
+.fpd-lcf .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.fpd-lcf .citem{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
+.fpd-lcf .citem .cico{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-lcf .citem .clabel{color:${TEXT};font-size:12px;font-weight:600;}
+.fpd-lcf .citem .cdesc{color:${MUTED};font-size:11px;line-height:1.5;margin-top:2px;}
+@media (max-width:760px){.fpd-lcf .cgrid{grid-template-columns:1fr;}}
+
+/* paid status banner */
+.fpd-lcf .paid-banner{display:flex;align-items:flex-start;gap:16px;padding:22px;border-radius:15px;background:rgba(95,190,145,0.05);border:1px solid rgba(95,190,145,0.3);}
+.fpd-lcf .paid-icon{width:48px;height:48px;border-radius:14px;background:rgba(95,190,145,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-lcf .paid-title{font-family:var(--font-display);font-size:17px;color:${TEXT};margin-bottom:6px;}
+.fpd-lcf .paid-desc{color:${MUTED};font-size:12.5px;line-height:1.7;margin-bottom:14px;}
+.fpd-lcf .pstat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.fpd-lcf .pstat .pcell{padding:11px 13px;border-radius:11px;background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.16);}
+.fpd-lcf .pstat .plbl{font-family:var(--font-mono);font-size:9.5px;color:#D99A6B;margin-bottom:3px;}
+.fpd-lcf .pstat .pval{color:${TEXT};font-size:12px;font-weight:500;}
+@media (max-width:800px){.fpd-lcf .pstat{grid-template-columns:1fr 1fr;}}
+
+/* two-column bento */
+.fpd-lcf .bento{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+@media (max-width:900px){.fpd-lcf .bento{grid-template-columns:1fr;}}
+
+/* price panel */
+.fpd-lcf .price-hero{text-align:center;margin-bottom:20px;}
+.fpd-lcf .price-val{font-family:var(--font-display);font-size:48px;color:#6FAE8B;font-weight:800;line-height:1;}
+.fpd-lcf .price-sub{color:${MUTED};font-size:13px;margin-top:6px;}
+.fpd-lcf .price-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 15px;border-radius:99px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12px;}
+.fpd-lcf .payer-label{color:${MUTED};font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.08em;margin-bottom:8px;}
+.fpd-lcf .payer{width:100%;display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border-radius:12px;background:#0F1624;border:2px solid transparent;cursor:pointer;text-align:left;transition:border-color .16s,background .16s;margin-bottom:8px;}
+.fpd-lcf .payer.on{background:rgba(91,110,225,0.08);border-color:${ACCENT};}
+.fpd-lcf .payer .prad{width:16px;height:16px;border-radius:50%;border:2px solid ${SOFT};flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;}
+.fpd-lcf .payer.on .prad{border-color:${ACCENT};}
+.fpd-lcf .payer .pdot{width:8px;height:8px;border-radius:50%;background:${ACCENT};}
+.fpd-lcf .payer .plabel{color:${TEXT};font-size:13px;font-weight:500;}
+.fpd-lcf .payer .psub{color:${MUTED};font-size:11px;margin-top:2px;}
+.fpd-lcf .pay-acts{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.fpd-lcf .pay-acts .btn-primary,.fpd-lcf .pay-acts .btn-crypto{width:100%;justify-content:center;padding:14px;font-size:14px;border-radius:14px;}
+.fpd-lcf .secure-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
+.fpd-lcf .secure-item{display:flex;align-items:center;gap:6px;color:${MUTED};font-size:10.5px;}
+
+/* paid state card */
+.fpd-lcf .paid-panel{text-align:center;padding:8px;}
+.fpd-lcf .paid-emoji{font-size:44px;}
+.fpd-lcf .paid-panel h4{font-family:var(--font-display);font-size:17px;color:${TEXT};margin:12px 0 10px;}
+.fpd-lcf .paid-panel p{color:${MUTED};font-size:12.5px;line-height:1.7;}
+.fpd-lcf .paid-panel p strong{color:#6FAE8B;}
+.fpd-lcf .doc-box{margin-top:14px;padding:13px 15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);text-align:left;}
+.fpd-lcf .doc-box .dk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:6px;}
+.fpd-lcf .doc-box .dv{color:${SOFT};font-size:12px;line-height:1.7;}
+.fpd-lcf .tid-box{margin-top:12px;padding:13px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
+.fpd-lcf .tid-box .tk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:4px;}
+.fpd-lcf .tid-box .tv{color:#6FAE8B;font-family:var(--font-mono);font-size:13px;}
+
+/* FAQ */
+.fpd-lcf .faq-item{padding-bottom:13px;margin-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-lcf .faq-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.fpd-lcf .faq-q{color:${TEXT};font-size:12.5px;font-weight:600;margin-bottom:4px;}
+.fpd-lcf .faq-a{color:${MUTED};font-size:12px;line-height:1.65;}
+
+/* modal */
+.fpd-lcf .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-lcf .modal{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
+.fpd-lcf .modal-head{display:flex;align-items:center;gap:12px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-lcf .modal-head .mico{width:40px;height:40px;border-radius:11px;background:rgba(91,110,225,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-lcf .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-lcf .modal-head .msub{color:${MUTED};font-size:11.5px;margin-top:2px;}
+.fpd-lcf .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-lcf .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
+.fpd-lcf .field input{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-lcf .field input::placeholder{color:${FAINT};}
+.fpd-lcf .field input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-lcf .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fpd-lcf .sumbox{padding:14px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
+.fpd-lcf .sumrow{display:flex;justify-content:space-between;font-size:12.5px;color:${MUTED};margin-bottom:6px;}
+.fpd-lcf .sumrow.total{border-top:1px solid rgba(91,110,225,0.16);margin-top:8px;padding-top:10px;font-size:14px;color:${TEXT};font-weight:700;}
+.fpd-lcf .sumrow.total span:last-child{color:#6FAE8B;font-family:var(--font-display);font-size:16px;}
+.fpd-lcf .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-lcf .modal-foot .save{flex:1;padding:13px;border-radius:12px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-lcf .modal-foot .save:hover{filter:brightness(1.08);}
+.fpd-lcf .modal-foot .save:disabled{opacity:.8;cursor:default;}
+.fpd-lcf .ssl-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px;color:${MUTED};font-size:11px;}
+`;
 
 export function LegacyContinuationFee() {
   const { setContinuationFeePaid } = useDemo();
@@ -95,53 +239,45 @@ export function LegacyContinuationFee() {
   };
 
   return (
-    <div style={{ background:"#070A12", minHeight:"100%", padding:24 }}>
-      <div style={{ maxWidth:960, margin:"0 auto" }} className="space-y-6">
+    <div className="fpd-lcf">
+      <style dangerouslySetInnerHTML={{ __html: LCF_CSS }} />
+      <div className="fpd-lcf-grain" />
 
-        {/* Header */}
+      <div className="wrap">
+        {/* ── Header ── */}
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Shield size={15} color="#3A5BD9"/>
-            <span style={{ color:"#3A5BD9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>LEGACY PROTECTION</span>
+          <div className="eyebrow"><Shield size={12} /> Legacy Protection</div>
+          <h1 className="pg-h1">Activate Legacy Access</h1>
+          <div className="pg-sub">
+            A one-time fee of <strong>$199</strong> that preserves your legacy contacts' ability to download your
+            <strong> complete Final Pass Down account</strong> — every document, video, memory, record, and file you have ever uploaded — after your passing is verified.
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#FFFFFF", marginBottom:8 }}>Activate Legacy Access</h1>
-          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8 }}>
-            A one-time fee of <strong style={{ color:"#FFFFFF" }}>$199</strong> that preserves your legacy contacts' ability to download your
-            <strong style={{ color:"#FFFFFF" }}> complete Final Pass Down account</strong> — every document, video, memory, record, and file you have ever uploaded — after your passing is verified.
-          </p>
         </div>
 
         {/* Demo simulation banner */}
-        <div className="flex items-center justify-between px-5 py-4 rounded-2xl flex-wrap gap-3"
-          style={{ background:"rgba(110,139,255,0.07)", border:"1px dashed rgba(110,139,255,0.4)" }}>
+        <div className="demo-banner">
           <div>
-            <div style={{ color:"#6E8BFF", fontSize:11, ...MONO, fontWeight:700, marginBottom:2 }}>🎮 DEMO MODE — SIMULATE THE FULL FLOW</div>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>
+            <div className="demo-tag">🎮 DEMO MODE — SIMULATE THE FULL FLOW</div>
+            <div className="demo-text">
               {!status.paid && !status.deathCertificateVerified && "Step 1: Pay the $199 fee using the payment form below, then Step 2: simulate admin verification."}
               {status.paid && !status.deathCertificateVerified && "Fee paid ✓ — Now simulate the FPD admin verifying the confirmation of passing to fully unlock."}
               {status.deathCertificateVerified && !status.paid && "Passing verified ✓ — Now pay the $199 fee to complete both conditions and unlock the vault."}
               {status.fullyUnlocked && "🎉 Both conditions met — vault is fully unlocked! Scroll down to see the Legacy Vault Clone."}
             </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="demo-acts">
             {!status.paid && (
-              <button onClick={() => { setShowPayment(true); }}
-                className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background:"rgba(58,91,217,0.1)", color:"#3A5BD9" }}>
+              <button onClick={() => { setShowPayment(true); }} className="btn-ghost">
                 1. Pay Fee →
               </button>
             )}
             {!status.deathCertificateVerified && (
-              <button onClick={simulateAdminVerification} disabled={simulatingVerif}
-                className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background:"rgba(110,139,255,0.15)", color:"#6E8BFF" }}>
+              <button onClick={simulateAdminVerification} disabled={simulatingVerif} className="btn-ghost">
                 {simulatingVerif ? "Verifying…" : "2. Simulate Admin Verification →"}
               </button>
             )}
             {(status.paid || status.deathCertificateVerified) && (
-              <button onClick={() => { setStatus(initStatus); setContinuationFeePaid(false); }}
-                className="px-3 py-2 rounded-xl text-xs"
-                style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181" }}>
+              <button onClick={() => { setStatus(initStatus); setContinuationFeePaid(false); }} className="btn-reset">
                 Reset Demo
               </button>
             )}
@@ -149,75 +285,65 @@ export function LegacyContinuationFee() {
         </div>
 
         {/* Two-condition gate explanation */}
-        <div className="p-5 rounded-2xl glow-surface" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.15)" }}>
-          <div style={{ color:"#3A5BD9", fontSize:12, fontWeight:700, ...MONO, marginBottom:10 }}>HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3 p-4 rounded-xl"
-              style={{ background:status.paid?"rgba(72,187,120,0.08)":"rgba(58,91,217,0.04)", border:`1px solid ${status.paid?"rgba(72,187,120,0.25)":"rgba(58,91,217,0.12)"}` }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ width:32, height:32, background:status.paid?"rgba(72,187,120,0.15)":"rgba(58,91,217,0.1)", color:status.paid?"#48BB78":"#3A5BD9", fontSize:13, fontWeight:700 }}>
+        <div className="gate">
+          <div className="gate-head">HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
+          <div className="ggrid">
+            <div className="gcard" style={{ background:status.paid?"rgba(95,190,145,0.08)":"rgba(91,110,225,0.04)", borderColor:status.paid?"rgba(95,190,145,0.28)":"rgba(91,110,225,0.14)" }}>
+              <div className="gnum" style={{ background:status.paid?"rgba(95,190,145,0.16)":"rgba(91,110,225,0.1)", color:status.paid?"#D99A6B":"#6E90C9" }}>
                 {status.paid ? <CheckCircle size={16}/> : "1"}
               </div>
               <div>
-                <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600, marginBottom:3 }}>
+                <div className="gtitle">
                   {status.paid ? "✓ Legacy Continuation Fee Paid" : "Legacy Continuation Fee"}
                 </div>
-                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>
+                <div className="gdesc">
                   $199 one-time fee. Can be paid by the account owner at any time — even now, years before passing. Or the legacy contact can pay it after the passing occurs.
                 </div>
               </div>
             </div>
-            <div className="flex items-start gap-3 p-4 rounded-xl"
-              style={{ background:status.deathCertificateVerified?"rgba(72,187,120,0.08)":"rgba(246,173,85,0.04)", border:`1px solid ${status.deathCertificateVerified?"rgba(72,187,120,0.25)":"rgba(246,173,85,0.2)"}` }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                style={{ width:32, height:32, background:status.deathCertificateVerified?"rgba(72,187,120,0.15)":"rgba(246,173,85,0.1)", color:status.deathCertificateVerified?"#48BB78":"#F6AD55", fontSize:13, fontWeight:700 }}>
+            <div className="gcard" style={{ background:status.deathCertificateVerified?"rgba(95,190,145,0.08)":"rgba(217,165,94,0.04)", borderColor:status.deathCertificateVerified?"rgba(95,190,145,0.28)":"rgba(217,165,94,0.22)" }}>
+              <div className="gnum" style={{ background:status.deathCertificateVerified?"rgba(95,190,145,0.16)":"rgba(217,165,94,0.12)", color:status.deathCertificateVerified?"#D99A6B":WARN }}>
                 {status.deathCertificateVerified ? <CheckCircle size={16}/> : "2"}
               </div>
               <div>
-                <div style={{ color:"#FFFFFF", fontSize:13, fontWeight:600, marginBottom:3 }}>
+                <div className="gtitle">
                   {status.deathCertificateVerified ? "✓ Confirmation of Passing Verified" : "Confirmation of Passing — Verified by FPD Admin"}
                 </div>
-                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>
+                <div className="gdesc">
                   Account takeover requires documentation confirming the user is no longer living — accepted documents include death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record. Verification and admin approval required, with a follow-up confirmation of death once received.
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 px-4 py-2 rounded-xl"
-            style={{ background:status.fullyUnlocked?"rgba(72,187,120,0.06)":"rgba(229,62,62,0.05)", border:`1px solid ${status.fullyUnlocked?"rgba(72,187,120,0.2)":"rgba(229,62,62,0.2)"}` }}>
+          <div className="gate-status" style={{ background:status.fullyUnlocked?"rgba(95,190,145,0.07)":"rgba(208,107,107,0.06)", borderColor:status.fullyUnlocked?"rgba(95,190,145,0.22)":"rgba(208,107,107,0.22)" }}>
             {status.fullyUnlocked
-              ? <><CheckCircle size={14} color="#48BB78"/><span style={{ color:"#48BB78", fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked for all verified legacy contacts.</span></>
-              : <><AlertTriangle size={14} color="#FC8181"/><span style={{ color:"#FC8181", fontSize:13 }}>Downloads are locked until <strong>both</strong> conditions are met. The fee alone does not unlock access.</span></>
+              ? <><CheckCircle size={14} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked for all verified legacy contacts.</span></>
+              : <><AlertTriangle size={14} color={NEG}/><span style={{ color:NEG, fontSize:13 }}>Downloads are locked until <strong>both</strong> conditions are met. The fee alone does not unlock access.</span></>
             }
           </div>
         </div>
 
         {/* What gets downloaded */}
-        <div className="p-5 rounded-2xl glow-surface" style={CARD}>
-          <button onClick={() => setShowCoverage(!showCoverage)}
-            className="w-full flex items-center justify-between"
-            style={{ background:"transparent", border:"none", cursor:"pointer" }}>
-            <div className="flex items-center gap-2">
-              <Download size={16} color="#3A5BD9"/>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF" }}>What the Legacy Vault Clone Downloads</span>
-            </div>
-            {showCoverage ? <ChevronUp size={16} color="rgba(255,255,255,0.65)"/> : <ChevronDown size={16} color="rgba(255,255,255,0.65)"/>}
+        <div className="card pad glow-surface">
+          <button onClick={() => setShowCoverage(!showCoverage)} className="cov-toggle">
+            <span className="sec-title">
+              <Download size={16} color="#FFFFFF"/> What the Legacy Vault Clone Downloads
+            </span>
+            {showCoverage ? <ChevronUp size={16} color={MUTED}/> : <ChevronDown size={16} color={MUTED}/>}
           </button>
-          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginTop:6, lineHeight:1.7 }}>
-            When conditions are met and a legacy contact clicks <strong style={{ color:"#FFFFFF" }}>LEGACY VAULT CLONE</strong>, they receive a complete, encrypted download of <strong style={{ color:"#3A5BD9" }}>everything</strong> the account holder ever saved — across all 30+ life categories.
-          </p>
+          <div className="cov-desc">
+            When conditions are met and a legacy contact clicks <strong>LEGACY VAULT CLONE</strong>, they receive a complete, encrypted download of <em>everything</em> the account holder ever saved — across all 30+ life categories.
+          </div>
           {showCoverage && (
-            <div className="grid md:grid-cols-2 gap-3 mt-4">
+            <div className="cgrid">
               {FULL_COVERAGE.map(item => (
-                <div key={item.label} className="flex items-start gap-3 px-4 py-3 rounded-xl"
-                  style={{ background:"rgba(58,91,217,0.03)", border:"1px solid rgba(58,91,217,0.08)" }}>
-                  <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                    style={{ width:28, height:28, background:`${item.color}14`, color:item.color }}>
+                <div key={item.label} className="citem">
+                  <div className="cico" style={{ background:`${item.color}1E`, color:item.color }}>
                     {item.icon}
                   </div>
                   <div>
-                    <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:600 }}>{item.label}</div>
-                    <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, lineHeight:1.5 }}>{item.desc}</div>
+                    <div className="clabel">{item.label}</div>
+                    <div className="cdesc">{item.desc}</div>
                   </div>
                 </div>
               ))}
@@ -227,25 +353,25 @@ export function LegacyContinuationFee() {
 
         {/* Paid status banner */}
         {status.paid && (
-          <div className="flex items-start gap-4 p-6 rounded-2xl border glow-surface" style={{ background:"rgba(72,187,120,0.05)", borderColor:"rgba(72,187,120,0.3)" }}>
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background:"rgba(72,187,120,0.12)" }}>
-              <CheckCircle size={24} color="#48BB78"/>
+          <div className="paid-banner">
+            <div className="paid-icon">
+              <CheckCircle size={24} color="#FFFFFF"/>
             </div>
-            <div className="flex-1">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF", marginBottom:6 }}>Legacy Continuation Fee Paid ✓</div>
-              <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7, marginBottom:12 }}>
+            <div style={{ flex: 1 }}>
+              <div className="paid-title">Legacy Continuation Fee Paid ✓</div>
+              <div className="paid-desc">
                 The fee has been recorded. Once a legacy contact submits confirmation of passing and FPD administrators verify it, the Legacy Vault Clone will be fully unlocked.
-              </p>
-              <div className="grid md:grid-cols-3 gap-4">
+              </div>
+              <div className="pstat">
                 {[
                   { label:"Paid On", value:status.paidDate ?? "—" },
                   { label:"Paid By", value:status.paidBy === "user" ? "Account Owner" : "Legacy Contact" },
                   { label:"Access Window", value:status.activeUntil ?? "—" },
                   { label:"Transaction ID", value:status.transactionId ?? "—" },
                 ].map(item => (
-                  <div key={item.label} className="px-4 py-3 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                    <div style={{ color:"#48BB78", fontSize:10, ...MONO, marginBottom:3 }}>{item.label.toUpperCase()}</div>
-                    <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:500 }}>{item.value}</div>
+                  <div key={item.label} className="pcell">
+                    <div className="plbl">{item.label.toUpperCase()}</div>
+                    <div className="pval">{item.value}</div>
                   </div>
                 ))}
               </div>
@@ -253,90 +379,81 @@ export function LegacyContinuationFee() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="bento">
           {/* Payment panel */}
-          <div className="space-y-4">
+          <div>
             {!status.paid ? (
-              <div className="p-6 rounded-2xl glow-surface" style={CARD}>
-                <div className="text-center mb-6">
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:52, color:"#3A5BD9", fontWeight:900, lineHeight:1 }}>$199</div>
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, marginTop:4 }}>One-time · Never expires · Non-refundable</div>
-                  <div className="flex items-center justify-center gap-2 mt-3 px-4 py-2 rounded-full mx-auto"
-                    style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", width:"fit-content" }}>
-                    <Star size={13} fill="#48BB78" color="#48BB78"/>
-                    <span style={{ color:"#48BB78", fontSize:12 }}>Covers complete download of all account data</span>
+              <div className="card pad glow-surface">
+                <div className="price-hero">
+                  <div className="price-val">$199</div>
+                  <div className="price-sub">One-time · Never expires · Non-refundable</div>
+                  <div className="price-badge">
+                    <Star size={13} fill={POS} color="#FFFFFF"/>
+                    <span>Covers complete download of all account data</span>
                   </div>
                 </div>
 
-                <div className="space-y-3 mb-5">
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, marginBottom:6 }}>WHO IS PAYING?</div>
-                  {[
-                    { id:"user",           label:"I'm paying now (account owner)", sub:"Pay at any time — even years before passing" },
-                    { id:"legacy_contact", label:"Legacy contact paying after passing", sub:"Contact pays after confirmation of passing is submitted" },
-                  ].map(opt => (
-                    <button key={opt.id} onClick={() => setPayerType(opt.id as any)}
-                      className="w-full flex items-start gap-3 p-3.5 rounded-xl text-left transition-all"
-                      style={{ background:payerType===opt.id?"rgba(58,91,217,0.08)":"#0F1A33", border:`2px solid ${payerType===opt.id?"#3A5BD9":"transparent"}`, color:"#FFFFFF" }}>
-                      <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ borderColor:payerType===opt.id?"#3A5BD9":"#C8D4EE" }}>
-                        {payerType===opt.id && <div style={{ width:8, height:8, borderRadius:"50%", background:"#3A5BD9" }}/>}
-                      </div>
-                      <div>
-                        <div style={{ fontSize:13, fontWeight:500 }}>{opt.label}</div>
-                        <div style={{ fontSize:11, color:"rgba(255,255,255,0.65)", marginTop:2 }}>{opt.sub}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <div className="payer-label">WHO IS PAYING?</div>
+                {[
+                  { id:"user",           label:"I'm paying now (account owner)", sub:"Pay at any time — even years before passing" },
+                  { id:"legacy_contact", label:"Legacy contact paying after passing", sub:"Contact pays after confirmation of passing is submitted" },
+                ].map(opt => (
+                  <button key={opt.id} onClick={() => setPayerType(opt.id as any)}
+                    className={`payer${payerType===opt.id ? " on" : ""}`}>
+                    <div className="prad">{payerType===opt.id && <div className="pdot"/>}</div>
+                    <div>
+                      <div className="plabel">{opt.label}</div>
+                      <div className="psub">{opt.sub}</div>
+                    </div>
+                  </button>
+                ))}
 
-                <div className="space-y-3">
-                  <button onClick={() => setShowPayment(true)} className="w-full py-4 rounded-2xl font-bold text-base"
-                    style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 8px 24px rgba(58,91,217,0.4)" }}>
-                    <CreditCard size={16} style={{ display:"inline", marginRight:8 }}/>
+                <div className="pay-acts">
+                  <button onClick={() => setShowPayment(true)} className="btn-primary">
+                    <CreditCard size={16}/>
                     Pay $199 with Card (Stripe)
                   </button>
-                  <button onClick={() => setShowCrypto(true)} className="w-full py-4 rounded-2xl font-bold text-base"
-                    style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 8px 24px rgba(247,147,26,0.35)" }}>
-                    <span style={{ fontSize:16, marginRight:8 }}>₿</span>
+                  <button onClick={() => setShowCrypto(true)} className="btn-crypto">
+                    <span style={{ fontSize: 16 }}>₿</span>
                     Pay $199 with Cryptocurrency
                   </button>
-                  <div className="flex items-center justify-center gap-5">
-                    <div className="flex items-center gap-1.5">
-                      <Lock size={11} color="rgba(255,255,255,0.65)"/>
-                      <span style={{ color:"rgba(255,255,255,0.65)", fontSize:10 }}>Stripe · PCI-DSS</span>
+                  <div className="secure-row">
+                    <div className="secure-item">
+                      <Lock size={11}/>
+                      <span>Stripe · PCI-DSS</span>
                     </div>
-                    <span style={{ color:"rgba(255,255,255,0.75)" }}>·</span>
-                    <div className="flex items-center gap-1.5">
-                      <span style={{ color:"#F7931A", fontSize:12 }}>₿</span>
-                      <span style={{ color:"rgba(255,255,255,0.65)", fontSize:10 }}>Coinbase Commerce · BitPay</span>
+                    <span>·</span>
+                    <div className="secure-item">
+                      <span style={{ color:"#EFA13F", fontSize: 12 }}>₿</span>
+                      <span>Coinbase Commerce · BitPay</span>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-6 rounded-2xl text-center space-y-4 glow-surface" style={CARD}>
-                <div className="text-5xl">🛡️</div>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Fee Paid — Awaiting Confirmation of Passing</div>
-                <p style={{ color:"rgba(255,255,255,0.7)", fontSize:13, lineHeight:1.7 }}>
-                  Your legacy contacts will be able to download <strong style={{ color:"#3A5BD9" }}>everything in your account</strong> for <strong style={{ color:"#3A5BD9" }}>{status.activationPeriod} months</strong> from your date of passing — once a legacy contact submits confirmation of passing and FPD administrators verify it.
+              <div className="card pad glow-surface paid-panel">
+                <div className="paid-emoji">🛡️</div>
+                <h4>Fee Paid — Awaiting Confirmation of Passing</h4>
+                <p>
+                  Your legacy contacts will be able to download <strong>everything in your account</strong> for <strong>{status.activationPeriod} months</strong> from your date of passing — once a legacy contact submits confirmation of passing and FPD administrators verify it.
                 </p>
-                <div className="px-4 py-3 rounded-xl text-left" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.1)" }}>
-                  <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:6 }}>ACCEPTED CONFIRMATION DOCUMENTS</div>
-                  <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.7 }}>
+                <div className="doc-box">
+                  <div className="dk">ACCEPTED CONFIRMATION DOCUMENTS</div>
+                  <div className="dv">
                     Death certificates · Obituaries · Hospital or hospice notices · Coroner reports · Funeral home letters · Probate filings · Any credible official record
                   </div>
                 </div>
-                <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.05)", border:"1px solid rgba(58,91,217,0.1)" }}>
-                  <div style={{ color:"rgba(255,255,255,0.65)", fontSize:10, ...MONO, marginBottom:4 }}>TRANSACTION ID</div>
-                  <div style={{ color:"#3A5BD9", fontSize:13, ...MONO }}>{status.transactionId}</div>
+                <div className="tid-box">
+                  <div className="tk">TRANSACTION ID</div>
+                  <div className="tv">{status.transactionId}</div>
                 </div>
               </div>
             )}
           </div>
 
           {/* FAQ */}
-          <div className="p-5 rounded-2xl space-y-4 glow-surface" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#FFFFFF", marginBottom:4 }}>Common Questions</div>
+          <div className="card pad glow-surface">
+            <h3 className="sec-title" style={{ marginBottom: 14 }}>Common Questions</h3>
             {[
               { q:"Can my legacy contact pay the fee after I pass?", a:"Yes. Either the account owner or a designated legacy contact can pay the $199 fee — before or after the passing. Both conditions (fee paid + confirmation of passing verified) must be met to unlock downloads." },
               { q:"Does paying the fee immediately unlock downloads?", a:"No. Paying the fee alone does not unlock access. A legacy contact must also submit confirmation of passing — accepted documents include death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record. FPD administrators review, verify, and approve before access is granted." },
@@ -346,9 +463,9 @@ export function LegacyContinuationFee() {
               { q:"Is the fee refundable?", a:"No. The Legacy Continuation Fee is non-refundable once processed." },
               { q:"What if I'm still alive when the period ends?", a:"The fee only applies during the post-passing continuation window. Your standard subscription continues normally while you're alive." },
             ].map(item => (
-              <div key={item.q} className="pb-3 border-b" style={{ borderColor:"rgba(58,91,217,0.06)" }}>
-                <div style={{ color:"#FFFFFF", fontSize:12, fontWeight:600, marginBottom:3 }}>{item.q}</div>
-                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, lineHeight:1.6 }}>{item.a}</div>
+              <div key={item.q} className="faq-item">
+                <div className="faq-q">{item.q}</div>
+                <div className="faq-a">{item.a}</div>
               </div>
             ))}
           </div>
@@ -357,56 +474,51 @@ export function LegacyContinuationFee() {
 
       {/* Stripe Payment Modal */}
       {showPayment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.45)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background:"rgba(58,91,217,0.1)" }}>
-                <CreditCard size={20} color="#3A5BD9"/>
-              </div>
+        <div className="backdrop">
+          <div className="card modal glow-surface">
+            <div className="modal-head">
+              <div className="mico"><CreditCard size={20} color="#FFFFFF"/></div>
               <div>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#FFFFFF" }}>Payment Details</div>
-                <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12 }}>Legacy Continuation Fee · $199.00</div>
+                <h3>Payment Details</h3>
+                <div className="msub">Legacy Continuation Fee · $199.00</div>
               </div>
             </div>
-            <div className="space-y-4">
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CARDHOLDER NAME</label>
-                <input value={name} onChange={e=>setName(e.target.value)} placeholder="James Doe"
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
+            <div className="modal-body">
+              <div className="field">
+                <label>CARDHOLDER NAME</label>
+                <input value={name} onChange={e=>setName(e.target.value)} placeholder="James Doe" />
               </div>
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CARD NUMBER</label>
+              <div className="field">
+                <label>CARD NUMBER</label>
                 <input value={cardNum} onChange={e=>setCardNum(formatCard(e.target.value))} placeholder="4242 4242 4242 4242" maxLength={19}
-                  className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                  style={{ fontFamily: "var(--font-mono)" }} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>EXPIRY</label>
+              <div className="row2">
+                <div className="field">
+                  <label>EXPIRY</label>
                   <input value={expiry} onChange={e=>setExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" maxLength={5}
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                    style={{ fontFamily: "var(--font-mono)" }} />
                 </div>
-                <div>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>CVC</label>
+                <div className="field">
+                  <label>CVC</label>
                   <input value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="•••"
-                    className="w-full px-4 py-3 rounded-xl" style={{ background:"#0F1A33", border:"1px solid rgba(58,91,217,0.15)", color:"#FFFFFF", fontSize:14, outline:"none", fontFamily:"var(--font-mono)" }}/>
+                    style={{ fontFamily: "var(--font-mono)" }} />
                 </div>
               </div>
-              <div className="px-4 py-3 rounded-xl" style={{ background:"rgba(58,91,217,0.04)", border:"1px solid rgba(58,91,217,0.12)" }}>
-                <div className="flex justify-between mb-1"><span style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Legacy Continuation Fee</span><span style={{ color:"#FFFFFF", fontSize:13 }}>$199.00</span></div>
-                <div className="flex justify-between mb-1"><span style={{ color:"rgba(255,255,255,0.7)", fontSize:13 }}>Processing Fee</span><span style={{ color:"#FFFFFF", fontSize:13 }}>$0.00</span></div>
-                <div className="border-t my-2" style={{ borderColor:"rgba(58,91,217,0.1)" }}/>
-                <div className="flex justify-between"><span style={{ color:"#FFFFFF", fontSize:14, fontWeight:700 }}>Total</span><span style={{ color:"#3A5BD9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>$199.00</span></div>
+              <div className="sumbox">
+                <div className="sumrow"><span>Legacy Continuation Fee</span><span style={{ color:TEXT }}>$199.00</span></div>
+                <div className="sumrow"><span>Processing Fee</span><span style={{ color:TEXT }}>$0.00</span></div>
+                <div className="sumrow total"><span>Total</span><span>$199.00</span></div>
               </div>
-              <div className="flex gap-3">
-                <button onClick={handlePay} disabled={processing} className="flex-1 py-3.5 rounded-xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#3A5BD9,#5B7BF5)", color:"#fff", boxShadow:"0 4px 16px rgba(58,91,217,0.35)", opacity:processing?0.8:1 }}>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={handlePay} disabled={processing} className="save">
                   {processing ? "Processing Stripe Payment..." : "Pay $199 Now"}
                 </button>
-                <button onClick={() => setShowPayment(false)} className="px-5 py-3.5 rounded-xl text-sm" style={{ background:"#070A12", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
+                <button onClick={() => setShowPayment(false)} className="btn-sec">Cancel</button>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <Lock size={11} color="rgba(255,255,255,0.65)"/>
-                <span style={{ color:"rgba(255,255,255,0.65)", fontSize:11 }}>256-bit SSL · Stripe PCI-DSS Level 1</span>
+              <div className="ssl-row">
+                <Lock size={11}/>
+                <span>256-bit SSL · Stripe PCI-DSS Level 1</span>
               </div>
             </div>
           </div>
