@@ -157,8 +157,31 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
   transition: width .22s ease; box-shadow: 0 0 8px 0 rgba(126,107,216,0.7); pointer-events: none;
 }
 .seg button:not(.on):hover::after { width: 60%; }
+.seg button.on:hover { filter: brightness(1.1); box-shadow: 0 8px 22px -8px rgba(126,107,216,0.95); }
 @media (prefers-reduced-motion: reduce) {
   .seg button::after { transition: none !important; }
+}
+
+/* ── Sitewide detail-grid tile laser ──
+   The dense spec-sheet tiles used inside record cards (VIN/Title Holder/
+   Lien, policy details, etc. — .dgrid .tile, shared by Personal Assets,
+   Warranties, Financial Records, Medical Info and 7 more) had no reaction
+   at all. Each tile now washes and underlines in purple on hover, and its
+   value brightens, instead of sitting completely flat. */
+.dgrid .tile { position: relative; transition: background .18s ease; }
+.dgrid .tile:hover { background: rgba(126,107,216,0.08); }
+.dgrid .tile::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; pointer-events: none;
+  background: linear-gradient(90deg, #7E6BD8, #5B6EE1); transform: scaleX(0); transform-origin: left;
+  transition: transform .2s ease; box-shadow: 0 0 8px 0 rgba(126,107,216,0.65);
+}
+.dgrid .tile:hover::after { transform: scaleX(1); }
+.dgrid .tile .tv { transition: color .18s ease; }
+.dgrid .tile:hover .tv { color: #C9BFF0; }
+@media (prefers-reduced-motion: reduce) {
+  .dgrid .tile { transition: none !important; }
+  .dgrid .tile::after { transition: none !important; }
+  .dgrid .tile .tv { transition: none !important; }
 }
 
 /* ── Thin brand scrollbar — for sidebar, panels, dropdowns ── */
