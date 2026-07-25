@@ -26,8 +26,8 @@ type VerifStatus = "not_sent" | "pending" | "id_submitted" | "verified" | "rejec
 const verifConfig: Record<VerifStatus, { label:string; color:string; icon:React.ReactNode }> = {
   not_sent:     { label:"NOT SENT",     color:MUTED, icon:<X size={11}/> },
   pending:      { label:"INVITE SENT",  color:WARN,  icon:<Clock size={11}/> },
-  id_submitted: { label:"ID SUBMITTED", color:ACCENT2, icon:<Upload size={11}/> },
-  verified:     { label:"VERIFIED",     color:POS,   icon:<CheckCircle size={11}/> },
+  id_submitted: { label:"ID SUBMITTED", color:"#6FAE8B", icon:<Upload size={11}/> },
+  verified:     { label:"VERIFIED",     color:"#D99A6B",   icon:<CheckCircle size={11}/> },
   rejected:     { label:"REJECTED",     color:NEG,   icon:<AlertTriangle size={11}/> },
 };
 
@@ -41,10 +41,10 @@ function toVerifStatus(s: string): VerifStatus {
 type ContactType = "legacy"|"guardian"|"emergency"|"pet_emergency";
 
 const typeConfig = {
-  legacy:       { label:"Legacy Contact",        color:ACCENT2, icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
-  guardian:     { label:"Guardian Contact",      color:POS,     icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
+  legacy:       { label:"Legacy Contact",        color:"#6FAE8B", icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
+  guardian:     { label:"Guardian Contact",      color:"#D99A6B",     icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
   emergency:    { label:"Emergency Contact",     color:WARN,    icon:<AlertCircle size={13}/>,  desc:"Notified by first responders in an emergency." },
-  pet_emergency:{ label:"Pet Emergency Contact", color:ACCENT,  icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
+  pet_emergency:{ label:"Pet Emergency Contact", color:"#6E90C9",  icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
 };
 
 /* ── Verification methods a user can configure per Legacy Contact ─── */
@@ -60,29 +60,29 @@ const VERIFICATION_METHODS = [
 ];
 
 const verStyle = {
-  verified: { color:POS,  label:"VERIFIED", icon:<CheckCircle size={11}/> },
+  verified: { color:"#D99A6B",  label:"VERIFIED", icon:<CheckCircle size={11}/> },
   pending:  { color:WARN, label:"PENDING",  icon:<Clock size={11}/> },
   not_sent: { color:MUTED,label:"NOT SENT", icon:<X size={11}/> },
 };
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
 const FOLDER_CATALOG = [
-  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#5B6EE1" },
-  { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#48BB78" },
+  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#6E90C9" },
+  { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#D99A6B" },
   { id:"medical",   label:"Medical Records",         emoji:"🏥",  color:"#FC8181" },
   { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
   { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
-  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#5BA7D6" },
-  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#6F9E94" },
-  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#5B6EE1" },
+  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#6FAE8B" },
+  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#D68FA8" },
+  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#6E90C9" },
   { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
   { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },
   { id:"photos",    label:"Photo Albums",            emoji:"📷",  color:"#F6AD55" },
-  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#5B6EE1" },
-  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#5B6EE1" },
-  { id:"business",  label:"Business Records",        emoji:"📊",  color:"#48BB78" },
+  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#6E90C9" },
+  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#6E90C9" },
+  { id:"business",  label:"Business Records",        emoji:"📊",  color:"#D99A6B" },
   { id:"crypto",    label:"Crypto & NFTs",           emoji:"₿",   color:"#F6AD55" },
-  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#5BA7D6" },
+  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#6FAE8B" },
   { id:"military",  label:"Military Records",        emoji:"🎖️",  color:"#ED8936" },
   { id:"other",     label:"Other Documents",         emoji:"📁",  color:MUTED },
 ];
@@ -93,13 +93,13 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
   return (
     <div className="space-y-3">
       <div className="view-only-note">
-        <Eye size={12} color={POS}/>
+        <Eye size={12} color="#FFFFFF"/>
         <span>VIEW ONLY — Guardian contacts cannot download files</span>
       </div>
       <div className="flex items-center justify-between">
         <span style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
         <div className="flex gap-2">
-          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: ACCENT2, fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
           <button onClick={()=>onChange([])} style={{ color: MUTED, fontSize: 10, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
         </div>
       </div>
@@ -211,7 +211,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
                         <div style={{ color:MUTED, fontSize:11, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
                       </div>
                       <div className="flex-shrink-0" style={{ marginTop: 2 }}>
-                        {selected ? <CheckCircle size={15} color={ACCENT2}/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
+                        {selected ? <CheckCircle size={15} color="#FFFFFF"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
                       </div>
                     </button>
                   );
@@ -297,7 +297,7 @@ function ContactSection({
 
       {isGuardian && contacts.length > 0 && (
         <div className="view-only-strip">
-          <Eye size={12} color={POS}/>
+          <Eye size={12} color="#FFFFFF"/>
           <span>Guardian contacts can <strong>view</strong> their assigned folders but <strong style={{ color: NEG }}>cannot download</strong> any files.</span>
         </div>
       )}
@@ -316,8 +316,8 @@ function ContactSection({
             <div key={c.id} className="contact-row">
               <div className="flex items-start gap-3">
                 {isLegacy && (
-                  <div className="priority-badge" style={{ background:i===0?"rgba(91,110,225,0.18)":"rgba(91,110,225,0.08)", color:i===0?ACCENT2:MUTED, border:i===0?"2px solid rgba(91,110,225,0.35)":"1px solid rgba(91,110,225,0.14)" }}>
-                    {i===0 ? <Crown size={18} color={ACCENT2}/> : `#${i+1}`}
+                  <div className="priority-badge" style={{ background:i===0?"rgba(91,110,225,0.18)":"rgba(91,110,225,0.08)", color:i===0?"#6FAE8B":MUTED, border:i===0?"2px solid rgba(91,110,225,0.35)":"1px solid rgba(91,110,225,0.14)" }}>
+                    {i===0 ? <Crown size={18} color="#FFFFFF"/> : `#${i+1}`}
                   </div>
                 )}
 
@@ -331,7 +331,7 @@ function ContactSection({
                   <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
                     <span style={{ color:TEXT, fontSize:14, fontWeight:600 }}>{c.name}</span>
                     {isLegacy && i === 0 && (
-                      <span className="rank-badge" style={{ background:"rgba(91,110,225,0.14)", color:ACCENT2 }}>
+                      <span className="rank-badge" style={{ background:"rgba(91,110,225,0.14)", color:"#6FAE8B" }}>
                         <Crown size={9}/> PRIMARY
                       </span>
                     )}
@@ -353,7 +353,7 @@ function ContactSection({
 
                   {isGuardian && c.accessLevel && (
                     <div className="flex items-center gap-1.5" style={{ marginTop: 6 }}>
-                      <FolderOpen size={10} color={POS}/>
+                      <FolderOpen size={10} color="#FFFFFF"/>
                       <span style={{ color:MUTED, fontSize:10 }}>{c.accessLevel}</span>
                     </div>
                   )}
@@ -386,13 +386,13 @@ function ContactSection({
 
                         <div className="flex gap-2 flex-wrap">
                           {vs2 === "not_sent" && (
-                            <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: ACCENT2 }}>
+                            <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
                               <Mail size={10}/> Send Verification Invite
                             </button>
                           )}
                           {vs2 === "pending" && (
                             <>
-                              <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: ACCENT2 }}>
+                              <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
                                 <Upload size={10}/> Simulate ID Submission
                               </button>
                               <button onClick={()=>toast.success(`Invite resent to ${c.email}`)} className="btn-sec">
@@ -401,14 +401,14 @@ function ContactSection({
                             </>
                           )}
                           {vs2 === "id_submitted" && (
-                            <button onClick={()=>simulateVerify?.(c.id)} disabled={verifying===c.id} className="btn-ghost" style={{ color: POS, background: "rgba(95,190,145,0.10)", borderColor: "rgba(95,190,145,0.3)" }}>
+                            <button onClick={()=>simulateVerify?.(c.id)} disabled={verifying===c.id} className="btn-ghost" style={{ color: "#D99A6B", background: "rgba(95,190,145,0.10)", borderColor: "rgba(95,190,145,0.3)" }}>
                               {verifying===c.id
                                 ? <><RefreshCw size={10} style={{ animation:"spin 1s linear infinite" }}/> Verifying…</>
                                 : <><CheckCircle size={10}/> Simulate Verify</>}
                             </button>
                           )}
                           {vs2 === "verified" && (
-                            <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: POS }}>
+                            <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: "#D99A6B" }}>
                               <UserCheck size={11}/> Vault access activates upon verified passing
                             </div>
                           )}
@@ -478,8 +478,8 @@ const CONTACTS_CSS = `
 .fpd-contacts .section-title{font-family:var(--font-display);font-size:15px;color:${TEXT};}
 .fpd-contacts .section-count{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--font-mono);}
 .fpd-contacts .section-desc{color:${MUTED};font-size:11px;margin-top:2px;}
-.fpd-contacts .view-only-strip{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(95,190,145,0.16);background:rgba(95,190,145,0.05);color:${POS};font-size:11px;}
-.fpd-contacts .view-only-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${POS};font-size:11px;font-weight:700;}
+.fpd-contacts .view-only-strip{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(95,190,145,0.16);background:rgba(95,190,145,0.05);color:#D99A6B;font-size:11px;}
+.fpd-contacts .view-only-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:11px;font-weight:700;}
 .fpd-contacts .add-one-link{margin-top:6px;font-size:11px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* contact row */
@@ -508,14 +508,14 @@ const CONTACTS_CSS = `
 
 /* folder picker */
 .fpd-contacts .folder-picker{border-radius:14px;overflow:hidden;border:1px solid rgba(95,190,145,0.28);}
-.fpd-contacts .folder-picker-hd{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(95,190,145,0.06);color:${POS};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .folder-picker-hd{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(95,190,145,0.06);color:#D99A6B;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-contacts .folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:200px;overflow-y:auto;}
 .fpd-contacts .folder-chip{display:flex;align-items:center;gap:6px;padding:8px;border-radius:9px;text-align:left;cursor:pointer;font-family:var(--font-body);}
 
 /* verification requirement rows */
 .fpd-contacts .verif-row{width:100%;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:11px;text-align:left;border:1px solid;font-family:var(--font-body);}
 .fpd-contacts .verif-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
-.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,110,225,0.14);color:${ACCENT2};font-family:var(--font-mono);}
+.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:10px;background:rgba(91,110,225,0.14);color:#6FAE8B;font-family:var(--font-mono);}
 .fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:11px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);}
 .fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
 .fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
@@ -569,10 +569,10 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
 
   const cfg = typeConfig[activeType];
   const access: Record<ContactType, { label:string; color:string }> = {
-    legacy:        { label:"Full vault download — after verified passing", color:ACCENT2 },
-    guardian:      { label:"View-only assigned folders — never downloads", color:POS },
+    legacy:        { label:"Full vault download — after verified passing", color:"#6FAE8B" },
+    guardian:      { label:"View-only assigned folders — never downloads", color:"#D99A6B" },
     emergency:     { label:"Informational only — no vault access", color:WARN },
-    pet_emergency: { label:"Informational only — pet care details", color:ACCENT },
+    pet_emergency: { label:"Informational only — pet care details", color:"#6E90C9" },
   };
   const Icon = activeType === "legacy" ? Shield : activeType === "guardian" ? Users : activeType === "emergency" ? AlertCircle : PawPrint;
 
@@ -603,7 +603,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
         {activeType === "legacy" && legacyContacts.length > 1 && (
           <div className="chain-box">
             <div className="chain-hd">
-              <Crown size={16} color={ACCENT2}/>
+              <Crown size={16} color="#FFFFFF"/>
               <span>Chain of Authority</span>
             </div>
             <div className="space-y-2">
@@ -631,7 +631,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
 
         {activeType === "legacy" && legacyContacts.length === 1 && (
           <div className="info-banner">
-            <Info size={16} color={ACCENT2} style={{ marginTop:1, flexShrink:0 }}/>
+            <Info size={16} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <p>You have one Legacy Contact. Consider adding a <strong style={{ color: TEXT }}>contingent backup</strong> — if your primary contact is also deceased or unable to act, there would be no one to claim your vault.</p>
           </div>
         )}

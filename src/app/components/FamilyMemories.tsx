@@ -138,8 +138,8 @@ const pets: PetRecord[] = [
 ];
 
 const statusStyles = {
-  completed: { color: "#48BB78", bg: "rgba(72,187,120,0.12)", label: "COMPLETED" },
-  in_progress: { color: "#5B6EE1", bg: "rgba(91,110,225,0.12)", label: "IN PROGRESS" },
+  completed: { color: "#D99A6B", bg: "rgba(72,187,120,0.12)", label: "COMPLETED" },
+  in_progress: { color: "#6E90C9", bg: "rgba(91,110,225,0.12)", label: "IN PROGRESS" },
   not_started: { color: "var(--muted-foreground)", bg: "var(--secondary)", label: "NOT STARTED" },
 };
 
@@ -178,10 +178,10 @@ const FAM_CSS = `
 .fpd-fam .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-fam .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-fam .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-fam .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-fam .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-fam .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-fam .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
-.fpd-fam .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-fam .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-fam .btn-pos:hover{background:rgba(95,190,145,0.2);}
 .fpd-fam .btn-mini{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-fam .btn-mini:hover{filter:brightness(1.08);}
@@ -210,10 +210,10 @@ const FAM_CSS = `
 
 /* generic record-card parts, reused across every tab */
 .fpd-fam .r-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.fpd-fam .r-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-fam .r-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-fam .r-title{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
 .fpd-fam .r-sub{color:${MUTED};font-size:12.5px;}
-.fpd-fam .r-sub.accent{color:${ACCENT2};}
+.fpd-fam .r-sub.accent{color:#6FAE8B;}
 .fpd-fam .r-desc{color:${MUTED};font-size:13px;line-height:1.6;}
 .fpd-fam .r-grid{display:grid;grid-template-columns:repeat(2,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;margin:14px 0;}
 .fpd-fam .r-grid.c3{grid-template-columns:repeat(3,1fr);}
@@ -237,7 +237,7 @@ const FAM_CSS = `
 
 .fpd-fam .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
 .fpd-fam .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-fam .tag{display:inline-block;padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;background:rgba(91,110,225,0.12);color:${ACCENT2};}
+.fpd-fam .tag{display:inline-block;padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;background:rgba(91,110,225,0.12);color:#6FAE8B;}
 
 .fpd-fam .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-fam .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
@@ -266,7 +266,7 @@ const FAM_CSS = `
 
 /* recorder panel — wraps the real getUserMedia/MediaRecorder UI; JS untouched */
 .fpd-fam .recorder{background:linear-gradient(180deg,rgba(91,110,225,0.08) 0%,rgba(91,110,225,0.02) 100%);border:1px solid rgba(91,110,225,0.22);border-radius:16px;padding:24px;}
-.fpd-fam .recorder .rec-eyebrow{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:${ACCENT2};display:flex;align-items:center;gap:7px;margin-bottom:18px;}
+.fpd-fam .recorder .rec-eyebrow{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#6FAE8B;display:flex;align-items:center;gap:7px;margin-bottom:18px;}
 .fpd-fam .rec-error{padding:12px 16px;border-radius:11px;background:rgba(208,107,107,0.08);border:1px solid rgba(208,107,107,0.24);color:${NEG};font-size:13px;margin-bottom:16px;}
 .fpd-fam .rec-idle{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0;}
 .fpd-fam .rec-orb{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.12);border:2px solid rgba(91,110,225,0.28);}
@@ -281,10 +281,10 @@ const FAM_CSS = `
 .fpd-fam .rec-controls{display:flex;align-items:center;gap:10px;}
 .fpd-fam .rec-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:11px;font-weight:600;font-size:13px;border:1px solid;cursor:pointer;font-family:var(--font-body);}
 .fpd-fam .rec-btn.pause{background:rgba(217,165,94,0.14);color:${WARN};border-color:rgba(217,165,94,0.3);}
-.fpd-fam .rec-btn.resume{background:rgba(91,110,225,0.14);color:${ACCENT2};border-color:rgba(91,110,225,0.3);}
+.fpd-fam .rec-btn.resume{background:rgba(91,110,225,0.14);color:#6FAE8B;border-color:rgba(91,110,225,0.3);}
 .fpd-fam .rec-btn.stop{background:rgba(208,107,107,0.14);color:${NEG};border-color:rgba(208,107,107,0.3);}
 .fpd-fam .rec-done{display:flex;flex-direction:column;gap:16px;}
-.fpd-fam .rec-donebadge{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);color:${POS};font-size:13px;font-weight:600;}
+.fpd-fam .rec-donebadge{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);color:#D99A6B;font-size:13px;font-weight:600;}
 .fpd-fam .recorder audio{width:100%;border-radius:10px;}
 .fpd-fam .rec-savebar{display:flex;gap:10px;}
 .fpd-fam .rec-save{flex:1;padding:13px;border-radius:12px;font-weight:700;font-size:14px;border:none;cursor:pointer;color:#fff;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);}
@@ -305,7 +305,7 @@ const FAM_CSS = `
 .fpd-fam .instruction .ph{color:${MUTED};font-size:13px;}
 .fpd-fam .instruction .desc{color:${SOFT};font-size:13px;line-height:1.6;}
 .fpd-fam .petdocs{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-fam .petdoc{padding:8px 13px;border-radius:11px;font-size:12.5px;cursor:pointer;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);font-family:var(--font-body);}
+.fpd-fam .petdoc{padding:8px 13px;border-radius:11px;font-size:12.5px;cursor:pointer;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);font-family:var(--font-body);}
 
 /* modal (shared pattern) */
 .fpd-fam .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
@@ -336,14 +336,14 @@ const FAM_CSS = `
 .fpd-fam .pfthumb img{width:72px;height:60px;object-fit:cover;border-radius:8px;}
 .fpd-fam .pfremove{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:${NEG};color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;line-height:1;}
 .fpd-fam .pfdocs{display:flex;flex-wrap:wrap;gap:7px;}
-.fpd-fam .pfdoc{padding:5px 10px;border-radius:7px;font-size:11.5px;background:rgba(91,110,225,0.08);color:${ACCENT2};}
+.fpd-fam .pfdoc{padding:5px 10px;border-radius:7px;font-size:11.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;}
 
 /* universal add modal — staged photo/video preview */
 .fpd-fam .stagethumbs{display:flex;flex-wrap:wrap;gap:8px;}
 .fpd-fam .stagethumb{position:relative;}
 .fpd-fam .stagethumb img{width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.22);}
 .fpd-fam .stageremove{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#0D1421;border:1px solid rgba(255,255,255,0.22);color:${MUTED};display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.fpd-fam .stagedrop{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:11px;background:rgba(91,110,225,0.06);border:1px dashed rgba(91,110,225,0.35);color:${ACCENT2};font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.fpd-fam .stagedrop{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:11px;background:rgba(91,110,225,0.06);border:1px dashed rgba(91,110,225,0.35);color:#6FAE8B;font-size:13px;cursor:pointer;font-family:var(--font-body);}
 .fpd-fam .stagevideo{width:100%;border-radius:12px;background:#000;}
 .fpd-fam .stagevideorow{display:flex;align-items:center;gap:10px;}
 .fpd-fam .stagevideorow .nm{color:${MUTED};font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -696,7 +696,7 @@ export function FamilyMemories() {
                 <div key={m.id} className="card pad glow-surface">
                   <div className="r-top" style={{ marginBottom: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <Camera size={16} color={ACCENT2} />
+                      <Camera size={16} color="#FFFFFF" />
                       <span className="r-sub">{m.date}</span>
                     </div>
                     <span className="pill" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{total} photo{total === 1 ? "" : "s"}</span>
@@ -728,7 +728,7 @@ export function FamilyMemories() {
             <div className="toolbar">
               <p>
                 Upload the videos you already have — home movies, phone clips, digitized VHS and camcorder tapes.
-                To record a new message for someone, use <span style={{ color: ACCENT2 }}>Messages to Loved Ones</span>.
+                To record a new message for someone, use <span style={{ color: "#6FAE8B" }}>Messages to Loved Ones</span>.
               </p>
               <div className="actions">
                 <input ref={videoInputRef} type="file" accept="video/*" className="hidden"
@@ -746,7 +746,7 @@ export function FamilyMemories() {
                         style={{ width: 168, borderRadius: 12, background: "#000", flexShrink: 0 }}/>
                     ) : (
                       <button className="vplay" onClick={() => toast.success(`▶ Playing: ${vid.title}`)}>
-                        <Play size={22} color={ACCENT2} />
+                        <Play size={22} color="#FFFFFF" />
                       </button>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -757,7 +757,7 @@ export function FamilyMemories() {
                         <span className="mono">{vid.duration}</span>
                         <span className="txt">{vid.source}</span>
                         <span className="txt">Added {vid.added}</span>
-                        <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: POS, marginLeft: "auto" }}>SECURED</span>
+                        <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                       </div>
                     </div>
                   </div>
@@ -785,7 +785,7 @@ export function FamilyMemories() {
               {recState === "idle" && !recBlob && (
                 <div className="rec-idle">
                   <div className="rec-orb">
-                    <Mic size={36} color={ACCENT2}/>
+                    <Mic size={36} color="#FFFFFF"/>
                   </div>
                   <div className="rec-hint">
                     Press Record to start capturing your audio memory.<br/>Your microphone will be activated.
@@ -895,7 +895,7 @@ export function FamilyMemories() {
                                 <Play size={11}/> Play
                               </button>
                             )}
-                            <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: POS, marginLeft: "auto" }}>SECURED</span>
+                            <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                           </div>
                         </div>
                       </div>
@@ -1092,7 +1092,7 @@ export function FamilyMemories() {
                       <div className="r-grid" style={{ margin: 0 }}>
                         {pet.vaccinations.map((v,i) => (
                           <div key={i} className="tile pos">
-                            <div className="tk" style={{ color: POS }}>Vaccination</div>
+                            <div className="tk" style={{ color: "#D99A6B" }}>Vaccination</div>
                             <div className="tv">{v.type} · {v.date}</div>
                           </div>
                         ))}
@@ -1157,7 +1157,7 @@ export function FamilyMemories() {
                 {/* Upload Images or Videos */}
                 <div>
                   <button className="dropzone" onClick={()=>petPhotoRef.current?.click()}>
-                    <ImageIcon size={32} color={ACCENT2}/>
+                    <ImageIcon size={32} color="#FFFFFF"/>
                     <div className="dt">Upload Images or Videos</div>
                     <div className="ds">Minimum 1 Maximum 10 images or videos</div>
                   </button>

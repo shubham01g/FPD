@@ -66,7 +66,7 @@ export function AttachDocumentField({
         <div className="flex items-center justify-between px-4 py-3 rounded-xl"
           style={{ background:"rgba(72,187,120,0.07)", border:"1px solid rgba(72,187,120,0.25)" }}>
           <div className="flex items-center gap-2">
-            <CheckCircle size={14} color="#48BB78"/>
+            <CheckCircle size={14} color="#FFFFFF"/>
             <span style={{ color:"var(--foreground)", fontSize:13 }}>{value}</span>
           </div>
           <button onClick={() => onChange(null)} style={{ color:"#FC8181" }}><X size={13}/></button>

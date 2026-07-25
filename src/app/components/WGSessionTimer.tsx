@@ -169,11 +169,11 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
       <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.12)" }}>
         <div className="px-4 py-3 border-b flex items-center gap-2"
           style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
-          <Clock size={14} color="#5B6EE1"/>
-          <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO }}>SESSION TIMER & BILLING</span>
+          <Clock size={14} color="#FFFFFF"/>
+          <span style={{ color:"#6E90C9", fontSize:12, fontWeight:700, ...MONO }}>SESSION TIMER & BILLING</span>
           {hasCard
             ? <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", ...MONO }}>
+                style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", ...MONO }}>
                 {card.brand} ****{card.last4} ON FILE
               </span>
             : <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
@@ -192,7 +192,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
                 className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
                 style={{ background:sessionType===t?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${sessionType===t?"#5B6EE1":"rgba(91,110,225,0.1)"}`,
-                  color:sessionType===t?"#5B6EE1":"#5A6A88" }}>
+                  color:sessionType===t?"#6E90C9":"#5A6A88" }}>
                 {label}
               </button>
             ))}
@@ -244,7 +244,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color:"#5A6A88", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
-            <span style={{ color:"#5B6EE1", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
+            <span style={{ color:"#6E90C9", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
               ${currentAmount.toFixed(2)}
             </span>
           </div>
@@ -290,7 +290,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           ) : (
             <button onClick={resumeSession}
               className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
               <Play size={13}/> Resume
             </button>
           )}
@@ -310,7 +310,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
       <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"2px solid rgba(91,110,225,0.25)" }}>
         <div className="px-5 py-4 border-b text-center"
           style={{ borderColor:"rgba(91,110,225,0.1)", background:"rgba(91,110,225,0.05)" }}>
-          <div style={{ color:"#5B6EE1", fontSize:13, fontWeight:700 }}>Confirm Session Billing</div>
+          <div style={{ color:"#6E90C9", fontSize:13, fontWeight:700 }}>Confirm Session Billing</div>
         </div>
         <div className="p-5 space-y-4">
           {/* Summary */}
@@ -329,7 +329,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             ))}
             <div className="flex justify-between py-2">
               <span style={{ color:"#0D1428", fontSize:15, fontWeight:700 }}>Total Charge</span>
-              <span style={{ color:"#5B6EE1", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
+              <span style={{ color:"#6E90C9", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
             </div>
           </div>
 
@@ -364,7 +364,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
   // ── Done ──
   return (
     <div className="rounded-2xl p-5 text-center glow-surface" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
-      <CheckCircle size={36} color="#48BB78" style={{ margin:"0 auto 12px" }}/>
+      <CheckCircle size={36} color="#FFFFFF" style={{ margin:"0 auto 12px" }}/>
       <div style={{ color:"#0D1428", fontSize:15, fontWeight:700, marginBottom:4 }}>Session Complete</div>
       <div style={{ color:"#5A6A88", fontSize:13, marginBottom:12 }}>
         ${amount.toFixed(2)} charged to {card.brand} ****{card.last4}
@@ -377,14 +377,14 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         ].map(s => (
           <div key={s.label} className="px-2 py-2 rounded-xl"
             style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.15)" }}>
-            <div style={{ color:"#48BB78", fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
+            <div style={{ color:"#D99A6B", fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{s.label.toUpperCase()}</div>
           </div>
         ))}
       </div>
       <button onClick={resetTimer}
         className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
-        style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.15)" }}>
+        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.15)" }}>
         <RefreshCw size={12}/> Start New Session
       </button>
     </div>
@@ -413,7 +413,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div style={{ color:"#5A6A88", fontSize:11, ...MONO }}>BILLING HISTORY</div>
-        <div style={{ color:"#5B6EE1", fontSize:13, fontWeight:700 }}>
+        <div style={{ color:"#6E90C9", fontSize:13, fontWeight:700 }}>
           Total: ${total.toFixed(2)}
           <span style={{ color:"#8A9AB8", fontSize:11, fontWeight:400, marginLeft:4 }}>
             (incl. $99 setup)
@@ -439,7 +439,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
             <span style={{ fontSize:14 }}>{r.sessionType === "phone" ? "📞" : "📹"}</span>
             <span style={{ color:"#5A6A88", fontSize:12, ...MONO }}>{r.durationMinutes} min</span>
             <span style={{ color:"#5A6A88", fontSize:12, ...MONO }}>{r.blocksCharged} × $25</span>
-            <span style={{ color:"#48BB78", fontSize:13, fontWeight:700, ...MONO }}>${r.amountCharged.toFixed(2)}</span>
+            <span style={{ color:"#D99A6B", fontSize:13, fontWeight:700, ...MONO }}>${r.amountCharged.toFixed(2)}</span>
           </div>
         ))}
       </div>

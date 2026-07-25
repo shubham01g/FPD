@@ -53,7 +53,7 @@ const WILLS_CSS = `
 .fpd-wills .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-wills .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-wills .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-wills .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-wills .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-wills .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-wills .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -77,10 +77,10 @@ const WILLS_CSS = `
 /* document cards */
 .fpd-wills .dlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-wills .dtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
-.fpd-wills .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-wills .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-wills .dtype{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
 .fpd-wills .dattorney{color:${MUTED};font-size:12.5px;}
-.fpd-wills .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;background:rgba(95,190,145,0.14);color:${POS};flex-shrink:0;}
+.fpd-wills .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;background:rgba(95,190,145,0.14);color:#D99A6B;flex-shrink:0;}
 .fpd-wills .dgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;margin-bottom:16px;}
 .fpd-wills .dgrid .tile:nth-child(3n+2),.fpd-wills .dgrid .tile:nth-child(3n){border-left:1px solid rgba(255,255,255,0.22);}
 .fpd-wills .dgrid .tile:nth-child(n+4){border-top:1px solid rgba(255,255,255,0.22);}
@@ -96,9 +96,9 @@ const WILLS_CSS = `
 
 /* empty state */
 .fpd-wills .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 12px;}
-.fpd-wills .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-wills .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:14px;}
 .fpd-wills .empty .et{color:${SOFT};font-size:14px;margin-bottom:8px;}
-.fpd-wills .empty .elink{background:none;border:none;color:${ACCENT2};font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);}
+.fpd-wills .empty .elink{background:none;border:none;color:#6FAE8B;font-size:13px;cursor:pointer;text-decoration:underline;font-family:var(--font-body);}
 
 /* modal */
 .fpd-wills .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
@@ -186,7 +186,7 @@ export function WillsAndTrusts() {
 
         {/* ── Info banner ── */}
         <div className="foot">
-          <Shield size={16} color={ACCENT2} style={{ flexShrink: 0, marginTop: 1 }} />
+          <Shield size={16} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
           <div className="ft">
             <b>Important:</b> Your legal documents should be prepared and executed by a licensed estate attorney.
             Store the original in a fireproof safe or safe deposit box, and upload a certified copy to your Legacy

@@ -35,7 +35,7 @@ interface Cabinet {
 
 const cabinets: Cabinet[] = [
   {
-    id:"legal", label:"Legal Documents", color:"#5B6EE1", emoji:"⚖️",
+    id:"legal", label:"Legal Documents", color:"#6E90C9", emoji:"⚖️",
     description:"Wills, trusts, power of attorney, contracts & deeds",
     acceptedTypes:"application/pdf,.pdf,.doc,.docx",
     subFolders:["Wills & Trusts","Power of Attorney","Property Deeds","Contracts","Court Documents"],
@@ -48,7 +48,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"financial", label:"Financial Records", color:"#48BB78", emoji:"💰",
+    id:"financial", label:"Financial Records", color:"#D99A6B", emoji:"💰",
     description:"Tax returns, bank statements, investment reports",
     acceptedTypes:"application/pdf,.pdf,.xlsx,.csv",
     subFolders:["Tax Returns","Bank Statements","Investment Reports","Insurance Policies","Loan Documents"],
@@ -98,7 +98,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"vehicles", label:"Vehicles", color:"#5BA7D6", emoji:"🚗",
+    id:"vehicles", label:"Vehicles", color:"#6FAE8B", emoji:"🚗",
     description:"Titles, registration, insurance, loan documents",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Titles & Registration","Insurance","Loan Documents","Service Records"],
@@ -110,7 +110,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"utilities", label:"Utilities & Services", color:"#6F9E94", emoji:"⚡",
+    id:"utilities", label:"Utilities & Services", color:"#D68FA8", emoji:"⚡",
     description:"Electric, gas, water, internet, phone, HOA monthly bills",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electric","Natural Gas","Water & Sewer","Internet","HOA","Phone & Cable"],
@@ -122,7 +122,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"insurance", label:"Insurance Policies", color:"#5BA7D6", emoji:"🛡️",
+    id:"insurance", label:"Insurance Policies", color:"#6FAE8B", emoji:"🛡️",
     description:"Life, health, home, auto, umbrella — all policies",
     acceptedTypes:"application/pdf,.pdf",
     subFolders:["Life Insurance","Health Insurance","Home Insurance","Auto Insurance","Umbrella"],
@@ -172,7 +172,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"videos", label:"Video Messages", color:"#5BA7D6", emoji:"🎥",
+    id:"videos", label:"Video Messages", color:"#6FAE8B", emoji:"🎥",
     description:"Video messages for loved ones — delivered after passing",
     acceptedTypes:"video/*,.mp4,.mov,.avi",
     subFolders:["Family Messages","Life Story Videos","Funeral Instructions"],
@@ -184,7 +184,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#5BA7D6", emoji:"🏺",
+    id:"keepsakes", label:"Keepsakes & Collectibles", color:"#6FAE8B", emoji:"🏺",
     description:"Photos and records of heirlooms, collectibles, and sentimental items",
     acceptedTypes:"image/*,.jpg,.jpeg,.png,application/pdf",
     subFolders:["Jewelry","Coins & Currency","Art","Military Memorabilia","Family Heirlooms"],
@@ -196,7 +196,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"digital", label:"Digital Assets", color:"#6F9E94", emoji:"₿",
+    id:"digital", label:"Digital Assets", color:"#D68FA8", emoji:"₿",
     description:"Cryptocurrency, online accounts, passwords, domains",
     acceptedTypes:"application/pdf,.txt,.pdf",
     subFolders:["Cryptocurrency","Online Accounts","Domains","Social Media","Passwords"],
@@ -220,7 +220,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"goals", label:"Goals & Life Plans", color:"#48BB78", emoji:"🎯",
+    id:"goals", label:"Goals & Life Plans", color:"#D99A6B", emoji:"🎯",
     description:"Personal goals, bucket list, life plans, vision documents",
     acceptedTypes:"application/pdf,.pdf,.doc,.docx",
     subFolders:["Personal Goals","Financial Goals","Family Goals","Completed Goals"],
@@ -253,7 +253,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"warranties", label:"Warranties", color:"#5BA7D6", emoji:"🛡️",
+    id:"warranties", label:"Warranties", color:"#6FAE8B", emoji:"🛡️",
     description:"Product warranties, extended protection plans, and proof of purchase",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Electronics","Appliances","Vehicles","Home & HVAC","Other"],
@@ -266,7 +266,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"ids", label:"IDs & Licensing", color:"#5BA7D6", emoji:"🪪",
+    id:"ids", label:"IDs & Licensing", color:"#6FAE8B", emoji:"🪪",
     description:"Government IDs, driver's license, passport & professional licenses",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Government IDs","Driver's License & Passport","Professional Licenses","Certifications"],
@@ -291,7 +291,7 @@ const cabinets: Cabinet[] = [
     ],
   },
   {
-    id:"places", label:"Favorite Places", color:"#48BB78", emoji:"📍",
+    id:"places", label:"Favorite Places", color:"#D99A6B", emoji:"📍",
     description:"Meaningful restaurants, parks, travel spots & family places",
     acceptedTypes:"application/pdf,.pdf,image/*",
     subFolders:["Restaurants","Parks & Nature","Travel","Family Spots"],
@@ -327,7 +327,7 @@ const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
 function getIcon(type: string, color = ACCENT2, size = 28) {
   if (type === "folder") return <Folder size={size} color={color} fill={`${color}22`}/>;
   if (type === "image")  return <Image size={size} color="#D9A55E"/>;
-  if (type === "video")  return <Film  size={size} color={ACCENT}/>;
+  if (type === "video")  return <Film  size={size} color="#FFFFFF"/>;
   if (type === "pdf" || type === "doc") return <FileText size={size} color={color}/>;
   if (type === "other") return <Lock size={size} color={NEG}/>;
   return <Archive size={size} color={MUTED}/>;
@@ -351,14 +351,14 @@ const CAB_CSS = `
 .fpd-cab .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 .fpd-cab .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
 .fpd-cab .crumb-btn{background:none;border:none;cursor:pointer;color:${MUTED};font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding:0;}
-.fpd-cab .crumb-btn:hover{color:${ACCENT2};}
-.fpd-cab .crumb-cur{color:${ACCENT2};}
+.fpd-cab .crumb-btn:hover{color:#6FAE8B;}
+.fpd-cab .crumb-cur{color:#6FAE8B;}
 
 /* header */
 .fpd-cab .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-cab .pg-h1row{display:flex;align-items:flex-start;gap:12px;}
 .fpd-cab .backbtn{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;margin-top:2px;}
-.fpd-cab .backbtn:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-cab .backbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-cab .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cab .pg-sub{color:${MUTED};font-size:13px;max-width:620px;line-height:1.6;}
 .fpd-cab .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -393,8 +393,8 @@ const CAB_CSS = `
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:13px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
 .fpd-cab .drop.on{border-color:rgba(91,110,225,0.5);background:rgba(91,110,225,0.06);}
 .fpd-cab .drop .dtxt{font-size:13px;color:${MUTED};}
-.fpd-cab .drop.on .dtxt{color:${ACCENT2};}
-.fpd-cab .drop .dtag{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${ACCENT2};padding:4px 9px;border-radius:7px;background:rgba(91,110,225,0.12);flex-shrink:0;}
+.fpd-cab .drop.on .dtxt{color:#6FAE8B;}
+.fpd-cab .drop .dtag{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:#6FAE8B;padding:4px 9px;border-radius:7px;background:rgba(91,110,225,0.12);flex-shrink:0;}
 
 /* chips (sub-folders) */
 .fpd-cab .chiprow{display:flex;flex-wrap:wrap;gap:8px;}
@@ -422,7 +422,7 @@ const CAB_CSS = `
 .fpd-cab .frow .rcount{font-family:var(--font-mono);font-size:10.5px;padding:4px 9px;border-radius:7px;flex-shrink:0;}
 
 .fpd-cab .newtile{border-radius:15px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
-.fpd-cab .newtile:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-cab .newtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 
 /* files */
 .fpd-cab .filegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;}
@@ -441,16 +441,16 @@ const CAB_CSS = `
 .fpd-cab .filerow .ftico img{width:34px;height:34px;object-fit:cover;}
 .fpd-cab .filerow .fname{color:${TEXT};font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-cab .filerow .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:11px;}
-.fpd-cab .filerow .synced{padding:2px 7px;border-radius:6px;font-size:10px;background:rgba(91,110,225,0.10);color:${ACCENT2};display:inline-flex;align-items:center;gap:4px;}
+.fpd-cab .filerow .synced{padding:2px 7px;border-radius:6px;font-size:10px;background:rgba(91,110,225,0.10);color:#6FAE8B;display:inline-flex;align-items:center;gap:4px;}
 .fpd-cab .filerow .fdate{color:${MUTED};font-size:11px;flex-shrink:0;}
 .fpd-cab .filerow .facts{display:flex;gap:2px;flex-shrink:0;}
 .fpd-cab .filerow .facts button{color:${MUTED};padding:5px;background:none;border:none;cursor:pointer;transition:color .16s;display:flex;}
-.fpd-cab .filerow .facts button:hover{color:${ACCENT2};}
+.fpd-cab .filerow .facts button:hover{color:#6FAE8B;}
 .fpd-cab .filerow .facts button.del:hover{color:${NEG};}
 
 .fpd-cab .uploadtile{border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;color:${MUTED};background:rgba(255,255,255,0.008);transition:border-color .18s,color .18s;}
-.fpd-cab .uploadtile.on{border-color:rgba(91,110,225,0.5);background:rgba(91,110,225,0.06);color:${ACCENT2};}
-.fpd-cab .uploadtile:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-cab .uploadtile.on{border-color:rgba(91,110,225,0.5);background:rgba(91,110,225,0.06);color:#6FAE8B;}
+.fpd-cab .uploadtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 
 /* detail panel */
 .fpd-cab .detail{position:fixed;bottom:24px;right:24px;width:290px;z-index:40;padding:18px;}
@@ -464,12 +464,12 @@ const CAB_CSS = `
 .fpd-cab .detail .dv{color:${TEXT};font-weight:500;}
 .fpd-cab .detail .dbtns{display:flex;gap:8px;margin-top:14px;}
 .fpd-cab .detail .dbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);}
-.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${ACCENT2};}
+.fpd-cab .detail .dbtn.ghost{background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:#6FAE8B;}
 .fpd-cab .detail .dbtn.solid{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;}
 
 /* empty */
 .fpd-cab .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 12px;}
-.fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-cab .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-cab .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 
 @media (max-width:640px){.fpd-cab .fgrid{grid-template-columns:repeat(2,1fr);}.fpd-cab .filegrid{grid-template-columns:repeat(2,1fr);}}

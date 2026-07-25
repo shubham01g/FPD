@@ -34,7 +34,7 @@ const plans = [
 
 const alertHistory = [
   { date: "Jun 10, 2026", type: "80%", message: "Storage at 80% — usage warning sent", color: WARN },
-  { date: "May 28, 2026", type: "Reset", message: "Monthly billing cycle reset — storage cleared to 0", color: POS },
+  { date: "May 28, 2026", type: "Reset", message: "Monthly billing cycle reset — storage cleared to 0", color: "#D99A6B" },
   { date: "Apr 29, 2026", type: "90%", message: "Storage at 90% — upgrade recommended", color: NEG },
 ];
 
@@ -109,7 +109,7 @@ const STORAGE_CSS = `
 @media (max-width:900px){.fpd-storage .plan-grid{grid-template-columns:1fr;}}
 .fpd-storage .plan-card{padding:20px;border-radius:13px;border:1px solid rgba(255,255,255,0.22);background:#0F1624;}
 .fpd-storage .plan-card.current{background:rgba(91,110,225,0.08);border:2px solid ${ACCENT};}
-.fpd-storage .plan-tag{font-size:10px;font-family:var(--font-mono);color:${ACCENT2};margin-bottom:6px;}
+.fpd-storage .plan-tag{font-size:10px;font-family:var(--font-mono);color:#6FAE8B;margin-bottom:6px;}
 .fpd-storage .plan-name{font-family:var(--font-display);font-size:17px;color:${TEXT};margin-bottom:6px;}
 .fpd-storage .plan-price{font-size:22px;color:${TEXT};font-weight:700;}
 .fpd-storage .plan-price-sub{color:${MUTED};font-size:12px;}
@@ -219,7 +219,7 @@ export function StorageUsage() {
               { label: "80% Threshold", pct: 80, msg: "Usage warning email", color: WARN },
               { label: "90% Threshold", pct: 90, msg: "Upgrade recommended email", color: NEG },
               { label: "95% Threshold", pct: 95, msg: "Critical alert email", color: "#E53E3E" },
-              { label: "100% Limit", pct: 100, msg: "Overage billing begins", color: ACCENT2 },
+              { label: "100% Limit", pct: 100, msg: "Overage billing begins", color: "#6FAE8B" },
             ].map(t => (
               <div key={t.pct} className="thresh">
                 <div className="thresh-pct" style={{ color: t.color }}>{t.pct}%</div>

@@ -378,7 +378,7 @@ const AI_CSS = `
 .fpd-ai .hd-status span{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};letter-spacing:0.02em;}
 .fpd-ai .hd-r{display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .fpd-ai .icon-btn{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.22);color:${MUTED};cursor:pointer;transition:color .18s,border-color .18s,background .18s;}
-.fpd-ai .icon-btn:hover{color:${ACCENT2};border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.08);}
+.fpd-ai .icon-btn:hover{color:#FFFFFF;border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.08);}
 
 /* ── Page chrome (mirrors the Dashboard / Calendar layout) ── */
 .fpd-ai .wrap{max-width:1320px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
@@ -407,7 +407,7 @@ const AI_CSS = `
 .fpd-ai .kcell.c-indigo{--c:${INDIGO};}
 .fpd-ai .kcell.c-cyan{--c:${CYAN};}
 .fpd-ai .kcell.c-green{--c:${GREEN};}
-.fpd-ai .kcell::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--c) 65%,transparent) 50%,transparent);transition:width .25s ease,top .25s ease,bottom .25s ease,box-shadow .25s ease;}
+.fpd-ai .kcell::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 80%,transparent) 50%,color-mix(in srgb,var(--c) 22%,transparent));transition:width .25s ease,top .25s ease,bottom .25s ease,box-shadow .25s ease;}
 .fpd-ai .kcell:first-child::before{display:none;}
 .fpd-ai .kcell:hover::before{top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,var(--c) 50%,transparent);box-shadow:0 0 16px 1px var(--c);}
 .fpd-ai .kcell .kbar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,var(--c),transparent);transform:scaleX(0);transform-origin:left;transition:transform .22s ease;}
@@ -436,10 +436,10 @@ const AI_CSS = `
 .fpd-ai .qrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;margin-bottom:8px;}
 .fpd-ai .qrow:last-child{margin-bottom:0;}
 .fpd-ai .qrow:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
-.fpd-ai .qrow .qico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.22);color:${ACCENT2};}
+.fpd-ai .qrow .qico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.22);color:#FFFFFF;}
 .fpd-ai .qrow .qtxt{flex:1;font-size:12.5px;color:${SOFT};font-weight:500;line-height:1.4;}
 .fpd-ai .qrow .qarr{color:${FAINT};flex-shrink:0;}
-.fpd-ai .qrow:hover .qarr{color:${ACCENT2};}
+.fpd-ai .qrow:hover .qarr{color:#6FAE8B;}
 
 /* footnote */
 .fpd-ai .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
@@ -486,7 +486,7 @@ const AI_CSS = `
 .fpd-ai .sugg{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.22);scrollbar-width:none;}
 .fpd-ai .sugg::-webkit-scrollbar{display:none;}
 .fpd-ai .sugg .flabel{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;color:${FAINT};align-self:center;flex-shrink:0;text-transform:uppercase;}
-.fpd-ai .chip{white-space:nowrap;flex-shrink:0;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;color:${ACCENT2};background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);transition:background .16s,border-color .16s;}
+.fpd-ai .chip{white-space:nowrap;flex-shrink:0;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;color:#6FAE8B;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);transition:background .16s,border-color .16s;}
 .fpd-ai .chip:hover{background:rgba(91,110,225,0.18);border-color:rgba(91,110,225,0.45);}
 
 /* input bar */
@@ -644,7 +644,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
               </div>
 
               <div className="foot">
-                <Info size={16} color={ACCENT2} style={{ flexShrink:0, marginTop:1 }}/>
+                <Info size={16} color="#FFFFFF" style={{ flexShrink:0, marginTop:1 }}/>
                 <div className="ft">
                   <b>This assistant knows the whole platform.</b> It only explains features and points you to the
                   right section — it never touches your data. For account-specific help, contact{" "}

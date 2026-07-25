@@ -34,9 +34,9 @@ const userGrowth = [
 ];
 
 const planDist = [
-  { name:"Foundation", value:18420, color:"#5BA7D6" },
-  { name:"Legacy Archive", value:24180, color:"#5B6EE1" },
-  { name:"Legacy Pro", value:7890, color:"#5BA7D6" },
+  { name:"Foundation", value:18420, color:"#6FAE8B" },
+  { name:"Legacy Archive", value:24180, color:"#6E90C9" },
+  { name:"Legacy Pro", value:7890, color:"#6FAE8B" },
 ];
 
 const storageByPlan = [
@@ -79,33 +79,33 @@ type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|
 
 // Gender
 const genderData = [
-  { label:"Female",          pct:54.2, count:27_894, color:"#5BA7D6" },
-  { label:"Male",            pct:40.1, count:20_647, color:"#5B6EE1" },
-  { label:"Non-binary",      pct:3.8,  count:1_957,  color:"#48BB78" },
+  { label:"Female",          pct:54.2, count:27_894, color:"#6FAE8B" },
+  { label:"Male",            pct:40.1, count:20_647, color:"#6E90C9" },
+  { label:"Non-binary",      pct:3.8,  count:1_957,  color:"#D99A6B" },
   { label:"Prefer not to say",pct:1.9, count:992,    color:"#5A6A88" },
 ];
 
 // Age cohorts
 const ageData = [
-  { range:"18 – 24", count:2_841,  pct:5.5,  color:"#5BA7D6", avgPlan:"Foundation" },
-  { range:"25 – 34", count:7_284,  pct:14.1, color:"#5B6EE1", avgPlan:"Legacy Archive" },
-  { range:"35 – 44", count:11_492, pct:22.3, color:"#5B6EE1", avgPlan:"Legacy Archive" },
-  { range:"45 – 54", count:13_840, pct:26.9, color:"#5BA7D6", avgPlan:"Legacy Pro" },
-  { range:"55 – 64", count:10_284, pct:20.0, color:"#48BB78", avgPlan:"Legacy Pro" },
+  { range:"18 – 24", count:2_841,  pct:5.5,  color:"#6FAE8B", avgPlan:"Foundation" },
+  { range:"25 – 34", count:7_284,  pct:14.1, color:"#6E90C9", avgPlan:"Legacy Archive" },
+  { range:"35 – 44", count:11_492, pct:22.3, color:"#6E90C9", avgPlan:"Legacy Archive" },
+  { range:"45 – 54", count:13_840, pct:26.9, color:"#6FAE8B", avgPlan:"Legacy Pro" },
+  { range:"55 – 64", count:10_284, pct:20.0, color:"#D99A6B", avgPlan:"Legacy Pro" },
   { range:"65 – 74", count:4_821,  pct:9.4,  color:"#F6AD55", avgPlan:"Legacy Archive" },
   { range:"75+",     count:928,    pct:1.8,  color:"#FC8181", avgPlan:"Foundation" },
 ];
 
 // Top US states
 const stateData = [
-  { state:"California",    abbr:"CA", users:9_284,  pct:18.0, mrr:232_100, color:"#5B6EE1" },
-  { state:"Texas",         abbr:"TX", users:6_841,  pct:13.3, mrr:171_025, color:"#5B6EE1" },
-  { state:"Florida",       abbr:"FL", users:5_492,  pct:10.7, mrr:137_300, color:"#5BA7D6" },
-  { state:"New York",      abbr:"NY", users:4_821,  pct:9.4,  mrr:120_525, color:"#5BA7D6" },
-  { state:"Georgia",       abbr:"GA", users:3_284,  pct:6.4,  mrr:82_100,  color:"#5BA7D6" },
-  { state:"Illinois",      abbr:"IL", users:2_948,  pct:5.7,  mrr:73_700,  color:"#5BA7D6" },
-  { state:"North Carolina",abbr:"NC", users:2_491,  pct:4.8,  mrr:62_275,  color:"#48BB78" },
-  { state:"Pennsylvania",  abbr:"PA", users:2_284,  pct:4.4,  mrr:57_100,  color:"#48BB78" },
+  { state:"California",    abbr:"CA", users:9_284,  pct:18.0, mrr:232_100, color:"#6E90C9" },
+  { state:"Texas",         abbr:"TX", users:6_841,  pct:13.3, mrr:171_025, color:"#6E90C9" },
+  { state:"Florida",       abbr:"FL", users:5_492,  pct:10.7, mrr:137_300, color:"#6FAE8B" },
+  { state:"New York",      abbr:"NY", users:4_821,  pct:9.4,  mrr:120_525, color:"#6FAE8B" },
+  { state:"Georgia",       abbr:"GA", users:3_284,  pct:6.4,  mrr:82_100,  color:"#6FAE8B" },
+  { state:"Illinois",      abbr:"IL", users:2_948,  pct:5.7,  mrr:73_700,  color:"#6FAE8B" },
+  { state:"North Carolina",abbr:"NC", users:2_491,  pct:4.8,  mrr:62_275,  color:"#D99A6B" },
+  { state:"Pennsylvania",  abbr:"PA", users:2_284,  pct:4.4,  mrr:57_100,  color:"#D99A6B" },
   { state:"Ohio",          abbr:"OH", users:1_941,  pct:3.8,  mrr:48_525,  color:"#F6AD55" },
   { state:"Arizona",       abbr:"AZ", users:1_724,  pct:3.3,  mrr:43_100,  color:"#F6AD55" },
 ];
@@ -126,27 +126,27 @@ const cityData = [
 
 // Country distribution
 const countryData = [
-  { country:"United States",  users:48_241, pct:93.7, color:"#5B6EE1" },
-  { country:"Canada",         users:1_284,  pct:2.5,  color:"#5BA7D6" },
-  { country:"United Kingdom", users:841,    pct:1.6,  color:"#48BB78" },
-  { country:"Australia",      users:492,    pct:1.0,  color:"#5BA7D6" },
+  { country:"United States",  users:48_241, pct:93.7, color:"#6E90C9" },
+  { country:"Canada",         users:1_284,  pct:2.5,  color:"#6FAE8B" },
+  { country:"United Kingdom", users:841,    pct:1.6,  color:"#D99A6B" },
+  { country:"Australia",      users:492,    pct:1.0,  color:"#6FAE8B" },
   { country:"Germany",        users:241,    pct:0.5,  color:"#F6AD55" },
   { country:"Other",          users:391,    pct:0.7,  color:"#5A6A88" },
 ];
 
 // Device / platform
 const deviceData = [
-  { label:"Mobile (iOS)",     pct:41.2, color:"#5B6EE1" },
-  { label:"Mobile (Android)", pct:28.4, color:"#48BB78" },
-  { label:"Desktop (Mac)",    pct:18.1, color:"#5BA7D6" },
-  { label:"Desktop (Windows)",pct:10.8, color:"#5BA7D6" },
+  { label:"Mobile (iOS)",     pct:41.2, color:"#6E90C9" },
+  { label:"Mobile (Android)", pct:28.4, color:"#D99A6B" },
+  { label:"Desktop (Mac)",    pct:18.1, color:"#6FAE8B" },
+  { label:"Desktop (Windows)",pct:10.8, color:"#6FAE8B" },
   { label:"Tablet",           pct:1.5,  color:"#F6AD55" },
 ];
 
 // Relationship status
 const relationshipData = [
-  { label:"Married / Partnered", pct:58.4, color:"#5B6EE1" },
-  { label:"Single",              pct:21.2, color:"#5BA7D6" },
+  { label:"Married / Partnered", pct:58.4, color:"#6E90C9" },
+  { label:"Single",              pct:21.2, color:"#6FAE8B" },
   { label:"Divorced / Separated",pct:12.8, color:"#F6AD55" },
   { label:"Widowed",             pct:6.1,  color:"#FC8181" },
   { label:"Prefer not to say",   pct:1.5,  color:"#5A6A88" },
@@ -154,13 +154,13 @@ const relationshipData = [
 
 // Feature adoption
 const featureAdoption = [
-  { feature:"Digital File Cabinet", adopted:87.4, total:51490, color:"#5B6EE1" },
-  { feature:"Legacy Contacts",      adopted:74.2, total:51490, color:"#5BA7D6" },
-  { feature:"Final Wishes",         adopted:62.8, total:51490, color:"#48BB78" },
-  { feature:"Medical Info",         adopted:58.1, total:51490, color:"#5BA7D6" },
+  { feature:"Digital File Cabinet", adopted:87.4, total:51490, color:"#6E90C9" },
+  { feature:"Legacy Contacts",      adopted:74.2, total:51490, color:"#6FAE8B" },
+  { feature:"Final Wishes",         adopted:62.8, total:51490, color:"#D99A6B" },
+  { feature:"Medical Info",         adopted:58.1, total:51490, color:"#6FAE8B" },
   { feature:"Financial Records",    adopted:52.4, total:51490, color:"#F6AD55" },
   { feature:"Digital Diary",        adopted:41.8, total:51490, color:"#ED8936" },
-  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#6F9E94" },
+  { feature:"Password Manager",     adopted:38.2, total:51490, color:"#D68FA8" },
   { feature:"Affiliate Program",    adopted:29.4, total:51490, color:"#FC8181" },
   { feature:"$199 Continuation Fee",adopted:18.7, total:51490, color:"#E53E3E" },
 ];
@@ -169,9 +169,9 @@ const featureAdoption = [
 const completionBuckets = [
   { range:"0 – 20%  (Just started)",  count:8_241,  color:"#FC8181" },
   { range:"21 – 40% (In progress)",   count:11_284, color:"#F6AD55" },
-  { range:"41 – 60% (Halfway)",       count:13_841, color:"#5BA7D6" },
-  { range:"61 – 80% (Nearly done)",   count:12_492, color:"#5BA7D6" },
-  { range:"81 – 100% (Complete)",     count:5_632,  color:"#48BB78" },
+  { range:"41 – 60% (Halfway)",       count:13_841, color:"#6FAE8B" },
+  { range:"61 – 80% (Nearly done)",   count:12_492, color:"#6FAE8B" },
+  { range:"81 – 100% (Complete)",     count:5_632,  color:"#D99A6B" },
 ];
 
 // Engagement
@@ -186,20 +186,20 @@ const engagementData = [
 
 // Signup sources
 const acquisitionData = [
-  { source:"Organic Search (Google)", pct:38.4, color:"#5B6EE1" },
-  { source:"Affiliate Referral",      pct:22.1, color:"#5BA7D6" },
-  { source:"Social Media",            pct:14.8, color:"#48BB78" },
+  { source:"Organic Search (Google)", pct:38.4, color:"#6E90C9" },
+  { source:"Affiliate Referral",      pct:22.1, color:"#6FAE8B" },
+  { source:"Social Media",            pct:14.8, color:"#D99A6B" },
   { source:"Partner Referral",        pct:12.4, color:"#F6AD55" },
-  { source:"Direct / Typed URL",      pct:8.2,  color:"#5BA7D6" },
+  { source:"Direct / Typed URL",      pct:8.2,  color:"#6FAE8B" },
   { source:"Paid Ads",                pct:4.1,  color:"#FC8181" },
 ];
 
 // Health / retention
 const retentionData = [
-  { month:"Month 1", retained:91.2, color:"#48BB78" },
-  { month:"Month 2", retained:84.8, color:"#48BB78" },
-  { month:"Month 3", retained:80.1, color:"#5BA7D6" },
-  { month:"Month 6", retained:74.4, color:"#5BA7D6" },
+  { month:"Month 1", retained:91.2, color:"#D99A6B" },
+  { month:"Month 2", retained:84.8, color:"#D99A6B" },
+  { month:"Month 3", retained:80.1, color:"#6FAE8B" },
+  { month:"Month 6", retained:74.4, color:"#6FAE8B" },
   { month:"Month 12",retained:68.2, color:"#F6AD55" },
 ];
 
@@ -270,10 +270,10 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
 
 const PLANS = [
   { id:"starter",    name:"Starter",    price:1.99,  storage:"1 GB",   color:"#5A6A88" },
-  { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#5BA7D6" },
-  { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#5B6EE1" },
-  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"1 TB", color:"#5BA7D6" },
-  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"5 TB", color:"#48BB78" },
+  { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#6FAE8B" },
+  { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#6E90C9" },
+  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"1 TB", color:"#6FAE8B" },
+  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"5 TB", color:"#D99A6B" },
 ];
 
 const WAIVE_REASONS = [
@@ -342,7 +342,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
         <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10" style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div className="flex items-center gap-3">
             <div className="rounded-xl p-2" style={{ background:"rgba(91,110,225,0.08)" }}>
-              <UserPlus size={16} color="#5B6EE1"/>
+              <UserPlus size={16} color="#FFFFFF"/>
             </div>
             <div>
               <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Manually Onboard User</div>
@@ -375,13 +375,13 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               <div className="flex items-center justify-between p-4 rounded-xl glow-surface" style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)" }}>
                 <div>
                   <div className="flex items-center gap-2">
-                    <Star size={14} color="#5BA7D6"/>
+                    <Star size={14} color="#FFFFFF"/>
                     <span style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>White Glove Service</span>
                   </div>
                   <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Assign a dedicated FPD concierge to assist this user</div>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, whiteGlove:!p.whiteGlove, subscriptionWaived: !p.whiteGlove || p.subscriptionWaived }))}
-                  style={{ color:form.whiteGlove?"#5BA7D6":"#8A9AB8" }}>
+                  style={{ color:form.whiteGlove?"#6FAE8B":"#8A9AB8" }}>
                   {form.whiteGlove ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
                 </button>
               </div>
@@ -444,7 +444,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                     </div>
                   </div>
                   <button onClick={() => setForm(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
-                    style={{ color:form.subscriptionWaived?"#48BB78":"#8A9AB8" }}>
+                    style={{ color:form.subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
                     {form.subscriptionWaived ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
                   </button>
                 </div>
@@ -457,7 +457,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                           className="px-3 py-2 rounded-lg text-xs text-left transition-all"
                           style={{ background:form.waiveReason===r.id?"rgba(72,187,120,0.1)":"rgba(91,110,225,0.04)",
                             border:`1px solid ${form.waiveReason===r.id?"#48BB78":"rgba(91,110,225,0.1)"}`,
-                            color:form.waiveReason===r.id?"#48BB78":"#5A6A88", fontWeight:form.waiveReason===r.id?600:400 }}>
+                            color:form.waiveReason===r.id?"#D99A6B":"#5A6A88", fontWeight:form.waiveReason===r.id?600:400 }}>
                           {r.label}
                         </button>
                       ))}
@@ -469,11 +469,11 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               {/* Send welcome email toggle */}
               <div className="flex items-center justify-between p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <div className="flex items-center gap-2">
-                  <Send size={13} color="#5B6EE1"/>
+                  <Send size={13} color="#FFFFFF"/>
                   <span style={{ color:"#0D1428", fontSize:13 }}>Send welcome email to user</span>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, sendWelcome:!p.sendWelcome }))}
-                  style={{ color:form.sendWelcome?"#5B6EE1":"#8A9AB8" }}>
+                  style={{ color:form.sendWelcome?"#6E90C9":"#8A9AB8" }}>
                   {form.sendWelcome ? <ToggleRight size={26}/> : <ToggleLeft size={26}/>}
                 </button>
               </div>
@@ -506,7 +506,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   <div key={row.label} className="flex items-center px-4 py-3"
                     style={{ background:i%2===0?"#fff":"#F8FAFF", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
                     <span style={{ color:"#8A9AB8", fontSize:11, width:120, flexShrink:0, ...MONO_S }}>{row.label.toUpperCase()}</span>
-                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#48BB78":row.label==="White Glove"&&form.whiteGlove?"#5BA7D6":"#0D1428", fontSize:13, fontWeight:500 }}>{row.value}</span>
+                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#D99A6B":row.label==="White Glove"&&form.whiteGlove?"#6FAE8B":"#0D1428", fontSize:13, fontWeight:500 }}>{row.value}</span>
                   </div>
                 ))}
               </div>
@@ -520,8 +520,8 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 
               {form.subscriptionWaived && (
                 <div className="flex items-start gap-2 px-4 py-3 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                  <Gift size={13} color="#48BB78" style={{ marginTop:1 }}/>
-                  <p style={{ color:"#48BB78", fontSize:12 }}>
+                  <Gift size={13} color="#FFFFFF" style={{ marginTop:1 }}/>
+                  <p style={{ color:"#D99A6B", fontSize:12 }}>
                     <strong>Subscription waived.</strong> This account will be created with full {selectedPlan.name} access at $0/mo. The waiver and reason are logged in the audit trail.
                   </p>
                 </div>
@@ -545,11 +545,11 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 }
 
 const topMetrics = [
-  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#5B6EE1" },
-  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#48BB78" },
-  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#5BA7D6" },
+  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#6E90C9" },
+  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#D99A6B" },
+  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#6FAE8B" },
   { label:"Affiliate Payouts (Jun)", value:"$23,040", change:+14.2, color:"#F6AD55" },
-  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#5B6EE1" },
+  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#6E90C9" },
   { label:"Churn Rate (Jun)", value:"2.3%", change:-0.4, color:"#FC8181", lowerBetter:true },
 ];
 
@@ -634,9 +634,9 @@ function PushNotificationCenter() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label:"Notifications Sent",   value:history.length,                  color:"#5B6EE1" },
-          { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#48BB78" },
-          { label:"Avg Open Rate",         value:`${avgOpenRate}%`,               color:"#5BA7D6" },
+          { label:"Notifications Sent",   value:history.length,                  color:"#6E90C9" },
+          { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#D99A6B" },
+          { label:"Avg Open Rate",         value:`${avgOpenRate}%`,               color:"#6FAE8B" },
           { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
@@ -689,12 +689,12 @@ function PushNotificationCenter() {
                     className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                     style={{ background:target===id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                       border:`1px solid ${target===id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
-                      color:target===id?"#5B6EE1":"#5A6A88" }}>
+                      color:target===id?"#6E90C9":"#5A6A88" }}>
                     {label}
                   </button>
                 ))}
               </div>
-              <div style={{ color:"#48BB78", fontSize:11, marginTop:6 }}>
+              <div style={{ color:"#D99A6B", fontSize:11, marginTop:6 }}>
                 📣 Will reach <strong>{TARGET_COUNTS[target].toLocaleString()}</strong> users
               </div>
             </div>
@@ -712,7 +712,7 @@ function PushNotificationCenter() {
                     className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl text-center transition-all"
                     style={{ background:channel===ch.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.03)", border:`1px solid ${channel===ch.id?"#5B6EE1":"rgba(91,110,225,0.12)"}` }}>
                     <span style={{ fontSize:18 }}>{ch.icon}</span>
-                    <span style={{ fontSize:11, fontWeight:700, color:channel===ch.id?"#5B6EE1":"#5A6A88" }}>{ch.label}</span>
+                    <span style={{ fontSize:11, fontWeight:700, color:channel===ch.id?"#6E90C9":"#5A6A88" }}>{ch.label}</span>
                     <span style={{ fontSize:9, color:"#8A9AB8", lineHeight:1.3 }}>{ch.desc}</span>
                   </button>
                 ))}
@@ -720,7 +720,7 @@ function PushNotificationCenter() {
               {channel === "both" && (
                 <div className="mt-2 px-3 py-2 rounded-xl text-xs flex items-center gap-1.5"
                   style={{ background:"rgba(91,110,225,0.04)", color:"#5A6A88" }}>
-                  <Bell size={10} color="#5B6EE1"/>
+                  <Bell size={10} color="#FFFFFF"/>
                   Push & Email will be sent simultaneously. Email recipients must have email notifications enabled.
                 </div>
               )}
@@ -753,7 +753,7 @@ function PushNotificationCenter() {
                 <div style={{ color:"#8A9AB8", fontSize:11 }}>Send at a specific date and time</div>
               </div>
               <button onClick={() => setScheduleMode(!scheduleMode)}
-                style={{ color:scheduleMode?"#5B6EE1":"#8A9AB8" }}>
+                style={{ color:scheduleMode?"#6E90C9":"#8A9AB8" }}>
                 {scheduleMode ? <ToggleRight size={26}/> : <ToggleLeft size={26}/>}
               </button>
             </div>
@@ -768,7 +768,7 @@ function PushNotificationCenter() {
             <div className="flex gap-3">
               <button onClick={() => setPreview(!preview)}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-semibold"
-                style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+                style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 {preview ? "Hide Preview" : "Preview"}
               </button>
               <button onClick={send} disabled={sending}
@@ -829,7 +829,7 @@ function PushNotificationCenter() {
 
             {/* Tips */}
             <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)" }}>
-              <div style={{ color:"#5B6EE1", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
+              <div style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
               <ul className="space-y-1.5">
                 {[
                   "Keep titles under 50 characters for full display on all devices",
@@ -884,15 +884,15 @@ function PushNotificationCenter() {
               <div className="grid grid-cols-3 gap-3">
                 <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>DELIVERED</div>
-                  <div style={{ color:"#5B6EE1", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
+                  <div style={{ color:"#6E90C9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
                 </div>
                 <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPENED</div>
-                  <div style={{ color:"#48BB78", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
+                  <div style={{ color:"#D99A6B", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
                 </div>
                 <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
                   <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPEN RATE</div>
-                  <div style={{ color:n.openRate > 50 ? "#48BB78" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>
+                  <div style={{ color:n.openRate > 50 ? "#D99A6B" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>
                     {n.openRate}%
                   </div>
                 </div>
@@ -941,8 +941,8 @@ export function MasterAdmin() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Crown size={15} color="#5B6EE1" />
-            <span style={{ color:"#5B6EE1", fontSize:11, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
+            <Crown size={15} color="#FFFFFF" />
+            <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Platform Command Center</h1>
           <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
@@ -954,8 +954,8 @@ export function MasterAdmin() {
             <UserPlus size={14}/> Onboard User
           </button>
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
-            <Activity size={13} color="#48BB78" />
-            <span style={{ color:"#48BB78", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
+            <Activity size={13} color="#FFFFFF" />
+            <span style={{ color:"#D99A6B", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
           </div>
         </div>
       </div>
@@ -963,20 +963,20 @@ export function MasterAdmin() {
       {/* Manually onboarded users strip */}
       {manualUsers.length > 0 && (
         <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
-          <UserPlus size={14} color="#5B6EE1"/>
-          <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:600 }}>Manually Onboarded:</span>
+          <UserPlus size={14} color="#FFFFFF"/>
+          <span style={{ color:"#6E90C9", fontSize:12, fontWeight:600 }}>Manually Onboarded:</span>
           <div className="flex flex-wrap gap-2 flex-1">
             {manualUsers.slice(0,4).map(u => (
               <span key={u.id} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
-                style={{ background:`rgba(91,110,225,0.1)`, color:"#5B6EE1", fontWeight:500 }}>
-                {u.whiteGlove && <Star size={9} color="#5BA7D6"/>}
+                style={{ background:`rgba(91,110,225,0.1)`, color:"#6E90C9", fontWeight:500 }}>
+                {u.whiteGlove && <Star size={9} color="#FFFFFF"/>}
                 {u.name}
-                {u.subscriptionWaived && <Gift size={9} color="#48BB78"/>}
+                {u.subscriptionWaived && <Gift size={9} color="#FFFFFF"/>}
               </span>
             ))}
             {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:12 }}>+{manualUsers.length-4} more</span>}
           </div>
-          <button onClick={() => setTab("users")} style={{ color:"#5B6EE1", fontSize:11, fontWeight:600 }}>View all →</button>
+          <button onClick={() => setTab("users")} style={{ color:"#6E90C9", fontSize:11, fontWeight:600 }}>View all →</button>
         </div>
       )}
 
@@ -988,7 +988,7 @@ export function MasterAdmin() {
               <div style={{ color:"#5A6A88", fontSize:10, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
                 style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
-                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#48BB78" : "#FC8181", fontSize:9, ...MONO }}>
+                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#D99A6B" : "#FC8181", fontSize:9, ...MONO }}>
                 {m.change>0 ? <ArrowUp size={8}/> : <ArrowDown size={8}/>}
                 {Math.abs(m.change)}%
               </div>
@@ -1017,11 +1017,11 @@ export function MasterAdmin() {
 
           {/* ── Top KPIs ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <StatChip label="Total Users" value="51,490" sub="All time" color="#5B6EE1"/>
-            <StatChip label="Female Users" value="54.2%" sub="27,894 accounts" color="#5BA7D6"/>
-            <StatChip label="Male Users" value="40.1%" sub="20,647 accounts" color="#5B6EE1"/>
-            <StatChip label="Median Age" value="47" sub="Years old" color="#48BB78"/>
-            <StatChip label="US Users" value="93.7%" sub="48,241 accounts" color="#5BA7D6"/>
+            <StatChip label="Total Users" value="51,490" sub="All time" color="#FFFFFF"/>
+            <StatChip label="Female Users" value="54.2%" sub="27,894 accounts" color="#FFFFFF"/>
+            <StatChip label="Male Users" value="40.1%" sub="20,647 accounts" color="#FFFFFF"/>
+            <StatChip label="Median Age" value="47" sub="Years old" color="#FFFFFF"/>
+            <StatChip label="US Users" value="93.7%" sub="48,241 accounts" color="#FFFFFF"/>
             <StatChip label="NPS Score" value={npsData.score} sub="Net Promoter Score" color="#F6AD55"/>
           </div>
 
@@ -1149,7 +1149,7 @@ export function MasterAdmin() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span style={{ color:"#5A6A88", fontSize:11 }}>{c.users.toLocaleString()}</span>
-                        <span style={{ color:"#5B6EE1", fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
+                        <span style={{ color:"#6E90C9", fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
                       </div>
                     </div>
                   ))}
@@ -1174,9 +1174,9 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-3 gap-2 mt-4">
                 {[
-                  { label:"Mobile Total", value:"69.6%", color:"#5B6EE1" },
-                  { label:"Desktop Total", value:"28.9%", color:"#5BA7D6" },
-                  { label:"PWA Installed", value:"34.2%", color:"#48BB78" },
+                  { label:"Mobile Total", value:"69.6%", color:"#6E90C9" },
+                  { label:"Desktop Total", value:"28.9%", color:"#6FAE8B" },
+                  { label:"PWA Installed", value:"34.2%", color:"#D99A6B" },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
                     <div style={{ color:s.color, fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
@@ -1234,7 +1234,7 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                  <div style={{ color:"#48BB78", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
+                  <div style={{ color:"#D99A6B", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
                   <div style={{ color:"#5A6A88", fontSize:11 }}>Fully complete vaults</div>
                 </div>
                 <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.15)" }}>
@@ -1263,9 +1263,9 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {[
-                  { label:"Avg DAU",         value:"9,284",    color:"#5B6EE1" },
-                  { label:"DAU/MAU Ratio",   value:"18.0%",    color:"#5BA7D6" },
-                  { label:"Avg Session",     value:"10.2 min", color:"#48BB78" },
+                  { label:"Avg DAU",         value:"9,284",    color:"#6E90C9" },
+                  { label:"DAU/MAU Ratio",   value:"18.0%",    color:"#6FAE8B" },
+                  { label:"Avg Session",     value:"10.2 min", color:"#D99A6B" },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
                     <div style={{ color:s.color, fontSize:15, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
@@ -1294,7 +1294,7 @@ export function MasterAdmin() {
                 ))}
                 <div className="px-3 py-2 rounded-xl mt-2" style={{ background:"rgba(91,110,225,0.05)" }}>
                   <span style={{ color:"#5A6A88", fontSize:12 }}>
-                    Industry benchmark (legacy planning): 58–65% at Month 12. FPD at <strong style={{ color:"#48BB78" }}>68.2%</strong> — above average.
+                    Industry benchmark (legacy planning): 58–65% at Month 12. FPD at <strong style={{ color:"#D99A6B" }}>68.2%</strong> — above average.
                   </span>
                 </div>
               </div>
@@ -1305,16 +1305,16 @@ export function MasterAdmin() {
               {/* NPS gauge */}
               <div className="text-center py-4">
                 <div style={{ fontFamily:"var(--font-display)", fontSize:64, lineHeight:1,
-                  color: npsData.score >= 50 ? "#48BB78" : npsData.score >= 30 ? "#F6AD55" : "#FC8181" }}>
+                  color: npsData.score >= 50 ? "#D99A6B" : npsData.score >= 30 ? "#F6AD55" : "#FC8181" }}>
                   {npsData.score}
                 </div>
-                <div style={{ color:"#48BB78", fontSize:14, fontWeight:600, marginTop:4 }}>
+                <div style={{ color:"#D99A6B", fontSize:14, fontWeight:600, marginTop:4 }}>
                   {npsData.score >= 50 ? "Excellent" : npsData.score >= 30 ? "Good" : "Needs Improvement"}
                 </div>
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label:"Promoters (9–10)", pct:npsData.promoters, color:"#48BB78", desc:"Would recommend" },
+                  { label:"Promoters (9–10)", pct:npsData.promoters, color:"#D99A6B", desc:"Would recommend" },
                   { label:"Passives (7–8)",   pct:npsData.passives,  color:"#F6AD55", desc:"Neutral" },
                   { label:"Detractors (0–6)", pct:npsData.detractors,color:"#FC8181", desc:"At churn risk" },
                 ].map(n => (
@@ -1334,18 +1334,18 @@ export function MasterAdmin() {
             <SectionHead title="Platform Health Metrics"/>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {[
-                { label:"Monthly Churn Rate",      value:"2.3%",      sub:"↓ 0.4% from last mo", color:"#48BB78" },
-                { label:"Annual Churn Rate",        value:"15.8%",     sub:"Industry avg: 24%",    color:"#48BB78" },
-                { label:"Avg Revenue per User",     value:"$27.40",    sub:"ARPU monthly",          color:"#5B6EE1" },
-                { label:"Customer Lifetime Value",  value:"$1,942",    sub:"At 12% annual churn",   color:"#5BA7D6" },
+                { label:"Monthly Churn Rate",      value:"2.3%",      sub:"↓ 0.4% from last mo", color:"#D99A6B" },
+                { label:"Annual Churn Rate",        value:"15.8%",     sub:"Industry avg: 24%",    color:"#D99A6B" },
+                { label:"Avg Revenue per User",     value:"$27.40",    sub:"ARPU monthly",          color:"#6E90C9" },
+                { label:"Customer Lifetime Value",  value:"$1,942",    sub:"At 12% annual churn",   color:"#6FAE8B" },
                 { label:"$199 Fee Adoption",        value:"18.7%",     sub:"Of total users",        color:"#F6AD55" },
-                { label:"Support Tickets (Jun)",    value:"284",       sub:"Avg 9.4/day",           color:"#5BA7D6" },
-                { label:"Avg Resolution Time",      value:"4.2 hrs",   sub:"Ticket-to-close",       color:"#48BB78" },
-                { label:"White Glove Clients",      value:"3",         sub:"Active concierge",      color:"#5BA7D6" },
-                { label:"Verified ID Contacts",     value:"12,841",    sub:"23.5% of contact pool", color:"#5B6EE1" },
-                { label:"Avg Vault Documents",      value:"11.4",      sub:"Per active user",       color:"#5BA7D6" },
+                { label:"Support Tickets (Jun)",    value:"284",       sub:"Avg 9.4/day",           color:"#6FAE8B" },
+                { label:"Avg Resolution Time",      value:"4.2 hrs",   sub:"Ticket-to-close",       color:"#D99A6B" },
+                { label:"White Glove Clients",      value:"3",         sub:"Active concierge",      color:"#6FAE8B" },
+                { label:"Verified ID Contacts",     value:"12,841",    sub:"23.5% of contact pool", color:"#6E90C9" },
+                { label:"Avg Vault Documents",      value:"11.4",      sub:"Per active user",       color:"#6FAE8B" },
                 { label:"Storage Overage Rate",     value:"8.4%",      sub:"Users over plan limit", color:"#F6AD55" },
-                { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#48BB78" },
+                { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#D99A6B" },
               ].map(m => (
                 <div key={m.label} className="p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
                   <div style={{ color:m.color, fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>{m.value}</div>
@@ -1366,7 +1366,7 @@ export function MasterAdmin() {
             <div className="lg:col-span-2 p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
               <div className="flex items-center gap-4 mb-4">
-                {[{color:"#5B6EE1",label:"MRR"},{color:"#5BA7D6",label:"Overage"}].map(l=>(
+                {[{color:"#6E90C9",label:"MRR"},{color:"#6FAE8B",label:"Overage"}].map(l=>(
                   <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
                 ))}
               </div>
@@ -1412,7 +1412,7 @@ export function MasterAdmin() {
             <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428", marginBottom:8 }}>User Growth vs Churn</h3>
               <div className="flex items-center gap-4 mb-4">
-                {[{color:"#5B6EE1",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
+                {[{color:"#6E90C9",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
                   <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
                 ))}
               </div>
@@ -1447,7 +1447,7 @@ export function MasterAdmin() {
                       <div style={{color:"#5A6A88",fontSize:11}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(72,187,120,0.15)",color:"#48BB78",fontWeight:700}}>Approve</button>
+                      <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B",fontWeight:700}}>Approve</button>
                       <button className="px-3 py-1 rounded-lg text-xs" style={{background:"rgba(252,129,129,0.12)",color:"#FC8181"}}>Reject</button>
                     </div>
                   </div>
@@ -1470,7 +1470,7 @@ export function MasterAdmin() {
               <Filter size={13} color="#5A6A88"/><span style={{color:"#5A6A88"}}>Filter</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{...GLASS}}>
-              <Download size={13} color="#5B6EE1"/><span style={{color:"#5B6EE1"}}>Export CSV</span>
+              <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
             </button>
           </div>
           <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
@@ -1486,13 +1486,13 @@ export function MasterAdmin() {
                   <div style={{color:"#0D1428",fontSize:13}}>{user.name}</div>
                   <div style={{color:"#5A6A88",fontSize:11}}>{user.email}</div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#5B6EE1",...MONO,fontSize:10}}>{user.plan}</span>
+                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:10}}>{user.plan}</span>
                 <span style={{color:"#0D1428",fontSize:12,...MONO}}>{user.storage} GB</span>
                 <span style={{color:"#0D1428",fontSize:12,...MONO}}>{user.contacts}</span>
-                <span style={{color:"#5B6EE1",fontSize:12,...MONO}}>{user.referrals}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#48BB78":"#FC8181",...MONO,fontSize:9}}>{user.status.toUpperCase()}</span>
+                <span style={{color:"#6E90C9",fontSize:12,...MONO}}>{user.referrals}</span>
+                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#D99A6B":"#FC8181",...MONO,fontSize:9}}>{user.status.toUpperCase()}</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={()=>setSelectedUser(user)} style={{color:"#5B6EE1"}}><Eye size={13}/></button>
+                  <button onClick={()=>setSelectedUser(user)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
                   <button style={{color:"#5A6A88"}}><Edit size={13}/></button>
                   <button style={{color:"#FC8181"}}><XCircle size={13}/></button>
                 </div>
@@ -1531,7 +1531,7 @@ export function MasterAdmin() {
       {tab === "revenue" && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#5B6EE1"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#5BA7D6"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#48BB78"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
+            {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#6E90C9"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#6FAE8B"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#D99A6B"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
                 <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
@@ -1542,7 +1542,7 @@ export function MasterAdmin() {
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
             <div className="flex items-center gap-4 mb-4">
-              {[{color:"#5B6EE1",label:"Subscriptions"},{color:"#5BA7D6",label:"Overage"},{color:"#48BB78",label:"Affiliates"}].map(l=>(
+              {[{color:"#6E90C9",label:"Subscriptions"},{color:"#6FAE8B",label:"Overage"},{color:"#D99A6B",label:"Affiliates"}].map(l=>(
                 <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#5A6A88",fontSize:12}}>{l.label}</span></div>
               ))}
             </div>
@@ -1571,7 +1571,7 @@ export function MasterAdmin() {
           <div className="grid md:grid-cols-3 gap-5">
             {storageByPlan.map(s=>(
               <div key={s.plan} className="p-6 rounded-2xl glow-surface" style={GLASS}>
-                <div style={{color:"#5B6EE1",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
+                <div style={{color:"#6E90C9",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
                 <div style={{fontFamily:"var(--font-display)",fontSize:28,color:"#0D1428"}}>{s.avgUsed} GB</div>
                 <div style={{color:"#5A6A88",fontSize:13,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
                 <div className="h-2 rounded-full" style={{background:"rgba(91,110,225,0.1)"}}>
@@ -1584,7 +1584,7 @@ export function MasterAdmin() {
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428",marginBottom:16}}>Platform Storage Totals</h3>
             <div className="grid grid-cols-4 gap-4">
-              {[{label:"Total Data Stored",value:"428.4 TB",color:"#5B6EE1"},{label:"Total Overage Billed",value:"52,120 GB",color:"#5BA7D6"},{label:"Avg per User",value:"12.4 GB",color:"#48BB78"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
+              {[{label:"Total Data Stored",value:"428.4 TB",color:"#6E90C9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6FAE8B"},{label:"Avg per User",value:"12.4 GB",color:"#D99A6B"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
                 <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
                   <div style={{color:"#5A6A88",fontSize:12,marginTop:4}}>{s.label}</div>
@@ -1599,7 +1599,7 @@ export function MasterAdmin() {
       {tab === "verification" && (
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
-            {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#48BB78"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#5B6EE1"}].map(s=>(
+            {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#D99A6B"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#6E90C9"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:28,color:s.color}}>{s.value}</div>
                 <div style={{color:"#5A6A88",fontSize:13,marginTop:4}}>{s.label}</div>
@@ -1619,13 +1619,13 @@ export function MasterAdmin() {
                 <div style={{color:"#5A6A88",fontSize:13}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
               </div>
               <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(72,187,120,0.12)",color:"#48BB78",border:"1px solid rgba(72,187,120,0.25)"}}>
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",border:"1px solid rgba(72,187,120,0.25)"}}>
                   <CheckCircle size={14}/> Approve
                 </button>
                 <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{background:"rgba(252,129,129,0.1)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)"}}>
                   <XCircle size={14}/> Reject
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{background:"rgba(91,110,225,0.08)",color:"#5B6EE1"}}>
+                <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{background:"rgba(91,110,225,0.08)",color:"#6E90C9"}}>
                   <Eye size={14}/> View Document
                 </button>
               </div>
@@ -1638,7 +1638,7 @@ export function MasterAdmin() {
       {tab === "payouts" && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#5B6EE1"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#48BB78"}].map(s=>(
+            {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#6E90C9"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#D99A6B"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl glow-surface" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
                 <div style={{color:"#0D1428",fontSize:13,marginTop:4}}>{s.label}</div>
@@ -1658,8 +1658,8 @@ export function MasterAdmin() {
                   <div style={{color:"#5A6A88",fontSize:11,...MONO}}>{p.id} · {p.type} · {p.method}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{fontFamily:"var(--font-display)",fontSize:18,color:"#5B6EE1"}}>${p.amount.toFixed(2)}</span>
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#48BB78"}}>Process</button>
+                  <span style={{fontFamily:"var(--font-display)",fontSize:18,color:"#6E90C9"}}>${p.amount.toFixed(2)}</span>
+                  <button className="px-3 py-1.5 rounded-lg text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B"}}>Process</button>
                 </div>
               </div>
             ))}
@@ -1672,7 +1672,7 @@ export function MasterAdmin() {
         <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
           <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(91,110,225,0.1)"}}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#0D1428"}}>System Audit Log</h3>
-            <button className="flex items-center gap-2 text-sm" style={{color:"#5B6EE1",...MONO,fontSize:12}}><Download size={13}/> Export</button>
+            <button className="flex items-center gap-2 text-sm" style={{color:"#6E90C9",...MONO,fontSize:12}}><Download size={13}/> Export</button>
           </div>
           {auditLogs.map((log,i)=>{
             const sc = {info:"#5A6A88",warning:"#F6AD55",critical:"#FC8181"}[log.severity] ?? "#5A6A88";
@@ -1696,12 +1696,12 @@ export function MasterAdmin() {
           {/* Admin config */}
           <div className="p-6 rounded-2xl glow-surface" style={GLASS}>
             <div className="flex items-center gap-2 mb-5">
-              <DollarSign size={16} color="#5B6EE1"/>
+              <DollarSign size={16} color="#FFFFFF"/>
               <h3 style={{fontFamily:"var(--font-display)",fontSize:16,color:"#0D1428"}}>Legacy Continuation Fee Configuration</h3>
               <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{background:"rgba(246,173,85,0.1)",color:"#F6AD55",border:"1px solid rgba(246,173,85,0.25)",...MONO,fontSize:9}}>REAL-TIME — UPDATES VIA SUPABASE</span>
             </div>
             <div className="grid md:grid-cols-3 gap-5 mb-5">
-              {[{label:"Current Fee Amount",value:"$199.00",color:"#5B6EE1"},{label:"Activation Window",value:"24 Months",color:"#48BB78"},{label:"Total Revenue Collected",value:"$597.00",color:"#5BA7D6"}].map(s=>(
+              {[{label:"Current Fee Amount",value:"$199.00",color:"#6E90C9"},{label:"Activation Window",value:"24 Months",color:"#D99A6B"},{label:"Total Revenue Collected",value:"$597.00",color:"#6FAE8B"}].map(s=>(
                 <div key={s.label} className="p-4 rounded-xl glow-surface" style={{background:"#F5F8FE",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
                   <div style={{color:"#5A6A88",fontSize:12,marginTop:2}}>{s.label}</div>
@@ -1712,14 +1712,14 @@ export function MasterAdmin() {
               <div>
                 <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>FEE AMOUNT ($) — Shown to users on payment page</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"#F5F8FE",border:"2px solid rgba(91,110,225,0.2)"}}>
-                  <DollarSign size={14} color="#5B6EE1"/>
+                  <DollarSign size={14} color="#FFFFFF"/>
                   <input defaultValue="199.00" type="number" step="0.01" style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update fee amount in Supabase")}/>
                 </div>
               </div>
               <div>
                 <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>ACTIVATION WINDOW (MONTHS) — After death certification</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{background:"#F5F8FE",border:"2px solid rgba(91,110,225,0.2)"}}>
-                  <Clock size={14} color="#5B6EE1"/>
+                  <Clock size={14} color="#FFFFFF"/>
                   <input defaultValue="24" type="number" step="1" min="1" max="120" style={{background:"transparent",border:"none",outline:"none",color:"#0D1428",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update period in Supabase")}/>
                 </div>
               </div>
@@ -1754,17 +1754,17 @@ export function MasterAdmin() {
                 </div>
                 <span style={{color:"#374669",fontSize:12}}>{fee.paidBy}</span>
                 <span style={{color:"#5A6A88",fontSize:12}}>{fee.date}</span>
-                <span style={{color:"#5B6EE1",fontSize:13,fontWeight:700,...MONO}}>{fee.amount}</span>
+                <span style={{color:"#6E90C9",fontSize:13,fontWeight:700,...MONO}}>{fee.amount}</span>
                 <div>
                   {fee.activated
-                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(91,167,214,0.12)",color:"#5BA7D6",...MONO,fontSize:9}}>ACTIVATED · Expires {fee.expires}</span>
-                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#48BB78",...MONO,fontSize:9}}>PAID · AWAITING ACTIVATION</span>
+                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",...MONO,fontSize:9}}>ACTIVATED · Expires {fee.expires}</span>
+                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",...MONO,fontSize:9}}>PAID · AWAITING ACTIVATION</span>
                   }
                 </div>
                 {!fee.activated
                   ? <button onClick={() => toast.success(`Activated for ${fee.user} — 24-month window started`)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                      style={{background:"rgba(91,167,214,0.12)",color:"#5BA7D6",border:"1px solid rgba(91,167,214,0.25)"}}>
+                      style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",border:"1px solid rgba(91,167,214,0.25)"}}>
                       🛡 Activate
                     </button>
                   : <span style={{color:"#8A9AB8",fontSize:11}}>Active ✓</span>
@@ -1773,7 +1773,7 @@ export function MasterAdmin() {
             ))}
           </div>
           <div className="px-4 py-3 rounded-xl border" style={{background:"rgba(91,110,225,0.03)",borderColor:"rgba(91,110,225,0.12)"}}>
-            <div style={{color:"#5B6EE1",fontSize:11,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
+            <div style={{color:"#6E90C9",fontSize:11,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
             <div style={{color:"#5A6A88",fontSize:12,lineHeight:1.8}}>1. User or legacy contact pays the $199 fee via Stripe. 2. Admin receives notification. 3. When a death certificate is submitted and verified, admin clicks "Activate" above. 4. The vault stays fully accessible to all verified legacy contacts for the configured period. 5. Stripe webhook updates the Supabase <code>legacy_continuation_fees</code> table automatically.</div>
           </div>
         </div>
@@ -1784,8 +1784,8 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Bell size={16} color="#5B6EE1"/>
-              <span style={{ color:"#5B6EE1", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
+              <Bell size={16} color="#FFFFFF"/>
+              <span style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
             </div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428" }}>Push Notification Center</h2>
             <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -1804,8 +1804,8 @@ export function MasterAdmin() {
         <div className="p-6" style={{ maxWidth:900 }}>
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-2">
-              <Bot size={16} color="#5BA7D6"/>
-              <span style={{ color:"#5BA7D6", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
+              <Bot size={16} color="#FFFFFF"/>
+              <span style={{ color:"#6FAE8B", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
             </div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428" }}>Admin AI Assistant</h2>
             <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -1822,14 +1822,14 @@ export function MasterAdmin() {
           <div className="flex items-center justify-between px-5 py-4 border-b"
             style={{ background:"rgba(91,110,225,0.05)", borderColor:"rgba(91,110,225,0.12)" }}>
             <div className="flex items-center gap-2">
-              <UserPlus size={15} color="#5B6EE1"/>
+              <UserPlus size={15} color="#FFFFFF"/>
               <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#0D1428" }}>Manually Onboarded Accounts</span>
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(91,110,225,0.1)", color:"#5B6EE1", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
+                style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
             </div>
             <button onClick={() => setShowOnboard(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <UserPlus size={11}/> Onboard Another
             </button>
           </div>
@@ -1838,11 +1838,11 @@ export function MasterAdmin() {
             return (
               <div key={u.id} className="flex items-center gap-4 px-5 py-4 border-b"
                 style={{ background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.06)" }}>
-                <span style={{ color:"#5B6EE1", fontSize:10, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
+                <span style={{ color:"#6E90C9", fontSize:10, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{u.name}</span>
-                    {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#5BA7D6", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
+                    {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
                   </div>
                   <div style={{ color:"#8A9AB8", fontSize:11 }}>{u.email} · {u.onboardedAt}</div>
                 </div>
@@ -1853,8 +1853,8 @@ export function MasterAdmin() {
                 <div className="text-center">
                   {u.subscriptionWaived ? (
                     <div>
-                      <div style={{ color:"#48BB78", fontSize:12, fontWeight:700 }}>$0.00/mo</div>
-                      <div style={{ color:"#48BB78", fontSize:9, fontFamily:"var(--font-mono)" }}>WAIVED</div>
+                      <div style={{ color:"#D99A6B", fontSize:12, fontWeight:700 }}>$0.00/mo</div>
+                      <div style={{ color:"#D99A6B", fontSize:9, fontFamily:"var(--font-mono)" }}>WAIVED</div>
                     </div>
                   ) : (
                     <div>
@@ -1865,12 +1865,12 @@ export function MasterAdmin() {
                 </div>
                 {u.subscriptionWaived && (
                   <span className="px-2 py-1 rounded-lg text-xs font-bold"
-                    style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", fontFamily:"var(--font-mono)" }}>
+                    style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
                     {WAIVE_REASONS.find(r=>r.id===u.waiveReason)?.label ?? "Waived"}
                   </span>
                 )}
                 <span className="px-2 py-0.5 rounded text-xs font-bold"
-                  style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", fontFamily:"var(--font-mono)" }}>
+                  style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
                   ACTIVE
                 </span>
               </div>

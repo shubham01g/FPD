@@ -102,20 +102,20 @@ const PASSETS_CSS = `
 .fpd-passets .dlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-passets .dtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
 .fpd-passets .dleft{display:flex;align-items:flex-start;gap:14px;min-width:0;}
-.fpd-passets .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-passets .dico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-passets .dtype{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
 .fpd-passets .dsub{color:${MUTED};font-size:12.5px;}
 .fpd-passets .dvalue{text-align:right;flex-shrink:0;}
-.fpd-passets .dvnum{font-family:var(--font-display);font-size:19px;font-weight:700;color:${POS};letter-spacing:-0.01em;line-height:1.2;}
+.fpd-passets .dvnum{font-family:var(--font-display);font-size:19px;font-weight:700;color:#D99A6B;letter-spacing:-0.01em;line-height:1.2;}
 .fpd-passets .dvlbl{color:${MUTED};font-size:11px;margin-top:2px;}
 .fpd-passets .dright{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.fpd-passets .damt{font-family:var(--font-mono);color:${ACCENT2};font-size:14px;font-weight:700;white-space:nowrap;}
+.fpd-passets .damt{font-family:var(--font-mono);color:#6FAE8B;font-size:14px;font-weight:700;white-space:nowrap;}
 .fpd-passets .damt span{color:${MUTED};font-weight:500;font-size:11px;}
 
 .fpd-passets .dbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
-.fpd-passets .dbadge.type{background:rgba(91,110,225,0.12);color:${ACCENT2};}
-.fpd-passets .dbadge.autopay{background:rgba(95,190,145,0.14);color:${POS};}
-.fpd-passets .catbadge{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};margin-bottom:9px;}
+.fpd-passets .dbadge.type{background:rgba(91,110,225,0.12);color:#6FAE8B;}
+.fpd-passets .dbadge.autopay{background:rgba(95,190,145,0.14);color:#D99A6B;}
+.fpd-passets .catbadge{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:#6FAE8B;margin-bottom:9px;}
 
 .fpd-passets .dgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;margin-bottom:4px;}
 .fpd-passets .dgrid.two{grid-template-columns:repeat(2,1fr);}
@@ -134,7 +134,7 @@ const PASSETS_CSS = `
 }
 
 .fpd-passets .notewarn{padding:12px 14px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.22);color:${WARN};font-size:12.5px;line-height:1.6;margin-top:12px;}
-.fpd-passets .noteinfo{padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);color:${ACCENT2};font-size:12.5px;line-height:1.6;margin-top:12px;}
+.fpd-passets .noteinfo{padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);color:#6FAE8B;font-size:12.5px;line-height:1.6;margin-top:12px;}
 .fpd-passets .notemuted{color:${MUTED};font-size:12px;margin-top:10px;line-height:1.6;}
 .fpd-passets .noteitalic{color:${MUTED};font-size:12px;margin-top:10px;font-style:italic;line-height:1.6;}
 .fpd-passets .dacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;}

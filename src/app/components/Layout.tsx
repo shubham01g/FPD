@@ -217,13 +217,13 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         }}
         onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(91,110,225,0.12)"; }}
         onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
-        <span style={{ flexShrink: 0, color: active ? "#FFFFFF" : HILITE, display: "flex" }}>{item.icon}</span>
+        <span style={{ flexShrink: 0, color: "#FFFFFF", display: "flex" }}>{item.icon}</span>
         {!collapsed && <span style={{ fontSize: 13, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
         {!collapsed && item.badge && (
           <span style={{
             fontSize: 8.5, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.04em",
             background: active ? "rgba(255,255,255,0.22)" : "rgba(91,110,225,0.25)",
-            color: active ? "#FFFFFF" : HILITE, padding: "2px 6px", borderRadius: 99,
+            color: active ? "#FFFFFF" : "#6FAE8B", padding: "2px 6px", borderRadius: 99,
           }}>{item.badge}</span>
         )}
       </button>
@@ -325,7 +325,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             }}
             onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"}
             onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
-            <Copy size={16} style={{ color: HILITE, flexShrink: 0 }}/>
+            <Copy size={16} style={{ color: "#6FAE8B", flexShrink: 0 }}/>
             {!collapsed && <span style={{ fontSize: 12.5, fontWeight: 600 }}>Legacy Vault Clone</span>}
           </button>
 
@@ -343,7 +343,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               </div>
               <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}>
                 <div style={{ fontSize: 12.5, fontWeight: 650, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
-                <div style={{ fontSize: 10, color: HILITE, fontFamily: "var(--font-mono)" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
+                <div style={{ fontSize: 10, color: "#6FAE8B", fontFamily: "var(--font-mono)" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
               </div>
               <button onClick={onSignOut} title="Sign out" style={{ color: MUTED, display: "flex", flexShrink: 0 }}
                 onMouseEnter={e => e.currentTarget.style.color = "#FC8181"} onMouseLeave={e => e.currentTarget.style.color = MUTED}>
@@ -365,12 +365,12 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             <button onClick={() => isMobile ? setMobileOpen(o => !o) : setCollapsed(c => !c)}
               title={isMobile ? "Menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
               className="flex items-center justify-center rounded-lg flex-shrink-0"
-              style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
+              style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
               {isMobile ? <Menu size={16}/> : collapsed ? <PanelLeft size={16}/> : <PanelLeftClose size={16}/>}
             </button>
             <div style={{ minWidth: 0 }}>
               <div className="flex items-center gap-1.5" style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: FAINT, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                <span>{meta.group}</span><ChevronRight size={10}/><span style={{ color: HILITE }}>{meta.label}</span>
+                <span>{meta.group}</span><ChevronRight size={10}/><span style={{ color: "#6FAE8B" }}>{meta.label}</span>
               </div>
               <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
             </div>
@@ -382,13 +382,13 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             </div>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(72,187,120,0.1)", border: "1px solid rgba(72,187,120,0.25)" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: SUCCESS, boxShadow: `0 0 6px ${SUCCESS}` }}/>
-              <span style={{ color: SUCCESS, fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600 }}>VAULT ACTIVE</span>
+              <span style={{ color: "#D99A6B", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600 }}>VAULT ACTIVE</span>
             </div>
 
             {onGoAdmin && (
               <button onClick={onGoAdmin} title="Admin portal"
                 className="flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}
+                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
                 <ShieldCheck size={16}/>
               </button>
@@ -397,7 +397,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
               <button onClick={() => setNotifOpen(o => !o)} className="relative flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: HILITE }}>
+                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
                 <Bell size={16}/>
                 {unreadCount > 0 && (
                   <span className="absolute flex items-center justify-center rounded-full" style={{ top: -5, right: -5, minWidth: 16, height: 16, padding: "0 4px", background: "#E53E3E", color: "#fff", fontSize: 9, fontWeight: 700, border: `2px solid ${BG}` }}>
@@ -409,7 +409,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                 <div className="absolute rounded-2xl fpd-fade-in-up" style={{ top: "calc(100% + 10px)", right: 0, width: 340, background: PANEL, border: `1px solid ${BORDER_S}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)", zIndex: 60, overflow: "hidden" }}>
                   <div className="flex items-center justify-between" style={{ padding: "13px 15px", borderBottom: `1px solid ${BORDER}` }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Notifications</span>
-                    {unreadCount > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: HILITE, fontWeight: 600 }}>Mark all read</button>}
+                    {unreadCount > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: "#6FAE8B", fontWeight: 600 }}>Mark all read</button>}
                   </div>
                   <div className="fpd-scroll" style={{ maxHeight: 360, overflowY: "auto" }}>
                     {notifications.length === 0 && <div style={{ padding: 24, textAlign: "center", color: MUTED, fontSize: 12 }}>You're all caught up.</div>}
@@ -434,7 +434,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             {/* Storage pill */}
             <button onClick={() => onNavigate("storage-usage")} title="Usage & Billing"
               className="hidden lg:flex items-center gap-2 rounded-lg" style={{ padding: "6px 11px", background: "rgba(91,110,225,0.08)", border: `1px solid ${BORDER}` }}>
-              <HardDrive size={14} style={{ color: storagePct >= 90 ? "#F6AD55" : HILITE }}/>
+              <HardDrive size={14} style={{ color: storagePct >= 90 ? "#F6AD55" : "#6FAE8B" }}/>
               <div style={{ width: 64 }}>
                 <div style={{ height: 4, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${storagePct}%`, borderRadius: 99, background: storagePct >= 90 ? "linear-gradient(90deg,#5B6EE1,#F6AD55)" : `linear-gradient(90deg,${ACCENT},${ACCENT2})` }}/>

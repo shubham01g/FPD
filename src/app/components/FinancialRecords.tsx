@@ -103,11 +103,11 @@ const FIN_CSS = `
 /* record cards */
 .fpd-fin .rlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-fin .rtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
-.fpd-fin .rico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-fin .rico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-fin .rtitle{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;display:flex;align-items:center;gap:9px;}
 .fpd-fin .rsub{color:${MUTED};font-size:12.5px;}
-.fpd-fin .rbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;background:rgba(95,190,145,0.14);color:${POS};flex-shrink:0;}
-.fpd-fin .rtag{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};margin-bottom:6px;}
+.fpd-fin .rbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;background:rgba(95,190,145,0.14);color:#D99A6B;flex-shrink:0;}
+.fpd-fin .rtag{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:#6FAE8B;margin-bottom:6px;}
 .fpd-fin .rgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;}
 .fpd-fin .rgrid.c2{grid-template-columns:1fr 1fr;}
 .fpd-fin .rgrid:not(.c2) .tile:nth-child(3n+2),.fpd-fin .rgrid:not(.c2) .tile:nth-child(3n){border-left:1px solid rgba(255,255,255,0.22);}
@@ -119,8 +119,8 @@ const FIN_CSS = `
 .fpd-fin .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
 .fpd-fin .bigval{font-family:var(--font-display);font-size:20px;font-weight:700;flex-shrink:0;}
 .fpd-fin .redit{background:none;border:none;color:${MUTED};cursor:pointer;padding:6px;display:flex;flex-shrink:0;transition:color .16s;}
-.fpd-fin .redit:hover{color:${ACCENT2};}
-.fpd-fin .docpill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:12px;background:rgba(95,190,145,0.08);color:${POS};border:1px solid rgba(95,190,145,0.22);margin-top:14px;}
+.fpd-fin .redit:hover{color:#6FAE8B;}
+.fpd-fin .docpill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:12px;background:rgba(95,190,145,0.08);color:#D99A6B;border:1px solid rgba(95,190,145,0.22);margin-top:14px;}
 .fpd-fin .notewarn{margin-top:14px;padding:12px 14px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.22);color:${WARN};font-size:13px;line-height:1.6;}
 @media (max-width:760px){
 .fpd-fin .rgrid,.fpd-fin .rgrid.c2{grid-template-columns:1fr;}
@@ -141,7 +141,7 @@ const FIN_CSS = `
 .fpd-fin .field input::placeholder,.fpd-fin .field textarea::placeholder{color:${FAINT};}
 .fpd-fin .field input:focus,.fpd-fin .field select:focus,.fpd-fin .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-fin .upload-row{display:flex;gap:8px;}
-.fpd-fin .upload-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:11px;border:1px dashed rgba(91,110,225,0.32);background:rgba(91,110,225,0.04);color:${ACCENT2};font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.fpd-fin .upload-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:11px;border:1px dashed rgba(91,110,225,0.32);background:rgba(91,110,225,0.04);color:#6FAE8B;font-size:13px;cursor:pointer;font-family:var(--font-body);}
 .fpd-fin .upload-ok{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.25);}
 .fpd-fin .upload-ok button{background:none;border:none;color:${NEG};cursor:pointer;display:flex;}
 .fpd-fin .upload-hint{color:${MUTED};font-size:11px;line-height:1.5;margin-top:6px;}
@@ -189,7 +189,7 @@ function AddModal({ title, fields, onClose, onAdd }: {
             {attachedDoc ? (
               <div className="upload-ok">
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <CheckCircle size={14} color={POS} />
+                  <CheckCircle size={14} color="#FFFFFF" />
                   <span style={{ color: TEXT, fontSize: 13 }}>{attachedDoc}</span>
                 </div>
                 <button onClick={() => setAttachedDoc(null)}><X size={13} /></button>
@@ -326,7 +326,7 @@ export function FinancialRecords() {
                         <div className="rsub">{prop.address}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: ACCENT2 }}>{prop.value}</div>
+                    <div className="bigval" style={{ color: "#6FAE8B" }}>{prop.value}</div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Mortgage / Lender</div><div className="tv">{prop.mortgage}</div></div>
@@ -357,7 +357,7 @@ export function FinancialRecords() {
                         <div className="rsub">{p.accountType} · {p.accountNum}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: POS }}>{p.value}</div>
+                    <div className="bigval" style={{ color: "#D99A6B" }}>{p.value}</div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Holdings</div><div className="tv">{p.holdings}</div></div>
@@ -387,7 +387,7 @@ export function FinancialRecords() {
                         <div className="rsub">{r.employer && `${r.employer} · `}{r.accountNum}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: ACCENT2 }}>{r.balance}</div>
+                    <div className="bigval" style={{ color: "#6FAE8B" }}>{r.balance}</div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Contributions</div><div className="tv">{r.contributions}</div></div>
@@ -410,7 +410,7 @@ export function FinancialRecords() {
                 <div key={t.year} className="card pad glow-surface">
                   <div className="rtop">
                     <div className="rtitle" style={{ fontSize: 18 }}>Tax Year {t.year}</div>
-                    <div className="bigval" style={{ fontSize: 15, color: t.refund.includes("refund") ? POS : NEG }}>{t.refund}</div>
+                    <div className="bigval" style={{ fontSize: 15, color: t.refund.includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
                   </div>
                   <div className="rgrid c2">
                     <div className="tile"><div className="tk">Filed Date</div><div className="tv">{t.filedDate}</div></div>

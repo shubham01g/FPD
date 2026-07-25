@@ -32,7 +32,7 @@ const REPORTS: ReportDef[] = [
     category: "financial",
     formats: ["CSV","PDF","XLSX"],
     icon: <DollarSign size={16}/>,
-    color: "#48BB78",
+    color: "#D99A6B",
     fields: ["Month","Plan","New Subscribers","Churned","MRR","Net Change","Overage Revenue"],
     estimatedRows: "~60 rows (5 plans × 12 months)",
   },
@@ -43,7 +43,7 @@ const REPORTS: ReportDef[] = [
     category: "financial",
     formats: ["CSV","PDF","XLSX"],
     icon: <TrendingUp size={16}/>,
-    color: "#48BB78",
+    color: "#D99A6B",
     fields: ["Date","Affiliate/Partner","Amount","Method","Status","Transaction ID","Period"],
     estimatedRows: "~840 rows",
   },
@@ -54,7 +54,7 @@ const REPORTS: ReportDef[] = [
     category: "financial",
     formats: ["CSV","XLSX"],
     icon: <HardDrive size={16}/>,
-    color: "#48BB78",
+    color: "#D99A6B",
     fields: ["User ID","Name","Plan","Storage Used GB","Limit GB","Overage GB","Rate","Amount Charged","Billing Date"],
     estimatedRows: "~2,400 rows",
   },
@@ -65,7 +65,7 @@ const REPORTS: ReportDef[] = [
     category: "financial",
     formats: ["CSV","PDF","XLSX"],
     icon: <Key size={16}/>,
-    color: "#48BB78",
+    color: "#D99A6B",
     fields: ["Account","Paid By","Amount","Method","Paid At","Death Cert Received","Activated At","Activated By"],
     estimatedRows: "~380 rows",
   },
@@ -76,7 +76,7 @@ const REPORTS: ReportDef[] = [
     category: "financial",
     formats: ["CSV","PDF","XLSX"],
     icon: <Star size={16}/>,
-    color: "#48BB78",
+    color: "#D99A6B",
     fields: ["Client","Specialist","Setup Fee","Sessions","Total Mins","Blocks Billed","Session Charges","Total Billed","Card Last 4"],
     estimatedRows: "~180 rows",
   },
@@ -89,7 +89,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","XLSX","JSON"],
     icon: <Users size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["User ID","Name","Email","Plan","Storage Used GB","Legacy Contacts","Guardian Contacts","Joined","Status","2FA Enabled"],
     estimatedRows: "~51,490 rows",
   },
@@ -100,7 +100,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","PDF","XLSX"],
     icon: <Users size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["Date","User ID","Name","Email","Plan","Referral Source","Affiliate ID","Channel","WG Enrolled"],
     estimatedRows: "Varies by date range",
   },
@@ -111,7 +111,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","PDF","XLSX"],
     icon: <Users size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["User ID","Name","Plan","Joined","Cancelled","Days Active","LTV","Cancellation Reason","Reactivated"],
     estimatedRows: "~3,200 rows",
   },
@@ -122,7 +122,7 @@ const REPORTS: ReportDef[] = [
     category: "users",
     formats: ["CSV","XLSX"],
     icon: <Users size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["Account ID","Name","Email","Plan","Waiver Reason","White Glove","Onboarded By","Onboarded At","Notes"],
     estimatedRows: "~420 rows",
   },
@@ -135,7 +135,7 @@ const REPORTS: ReportDef[] = [
     category: "storage",
     formats: ["CSV","XLSX"],
     icon: <HardDrive size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["User ID","Name","Plan","Limit GB","Used GB","Pct Used","Legal Docs GB","Financial GB","Media GB","Other GB","Status"],
     estimatedRows: "~51,490 rows",
   },
@@ -146,7 +146,7 @@ const REPORTS: ReportDef[] = [
     category: "storage",
     formats: ["CSV","PDF"],
     icon: <AlertTriangle size={16}/>,
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     fields: ["Date","User ID","Name","Alert Type","Storage Pct","Email Sent","Action Taken"],
     estimatedRows: "~18,000 rows",
   },
@@ -240,7 +240,7 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF","XLSX"],
     icon: <BarChart3 size={16}/>,
-    color: "#5B6EE1",
+    color: "#6E90C9",
     fields: ["Notification ID","Title","Type","Target Segment","Sent At","Delivered","Opened","Open Rate %","Scheduled"],
     estimatedRows: "~240 rows",
   },
@@ -251,19 +251,19 @@ const REPORTS: ReportDef[] = [
     category: "marketing",
     formats: ["CSV","PDF"],
     icon: <Send size={16}/>,
-    color: "#5B6EE1",
+    color: "#6E90C9",
     fields: ["Template","Sent","Delivered","Opens","Open Rate %","Bounces","Bounce Rate %","Unsubscribes"],
     estimatedRows: "~16 rows (one per template)",
   },
 ];
 
 const CATEGORY_META: Record<ReportDef["category"], { label: string; color: string; icon: React.ReactNode }> = {
-  financial:   { label:"Financial",   color:"#48BB78", icon:<DollarSign size={13}/> },
-  users:       { label:"Users",       color:"#5BA7D6", icon:<Users size={13}/> },
-  storage:     { label:"Storage",     color:"#5BA7D6", icon:<HardDrive size={13}/> },
+  financial:   { label:"Financial",   color:"#D99A6B", icon:<DollarSign size={13}/> },
+  users:       { label:"Users",       color:"#6FAE8B", icon:<Users size={13}/> },
+  storage:     { label:"Storage",     color:"#6FAE8B", icon:<HardDrive size={13}/> },
   operations:  { label:"Operations",  color:"#ED8936", icon:<Star size={13}/> },
   compliance:  { label:"Compliance",  color:"#FC8181", icon:<Shield size={13}/> },
-  marketing:   { label:"Marketing",   color:"#5B6EE1", icon:<BarChart3 size={13}/> },
+  marketing:   { label:"Marketing",   color:"#6E90C9", icon:<BarChart3 size={13}/> },
 };
 
 /* ── Recent downloads seed ───────────────────────────────────────── */
@@ -413,9 +413,9 @@ export function ReportsDownloads() {
   );
 
   const stats = [
-    { label:"Available Reports", value:REPORTS.length,  color:"#5B6EE1" },
-    { label:"Generated This Month", value:downloads.length, color:"#48BB78" },
-    { label:"Categories",          value:6,              color:"#5BA7D6" },
+    { label:"Available Reports", value:REPORTS.length,  color:"#6E90C9" },
+    { label:"Generated This Month", value:downloads.length, color:"#D99A6B" },
+    { label:"Categories",          value:6,              color:"#6FAE8B" },
     { label:"Export Formats",      value:4,              color:"#ED8936" },
   ];
 
@@ -425,8 +425,8 @@ export function ReportsDownloads() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Download size={15} color="#5B6EE1"/>
-          <span style={{ color:"#5B6EE1", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
+          <Download size={15} color="#FFFFFF"/>
+          <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
         </div>
         <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Reports & Downloads</h1>
         <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -532,7 +532,7 @@ export function ReportsDownloads() {
                         {dl.status === "ready" ? (
                           <button onClick={() => toast.success(`Downloading ${dl.reportName}.${dl.format.toLowerCase()}…`)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                            style={{ background:"rgba(91,110,225,0.06)", color:"#5B6EE1" }}>
+                            style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                             <Download size={11}/> Download
                           </button>
                         ) : dl.status === "generating" ? (
@@ -554,7 +554,7 @@ export function ReportsDownloads() {
 
           {/* Info banner */}
           <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
-            <Shield size={14} color="#5B6EE1" style={{ marginTop:1, flexShrink:0 }}/>
+            <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
               All reports are generated in real time from the live database. Files are retained for 30 days. Reports containing PII are access-logged per your admin audit policy. GDPR data requests are archived separately for 7 years per compliance requirements.
             </div>

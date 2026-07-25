@@ -34,12 +34,12 @@ const folders = [
 const remStatus = {
   overdue:  { color:NEG,  label:"OVERDUE" },
   due_soon: { color:WARN, label:"DUE SOON" },
-  upcoming: { color:POS,  label:"UPCOMING" },
+  upcoming: { color:"#D99A6B",  label:"UPCOMING" },
   completed:{ color:FAINT,label:"DONE" },
 };
 const occType = {
-  birthday:    { color:ACCENT2,    Icon:Cake },
-  anniversary: { color:"#7E6BD8",  Icon:Heart },
+  birthday:    { color:"#6FAE8B",    Icon:Cake },
+  anniversary: { color:"#A98CC7",  Icon:Heart },
   holiday:     { color:WARN,       Icon:PartyPopper },
 };
 
@@ -108,13 +108,13 @@ const ORG_CSS = `
 .fpd-org .ocard .odate{font-family:var(--font-mono);font-size:11.5px;margin-top:2px;}
 .fpd-org .ocard .orec{color:${MUTED};font-size:12px;margin-bottom:4px;}
 .fpd-org .ocard .onotes{color:${MUTED};font-size:11.5px;font-style:italic;}
-.fpd-org .ocard .oannual{margin-left:auto;color:${POS};font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
+.fpd-org .ocard .oannual{margin-left:auto;color:#D99A6B;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
 
 /* new-tile / empty */
 .fpd-org .newtile{border-radius:15px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
-.fpd-org .newtile:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-org .newtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-org .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 12px;}
-.fpd-org .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-org .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-org .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 
 /* modal */
@@ -327,7 +327,7 @@ export function OrganizeHub() {
                   <div key={r.id} className="card rrow glow-surface">
                     <div style={{ flex:1, minWidth:0 }}>
                       <div className="rtop">
-                        <Bell size={13} color={ACCENT2}/>
+                        <Bell size={13} color="#FFFFFF"/>
                         <span className="rtitle">{r.title}</span>
                       </div>
                       <div className="rmeta">
@@ -340,7 +340,7 @@ export function OrganizeHub() {
                     <div className="racts">
                       <span className="rbadge" style={{ background:`${s.color}22`, color:s.color }}>{s.label}</span>
                       {r.status!=="completed" && (
-                        <button onClick={()=>completeReminder(r.id)} style={{ color:POS }}><CheckCircle size={15}/></button>
+                        <button onClick={()=>completeReminder(r.id)} style={{ color:"#D99A6B" }}><CheckCircle size={15}/></button>
                       )}
                       <button onClick={()=>removeReminder(r.id)} style={{ color:NEG }}><Trash2 size={14}/></button>
                     </div>

@@ -48,8 +48,8 @@ const initTrips: Trip[] = [
 ];
 
 const statusConfig = {
-  planned:   { color:ACCENT2, bg:"rgba(91,167,214,0.14)", label:"PLANNED" },
-  completed: { color:POS, bg:"rgba(95,190,145,0.14)",  label:"COMPLETED" },
+  planned:   { color:"#6FAE8B", bg:"rgba(91,167,214,0.14)", label:"PLANNED" },
+  completed: { color:"#D99A6B", bg:"rgba(95,190,145,0.14)",  label:"COMPLETED" },
   cancelled: { color:NEG, bg:"rgba(208,107,107,0.14)", label:"CANCELLED" },
 };
 
@@ -114,7 +114,7 @@ const TRAVEL_CSS = `
 .fpd-travel .callout .ck{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:4px;}
 .fpd-travel .callout .cv{color:${TEXT};font-size:13px;line-height:1.7;}
 .fpd-travel .docs-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:${MUTED};margin-bottom:8px;margin-top:14px;}
-.fpd-travel .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
+.fpd-travel .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
 @media (max-width:640px){
 .fpd-travel .tgrid{grid-template-columns:1fr;}
 .fpd-travel .tgrid .tile:nth-child(2n){border-left:none;}
@@ -256,7 +256,7 @@ export function TravelPlanner() {
 
                     {trip.highlights && (
                       <div className="callout" style={{ background: "rgba(95,190,145,0.06)", border: "1px solid rgba(95,190,145,0.2)" }}>
-                        <div className="ck" style={{ color: POS }}>HIGHLIGHTS & MEMORIES</div>
+                        <div className="ck" style={{ color: "#D99A6B" }}>HIGHLIGHTS & MEMORIES</div>
                         <div className="cv">{trip.highlights}</div>
                       </div>
                     )}

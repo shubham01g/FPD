@@ -96,7 +96,7 @@ const JOB_CSS = `
 .fpd-job .callout .ck{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:4px;}
 .fpd-job .callout .cv{color:${TEXT};font-size:13px;line-height:1.6;}
 .fpd-job .docs-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:${MUTED};margin-bottom:8px;margin-top:14px;}
-.fpd-job .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
+.fpd-job .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
 @media (max-width:640px){
 .fpd-job .jgrid{grid-template-columns:1fr;}
 .fpd-job .jgrid .tile:nth-child(2n){border-left:none;}
@@ -196,8 +196,8 @@ export function JobHistory() {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 3 }}>
                       <span className="jtitle">{job.title}</span>
-                      {job.current && <span className="jbadge" style={{ background: "rgba(95,190,145,0.16)", color: POS }}>CURRENT</span>}
-                      <span className="jbadge" style={{ background: "rgba(91,110,225,0.14)", color: ACCENT2 }}>{job.type.toUpperCase()}</span>
+                      {job.current && <span className="jbadge" style={{ background: "rgba(95,190,145,0.16)", color: "#D99A6B" }}>CURRENT</span>}
+                      <span className="jbadge" style={{ background: "rgba(91,110,225,0.14)", color: "#6FAE8B" }}>{job.type.toUpperCase()}</span>
                     </div>
                     <div className="jemployer">{job.employer}</div>
                     <div className="jmeta">
@@ -232,7 +232,7 @@ export function JobHistory() {
 
                   {job.achievements && (
                     <div className="callout" style={{ background: "rgba(95,190,145,0.06)", border: "1px solid rgba(95,190,145,0.2)" }}>
-                      <div className="ck" style={{ color: POS }}>KEY ACHIEVEMENTS</div>
+                      <div className="ck" style={{ color: "#D99A6B" }}>KEY ACHIEVEMENTS</div>
                       <div className="cv">{job.achievements}</div>
                     </div>
                   )}

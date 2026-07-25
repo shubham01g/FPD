@@ -51,13 +51,13 @@ export type AdminRole = "super_admin" | "operations_manager" | "support_agent" |
 const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; description: string; permissions: ModulePermission[] }> = {
   super_admin: {
     label: "Super Admin",
-    color: "#5B6EE1",
+    color: "#6E90C9",
     description: "Full access to everything. Cannot be restricted.",
     permissions: makePermissions(true, true, true),
   },
   operations_manager: {
     label: "Operations Manager",
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     description: "Full view access + edit on users, WG, verification, notifications. No financial delete.",
     permissions: MODULE_DEFS.map(m => ({
       ...m,
@@ -68,7 +68,7 @@ const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; descriptio
   },
   support_agent: {
     label: "Support Agent",
-    color: "#5BA7D6",
+    color: "#6FAE8B",
     description: "View users and white glove only. No financial data, no config access.",
     permissions: MODULE_DEFS.map(m => ({
       ...m,
@@ -79,7 +79,7 @@ const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; descriptio
   },
   finance_manager: {
     label: "Finance Manager",
-    color: "#48BB78",
+    color: "#D99A6B",
     description: "Full access to revenue, payouts, $199 fee, crypto. View-only everything else.",
     permissions: MODULE_DEFS.map(m => ({
       ...m,
@@ -271,7 +271,7 @@ function AdminCard({
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-0.5">
                 <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>{admin.name}</span>
-                {isSelf && <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#5B6EE1", ...MONO }}>YOU</span>}
+                {isSelf && <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>YOU</span>}
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:`${preset.color}15`, color:preset.color, ...MONO }}>
                   {preset.label.toUpperCase()}
                 </span>
@@ -297,7 +297,7 @@ function AdminCard({
             {admin.status === "suspended" && (
               <button onClick={() => { onUpdate(admin.id, { status:"active" }); toast.success(`${admin.name} reactivated`); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
-                style={{ background:"rgba(72,187,120,0.08)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.2)" }}>
+                style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <Unlock size={11}/> Reactivate
               </button>
             )}
@@ -389,7 +389,7 @@ function AdminCard({
                   ) : (
                     <button onClick={() => setEditingPerms(true)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
-                      style={{ background:"rgba(91,110,225,0.06)", color:"#5B6EE1" }}>
+                      style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                       <Edit2 size={11}/> Edit Permissions
                     </button>
                   )}
@@ -400,8 +400,8 @@ function AdminCard({
             {isSuper && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl mb-3"
                 style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.15)" }}>
-                <Crown size={14} color="#5B6EE1"/>
-                <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:600 }}>Super Admin has unrestricted access to all modules and cannot be limited.</span>
+                <Crown size={14} color="#FFFFFF"/>
+                <span style={{ color:"#6E90C9", fontSize:12, fontWeight:600 }}>Super Admin has unrestricted access to all modules and cannot be limited.</span>
               </div>
             )}
 
@@ -488,8 +488,8 @@ export function AdminRoles() {
   );
 
   const stats = [
-    { label:"Total Admins",  value:admins.length,                                  color:"#5B6EE1" },
-    { label:"Active",         value:admins.filter(a=>a.status==="active").length,   color:"#48BB78" },
+    { label:"Total Admins",  value:admins.length,                                  color:"#6E90C9" },
+    { label:"Active",         value:admins.filter(a=>a.status==="active").length,   color:"#D99A6B" },
     { label:"Invited",        value:admins.filter(a=>a.status==="invited").length,  color:"#F6AD55" },
     { label:"Suspended",      value:admins.filter(a=>a.status==="suspended").length,color:"#FC8181" },
   ];
@@ -505,8 +505,8 @@ export function AdminRoles() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Shield size={15} color="#5B6EE1"/>
-            <span style={{ color:"#5B6EE1", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · TEAM & ROLES</span>
+            <Shield size={15} color="#FFFFFF"/>
+            <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · TEAM & ROLES</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>Admin Team & Permissions</h1>
           <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -594,7 +594,7 @@ export function AdminRoles() {
                       style={{ width:20, height:20, background:done?"#48BB78":active?"#5B6EE1":"rgba(91,110,225,0.1)", color:done||active?"#fff":"#8A9AB8" }}>
                       {done ? <CheckCircle size={11}/> : i+1}
                     </div>
-                    <span style={{ fontSize:10, fontWeight:600, color:active?"#5B6EE1":done?"#48BB78":"#8A9AB8", ...MONO }}>{label.toUpperCase()}</span>
+                    <span style={{ fontSize:10, fontWeight:600, color:active?"#6E90C9":done?"#D99A6B":"#8A9AB8", ...MONO }}>{label.toUpperCase()}</span>
                   </div>
                 );
               })}
@@ -649,7 +649,7 @@ export function AdminRoles() {
                     <div className="flex flex-wrap gap-1.5">
                       {ROLE_PRESETS[newAdmin.role].permissions.filter(p => p.canView).map(p => (
                         <span key={p.module} className="px-2 py-1 rounded-lg text-xs flex items-center gap-1"
-                          style={{ background:"rgba(72,187,120,0.08)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.2)" }}>
+                          style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                           <CheckCircle size={8}/>{p.label}
                         </span>
                       ))}
@@ -689,7 +689,7 @@ export function AdminRoles() {
                 <div className="relative">
                   <div className="flex items-center justify-center rounded-full"
                     style={{ width:72, height:72, background:"rgba(91,110,225,0.08)", border:"2px solid rgba(91,110,225,0.2)" }}>
-                    <Send size={28} color="#5B6EE1"/>
+                    <Send size={28} color="#FFFFFF"/>
                   </div>
                   <div className="absolute -top-1 -right-1 flex items-center justify-center rounded-full"
                     style={{ width:22, height:22, background:"#5B6EE1" }}>
@@ -700,14 +700,14 @@ export function AdminRoles() {
                   Creating Administrator Account…
                 </div>
                 <div style={{ color:"#8A9AB8", fontSize:13, textAlign:"center", lineHeight:1.6 }}>
-                  Sending invite to <strong style={{ color:"#5B6EE1" }}>{newAdmin.email}</strong>
+                  Sending invite to <strong style={{ color:"#6E90C9" }}>{newAdmin.email}</strong>
                 </div>
                 <div className="w-full max-w-xs space-y-2.5 mt-2">
                   {["Creating account record","Assigning role permissions","Generating one-time login token","Sending invite email"].map(step => (
                     <div key={step} className="flex items-center gap-3">
                       <div className="flex items-center justify-center rounded-full flex-shrink-0"
                         style={{ width:20, height:20, background:"rgba(72,187,120,0.15)" }}>
-                        <CheckCircle size={11} color="#48BB78"/>
+                        <CheckCircle size={11} color="#FFFFFF"/>
                       </div>
                       <span style={{ fontSize:12, color:"#5A6A88" }}>{step}</span>
                     </div>
@@ -724,7 +724,7 @@ export function AdminRoles() {
                   <div className="flex flex-col items-center text-center gap-3 py-2">
                     <div className="flex items-center justify-center rounded-full"
                       style={{ width:60, height:60, background:"rgba(72,187,120,0.12)", border:"2px solid rgba(72,187,120,0.3)" }}>
-                      <CheckCircle size={26} color="#48BB78"/>
+                      <CheckCircle size={26} color="#FFFFFF"/>
                     </div>
                     <div>
                       <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#0D1428" }}>Invite Sent!</div>
@@ -774,7 +774,7 @@ export function AdminRoles() {
                       </div>
                       <button onClick={copyLink}
                         className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold flex-shrink-0"
-                        style={{ background:linkCopied?"rgba(72,187,120,0.1)":"rgba(91,110,225,0.08)", color:linkCopied?"#48BB78":"#5B6EE1", border:`1px solid ${linkCopied?"rgba(72,187,120,0.3)":"rgba(91,110,225,0.15)"}` }}>
+                        style={{ background:linkCopied?"rgba(72,187,120,0.1)":"rgba(91,110,225,0.08)", color:linkCopied?"#D99A6B":"#6E90C9", border:`1px solid ${linkCopied?"rgba(72,187,120,0.3)":"rgba(91,110,225,0.15)"}` }}>
                         {linkCopied ? <><CheckCircle size={11}/> Copied!</> : <><Copy size={11}/> Copy</>}
                       </button>
                     </div>

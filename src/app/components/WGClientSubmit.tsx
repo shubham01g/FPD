@@ -101,8 +101,8 @@ const DOCUMENT_CATEGORIES = [
 function StatusBadge({ status }: { status: SubmittedDocument["status"] }) {
   const cfg = {
     pending:            { color:"#F6AD55", bg:"rgba(246,173,85,0.12)",   label:"Waiting to be received" },
-    received:           { color:"#5B6EE1", bg:"rgba(91,110,225,0.1)",     label:"Received by specialist" },
-    uploaded_to_vault:  { color:"#48BB78", bg:"rgba(72,187,120,0.12)",   label:"Uploaded to your vault ✓" },
+    received:           { color:"#6E90C9", bg:"rgba(91,110,225,0.1)",     label:"Received by specialist" },
+    uploaded_to_vault:  { color:"#D99A6B", bg:"rgba(72,187,120,0.12)",   label:"Uploaded to your vault ✓" },
     needs_resubmit:     { color:"#FC8181", bg:"rgba(252,129,129,0.12)",  label:"Please resubmit — unclear scan" },
   }[status];
   return (
@@ -199,7 +199,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", color:"#5BA7D6", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>
+            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>
               FINAL PASS DOWN
             </div>
             <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>
@@ -215,8 +215,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
         <div className="p-5 rounded-2xl glow-surface"
           style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", border:"1px solid rgba(91,167,214,0.3)" }}>
           <div className="flex items-center gap-2 mb-3">
-            <Star size={16} color="#6F9E94" fill="rgba(111,158,148,0.3)"/>
-            <span style={{ color:"#6F9E94", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+            <Star size={16} color="#FFFFFF" fill="rgba(111,158,148,0.3)"/>
+            <span style={{ color:"#D68FA8", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
               WHITE GLOVE CONCIERGE
             </span>
           </div>
@@ -224,12 +224,12 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             Hello, {clientName.split(" ")[0]}! 👋
           </div>
           <p style={{ color:"#8AA3C8", fontSize:13, lineHeight:1.7 }}>
-            Your specialist <strong style={{ color:"#6F9E94" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
+            Your specialist <strong style={{ color:"#D68FA8" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
           </p>
           <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl"
             style={{ background:"rgba(72,187,120,0.1)", border:"1px solid rgba(72,187,120,0.2)" }}>
-            <Lock size={12} color="#48BB78"/>
-            <span style={{ color:"#48BB78", fontSize:11 }}>
+            <Lock size={12} color="#FFFFFF"/>
+            <span style={{ color:"#D99A6B", fontSize:11 }}>
               Secure · Encrypted · Only your specialist can see these
             </span>
           </div>
@@ -255,7 +255,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 1: Get the document */}
             <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(91,167,214,0.12)" }}>
-              <div style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 1 — GET YOUR DOCUMENT READY
               </div>
 
@@ -272,7 +272,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                   {/* File upload fallback */}
                   <button onClick={() => fileRef.current?.click()}
                     className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold text-sm"
-                    style={{ background:"rgba(91,167,214,0.06)", color:"#5BA7D6", border:"2px dashed rgba(91,167,214,0.3)" }}>
+                    style={{ background:"rgba(91,167,214,0.06)", color:"#6FAE8B", border:"2px dashed rgba(91,167,214,0.3)" }}>
                     <Upload size={16}/> Upload from Phone or Computer
                   </button>
                   <input ref={fileRef} type="file"
@@ -293,7 +293,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                     ) : (
                       <div className="flex items-center gap-3 px-4 py-5"
                         style={{ background:"rgba(91,110,225,0.04)" }}>
-                        <FileText size={28} color="#5B6EE1"/>
+                        <FileText size={28} color="#FFFFFF"/>
                         <div>
                           <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>{selectedFile.name}</div>
                           <div style={{ color:"#8A9AB8", fontSize:11 }}>{selectedFile.type} · {Math.round(selectedFile.size/1024)}KB</div>
@@ -317,14 +317,14 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 2: Label it */}
             <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(91,167,214,0.12)" }}>
-              <div style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 2 — WHAT KIND OF DOCUMENT IS THIS?
               </div>
               <button onClick={() => setShowCategoryPicker(!showCategoryPicker)}
                 className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl"
                 style={{ background:category?"rgba(91,167,214,0.08)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${category?"rgba(91,167,214,0.4)":"rgba(91,110,225,0.15)"}`,
-                  color:category?"#5BA7D6":"#8A9AB8" }}>
+                  color:category?"#6FAE8B":"#8A9AB8" }}>
                 <span style={{ fontSize:14 }}>
                   {category
                     ? DOCUMENT_CATEGORIES.find(c=>c.id===category)?.emoji + " " + DOCUMENT_CATEGORIES.find(c=>c.id===category)?.label
@@ -342,7 +342,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                         borderColor:"rgba(91,167,214,0.08)", color:"#0D1428" }}>
                       <span style={{ fontSize:20 }}>{cat.emoji}</span>
                       <span style={{ fontSize:14 }}>{cat.label}</span>
-                      {category===cat.id && <CheckCircle size={14} color="#5BA7D6" style={{ marginLeft:"auto" }}/>}
+                      {category===cat.id && <CheckCircle size={14} color="#FFFFFF" style={{ marginLeft:"auto" }}/>}
                     </button>
                   ))}
                 </div>
@@ -351,7 +351,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 3: Notes */}
             <div className="p-5 rounded-2xl glow-surface" style={{ background:"#fff", border:"1px solid rgba(91,167,214,0.12)" }}>
-              <div style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 3 — ADD A NOTE (OPTIONAL)
               </div>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
@@ -391,9 +391,9 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             {/* Summary */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label:"Sent",     value:submissions.length,  color:"#5BA7D6" },
-                { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#5B6EE1" },
-                { label:"In Vault", value:uploadedCount, color:"#48BB78" },
+                { label:"Sent",     value:submissions.length,  color:"#6FAE8B" },
+                { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#6E90C9" },
+                { label:"In Vault", value:uploadedCount, color:"#D99A6B" },
               ].map(s => (
                 <div key={s.label} className="p-3 rounded-xl text-center glow-surface"
                   style={{ background:"#fff", border:"1px solid rgba(91,167,214,0.12)" }}>
@@ -446,7 +446,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             {/* Help contact */}
             <div className="p-4 rounded-2xl flex items-center gap-3 glow-surface"
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
-              <Phone size={18} color="#5BA7D6" style={{ flexShrink:0 }}/>
+              <Phone size={18} color="#FFFFFF" style={{ flexShrink:0 }}/>
               <div>
                 <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Need help sending documents?</div>
                 <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>

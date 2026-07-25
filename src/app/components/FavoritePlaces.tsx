@@ -20,20 +20,20 @@ const CAT_META: Record<string, { emoji:string; color:string; bg:string }> = {
   "Restaurant":        { emoji:"🍽️", color:"#ED8936", bg:"rgba(237,137,54,0.1)" },
   "Coffee Shop":       { emoji:"☕",  color:"#92400E", bg:"rgba(146,64,14,0.1)" },
   "Bakery":            { emoji:"🥐",  color:"#F6AD55", bg:"rgba(246,173,85,0.1)" },
-  "Bar / Lounge":      { emoji:"🍸",  color:"#5B6EE1", bg:"rgba(91,110,225,0.1)" },
-  "Park / Nature":     { emoji:"🌳",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
-  "Beach":             { emoji:"🏖️", color:"#5BA7D6", bg:"rgba(91,167,214,0.1)" },
-  "Museum / Art":      { emoji:"🏛️", color:"#5B6EE1", bg:"rgba(91,110,225,0.1)" },
+  "Bar / Lounge":      { emoji:"🍸",  color:"#6E90C9", bg:"rgba(91,110,225,0.1)" },
+  "Park / Nature":     { emoji:"🌳",  color:"#D99A6B", bg:"rgba(72,187,120,0.1)" },
+  "Beach":             { emoji:"🏖️", color:"#6FAE8B", bg:"rgba(91,167,214,0.1)" },
+  "Museum / Art":      { emoji:"🏛️", color:"#6E90C9", bg:"rgba(91,110,225,0.1)" },
   "Entertainment":     { emoji:"🎭",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
-  "Shopping":          { emoji:"🛍️", color:"#5B6EE1", bg:"rgba(91,110,225,0.1)" },
-  "Grocery / Market":  { emoji:"🛒",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
+  "Shopping":          { emoji:"🛍️", color:"#6E90C9", bg:"rgba(91,110,225,0.1)" },
+  "Grocery / Market":  { emoji:"🛒",  color:"#D99A6B", bg:"rgba(72,187,120,0.1)" },
   "Doctor / Medical":  { emoji:"🏥",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
-  "Dentist":           { emoji:"🦷",  color:"#5BA7D6", bg:"rgba(91,167,214,0.1)" },
-  "Religious / Church":{ emoji:"⛪",  color:"#5B6EE1", bg:"rgba(91,110,225,0.1)" },
+  "Dentist":           { emoji:"🦷",  color:"#6FAE8B", bg:"rgba(91,167,214,0.1)" },
+  "Religious / Church":{ emoji:"⛪",  color:"#6E90C9", bg:"rgba(91,110,225,0.1)" },
   "Gym / Fitness":     { emoji:"💪",  color:"#FC8181", bg:"rgba(252,129,129,0.1)" },
   "Hotel / Resort":    { emoji:"🏨",  color:"#ED8936", bg:"rgba(237,137,54,0.1)" },
-  "Vacation Spot":     { emoji:"🌴",  color:"#48BB78", bg:"rgba(72,187,120,0.1)" },
-  "Family Home":       { emoji:"🏡",  color:"#5B6EE1", bg:"rgba(91,110,225,0.1)" },
+  "Vacation Spot":     { emoji:"🌴",  color:"#D99A6B", bg:"rgba(72,187,120,0.1)" },
+  "Family Home":       { emoji:"🏡",  color:"#6E90C9", bg:"rgba(91,110,225,0.1)" },
 };
 
 function getMeta(cat:string) { return CAT_META[cat] || { emoji:"📍", color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)" }; }
@@ -84,7 +84,7 @@ const FAV_CSS = `
 .fpd-fav .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-fav .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-fav .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-fav .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-fav .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-fav .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-fav .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -129,15 +129,15 @@ const FAV_CSS = `
 .fpd-fav .pwhy{color:${MUTED};font-size:12px;line-height:1.65;font-style:italic;margin-bottom:12px;}
 .fpd-fav .pfoot-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
 .fpd-fav .ptags{display:flex;flex-wrap:wrap;gap:6px;}
-.fpd-fav .ptag{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(91,110,225,0.10);color:${ACCENT2};}
+.fpd-fav .ptag{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:500;background:rgba(91,110,225,0.10);color:#6FAE8B;}
 .fpd-fav .pvisited{color:${MUTED};font-size:10.5px;font-family:var(--font-mono);flex-shrink:0;}
 .fpd-fav .pacts{display:flex;gap:8px;flex-wrap:wrap;}
-.fpd-fav .pact-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);background:rgba(91,110,225,0.08);color:${ACCENT2};transition:background .16s;}
+.fpd-fav .pact-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);background:rgba(91,110,225,0.08);color:#6FAE8B;transition:background .16s;}
 .fpd-fav .pact-btn:hover{background:rgba(91,110,225,0.16);}
 
 /* empty state */
 .fpd-fav .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 12px;}
-.fpd-fav .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-fav .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:14px;}
 .fpd-fav .empty .et{color:${SOFT};font-size:14px;font-weight:600;font-family:var(--font-display);margin-bottom:4px;}
 .fpd-fav .empty .ed{color:${MUTED};font-size:12.5px;}
 

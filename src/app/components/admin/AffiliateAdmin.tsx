@@ -39,10 +39,10 @@ export function AffiliateAdmin() {
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Affiliates", value: 181, sub: "12 joined this month", color: "#5BA7D6" },
+          { label: "Total Affiliates", value: 181, sub: "12 joined this month", color: "#6FAE8B" },
           { label: "Active Referrals", value: "4,841", sub: "Within 12-month cap", color: "var(--gold)" },
-          { label: "Jun Commission Pool", value: "$76,122", sub: "Unpaid + processing", color: "#48BB78" },
-          { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#5BA7D6" },
+          { label: "Jun Commission Pool", value: "$76,122", sub: "Unpaid + processing", color: "#D99A6B" },
+          { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -138,7 +138,7 @@ export function AffiliateAdmin() {
               className="px-2 py-1 rounded"
               style={{
                 background: aff.status === "active" ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
-                color: aff.status === "active" ? "#48BB78" : "#FC8181",
+                color: aff.status === "active" ? "#D99A6B" : "#FC8181",
                 fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
               }}
             >
@@ -149,7 +149,7 @@ export function AffiliateAdmin() {
               <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
               {aff.status === "active"
                 ? <button style={{ color: "#FC8181" }}><XCircle size={14} /></button>
-                : <button style={{ color: "#48BB78" }}><CheckCircle size={14} /></button>
+                : <button style={{ color: "#D99A6B" }}><CheckCircle size={14} /></button>
               }
             </div>
           </div>

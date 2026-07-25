@@ -58,7 +58,7 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
     <div className="faq-item">
       <button onClick={() => setOpen(!open)} className="faq-q" style={{ background: open ? "rgba(91,110,225,0.06)" : "transparent" }}>
         <span>{faq.q}</span>
-        {open ? <ChevronUp size={16} color={ACCENT}/> : <ChevronDown size={16} color={MUTED}/>}
+        {open ? <ChevronUp size={16} color="#FFFFFF"/> : <ChevronDown size={16} color={MUTED}/>}
       </button>
       {open && (
         <div className="faq-a">
@@ -84,7 +84,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
   if (submitted) {
     return (
       <div className="submitted">
-        <div className="submitted-ico"><CheckCircle size={40} color={ACCENT}/></div>
+        <div className="submitted-ico"><CheckCircle size={40} color="#FFFFFF"/></div>
         <h3>We'll Call You Soon!</h3>
         <p>Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.</p>
         <div className="ref-box">
@@ -118,7 +118,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
         <div className="grid grid-cols-3 gap-2">
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))} className="pick-btn"
-              style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?ACCENT2:MUTED }}>
+              style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?"#6FAE8B":MUTED }}>
               {label}
             </button>
           ))}
@@ -130,7 +130,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
         <div className="grid grid-cols-2 gap-2">
           {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))} className="pick-btn"
-              style={{ background:form.contactedBy===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?ACCENT2:MUTED }}>
+              style={{ background:form.contactedBy===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?"#6FAE8B":MUTED }}>
               {label}
             </button>
           ))}
@@ -168,7 +168,7 @@ const WG_CSS = `
 .fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;}
 .fpd-wg .hero-inner{position:relative;max-width:720px;margin:0 auto;text-align:center;}
 .fpd-wg .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;margin-bottom:22px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.32);}
-.fpd-wg .hero-badge span{color:${ACCENT2};font-size:12px;font-family:var(--font-mono);letter-spacing:0.1em;}
+.fpd-wg .hero-badge span{color:#6FAE8B;font-size:12px;font-family:var(--font-mono);letter-spacing:0.1em;}
 .fpd-wg .hero h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.4rem);color:${TEXT};line-height:1.15;margin-bottom:18px;}
 .fpd-wg .hero h1 em{color:${SOFT};font-style:normal;}
 .fpd-wg .hero p{color:${MUTED};font-size:16px;line-height:1.85;max-width:520px;margin:0 auto 36px;}
@@ -192,21 +192,21 @@ const WG_CSS = `
 .fpd-wg .price-feat+.price-feat{margin-top:8px;}
 .fpd-wg .price-feat span{color:${SOFT};font-size:13px;}
 .fpd-wg .total-box{margin-top:20px;padding:14px 16px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);}
-.fpd-wg .total-box .tb-lbl{color:${ACCENT2};font-size:13px;font-weight:700;}
+.fpd-wg .total-box .tb-lbl{color:#6FAE8B;font-size:13px;font-weight:700;}
 .fpd-wg .total-box .tb-val{color:${TEXT};font-size:20px;font-family:var(--font-display);font-weight:700;margin-top:2px;}
 .fpd-wg .total-box .tb-sub{color:${MUTED};font-size:11px;}
 
 /* section heading */
 .fpd-wg .sec-head{text-align:center;margin-bottom:36px;}
-.fpd-wg .sec-eyebrow{color:${ACCENT2};font-size:11px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:8px;}
+.fpd-wg .sec-eyebrow{color:#6FAE8B;font-size:11px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:8px;}
 .fpd-wg .sec-h2{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.2rem);color:${TEXT};line-height:1.2;}
 
 /* steps */
 .fpd-wg .step-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media (max-width:700px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
 .fpd-wg .step-card{display:flex;align-items:flex-start;gap:16px;padding:20px;}
-.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:${ACCENT2};}
-.fpd-wg .step-num{color:${ACCENT2};font-size:10px;font-weight:700;font-family:var(--font-mono);}
+.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:#FFFFFF;}
+.fpd-wg .step-num{color:#6FAE8B;font-size:10px;font-weight:700;font-family:var(--font-mono);}
 .fpd-wg .step-title{font-family:var(--font-display);font-size:16px;color:${TEXT};margin:2px 0 4px;}
 .fpd-wg .step-desc{color:${MUTED};font-size:13px;line-height:1.7;}
 
@@ -239,9 +239,9 @@ const WG_CSS = `
 .fpd-wg .submitted h3{font-family:var(--font-display);font-size:22px;color:${TEXT};margin-bottom:10px;}
 .fpd-wg .submitted p{color:${MUTED};font-size:14px;line-height:1.8;max-width:360px;margin:0 auto 22px;}
 .fpd-wg .ref-box{padding:16px 20px;border-radius:16px;margin-bottom:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);}
-.fpd-wg .ref-lbl{color:${ACCENT2};font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
+.fpd-wg .ref-lbl{color:#6FAE8B;font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
 .fpd-wg .ref-val{color:${TEXT};font-size:18px;font-family:var(--font-display);font-weight:700;}
-.fpd-wg .btn-ghost{padding:12px 24px;border-radius:16px;font-weight:700;font-size:13px;background:rgba(91,110,225,0.10);color:${ACCENT2};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-wg .btn-ghost{padding:12px 24px;border-radius:16px;font-weight:700;font-size:13px;background:rgba(91,110,225,0.10);color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* faq */
 .fpd-wg .faq-list{display:flex;flex-direction:column;gap:12px;}
@@ -255,7 +255,7 @@ const WG_CSS = `
 .fpd-wg .reassure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 @media (max-width:700px){.fpd-wg .reassure-grid{grid-template-columns:1fr;}}
 .fpd-wg .reassure-card{padding:20px;text-align:center;}
-.fpd-wg .reassure-card .ri{color:${ACCENT};margin:0 auto 10px;display:flex;justify-content:center;}
+.fpd-wg .reassure-card .ri{color:#6E90C9;margin:0 auto 10px;display:flex;justify-content:center;}
 .fpd-wg .reassure-card .rt{font-family:var(--font-display);font-size:14px;color:${TEXT};margin-bottom:4px;}
 .fpd-wg .reassure-card .rd{color:${MUTED};font-size:12px;line-height:1.6;}
 
@@ -283,7 +283,7 @@ export function WhiteGloveService() {
         <div className="hero-glow-b"/>
         <div className="hero-inner">
           <div className="hero-badge">
-            <Star size={13} color={ACCENT} fill={ACCENT}/>
+            <Star size={13} color="#FFFFFF" fill={ACCENT}/>
             <span>WHITE GLOVE SERVICE</span>
           </div>
           <h1>We Set Everything Up<br/><em>For You.</em></h1>
@@ -310,18 +310,18 @@ export function WhiteGloveService() {
             <div className="price-sub">Paid once · Gets you started</div>
             <div>
               {["Specialist assigned to your account","Intake call to understand your needs","Secure document upload link sent to you","Complete onboarding plan created"].map(f => (
-                <div key={f} className="price-feat"><CheckCircle size={13} color={ACCENT}/><span>{f}</span></div>
+                <div key={f} className="price-feat"><CheckCircle size={13} color="#FFFFFF"/><span>{f}</span></div>
               ))}
             </div>
           </div>
 
           <div className="card price-card glow-surface">
-            <div className="price-eyebrow" style={{ color: ACCENT2 }}>SESSION RATE</div>
+            <div className="price-eyebrow" style={{ color: "#6FAE8B" }}>SESSION RATE</div>
             <div className="price-big">${PRICING.sessionRate}</div>
             <div className="price-sub">per {PRICING.sessionLength} minutes · Only pay for what you use</div>
             <div>
               {["Phone or video call with your specialist","Specialist uploads documents during the session","Session notes and progress tracking","Typical setup: 2–4 sessions total"].map(f => (
-                <div key={f} className="price-feat"><CheckCircle size={13} color={ACCENT}/><span>{f}</span></div>
+                <div key={f} className="price-feat"><CheckCircle size={13} color="#FFFFFF"/><span>{f}</span></div>
               ))}
             </div>
             <div className="total-box">
@@ -357,7 +357,7 @@ export function WhiteGloveService() {
           <div className="includes-title">Everything Is Included</div>
           <div className="includes-grid">
             {INCLUDES.map(f => (
-              <div key={f} className="includes-row"><CheckCircle size={14} color={ACCENT} style={{ marginTop:2, flexShrink:0 }}/><span>{f}</span></div>
+              <div key={f} className="includes-row"><CheckCircle size={14} color="#FFFFFF" style={{ marginTop:2, flexShrink:0 }}/><span>{f}</span></div>
             ))}
           </div>
           <div className="includes-cta">
@@ -370,7 +370,7 @@ export function WhiteGloveService() {
         {/* Inline form */}
         <div className="card intake-card glow-surface">
           <div className="intake-hd">
-            <Star size={28} color={ACCENT} fill="rgba(91,110,225,0.3)"/>
+            <Star size={28} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
             <h2>Ready to Get Started?</h2>
             <p>Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.</p>
           </div>
@@ -409,7 +409,7 @@ export function WhiteGloveService() {
           <div className="card modal glow-surface">
             <div className="modal-head">
               <div className="flex items-center gap-2">
-                <Star size={16} color={ACCENT} fill="rgba(91,110,225,0.3)"/>
+                <Star size={16} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
                 <h3>White Glove Request</h3>
               </div>
               <button onClick={() => setShowModal(false)}><X size={16}/></button>

@@ -18,9 +18,9 @@ const NEG     = "#D06B6B";
 const ID_TYPES = ["Driver's License","Passport","Social Security Card","Birth Certificate","Military ID","Medicare Card","Medicaid Card","Health Insurance Card","Dental Insurance Card","Vision Insurance Card","Work / Employee ID","Student ID","Global Entry / TSA PreCheck","Green Card / Permanent Resident","Voter Registration","Vehicle Registration","Concealed Carry Permit","Professional License","Other"];
 
 const CATEGORIES: Record<string, { color:string; bg:string; emoji:string }> = {
-  "Government ID":   { color:"#5B6EE1", bg:"rgba(91,110,225,0.1)",   emoji:"🪪" },
-  "Insurance":       { color:"#48BB78", bg:"rgba(72,187,120,0.1)",  emoji:"🛡️" },
-  "Professional":    { color:"#5B6EE1", bg:"rgba(91,110,225,0.1)", emoji:"💼" },
+  "Government ID":   { color:"#6E90C9", bg:"rgba(91,110,225,0.1)",   emoji:"🪪" },
+  "Insurance":       { color:"#D99A6B", bg:"rgba(72,187,120,0.1)",  emoji:"🛡️" },
+  "Professional":    { color:"#6E90C9", bg:"rgba(91,110,225,0.1)", emoji:"💼" },
   "Military":        { color:"#ED8936", bg:"rgba(237,137,54,0.1)",  emoji:"🎖️" },
   "Other":           { color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)", emoji:"📋" },
 };
@@ -250,7 +250,7 @@ export function IDKeeper() {
                   <div className="flex flex-col items-end gap-1">
                     {expired && <span className="ibadge" style={{ background: "rgba(208,107,107,0.16)", color: NEG }}>EXPIRED</span>}
                     {expiring && !expired && <span className="ibadge" style={{ background: "rgba(217,165,94,0.16)", color: WARN }}>EXPIRING SOON</span>}
-                    {r.documentScanned && <span className="ibadge" style={{ background: "rgba(95,190,145,0.14)", color: POS }}>✓ SCANNED</span>}
+                    {r.documentScanned && <span className="ibadge" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B" }}>✓ SCANNED</span>}
                   </div>
                 </div>
 

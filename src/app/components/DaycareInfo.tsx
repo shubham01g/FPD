@@ -146,7 +146,7 @@ const DAYCARE_CSS = `
 /* record cards */
 .fpd-daycare .rlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-daycare .rhead{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;background:none;border:none;cursor:pointer;text-align:left;}
-.fpd-daycare .rico{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-daycare .rico{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-daycare .rtitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
 .fpd-daycare .rname{font-family:var(--font-display);font-size:16.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
 .fpd-daycare .rchild{color:${SOFT};font-size:13px;font-weight:500;margin-bottom:6px;}
@@ -182,18 +182,18 @@ const DAYCARE_CSS = `
 /* authorized pickups */
 .fpd-daycare .pickup-intro{color:${MUTED};font-size:12.5px;line-height:1.65;}
 .fpd-daycare .pcard{display:flex;align-items:flex-start;gap:14px;padding:15px 16px;border-radius:12px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);}
-.fpd-daycare .pavatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.14);color:${ACCENT2};font-family:var(--font-display);font-weight:700;font-size:14px;}
+.fpd-daycare .pavatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.14);color:#6FAE8B;font-family:var(--font-display);font-weight:700;font-size:14px;}
 .fpd-daycare .pinfo-name{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;}
 .fpd-daycare .pinfo-name b{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-daycare .pinfo-name span{color:${MUTED};font-size:12px;}
 .fpd-daycare .pinfo-row{display:flex;align-items:center;gap:6px;color:${MUTED};font-size:11.5px;}
-.fpd-daycare .pinfo-row.ok{color:${POS};margin-top:3px;}
-.fpd-daycare .adddash{width:100%;padding:12px;border-radius:11px;border:1px dashed rgba(91,110,225,0.4);background:rgba(91,110,225,0.04);color:${ACCENT2};font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-daycare .pinfo-row.ok{color:#D99A6B;margin-top:3px;}
+.fpd-daycare .adddash{width:100%;padding:12px;border-radius:11px;border:1px dashed rgba(91,110,225,0.4);background:rgba(91,110,225,0.04);color:#6FAE8B;font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-daycare .adddash:hover{background:rgba(91,110,225,0.09);}
 
 /* documents */
 .fpd-daycare .docrow{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-daycare .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
+.fpd-daycare .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
 .fpd-daycare .docchip:hover{background:rgba(91,110,225,0.16);}
 
 /* modal */

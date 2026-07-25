@@ -129,7 +129,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("• ") || line.startsWith("* ")) {
       const content = line.slice(2).replace(/\*\*([^*]+)\*\*/g,"$1");
-      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#374669" }}><span style={{ color:"#5B6EE1", flexShrink:0 }}>•</span><span>{content}</span></div>;
+      return <div key={i} className="flex items-start gap-2 text-sm" style={{ color:"#374669" }}><span style={{ color:"#6E90C9", flexShrink:0 }}>•</span><span>{content}</span></div>;
     }
     const parts = line.split(/\*\*([^*]+)\*\*/g);
     return (
@@ -236,7 +236,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
             {ADMIN_SUGGESTIONS.map(s => (
               <button key={s} onClick={()=>send(s)}
                 className="text-xs px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6", border:"1px solid rgba(91,167,214,0.2)" }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", border:"1px solid rgba(91,167,214,0.2)" }}>
                 {s}
               </button>
             ))}
@@ -250,7 +250,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
               style={{ flex:1, border:"1px solid rgba(91,167,214,0.25)", borderRadius:12, padding:"8px 14px", fontSize:13, outline:"none", background:"rgba(91,167,214,0.03)" }}/>
             <button onClick={()=>send(input)} disabled={!input.trim()}
               className="flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#6F9E94" }}>
+              style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#D68FA8" }}>
               <Send size={16}/>
             </button>
           </div>

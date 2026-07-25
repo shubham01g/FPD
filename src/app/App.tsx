@@ -83,7 +83,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           style={{ background:"#fff", borderColor:"rgba(91,167,214,0.15)" }}>
           <button onClick={() => setSelected(null)}
             className="flex items-center gap-2 text-sm font-semibold"
-            style={{ color:"#5BA7D6" }}>
+            style={{ color:"#6FAE8B" }}>
             ← Switch Client
           </button>
           <div style={{ color:"#5A6A88", fontSize:12, ...MONO }}>
@@ -91,7 +91,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
           </div>
           <button onClick={() => setMode("concierge")}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
             View {client.specialist.split(" ")[0]}'s Inbox →
           </button>
         </div>
@@ -105,7 +105,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
       style={{ background:"#F5F8FF", fontFamily:"var(--font-body)" }}>
       <div style={{ maxWidth:520, width:"100%" }}>
         <div className="text-center mb-8">
-          <div style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
+          <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
             📤 CLIENT DOCUMENT SUBMISSION — DEMO
           </div>
           <h2 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#0D1428", marginBottom:8 }}>
@@ -123,20 +123,20 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
               style={{ background:"#fff", border:"1.5px solid rgba(91,167,214,0.2)",
                 boxShadow:"0 2px 12px rgba(91,167,214,0.06)" }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#5BA7D6", fontFamily:"var(--font-display)", fontSize:18 }}>
+                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-display)", fontSize:18 }}>
                 {c.name.split(" ").map((w:string) => w[0]).join("").slice(0,2)}
               </div>
               <div className="flex-1">
                 <div style={{ color:"#0D1428", fontSize:15, fontWeight:600, marginBottom:3 }}>{c.name}</div>
                 <div style={{ color:"#8A9AB8", fontSize:12 }}>
-                  Specialist: <strong style={{ color:"#5BA7D6" }}>{c.specialist}</strong>
+                  Specialist: <strong style={{ color:"#6FAE8B" }}>{c.specialist}</strong>
                 </div>
                 <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2, ...MONO }}>
                   Token: {c.token}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl self-center flex-shrink-0"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6", fontSize:12, fontWeight:700 }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", fontSize:12, fontWeight:700 }}>
                 Open →
               </div>
             </button>
@@ -145,7 +145,7 @@ function WGClientSubmitDemo({ setMode }: { setMode: (m: AppMode) => void }) {
 
         <div className="mt-6 p-4 rounded-2xl text-center"
           style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)" }}>
-          <div style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
+          <div style={{ color:"#6E90C9", fontSize:12, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
           <ol style={{ color:"#5A6A88", fontSize:12, lineHeight:2, textAlign:"left" }}>
             <li>1. Select a client above (e.g. Dorothy Henderson)</li>
             <li>2. Submit a document on their page</li>
@@ -220,7 +220,7 @@ function DemoBar({ mode, setMode }: { mode: AppMode; setMode: (m: AppMode) => vo
         style={{
           display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
           borderRadius:99, fontSize:10, fontWeight:700, cursor:"pointer",
-          background:"rgba(10,10,15,0.95)", color:"#5BA7D6",
+          background:"rgba(10,10,15,0.95)", color:"#6FAE8B",
           border:"1px solid rgba(91,110,225,0.4)",
           boxShadow:"0 4px 20px rgba(0,0,0,0.5)", backdropFilter:"blur(16px)",
           letterSpacing:"0.06em",

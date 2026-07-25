@@ -84,10 +84,10 @@ const PWD_CSS = `
 .fpd-pwd .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-pwd .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-pwd .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-pwd .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-pwd .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-pwd .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-pwd .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
-.fpd-pwd .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-pwd .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-pwd .btn-pos:hover{background:rgba(95,190,145,0.2);}
 
 /* KPI ledger */
@@ -120,14 +120,14 @@ const PWD_CSS = `
 .fpd-pwd .plist{display:flex;flex-direction:column;gap:10px;}
 .fpd-pwd .prow{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:border-color .18s,background .18s;}
 .fpd-pwd .prow.sel{border-color:rgba(91,110,225,0.5);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.4),0 6px 20px -8px rgba(91,110,225,0.45);}
-.fpd-pwd .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-pwd .pico{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-pwd .ptitle-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .fpd-pwd .ptitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
 .fpd-pwd .psub{color:${MUTED};font-size:12px;margin-top:2px;}
 .fpd-pwd .pbadge{padding:2.5px 8px;border-radius:6px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.05em;}
 .fpd-pwd .pacts{display:flex;align-items:center;gap:1px;flex-shrink:0;}
 .fpd-pwd .icon-btn{background:none;border:none;cursor:pointer;padding:7px;border-radius:8px;display:flex;color:${MUTED};transition:color .16s,background .16s;}
-.fpd-pwd .icon-btn:hover{color:${ACCENT2};background:rgba(91,110,225,0.1);}
+.fpd-pwd .icon-btn:hover{color:#FFFFFF;background:rgba(91,110,225,0.1);}
 .fpd-pwd .icon-btn.del:hover{color:${NEG};background:rgba(208,107,107,0.1);}
 
 /* strength meter */
@@ -147,7 +147,7 @@ const PWD_CSS = `
 .fpd-pwd .tile-row .tv.mono{font-family:var(--font-mono);}
 .fpd-pwd .tile-row .trow-l{flex:1;min-width:0;}
 .fpd-pwd .tile-row .trow-l .tv{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.fpd-pwd .tfa-banner{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:11px;background:rgba(95,190,145,0.10);border:1px solid rgba(95,190,145,0.24);color:${POS};font-size:12px;font-weight:500;margin-top:10px;}
+.fpd-pwd .tfa-banner{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:11px;background:rgba(95,190,145,0.10);border:1px solid rgba(95,190,145,0.24);color:#D99A6B;font-size:12px;font-weight:500;margin-top:10px;}
 .fpd-pwd .sq-box{padding:13px 15px;border-radius:11px;background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.22);margin-top:10px;}
 .fpd-pwd .sq-box .tk{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:4px;}
 .fpd-pwd .sq-box .qtext{color:${SOFT};font-size:12.5px;margin-bottom:8px;}
@@ -159,7 +159,7 @@ const PWD_CSS = `
 
 /* empty state */
 .fpd-pwd .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 16px;}
-.fpd-pwd .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-pwd .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:14px;}
 .fpd-pwd .empty .et{color:${SOFT};font-size:13.5px;}
 
 /* importance picker */
@@ -187,7 +187,7 @@ const PWD_CSS = `
 .fpd-pwd .pw-wrap input{padding-right:38px;}
 .fpd-pwd .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-pwd .login-box{padding:15px;border-radius:12px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);display:flex;flex-direction:column;gap:12px;}
-.fpd-pwd .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT2};font-weight:700;}
+.fpd-pwd .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#6FAE8B;font-weight:700;}
 .fpd-pwd .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-pwd .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;opacity:1;}
 .fpd-pwd .modal-foot .save:hover{filter:brightness(1.08);}
@@ -236,7 +236,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal glow-surface">
         <div className="modal-head">
-          <h3><Key size={16} color={ACCENT2} /> Add Password Entry</h3>
+          <h3><Key size={16} color="#FFFFFF" /> Add Password Entry</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
@@ -304,7 +304,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
             <input ref={fileRef} type="file" multiple className="hidden" style={{ display:"none" }} accept=".pdf,.jpg,.png,.doc,.docx" onChange={e => { if (e.target.files?.[0]) toast.success(`Document attached: ${e.target.files[0].name}`); }}/>
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
               <div onClick={() => fileRef.current?.click()} className="dropzone">
-                <Upload size={15} color={ACCENT2} style={{ opacity:0.7 }}/>
+                <Upload size={15} color="#FFFFFF" style={{ opacity:0.7 }}/>
                 <span>Attach PDF, image, or document</span>
               </div>
               <ScanButton folder="other" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
@@ -392,7 +392,7 @@ export function PasswordManager() {
               const on = category === c;
               return (
                 <button key={c} onClick={() => setCategory(c)} className={`chip ${on ? "" : "off"}`}
-                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
+                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? "#6FAE8B" : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
                   {c}
                 </button>
               );
@@ -415,7 +415,7 @@ export function PasswordManager() {
                         {IMPORTANCE_META[p.importance].short}
                       </span>
                     )}
-                    {p.twoFactor && <Shield size={12} color={POS}/>}
+                    {p.twoFactor && <Shield size={12} color="#FFFFFF"/>}
                   </div>
                   <div className="psub">{p.username || p.email || p.website}</div>
                 </div>

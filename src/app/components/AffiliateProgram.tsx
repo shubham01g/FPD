@@ -26,9 +26,9 @@ const monthlyEarnings = [
 ];
 
 const tiers = [
-  { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#5BA7D6" },
-  { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: ACCENT },
-  { tier: 3, label: "Tier 3", range: "74+ accounts", rate: 30, color: POS },
+  { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#6FAE8B" },
+  { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: "#6E90C9" },
+  { tier: 3, label: "Tier 3", range: "74+ accounts", rate: 30, color: "#D99A6B" },
 ];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
@@ -195,11 +195,11 @@ export function AffiliateProgram() {
           <h3 className="sec-title"><span className="tick"/>Your Referral Link</h3>
           <div className="link-row">
             <div className="link-box">
-              <Link size={14} color={ACCENT2} />
+              <Link size={14} color="#FFFFFF" />
               <span>{affiliateLink}</span>
             </div>
             <button onClick={handleCopy} className="copy-btn"
-              style={{ background: copied ? "rgba(95,190,145,0.16)" : "linear-gradient(180deg,#7E6BD8,#5B6EE1)", color: copied ? POS : "#fff" }}>
+              style={{ background: copied ? "rgba(95,190,145,0.16)" : "linear-gradient(180deg,#7E6BD8,#5B6EE1)", color: copied ? "#D99A6B" : "#fff" }}>
               {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
               {copied ? "Copied!" : "Copy Link"}
             </button>
@@ -265,7 +265,7 @@ export function AffiliateProgram() {
                   )}
                 </div>
                 <div>
-                  <span className="status-pill" style={{ background: ref.status === "active" ? "rgba(95,190,145,0.16)" : "rgba(140,151,180,0.14)", color: ref.status === "active" ? POS : MUTED }}>
+                  <span className="status-pill" style={{ background: ref.status === "active" ? "rgba(95,190,145,0.16)" : "rgba(140,151,180,0.14)", color: ref.status === "active" ? "#D99A6B" : MUTED }}>
                     {ref.status === "active" ? "ACTIVE" : "CAP REACHED"}
                   </span>
                 </div>
@@ -276,7 +276,7 @@ export function AffiliateProgram() {
 
         {/* ── Cap notice ── */}
         <div className="notice">
-          <Info size={15} color={ACCENT2} style={{ flexShrink: 0, marginTop: 2 }} />
+          <Info size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 2 }} />
           <p><strong style={{ color: TEXT }}>12-Month Commission Cap:</strong> Affiliate commissions are earned for 12 months from each user's join date. After 12 months, that referral no longer generates commission. There is no cap on the number of referrals you can make.</p>
         </div>
       </div>

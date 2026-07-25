@@ -48,7 +48,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
         <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10"
           style={{ borderColor:"rgba(91,167,214,0.1)" }}>
           <div className="flex items-center gap-2">
-            <Star size={16} color="#5BA7D6"/>
+            <Star size={16} color="#FFFFFF"/>
             <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Invite Concierge Employee</span>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
@@ -58,7 +58,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
           {/* Info banner */}
           <div className="flex items-start gap-2 p-3 rounded-xl glow-surface"
             style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.2)" }}>
-            <Shield size={12} color="#5BA7D6" style={{ marginTop:1 }}/>
+            <Shield size={12} color="#FFFFFF" style={{ marginTop:1 }}/>
             <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.6 }}>
               The employee will receive an email with a unique link to the <strong>Concierge Portal</strong> — separate from the master admin. They can only see the clients you assign here.
             </p>
@@ -182,12 +182,12 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
           <div className="flex items-center gap-2">
             <button onClick={() => setExpanded(!expanded)}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6" }}>
+              style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               {expanded ? "Hide" : "Manage"}
             </button>
             <button onClick={() => { revokeEmployee(emp.id); onUpdate(); toast.success(`${emp.name}'s access ${emp.status==="suspended"?"restored":"suspended"}`); }}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:emp.status==="suspended"?"rgba(72,187,120,0.1)":"rgba(252,129,129,0.1)", color:emp.status==="suspended"?"#48BB78":"#FC8181" }}>
+              style={{ background:emp.status==="suspended"?"rgba(72,187,120,0.1)":"rgba(252,129,129,0.1)", color:emp.status==="suspended"?"#D99A6B":"#FC8181" }}>
               {emp.status === "suspended" ? "Restore" : "Suspend"}
             </button>
           </div>
@@ -200,7 +200,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
               const c = AVAILABLE_CLIENTS.find(x => x.id === id);
               return c ? (
                 <span key={id} className="px-2 py-0.5 rounded-full text-xs"
-                  style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6", border:"1px solid rgba(91,167,214,0.2)" }}>
+                  style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", border:"1px solid rgba(91,167,214,0.2)" }}>
                   ⭐ {c.name}
                 </span>
               ) : null;
@@ -235,7 +235,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
                       {isAssigned && <CheckCircle size={10} color="#fff"/>}
                     </div>
                     <span style={{ color:isAssigned?"#0D1428":"#5A6A88", fontSize:12 }}>{c.name}</span>
-                    <span style={{ marginLeft:"auto", color:isAssigned?"#FC8181":"#48BB78", fontSize:10, fontWeight:600 }}>
+                    <span style={{ marginLeft:"auto", color:isAssigned?"#FC8181":"#D99A6B", fontSize:10, fontWeight:600 }}>
                       {isAssigned ? "Remove" : "Assign"}
                     </span>
                   </button>
@@ -251,7 +251,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <span style={{ color:"#5A6A88", fontSize:10, ...MONO, flex:1 }} className="truncate">{portalLink}</span>
               <button onClick={() => { copyToClipboard(portalLink); toast.success("Portal link copied"); }}
-                style={{ color:"#5BA7D6", flexShrink:0 }}><Copy size={12}/></button>
+                style={{ color:"#6FAE8B", flexShrink:0 }}><Copy size={12}/></button>
             </div>
             <div style={{ color:"#8A9AB8", fontSize:10, marginTop:4 }}>
               Send this link to {emp.name} so they can access the Concierge Portal. Login: {emp.email} / {emp.password}
@@ -261,12 +261,12 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
           <div className="flex gap-2">
             <button onClick={() => { copyToClipboard(`Login: ${emp.email}\nPassword: ${emp.password}\nPortal: ${portalLink}`); toast.success("Credentials copied"); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold flex-1"
-              style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6" }}>
+              style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               <Key size={11}/> Copy Full Credentials
             </button>
             <button onClick={() => toast.success(`Invite email resent to ${emp.email}`)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"rgba(91,110,225,0.06)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
               <Send size={11}/> Resend Invite
             </button>
           </div>
@@ -292,7 +292,7 @@ export function ConciergeStaffAdmin() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div style={{ color:"#5BA7D6", fontSize:11, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>WHITE GLOVE · CONCIERGE STAFF</div>
+          <div style={{ color:"#6FAE8B", fontSize:11, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>WHITE GLOVE · CONCIERGE STAFF</div>
           <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#0D1428" }}>Staff Management</h2>
           <p style={{ color:"#5A6A88", fontSize:12, marginTop:4 }}>
             Invite employees to the Concierge Portal. Each employee only sees their assigned clients — no master admin access.
@@ -308,7 +308,7 @@ export function ConciergeStaffAdmin() {
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label:"Active Staff",   value:active,    color:"#48BB78" },
+          { label:"Active Staff",   value:active,    color:"#D99A6B" },
           { label:"Pending Invite", value:invited,   color:"#F6AD55" },
           { label:"Suspended",      value:suspended, color:"#FC8181" },
         ].map(s => (
@@ -321,7 +321,7 @@ export function ConciergeStaffAdmin() {
 
       {/* How it works banner */}
       <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.2)" }}>
-        <div style={{ color:"#5BA7D6", fontSize:11, fontWeight:700, ...MONO, marginBottom:8 }}>HOW CONCIERGE ACCESS WORKS</div>
+        <div style={{ color:"#6FAE8B", fontSize:11, fontWeight:700, ...MONO, marginBottom:8 }}>HOW CONCIERGE ACCESS WORKS</div>
         <div className="grid md:grid-cols-4 gap-3">
           {[
             { step:"1", text:"You invite an employee by email and assign them specific clients" },

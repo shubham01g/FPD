@@ -172,12 +172,12 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           <div className="flex items-center gap-2">
             <button onClick={() => setExpanded(!expanded)}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               {expanded ? "Hide" : "Configure"}
             </button>
             <button onClick={connect}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-              style={{ background:proc.status==="connected"?"rgba(252,129,129,0.1)":"rgba(72,187,120,0.1)", color:proc.status==="connected"?"#FC8181":"#48BB78" }}>
+              style={{ background:proc.status==="connected"?"rgba(252,129,129,0.1)":"rgba(72,187,120,0.1)", color:proc.status==="connected"?"#FC8181":"#D99A6B" }}>
               {proc.status === "connected" ? "Disconnect" : "Connect"}
             </button>
           </div>
@@ -244,7 +244,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
             </button>
             <button onClick={() => { copyToClipboard(`https://api.finalpassdown.com/webhooks/${proc.id}`); toast.success("Webhook URL copied"); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Copy size={11}/> Copy Webhook URL
             </button>
           </div>
@@ -292,9 +292,9 @@ export function CryptoMerchant() {
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label:"Connected Processors", value:connected.length,                            color:"#48BB78" },
+          { label:"Connected Processors", value:connected.length,                            color:"#D99A6B" },
           { label:"Crypto Revenue (Jun)",  value:`$${totalCryptoRevenue.toLocaleString()}`,  color:"#F7931A" },
-          { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#5B6EE1" },
+          { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#6E90C9" },
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
@@ -334,7 +334,7 @@ export function CryptoMerchant() {
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
-            <Shield size={14} color="#5B6EE1" style={{ marginTop:1, flexShrink:0 }}/>
+            <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div>
               <p style={{ color:"#5A6A88", fontSize:12, lineHeight:1.7 }}>
                 <strong style={{ color:"#0D1428" }}>Become a crypto merchant:</strong> Connect one or more processors below. Each processor handles payment routing, fraud screening, and automatic USD settlement so you never hold volatile crypto. We recommend Coinbase Commerce + BitPay for maximum coin coverage.
@@ -387,7 +387,7 @@ export function CryptoMerchant() {
               <tbody>
                 {MOCK_TXS.map((tx, i) => (
                   <tr key={tx.id} style={{ background:i%2===0?"#fff":"#F8FAFF", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#5B6EE1", fontSize:10, ...MONO }}>{tx.id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{tx.id}</td>
                     <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:12, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
                     <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:11, whiteSpace:"nowrap" }}>{tx.type}</td>
                     <td className="px-4 py-3">
@@ -397,12 +397,12 @@ export function CryptoMerchant() {
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#0D1428", fontSize:11, ...MONO }}>{tx.amount}</td>
-                    <td className="px-4 py-3" style={{ color:"#48BB78", fontSize:12, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
+                    <td className="px-4 py-3" style={{ color:"#D99A6B", fontSize:12, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
                     <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#5A6A88", fontSize:11 }}>{tx.processor}</td>
                     <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#5A6A88", fontSize:11 }}>{tx.date}</td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded text-xs font-bold"
-                        style={{ background:tx.status==="confirmed"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:tx.status==="confirmed"?"#48BB78":"#F6AD55", ...MONO }}>
+                        style={{ background:tx.status==="confirmed"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:tx.status==="confirmed"?"#D99A6B":"#F6AD55", ...MONO }}>
                         {tx.status.toUpperCase()}
                       </span>
                     </td>
@@ -452,14 +452,14 @@ export function CryptoMerchant() {
                 <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>ADDRESS:</span>
                 <code style={{ color:"#5A6A88", fontSize:11, flex:1 }} className="truncate">{w.address}</code>
                 <button onClick={() => { copyToClipboard(w.address); toast.success(`${w.coin} address copied`); }}
-                  style={{ color:"#5B6EE1", flexShrink:0 }}><Copy size={13}/></button>
+                  style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={13}/></button>
               </div>
             </div>
           ))}
 
           <button onClick={() => toast.success("Manual wallet setup — contact integrations@finalpassdown.com")}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
             <Plus size={14}/> Add Self-Custody Wallet Address
           </button>
         </div>
@@ -498,7 +498,7 @@ export function CryptoMerchant() {
                 <div style={{ color:"#0D1428", fontSize:13, fontWeight:500 }}>Show crypto payment option to all users</div>
                 <div style={{ color:"#8A9AB8", fontSize:11 }}>When off, crypto is only shown for $199 continuation fee</div>
               </div>
-              <ToggleRight size={28} color="#5B6EE1"/>
+              <ToggleRight size={28} color="#FFFFFF"/>
             </div>
 
             <button onClick={() => toast.success("Crypto payment settings saved")}
@@ -518,8 +518,8 @@ export function CryptoMerchant() {
               To unlock higher transaction limits and lower fees, complete business verification with each processor. Required for: transactions over $10,000/day, international payments, and institutional settlement.
             </p>
             {[
-              { name:"Coinbase Commerce",  status:"Verified ✓",      color:"#48BB78" },
-              { name:"BitPay",             status:"Verified ✓",      color:"#48BB78" },
+              { name:"Coinbase Commerce",  status:"Verified ✓",      color:"#D99A6B" },
+              { name:"BitPay",             status:"Verified ✓",      color:"#D99A6B" },
               { name:"NOWPayments",        status:"Not started",     color:"#8A9AB8" },
             ].map(v => (
               <div key={v.name} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
@@ -529,7 +529,7 @@ export function CryptoMerchant() {
             ))}
             <button onClick={() => toast.success("Business verification — complete at nowpayments.io/merchant")}
               className="flex items-center gap-1.5 mt-3 text-sm px-4 py-2 rounded-xl font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <ExternalLink size={12}/> Complete NOWPayments Verification
             </button>
           </div>

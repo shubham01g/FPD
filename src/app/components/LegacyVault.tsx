@@ -212,7 +212,7 @@ const VAULT_CSS = `
 .fpd-vault .cond.met{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.24);}
 .fpd-vault .cond.unmet{background:rgba(217,165,94,0.05);border:1px solid rgba(217,165,94,0.2);}
 .fpd-vault .cond-badge{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;}
-.fpd-vault .cond-badge.met{background:rgba(95,190,145,0.16);color:${POS};}
+.fpd-vault .cond-badge.met{background:rgba(95,190,145,0.16);color:#D99A6B;}
 .fpd-vault .cond-badge.unmet{background:rgba(217,165,94,0.14);color:${WARN};}
 .fpd-vault .cond-title{color:${TEXT};font-size:13.5px;font-weight:600;margin-bottom:3px;font-family:var(--font-display);}
 .fpd-vault .cond-desc{color:${MUTED};font-size:12px;line-height:1.6;}
@@ -225,7 +225,7 @@ const VAULT_CSS = `
 .fpd-vault .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* section rows */
-.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
+.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
 .fpd-vault .btn-link:hover{background:rgba(91,110,225,0.18);}
 .fpd-vault .psgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 .fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.22);transition:border-color .16s,background .16s;}
@@ -237,9 +237,9 @@ const VAULT_CSS = `
 .fpd-vault .psec-desc{color:${MUTED};font-size:11.5px;line-height:1.55;}
 .fpd-vault .psec-acts{display:flex;gap:2px;flex-shrink:0;}
 .fpd-vault .psec-acts button{background:none;border:none;padding:5px;cursor:pointer;display:flex;color:${MUTED};transition:color .16s;}
-.fpd-vault .psec-acts button:hover{color:${ACCENT2};}
+.fpd-vault .psec-acts button:hover{color:#6FAE8B;}
 .fpd-vault .showmore{width:100%;margin-top:12px;padding:13px;border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.008);color:${MUTED};font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:border-color .18s,color .18s;}
-.fpd-vault .showmore:hover{border-color:rgba(91,110,225,0.35);color:${ACCENT2};}
+.fpd-vault .showmore:hover{border-color:rgba(91,110,225,0.35);color:#6FAE8B;}
 
 /* clone CTA */
 .fpd-vault .cta{text-align:center;padding:36px 30px;}
@@ -249,7 +249,7 @@ const VAULT_CSS = `
 .fpd-vault .cta-btns{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
 .fpd-vault .cta-primary{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:13px;font-size:13.5px;font-weight:700;border:none;font-family:var(--font-body);cursor:pointer;transition:filter .18s,transform .18s;}
 .fpd-vault .cta-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:13px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.3);color:${ACCENT2};font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
+.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:13px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.3);color:#6FAE8B;font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
 .fpd-vault .cta-secondary:hover{background:rgba(91,110,225,0.18);}
 
 /* footnote */
@@ -353,7 +353,7 @@ export function LegacyVault() {
             )}
             <div className={`status-row ${fullyUnlocked ? "ok" : "no"}`}>
               {fullyUnlocked
-                ? <><CheckCircle size={15} color={POS}/><span style={{ color:POS, fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked.</span></>
+                ? <><CheckCircle size={15} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked.</span></>
                 : <><AlertTriangle size={15} color={NEG}/><span style={{ color:NEG, fontSize:13 }}>Downloads are locked until <strong>both</strong> conditions are met.</span></>
               }
             </div>
@@ -422,7 +422,7 @@ export function LegacyVault() {
         {/* ── Legacy Vault Clone CTA ── */}
         <div className="card cta glow-surface">
           <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,110,225,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,110,225,0.26)"}` }}>
-            {fullyUnlocked ? <Unlock size={26} color={POS}/> : <Lock size={26} color={ACCENT2}/>}
+            {fullyUnlocked ? <Unlock size={26} color="#FFFFFF"/> : <Lock size={26} color="#FFFFFF"/>}
           </div>
           <div className="cta-title">
             {fullyUnlocked ? "Legacy Vault Clone — Ready to Download" : "Legacy Vault Clone — Locked"}
@@ -454,7 +454,7 @@ export function LegacyVault() {
 
         {/* ── Tip ── */}
         <div className="foot">
-          <Info size={16} color={ACCENT2} style={{ flexShrink:0, marginTop:1 }}/>
+          <Info size={16} color="#FFFFFF" style={{ flexShrink:0, marginTop:1 }}/>
           <div className="ft">
             <b>Want to add or update your information?</b> Use the sections in the left sidebar — File Cabinet, Final
             Wishes, Medical Info, Financial Records, and all other sections. Everything you add there automatically

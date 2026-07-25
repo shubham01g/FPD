@@ -48,13 +48,13 @@ interface Message {
 }
 
 const MEDIUM_META: Record<Medium, { label: string; icon: React.ReactNode; color: string }> = {
-  letter: { label: "Letter", icon: <FileText size={14} />, color: "#5B6EE1" },
-  voice:  { label: "Voice",  icon: <Mic size={14} />,      color: "#48BB78" },
+  letter: { label: "Letter", icon: <FileText size={14} />, color: "#6E90C9" },
+  voice:  { label: "Voice",  icon: <Mic size={14} />,      color: "#D99A6B" },
   video:  { label: "Video",  icon: <Video size={14} />,    color: "#FC8181" },
 };
 
 const TRIGGER_META: Record<Trigger, { label: string; short: string; color: string }> = {
-  on_passing:  { label: "Delivered after my passing",     short: "On passing",   color: "#5BA7D6" },
+  on_passing:  { label: "Delivered after my passing",     short: "On passing",   color: "#6FAE8B" },
   on_date:     { label: "Delivered on a specific date",   short: "On date",      color: "#F6AD55" },
   birthday:    { label: "Delivered each birthday",        short: "Birthday",     color: "#FC8181" },
   anniversary: { label: "Delivered each anniversary",     short: "Anniversary",  color: "#ED8936" },
@@ -62,8 +62,8 @@ const TRIGGER_META: Record<Trigger, { label: string; short: string; color: strin
 
 const STATUS_META: Record<Status, { label: string; color: string }> = {
   draft:     { label: "Draft",     color: "#8A9AB8" },
-  sealed:    { label: "Sealed",    color: "#48BB78" },
-  delivered: { label: "Delivered", color: "#5B6EE1" },
+  sealed:    { label: "Sealed",    color: "#D99A6B" },
+  delivered: { label: "Delivered", color: "#6E90C9" },
 };
 
 /** Trigger dates are stored as ISO (what <input type="date"> gives us) but
@@ -193,7 +193,7 @@ const MSG_CSS = `
 
 /* empty state */
 .fpd-msg .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
-.fpd-msg .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-msg .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .fpd-msg .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
 .fpd-msg .empty-desc{color:${MUTED};font-size:12.5px;max-width:360px;line-height:1.6;margin-bottom:6px;}
 
@@ -511,7 +511,7 @@ function ComposeModal({
               {form.duration ? (
                 <div className="rec-saved">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={15} color={POS} />
+                    <CheckCircle2 size={15} color="#FFFFFF" />
                     <span style={{ color: TEXT, fontSize: 13 }}>Recording captured — {form.duration}</span>
                   </div>
                   <button className="rerecord" onClick={() => setF("duration", undefined as never)}>Re-record</button>
@@ -678,7 +678,7 @@ export function MessagesToLovedOnes() {
                   <span className="ravatar">{recipient.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
                   <span className="rname">{recipient}</span>
                   <span className="rrel">{msgs[0].relationship}</span>
-                  <span className="tag" style={{ background: `${ACCENT2}1A`, color: ACCENT2, marginLeft: "auto" }}>
+                  <span className="tag" style={{ background: `${ACCENT2}1A`, color: "#6FAE8B", marginLeft: "auto" }}>
                     {msgs.length} message{msgs.length === 1 ? "" : "s"}
                   </span>
                 </div>
@@ -698,7 +698,7 @@ export function MessagesToLovedOnes() {
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div className="mrow-title">
                               <span className="t">{m.title}</span>
-                              {m.status === "sealed" && <Lock size={11} color={POS} />}
+                              {m.status === "sealed" && <Lock size={11} color="#FFFFFF" />}
                             </div>
                             <div className="mrow-tags">
                               <span className="tag" style={{ background: `${mm.color}1A`, color: mm.color }}>{mm.label}{m.duration ? ` · ${m.duration}` : ""}</span>
@@ -756,7 +756,7 @@ export function MessagesToLovedOnes() {
                                     <button className="btn-ghost-sm" style={{ color: MUTED }} onClick={() => { setEditing(m); setComposing(true); }}>
                                       <Pencil size={13} /> Edit
                                     </button>
-                                    <button className="btn-ghost-sm" style={{ color: POS, background: "rgba(95,190,145,0.1)", borderColor: "rgba(95,190,145,0.2)" }} onClick={() => seal(m.id)}>
+                                    <button className="btn-ghost-sm" style={{ color: "#D99A6B", background: "rgba(95,190,145,0.1)", borderColor: "rgba(95,190,145,0.2)" }} onClick={() => seal(m.id)}>
                                       <Lock size={13} /> Seal
                                     </button>
                                   </>

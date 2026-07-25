@@ -51,7 +51,7 @@ const ACCT_CSS = `
 .fpd-acct .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-acct .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-acct .btn-primary:disabled{opacity:.65;cursor:default;transform:none;}
-.fpd-acct .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-acct .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-acct .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-acct .btn-ghost:disabled{opacity:.6;cursor:default;}
 .fpd-acct .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
@@ -89,7 +89,7 @@ const ACCT_CSS = `
 .fpd-acct .avatar-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
 .fpd-acct .avatar-circle{width:88px;height:88px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:3px solid rgba(91,110,225,0.24);position:relative;}
 .fpd-acct .avatar-circle img{width:100%;height:100%;object-fit:cover;}
-.fpd-acct .avatar-init{font-family:var(--font-display);font-size:32px;font-weight:700;color:${ACCENT2};}
+.fpd-acct .avatar-init{font-family:var(--font-display);font-size:32px;font-weight:700;color:#6FAE8B;}
 .fpd-acct .avatar-cam{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;border:2px solid #0A0F1A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px -2px rgba(91,110,225,0.65);}
 .fpd-acct .avatar-name{color:${TEXT};font-size:15px;font-weight:600;}
 .fpd-acct .avatar-email{color:${MUTED};font-size:12px;margin-top:2px;}
@@ -115,7 +115,7 @@ const ACCT_CSS = `
 .fpd-acct .mcard .mbtn:hover{filter:brightness(1.1);}
 @media (max-width:760px){.fpd-acct .mgrid{grid-template-columns:1fr;}}
 
-.fpd-acct .active-note{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${POS};font-size:12px;}
+.fpd-acct .active-note{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12px;}
 .fpd-acct .active-note strong{font-weight:700;}
 
 /* steps (encryption how-it-works) */
@@ -135,7 +135,7 @@ const ACCT_CSS = `
 
 /* encrypted file chips */
 .fpd-acct .filetag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${TEXT};font-size:12px;}
-.fpd-acct .filetag .fbadge{padding:2px 6px;border-radius:5px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;background:rgba(95,190,145,0.16);color:${POS};}
+.fpd-acct .filetag .fbadge{padding:2px 6px;border-radius:5px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;background:rgba(95,190,145,0.16);color:#D99A6B;}
 
 /* notification rows */
 .fpd-acct .nrow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.22);gap:16px;}
@@ -412,11 +412,11 @@ export function AccountSettings() {
             {/* 2FA status banner */}
             <div className={`banner ${twoFAEnabled ? "pos" : "warn"}`}>
               {twoFAEnabled
-                ? <CheckCircle size={20} color={POS} style={{ flexShrink: 0, marginTop: 1 }}/>
+                ? <CheckCircle size={20} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }}/>
                 : <AlertCircle size={20} color={WARN} style={{ flexShrink: 0, marginTop: 1 }}/>
               }
               <div>
-                <div className="btitle" style={{ color: twoFAEnabled ? POS : WARN }}>
+                <div className="btitle" style={{ color: twoFAEnabled ? "#D99A6B" : WARN }}>
                   {twoFAEnabled ? `Two-Factor Authentication Active — ${twoFAMethod === "sms" ? "SMS" : twoFAMethod === "email_otp" ? "Email OTP" : "Authenticator App"}` : "Two-Factor Authentication Not Enabled"}
                 </div>
                 <p className="btext">
@@ -436,7 +436,7 @@ export function AccountSettings() {
                   {
                     id:"sms" as TwoFAMethod,
                     icon:<Smartphone size={22}/>,
-                    color:POS,
+                    color:"#D99A6B",
                     label:"SMS Text Message",
                     desc:"A 6-digit code is sent to your mobile phone number via text message on each login.",
                     tag:"Most convenient",
@@ -444,7 +444,7 @@ export function AccountSettings() {
                   {
                     id:"email_otp" as TwoFAMethod,
                     icon:<Mail size={22}/>,
-                    color:ACCENT,
+                    color:"#6E90C9",
                     label:"Email OTP",
                     desc:"A one-time password is sent to your registered email address on each login.",
                     tag:"Recommended",
@@ -452,7 +452,7 @@ export function AccountSettings() {
                   {
                     id:"authenticator" as TwoFAMethod,
                     icon:<Key size={22}/>,
-                    color:ACCENT2,
+                    color:"#6FAE8B",
                     label:"Authenticator App",
                     desc:"Use Google Authenticator or Authy to generate time-based codes without internet.",
                     tag:"Most secure",
@@ -484,7 +484,7 @@ export function AccountSettings() {
 
               {twoFAEnabled && (
                 <div className="active-note">
-                  <Shield size={13} color={POS}/>
+                  <Shield size={13} color="#FFFFFF"/>
                   <span>
                     2FA is active via <strong>{twoFAMethod === "sms" ? "SMS to " + user.phone : twoFAMethod === "email_otp" ? "Email to " + user.email : "Authenticator App"}</strong>. Every login requires a verification code.
                   </span>
@@ -531,10 +531,10 @@ export function AccountSettings() {
             {/* Active encryption banner */}
             <div className="banner pos" style={{ border: "2px solid rgba(95,190,145,0.3)" }}>
               <div className="bicon" style={{ background: "rgba(95,190,145,0.12)" }}>
-                <Lock size={22} color={POS}/>
+                <Lock size={22} color="#FFFFFF"/>
               </div>
               <div>
-                <div className="btitle" style={{ color: POS }}>
+                <div className="btitle" style={{ color: "#D99A6B" }}>
                   AES-256 Encryption Active — Always On
                 </div>
                 <p className="btext">
@@ -549,17 +549,17 @@ export function AccountSettings() {
               <div className="steps">
                 {[
                   {
-                    step:"1", color:ACCENT,
+                    step:"1", color:"#6E90C9",
                     title:"Upload — Encrypted Before Sending",
                     desc:"When you upload a file, it is encrypted with AES-256-GCM in your browser before any data is transmitted. The encrypted file travels to FPD servers. The unencrypted original never leaves your device.",
                   },
                   {
-                    step:"2", color:ACCENT2,
+                    step:"2", color:"#6FAE8B",
                     title:"Storage — Encrypted at Rest",
                     desc:"Your files are stored on FPD's Supabase infrastructure in encrypted form only. FPD servers store ciphertext — unreadable without your personal encryption key. Even a complete server breach exposes nothing readable.",
                   },
                   {
-                    step:"3", color:POS,
+                    step:"3", color:"#D99A6B",
                     title:"Download — Decrypted Only on Your Device",
                     desc:"When you or an authorized legacy contact downloads a file, the encrypted ciphertext is sent from the server. Decryption happens locally in the browser using your key. The decrypted file exists only on your device, never on FPD servers.",
                   },
@@ -585,9 +585,9 @@ export function AccountSettings() {
             {/* Encryption stats */}
             <div className="stat3">
               {[
-                { label:"Encryption Standard", value:"AES-256-GCM", color:ACCENT, sub:"Military-grade" },
-                { label:"Key Derivation",       value:"PBKDF2",      color:ACCENT2, sub:"100,000 iterations" },
-                { label:"Architecture",         value:"Zero-Knowledge", color:POS, sub:"FPD cannot read your data" },
+                { label:"Encryption Standard", value:"AES-256-GCM", color:"#6E90C9", sub:"Military-grade" },
+                { label:"Key Derivation",       value:"PBKDF2",      color:"#6FAE8B", sub:"100,000 iterations" },
+                { label:"Architecture",         value:"Zero-Knowledge", color:"#D99A6B", sub:"FPD cannot read your data" },
               ].map(s => (
                 <div key={s.label} className="card scell glow-surface">
                   <div className="sval" style={{ color: s.color }}>{s.value}</div>
@@ -603,7 +603,7 @@ export function AccountSettings() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
                   <div key={f} className="filetag">
-                    <Lock size={10} color={POS}/>
+                    <Lock size={10} color="#FFFFFF"/>
                     <span>{f}</span>
                     <span className="fbadge">ENCRYPTED</span>
                   </div>

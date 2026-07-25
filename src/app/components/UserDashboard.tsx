@@ -51,7 +51,7 @@ const DASH_CSS = `
 .fpd-dash .sec-title{font-size:13px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-dash .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 .fpd-dash .sec-link{color:${MUTED};font-size:11.5px;font-weight:500;display:inline-flex;align-items:center;gap:4px;transition:color .18s;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-dash .sec-link:hover{color:${ACCENT2};}
+.fpd-dash .sec-link:hover{color:#6FAE8B;}
 .fpd-dash .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};}
 
 /* header */
@@ -74,7 +74,7 @@ const DASH_CSS = `
 .fpd-dash .ready{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:26px;padding:22px 26px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.16);}
 .fpd-dash .ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
 .fpd-dash .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.fpd-dash .ring-em{width:30px;height:30px;border-radius:9px;background:rgba(91,110,225,0.12);border:1px solid rgba(91,110,225,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);color:${ACCENT2};}
+.fpd-dash .ring-em{width:30px;height:30px;border-radius:9px;background:rgba(91,110,225,0.12);border:1px solid rgba(91,110,225,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);color:#6FAE8B;}
 .fpd-dash .ring-center b{font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};line-height:1;}
 .fpd-dash .ready-mid{min-width:200px;border-right:1px solid rgba(255,255,255,0.22);padding-right:26px;}
 .fpd-dash .ready-st{display:inline-flex;align-items:center;gap:7px;margin-bottom:9px;}
@@ -88,7 +88,7 @@ const DASH_CSS = `
 .fpd-dash .ess{display:flex;align-items:center;gap:10px;white-space:nowrap;padding:7px 11px;border-radius:9px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.22);cursor:pointer;text-align:left;width:100%;transition:border-color .18s,background .18s;font-family:var(--font-body);}
 .fpd-dash .ess:hover{border-color:rgba(91,110,225,0.3);background:rgba(91,110,225,0.06);}
 .fpd-dash .ess .ck{width:17px;height:17px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-dash .ess .ck.done{background:rgba(95,190,145,0.15);border:1px solid rgba(95,190,145,0.32);color:${POS};}
+.fpd-dash .ess .ck.done{background:rgba(95,190,145,0.15);border:1px solid rgba(95,190,145,0.32);color:#D99A6B;}
 .fpd-dash .ess .ck.todo{background:transparent;border:1px solid ${FAINT};}
 .fpd-dash .ess .lbl{font-size:12px;color:${SOFT};}
 @media (max-width:1240px){.fpd-dash .ready{grid-template-columns:auto 1fr;}.fpd-dash .ready-mid{border-right:none;padding-right:0;}.fpd-dash .ess-grid{grid-column:1 / -1;}}
@@ -105,11 +105,11 @@ const DASH_CSS = `
 .fpd-dash .kcell.hl::after{transform:scaleX(1);background:linear-gradient(90deg,${ACCENT2},${ACCENT});}
 .fpd-dash .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .fpd-dash .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-dash .kcell.hl .klbl{color:${ACCENT2};}
+.fpd-dash .kcell.hl .klbl{color:#6FAE8B;}
 .fpd-dash .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-dash .kcell.hl .kico{background:rgba(91,110,225,0.12);border-color:rgba(91,110,225,0.36);color:${ACCENT2};}
+.fpd-dash .kcell.hl .kico{background:rgba(91,110,225,0.12);border-color:rgba(91,110,225,0.36);color:#FFFFFF;}
 .fpd-dash .kcell .kval{font-family:var(--font-display);font-size:27px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-dash .kcell.hl .kval{color:${ACCENT2};}
+.fpd-dash .kcell.hl .kval{color:#6FAE8B;}
 .fpd-dash .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-dash .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:880px){.fpd-dash .kstrip{grid-template-columns:1fr 1fr;}.fpd-dash .kcell:nth-child(3){border-left:none;}.fpd-dash .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.22);}}
@@ -145,7 +145,7 @@ const DASH_CSS = `
 .fpd-dash .trend{margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-dash .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .fpd-dash .trend-head .t{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-dash .trend-head .v{font-family:var(--font-mono);font-size:11px;color:${POS};}
+.fpd-dash .trend-head .v{font-family:var(--font-mono);font-size:11px;color:#D99A6B;}
 .fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
 .fpd-dash .months span{font-family:var(--font-mono);font-size:9.5px;color:${FAINT};}
 
@@ -182,12 +182,12 @@ const DASH_CSS = `
 .fpd-dash .qa-btn:first-child{border-top:none;padding-top:4px;}
 .fpd-dash .qa-btn:hover{padding-left:8px;}
 .fpd-dash .qa-ico{width:33px;height:33px;border-radius:9px;flex-shrink:0;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);transition:border-color .18s,color .18s;}
-.fpd-dash .qa-btn:hover .qa-ico{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-dash .qa-btn:hover .qa-ico{border-color:rgba(91,110,225,0.4);color:#FFFFFF;}
 .fpd-dash .qa-btn .qt{flex:1;}
 .fpd-dash .qa-btn .qt b{display:block;font-size:12.5px;font-weight:600;color:${TEXT};}
 .fpd-dash .qa-btn .qt i{display:block;font-style:normal;font-size:11px;color:${MUTED};margin-top:1px;}
 .fpd-dash .qa-btn .qarrow{color:${FAINT};transition:color .18s,transform .18s;display:flex;}
-.fpd-dash .qa-btn:hover .qarrow{color:${ACCENT2};transform:translateX(2px);}
+.fpd-dash .qa-btn:hover .qarrow{color:#6FAE8B;transform:translateX(2px);}
 `;
 
 export function UserDashboard({ onNavigate }: UserDashboardProps) {
@@ -329,7 +329,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           <div className="ready-mid">
             <div className="ready-st">
               <span className="d" style={{ background: sealed ? POS : WARN, boxShadow: `0 0 8px ${sealed ? "rgba(95,190,145,0.7)" : "rgba(217,165,94,0.7)"}` }} />
-              <span style={{ color: sealed ? POS : WARN }}>{sealed ? "SECURED & SEALED" : "SEALING IN PROGRESS"}</span>
+              <span style={{ color: sealed ? "#D99A6B" : WARN }}>{sealed ? "SECURED & SEALED" : "SEALING IN PROGRESS"}</span>
             </div>
             <h2>{sealed ? "Vault fully prepared" : `Vault ${readyPct}% prepared`}</h2>
             <p>
@@ -476,7 +476,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             <div className="card pad ncard glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Notifications</h3>
-                <span className="sec-link" style={{ cursor: "default", color: unread ? ACCENT2 : MUTED }}>
+                <span className="sec-link" style={{ cursor: "default", color: unread ? "#6FAE8B" : MUTED }}>
                   <Bell size={12} /> {unread} new
                 </span>
               </div>

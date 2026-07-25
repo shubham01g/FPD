@@ -15,9 +15,9 @@ const recurringHistory = [
 ];
 
 const tiers = [
-  { tier: 1, range: "0–50 accounts", rate: 20, color: "#5BA7D6" },
-  { tier: 2, range: "51–100 accounts", rate: 25, color: "#5B6EE1" },
-  { tier: 3, range: "101+ accounts", rate: 30, color: "#48BB78" },
+  { tier: 1, range: "0–50 accounts", rate: 20, color: "#6FAE8B" },
+  { tier: 2, range: "51–100 accounts", rate: 25, color: "#6E90C9" },
+  { tier: 3, range: "101+ accounts", rate: 30, color: "#D99A6B" },
 ];
 
 export function PartnershipProgram() {
@@ -75,7 +75,7 @@ export function PartnershipProgram() {
             <div style={{ color: t.color, fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{t.rate}%</div>
             <div style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500 }}>Tier {t.tier}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 13, marginTop: 2 }}>{t.range}</div>
-            <div className="flex items-center gap-1 mt-3" style={{ color: "#48BB78", fontSize: 12 }}>
+            <div className="flex items-center gap-1 mt-3" style={{ color: "#D99A6B", fontSize: 12 }}>
               <CheckCircle size={12} /> Recurring · Lifetime · No cap
             </div>
           </div>
@@ -85,10 +85,10 @@ export function PartnershipProgram() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Partner Organizations", value: partnerReferrals.length, sub: "Active partnerships", color: "#5BA7D6" },
+          { label: "Partner Organizations", value: partnerReferrals.length, sub: "Active partnerships", color: "#6FAE8B" },
           { label: "Total Accounts", value: totalAccounts, sub: "Across all partners", color: "var(--gold)" },
-          { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#48BB78" },
-          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#5BA7D6" },
+          { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#D99A6B" },
+          { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -109,7 +109,7 @@ export function PartnershipProgram() {
           <button
             onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}
             className="flex items-center gap-2 px-5 py-3 rounded-xl"
-            style={{ background: copied ? "rgba(72, 187, 120, 0.15)" : "var(--gold)", color: copied ? "#48BB78" : "#070D1A", fontWeight: 600, fontSize: 14 }}
+            style={{ background: copied ? "rgba(72, 187, 120, 0.15)" : "var(--gold)", color: copied ? "#D99A6B" : "#070D1A", fontWeight: 600, fontSize: 14 }}
           >
             {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
             {copied ? "Copied!" : "Copy Link"}
@@ -121,7 +121,7 @@ export function PartnershipProgram() {
       <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Monthly Recurring Revenue</h3>
-          <div className="flex items-center gap-1" style={{ color: "#48BB78", fontSize: 13 }}>
+          <div className="flex items-center gap-1" style={{ color: "#D99A6B", fontSize: 13 }}>
             <TrendingUp size={14} /> +24% from last month
           </div>
         </div>
@@ -180,8 +180,8 @@ export function PartnershipProgram() {
               ${(partner.revenue / 12).toFixed(2)}/mo
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle size={13} color="#48BB78" />
-              <span style={{ color: "#48BB78", fontSize: 12, fontFamily: "var(--font-mono)" }}>ACTIVE</span>
+              <CheckCircle size={13} color="#FFFFFF" />
+              <span style={{ color: "#D99A6B", fontSize: 12, fontFamily: "var(--font-mono)" }}>ACTIVE</span>
             </div>
           </div>
         ))}

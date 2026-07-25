@@ -72,11 +72,11 @@ const VITAL_CSS = `
 .fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
-.fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:${ACCENT2};}
+.fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:#6FAE8B;}
 
 /* empty state */
 .fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
-.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .fpd-vital .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
 .fpd-vital .empty-desc{color:${MUTED};font-size:12.5px;max-width:440px;line-height:1.6;}
 
@@ -132,11 +132,11 @@ export function VitalClone() {
   if (!configured) {
     const reqs = [
       {
-        icon: <ExternalLink size={15} />, color: ACCENT2, title: "A live https:// URL",
+        icon: <ExternalLink size={15} />, color: "#6FAE8B", title: "A live https:// URL",
         body: "The running VitalClone web app — not a GitHub repository. An iframe loads a served page, not source code. GitHub also refuses to be framed, so a repo URL can never work here.",
       },
       {
-        icon: <ShieldCheck size={15} />, color: POS, title: "Permissive framing headers",
+        icon: <ShieldCheck size={15} />, color: "#D99A6B", title: "Permissive framing headers",
         body: <>VitalClone must not send X-Frame-Options: DENY or SAMEORIGIN, and its Content-Security-Policy frame-ancestors must list this app's origin. Both are set on VitalClone's server — this page cannot override them.</>,
       },
       {
@@ -190,7 +190,7 @@ export function VitalClone() {
         <div className="frame-overlay">
           {state === "loading" ? (
             <>
-              <Loader2 size={26} color={ACCENT} className="spin" />
+              <Loader2 size={26} color="#FFFFFF" className="spin" />
               <div style={{ color: MUTED, fontSize: 13 }}>Loading VitalClone…</div>
               <div className="url">{VITALCLONE_URL}</div>
             </>
@@ -254,7 +254,7 @@ export function VitalClone() {
         <div className="glow-surface" style={{ borderRadius: 15 }}>{frame}</div>
 
         <div className="note">
-          <ShieldCheck size={15} color={ACCENT} style={{ flexShrink: 0, marginTop: 1 }} />
+          <ShieldCheck size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
             VitalClone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
             and anything you enter there is governed by VitalClone's own privacy policy.

@@ -51,7 +51,7 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
   if (synced) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold"
-        style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.2)" }}>
+        style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
         <CheckCircle size={10}/> Synced → {synced}
       </span>
     );

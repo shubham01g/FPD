@@ -17,9 +17,9 @@ const GLASS: React.CSSProperties = { background:"#FFFFFF", border:"1px solid rgb
 
 /* ── Volume-based commission tiers ──────────────────────────────── */
 const VOLUME_TIERS = [
-  { tier:1, label:"Tier 1", range:"1 – 50 active accounts",  rate:20, color:"#5BA7D6", glow:"rgba(91,167,214,0.2)" },
-  { tier:2, label:"Tier 2", range:"51 – 100 active accounts", rate:25, color:"#5B6EE1", glow:"rgba(91,110,225,0.2)" },
-  { tier:3, label:"Tier 3", range:"101+ active accounts",     rate:30, color:"#48BB78", glow:"rgba(72,187,120,0.2)" },
+  { tier:1, label:"Tier 1", range:"1 – 50 active accounts",  rate:20, color:"#6FAE8B", glow:"rgba(91,167,214,0.2)" },
+  { tier:2, label:"Tier 2", range:"51 – 100 active accounts", rate:25, color:"#6E90C9", glow:"rgba(91,110,225,0.2)" },
+  { tier:3, label:"Tier 3", range:"101+ active accounts",     rate:30, color:"#D99A6B", glow:"rgba(72,187,120,0.2)" },
 ];
 
 const SETUP_FEE = 599;
@@ -117,7 +117,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
         <div className="w-full max-w-lg text-center">
           <div className="flex items-center justify-center mb-6">
             <div className="rounded-full p-6" style={{ background:"rgba(72,187,120,0.1)", border:"2px solid rgba(72,187,120,0.3)" }}>
-              <CheckCircle size={52} color="#48BB78"/>
+              <CheckCircle size={52} color="#FFFFFF"/>
             </div>
           </div>
           <h2 style={{ ...DISPLAY, fontSize:32, color:"#0D1428", marginBottom:8 }}>Welcome to the Partner Program!</h2>
@@ -125,11 +125,11 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             Your $599 one-time setup fee has been processed. Our team will activate your partner account within <strong>1 business day</strong>.
           </p>
           <p style={{ color:"#5A6A88", fontSize:14, lineHeight:1.8, marginBottom:32 }}>
-            You start at <strong style={{ color:"#5BA7D6" }}>Tier 1 (20% commission)</strong>. As you grow to 51+ accounts you automatically advance to Tier 2 (25%), and 101+ unlocks Tier 3 (30%).
+            You start at <strong style={{ color:"#6FAE8B" }}>Tier 1 (20% commission)</strong>. As you grow to 51+ accounts you automatically advance to Tier 2 (25%), and 101+ unlocks Tier 3 (30%).
           </p>
           <div className="p-5 rounded-2xl mb-6 glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#5A6A88", fontSize:10, ...MONO, marginBottom:6 }}>YOUR PARTNER REFERENCE</div>
-            <div style={{ ...MONO, fontSize:20, color:"#5B6EE1", fontWeight:700, marginBottom:4 }}>{refCode}</div>
+            <div style={{ ...MONO, fontSize:20, color:"#6E90C9", fontWeight:700, marginBottom:4 }}>{refCode}</div>
             <div style={{ color:"#8A9AB8", fontSize:11 }}>Your unique referral link will be emailed within 24 hours</div>
           </div>
           <button onClick={onComplete} className="w-full py-4 rounded-2xl font-bold text-base"
@@ -151,7 +151,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
           <div className="flex items-center gap-3">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:8, objectFit:"contain" }}/>
             <div>
-              <div style={{ ...DISPLAY, color:"#5B6EE1", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ ...DISPLAY, color:"#6E90C9", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>PARTNER PORTAL — ONBOARDING</div>
             </div>
           </div>
@@ -174,7 +174,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             {/* Setup fee card */}
             <div className="rounded-2xl p-7 text-center glow-surface" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)", background:"rgba(91,110,225,0.02)" }}>
               <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:8 }}>ONE-TIME SETUP FEE</div>
-              <div style={{ ...DISPLAY, fontSize:56, color:"#5B6EE1", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
+              <div style={{ ...DISPLAY, fontSize:56, color:"#6E90C9", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
               <div style={{ color:"#5A6A88", fontSize:14, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
               <div className="grid grid-cols-3 gap-4">
                 {[
@@ -183,7 +183,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   { icon:<Zap size={16}/>,      label:"Referral tracking" },
                 ].map(f => (
                   <div key={f.label} className="flex flex-col items-center gap-2 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.06)" }}>
-                    <span style={{ color:"#5B6EE1" }}>{f.icon}</span>
+                    <span style={{ color:"#FFFFFF" }}>{f.icon}</span>
                     <span style={{ color:"#5A6A88", fontSize:11, fontWeight:600 }}>{f.label}</span>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                     <div style={{ color:t.color, fontSize:10, ...MONO, fontWeight:700, marginBottom:6 }}>{t.label.toUpperCase()}</div>
                     <div style={{ ...DISPLAY, fontSize:40, color:t.color, lineHeight:1, marginBottom:6 }}>{t.rate}%</div>
                     <div style={{ color:"#5A6A88", fontSize:12, lineHeight:1.5 }}>{t.range}</div>
-                    <div className="mt-3 flex items-center justify-center gap-1" style={{ color:"#48BB78", fontSize:11 }}>
+                    <div className="mt-3 flex items-center justify-center gap-1" style={{ color:"#D99A6B", fontSize:11 }}>
                       <CheckCircle size={11}/> Recurring · Lifetime
                     </div>
                   </div>
@@ -209,7 +209,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
 
             {/* Earnings estimate */}
             <div className="rounded-2xl p-6 glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
-              <div style={{ color:"#5B6EE1", fontSize:11, ...MONO, marginBottom:12 }}>ESTIMATED MONTHLY EARNINGS AT SCALE</div>
+              <div style={{ color:"#6E90C9", fontSize:11, ...MONO, marginBottom:12 }}>ESTIMATED MONTHLY EARNINGS AT SCALE</div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 {[
                   { accounts:25,  tier:1, rate:20 },
@@ -220,7 +220,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   return (
                     <div key={row.accounts}>
                       <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{row.accounts} ACCOUNTS · TIER {row.tier}</div>
-                      <div style={{ ...DISPLAY, fontSize:24, color:"#5B6EE1", marginTop:4 }}>${est.toLocaleString()}<span style={{ fontSize:11, color:"#8A9AB8" }}>/mo</span></div>
+                      <div style={{ ...DISPLAY, fontSize:24, color:"#6E90C9", marginTop:4 }}>${est.toLocaleString()}<span style={{ fontSize:11, color:"#8A9AB8" }}>/mo</span></div>
                     </div>
                   );
                 })}
@@ -251,7 +251,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   {ORG_TYPES.map(t => (
                     <button key={t.id} onClick={() => setOrg(o=>({...o,type:t.id}))}
                       className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                      style={{ background:org.type===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${org.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:org.type===t.id?"#5B6EE1":"#5A6A88" }}>
+                      style={{ background:org.type===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${org.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:org.type===t.id?"#6E90C9":"#5A6A88" }}>
                       {t.label}
                     </button>
                   ))}
@@ -307,7 +307,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                     <div style={{ ...DISPLAY, fontSize:18, color:"#0D1428" }}>Final Pass Down Partner Setup</div>
                     <div style={{ color:"#5A6A88", fontSize:13 }}>{org.name || "Your Organization"} · {ORG_TYPES.find(t=>t.id===org.type)?.label}</div>
                   </div>
-                  <div style={{ ...DISPLAY, fontSize:32, color:"#5B6EE1" }}>${SETUP_FEE}</div>
+                  <div style={{ ...DISPLAY, fontSize:32, color:"#6E90C9" }}>${SETUP_FEE}</div>
                 </div>
                 <div className="space-y-2 pt-4 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
                   {[
@@ -319,7 +319,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                     "Marketing kit & onboarding materials",
                   ].map(f => (
                     <div key={f} className="flex items-center gap-2">
-                      <CheckCircle size={12} color="#48BB78"/>
+                      <CheckCircle size={12} color="#FFFFFF"/>
                       <span style={{ color:"#5A6A88", fontSize:12 }}>{f}</span>
                     </div>
                   ))}
@@ -356,8 +356,8 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                  <Shield size={12} color="#48BB78"/>
-                  <span style={{ color:"#48BB78", fontSize:11 }}>256-bit SSL encryption · Processed by Stripe · No card data stored</span>
+                  <Shield size={12} color="#FFFFFF"/>
+                  <span style={{ color:"#D99A6B", fontSize:11 }}>256-bit SSL encryption · Processed by Stripe · No card data stored</span>
                 </div>
               </div>
             </div>
@@ -417,7 +417,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
           <div className="flex items-center gap-2.5">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:7, objectFit:"contain" }}/>
             <div>
-              <div style={{ ...DISPLAY, color:"#5BA7D6", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ ...DISPLAY, color:"#6FAE8B", fontSize:9, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
               <div style={{ color:"#4A5A7A", fontSize:7, letterSpacing:"0.12em", ...MONO }}>PARTNER PORTAL</div>
             </div>
           </div>
@@ -437,7 +437,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
             <button key={item.id} onClick={() => setTab(item.id)}
               className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all text-left"
               style={{ background:tab===item.id?"rgba(91,110,225,0.12)":"transparent", color:tab===item.id?"#FFFFFF":"#B0C0DC", borderLeft:`2px solid ${tab===item.id?"#5B6EE1":"transparent"}` }}>
-              <span style={{ color:tab===item.id?"#5BA7D6":"inherit" }}>{item.icon}</span>
+              <span style={{ color:tab===item.id?"#FFFFFF":"inherit" }}>{item.icon}</span>
               <span style={{ fontSize:12, fontWeight:tab===item.id?600:400 }}>{item.label}</span>
             </button>
           ))}
@@ -463,7 +463,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
           </div>
           <div className="flex items-center gap-2">
             <div className="px-2 py-1 rounded text-xs font-bold flex items-center gap-1"
-              style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", color:"#48BB78", ...MONO }}>
+              style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", color:"#D99A6B", ...MONO }}>
               <div style={{ width:4, height:4, borderRadius:"50%", background:"#48BB78" }}/>LIVE DEMO
             </div>
             <button style={{ color:"#8A9AB8" }}><Bell size={14}/></button>
@@ -481,7 +481,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                 {[
                   { label:"Active Accounts", value:stats.accounts, sub:"Current volume",     color:currentTier.color },
                   { label:"Current Tier",    value:`${currentTier.rate}%`, sub:currentTier.label+" commission", color:currentTier.color },
-                  { label:"Monthly Earned",  value:`$${stats.monthlyEarned.toLocaleString()}`, sub:"This month",  color:"#5BA7D6" },
+                  { label:"Monthly Earned",  value:`$${stats.monthlyEarned.toLocaleString()}`, sub:"This month",  color:"#6FAE8B" },
                   { label:"Total Earned",    value:`$${stats.totalEarned.toLocaleString()}`,   sub:"All time",    color:"#F6AD55" },
                 ].map(kpi => (
                   <div key={kpi.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
@@ -547,7 +547,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="p-5 rounded-2xl glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)", background:"rgba(72,187,120,0.03)" }}>
-                  <div style={{ color:"#48BB78", fontSize:9, ...MONO, marginBottom:6 }}>NEXT PAYOUT</div>
+                  <div style={{ color:"#D99A6B", fontSize:9, ...MONO, marginBottom:6 }}>NEXT PAYOUT</div>
                   <div style={{ ...DISPLAY, fontSize:24, color:"#0D1428", marginBottom:2 }}>${stats.pendingPayout.toLocaleString()}</div>
                   <div style={{ color:"#5A6A88", fontSize:11 }}>Scheduled {stats.nextPayout} · Auto-deposit</div>
                 </div>
@@ -559,7 +559,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                     { label:"Marketing Kit", fn:()=>toast.success("Opening marketing kit…") },
                   ].map(a => (
                     <button key={a.label} onClick={a.fn} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left"
-                      style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)", color:"#5B6EE1" }}>
+                      style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)", color:"#6E90C9" }}>
                       <Copy size={11}/><span style={{ fontSize:11, fontWeight:600 }}>{a.label}</span>
                       <ArrowRight size={10} style={{ marginLeft:"auto" }}/>
                     </button>
@@ -594,15 +594,15 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   <tbody>
                     {DEMO_REFERRALS.map((r, i) => (
                       <tr key={r.id} style={{ borderBottom:i<DEMO_REFERRALS.length-1?"1px solid rgba(91,110,225,0.06)":"none" }}>
-                        <td className="px-4 py-3" style={{ color:"#5B6EE1", fontSize:10, ...MONO }}>{r.id}</td>
+                        <td className="px-4 py-3" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{r.id}</td>
                         <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:12, fontWeight:500 }}>{r.name}</td>
                         <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:11 }}>{r.plan}</td>
                         <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:10 }}>{r.date}</td>
-                        <td className="px-4 py-3" style={{ color:"#48BB78", fontSize:12, fontWeight:700 }}>
+                        <td className="px-4 py-3" style={{ color:"#D99A6B", fontSize:12, fontWeight:700 }}>
                           ${(r.mrr * currentTier.rate / 100).toFixed(2)}/mo
                         </td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:r.status==="active"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:r.status==="active"?"#48BB78":"#F6AD55", ...MONO }}>
+                          <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:r.status==="active"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:r.status==="active"?"#D99A6B":"#F6AD55", ...MONO }}>
                             {r.status.toUpperCase()}
                           </span>
                         </td>
@@ -619,9 +619,9 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
               <h2 style={{ ...DISPLAY, fontSize:20, color:"#0D1428" }}>Payout History</h2>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label:"Total Earned",  value:`$${stats.totalEarned.toLocaleString()}`,  color:"#5B6EE1" },
+                  { label:"Total Earned",  value:`$${stats.totalEarned.toLocaleString()}`,  color:"#6E90C9" },
                   { label:"Pending",       value:`$${stats.pendingPayout.toLocaleString()}`, color:"#F6AD55" },
-                  { label:"Next Pay Date", value:stats.nextPayout, color:"#48BB78" },
+                  { label:"Next Pay Date", value:stats.nextPayout, color:"#D99A6B" },
                 ].map(k => (
                   <div key={k.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
                     <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:5 }}>{k.label.toUpperCase()}</div>
@@ -641,11 +641,11 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   <tbody>
                     {DEMO_PAYOUTS.map((p, i) => (
                       <tr key={p.ref} style={{ borderBottom:i<DEMO_PAYOUTS.length-1?"1px solid rgba(91,110,225,0.06)":"none" }}>
-                        <td className="px-4 py-3" style={{ color:"#5B6EE1", fontSize:10, ...MONO }}>{p.ref}</td>
+                        <td className="px-4 py-3" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{p.ref}</td>
                         <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:12 }}>{p.date}</td>
                         <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:13, fontWeight:600 }}>${p.amount.toLocaleString()}</td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:p.status==="paid"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:p.status==="paid"?"#48BB78":"#F6AD55", ...MONO }}>
+                          <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:p.status==="paid"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:p.status==="paid"?"#D99A6B":"#F6AD55", ...MONO }}>
                             {p.status.toUpperCase()}
                           </span>
                         </td>
@@ -675,7 +675,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                       <div style={{ color:"#5A6A88", fontSize:11, marginBottom:8 }}>{r.desc}</div>
                       <button onClick={() => toast.success(`${r.title} — opening…`)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                        style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.15)" }}>
+                        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.15)" }}>
                         Open <ArrowRight size={10}/>
                       </button>
                     </div>
@@ -703,7 +703,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                     <div style={{ color:"#0D1428", fontSize:12, marginTop:2 }}>{f.value}</div>
                   </div>
                   {f.label !== "Setup Fee Paid" && f.label !== "Current Tier" && (
-                    <button onClick={() => toast.success(`Edit ${f.label} — coming soon`)} style={{ color:"#5B6EE1", fontSize:11 }}>Edit</button>
+                    <button onClick={() => toast.success(`Edit ${f.label} — coming soon`)} style={{ color:"#6E90C9", fontSize:11 }}>Edit</button>
                   )}
                 </div>
               ))}
@@ -726,12 +726,12 @@ export function PartnerOnboarding() {
         style={{ background:"rgba(72,187,120,0.08)", borderBottom:"1px solid rgba(72,187,120,0.2)" }}>
         <div className="flex items-center gap-2">
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 8px #48BB78" }}/>
-          <span style={{ color:"#48BB78", fontSize:10, ...MONO, fontWeight:700 }}>PARTNER PORTAL — FULL DEMO MODE</span>
+          <span style={{ color:"#D99A6B", fontSize:10, ...MONO, fontWeight:700 }}>PARTNER PORTAL — FULL DEMO MODE</span>
           <span style={{ color:"#5A6A88", fontSize:10, ...MONO }}>· $599 one-time setup · Volume-based commission tiers</span>
         </div>
         <button onClick={() => setView(view === "dashboard" ? "onboarding" : "dashboard")}
           className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
-          style={{ background:"rgba(72,187,120,0.12)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.25)", ...MONO }}>
+          style={{ background:"rgba(72,187,120,0.12)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.25)", ...MONO }}>
           <BarChart3 size={11}/>
           {view === "dashboard" ? "← Back to Onboarding" : "Skip → Partner Dashboard"}
         </button>

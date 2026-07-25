@@ -127,7 +127,7 @@ select.fpd-field option { background: #101728; color: #FFFFFF; }
 .kstrip .kcell::before {
   content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 1px;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--klaser) 65%, transparent) 50%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--klaser) 22%, transparent), color-mix(in srgb, var(--klaser) 80%, transparent) 50%, color-mix(in srgb, var(--klaser) 22%, transparent));
   transition: width .25s ease, top .25s ease, bottom .25s ease, box-shadow .25s ease;
 }
 .kstrip .kcell:first-child::before { display: none; }

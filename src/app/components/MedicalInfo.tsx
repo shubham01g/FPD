@@ -20,7 +20,7 @@ type Tab = "emergency" | "allergies" | "medications";
 const sevStyle: Record<Allergy["severity"], { bg: string; color: string; label: string }> = {
   severe:   { bg: "rgba(208,107,107,0.14)", color: NEG,  label: "SEVERE" },
   moderate: { bg: "rgba(217,165,94,0.14)",  color: WARN, label: "MODERATE" },
-  mild:     { bg: "rgba(95,190,145,0.14)",  color: POS,  label: "MILD" },
+  mild:     { bg: "rgba(95,190,145,0.14)",  color: "#D99A6B",  label: "MILD" },
 };
 
 type EmergencyInfo = {
@@ -69,7 +69,7 @@ const MED_CSS = `
 .fpd-med .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-med .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-med .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-med .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-med .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-med .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-med .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -99,7 +99,7 @@ const MED_CSS = `
 .fpd-med .tgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fpd-med .hero-tile{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);margin-bottom:14px;}
 .fpd-med .hero-tile .hlbl{color:${SOFT};font-size:13px;}
-.fpd-med .hero-tile .hval{font-family:var(--font-display);font-size:24px;color:${ACCENT2};font-weight:700;}
+.fpd-med .hero-tile .hval{font-family:var(--font-display);font-size:24px;color:#6FAE8B;font-weight:700;}
 .fpd-med .hero-tile select{width:130px;padding:9px 11px;border-radius:9px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);}
 .fpd-med .chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
 @media (max-width:820px){.fpd-med .mgrid{grid-template-columns:1fr;}.fpd-med .tgrid2{grid-template-columns:1fr;}}
@@ -132,11 +132,11 @@ button.chip:hover{opacity:.85;}
 /* allergy / medication record cards */
 .fpd-med .rlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-med .rtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
-.fpd-med .rico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:${ACCENT2};}
+.fpd-med .rico{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
 .fpd-med .rtitle{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
 .fpd-med .rsub{color:${MUTED};font-size:12.5px;}
 .fpd-med .rbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.04em;flex-shrink:0;}
-.fpd-med .rtag{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};text-transform:uppercase;}
+.fpd-med .rtag{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:#6FAE8B;text-transform:uppercase;}
 .fpd-med .rgrid{display:grid;grid-template-columns:repeat(3,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);overflow:hidden;}
 .fpd-med .rgrid .tile{border:none;border-radius:0;background:transparent;}
 .fpd-med .rgrid .tile:nth-child(3n+2),.fpd-med .rgrid .tile:nth-child(3n){border-left:1px solid rgba(255,255,255,0.22);}
@@ -151,7 +151,7 @@ button.chip:hover{opacity:.85;}
 
 /* empty state */
 .fpd-med .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 12px;}
-.fpd-med .empty .ei{width:48px;height:48px;border-radius:13px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:13px;}
+.fpd-med .empty .ei{width:48px;height:48px;border-radius:13px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:13px;}
 .fpd-med .empty .et{color:${SOFT};font-size:14px;}
 
 /* modal */
@@ -207,7 +207,7 @@ function TChip({ label, active, onToggle }: { label: string; active: boolean; on
       className={`chip ${active ? "" : "off"}`}
       style={{
         background: active ? "rgba(95,190,145,0.14)" : "rgba(255,255,255,0.04)",
-        color: active ? POS : MUTED,
+        color: active ? "#D99A6B" : MUTED,
         borderColor: active ? "rgba(95,190,145,0.35)" : "rgba(255,255,255,0.09)",
       }}
     >
@@ -483,7 +483,7 @@ export function MedicalInfo() {
               <div className="condrow">
                 {d.conditions.map((c, i) => (
                   <span key={`${c}-${i}`} className="condtag">
-                    <Heart size={11} color={ACCENT2} />{c}
+                    <Heart size={11} color="#FFFFFF" />{c}
                     {editing && <button onClick={() => removeCondition(i)}><X size={12} /></button>}
                   </span>
                 ))}

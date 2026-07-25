@@ -282,7 +282,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                     {selectedCoin.address}
                   </code>
                   <button onClick={() => doCopy(selectedCoin.address)} className="flex-shrink-0 p-1.5 rounded-lg"
-                    style={{ background: copied ? "rgba(72,187,120,0.15)" : "rgba(255,255,255,0.06)", color: copied ? "#48BB78" : "#6B7FA8" }}>
+                    style={{ background: copied ? "rgba(72,187,120,0.15)" : "rgba(255,255,255,0.06)", color: copied ? "#D99A6B" : "#6B7FA8" }}>
                     {copied ? <CheckCircle size={14}/> : <Copy size={14}/>}
                   </button>
                 </div>
@@ -307,8 +307,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 </div>
                 <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
                   style={{ background:"rgba(91,110,225,0.08)", border:"1px solid rgba(91,110,225,0.15)" }}>
-                  <Shield size={12} color="#5BA7D6" style={{ marginTop:1, flexShrink:0 }}/>
-                  <p style={{ color:"#5BA7D6", fontSize:11, lineHeight:1.6 }}>
+                  <Shield size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
+                  <p style={{ color:"#6FAE8B", fontSize:11, lineHeight:1.6 }}>
                     Only send {selectedCoin.symbol} on the {selectedCoin.network} network. Sending on wrong network will result in permanent loss.
                   </p>
                 </div>
@@ -317,7 +317,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               {/* Demo note */}
               <div className="px-3 py-2 rounded-xl"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                <span style={{ color:"#48BB78", fontSize:10, fontFamily:"var(--font-mono)" }}>
+                <span style={{ color:"#D99A6B", fontSize:10, fontFamily:"var(--font-mono)" }}>
                   DEMO MODE · Payment auto-simulates in ~8 seconds
                 </span>
               </div>
@@ -366,7 +366,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
             <div className="text-center py-8 space-y-5">
               <div className="flex items-center justify-center">
                 <div className="rounded-full p-5" style={{ background:"rgba(72,187,120,0.12)", border:"2px solid rgba(72,187,120,0.3)" }}>
-                  <CheckCircle size={52} color="#48BB78"/>
+                  <CheckCircle size={52} color="#FFFFFF"/>
                 </div>
               </div>
               <div>
@@ -387,7 +387,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                   <div key={k} className="flex justify-between px-4 py-2.5 rounded-xl"
                     style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.12)" }}>
                     <span style={{ color:"#6B7FA8", fontSize:12 }}>{k}</span>
-                    <span style={{ color: k==="Status" ? "#48BB78" : "#E8EDF5", fontSize:12, fontFamily:k==="Invoice"?"var(--font-mono)":"inherit" }}>{v}</span>
+                    <span style={{ color: k==="Status" ? "#D99A6B" : "#E8EDF5", fontSize:12, fontFamily:k==="Invoice"?"var(--font-mono)":"inherit" }}>{v}</span>
                   </div>
                 ))}
               </div>

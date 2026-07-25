@@ -96,9 +96,9 @@ const WISHES_CSS = `
 .fpd-wishes .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-wishes .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-wishes .btn-ghost:hover{background:rgba(91,110,225,0.18);}
-.fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-wishes .btn-pos:hover{background:rgba(95,190,145,0.2);}
 .fpd-wishes .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -126,18 +126,18 @@ const WISHES_CSS = `
 .fpd-wishes .wlist{display:flex;flex-direction:column;gap:10px;}
 .fpd-wishes .wrow{padding:18px 20px;}
 .fpd-wishes .wrow .wtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.fpd-wishes .wcat{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:${ACCENT2};margin-bottom:9px;}
+.fpd-wishes .wcat{display:inline-block;padding:3px 9px;border-radius:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;background:rgba(91,110,225,0.12);color:#6FAE8B;margin-bottom:9px;}
 .fpd-wishes .witem{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);margin-bottom:5px;}
 .fpd-wishes .wrec{color:${MUTED};font-size:12.5px;display:flex;align-items:center;gap:6px;}
 .fpd-wishes .wnotes{color:${MUTED};font-size:12px;margin-top:7px;font-style:italic;line-height:1.6;}
 .fpd-wishes .wacts{display:flex;gap:4px;flex-shrink:0;}
 .fpd-wishes .wacts button{background:none;border:none;cursor:pointer;padding:6px;display:flex;color:${MUTED};transition:color .16s;}
-.fpd-wishes .wacts button:hover{color:${ACCENT2};}
+.fpd-wishes .wacts button:hover{color:#6FAE8B;}
 .fpd-wishes .wacts button.del:hover{color:${NEG};}
 
 /* empty state */
 .fpd-wishes .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 12px;}
-.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-wishes .empty .et{color:${SOFT};font-size:14px;font-weight:600;font-family:var(--font-display);margin-bottom:4px;}
 .fpd-wishes .empty .ed{color:${MUTED};font-size:12.5px;}
 
@@ -150,8 +150,8 @@ const WISHES_CSS = `
 .fpd-wishes .tile .tv{color:${TEXT};font-size:13px;line-height:1.55;}
 .fpd-wishes .tags{display:flex;flex-wrap:wrap;gap:7px;}
 .fpd-wishes .tag{padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;}
-.fpd-wishes .tag.music{background:rgba(91,110,225,0.12);color:${ACCENT2};}
-.fpd-wishes .tag.read{background:rgba(126,107,216,0.14);color:${LAVENDER};}
+.fpd-wishes .tag.music{background:rgba(91,110,225,0.12);color:#6FAE8B;}
+.fpd-wishes .tag.read{background:rgba(126,107,216,0.14);color:#A98CC7;}
 
 /* obituary */
 .fpd-wishes .obit{padding:16px 18px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};font-size:13.5px;line-height:1.85;white-space:pre-wrap;}
@@ -159,7 +159,7 @@ const WISHES_CSS = `
 .fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
 
 /* questionnaire */
-.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,110,225,0.10);color:${ACCENT2};font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
+.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,110,225,0.10);color:#6FAE8B;font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
 .fpd-wishes .qbar{height:7px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-wishes .qbar i{display:block;height:100%;background:linear-gradient(90deg,${ACCENT2},${ACCENT});transition:width .4s cubic-bezier(.4,0,.2,1);}
 .fpd-wishes .qcat{border-radius:14px;overflow:hidden;}
@@ -363,7 +363,7 @@ export function FinalWishes() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <span className="wcat">{wish.category.toUpperCase()}</span>
                       <div className="witem">{wish.item}</div>
-                      <div className="wrec"><ArrowRight size={12} color={ACCENT2} /> {wish.recipient}</div>
+                      <div className="wrec"><ArrowRight size={12} color="#FFFFFF" /> {wish.recipient}</div>
                       {wish.notes && <div className="wnotes">"{wish.notes}"</div>}
                     </div>
                     <div className="wacts">

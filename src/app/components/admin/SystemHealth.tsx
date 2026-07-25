@@ -1314,7 +1314,7 @@ function AlertRecipientsPanel({
             Recipients are automatically emailed when a new incident is created or status is updated.
             Each recipient can be configured to receive <span style={{ color:T.red, fontWeight:600 }}>critical</span>,{" "}
             <span style={{ color:T.amber, fontWeight:600 }}>major</span>, and/or{" "}
-            <span style={{ color:"#5BA7D6", fontWeight:600 }}>minor</span> alerts.
+            <span style={{ color:"#6FAE8B", fontWeight:600 }}>minor</span> alerts.
             Inactive recipients remain in the list but receive no emails.
           </div>
         </div>
@@ -1981,10 +1981,10 @@ function ApiMonitorPanel() {
         <div className="grid grid-cols-3 gap-3">
           {[
             { tier:"Starter",        rps:10,   burst:50,    daily:1000,   color:"#5A6A88" },
-            { tier:"Foundation",     rps:30,   burst:150,   daily:5000,   color:"#5BA7D6" },
-            { tier:"Legacy Archive", rps:100,  burst:500,   daily:20000,  color:"#5B6EE1" },
-            { tier:"Legacy Pro",     rps:300,  burst:1500,  daily:100000, color:"#5BA7D6" },
-            { tier:"Legacy Vault",   rps:1000, burst:5000,  daily:500000, color:"#48BB78" },
+            { tier:"Foundation",     rps:30,   burst:150,   daily:5000,   color:"#6FAE8B" },
+            { tier:"Legacy Archive", rps:100,  burst:500,   daily:20000,  color:"#6E90C9" },
+            { tier:"Legacy Pro",     rps:300,  burst:1500,  daily:100000, color:"#6FAE8B" },
+            { tier:"Legacy Vault",   rps:1000, burst:5000,  daily:500000, color:"#D99A6B" },
             { tier:"Admin / API Key",rps:5000, burst:10000, daily:999999, color:"#F6AD55" },
           ].map(r => (
             <div key={r.tier} className="px-4 py-3 rounded-xl"

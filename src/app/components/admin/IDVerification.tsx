@@ -63,9 +63,9 @@ export function IDVerification() {
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Pending Review", value: 3, color: "#F6AD55", icon: <Clock size={16} /> },
-          { label: "Approved Today", value: 7, color: "#48BB78", icon: <CheckCircle size={16} /> },
+          { label: "Approved Today", value: 7, color: "#D99A6B", icon: <CheckCircle size={16} /> },
           { label: "Rejected Today", value: 1, color: "#FC8181", icon: <XCircle size={16} /> },
-          { label: "Avg Review Time", value: "4.2h", color: "#5BA7D6", icon: <Shield size={16} /> },
+          { label: "Avg Review Time", value: "4.2h", color: "#FFFFFF", icon: <Shield size={16} /> },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="rounded-lg p-2 mb-3" style={{ background: `${stat.color}15`, color: stat.color, width: "fit-content" }}>
@@ -150,7 +150,7 @@ export function IDVerification() {
               <button
                 onClick={() => handleApprove(verif.id)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl"
-                style={{ background: "rgba(72,187,120,0.15)", color: "#48BB78", border: "1px solid rgba(72,187,120,0.3)", fontWeight: 600, fontSize: 14 }}
+                style={{ background: "rgba(72,187,120,0.15)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.3)", fontWeight: 600, fontSize: 14 }}
               >
                 <CheckCircle size={15} /> Approve Verification
               </button>
@@ -190,7 +190,7 @@ export function IDVerification() {
             <div style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{r.processedDate}</div>
             <div className="flex items-center gap-2">
               {r.status === "approved"
-                ? <><CheckCircle size={14} color="#48BB78" /><span style={{ color: "#48BB78", fontSize: 13 }}>Approved</span></>
+                ? <><CheckCircle size={14} color="#FFFFFF" /><span style={{ color: "#D99A6B", fontSize: 13 }}>Approved</span></>
                 : <><XCircle size={14} color="#FC8181" /><span style={{ color: "#FC8181", fontSize: 13 }}>Rejected{r.reason ? ` — ${r.reason}` : ""}</span></>
               }
             </div>

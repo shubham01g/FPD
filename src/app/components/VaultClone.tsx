@@ -25,14 +25,14 @@ interface VaultCloneProps {
 
 // Everything included in the full account download
 const ALL_CONTENTS = [
-  { icon:<FileText size={13}/>,    color:"#5B6EE1", label:"All Documents",         count:"14 files", desc:"All 18 folder categories" },
+  { icon:<FileText size={13}/>,    color:"#6E90C9", label:"All Documents",         count:"14 files", desc:"All 18 folder categories" },
   { icon:<Heart size={13}/>,       color:"#FC8181", label:"Final Wishes",          count:"5 records",  desc:"Wills, bequests, instructions" },
-  { icon:<Stethoscope size={13}/>, color:"#48BB78", label:"Medical Info",          count:"8 records",  desc:"Allergies, medications, directives" },
+  { icon:<Stethoscope size={13}/>, color:"#D99A6B", label:"Medical Info",          count:"8 records",  desc:"Allergies, medications, directives" },
   { icon:<Wallet size={13}/>,      color:"#F6AD55", label:"Financial Records",     count:"12 records", desc:"Insurance, investments, real estate" },
-  { icon:<Car size={13}/>,         color:ACCENT2,   label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
-  { icon:<Camera size={13}/>,      color:"#5B6EE1", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
+  { icon:<Car size={13}/>,         color:"#6FAE8B",   label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
+  { icon:<Camera size={13}/>,      color:"#6E90C9", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
   { icon:<BookOpen size={13}/>,    color:"#ED8936", label:"Digital Diary",         count:"12 entries", desc:"Audio, video, and text entries" },
-  { icon:<Key size={13}/>,         color:"#6F9E94", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
+  { icon:<Key size={13}/>,         color:"#D68FA8", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
   { icon:<Users size={13}/>,       color:"#68D391", label:"Contacts & Designations",count:"6 contacts",desc:"Legacy, guardian, emergency contacts" },
   { icon:<PawPrint size={13}/>,    color:"#F6AD55", label:"Pet Records",           count:"5 records",  desc:"Vet records, instructions" },
   { icon:<Lock size={13}/>,        color:"#FC8181", label:"Secret Vault",          count:"3 items",    desc:"Most sensitive items (opt-in)" },
@@ -45,7 +45,7 @@ const VCLONE_CSS = `
 .fpd-vclone .modal{width:100%;max-width:560px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.22);border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 30px 80px rgba(0,0,0,0.6);}
 .fpd-vclone .close-btn{position:absolute;top:20px;right:20px;z-index:10;color:${MUTED};background:none;border:none;cursor:pointer;display:flex;}
 .fpd-vclone .modal-head{padding:28px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;gap:12px;}
-.fpd-vclone .head-ico{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.16);color:${ACCENT2};}
+.fpd-vclone .head-ico{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.16);color:#FFFFFF;}
 .fpd-vclone .head-title{font-family:var(--font-display);font-size:18px;color:${TEXT};}
 .fpd-vclone .head-sub{color:${MUTED};font-size:12px;margin-top:2px;}
 .fpd-vclone .modal-body{padding:24px 28px;overflow-y:auto;max-height:75vh;display:flex;flex-direction:column;gap:18px;}
@@ -57,15 +57,15 @@ const VCLONE_CSS = `
 .fpd-vclone .cond-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:9px;background:rgba(208,107,107,0.10);}
 .fpd-vclone .cond-row span{color:${MUTED};font-size:12px;}
 .fpd-vclone .panel-info{background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.18);}
-.fpd-vclone .panel-info-lbl{color:${ACCENT2};font-size:12px;font-weight:700;font-family:var(--font-mono);margin-bottom:8px;}
+.fpd-vclone .panel-info-lbl{color:#6FAE8B;font-size:12px;font-weight:700;font-family:var(--font-mono);margin-bottom:8px;}
 .fpd-vclone .panel-info p{color:${MUTED};font-size:13px;line-height:1.7;}
 .fpd-vclone .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
 .fpd-vclone .preview-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:9px;background:rgba(255,255,255,0.03);}
 .fpd-vclone .preview-chip span{color:${MUTED};font-size:11px;}
-.fpd-vclone .btn-close{width:100%;padding:13px;border-radius:12px;font-size:13px;font-weight:600;background:rgba(91,110,225,0.10);color:${ACCENT2};border:1px solid rgba(91,110,225,0.24);cursor:pointer;font-family:var(--font-body);}
+.fpd-vclone .btn-close{width:100%;padding:13px;border-radius:12px;font-size:13px;font-weight:600;background:rgba(91,110,225,0.10);color:#6FAE8B;border:1px solid rgba(91,110,225,0.24);cursor:pointer;font-family:var(--font-body);}
 
 .fpd-vclone .panel-unlocked{display:flex;align-items:flex-start;gap:12px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.28);}
-.fpd-vclone .panel-unlocked-title{color:${POS};font-size:13px;font-weight:600;margin-bottom:3px;}
+.fpd-vclone .panel-unlocked-title{color:#D99A6B;font-size:13px;font-weight:600;margin-bottom:3px;}
 .fpd-vclone .panel-unlocked p{color:${MUTED};font-size:12px;line-height:1.6;}
 
 .fpd-vclone .contents-lbl{color:${MUTED};font-size:11px;font-family:var(--font-mono);margin-bottom:10px;}
@@ -85,7 +85,7 @@ const VCLONE_CSS = `
 .fpd-vclone .summary-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.22);}
 .fpd-vclone .summary-row span:first-child{color:${MUTED};font-size:12px;}
 .fpd-vclone .summary-row span:last-child{color:${SOFT};font-size:12px;}
-.fpd-vclone .btn-back{flex:1;padding:13px;border-radius:12px;font-size:13px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.22);cursor:pointer;font-family:var(--font-body);}
+.fpd-vclone .btn-back{flex:1;padding:13px;border-radius:12px;font-size:13px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.22);cursor:pointer;font-family:var(--font-body);}
 
 .fpd-vclone .center{text-align:center;padding:24px 0;display:flex;flex-direction:column;gap:18px;align-items:center;}
 .fpd-vclone .icon-circle{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;}
@@ -93,11 +93,11 @@ const VCLONE_CSS = `
 .fpd-vclone .status-sub{color:${MUTED};font-size:13px;}
 .fpd-vclone .progress-track{height:8px;border-radius:99px;background:rgba(91,110,225,0.14);max-width:320px;width:100%;margin:0 auto;}
 .fpd-vclone .progress-fill{height:8px;border-radius:99px;background:linear-gradient(90deg,#5B6EE1,#5B6EE1);box-shadow:0 0 12px rgba(91,110,225,0.5);transition:width .3s;}
-.fpd-vclone .progress-pct{color:${ACCENT2};font-size:14px;font-family:var(--font-mono);}
+.fpd-vclone .progress-pct{color:#6FAE8B;font-size:14px;font-family:var(--font-mono);}
 
 .fpd-vclone .ref-box{padding:14px 16px;border-radius:12px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);width:100%;}
-.fpd-vclone .ref-lbl{color:${POS};font-size:10px;font-family:var(--font-mono);margin-bottom:4px;}
-.fpd-vclone .ref-val{color:${POS};font-family:var(--font-mono);font-size:15px;font-weight:700;}
+.fpd-vclone .ref-lbl{color:#D99A6B;font-size:10px;font-family:var(--font-mono);margin-bottom:4px;}
+.fpd-vclone .ref-val{color:#D99A6B;font-family:var(--font-mono);font-size:15px;font-weight:700;}
 .fpd-vclone .important-box{padding:16px;border-radius:14px;text-align:left;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);width:100%;}
 .fpd-vclone .important-lbl{color:${WARN};font-size:11px;font-weight:700;font-family:var(--font-mono);margin-bottom:6px;}
 .fpd-vclone .important-box p{color:${MUTED};font-size:12px;line-height:1.7;}
@@ -193,7 +193,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {isUnlocked && step === "overview" && (
             <>
               <div className="panel panel-unlocked">
-                <Shield size={16} color={POS} style={{ marginTop:1, flexShrink:0 }}/>
+                <Shield size={16} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
                 <div>
                   <div className="panel-unlocked-title">Legacy Vault Clone Unlocked</div>
                   <p>Legacy Continuation Fee paid and confirmation of passing verified by FPD administrators. This download contains <strong style={{ color: TEXT }}>everything</strong> in the account — {totalItems}+ items across all categories.</p>
@@ -272,7 +272,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {step === "downloading" && (
             <div className="center">
               <div className="icon-circle" style={{ background: "rgba(91,110,225,0.16)", border: "1px solid rgba(91,110,225,0.3)" }}>
-                <Download size={28} color={ACCENT2} style={{ animation:"bounce 1s infinite" }}/>
+                <Download size={28} color="#FFFFFF" style={{ animation:"bounce 1s infinite" }}/>
               </div>
               <div>
                 <div className="status-title">Preparing Your Legacy Package</div>
@@ -295,7 +295,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           {step === "done" && (
             <div className="center">
               <div className="icon-circle" style={{ background: "rgba(95,190,145,0.14)", border: "1px solid rgba(95,190,145,0.3)", boxShadow: "0 0 30px rgba(95,190,145,0.15)" }}>
-                <CheckCircle size={30} color={POS}/>
+                <CheckCircle size={30} color="#FFFFFF"/>
               </div>
               <div>
                 <div className="status-title">Legacy Package Ready</div>

@@ -214,7 +214,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
           style={{ borderColor:"rgba(91,110,225,0.2)" }}>
           <div className="flex items-center gap-3">
             <div className="rounded-xl p-2" style={{ background:"rgba(91,110,225,0.15)" }}>
-              <Scan size={18} color="#5BA7D6"/>
+              <Scan size={18} color="#FFFFFF"/>
             </div>
             <div>
               <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600 }}>Document Scanner</div>
@@ -318,7 +318,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                     className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
                     style={{ background:scanMode===id?"rgba(91,110,225,0.25)":"rgba(255,255,255,0.04)",
                       border:`1px solid ${scanMode===id?"#5B6EE1":"rgba(255,255,255,0.08)"}` }}>
-                    <span style={{ fontSize:10, fontWeight:700, color:scanMode===id?"#5BA7D6":"#4A5A7A" }}>{cfg.label}</span>
+                    <span style={{ fontSize:10, fontWeight:700, color:scanMode===id?"#6FAE8B":"#4A5A7A" }}>{cfg.label}</span>
                     <span style={{ fontSize:8, color:"#2A3A5A", textAlign:"center", lineHeight:1.3 }}>{cfg.desc}</span>
                   </button>
                 ))}
@@ -343,7 +343,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                       style={{ background:docFolder===f.id?"rgba(91,110,225,0.2)":"rgba(255,255,255,0.04)",
                         border:`1px solid ${docFolder===f.id?"rgba(91,110,225,0.5)":"rgba(255,255,255,0.06)"}` }}>
                       <span style={{ fontSize:14 }}>{f.emoji}</span>
-                      <span style={{ fontSize:8, color:docFolder===f.id?"#5BA7D6":"#4A5A7A", lineHeight:1.2 }}>{f.label.split(" ")[0]}</span>
+                      <span style={{ fontSize:8, color:docFolder===f.id?"#6FAE8B":"#4A5A7A", lineHeight:1.2 }}>{f.label.split(" ")[0]}</span>
                     </button>
                   ))}
                 </div>
@@ -413,7 +413,7 @@ export function ScanButton({
     <>
       <button onClick={() => setOpen(true)}
         className="flex items-center font-semibold transition-all hover:scale-105"
-        style={{ ...styles[size], background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
+        style={{ ...styles[size], background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
         <Camera size={iconSize}/> {label}
       </button>
       <DocumentScanner

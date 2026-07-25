@@ -124,7 +124,7 @@ function LivePreview({ config }: { config: WhiteLabelConfig }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {["14 Documents", "3 Contacts", "16.9 GB Used", "$284 Earned"].map((stat, i) => (
                 <div key={i} style={{ background: "#FFFFFF", borderRadius: 10, padding: 10, border: `1px solid ${pc}12` }}>
-                  <div style={{ color: [pc, "#48BB78", "#F6AD55", "#5BA7D6"][i], fontSize: 14, fontWeight: 700 }}>{stat.split(" ")[0]}</div>
+                  <div style={{ color: [pc, "#D99A6B", "#F6AD55", "#6FAE8B"][i], fontSize: 14, fontWeight: 700 }}>{stat.split(" ")[0]}</div>
                   <div style={{ color: "#5A6A88", fontSize: 10 }}>{stat.split(" ").slice(1).join(" ")}</div>
                 </div>
               ))}
@@ -204,7 +204,7 @@ const WL_CSS = `
 .fpd-wl .color-preset span{color:#F0F4FA;font-size:9px;font-weight:700;}
 .fpd-wl .swatch-preview{padding:14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-wl .upload-box{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:2px dashed rgba(91,110,225,0.3);background:rgba(91,110,225,0.04);cursor:pointer;}
-.fpd-wl .upload-box span{color:${ACCENT2};font-size:13px;}
+.fpd-wl .upload-box span{color:#6FAE8B;font-size:13px;}
 
 /* feature toggles */
 .fpd-wl .info-strip{padding:12px 20px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.2);}
@@ -225,7 +225,7 @@ const WL_CSS = `
 /* domain */
 .fpd-wl .dns-box{padding:12px 14px;border-radius:11px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);}
 .fpd-wl .dns-box .dl{color:${MUTED};font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
-.fpd-wl .dns-box .dv{color:${POS};font-size:12px;font-family:var(--font-mono);}
+.fpd-wl .dns-box .dv{color:#D99A6B;font-size:12px;font-family:var(--font-mono);}
 .fpd-wl .email-preview-box{padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.18);}
 .fpd-wl .warn-box{padding:12px 14px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);color:${WARN};font-size:12px;}
 
@@ -294,7 +294,7 @@ export function WhiteLabelConfig() {
             <button onClick={reset} className="btn-ghost" style={{ color: WARN, background: "rgba(217,165,94,0.08)", borderColor: "rgba(217,165,94,0.24)" }}>
               <RefreshCw size={13} /> Reset
             </button>
-            <button onClick={handleSave} className="btn-primary" style={{ background: saved ? "rgba(95,190,145,0.16)" : undefined, color: saved ? POS : "#fff", boxShadow: saved ? "none" : undefined }}>
+            <button onClick={handleSave} className="btn-primary" style={{ background: saved ? "rgba(95,190,145,0.16)" : undefined, color: saved ? "#D99A6B" : "#fff", boxShadow: saved ? "none" : undefined }}>
               {saved ? <CheckCircle size={13} /> : <Save size={13} />}
               {saved ? "Saved!" : "Publish Config"}
             </button>
@@ -306,7 +306,7 @@ export function WhiteLabelConfig() {
           <div className="status-banner">
             <div className="status-dot" />
             <span>White label mode is <strong>ACTIVE</strong> — platform displaying as "<strong>{config.companyName}</strong>" on {config.domain}</span>
-            <button className="btn-ghost" style={{ marginLeft: "auto", color: ACCENT2, background: "rgba(91,110,225,0.14)", borderColor: "rgba(91,110,225,0.3)", padding: "6px 12px", fontSize: 11 }}>
+            <button className="btn-ghost" style={{ marginLeft: "auto", color: "#6FAE8B", background: "rgba(91,110,225,0.14)", borderColor: "rgba(91,110,225,0.3)", padding: "6px 12px", fontSize: 11 }}>
               <ExternalLink size={11} /> Visit Site
             </button>
           </div>
@@ -349,7 +349,7 @@ export function WhiteLabelConfig() {
                 <div className="field">
                   <label>LOGO UPLOAD</label>
                   <div className="upload-box" onClick={() => toast.info("File upload available in production build")}>
-                    <Upload size={16} color={ACCENT2} />
+                    <Upload size={16} color="#FFFFFF" />
                     <span>Upload logo (PNG, SVG) — Demo mode uses text</span>
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export function WhiteLabelConfig() {
               <div className="preset-lbl">HOW PLAN NAMES APPEAR</div>
               <div className="flex gap-4 flex-wrap">
                 {(["essential", "premium", "legacyPro"] as const).map((k, i) => (
-                  <div key={k} className="plan-tag" style={{ background: ["rgba(91,167,214,0.16)","rgba(91,110,225,0.16)","rgba(91,167,214,0.16)"][i], color: ["#5BA7D6",ACCENT,ACCENT2][i] }}>
+                  <div key={k} className="plan-tag" style={{ background: ["rgba(91,167,214,0.16)","rgba(91,110,225,0.16)","rgba(91,167,214,0.16)"][i], color: ["#6FAE8B","#6E90C9","#6FAE8B"][i] }}>
                     {config.planNames[k]}
                   </div>
                 ))}
@@ -493,12 +493,12 @@ export function WhiteLabelConfig() {
             </div>
             <div className="grid md:grid-cols-3 gap-4">
               {[
-                { label: "Brand Name", value: config.companyName, color: ACCENT2 },
+                { label: "Brand Name", value: config.companyName, color: "#6FAE8B" },
                 { label: "Primary Color", value: config.primaryColor, color: config.primaryColor },
-                { label: "Domain", value: config.domain, color: ACCENT },
-                { label: "Features Active", value: `${Object.values(config.features).filter(Boolean).length}/${featureList.length}`, color: POS },
+                { label: "Domain", value: config.domain, color: "#6E90C9" },
+                { label: "Features Active", value: `${Object.values(config.features).filter(Boolean).length}/${featureList.length}`, color: "#D99A6B" },
                 { label: "Plan Names", value: `${config.planNames.starter} → ${config.planNames.essential} → ${config.planNames.premium} → ${config.planNames.legacyPro} → ${config.planNames.enterprise}`, color: WARN },
-                { label: "Status", value: config.enabled ? "LIVE" : "DRAFT", color: config.enabled ? POS : WARN },
+                { label: "Status", value: config.enabled ? "LIVE" : "DRAFT", color: config.enabled ? "#D99A6B" : WARN },
               ].map(item => (
                 <div key={item.label} className="card summary-tile glow-surface">
                   <div className="summary-lbl">{item.label.toUpperCase()}</div>
@@ -510,7 +510,7 @@ export function WhiteLabelConfig() {
               <button onClick={handleSave} className="btn-primary">
                 <Save size={14} /> Publish White Label Config
               </button>
-              <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: ACCENT2, background: "rgba(91,110,225,0.10)", borderColor: "rgba(91,110,225,0.3)" }}>
+              <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: "#6FAE8B", background: "rgba(91,110,225,0.10)", borderColor: "rgba(91,110,225,0.3)" }}>
                 <ExternalLink size={14} /> Open Staging Preview
               </button>
               <button onClick={() => { copyToClipboard(JSON.stringify(config, null, 2)); toast.success("Config JSON copied") }} className="btn-ghost" style={{ color: MUTED, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>

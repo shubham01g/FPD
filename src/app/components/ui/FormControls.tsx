@@ -104,7 +104,7 @@ export function ToggleChip({ label, active, onToggle }: { label: string; active:
       className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
       style={{
         background: active ? "rgba(72,187,120,0.12)" : "rgba(107,114,128,0.12)",
-        color: active ? "#48BB78" : "#A3ADC9",
+        color: active ? "#D99A6B" : "#A3ADC9",
         border: `1px solid ${active ? "rgba(72,187,120,0.3)" : "rgba(107,114,128,0.2)"}`,
         cursor: onToggle ? "pointer" : "default",
       }}

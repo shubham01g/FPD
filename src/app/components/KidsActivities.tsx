@@ -18,26 +18,26 @@ const NEG     = "#D06B6B";
 const ACTIVITY_TYPES = ["Soccer","Baseball / Softball","Basketball","Football","Swimming","Tennis","Gymnastics","Dance","Martial Arts","Track & Field","Volleyball","Cheerleading","Music / Band","Piano","Guitar","Violin","Drama / Theater","Art Class","Coding / STEM","Chess","Scouts / Scouting","Religious Education","Tutoring","Language Class","Yoga / Fitness","Other"];
 
 const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
-  "Soccer":          {emoji:"⚽",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
+  "Soccer":          {emoji:"⚽",color:"#D99A6B",bg:"rgba(72,187,120,0.1)"},
   "Baseball / Softball":{emoji:"⚾",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
   "Basketball":      {emoji:"🏀",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Football":        {emoji:"🏈",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
-  "Swimming":        {emoji:"🏊",color:"#5BA7D6",bg:"rgba(91,167,214,0.1)"},
+  "Football":        {emoji:"🏈",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
+  "Swimming":        {emoji:"🏊",color:"#6FAE8B",bg:"rgba(91,167,214,0.1)"},
   "Gymnastics":      {emoji:"🤸",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
-  "Dance":           {emoji:"💃",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Dance":           {emoji:"💃",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
   "Martial Arts":    {emoji:"🥋",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Music / Band":    {emoji:"🎵",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
-  "Piano":           {emoji:"🎹",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
-  "Guitar":          {emoji:"🎸",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Music / Band":    {emoji:"🎵",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
+  "Piano":           {emoji:"🎹",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
+  "Guitar":          {emoji:"🎸",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
   "Drama / Theater": {emoji:"🎭",color:"#FC8181",bg:"rgba(252,129,129,0.1)"},
   "Art Class":       {emoji:"🎨",color:"#ED8936",bg:"rgba(237,137,54,0.1)"},
-  "Coding / STEM":   {emoji:"💻",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Chess":           {emoji:"♟️",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
-  "Scouts / Scouting":{emoji:"🏕️",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Religious Education":{emoji:"⛪",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Coding / STEM":   {emoji:"💻",color:"#D99A6B",bg:"rgba(72,187,120,0.1)"},
+  "Chess":           {emoji:"♟️",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
+  "Scouts / Scouting":{emoji:"🏕️",color:"#D99A6B",bg:"rgba(72,187,120,0.1)"},
+  "Religious Education":{emoji:"⛪",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
   "Tutoring":        {emoji:"📚",color:"#F6AD55",bg:"rgba(246,173,85,0.1)"},
-  "Tennis":          {emoji:"🎾",color:"#48BB78",bg:"rgba(72,187,120,0.1)"},
-  "Violin":          {emoji:"🎻",color:"#5B6EE1",bg:"rgba(91,110,225,0.1)"},
+  "Tennis":          {emoji:"🎾",color:"#D99A6B",bg:"rgba(72,187,120,0.1)"},
+  "Violin":          {emoji:"🎻",color:"#6E90C9",bg:"rgba(91,110,225,0.1)"},
 };
 function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"rgba(255,255,255,0.65)",bg:"rgba(138,154,184,0.1)"}; }
 
@@ -184,7 +184,7 @@ const KIDS_CSS = `
 
 /* transportation / notes */
 .fpd-kids .infobox{padding:13px 15px;border-radius:11px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
-.fpd-kids .infobox .ik{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:${ACCENT2};font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;}
+.fpd-kids .infobox .ik{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:#6FAE8B;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;}
 .fpd-kids .infobox .iv{color:${TEXT};font-size:13px;line-height:1.7;}
 .fpd-kids .notebox{padding:13px 15px;border-radius:11px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);}
 .fpd-kids .notebox .nk{color:${WARN};font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:6px;}
@@ -193,7 +193,7 @@ const KIDS_CSS = `
 /* documents */
 .fpd-kids .doclbl{color:${MUTED};font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;margin-bottom:8px;}
 .fpd-kids .docrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-.fpd-kids .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,110,225,0.08);color:${ACCENT2};border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
+.fpd-kids .docchip{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;font-size:12px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);transition:background .16s;}
 .fpd-kids .docchip:hover{background:rgba(91,110,225,0.16);}
 
 /* modal */
@@ -289,7 +289,7 @@ export function KidsActivities() {
                 className={`chip ${on ? "" : "off"}`}
                 style={{
                   background: on ? "rgba(91,110,225,0.16)" : "rgba(91,110,225,0.05)",
-                  color: on ? ACCENT2 : MUTED,
+                  color: on ? "#6FAE8B" : MUTED,
                   borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)",
                 }}
               >
@@ -349,7 +349,7 @@ export function KidsActivities() {
 
                     {act.transportationNotes && (
                       <div className="infobox">
-                        <div className="ik"><Car size={13} color={ACCENT2} />TRANSPORTATION & PICKUP NOTES</div>
+                        <div className="ik"><Car size={13} color="#FFFFFF" />TRANSPORTATION & PICKUP NOTES</div>
                         <div className="iv">{act.transportationNotes}</div>
                       </div>
                     )}

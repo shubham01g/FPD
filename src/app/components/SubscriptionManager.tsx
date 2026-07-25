@@ -44,7 +44,7 @@ const initSubs: Subscription[] = [
 
 const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#6F9E94", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
 const statusColor: Record<string, { color:string; bg:string }> = {
-  active:    { color:POS,  bg:"rgba(95,190,145,0.12)" },
+  active:    { color:"#D99A6B",  bg:"rgba(95,190,145,0.12)" },
   paused:    { color:WARN, bg:"rgba(217,165,94,0.12)" },
   cancelled: { color:NEG,  bg:"rgba(208,107,107,0.12)" },
 };
@@ -70,10 +70,10 @@ const SUB_CSS = `
 .fpd-sub .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-sub .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-sub .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-sub .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-sub .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-sub .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-sub .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
-.fpd-sub .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:${POS};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-sub .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-sub .btn-pos:hover{background:rgba(95,190,145,0.2);}
 
 /* KPI ledger */
@@ -115,13 +115,13 @@ const SUB_CSS = `
 .fpd-sub .ptitle-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
 .fpd-sub .ptitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;letter-spacing:-0.01em;}
 .fpd-sub .pbadge{padding:2.5px 8px;border-radius:99px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.05em;}
-.fpd-sub .autotag{color:${POS};font-size:10px;font-family:var(--font-mono);font-weight:600;letter-spacing:0.04em;}
+.fpd-sub .autotag{color:#D99A6B;font-size:10px;font-family:var(--font-mono);font-weight:600;letter-spacing:0.04em;}
 .fpd-sub .psub{color:${MUTED};font-size:12px;}
 .fpd-sub .pamt{text-align:right;flex-shrink:0;}
 .fpd-sub .pamt .val{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;font-variant-numeric:tabular-nums;}
 .fpd-sub .pamt .freq{font-family:var(--font-mono);font-size:10px;margin-top:2px;}
 .fpd-sub .icon-btn{background:none;border:none;cursor:pointer;padding:7px;border-radius:8px;display:flex;color:${MUTED};transition:color .16s,background .16s;flex-shrink:0;}
-.fpd-sub .icon-btn:hover{color:${ACCENT2};background:rgba(91,110,225,0.1);}
+.fpd-sub .icon-btn:hover{color:#FFFFFF;background:rgba(91,110,225,0.1);}
 .fpd-sub .icon-btn.del:hover{color:${NEG};background:rgba(208,107,107,0.1);}
 
 /* detail panel */
@@ -146,7 +146,7 @@ const SUB_CSS = `
 
 /* empty state */
 .fpd-sub .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 16px;}
-.fpd-sub .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:14px;}
+.fpd-sub .empty .ei{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:14px;}
 .fpd-sub .empty .et{color:${SOFT};font-size:13.5px;}
 
 /* modal */
@@ -157,7 +157,7 @@ const SUB_CSS = `
 .fpd-sub .pw-wrap input{padding-right:38px;}
 .fpd-sub .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-sub .login-box{padding:15px;border-radius:12px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);display:flex;flex-direction:column;gap:12px;}
-.fpd-sub .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${ACCENT2};font-weight:700;}
+.fpd-sub .login-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#6FAE8B;font-weight:700;}
 .fpd-sub .payment-box{padding:15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-sub .payment-box .lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:10px;}
 .fpd-sub .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
@@ -214,7 +214,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal glow-surface">
         <div className="modal-head">
-          <h3><CreditCard size={16} color={ACCENT2} /> Add Subscription / Auto Pay</h3>
+          <h3><CreditCard size={16} color="#FFFFFF" /> Add Subscription / Auto Pay</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
@@ -273,7 +273,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
             <input ref={fileRef} type="file" multiple style={{ display:"none" }} onChange={e => { if(e.target.files?.[0]) toast.success(`Attached: ${e.target.files[0].name}`); }}/>
             <div style={{ display:"flex", alignItems:"center", gap:10 }}>
               <div onClick={() => fileRef.current?.click()} className="dropzone">
-                <Upload size={14} color={ACCENT2} style={{ opacity:0.7 }}/>
+                <Upload size={14} color="#FFFFFF" style={{ opacity:0.7 }}/>
                 <span>Attach bill, statement, or agreement</span>
               </div>
               <ScanButton folder="financial" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
@@ -374,7 +374,7 @@ export function SubscriptionManager() {
               const on = category === c;
               return (
                 <button key={c} onClick={() => setCategory(c)} className={`chip ${on ? "" : "off"}`}
-                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? ACCENT2 : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
+                  style={{ background: on ? "rgba(91,110,225,0.16)" : "transparent", color: on ? "#6FAE8B" : MUTED, borderColor: on ? "rgba(91,110,225,0.4)" : "rgba(255,255,255,0.09)" }}>
                   {c}
                 </button>
               );

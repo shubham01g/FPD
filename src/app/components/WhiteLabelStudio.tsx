@@ -58,10 +58,10 @@ function SectionCard({ icon, title, sub, children, step }: { icon: React.ReactNo
   return (
     <div className="p-6 sm:p-7 glow-surface" style={GLASS}>
       <div className="flex items-start gap-3.5 mb-6">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.15)", color: HILITE }}>{icon}</div>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.15)", color: "#6FAE8B" }}>{icon}</div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span style={{ ...MONO, color: HILITE, fontSize: 11 }}>STEP {step}</span>
+            <span style={{ ...MONO, color: "#6FAE8B", fontSize: 11 }}>STEP {step}</span>
           </div>
           <h3 style={{ ...DISPLAY, fontSize: 18, color: TEXT, fontWeight: 600, marginTop: 2 }}>{title}</h3>
           <p style={{ color: MUTED, fontSize: 13, marginTop: 3, lineHeight: 1.6 }}>{sub}</p>
@@ -92,7 +92,7 @@ function UnlockBanner({ onPurchase }: { onPurchase?: () => void }) {
     <div className="p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 justify-between"
       style={{ background: "linear-gradient(135deg,rgba(91,110,225,0.14),rgba(91,110,225,0.06))", border: "1px solid rgba(91,167,214,0.32)" }}>
       <div className="flex items-start gap-3.5 min-w-0">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.2)", color: HILITE }}><Lock size={18} /></div>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.2)", color: "#6FAE8B" }}><Lock size={18} /></div>
         <div className="min-w-0">
           <div style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 700 }}>White Label is locked</div>
           <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6, marginTop: 3 }}>
@@ -204,8 +204,8 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
         <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(91,110,225,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.06) 1px,transparent 1px)", backgroundSize: "42px 42px", opacity: 0.5, pointerEvents: "none" }} />
         <div className="relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style={{ background: "rgba(91,110,225,0.12)", border: "1px solid rgba(91,110,225,0.3)" }}>
-            <Layers size={13} color={HILITE} />
-            <span style={{ color: HILITE, fontSize: 11, letterSpacing: "0.12em", ...MONO }}>WHITE LABEL STUDIO</span>
+            <Layers size={13} color="#FFFFFF" />
+            <span style={{ color: "#6FAE8B", fontSize: 11, letterSpacing: "0.12em", ...MONO }}>WHITE LABEL STUDIO</span>
           </div>
           <h1 style={{ ...DISPLAY, fontSize: "clamp(1.7rem,3.4vw,2.5rem)", fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 640 }}>
             Offer Final Pass Down under <span style={{ background: `linear-gradient(120deg,${ACCENT2},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>your own brand</span>
@@ -215,12 +215,12 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
           </p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6">
             {["Your domain & branding", "Lifetime recurring commission", "Dedicated onboarding"].map(t => (
-              <span key={t} className="flex items-center gap-2" style={{ color: MUTED, fontSize: 13 }}><CheckCircle size={14} color={SUCCESS} /> {t}</span>
+              <span key={t} className="flex items-center gap-2" style={{ color: MUTED, fontSize: 13 }}><CheckCircle size={14} color="#FFFFFF" /> {t}</span>
             ))}
           </div>
           <div className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl" style={{ background: config.enabled ? "rgba(72,187,120,0.12)" : "rgba(91,167,214,0.08)", border: `1px solid ${config.enabled ? "rgba(72,187,120,0.35)" : "rgba(91,167,214,0.2)"}` }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: config.enabled ? SUCCESS : MUTED, boxShadow: config.enabled ? `0 0 10px ${SUCCESS}` : "none" }} />
-            <span style={{ color: config.enabled ? SUCCESS : MUTED, fontSize: 12.5, fontWeight: 600 }}>{config.enabled ? "White-label portal is LIVE" : "Draft — not published yet"}</span>
+            <span style={{ color: config.enabled ? "#D99A6B" : MUTED, fontSize: 12.5, fontWeight: 600 }}>{config.enabled ? "White-label portal is LIVE" : "Draft — not published yet"}</span>
           </div>
         </div>
       </div>
@@ -283,9 +283,9 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
           <SectionCard step={3} icon={<Globe size={18} />} title="Custom domain" sub="Run the platform on your own web address. We'll issue the SSL certificate automatically.">
             <Field label="Portal domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourbrand.com" icon={<Globe size={15} />} disabled={locked} />
             <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.15)" }}>
-              <ShieldCheck size={15} color={HILITE} style={{ marginTop: 1, flexShrink: 0 }} />
+              <ShieldCheck size={15} color="#FFFFFF" style={{ marginTop: 1, flexShrink: 0 }} />
               <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.65 }}>
-                Point a <span style={{ color: SOFT, ...MONO }}>CNAME</span> record at <span style={{ color: HILITE, ...MONO }}>portals.finalpassdown.com</span> and we handle the rest — HTTPS, renewals, and routing. Your clients never see our name in the URL.
+                Point a <span style={{ color: SOFT, ...MONO }}>CNAME</span> record at <span style={{ color: "#6FAE8B", ...MONO }}>portals.finalpassdown.com</span> and we handle the rest — HTTPS, renewals, and routing. Your clients never see our name in the URL.
               </p>
             </div>
           </SectionCard>
@@ -307,7 +307,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                             <span style={{ ...DISPLAY, color: TEXT, fontSize: 15.5, fontWeight: 700 }}>{pkg.name}</span>
                             {pkg.badge && <span className="px-2 py-0.5 rounded-full" style={{ background: `${pkg.color}22`, color: pkg.color, fontSize: 10, fontWeight: 700, ...MONO }}>{pkg.badge}</span>}
                           </div>
-                          <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>{pkg.userLimitLabel} · <span style={{ color: SUCCESS }}>{pkg.commission}% lifetime commission</span></div>
+                          <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>{pkg.userLimitLabel} · <span style={{ color: "#D99A6B" }}>{pkg.commission}% lifetime commission</span></div>
                           <div style={{ color: MUTED, fontSize: 11, marginTop: 3, ...MONO }}>{bl.setup}</div>
                         </div>
                       </div>
@@ -347,7 +347,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
         <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-6">
           <div className="p-5 sm:p-6 glow-surface" style={GLASS}>
             <div className="flex items-center gap-2 mb-4">
-              <Eye size={16} color={HILITE} />
+              <Eye size={16} color="#FFFFFF" />
               <span style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 600 }}>Preview</span>
             </div>
             <LivePreview name={config.companyName} logo={config.logoText} tagline={config.tagline} primary={config.primaryColor} accent={config.accentColor} />
@@ -374,7 +374,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                 : <><Rocket size={16} /> {config.enabled ? "Update Live Portal" : "Publish White-Label Portal"}</>}
             </button>
             <button onClick={() => toast.success("Draft saved (demo).")} disabled={locked} className="w-full py-2.5 mt-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: "rgba(91,167,214,0.08)", color: HILITE, border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
+              style={{ background: "rgba(91,167,214,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
               <Save size={15} /> Save Draft
             </button>
             <p style={{ color: MUTED, fontSize: 11, lineHeight: 1.6, marginTop: 14, textAlign: "center" }}>

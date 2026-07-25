@@ -38,8 +38,8 @@ interface DiaryEntry {
 
 const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: string }> = {
   great:     { icon: <Sun size={16}/>,      label: "Great",     color: WARN },
-  good:      { icon: <Smile size={16}/>,    label: "Good",      color: POS },
-  okay:      { icon: <Meh size={16}/>,      label: "Okay",      color: ACCENT2 },
+  good:      { icon: <Smile size={16}/>,    label: "Good",      color: "#D99A6B" },
+  okay:      { icon: <Meh size={16}/>,      label: "Okay",      color: "#6FAE8B" },
   sad:       { icon: <Cloud size={16}/>,    label: "Sad",       color: SOFT },
   difficult: { icon: <CloudRain size={16}/>,label: "Difficult", color: NEG },
 };
@@ -151,7 +151,7 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
       <div className="rec-dial" style={{ background: recording ? "rgba(208,107,107,0.12)" : "rgba(91,110,225,0.10)", borderColor: recording ? NEG : ACCENT }}>
         {recording
           ? <Square size={28} color={NEG} fill={NEG}/>
-          : <Mic size={28} color={ACCENT2}/>}
+          : <Mic size={28} color="#FFFFFF"/>}
         {recording && <div className="rec-ping" />}
       </div>
       <div className="rec-time">{`${mins.toString().padStart(2,"0")}:${secs.toString().padStart(2,"0")}`}</div>
@@ -233,7 +233,7 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
     return (
       <div className="recorder">
         <div className="rec-dial" style={{ background:"rgba(91,110,225,0.10)", borderColor: ACCENT }}>
-          <Video size={28} color={ACCENT2}/>
+          <Video size={28} color="#FFFFFF"/>
         </div>
         <div className="rec-hint">Start your camera to record a video diary entry</div>
         <button onClick={startPreview} className="rec-btn" style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)" }}>
@@ -332,11 +332,11 @@ const DIARY_CSS = `
 .fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,110,225,0.2);}
 .fpd-diary .eaudio-fill{height:4px;border-radius:99px;background:${ACCENT};transition:width .3s;}
 .fpd-diary .etags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
-.fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:11px;background:#141B2E;color:${ACCENT2};}
+.fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:11px;background:#141B2E;color:#6FAE8B;}
 
 /* empty state */
 .fpd-diary .empty{padding:52px 12px;text-align:center;}
-.fpd-diary .empty .ei{width:36px;height:36px;margin:0 auto 12px;color:rgba(91,110,225,0.3);}
+.fpd-diary .empty .ei{width:36px;height:36px;margin:0 auto 12px;color:rgba(126,147,176,0.3);}
 .fpd-diary .empty .et{color:${MUTED};}
 
 /* detail rail */
@@ -358,7 +358,7 @@ const DIARY_CSS = `
 .fpd-diary .stat-row{display:flex;justify-content:space-between;padding:9px 12px;border-radius:9px;background:#0F1624;}
 .fpd-diary .stat-row + .stat-row{margin-top:6px;}
 .fpd-diary .stat-row span:first-child{color:${MUTED};font-size:12px;}
-.fpd-diary .stat-row span:last-child{color:${ACCENT2};font-size:12px;font-weight:600;font-family:var(--font-mono);}
+.fpd-diary .stat-row span:last-child{color:#6FAE8B;font-size:12px;font-weight:600;font-family:var(--font-mono);}
 
 /* recorder panel (used inside modal) */
 .fpd-diary .recorder{display:flex;flex-direction:column;align-items:center;gap:18px;padding:32px 20px;}
@@ -392,7 +392,7 @@ const DIARY_CSS = `
 .fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-diary .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:11px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
-.fpd-diary .type-btn.on{background:rgba(91,110,225,0.14);border-color:${ACCENT};color:${ACCENT2};}
+.fpd-diary .type-btn.on{background:rgba(91,110,225,0.14);border-color:${ACCENT};color:#6FAE8B;}
 .fpd-diary .type-btn:not(.on){color:${MUTED};}
 .fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.14);}
 .fpd-diary .record-done{padding:26px 0;text-align:center;}
@@ -627,7 +627,7 @@ export function DigitalDiary() {
                 {selected.body && <div className="dbody">{selected.body}</div>}
                 {selected.type === "audio" && (
                   <div className="daudio">
-                    <Mic size={24} color={ACCENT2} style={{ margin:"0 auto 8px" }}/>
+                    <Mic size={24} color="#FFFFFF" style={{ margin:"0 auto 8px" }}/>
                     <div style={{ color: TEXT, fontSize: 13 }}>Voice Recording · {selected.duration}</div>
                     <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="daudio-btn">
                       <Play size={13}/> Play Recording
@@ -638,7 +638,7 @@ export function DigitalDiary() {
                   <div className="dvideo" onClick={() => toast.success("▶ Video playback started — demo mode")}>
                     {selected.thumbnail
                       ? <img src={selected.thumbnail} alt=""/>
-                      : <div className="dvideo-placeholder"><Video size={28} color={ACCENT2}/></div>
+                      : <div className="dvideo-placeholder"><Video size={28} color="#FFFFFF"/></div>
                     }
                     <div className="dvideo-overlay">
                       <div className="dvideo-play"><Play size={20} color="#FFFFFF" fill="#FFFFFF"/></div>
@@ -705,7 +705,7 @@ export function DigitalDiary() {
               {newType === "audio" && (
                 <div className="record-box">
                   {audioSaved
-                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: POS, fontWeight: 600 }}>Audio recorded successfully</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Audio recorded successfully</div></div>
                     : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); toast.success(`Recorded ${dur} of audio`); }}/>}
                 </div>
               )}
@@ -713,7 +713,7 @@ export function DigitalDiary() {
               {newType === "video" && (
                 <div className="record-box" style={{ padding: 16 }}>
                   {videoDuration
-                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: POS, fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
                     : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
                 </div>
               )}
@@ -725,7 +725,7 @@ export function DigitalDiary() {
                     if (f) { toast.success(`"${f.name}" attached to entry`); }
                   }}/>
                   <div onClick={() => fileRef.current?.click()} className="upload-box">
-                    <Upload size={28} color={ACCENT2} style={{ opacity:0.7 }}/>
+                    <Upload size={28} color="#FFFFFF" style={{ opacity:0.7 }}/>
                     <div style={{ color: MUTED, fontSize: 13 }}>Upload video, photo, or audio file</div>
                     <div style={{ color: FAINT, fontSize: 11 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
                   </div>

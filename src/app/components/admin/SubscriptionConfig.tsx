@@ -13,10 +13,10 @@ interface PlanConfig {
 }
 
 const initialPlans: PlanConfig[] = [
-  { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#48BB78" },
-  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#5BA7D6" },
-  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#5B6EE1" },
-  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#5BA7D6" },
+  { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#D99A6B" },
+  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#6FAE8B" },
+  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#6E90C9" },
+  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#6FAE8B" },
   { id: "legacy_vault",   name: "Legacy Vault",   price: 129.99, annualDiscount: 20, storage: 1024, overageRate: 0.40, maxContacts: 999, color: "#ED8936" },
 ];
 
@@ -75,7 +75,7 @@ export function SubscriptionConfig() {
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all"
             style={{
               background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #5B6EE1, #5B6EE1)",
-              color: saved ? "#48BB78" : "#070D1A",
+              color: saved ? "#D99A6B" : "#070D1A",
               border: saved ? "1px solid rgba(72,187,120,0.3)" : "none",
               fontWeight: 600, fontSize: 14,
             }}
@@ -88,7 +88,7 @@ export function SubscriptionConfig() {
 
       {/* Live preview notice */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-xl border" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
-        <RefreshCw size={14} color="#48BB78" />
+        <RefreshCw size={14} color="#FFFFFF" />
         <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
           Pricing changes propagate to the public pricing page in real time via API. No deployment required.
         </span>
@@ -190,7 +190,7 @@ export function SubscriptionConfig() {
                     style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                 </div>
-                {plan.maxContacts === 999 && <div style={{ color: "#48BB78", fontSize: 11, marginTop: 4 }}>Unlimited contacts</div>}
+                {plan.maxContacts === 999 && <div style={{ color: "#D99A6B", fontSize: 11, marginTop: 4 }}>Unlimited contacts</div>}
               </div>
 
               {/* Preview */}

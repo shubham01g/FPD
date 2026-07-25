@@ -65,7 +65,7 @@ function BlastEmailModal({
       <div className="card modal glow-surface">
         <div className="modal-head">
           <div className="flex items-center gap-2">
-            <Send size={16} color={ACCENT2}/>
+            <Send size={16} color="#FFFFFF"/>
             <h3>Blast Email — {group.name}</h3>
           </div>
           <button onClick={onClose}><X size={16}/></button>
@@ -91,7 +91,7 @@ function BlastEmailModal({
             <textarea value={body} onChange={e => setBody(e.target.value)} rows={5} placeholder="Write your message here…"/>
           </div>
           <div className="bcc-note">
-            <Mail size={12} color={POS} style={{ marginTop:1, flexShrink:0 }}/>
+            <Mail size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <p>Recipients are BCC'd — each person sees only themselves in the To field. Opens your default email client.</p>
           </div>
         </div>
@@ -109,22 +109,22 @@ function BlastEmailModal({
 const COLORS = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#6F9E94","#ED8936","#5BA7D6"];
 
 const initContacts: Contact[] = [
-  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#5B6EE1", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
-  { id:"c2", name:"Michael Doe", relationship:"Son", phone:"(415) 555-0871", email:"m.doe@email.com", birthday:"Mar 5", group:"immediate", starred:true, initials:"MD", color:"#48BB78", notes:"Married to Amanda. Has Tyler and Lily." },
-  { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#5B6EE1", notes:"Lives in Sacramento. Loves art and teaching." },
+  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#6E90C9", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
+  { id:"c2", name:"Michael Doe", relationship:"Son", phone:"(415) 555-0871", email:"m.doe@email.com", birthday:"Mar 5", group:"immediate", starred:true, initials:"MD", color:"#D99A6B", notes:"Married to Amanda. Has Tyler and Lily." },
+  { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#6E90C9", notes:"Lives in Sacramento. Loves art and teaching." },
   { id:"c4", name:"Tyler Doe", relationship:"Grandson", birthday:"Mar 5", group:"immediate", initials:"TD", color:"#F6AD55", notes:"Age 8. Loves dinosaurs and baseball. Peanut allergy." },
   { id:"c5", name:"Lily Doe", relationship:"Granddaughter", birthday:"Jul 19", group:"immediate", initials:"LD", color:"#FC8181", notes:"Age 6. Loves ballet and painting." },
-  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#6F9E94" },
+  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#D68FA8" },
   { id:"c7", name:"Linda Torres", relationship:"Sister-in-law", phone:"(916) 555-0821", email:"ltorres@email.com", birthday:"Apr 12", group:"extended", initials:"LT", color:"#ED8936" },
-  { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#5BA7D6", notes:"We go back to Army days. Fishing partner." },
-  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#5B6EE1", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
-  { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#5B6EE1", notes:"Grace Community Church. Has conducted family funerals." },
+  { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#6FAE8B", notes:"We go back to Army days. Fishing partner." },
+  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#6E90C9", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
+  { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#6E90C9", notes:"Grace Community Church. Has conducted family funerals." },
 ];
 
 const groupConfig = {
-  immediate: { label: "Immediate Family", color: ACCENT2 },
-  extended:  { label: "Extended Family",  color: POS },
-  friends:   { label: "Friends",          color: ACCENT },
+  immediate: { label: "Immediate Family", color: "#6FAE8B" },
+  extended:  { label: "Extended Family",  color: "#D99A6B" },
+  friends:   { label: "Friends",          color: "#6E90C9" },
   other:     { label: "Other Contacts",   color: WARN },
 };
 
@@ -187,9 +187,9 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
 }
 
 const initGroups: ContactGroup[] = [
-  { id:"g1", name:"Estate Team", color:"#5B6EE1", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
-  { id:"g2", name:"Close Family", color:"#5B6EE1", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
-  { id:"g3", name:"Sacramento Neighbors", color:"#48BB78", description:"Local friends and neighbors", memberIds:["c8","c9"], createdAt:"Jun 5, 2026" },
+  { id:"g1", name:"Estate Team", color:"#6E90C9", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
+  { id:"g2", name:"Close Family", color:"#6E90C9", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
+  { id:"g3", name:"Sacramento Neighbors", color:"#D99A6B", description:"Local friends and neighbors", memberIds:["c8","c9"], createdAt:"Jun 5, 2026" },
 ];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
@@ -212,7 +212,7 @@ const FF_CSS = `
 .fpd-ff .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-ff .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-ff .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-ff .btn-ghost.on{background:rgba(91,110,225,0.20);}
 .fpd-ff .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
@@ -241,9 +241,9 @@ const FF_CSS = `
 .fpd-ff .gavatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--font-display);}
 .fpd-ff .gname{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-ff .gmeta{color:${MUTED};font-size:11px;}
-.fpd-ff .gmember-chip{padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(91,110,225,0.09);color:${ACCENT2};}
+.fpd-ff .gmember-chip{padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(91,110,225,0.09);color:#6FAE8B;}
 .fpd-ff .gcreate{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.22);background:rgba(91,110,225,0.03);display:flex;flex-direction:column;gap:12px;}
-.fpd-ff .gcreate-lbl{color:${ACCENT2};font-size:12px;font-weight:700;font-family:var(--font-mono);}
+.fpd-ff .gcreate-lbl{color:#6FAE8B;font-size:12px;font-weight:700;font-family:var(--font-mono);}
 .fpd-ff .swatch{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);cursor:pointer;}
 .fpd-ff .member-pick{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;}
 
@@ -271,7 +271,7 @@ const FF_CSS = `
 .fpd-ff .dphoto{position:relative;height:128px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .fpd-ff .dphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.8;}
 .fpd-ff .dphoto-init{font-family:var(--font-display);font-size:48px;opacity:0.4;}
-.fpd-ff .dphoto-btn{position:absolute;bottom:8px;right:8px;display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(13,20,33,0.9);color:${ACCENT2};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .dphoto-btn{position:absolute;bottom:8px;right:8px;display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(13,20,33,0.9);color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-ff .dname{font-family:var(--font-display);font-size:20px;color:${TEXT};margin-bottom:4px;}
 .fpd-ff .drel{font-size:13px;font-weight:500;margin-bottom:16px;}
 .fpd-ff .dfield{display:flex;align-items:center;gap:8px;color:${TEXT};font-size:13px;}
@@ -279,7 +279,7 @@ const FF_CSS = `
 .fpd-ff .dnotes{margin-top:16px;padding:12px;border-radius:11px;background:#0F1624;}
 .fpd-ff .dnotes-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${MUTED};margin-bottom:4px;}
 .fpd-ff .dnotes-val{color:${SOFT};font-size:13px;line-height:1.7;}
-.fpd-ff .dedit{flex:1;padding:9px;border-radius:11px;font-size:13px;background:#141B2E;color:${ACCENT2};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .dedit{flex:1;padding:9px;border-radius:11px;font-size:13px;background:#141B2E;color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-ff .ddelete{padding:9px 13px;border-radius:11px;font-size:13px;background:rgba(208,107,107,0.12);color:${NEG};border:none;cursor:pointer;}
 
 /* modal */
@@ -297,10 +297,10 @@ const FF_CSS = `
 .fpd-ff .recipients-box{padding:12px;border-radius:11px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-ff .rec-lbl{font-family:var(--font-mono);font-size:10.5px;color:${MUTED};margin-bottom:8px;}
 .fpd-ff .rec-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;}
-.fpd-ff .rec-chip.on{background:rgba(91,110,225,0.10);color:${ACCENT2};}
+.fpd-ff .rec-chip.on{background:rgba(91,110,225,0.10);color:#6FAE8B;}
 .fpd-ff .rec-chip.off{background:rgba(140,151,180,0.10);color:${MUTED};}
 .fpd-ff .bcc-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.2);}
-.fpd-ff .bcc-note p{color:${POS};font-size:11px;line-height:1.6;}
+.fpd-ff .bcc-note p{color:#D99A6B;font-size:11px;line-height:1.6;}
 .fpd-ff .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-ff .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 `;
@@ -369,7 +369,7 @@ export function FamilyFriends() {
           <div className="card glow-surface" style={{ overflow: "hidden" }}>
             <div className="gpanel-hd">
               <div className="flex items-center gap-2">
-                <Layers size={15} color={ACCENT2}/>
+                <Layers size={15} color="#FFFFFF"/>
                 <span className="gpanel-title">Contact Groups</span>
                 <span className="gpanel-desc">— create groups to send blast emails to multiple contacts at once</span>
               </div>

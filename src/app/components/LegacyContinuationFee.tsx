@@ -40,15 +40,15 @@ const initStatus: ContinuationStatus = {
 
 // Everything the legacy contact receives when fully unlocked
 const FULL_COVERAGE = [
-  { icon:<FileText size={14}/>,    color:ACCENT,  label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
+  { icon:<FileText size={14}/>,    color:"#6E90C9",  label:"All Documents (18 folders)", desc:"Every file uploaded across all 18 folder categories" },
   { icon:<Heart size={14}/>,       color:NEG,     label:"Final Wishes & Wills", desc:"Complete estate instructions and bequests" },
-  { icon:<Stethoscope size={14}/>, color:POS,     label:"Medical Records", desc:"Allergies, medications, healthcare directives" },
+  { icon:<Stethoscope size={14}/>, color:"#D99A6B",     label:"Medical Records", desc:"Allergies, medications, healthcare directives" },
   { icon:<Wallet size={14}/>,      color:WARN,    label:"Financial Records", desc:"Insurance, investments, real estate, retirement" },
-  { icon:<Car size={14}/>,         color:ACCENT2, label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
-  { icon:<Camera size={14}/>,      color:ACCENT2, label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
+  { icon:<Car size={14}/>,         color:"#6FAE8B", label:"Personal Assets", desc:"Vehicles, utilities, digital assets, firearms" },
+  { icon:<Camera size={14}/>,      color:"#6FAE8B", label:"Memories & Family Media", desc:"Photos, videos, written memories, diary entries" },
   { icon:<BookOpen size={14}/>,    color:WARN,    label:"Digital Diary", desc:"All audio, video, and written diary entries" },
-  { icon:<Key size={14}/>,         color:"#6F9E94", label:"Password Manager", desc:"All saved credentials and account information" },
-  { icon:<Users size={14}/>,       color:POS,     label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
+  { icon:<Key size={14}/>,         color:"#D68FA8", label:"Password Manager", desc:"All saved credentials and account information" },
+  { icon:<Users size={14}/>,       color:"#D99A6B",     label:"Contacts & Legacy Instructions", desc:"All designated contacts and their permissions" },
   { icon:<PawPrint size={14}/>,    color:WARN,    label:"Pet Records & Instructions", desc:"Veterinary records and pet care instructions" },
 ];
 
@@ -75,7 +75,7 @@ const LCF_CSS = `
 .fpd-lcf .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-lcf .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-lcf .btn-primary:disabled{opacity:.7;cursor:default;transform:none;}
-.fpd-lcf .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-lcf .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-lcf .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-lcf .btn-ghost:disabled{opacity:.6;cursor:default;}
 .fpd-lcf .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.22);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
@@ -85,13 +85,13 @@ const LCF_CSS = `
 
 /* demo banner */
 .fpd-lcf .demo-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px dashed rgba(91,110,225,0.4);}
-.fpd-lcf .demo-tag{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:${ACCENT2};margin-bottom:4px;}
+.fpd-lcf .demo-tag{font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:#6FAE8B;margin-bottom:4px;}
 .fpd-lcf .demo-text{color:${MUTED};font-size:12.5px;line-height:1.6;}
 .fpd-lcf .demo-acts{display:flex;gap:8px;flex-wrap:wrap;}
 
 /* two-condition gate */
 .fpd-lcf .gate{background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.16);border-radius:15px;padding:20px 22px;}
-.fpd-lcf .gate-head{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.1em;color:${ACCENT2};margin-bottom:14px;}
+.fpd-lcf .gate-head{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.1em;color:#6FAE8B;margin-bottom:14px;}
 .fpd-lcf .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .fpd-lcf .gcard{display:flex;align-items:flex-start;gap:12px;padding:15px 16px;border-radius:13px;border:1px solid;}
 .fpd-lcf .gcard .gnum{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;}
@@ -104,7 +104,7 @@ const LCF_CSS = `
 .fpd-lcf .cov-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;}
 .fpd-lcf .cov-desc{color:${MUTED};font-size:13px;margin-top:8px;line-height:1.7;}
 .fpd-lcf .cov-desc strong{color:${TEXT};}
-.fpd-lcf .cov-desc em{color:${ACCENT2};font-style:normal;font-weight:600;}
+.fpd-lcf .cov-desc em{color:#6FAE8B;font-style:normal;font-weight:600;}
 .fpd-lcf .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
 .fpd-lcf .citem{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);}
 .fpd-lcf .citem .cico{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
@@ -119,7 +119,7 @@ const LCF_CSS = `
 .fpd-lcf .paid-desc{color:${MUTED};font-size:12.5px;line-height:1.7;margin-bottom:14px;}
 .fpd-lcf .pstat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .fpd-lcf .pstat .pcell{padding:11px 13px;border-radius:11px;background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.16);}
-.fpd-lcf .pstat .plbl{font-family:var(--font-mono);font-size:9.5px;color:${POS};margin-bottom:3px;}
+.fpd-lcf .pstat .plbl{font-family:var(--font-mono);font-size:9.5px;color:#D99A6B;margin-bottom:3px;}
 .fpd-lcf .pstat .pval{color:${TEXT};font-size:12px;font-weight:500;}
 @media (max-width:800px){.fpd-lcf .pstat{grid-template-columns:1fr 1fr;}}
 
@@ -129,9 +129,9 @@ const LCF_CSS = `
 
 /* price panel */
 .fpd-lcf .price-hero{text-align:center;margin-bottom:20px;}
-.fpd-lcf .price-val{font-family:var(--font-display);font-size:48px;color:${ACCENT2};font-weight:800;line-height:1;}
+.fpd-lcf .price-val{font-family:var(--font-display);font-size:48px;color:#6FAE8B;font-weight:800;line-height:1;}
 .fpd-lcf .price-sub{color:${MUTED};font-size:13px;margin-top:6px;}
-.fpd-lcf .price-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 15px;border-radius:99px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.22);color:${POS};font-size:12px;}
+.fpd-lcf .price-badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 15px;border-radius:99px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12px;}
 .fpd-lcf .payer-label{color:${MUTED};font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.08em;margin-bottom:8px;}
 .fpd-lcf .payer{width:100%;display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border-radius:12px;background:#0F1624;border:2px solid transparent;cursor:pointer;text-align:left;transition:border-color .16s,background .16s;margin-bottom:8px;}
 .fpd-lcf .payer.on{background:rgba(91,110,225,0.08);border-color:${ACCENT};}
@@ -150,13 +150,13 @@ const LCF_CSS = `
 .fpd-lcf .paid-emoji{font-size:44px;}
 .fpd-lcf .paid-panel h4{font-family:var(--font-display);font-size:17px;color:${TEXT};margin:12px 0 10px;}
 .fpd-lcf .paid-panel p{color:${MUTED};font-size:12.5px;line-height:1.7;}
-.fpd-lcf .paid-panel p strong{color:${ACCENT2};}
+.fpd-lcf .paid-panel p strong{color:#6FAE8B;}
 .fpd-lcf .doc-box{margin-top:14px;padding:13px 15px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.22);text-align:left;}
 .fpd-lcf .doc-box .dk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:6px;}
 .fpd-lcf .doc-box .dv{color:${SOFT};font-size:12px;line-height:1.7;}
 .fpd-lcf .tid-box{margin-top:12px;padding:13px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
 .fpd-lcf .tid-box .tk{font-family:var(--font-mono);font-size:9.5px;color:${MUTED};margin-bottom:4px;}
-.fpd-lcf .tid-box .tv{color:${ACCENT2};font-family:var(--font-mono);font-size:13px;}
+.fpd-lcf .tid-box .tv{color:#6FAE8B;font-family:var(--font-mono);font-size:13px;}
 
 /* FAQ */
 .fpd-lcf .faq-item{padding-bottom:13px;margin-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.22);}
@@ -180,7 +180,7 @@ const LCF_CSS = `
 .fpd-lcf .sumbox{padding:14px 15px;border-radius:12px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.14);}
 .fpd-lcf .sumrow{display:flex;justify-content:space-between;font-size:12.5px;color:${MUTED};margin-bottom:6px;}
 .fpd-lcf .sumrow.total{border-top:1px solid rgba(91,110,225,0.16);margin-top:8px;padding-top:10px;font-size:14px;color:${TEXT};font-weight:700;}
-.fpd-lcf .sumrow.total span:last-child{color:${ACCENT2};font-family:var(--font-display);font-size:16px;}
+.fpd-lcf .sumrow.total span:last-child{color:#6FAE8B;font-family:var(--font-display);font-size:16px;}
 .fpd-lcf .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.22);}
 .fpd-lcf .modal-foot .save{flex:1;padding:13px;border-radius:12px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-lcf .modal-foot .save:hover{filter:brightness(1.08);}
@@ -289,7 +289,7 @@ export function LegacyContinuationFee() {
           <div className="gate-head">HOW ACCESS WORKS — TWO CONDITIONS MUST BOTH BE MET</div>
           <div className="ggrid">
             <div className="gcard" style={{ background:status.paid?"rgba(95,190,145,0.08)":"rgba(91,110,225,0.04)", borderColor:status.paid?"rgba(95,190,145,0.28)":"rgba(91,110,225,0.14)" }}>
-              <div className="gnum" style={{ background:status.paid?"rgba(95,190,145,0.16)":"rgba(91,110,225,0.1)", color:status.paid?POS:ACCENT }}>
+              <div className="gnum" style={{ background:status.paid?"rgba(95,190,145,0.16)":"rgba(91,110,225,0.1)", color:status.paid?"#D99A6B":"#6E90C9" }}>
                 {status.paid ? <CheckCircle size={16}/> : "1"}
               </div>
               <div>
@@ -302,7 +302,7 @@ export function LegacyContinuationFee() {
               </div>
             </div>
             <div className="gcard" style={{ background:status.deathCertificateVerified?"rgba(95,190,145,0.08)":"rgba(217,165,94,0.04)", borderColor:status.deathCertificateVerified?"rgba(95,190,145,0.28)":"rgba(217,165,94,0.22)" }}>
-              <div className="gnum" style={{ background:status.deathCertificateVerified?"rgba(95,190,145,0.16)":"rgba(217,165,94,0.12)", color:status.deathCertificateVerified?POS:WARN }}>
+              <div className="gnum" style={{ background:status.deathCertificateVerified?"rgba(95,190,145,0.16)":"rgba(217,165,94,0.12)", color:status.deathCertificateVerified?"#D99A6B":WARN }}>
                 {status.deathCertificateVerified ? <CheckCircle size={16}/> : "2"}
               </div>
               <div>
@@ -317,7 +317,7 @@ export function LegacyContinuationFee() {
           </div>
           <div className="gate-status" style={{ background:status.fullyUnlocked?"rgba(95,190,145,0.07)":"rgba(208,107,107,0.06)", borderColor:status.fullyUnlocked?"rgba(95,190,145,0.22)":"rgba(208,107,107,0.22)" }}>
             {status.fullyUnlocked
-              ? <><CheckCircle size={14} color={POS}/><span style={{ color:POS, fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked for all verified legacy contacts.</span></>
+              ? <><CheckCircle size={14} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:13, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked for all verified legacy contacts.</span></>
               : <><AlertTriangle size={14} color={NEG}/><span style={{ color:NEG, fontSize:13 }}>Downloads are locked until <strong>both</strong> conditions are met. The fee alone does not unlock access.</span></>
             }
           </div>
@@ -327,7 +327,7 @@ export function LegacyContinuationFee() {
         <div className="card pad glow-surface">
           <button onClick={() => setShowCoverage(!showCoverage)} className="cov-toggle">
             <span className="sec-title">
-              <Download size={16} color={ACCENT2}/> What the Legacy Vault Clone Downloads
+              <Download size={16} color="#FFFFFF"/> What the Legacy Vault Clone Downloads
             </span>
             {showCoverage ? <ChevronUp size={16} color={MUTED}/> : <ChevronDown size={16} color={MUTED}/>}
           </button>
@@ -355,7 +355,7 @@ export function LegacyContinuationFee() {
         {status.paid && (
           <div className="paid-banner">
             <div className="paid-icon">
-              <CheckCircle size={24} color={POS}/>
+              <CheckCircle size={24} color="#FFFFFF"/>
             </div>
             <div style={{ flex: 1 }}>
               <div className="paid-title">Legacy Continuation Fee Paid ✓</div>
@@ -388,7 +388,7 @@ export function LegacyContinuationFee() {
                   <div className="price-val">$199</div>
                   <div className="price-sub">One-time · Never expires · Non-refundable</div>
                   <div className="price-badge">
-                    <Star size={13} fill={POS} color={POS}/>
+                    <Star size={13} fill={POS} color="#FFFFFF"/>
                     <span>Covers complete download of all account data</span>
                   </div>
                 </div>
@@ -477,7 +477,7 @@ export function LegacyContinuationFee() {
         <div className="backdrop">
           <div className="card modal glow-surface">
             <div className="modal-head">
-              <div className="mico"><CreditCard size={20} color={ACCENT2}/></div>
+              <div className="mico"><CreditCard size={20} color="#FFFFFF"/></div>
               <div>
                 <h3>Payment Details</h3>
                 <div className="msub">Legacy Continuation Fee · $199.00</div>

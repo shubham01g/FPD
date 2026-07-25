@@ -49,7 +49,7 @@ function BillingEditor({
               className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all"
               style={{ background:billing.type===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                 border:`1px solid ${billing.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
-                color:billing.type===t.id?"#5B6EE1":"#5A6A88" }}>
+                color:billing.type===t.id?"#FFFFFF":"#5A6A88" }}>
               {t.icon}
               <span style={{ fontSize:10, fontWeight:700 }}>{t.label}</span>
               <span style={{ fontSize:9, color:"#8A9AB8", lineHeight:1.3, textAlign:"center" }}>{t.desc}</span>
@@ -110,7 +110,7 @@ function BillingEditor({
 
       {/* Live charge preview */}
       <div className="p-3 rounded-xl glow-surface" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-        <div style={{ color:"#48BB78", fontSize:9, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
+        <div style={{ color:"#D99A6B", fontSize:9, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[50, 200, 1000].map(n => (
             <div key={n}>
@@ -128,7 +128,7 @@ function BillingEditor({
 const DEFAULT_PKG: WLPackage = {
   id:"", name:"New Package", tier:"CUSTOM", userLimit:500, userLimitLabel:"Up to 500 users",
   billing:{ type:"flat_monthly", flatMonthly:2999, setupFee:2500 },
-  commission:20, color:"#5B6EE1", badge:null, features:["Feature 1"],
+  commission:20, color:"#6E90C9", badge:null, features:["Feature 1"],
   active:true, stripeProductId:null, stripePriceId:null,
   onboardingLink:"finalpassdown.com/partner/onboard?tier=custom",
   processorOverride:null,
@@ -215,7 +215,7 @@ function PackageModal({ pkg, onClose, onSave }: {
               <label style={{ color:"#5A6A88", fontSize:11, ...MONO }}>FEATURES LIST</label>
               <button onClick={() => setForm(p => ({ ...p, features:[...p.features,"New feature"] }))}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg"
-                style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+                style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={11}/> Add
               </button>
             </div>
@@ -253,7 +253,7 @@ function PackageModal({ pkg, onClose, onSave }: {
               <div style={{ color:"#8A9AB8", fontSize:11 }}>When off, hidden from the website and onboarding</div>
             </div>
             <button onClick={() => setForm(p => ({ ...p, active:!p.active }))}
-              style={{ color:form.active?"#48BB78":"#8A9AB8" }}>
+              style={{ color:form.active?"#D99A6B":"#8A9AB8" }}>
               {form.active ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
             </button>
           </div>
@@ -324,8 +324,8 @@ export function PartnerOnboardingAdmin() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Building size={15} color="#5B6EE1"/>
-              <span style={{ color:"#5B6EE1", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WL ONBOARDING CONTROL</span>
+              <Building size={15} color="#FFFFFF"/>
+              <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WL ONBOARDING CONTROL</span>
             </div>
             <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>WL Onboarding Control</h1>
             <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -335,7 +335,7 @@ export function PartnerOnboardingAdmin() {
           <div className="flex gap-2">
             <button onClick={() => setCreating(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1", border:"1px solid rgba(91,110,225,0.2)" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
               <Plus size={14}/> New Package
             </button>
             <button onClick={() => setShowSend(true)}
@@ -349,9 +349,9 @@ export function PartnerOnboardingAdmin() {
         {/* KPIs */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label:"Active WL Accounts",  value:activeSales.length,                  color:"#5B6EE1" },
-            { label:"Total WL Users",       value:totalUsers.toLocaleString(),         color:"#48BB78" },
-            { label:"WL Platform MRR",      value:`$${totalMRR.toLocaleString()}`,     color:"#5BA7D6" },
+            { label:"Active WL Accounts",  value:activeSales.length,                  color:"#6E90C9" },
+            { label:"Total WL Users",       value:totalUsers.toLocaleString(),         color:"#D99A6B" },
+            { label:"WL Platform MRR",      value:`$${totalMRR.toLocaleString()}`,     color:"#6FAE8B" },
             { label:"Total WL Revenue",     value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
           ].map(s => (
             <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
@@ -410,7 +410,7 @@ export function PartnerOnboardingAdmin() {
                     <div className="flex gap-2">
                       <button onClick={() => setEditPkg(pkg)}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                        style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+                        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                         <Edit2 size={11}/> Edit
                       </button>
                       <button onClick={async () => {
@@ -418,7 +418,7 @@ export function PartnerOnboardingAdmin() {
                         reload();
                         toast.success(pkg.active ? "Package deactivated" : "Package activated — live on website");
                       }} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                        style={{ background:pkg.active?"rgba(229,62,62,0.08)":"rgba(72,187,120,0.08)", color:pkg.active?"#FC8181":"#48BB78" }}>
+                        style={{ background:pkg.active?"rgba(229,62,62,0.08)":"rgba(72,187,120,0.08)", color:pkg.active?"#FC8181":"#D99A6B" }}>
                         {pkg.active ? "Deactivate" : "Activate"}
                       </button>
                     </div>
@@ -435,7 +435,7 @@ export function PartnerOnboardingAdmin() {
                     </div>
                     <div className="px-3 py-2 rounded-xl" style={{ background:"#F5F8FE" }}>
                       <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>STRIPE PRODUCT</div>
-                      <div style={{ color:pkg.stripeProductId?"#5B6EE1":"#FC8181", fontSize:11, ...MONO, marginTop:2 }}>
+                      <div style={{ color:pkg.stripeProductId?"#6E90C9":"#FC8181", fontSize:11, ...MONO, marginTop:2 }}>
                         {pkg.stripeProductId ?? "⚠ Not linked"}
                       </div>
                     </div>
@@ -497,14 +497,14 @@ export function PartnerOnboardingAdmin() {
                     const statusColor = ({ active:"#48BB78", pending:"#F6AD55", suspended:"#FC8181", cancelled:"#5A6A88" } as Record<string,string>)[s.status] ?? "#5A6A88";
                     return (
                       <tr key={s.id} style={{ background:i%2===0?"#fff":"#F8FAFF", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
-                        <td className="px-4 py-3" style={{ color:"#5B6EE1", fontSize:10, ...MONO }}>{s.id}</td>
+                        <td className="px-4 py-3" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{s.id}</td>
                         <td className="px-4 py-3">
                           <div style={{ color:"#0D1428", fontSize:12, fontWeight:500 }}>{s.org}</div>
                           <div style={{ color:"#8A9AB8", fontSize:10 }}>{s.subdomain}</div>
                         </td>
                         <td className="px-4 py-3" style={{ color:pkg?.color ?? "#5A6A88", fontSize:11, fontWeight:600 }}>{pkg?.name ?? s.packageId}</td>
                         <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:12, ...MONO }}>{s.users.toLocaleString()}</td>
-                        <td className="px-4 py-3" style={{ color:"#5BA7D6", fontSize:12, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
+                        <td className="px-4 py-3" style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#0D1428", fontSize:12, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#5A6A88", fontSize:11 }}>{s.processor}</td>
                         <td className="px-4 py-3">
@@ -527,7 +527,7 @@ export function PartnerOnboardingAdmin() {
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
-              <AlertCircle size={14} color="#5B6EE1" style={{ marginTop:1, flexShrink:0 }}/>
+              <AlertCircle size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
               <p style={{ color:"#5A6A88", fontSize:12 }}>
                 Each link includes a one-time token. When a prospect clicks it, the onboarding wizard opens pre-set to that package. Copy and share directly, or use Email Invite.
               </p>
@@ -551,12 +551,12 @@ export function PartnerOnboardingAdmin() {
                 <div className="flex gap-2">
                   <button onClick={() => doCopy(pkg.id)}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold flex-1"
-                    style={{ background:copiedId===pkg.id?"rgba(72,187,120,0.12)":`${pkg.color}12`, color:copiedId===pkg.id?"#48BB78":pkg.color }}>
+                    style={{ background:copiedId===pkg.id?"rgba(72,187,120,0.12)":`${pkg.color}12`, color:copiedId===pkg.id?"#D99A6B":pkg.color }}>
                     {copiedId===pkg.id ? <><CheckCircle size={11}/>Copied!</> : <><Copy size={11}/>Copy Unique Link</>}
                   </button>
                   <button onClick={() => { setSendPkgId(pkg.id); setShowSend(true); }}
                     className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold"
-                    style={{ background:"rgba(91,110,225,0.06)", color:"#5B6EE1" }}>
+                    style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                     <Send size={11}/> Email Invite
                   </button>
                 </div>
@@ -583,7 +583,7 @@ export function PartnerOnboardingAdmin() {
                     <div>
                       <div className="flex items-center gap-2">
                         <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#0D1428" }}>{proc.name}</span>
-                        {proc.isDefault && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#5B6EE1", ...MONO }}>DEFAULT</span>}
+                        {proc.isDefault && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>DEFAULT</span>}
                       </div>
                       <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>
                         {proc.enabled ? "Active" : "Disabled"}
@@ -597,7 +597,7 @@ export function PartnerOnboardingAdmin() {
                         setProcessors(await getProcessors());
                         toast.success(`${proc.name} set as default processor`);
                       }} className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                        style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+                        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                         Set Default
                       </button>
                     )}
@@ -605,7 +605,7 @@ export function PartnerOnboardingAdmin() {
                       await updateProcessor(proc.id, { enabled:!proc.enabled });
                       setProcessors(await getProcessors());
                       toast.success(`${proc.name} ${proc.enabled ? "disabled" : "enabled"}`);
-                    }} style={{ color:proc.enabled?"#48BB78":"#8A9AB8" }}>
+                    }} style={{ color:proc.enabled?"#D99A6B":"#8A9AB8" }}>
                       {proc.enabled ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
                     </button>
                   </div>
@@ -642,7 +642,7 @@ export function PartnerOnboardingAdmin() {
               </div>
               <button onClick={() => toast.success("Request sent to integrations team")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-                style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+                style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={13}/> Request Custom Integration
               </button>
             </div>

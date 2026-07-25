@@ -68,7 +68,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
-                  style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#5B6EE1":"#5A6A88" }}>
+                  style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#6E90C9":"#5A6A88" }}>
                   {t.label}
                 </button>
               ))}
@@ -98,9 +98,9 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
           {/* Preview link */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
             <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
-            <span style={{ color:"#5B6EE1", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
+            <span style={{ color:"#6E90C9", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
             <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
-              style={{ color:"#5B6EE1", flexShrink:0 }}><Copy size={12}/></button>
+              style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={12}/></button>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -133,8 +133,8 @@ export function PartnershipAdmin() {
     <div className="p-6 space-y-6" style={{ maxWidth: 1200 }}>
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Handshake size={16} color="#5BA7D6" />
-          <span style={{ color: "#5BA7D6", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
+          <Handshake size={16} color="#FFFFFF" />
+          <span style={{ color: "#6FAE8B", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
         </div>
         <div className="flex items-start justify-between">
           <div>
@@ -153,10 +153,10 @@ export function PartnershipAdmin() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Partners", value: activePartners, sub: "Organizations", color: "#5BA7D6" },
+          { label: "Active Partners", value: activePartners, sub: "Organizations", color: "#6FAE8B" },
           { label: "Total Referred Accounts", value: totalAccounts.toLocaleString(), sub: "Lifetime active", color: "var(--gold)" },
-          { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#48BB78" },
-          { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#5BA7D6" },
+          { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#D99A6B" },
+          { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -170,7 +170,7 @@ export function PartnershipAdmin() {
       <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
-          <div style={{ color: "#48BB78", fontSize: 13 }}>+264% in 6 months</div>
+          <div style={{ color: "#D99A6B", fontSize: 13 }}>+264% in 6 months</div>
         </div>
         {(() => {
           const maxMrr = Math.max(...mrrGrowth.map(d => d.mrr));
@@ -229,7 +229,7 @@ export function PartnershipAdmin() {
             <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
             <div className="flex items-center gap-3">
               <div className="rounded-lg p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
-                <Building size={13} color="#5BA7D6" />
+                <Building size={13} color="#FFFFFF" />
               </div>
               <div>
                 <div style={{ color: "var(--foreground)", fontSize: 13 }}>{partner.name}</div>
@@ -241,24 +241,24 @@ export function PartnershipAdmin() {
               <span style={{ color: (tierColors as any)[partner.tier], fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[partner.tier]}</span>
             </div>
             <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{partner.accounts}</span>
-            <span style={{ color: "#5BA7D6", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.monthlyEarn.toFixed(2)}</span>
+            <span style={{ color: "#6FAE8B", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.monthlyEarn.toFixed(2)}</span>
             <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>${partner.totalEarned.toLocaleString()}</span>
             <div
               className="px-2 py-1 rounded"
               style={{
                 background: partner.status === "active" ? "rgba(72,187,120,0.12)" : "rgba(107,114,128,0.12)",
-                color: partner.status === "active" ? "#48BB78" : "var(--muted-foreground)",
+                color: partner.status === "active" ? "#D99A6B" : "var(--muted-foreground)",
                 fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
               }}
             >
               {partner.status.toUpperCase()}
             </div>
             <div className="flex items-center gap-2">
-              <button style={{ color: "#5BA7D6" }}><Eye size={14} /></button>
+              <button style={{ color: "#6FAE8B" }}><Eye size={14} /></button>
               <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
               {partner.status === "active"
                 ? <button style={{ color: "#FC8181" }}><XCircle size={14} /></button>
-                : <button style={{ color: "#48BB78" }}><CheckCircle size={14} /></button>
+                : <button style={{ color: "#D99A6B" }}><CheckCircle size={14} /></button>
               }
             </div>
           </div>

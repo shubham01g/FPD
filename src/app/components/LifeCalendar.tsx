@@ -39,14 +39,14 @@ const NEG    = "#D06B6B";
    web-safe rainbow. Labels still come from SOURCE_META so the data owns them. */
 type IconCmp = React.ComponentType<{ size?: number }>;
 const SRC: Record<EventSource, { color: string; Icon: IconCmp }> = {
-  billing:   { color: "#5BA7D6", Icon: CreditCard },  // periwinkle (theme accent)
-  reminder:  { color: "#5BA7D6", Icon: Bell },        // soft sky blue
-  occasion:  { color: "#7E6BD8", Icon: Cake },        // soft lavender
-  warranty:  { color: "#5B6EE1", Icon: ShieldCheck }, // royal blue
-  document:  { color: "#5BA7D6", Icon: IdCard },      // dusty blue
-  travel:    { color: "#6F9E94", Icon: Plane },       // calm teal
-  medical:   { color: "#6FAE8B", Icon: Pill },        // soft sage
-  concierge: { color: "#7E6BD8", Icon: Star },        // soft lilac
+  billing:   { color: "#6FAE8B", Icon: CreditCard },  // periwinkle (theme accent)
+  reminder:  { color: "#6FAE8B", Icon: Bell },        // soft sky blue
+  occasion:  { color: "#A98CC7", Icon: Cake },        // soft lavender
+  warranty:  { color: "#6E90C9", Icon: ShieldCheck }, // royal blue
+  document:  { color: "#6FAE8B", Icon: IdCard },      // dusty blue
+  travel:    { color: "#D68FA8", Icon: Plane },       // calm teal
+  medical:   { color: "#D99A6B", Icon: Pill },        // soft sage
+  concierge: { color: "#A98CC7", Icon: Star },        // soft lilac
   custom:    { color: "#97A2C6", Icon: Pin },         // slate blue
 };
 
@@ -84,7 +84,7 @@ const CAL_CSS = `
 .fpd-cal .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cal .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-cal .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:${ACCENT2};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
+.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
 .fpd-cal .btn-today:hover{background:rgba(91,110,225,0.18);}
 
 /* segmented view toggle */
@@ -119,7 +119,7 @@ const CAL_CSS = `
 
 /* month grid */
 .fpd-cal .navbtn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.22);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
-.fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:${ACCENT2};}
+.fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
 .fpd-cal .dow span{text-align:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;color:${FAINT};padding:2px 0;}
 .fpd-cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
@@ -131,7 +131,7 @@ const CAL_CSS = `
 .fpd-cal .cell.today.sel{box-shadow:inset 0 0 0 1px rgba(91,110,225,0.5),0 6px 20px -8px rgba(91,110,225,0.55);}
 .fpd-cal .chead{display:flex;align-items:center;justify-content:space-between;}
 .fpd-cal .dnum{font-family:var(--font-mono);font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT};}
-.fpd-cal .cell.today .dnum{color:${POS};font-weight:700;}
+.fpd-cal .cell.today .dnum{color:#D99A6B;font-weight:700;}
 .fpd-cal .cell.sel .dnum{color:#fff;font-weight:700;}
 .fpd-cal .cmore{font-family:var(--font-mono);font-size:9px;color:${MUTED};}
 .fpd-cal .chips{display:flex;flex-direction:column;gap:3px;margin-top:5px;}
@@ -154,7 +154,7 @@ const CAL_CSS = `
 
 /* empty state */
 .fpd-cal .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 12px;}
-.fpd-cal .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:12px;}
+.fpd-cal .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-cal .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 .fpd-cal .empty .ed{color:${MUTED};font-size:12px;line-height:1.6;margin-top:5px;max-width:340px;}
 
@@ -164,13 +164,13 @@ const CAL_CSS = `
 .fpd-cal .agday{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .fpd-cal .agd{font-family:var(--font-mono);font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;}
 .fpd-cal .agline{flex:1;height:1px;background:rgba(255,255,255,0.07);}
-.fpd-cal .agtoday{padding:2px 7px;border-radius:6px;background:rgba(95,190,145,0.14);color:${POS};font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;}
+.fpd-cal .agtoday{padding:2px 7px;border-radius:6px;background:rgba(95,190,145,0.14);color:#D99A6B;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;}
 
 /* footnote */
 .fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-cal .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
 .fpd-cal .foot .ft b{color:${SOFT};font-weight:600;}
-.fpd-cal .foot .ft em{color:${ACCENT2};font-style:normal;}
+.fpd-cal .foot .ft em{color:#6FAE8B;font-style:normal;}
 `;
 
 /* ── One event row — used in the day panel, upcoming rail and agenda ── */
@@ -479,7 +479,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                 return (
                   <div key={date} className="aggroup">
                     <div className="agday">
-                      <span className="agd" style={{ color: isToday ? POS : isPast ? MUTED : SOFT }}>
+                      <span className="agd" style={{ color: isToday ? "#D99A6B" : isPast ? MUTED : SOFT }}>
                         {fmtDate(date)}
                       </span>
                       {isToday && <span className="agtoday">TODAY</span>}
@@ -497,7 +497,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
 
         {/* ── Footnote ── */}
         <div className="foot">
-          <Info size={16} color={ACCENT2} style={{ flexShrink: 0, marginTop: 1 }} />
+          <Info size={16} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
           <div className="ft">
             <b>This calendar is read-only by design.</b> Every entry is owned by the section that created it, so
             editing a warranty date in Warranties updates it here automatically — there is no second copy to keep in

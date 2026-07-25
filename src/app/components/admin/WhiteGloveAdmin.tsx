@@ -17,9 +17,9 @@ const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.2)", color:"#0D1428", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
 const SPECIALISTS = [
-  { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#5B6EE1" },
-  { id:"patricia", name:"Patricia Chen",  title:"Legacy Onboarding Specialist", clients:9,  rating:4.8, avatar:"PC", color:"#5BA7D6" },
-  { id:"james",   name:"James Rivera",   title:"Estate Documentation Specialist", clients:7, rating:5.0, avatar:"JR", color:"#48BB78" },
+  { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#6E90C9" },
+  { id:"patricia", name:"Patricia Chen",  title:"Legacy Onboarding Specialist", clients:9,  rating:4.8, avatar:"PC", color:"#6FAE8B" },
+  { id:"james",   name:"James Rivera",   title:"Estate Documentation Specialist", clients:7, rating:5.0, avatar:"JR", color:"#D99A6B" },
 ];
 
 type SessionStatus = "scheduled" | "completed" | "cancelled" | "pending";
@@ -109,7 +109,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
             <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#5BA7D6", fontSize:16, fontFamily:"var(--font-display)" }}>
+              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#6FAE8B", fontSize:16, fontFamily:"var(--font-display)" }}>
               {client.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
             </div>
             <div>
@@ -117,7 +117,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
                 <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>{client.name}</span>
                 {client.age && <span style={{ color:"#8A9AB8", fontSize:12 }}>Age {client.age}</span>}
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:`${statusColor}18`, color:statusColor, ...MONO }}>{client.status.toUpperCase()}</span>
-                {client.subscriptionWaived && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78", ...MONO }}>WAIVED</span>}
+                {client.subscriptionWaived && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", ...MONO }}>WAIVED</span>}
                 <WGCardOnFile clientId={client.id} clientName={client.name} compact={true}/>
               </div>
               <div style={{ color:"#5A6A88", fontSize:12, marginTop:2 }}>{client.email} · {client.phone}</div>
@@ -135,7 +135,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
             <span style={{ color:"#5A6A88", fontSize:11 }}>Vault Setup Progress</span>
-            <span style={{ color:"#5BA7D6", fontSize:11, fontWeight:700 }}>{client.completionPct}%</span>
+            <span style={{ color:"#6FAE8B", fontSize:11, fontWeight:700 }}>{client.completionPct}%</span>
           </div>
           <div className="h-2 rounded-full" style={{ background:"rgba(91,167,214,0.1)" }}>
             <div className="h-2 rounded-full" style={{ width:`${client.completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#6F9E94)" }}/>
@@ -156,9 +156,9 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           return (
             <div className="grid grid-cols-3 gap-2 mt-3">
               {[
-                { label:"Setup Fee", value:"$99", color:"#5BA7D6", sub:"one-time" },
-                { label:"Session Time", value:`${totalMins} min`, color:"#5B6EE1", sub:`$${sessionCost} billed` },
-                { label:"Total Billed", value:`$${totalCost}`, color:"#48BB78", sub:"to date" },
+                { label:"Setup Fee", value:"$99", color:"#6FAE8B", sub:"one-time" },
+                { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`$${sessionCost} billed` },
+                { label:"Total Billed", value:`$${totalCost}`, color:"#D99A6B", sub:"to date" },
               ].map(s => (
                 <div key={s.label} className="px-3 py-2 rounded-xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
                   <div style={{ color:s.color, fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
@@ -194,7 +194,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
               <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
               <button onClick={() => toast.success("Schedule session — opens calendar (demo)")}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#5BA7D6" }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
                 <Plus size={10}/> Schedule Session
               </button>
             </div>
@@ -243,12 +243,12 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           <div className="flex gap-2 pt-2">
             <button onClick={() => toast.success(`Sending check-in email to ${client.name}`)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-1"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Send size={11}/> Send Check-in
             </button>
             <button onClick={() => { onUpdate(client.id, { completionPct:100, status:"completed", nextSession:undefined }); toast.success(`${client.name} marked as complete`); }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
-              style={{ background:"rgba(72,187,120,0.1)", color:"#48BB78" }}>
+              style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B" }}>
               <CheckCircle size={11}/> Mark Complete
             </button>
           </div>
@@ -313,8 +313,8 @@ export function WhiteGloveAdmin() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Star size={15} color="#5BA7D6"/>
-            <span style={{ color:"#5BA7D6", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WHITE GLOVE SERVICE</span>
+            <Star size={15} color="#FFFFFF"/>
+            <span style={{ color:"#6FAE8B", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WHITE GLOVE SERVICE</span>
           </div>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#0D1428" }}>White Glove Concierge</h1>
           <p style={{ color:"#5A6A88", fontSize:13, marginTop:4 }}>
@@ -353,7 +353,7 @@ export function WhiteGloveAdmin() {
       {mainTab === "billing"  && (
         <div className="space-y-5">
           <div>
-            <div style={{ color:"#5BA7D6", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em", marginBottom:4 }}>
+            <div style={{ color:"#6FAE8B", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em", marginBottom:4 }}>
               WHITE GLOVE · BILLING
             </div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#0D1428" }}>Session Billing</h2>
@@ -380,9 +380,9 @@ export function WhiteGloveAdmin() {
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label:"Active Clients",     value:activeCount,     color:"#5BA7D6" },
-          { label:"Completed",          value:completedCount,  color:"#48BB78" },
-          { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#5B6EE1" },
+          { label:"Active Clients",     value:activeCount,     color:"#6FAE8B" },
+          { label:"Completed",          value:completedCount,  color:"#D99A6B" },
+          { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#6E90C9" },
           { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
@@ -446,7 +446,7 @@ export function WhiteGloveAdmin() {
             <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10"
               style={{ borderColor:"rgba(91,167,214,0.12)" }}>
               <div className="flex items-center gap-2">
-                <Star size={16} color="#5BA7D6"/>
+                <Star size={16} color="#FFFFFF"/>
                 <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#0D1428" }}>Add White Glove Client</span>
               </div>
               <button onClick={() => setShowAdd(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
@@ -499,7 +499,7 @@ export function WhiteGloveAdmin() {
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <span style={{ color:"#0D1428", fontSize:13 }}>Waive subscription fee</span>
                 <button onClick={() => setNewClient(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
-                  style={{ color:newClient.subscriptionWaived?"#48BB78":"#8A9AB8" }}>
+                  style={{ color:newClient.subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
                   {newClient.subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}
                 </button>
               </div>

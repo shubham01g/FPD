@@ -64,7 +64,7 @@ function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = 
       {showPlay && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <div className="flex items-center justify-center rounded-full" style={{ width: 72, height: 72, background: "rgba(91,110,225,0.22)", border: "1px solid rgba(91,167,214,0.4)", backdropFilter: "blur(4px)" }}>
-            <Play size={26} color={HILITE} style={{ marginLeft: 4 }} />
+            <Play size={26} color="#FFFFFF" style={{ marginLeft: 4 }} />
           </div>
         </div>
       )}
@@ -155,7 +155,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
           ))}
         </div>
         <div className="flex items-center gap-2.5">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors" style={{ color: VIOLET_SOFT }}>
+          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors" style={{ color: "#A98CC7" }}>
             <Star size={13} /> White Glove
           </button>
           <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:text-white" style={{ color: SOFT }}>Sign In</button>
@@ -168,7 +168,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg" style={{ color: SOFT, fontSize: 14 }}>{l}</button>
           ))}
-          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg" style={{ color: VIOLET_SOFT, fontSize: 14 }}>White Glove Concierge</button>
+          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg" style={{ color: "#A98CC7", fontSize: 14 }}>White Glove Concierge</button>
         </div>
       )}
     </nav>
@@ -208,7 +208,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-12">
           {stats.map(([val, label]) => (
             <div key={label} className="p-5 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 800, color: HILITE }}>{val}</div>
+              <div style={{ ...DISPLAY, fontSize: 26, fontWeight: 800, color: "#6FAE8B" }}>{val}</div>
               <div style={{ color: MUTED, fontSize: 12, marginTop: 4, ...MONO }}>{label}</div>
             </div>
           ))}
@@ -220,7 +220,7 @@ function Hero({ onStart }: { onStart: () => void }) {
             {["AR", "MT", "JW", "LK", "DP", "RH"].map((ini, i) => (
               <div key={ini} className="flex items-center justify-center" style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: i > 0 ? -10 : 0, background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 11, fontWeight: 700, ...MONO }}>{ini}</div>
             ))}
-            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: -10, background: "rgba(91,110,225,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: HILITE, fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: -10, background: "rgba(91,110,225,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#6FAE8B", fontSize: 10, fontWeight: 700, ...MONO }}>+50k</div>
           </div>
           <div style={{ color: MUTED, fontSize: 13 }}>Joined by 50,000+ families protecting their legacy</div>
         </div>
@@ -245,7 +245,7 @@ function About({ onStart }: { onStart: () => void }) {
           <Kicker>About Final Pass Down</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
             What Happens to Your<br />
-            <span style={{ color: HILITE }}>Life's Work</span> When You're Gone?
+            <span style={{ color: "#6FAE8B" }}>Life's Work</span> When You're Gone?
           </h2>
           <p style={{ color: SOFT, fontSize: 16.5, lineHeight: 1.85, marginBottom: 18 }}>
             Most families face chaos after a loved one passes — scrambling to find documents, discover accounts, and piece together final wishes. Final Pass Down changes everything.
@@ -256,7 +256,7 @@ function About({ onStart }: { onStart: () => void }) {
           <div className="flex flex-col gap-3 mb-8">
             {points.map(p => (
               <div key={p} className="flex items-start gap-3">
-                <CheckCircle2 size={17} color={ACCENT} style={{ marginTop: 2, flexShrink: 0 }} />
+                <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 15, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
@@ -266,7 +266,7 @@ function About({ onStart }: { onStart: () => void }) {
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-vault.mp4" tone="deep" overlay={0.35} showPlay />
           <div className="absolute top-4 right-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
-            <div style={{ ...MONO, color: HILITE, fontSize: 11, marginBottom: 4, letterSpacing: "0.08em" }}>PLATFORM COVERAGE</div>
+            <div style={{ ...MONO, color: "#6FAE8B", fontSize: 11, marginBottom: 4, letterSpacing: "0.08em" }}>PLATFORM COVERAGE</div>
             <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>30+</div>
             <div style={{ color: MUTED, fontSize: 13 }}>Life Categories</div>
           </div>
@@ -292,8 +292,8 @@ function HowItWorks() {
         <div className="grid md:grid-cols-4 gap-5">
           {STEPS.map(s => (
             <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div style={{ ...DISPLAY, fontSize: 44, fontWeight: 800, color: "rgba(91,167,214,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.14)", color: HILITE }}>{s.icon}</div>
+              <div style={{ ...DISPLAY, fontSize: 44, fontWeight: 800, color: "rgba(147,168,124,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.14)", color: "#FFFFFF" }}>{s.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 17, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</h3>
               <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.65 }}>{s.desc}</p>
             </div>
@@ -359,7 +359,7 @@ function Features() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {filtered.map(f => (
             <div key={f.title} className="p-5 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: HILITE }}>{f.icon}</div>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{f.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 6 }}>{f.title}</div>
               <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
@@ -389,18 +389,18 @@ function Security() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           {SEC_ITEMS.map(item => (
             <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(91,110,225,0.14)", color: HILITE, boxShadow: "0 0 20px rgba(91,110,225,0.15)" }}>{item.icon}</div>
+              <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(91,110,225,0.14)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(91,110,225,0.15)" }}>{item.icon}</div>
               <h3 style={{ ...DISPLAY, fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 10 }}>{item.title}</h3>
               <p style={{ color: MUTED, fontSize: 13.5, lineHeight: 1.7 }}>{item.desc}</p>
             </div>
           ))}
         </div>
         <div className="p-8 rounded-2xl text-center" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
-          <div style={{ ...MONO, color: HILITE, fontSize: 12, letterSpacing: "0.1em", marginBottom: 14 }}>SECURITY CERTIFICATION</div>
+          <div style={{ ...MONO, color: "#6FAE8B", fontSize: 12, letterSpacing: "0.1em", marginBottom: 14 }}>SECURITY CERTIFICATION</div>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {SEC_BADGES.map(b => (
               <div key={b} className="flex items-center gap-2">
-                <CheckCircle2 size={14} color={ACCENT} />
+                <CheckCircle2 size={14} color="#FFFFFF" />
                 <span style={{ color: SOFT, fontSize: 13 }}>{b}</span>
               </div>
             ))}
@@ -414,10 +414,10 @@ function Security() {
 /* ── PRICING (5 tiers + annual toggle) ────────────────────────── */
 type Plan = { name: string; price: number; storage: string; contacts: number; color: string; popular: boolean; features: string[] };
 const PLANS: Plan[] = [
-  { name: "Starter", price: 1.99, storage: "1 GB", contacts: 1, color: "#48BB78", popular: false, features: ["1 GB Legacy Storage", "1 Legacy Contact", "1 Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Foundation", price: 9.99, storage: "50 GB", contacts: 3, color: ACCENT, popular: false, features: ["50 GB Legacy Storage", "3 Legacy Contacts", "3 Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Legacy Archive", price: 24.99, storage: "250 GB", contacts: -1, color: PRIMARY, popular: true, features: ["250 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
-  { name: "Legacy Pro", price: 49.99, storage: "500 GB", contacts: -1, color: VIOLET, popular: false, features: ["500 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  { name: "Starter", price: 1.99, storage: "1 GB", contacts: 1, color: "#D99A6B", popular: false, features: ["1 GB Legacy Storage", "1 Legacy Contact", "1 Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  { name: "Foundation", price: 9.99, storage: "50 GB", contacts: 3, color: "#6E90C9", popular: false, features: ["50 GB Legacy Storage", "3 Legacy Contacts", "3 Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  { name: "Legacy Archive", price: 24.99, storage: "250 GB", contacts: -1, color: "#A98CC7", popular: true, features: ["250 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  { name: "Legacy Pro", price: 49.99, storage: "500 GB", contacts: -1, color: "#A98CC7", popular: false, features: ["500 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
   { name: "Legacy Vault", price: 129.99, storage: "1 TB", contacts: -1, color: "#ED8936", popular: false, features: ["1 TB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
 ];
 
@@ -432,7 +432,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(91,110,225,0.3)", boxShadow: annual ? "0 0 20px rgba(91,110,225,0.4)" : "none" }}>
             <div className="absolute top-1 rounded-full transition-all" style={{ width: 18, height: 18, background: "#fff", left: annual ? 26 : 4 }} />
           </button>
-          <span style={{ color: annual ? HILITE : MUTED, fontSize: 14 }}>Annual <span style={{ color: "#48BB78", fontSize: 12 }}>Save 20%</span></span>
+          <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>Annual <span style={{ color: "#D99A6B", fontSize: 12 }}>Save 20%</span></span>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch">
           {PLANS.map(plan => (
@@ -456,7 +456,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
                 ))}
               </ul>
               <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold text-sm fpd-btn-lift"
-                style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: HILITE, border: "1px solid rgba(91,110,225,0.25)" }}>
+                style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.25)" }}>
                 Get Started
               </button>
             </div>
@@ -487,7 +487,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
         <div>
           <Kicker>Affiliate Program</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
-            Earn Up to <span style={{ color: HILITE }}>30%</span><br />Referring Friends
+            Earn Up to <span style={{ color: "#6FAE8B" }}>30%</span><br />Referring Friends
           </h2>
           <p style={{ color: SOFT, fontSize: 16, lineHeight: 1.85, marginBottom: 28 }}>
             Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
@@ -495,7 +495,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
           <div className="flex flex-col gap-3 mb-8">
             {benefits.map(([bold, rest]) => (
               <div key={bold} className="flex items-start gap-3">
-                <CheckCircle2 size={15} color={ACCENT} style={{ marginTop: 3, flexShrink: 0 }} />
+                <CheckCircle2 size={15} color="#FFFFFF" style={{ marginTop: 3, flexShrink: 0 }} />
                 <span style={{ color: SOFT, fontSize: 14 }}><strong style={{ color: TEXT }}>{bold}</strong> — {rest}</span>
               </div>
             ))}
@@ -507,17 +507,17 @@ function Affiliates({ onStart }: { onStart: () => void }) {
             <div key={t.tier} className="p-6 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div style={{ ...MONO, color: HILITE, fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{t.tier.toUpperCase()}</div>
+                  <div style={{ ...MONO, color: "#6FAE8B", fontSize: 11, letterSpacing: "0.1em", marginBottom: 4 }}>{t.tier.toUpperCase()}</div>
                   <div style={{ color: TEXT, fontSize: 15, fontWeight: 500 }}>{t.range}</div>
                   <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>{t.note}</div>
                 </div>
-                <div style={{ ...DISPLAY, fontSize: 42, fontWeight: 800, color: HILITE }}>{t.rate}</div>
+                <div style={{ ...DISPLAY, fontSize: 42, fontWeight: 800, color: "#6FAE8B" }}>{t.rate}</div>
               </div>
             </div>
           ))}
           <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
             <div style={{ color: MUTED, fontSize: 13 }}>Example: 30 referrals on Legacy Archive ($24.99/mo) =</div>
-            <div style={{ ...DISPLAY, fontSize: 28, fontWeight: 800, color: HILITE, marginTop: 4 }}>$187.43 / month</div>
+            <div style={{ ...DISPLAY, fontSize: 28, fontWeight: 800, color: "#6FAE8B", marginTop: 4 }}>$187.43 / month</div>
             <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>at Tier 2 (25%) for 12 months</div>
           </div>
         </div>
@@ -544,14 +544,14 @@ function Partnerships({ onStart }: { onStart: () => void }) {
   return (
     <section id="partners" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: HILITE }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
+        <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
         <div className="grid md:grid-cols-3 gap-5 mb-12">
           {tiers.map(t => (
             <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
-              <div style={{ ...DISPLAY, fontSize: 52, fontWeight: 800, color: HILITE, lineHeight: 1 }}>{t.rate}</div>
-              <div style={{ ...MONO, color: ACCENT, fontSize: 11, letterSpacing: "0.1em", margin: "8px 0 4px" }}>{t.tier.toUpperCase()}</div>
+              <div style={{ ...DISPLAY, fontSize: 52, fontWeight: 800, color: "#6FAE8B", lineHeight: 1 }}>{t.rate}</div>
+              <div style={{ ...MONO, color: "#6E90C9", fontSize: 11, letterSpacing: "0.1em", margin: "8px 0 4px" }}>{t.tier.toUpperCase()}</div>
               <div style={{ color: MUTED, fontSize: 13 }}>{t.range}</div>
-              <div className="mt-3 flex items-center justify-center gap-1" style={{ color: "#48BB78", fontSize: 12 }}>
+              <div className="mt-3 flex items-center justify-center gap-1" style={{ color: "#D99A6B", fontSize: 12 }}>
                 <CheckCircle2 size={12} /> Recurring · Lifetime · No cap
               </div>
             </div>
@@ -560,7 +560,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           {partners.map(p => (
             <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: HILITE }}>{p.icon}</div>
+              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{p.icon}</div>
               <div>
                 <div style={{ color: TEXT, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{p.label}</div>
                 <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.7 }}>{p.desc}</div>
@@ -614,7 +614,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
           <Kicker tone="violet">White Glove Concierge Service</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2rem,4.5vw,3.2rem)", fontWeight: 700, color: TEXT, lineHeight: 1.12, margin: "18px 0 16px", letterSpacing: "-0.02em" }}>
             Not Comfortable With Technology?<br />
-            <span style={{ color: VIOLET_SOFT }}>We Do Everything For You.</span>
+            <span style={{ color: "#A98CC7" }}>We Do Everything For You.</span>
           </h2>
           <p style={{ color: SOFT, fontSize: 17, lineHeight: 1.85, maxWidth: 620 }}>
             Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone.
@@ -625,8 +625,8 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {steps.map(s => (
             <div key={s.num} className="relative p-6 rounded-2xl" style={{ background: "rgba(126,107,216,0.05)", border: `1px solid ${vBorder}`, borderTop: `3px solid rgba(126,107,216,0.5)` }}>
-              <div style={{ ...DISPLAY, color: "rgba(126,107,216,0.28)", fontSize: 52, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
-              <div style={{ color: VIOLET_SOFT, marginBottom: 10 }}>{s.icon}</div>
+              <div style={{ ...DISPLAY, color: "rgba(185,140,166,0.28)", fontSize: 52, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
+              <div style={{ color: "#FFFFFF", marginBottom: 10 }}>{s.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 16, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</div>
               <div style={{ color: MUTED, fontSize: 13, lineHeight: 1.75 }}>{s.desc}</div>
             </div>
@@ -636,32 +636,32 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         {/* Pricing — two cards */}
         <div className="grid md:grid-cols-2 gap-5 mb-14">
           <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(126,107,216,0.4)`, boxShadow: "0 0 48px rgba(126,107,216,0.15)" }}>
-            <div style={{ color: VIOLET_SOFT, fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
+            <div style={{ color: "#A98CC7", fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize: 72, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$99</div>
             <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>Paid once · Gets you started with your dedicated specialist</div>
             <div className="flex flex-col gap-2 text-left">
               {["Specialist assigned to your account", "Intake call to understand your needs", "Secure document upload link sent to you", "Full onboarding plan created"].map(f => (
                 <div key={f} className="flex items-center gap-2">
-                  <CheckCircle2 size={12} color={VIOLET} />
+                  <CheckCircle2 size={12} color="#FFFFFF" />
                   <span style={{ color: SOFT, fontSize: 13 }}>{f}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="rounded-3xl p-8 text-center" style={{ background: "rgba(126,107,216,0.06)", border: `2px solid ${vBorder}` }}>
-            <div style={{ color: VIOLET, fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>SESSION RATE</div>
+            <div style={{ color: "#A98CC7", fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>SESSION RATE</div>
             <div style={{ ...DISPLAY, fontSize: 72, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$25</div>
             <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>per 30 minutes · Only pay for time you use</div>
             <div className="flex flex-col gap-2 text-left mb-6">
               {["Phone or video session with your specialist", "Specialist uploads documents during the call", "Session notes + progress tracking", "No minimum session requirement"].map(f => (
                 <div key={f} className="flex items-center gap-2">
-                  <CheckCircle2 size={12} color={VIOLET} />
+                  <CheckCircle2 size={12} color="#FFFFFF" />
                   <span style={{ color: SOFT, fontSize: 13 }}>{f}</span>
                 </div>
               ))}
             </div>
             <div className="px-4 py-3 rounded-2xl" style={{ background: "rgba(126,107,216,0.1)", border: `1px solid ${vBorder}` }}>
-              <div style={{ color: VIOLET_SOFT, fontSize: 12, fontWeight: 600 }}>Typical Total: $199–$249</div>
+              <div style={{ color: "#A98CC7", fontSize: 12, fontWeight: 600 }}>Typical Total: $199–$249</div>
               <div style={{ color: MUTED, fontSize: 11 }}>$99 setup + 2–3 hours of sessions</div>
             </div>
           </div>
@@ -670,11 +670,11 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         {/* Included + CTA */}
         <div className="grid md:grid-cols-2 gap-10 items-center mb-16">
           <div>
-            <div style={{ color: VIOLET_SOFT, fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 16 }}>EVERYTHING INCLUDED</div>
+            <div style={{ color: "#A98CC7", fontSize: 11, ...MONO, letterSpacing: "0.14em", marginBottom: 16 }}>EVERYTHING INCLUDED</div>
             <ul className="flex flex-col gap-3">
               {included.map(item => (
                 <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2 size={14} color={VIOLET} style={{ marginTop: 2, flexShrink: 0 }} />
+                  <CheckCircle2 size={14} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                   <span style={{ color: SOFT, fontSize: 14, lineHeight: 1.6 }}>{item}</span>
                 </li>
               ))}
@@ -684,7 +684,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
             <div style={{ position: "relative", height: 200 }}>
               <MediaBackdrop tone="deep" overlay={0.5} />
               <div style={{ position: "absolute", bottom: 16, left: 20 }}>
-                <div style={{ ...DISPLAY, color: VIOLET_SOFT, fontSize: 14, fontWeight: 700 }}>Your Personal Specialist</div>
+                <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 14, fontWeight: 700 }}>Your Personal Specialist</div>
                 <div style={{ ...MONO, color: MUTED, fontSize: 11 }}>Calls you within 1 business day</div>
               </div>
             </div>
@@ -693,7 +693,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               <div className="flex flex-col gap-2 mb-8">
                 {perfectFor.map(p => (<div key={p} style={{ color: SOFT, fontSize: 13 }}>· {p}</div>))}
               </div>
-              <div style={{ ...DISPLAY, color: VIOLET_SOFT, fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
+              <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
               <div style={{ color: MUTED, fontSize: 13, marginBottom: 20 }}>A specialist calls within 1 business day. No apps. No computers. Just a phone call.</div>
               <div className="flex justify-center gap-4 mb-5">
                 <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
@@ -718,7 +718,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         <div className="grid md:grid-cols-3 gap-4">
           {trust.map(t => (
             <div key={t.title} className="p-5 rounded-2xl text-center" style={{ background: "rgba(126,107,216,0.04)", border: "1px solid rgba(126,107,216,0.12)" }}>
-              <div style={{ color: VIOLET, margin: "0 auto 10px", display: "flex", justifyContent: "center" }}>{t.icon}</div>
+              <div style={{ color: "#FFFFFF", margin: "0 auto 10px", display: "flex", justifyContent: "center" }}>{t.icon}</div>
               <div style={{ ...DISPLAY, fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 4 }}>{t.title}</div>
               <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.7 }}>{t.desc}</div>
             </div>
@@ -791,7 +791,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {perks.map(f => (
             <div key={f.title} className="flex gap-3 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div style={{ color: HILITE, flexShrink: 0 }}>{f.icon}</div>
+              <div style={{ color: "#FFFFFF", flexShrink: 0 }}>{f.icon}</div>
               <div>
                 <div style={{ color: TEXT, fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{f.title}</div>
                 <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.6 }}>{f.desc}</div>
@@ -819,7 +819,7 @@ function Testimonials() {
           {quotes.map(q => (
             <div key={q.name} className="p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex gap-1 mb-4">
-                {Array.from({ length: q.rating }).map((_, i) => <Star key={i} size={13} fill={HILITE} color={HILITE} />)}
+                {Array.from({ length: q.rating }).map((_, i) => <Star key={i} size={13} fill={HILITE} color="#FFFFFF" />)}
               </div>
               <p style={{ color: SOFT, fontSize: 14.5, lineHeight: 1.85, flex: 1, marginBottom: 20 }}>"{q.quote}"</p>
               <div className="flex items-center gap-3 pt-4" style={{ borderTop: "1px solid rgba(91,110,225,0.12)" }}>
@@ -860,7 +860,7 @@ function Help() {
               <button className="w-full flex items-center justify-between px-6 py-5" onClick={() => setOpen(open === i ? null : i)}
                 style={{ background: open === i ? "rgba(91,110,225,0.08)" : CARD, textAlign: "left" }}>
                 <span style={{ color: TEXT, fontSize: 15, fontWeight: 500 }}>{faq.q}</span>
-                <ChevronDown size={16} color={HILITE} style={{ transform: open === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0 }} />
+                <ChevronDown size={16} color="#FFFFFF" style={{ transform: open === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0 }} />
               </button>
               {open === i && (
                 <div className="px-6 pb-5 pt-1" style={{ background: "rgba(91,110,225,0.04)", color: SOFT, fontSize: 14, lineHeight: 1.85 }}>{faq.a}</div>
@@ -954,20 +954,20 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
           <span style={{ color: FAINT, fontSize: 13 }}>© {new Date().getFullYear()} Final Pass Down Inc. All rights reserved.</span>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {["App Store", "Google Play", "PWA"].map(p => (
-              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(91,110,225,0.08)", color: HILITE, border: "1px solid rgba(91,110,225,0.2)", ...MONO }}>{p}</span>
+              <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.2)", ...MONO }}>{p}</span>
             ))}
             {onPartnerPortal && (
-              <button onClick={onPartnerPortal} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(72,187,120,0.1)", color: "#48BB78", border: "1px solid rgba(72,187,120,0.3)", ...MONO, letterSpacing: "0.06em" }}>
+              <button onClick={onPartnerPortal} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(72,187,120,0.1)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.3)", ...MONO, letterSpacing: "0.06em" }}>
                 <Handshake size={11} /> PARTNER PORTAL
               </button>
             )}
             {onConciergeLogin && (
-              <button onClick={onConciergeLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(126,107,216,0.1)", color: VIOLET_SOFT, border: "1px solid rgba(126,107,216,0.3)", ...MONO, letterSpacing: "0.06em" }}>
+              <button onClick={onConciergeLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(126,107,216,0.1)", color: "#A98CC7", border: "1px solid rgba(126,107,216,0.3)", ...MONO, letterSpacing: "0.06em" }}>
                 <Star size={11} /> CONCIERGE STAFF
               </button>
             )}
             {onAdminLogin && (
-              <button onClick={onAdminLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(91,110,225,0.12)", color: HILITE, border: "1px solid rgba(91,110,225,0.35)", ...MONO, letterSpacing: "0.06em" }}>
+              <button onClick={onAdminLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all" style={{ background: "rgba(91,110,225,0.12)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.35)", ...MONO, letterSpacing: "0.06em" }}>
                 <Lock size={11} /> MASTER ADMIN LOGIN
               </button>
             )}

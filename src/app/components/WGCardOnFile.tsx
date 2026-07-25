@@ -95,8 +95,8 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       return (
         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
           style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", display:"inline-flex" }}>
-          <CreditCard size={11} color="#48BB78"/>
-          <span style={{ color:"#48BB78", fontSize:11, fontWeight:700, ...MONO }}>
+          <CreditCard size={11} color="#FFFFFF"/>
+          <span style={{ color:"#D99A6B", fontSize:11, fontWeight:700, ...MONO }}>
             {existing.brand} ****{existing.last4}
           </span>
         </div>
@@ -116,13 +116,13 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       <div className="flex items-center justify-between px-4 py-3 border-b"
         style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
         <div className="flex items-center gap-2">
-          <CreditCard size={14} color="#5B6EE1"/>
-          <span style={{ color:"#5B6EE1", fontSize:12, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
+          <CreditCard size={14} color="#FFFFFF"/>
+          <span style={{ color:"#6E90C9", fontSize:12, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
         </div>
         {hasCard && !editing && (
           <button onClick={() => setEditing(true)}
             className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#5B6EE1" }}>
+            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
             <Edit2 size={11}/> Update
           </button>
         )}
@@ -149,8 +149,8 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
           </div>
           <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
             style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-            <CheckCircle size={12} color="#48BB78" style={{ marginTop:1, flexShrink:0 }}/>
-            <p style={{ color:"#48BB78", fontSize:12, lineHeight:1.6 }}>
+            <CheckCircle size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
+            <p style={{ color:"#D99A6B", fontSize:12, lineHeight:1.6 }}>
               This card will be automatically charged after each session at $25 per 30 minutes, rounded up. The client will receive an email receipt after each charge.
             </p>
           </div>
