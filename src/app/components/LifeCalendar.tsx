@@ -135,18 +135,16 @@ const CAL_CSS = `
 /* "At a Glance" band — plain flat card, same treatment as every other card.
    A single clean cross-divider through the middle of the 2x2 grid instead of
    per-cell borders (which misalign into broken segments). */
-.fpd-cal .band-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT};padding:20px 24px 2px;}
-.fpd-cal .kpi-grid{position:relative;display:grid;grid-template-columns:repeat(2,1fr);}
-.fpd-cal .kpi-grid::before{content:"";position:absolute;left:50%;top:10%;bottom:10%;width:1px;background:rgba(255,255,255,0.13);}
-.fpd-cal .kpi-grid::after{content:"";position:absolute;top:50%;left:24px;right:24px;height:1px;background:rgba(255,255,255,0.13);}
-.fpd-cal .kpi-col{padding:18px 24px;position:relative;}
-.fpd-cal .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;position:relative;}
-.fpd-cal .klbl{font-size:11.5px;font-weight:600;color:${MUTED};}
-.fpd-cal .kico{width:32px;height:32px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);position:relative;}
-.fpd-cal .kval{font-family:var(--font-display);font-size:23px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;position:relative;}
-.fpd-cal .ksub{font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;position:relative;}
-.fpd-cal .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:520px){.fpd-cal .kpi-grid{grid-template-columns:1fr;} .fpd-cal .kpi-grid::before,.fpd-cal .kpi-grid::after{display:none;} .fpd-cal .kpi-col:not(:first-child){border-top:1px solid rgba(255,255,255,0.13);}}
+.fpd-cal .kpi-stack{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fpd-cal .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-cal .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
+.fpd-cal .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-cal .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-cal .kpi-mini-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-cal .kpi-mini-lbl{font-size:11.5px;color:${MUTED};margin-top:4px;}
+.fpd-cal .kpi-mini-sub{font-size:11px;color:${SOFT};margin-top:5px;display:flex;align-items:center;gap:6px;}
+.fpd-cal .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:520px){.fpd-cal .kpi-stack{grid-template-columns:1fr;}}
 
 /* filters */
 .fpd-cal .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -528,25 +526,22 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
 
         {view === "month" ? (
           <div className="bento">
-            {/* Left column — At a Glance band + month grid */}
+            {/* Left column — At a Glance stat cards + month grid */}
             <div className="col" ref={leftColRef}>
-              <div className="card">
-                <div className="band-eyebrow">At a Glance</div>
-                <div className="kpi-grid">
-                  {kpis.map(k => {
-                    const tone = KPI_TONES[k.tone] ?? KPI_TONES.sky;
-                    return (
-                      <div key={k.label} className="kpi-col">
-                        <div className="khead">
-                          <span className="klbl">{k.label}</span>
-                          <span className="kico" style={{ background: tone.bg, color: tone.fg }}>{k.icon}</span>
-                        </div>
-                        <div className="kval">{k.value}</div>
-                        <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+              <div className="kpi-stack">
+                {kpis.map(k => {
+                  const tone = KPI_TONES[k.tone] ?? KPI_TONES.sky;
+                  return (
+                    <div key={k.label} className="kpi-mini">
+                      <span className="kpi-mini-ico" style={{ background: tone.bg, color: tone.fg }}>{k.icon}</span>
+                      <div className="kpi-mini-txt">
+                        <div className="kpi-mini-val">{k.value}</div>
+                        <div className="kpi-mini-lbl">{k.label}</div>
+                        <div className="kpi-mini-sub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="card pad gridcard">
