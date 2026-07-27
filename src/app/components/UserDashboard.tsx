@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Archive, Users, HardDrive, TrendingUp, AlertTriangle, FileText,
+  Archive, Users, HardDrive, TrendingUp, AlertTriangle, AlertCircle, FileText,
   ArrowRight, Bell, Plus, ShieldCheck, Check
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
@@ -8,24 +8,26 @@ import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
-/* ── Royal Vault Blue palette (refined estate treatment) ── */
-const TEXT    = "#EFF2F9";
-const SOFT    = "#BCC5DA";
-const MUTED   = "#A3ADC9";
-const FAINT   = "#929CBC";
-const ACCENT  = "#5B6EE1";
-const ACCENT2 = "#5BA7D6";
-const POS     = "#5FBE91";
-const WARN    = "#D9A55E";
-const NEG     = "#D06B6B";
+/* ── Royal Vault Blue palette (unchanged brand tokens) ── */
+const TEXT     = "#EFF2F9";
+const SOFT     = "#BCC5DA";
+const MUTED    = "#A3ADC9";
+const FAINT    = "#929CBC";
+const ACCENT   = "#5B6EE1";
+const ACCENT2  = "#5BA7D6"; /* sky */
+const ACCENT_D = "#7E6BD8"; /* accent-deep */
+const MINT     = "#6FAE8B";
+const POS      = "#5FBE91"; /* good */
+const WARN     = "#D9A55E";
+const NEG      = "#D06B6B"; /* critical */
+const SURFACE2 = "#101728";
+const LINE_SOFT   = "rgba(255,255,255,0.045)";
+const LINE_SOFT_2 = "rgba(255,255,255,0.13)";
 
 /* Calm, cool storage palette — applied dashboard-side only, so the shared
    STORAGE_BREAKDOWN (and the Usage & Billing page) keep their own category
-   colours untouched. Toned to match the Calendar: every slice stays light
-   enough to read on the dark surface and distinct enough to tell apart,
-   without any slice shouting against the theme. */
+   colours untouched. */
 const STORAGE_RAMP = ["#5BA7D6", "#6F9E94", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
-/* Remaining / free space — a quiet slate so "what's left" reads at a glance. */
 const FREE = "#929CBC";
 
 const storageHistory = [
@@ -37,157 +39,163 @@ const storageHistory = [
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
-/* All redesign styling is scoped under .fpd-dash so nothing else in the app is
-   affected. Interactive states (hover, highlight underline) live here as real CSS. */
+/* Icon-chip tone → colour, used for every icon chip on the dashboard. */
+const TONES: Record<string, { bg: string; fg: string }> = {
+  accent:   { bg: "linear-gradient(150deg, rgba(91,110,225,0.32), rgba(91,110,225,0.09))",  fg: "#AEB9F5" },
+  sky:      { bg: "linear-gradient(150deg, rgba(91,167,214,0.32), rgba(91,167,214,0.09))",  fg: "#9FD3EE" },
+  mint:     { bg: "linear-gradient(150deg, rgba(111,174,139,0.32), rgba(111,174,139,0.09))", fg: "#A9DABC" },
+  good:     { bg: "linear-gradient(150deg, rgba(95,190,145,0.30), rgba(95,190,145,0.09))",   fg: "#A9E6C4" },
+  warn:     { bg: "linear-gradient(150deg, rgba(217,165,94,0.30), rgba(217,165,94,0.09))",   fg: "#F0C088" },
+  critical: { bg: "linear-gradient(150deg, rgba(208,107,107,0.30), rgba(208,107,107,0.09))", fg: "#F0A9A9" },
+};
+function Chip({ tone, size = 34, iconSize = 16, children }: { tone: string; size?: number; iconSize?: number; children: React.ReactNode }) {
+  const t = TONES[tone] ?? TONES.accent;
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: Math.round(size * 0.36), flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: t.bg, color: t.fg, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+    }}>
+      {children}
+    </div>
+  );
+}
+
+/* Category → tone, so existing document categories get a consistent colour
+   without inventing any new fields. */
+const DOC_TONE: Record<string, string> = { legal: "accent", financial: "mint", digital: "sky", medical: "warn", personal: "good" };
+const NOTIF_TONE: Record<string, string> = { info: "sky", success: "good", warning: "warn", error: "critical" };
+const NOTIF_ICON: Record<string, React.ReactNode> = {
+  info: <Bell size={15} />, success: <Check size={15} />, warning: <AlertTriangle size={15} />, error: <AlertCircle size={15} />,
+};
+
 const DASH_CSS = `
 .fpd-dash{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-dash *{box-sizing:border-box;}
-.fpd-dash-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
-.fpd-dash .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+.fpd-dash-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.02;mix-blend-mode:overlay;background-image:${GRAIN};}
+.fpd-dash .wrap{max-width:1340px;margin:0 auto;padding:30px 34px 30px;display:flex;flex-direction:column;gap:24px;position:relative;z-index:1;}
 
-.fpd-dash .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-dash .card.pad{padding:22px;}
-.fpd-dash .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.fpd-dash .sec-title{font-size:13px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;}
-.fpd-dash .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
-.fpd-dash .sec-link{color:${MUTED};font-size:11.5px;font-weight:500;display:inline-flex;align-items:center;gap:4px;transition:color .18s;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-dash .sec-link:hover{color:#6FAE8B;}
-.fpd-dash .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};}
+.fpd-dash .card{background:${SURFACE2};border:1px solid ${LINE_SOFT};border-radius:24px;}
+.fpd-dash .card.pad{padding:30px;}
+.fpd-dash .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px;}
+.fpd-dash .sec-title{font-size:16px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);}
+.fpd-dash .sec-title .tick{width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+.fpd-dash .sec-link{color:${SOFT};font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:color .15s,background .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:5px 10px;margin:-5px -10px;border-radius:99px;}
+.fpd-dash .sec-link:hover{color:${MINT};background:rgba(111,174,139,0.1);}
 
 /* header */
 .fpd-dash .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.fpd-dash .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-dash .pg-sub{color:${MUTED};font-size:13px;}
-.fpd-dash .head-r{display:flex;align-items:center;gap:14px;}
+.fpd-dash .pg-h1{font-size:31px;color:${TEXT};font-weight:600;margin:7px 0;letter-spacing:-0.01em;font-family:var(--font-display);}
+.fpd-dash .pg-h1 .accent-name{color:${ACCENT2};}
+.fpd-dash .pg-sub{color:${SOFT};font-size:14.5px;line-height:1.5;}
+.fpd-dash .head-r{display:flex;align-items:center;gap:16px;}
 .fpd-dash .head-meta{text-align:right;line-height:1.35;}
-.fpd-dash .head-meta .a{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:${FAINT};}
-.fpd-dash .head-meta .b{font-size:12px;color:${SOFT};font-family:var(--font-mono);}
-.fpd-dash .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .head-meta .a{font-size:10.5px;color:${FAINT};}
+.fpd-dash .head-meta .b{font-size:12.5px;color:${SOFT};}
+.fpd-dash .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:99px;background:linear-gradient(180deg,${ACCENT_D},${ACCENT});color:#fff;font-size:13px;font-weight:600;box-shadow:0 14px 30px -12px rgba(91,110,225,0.85),inset 0 1px 0 rgba(255,255,255,0.18);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-dash .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* storage alert */
-.fpd-dash .salert{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:12px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.24);}
-.fpd-dash .salert .msg{flex:1;font-size:13px;}
-.fpd-dash .salert button{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;background:rgba(217,165,94,0.16);color:${WARN};font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .salert{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:16px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);}
+.fpd-dash .salert .msg{flex:1;font-size:13.5px;}
+.fpd-dash .salert button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;background:rgba(217,165,94,0.16);color:${WARN};font-size:12.5px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
 
-/* readiness band */
-.fpd-dash .ready{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:26px;padding:22px 26px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.16);}
-.fpd-dash .ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
+/* hero row */
+.fpd-dash .hero-grid{display:grid;grid-template-columns:1.65fr 1fr;gap:20px;align-items:stretch;}
+@media (max-width:1080px){.fpd-dash .hero-grid{grid-template-columns:1fr;}}
+.fpd-dash .ready{display:flex;align-items:center;gap:34px;padding:32px 34px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.18);}
+@media (max-width:640px){.fpd-dash .ready{flex-direction:column;align-items:flex-start;gap:22px;}}
+.fpd-dash .ring-col{display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0;}
+.fpd-dash .ring-wrap{position:relative;width:132px;height:132px;flex-shrink:0;}
 .fpd-dash .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.fpd-dash .ring-em{width:30px;height:30px;border-radius:9px;background:rgba(91,110,225,0.12);border:1px solid rgba(91,110,225,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);color:#6FAE8B;}
-.fpd-dash .ring-center b{font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};line-height:1;}
-.fpd-dash .ready-mid{min-width:200px;border-right:1px solid rgba(255,255,255,0.34);padding-right:26px;}
-.fpd-dash .ready-st{display:inline-flex;align-items:center;gap:7px;margin-bottom:9px;}
-.fpd-dash .ready-st .d{width:6px;height:6px;border-radius:50%;}
-.fpd-dash .ready-st span{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.15em;}
-.fpd-dash .ready-mid h2{font-size:19px;font-weight:600;color:${TEXT};margin-bottom:6px;letter-spacing:-0.01em;font-family:var(--font-display);}
-.fpd-dash .ready-mid p{color:${MUTED};font-size:12.5px;max-width:240px;}
-.fpd-dash .finish{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:9px 15px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
+.fpd-dash .ring-em{margin-bottom:6px;}
+.fpd-dash .ring-center b{font-family:var(--font-display);font-size:21px;font-weight:600;color:${TEXT};line-height:1;}
+.fpd-dash .ring-tag{font-size:11.5px;font-weight:600;}
+.fpd-dash .ready-info{flex:1;min-width:0;}
+.fpd-dash .ready-info h2{font-size:24px;font-weight:600;color:${TEXT};margin-bottom:8px;letter-spacing:-0.01em;font-family:var(--font-display);}
+.fpd-dash .ready-info p{color:${SOFT};font-size:14px;line-height:1.6;max-width:440px;margin-bottom:16px;}
+.fpd-dash .finish{display:inline-flex;align-items:center;gap:7px;margin-bottom:18px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,${ACCENT_D},${ACCENT});color:#fff;font-size:12.5px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-dash .finish:hover{filter:brightness(1.08);}
-.fpd-dash .ess-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px;}
-.fpd-dash .ess{display:flex;align-items:center;gap:10px;white-space:nowrap;padding:7px 11px;border-radius:9px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.34);cursor:pointer;text-align:left;width:100%;transition:border-color .18s,background .18s;font-family:var(--font-body);}
-.fpd-dash .ess:hover{border-color:rgba(91,110,225,0.3);background:rgba(91,110,225,0.06);}
-.fpd-dash .ess .ck{width:17px;height:17px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-dash .ess .ck.done{background:rgba(95,190,145,0.15);border:1px solid rgba(95,190,145,0.32);color:#D99A6B;}
-.fpd-dash .ess .ck.todo{background:transparent;border:1px solid ${FAINT};}
-.fpd-dash .ess .lbl{font-size:12px;color:${SOFT};}
-@media (max-width:1240px){.fpd-dash .ready{grid-template-columns:auto 1fr;}.fpd-dash .ready-mid{border-right:none;padding-right:0;}.fpd-dash .ess-grid{grid-column:1 / -1;}}
+.fpd-dash .ess-list{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+@media (max-width:640px){.fpd-dash .ess-list{width:100%;}}
+.fpd-dash .ess{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};cursor:pointer;text-align:left;width:100%;transition:border-color .15s,background .15s,transform .15s;font-family:var(--font-body);}
+.fpd-dash .ess:hover{border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.06);transform:translateY(-1px);}
+.fpd-dash .ess .lbl{font-size:13px;color:${SOFT};}
 
-/* KPI ledger */
-.fpd-dash .kstrip{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;}
-.fpd-dash .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;transition:background .18s;text-align:left;overflow:hidden;background:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-dash .kcell:first-child{border-left:none;}
-.fpd-dash .kcell:hover{background:rgba(255,255,255,0.02);}
-.fpd-dash .kcell::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,${ACCENT},transparent);transform:scaleX(0);transform-origin:left;transition:transform .18s;}
-.fpd-dash .kcell:hover::after{transform:scaleX(1);}
-.fpd-dash .kcell.hl{background:linear-gradient(180deg,rgba(91,110,225,0.15),rgba(91,110,225,0.04));}
-.fpd-dash .kcell.hl:hover{background:linear-gradient(180deg,rgba(91,110,225,0.19),rgba(91,110,225,0.06));}
-.fpd-dash .kcell.hl::after{transform:scaleX(1);background:linear-gradient(90deg,${ACCENT2},${ACCENT});}
-.fpd-dash .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-dash .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-dash .kcell.hl .klbl{color:#6FAE8B;}
-.fpd-dash .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-dash .kcell.hl .kico{background:rgba(91,110,225,0.12);border-color:rgba(91,110,225,0.36);color:#FFFFFF;}
-.fpd-dash .kcell .kval{font-family:var(--font-display);font-size:27px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-dash .kcell.hl .kval{color:#6FAE8B;}
-.fpd-dash .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
-.fpd-dash .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-dash .kstrip{grid-template-columns:1fr 1fr;}.fpd-dash .kcell:nth-child(3){border-left:none;}.fpd-dash .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+/* at-a-glance stat block */
+.fpd-dash .kpi-stack{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:100%;}
+@media (max-width:520px){.fpd-dash .kpi-stack{grid-template-columns:1fr;}}
+.fpd-dash .kpi-mini{display:flex;align-items:center;gap:13px;padding:18px 16px;border-radius:15px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};transition:background .15s,border-color .15s,transform .15s;height:100%;width:100%;text-align:left;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .kpi-mini:hover{background:${SURFACE2};border-color:${LINE_SOFT_2};transform:translateY(-1px);}
+.fpd-dash .kpi-mini.hl{background:linear-gradient(135deg,rgba(91,110,225,0.18),transparent 75%);border-color:rgba(91,110,225,0.32);}
+.fpd-dash .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-dash .kpi-mini-val{font-family:var(--font-display);font-size:21px;font-weight:600;color:${TEXT};line-height:1.15;font-variant-numeric:tabular-nums;}
+.fpd-dash .kpi-mini-lbl{font-size:11px;color:${FAINT};margin-top:4px;}
+.fpd-dash .kpi-mini-sub{font-size:11px;color:${SOFT};margin-top:4px;display:flex;align-items:center;gap:5px;}
+.fpd-dash .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 
-/* bento */
-.fpd-dash .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:18px;align-items:stretch;}
-.fpd-dash .col{display:flex;flex-direction:column;gap:18px;min-width:0;}
-@media (max-width:1080px){.fpd-dash .bento{grid-template-columns:1fr;}}
+/* second row: two balanced columns */
+.fpd-dash .tri-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:stretch;}
+.fpd-dash .stack-col{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.fpd-dash .stack-col>.card:last-child{flex:1;display:flex;flex-direction:column;}
+.fpd-dash .qa-list,.fpd-dash .notif-list{flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+@media (max-width:900px){.fpd-dash .tri-grid{grid-template-columns:1fr;}.fpd-dash .stack-col>.card:last-child{flex:initial;}}
 
 /* storage */
-.fpd-dash .stor-fig{display:flex;align-items:baseline;gap:9px;margin-bottom:16px;}
+.fpd-dash .stor-fig{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .fpd-dash .stor-fig .big{font-family:var(--font-display);font-size:28px;font-weight:600;color:${TEXT};letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-dash .stor-fig .of{color:${MUTED};font-size:13px;}
-.fpd-dash .stor-fig .free{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:${SOFT};padding:4px 10px;border-radius:7px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
-.fpd-dash .meter{display:flex;height:9px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,0.05);margin-bottom:12px;gap:1.5px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
+.fpd-dash .stor-fig .of{color:${FAINT};font-size:13.5px;}
+.fpd-dash .stor-fig .free{margin-left:auto;font-size:11.5px;color:${SOFT};padding:5px 11px;border-radius:99px;background:${SURFACE2};border:1px solid ${LINE_SOFT};}
+.fpd-dash .meter{display:flex;height:11px;border-radius:99px;overflow:hidden;background:${SURFACE2};margin-bottom:14px;gap:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.4);}
 .fpd-dash .meter i{display:block;height:100%;}
-/* used / free split — the quick "how much is left" read */
-.fpd-dash .uf{display:flex;gap:20px;margin-bottom:20px;}
+.fpd-dash .uf{display:flex;gap:22px;margin-bottom:20px;flex-wrap:wrap;}
 .fpd-dash .uf-i{display:flex;align-items:center;gap:7px;font-size:12px;color:${SOFT};}
-.fpd-dash .uf-i b{font-family:var(--font-mono);color:${TEXT};font-weight:600;font-variant-numeric:tabular-nums;margin-left:1px;}
-.fpd-dash .uf-i i{font-family:var(--font-mono);font-style:normal;color:${MUTED};font-size:11px;}
+.fpd-dash .uf-i b{font-family:var(--font-body);color:${TEXT};font-weight:600;margin-left:1px;font-variant-numeric:tabular-nums;}
 .fpd-dash .uf-d{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
 .fpd-dash .uf-d.used{background:${ACCENT2};}
-.fpd-dash .uf-d.free{background:transparent;border:1.5px solid ${FREE};}
-.fpd-dash .leg{width:100%;border-collapse:collapse;}
-.fpd-dash .leg td{padding:8.5px 0;border-top:1px solid rgba(255,255,255,0.34);font-size:12.5px;}
-.fpd-dash .leg tr:first-child td{border-top:none;}
-.fpd-dash .leg .sw{width:22px;}
-.fpd-dash .leg .sw span{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;}
-.fpd-dash .leg .nm{color:${SOFT};}
-.fpd-dash .leg .gb{text-align:right;color:${TEXT};font-family:var(--font-mono);font-size:12px;width:72px;font-variant-numeric:tabular-nums;}
-.fpd-dash .leg .pc{text-align:right;color:${MUTED};font-family:var(--font-mono);font-size:11px;width:58px;font-variant-numeric:tabular-nums;}
-.fpd-dash .trend{margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-dash .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.fpd-dash .trend-head .t{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-dash .trend-head .v{font-family:var(--font-mono);font-size:11px;color:#D99A6B;}
+.fpd-dash .uf-d.free{background:transparent;border:1.5px solid ${FAINT};}
+.fpd-dash .leg{width:100%;}
+.fpd-dash .leg-row{display:flex;align-items:center;gap:11px;padding:10px 6px;border-top:1px solid ${LINE_SOFT};font-size:12.5px;border-radius:9px;transition:background .15s;}
+.fpd-dash .leg-row:first-child{border-top:none;}
+.fpd-dash .leg-row .sw{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+.fpd-dash .leg-row .nm{color:${SOFT};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fpd-dash .leg-row .gb{color:${TEXT};font-variant-numeric:tabular-nums;}
+.fpd-dash .leg-row .pc{color:${FAINT};width:48px;text-align:right;font-variant-numeric:tabular-nums;}
+.fpd-dash .trend{margin-top:18px;padding-top:18px;border-top:1px solid ${LINE_SOFT};}
+.fpd-dash .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.fpd-dash .trend-head .t{font-size:11px;color:${FAINT};font-weight:600;}
+.fpd-dash .trend-head .v{font-size:11px;color:${MINT};font-weight:600;}
 .fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
-.fpd-dash .months span{font-family:var(--font-mono);font-size:9.5px;color:${FAINT};}
+.fpd-dash .months span{font-size:10px;color:${FAINT};}
 
-/* documents table */
-.fpd-dash .tbl{width:100%;border-collapse:collapse;}
-.fpd-dash .tbl thead th{text-align:left;font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT};font-weight:600;padding:0 0 12px;border-bottom:1px solid rgba(255,255,255,0.34);}
-.fpd-dash .tbl thead th.r{text-align:right;}
-.fpd-dash .tbl tbody td{padding:12px 0;border-top:1px solid rgba(255,255,255,0.34);vertical-align:middle;}
-.fpd-dash .tbl tbody tr:first-child td{border-top:none;}
-.fpd-dash .doc-c{display:flex;align-items:center;gap:12px;min-width:0;}
-.fpd-dash .doc-ico{width:31px;height:31px;border-radius:8px;flex-shrink:0;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${MUTED};display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
-.fpd-dash .doc-nm{color:${TEXT};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fpd-dash .td-sz,.fpd-dash .td-dt{color:${MUTED};font-family:var(--font-mono);font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums;}
-.fpd-dash .td-st{text-align:right;}
-.fpd-dash .st-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.04em;}
-.fpd-dash .st-badge .dt{width:5px;height:5px;border-radius:50%;}
-.fpd-dash .drow{cursor:pointer;transition:background .18s;}
-.fpd-dash .drow:hover td{background:rgba(255,255,255,0.018);}
+/* documents list */
+.fpd-dash .doc-list{display:flex;flex-direction:column;}
+.fpd-dash .doc-row{display:flex;align-items:center;gap:13px;padding:13px 8px;border-top:1px solid ${LINE_SOFT};border-radius:12px;cursor:pointer;transition:background .15s;background:none;border-left:none;border-right:none;border-bottom:none;text-align:left;width:100%;font-family:var(--font-body);}
+.fpd-dash .doc-row:first-child{border-top:none;}
+.fpd-dash .doc-row:hover{background:${SURFACE2};}
+.fpd-dash .doc-info{flex:1;min-width:0;}
+.fpd-dash .doc-nm{color:${TEXT};font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fpd-dash .doc-meta{font-size:11.5px;color:${FAINT};margin-top:3px;}
+.fpd-dash .doc-status{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;flex-shrink:0;white-space:nowrap;}
 
 /* notifications */
-.fpd-dash .ncard{display:flex;flex-direction:column;flex:1;}
-.fpd-dash .ncard .notif-list{flex:1;display:flex;flex-direction:column;justify-content:space-between;}
-.fpd-dash .notif{display:flex;gap:12px;padding:13px 0;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-dash .notif:first-of-type{border-top:none;padding-top:2px;}
-.fpd-dash .notif .d{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;}
-.fpd-dash .notif .nt{font-size:12.5px;font-weight:600;color:${TEXT};}
-.fpd-dash .notif.read .nt{color:${SOFT};font-weight:500;}
-.fpd-dash .notif .nm{color:${MUTED};font-size:11.5px;line-height:1.5;margin-top:2px;}
-.fpd-dash .notif .ntime{color:${FAINT};font-size:9.5px;margin-top:4px;font-family:var(--font-mono);letter-spacing:0.03em;}
+.fpd-dash .notif{display:flex;gap:12px;padding:14px 10px;border-top:1px solid ${LINE_SOFT};border-radius:12px;position:relative;}
+.fpd-dash .notif:first-child{border-top:none;}
+.fpd-dash .notif.unread{background:${SURFACE2};}
+.fpd-dash .notif.unread::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
+.fpd-dash .notif-title{font-size:13px;font-weight:600;color:${TEXT};}
+.fpd-dash .notif.read .notif-title{color:${SOFT};font-weight:500;}
+.fpd-dash .notif-msg{color:${SOFT};font-size:12px;line-height:1.55;margin-top:3px;}
+.fpd-dash .notif-time{color:${FAINT};font-size:10.5px;margin-top:4px;}
 
 /* quick actions */
-.fpd-dash .qa{display:flex;flex-direction:column;}
-.fpd-dash .qa-btn{display:flex;align-items:center;gap:13px;padding:13px 4px;border-top:1px solid rgba(255,255,255,0.34);text-align:left;transition:padding-left .18s;background:none;border-left:none;border-right:none;border-bottom:none;cursor:pointer;font-family:var(--font-body);width:100%;}
-.fpd-dash .qa-btn:first-child{border-top:none;padding-top:4px;}
-.fpd-dash .qa-btn:hover{padding-left:8px;}
-.fpd-dash .qa-ico{width:33px;height:33px;border-radius:9px;flex-shrink:0;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${SOFT};display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);transition:border-color .18s,color .18s;}
-.fpd-dash .qa-btn:hover .qa-ico{border-color:rgba(91,110,225,0.4);color:#FFFFFF;}
-.fpd-dash .qa-btn .qt{flex:1;}
-.fpd-dash .qa-btn .qt b{display:block;font-size:12.5px;font-weight:600;color:${TEXT};}
-.fpd-dash .qa-btn .qt i{display:block;font-style:normal;font-size:11px;color:${MUTED};margin-top:1px;}
-.fpd-dash .qa-btn .qarrow{color:${FAINT};transition:color .18s,transform .18s;display:flex;}
-.fpd-dash .qa-btn:hover .qarrow{color:#6FAE8B;transform:translateX(2px);}
+.fpd-dash .qa-btn{display:flex;align-items:center;gap:14px;padding:13px 9px;border-radius:14px;text-align:left;transition:background .15s,padding-left .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
+.fpd-dash .qa-btn:hover{background:${SURFACE2};padding-left:11px;}
+.fpd-dash .qa-txt{flex:1;}
+.fpd-dash .qa-txt b{display:block;font-size:13px;font-weight:600;color:${TEXT};}
+.fpd-dash .qa-txt i{display:block;font-style:normal;font-size:11px;color:${FAINT};margin-top:2px;}
+.fpd-dash .qa-arrow{color:${FAINT};transition:color .15s,transform .15s;display:flex;}
+.fpd-dash .qa-btn:hover .qa-arrow{color:${MINT};transform:translateX(2px);}
 `;
 
 export function UserDashboard({ onNavigate }: UserDashboardProps) {
@@ -227,40 +235,40 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const nextUp = essentials.find(e => !e.done);
 
   const unread = notifications.filter(n => !n.read).length;
-  const notifDot: Record<string, string> = { info: ACCENT2, success: POS, warning: WARN, error: NEG };
 
   const statCards = [
-    { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={13} />, page: "file-cabinet", dot: WARN, hl: false },
-    { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={13} />, page: "contacts-legacy", dot: POS, hl: false },
-    { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={13} />, page: "storage-usage", dot: ACCENT2, hl: false },
-    { label: "Referral Earnings", value: "$284.50", sub: "This month", icon: <TrendingUp size={13} />, page: "affiliate", dot: POS, hl: true },
+    { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN, hl: false },
+    { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS, hl: false },
+    { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2, hl: false },
+    { label: "Referral Earnings", value: "$284.50", sub: "This month", icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: POS, hl: true },
   ];
 
   const quickActions = [
-    { icon: <Plus size={15} />, label: "Add document", sub: "Upload to your vault", page: "file-cabinet" },
-    { icon: <Users size={15} />, label: "Add contact", sub: "Assign legacy access", page: "contacts-legacy" },
-    { icon: <HardDrive size={15} />, label: "Check storage", sub: "Review usage & billing", page: "storage-usage" },
-    { icon: <TrendingUp size={15} />, label: "Refer & earn", sub: "Share your link", page: "affiliate" },
+    { icon: <Plus size={16} />, label: "Add document", sub: "Upload to your vault", page: "file-cabinet", tone: "accent" },
+    { icon: <Users size={16} />, label: "Add contact", sub: "Assign legacy access", page: "contacts-legacy", tone: "good" },
+    { icon: <HardDrive size={16} />, label: "Check storage", sub: "Review usage & billing", page: "storage-usage", tone: "sky" },
+    { icon: <TrendingUp size={16} />, label: "Refer & earn", sub: "Share your link", page: "affiliate", tone: "mint" },
   ];
 
   /* ── Readiness ring geometry ── */
-  const RING = 96, RC = RING / 2, RR = 43, RST = 5;
+  const RING = 132, RC = RING / 2, RR = 57, RST = 7;
   const RCIRC = 2 * Math.PI * RR;
   const ROFF = RCIRC * (1 - readyPct / 100);
 
   /* ── 6-month trend area chart ── */
   const vals = storageHistory.map(d => d.used);
-  const CW = 300, CH = 92, cpt = 8, cpb = 8, innerH = CH - cpt - cpb;
+  const CW = 300, CH = 88, cpt = 8, cpb = 8, innerH = CH - cpt - cpb;
   const maxV = Math.max(18, Math.ceil(Math.max(...vals) / 6) * 6);
   const cx = (i: number) => (i / (vals.length - 1)) * CW;
   const cy = (v: number) => cpt + (1 - v / maxV) * innerH;
   let linePath = "";
   vals.forEach((v, i) => { linePath += `${i ? "L" : "M"} ${cx(i).toFixed(1)} ${cy(v).toFixed(1)} `; });
   const areaPath = `M ${cx(0).toFixed(1)} ${CH - cpb} ${linePath}L ${CW} ${CH - cpb} Z`;
-  const gridYs = [maxV / 3, (2 * maxV) / 3, maxV].map(g => cy(g));
+  const gridYs = [0.33, 0.67, 1].map(f => cpt + (1 - f) * innerH);
   const trendDelta = (vals[vals.length - 1] - vals[0]).toFixed(1);
+  const lastX = cx(vals.length - 1), lastY = cy(vals[vals.length - 1]);
 
-  const todayLong = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase();
+  const todayLong = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   return (
     <div className="fpd-dash">
@@ -271,8 +279,8 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         {/* ── Header ── */}
         <div className="pg-head">
           <div>
-            <div className="eyebrow">{todayLong}</div>
-            <h1 className="pg-h1">Welcome back, {firstName}</h1>
+            <div className="eyebrow" style={{ fontSize: 12, color: FAINT, marginBottom: 6 }}>{todayLong}</div>
+            <h1 className="pg-h1">Welcome back, <span className="accent-name">{firstName}</span></h1>
             <div className="pg-sub">
               {sealed
                 ? "Your legacy is fully prepared, sealed, and encrypted end-to-end."
@@ -285,7 +293,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
               <div className="b">2 hours ago</div>
             </div>
             <button className="btn-primary" onClick={() => onNavigate("file-cabinet")}>
-              <Plus size={14} /> Add to vault
+              <Plus size={15} /> Add to vault
             </button>
           </div>
         </div>
@@ -293,7 +301,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         {/* ── Storage threshold alert (only near the limit) ── */}
         {pct >= 80 && (
           <div className="salert">
-            <AlertTriangle size={15} color={WARN} />
+            <AlertTriangle size={16} color={WARN} />
             <div className="msg">
               <span style={{ color: WARN, fontWeight: 700 }}>Storage at {pct}% </span>
               <span style={{ color: SOFT }}>— approaching your {total} GB limit.</span>
@@ -302,78 +310,78 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
         )}
 
-        {/* ── Readiness band ── */}
-        <div className="card ready glow-surface">
-          <div className="ring-wrap">
-            <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
-              <defs>
-                <linearGradient id="fpdRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor={ACCENT2} />
-                  <stop offset="100%" stopColor={ACCENT} />
-                </linearGradient>
-              </defs>
-              <circle cx={RC} cy={RC} r={RR} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={RST} />
-              <circle
-                cx={RC} cy={RC} r={RR} fill="none" stroke="url(#fpdRing)" strokeWidth={RST}
-                strokeLinecap="round" strokeDasharray={RCIRC} strokeDashoffset={ROFF}
-                transform={`rotate(-90 ${RC} ${RC})`}
-                style={{ transition: "stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)" }}
-              />
-            </svg>
-            <div className="ring-center">
-              <span className="ring-em"><ShieldCheck size={16} /></span>
-              <b>{readyPct}%</b>
-            </div>
-          </div>
-
-          <div className="ready-mid">
-            <div className="ready-st">
-              <span className="d" style={{ background: sealed ? POS : WARN, boxShadow: `0 0 8px ${sealed ? "rgba(95,190,145,0.7)" : "rgba(217,165,94,0.7)"}` }} />
-              <span style={{ color: sealed ? "#D99A6B" : WARN }}>{sealed ? "SECURED & SEALED" : "SEALING IN PROGRESS"}</span>
-            </div>
-            <h2>{sealed ? "Vault fully prepared" : `Vault ${readyPct}% prepared`}</h2>
-            <p>
-              {sealed
-                ? <>All {essentials.length} estate essentials complete, encrypted &amp; sealed for those you love.</>
-                : <>{doneCount} of {essentials.length} essentials in place.{nextUp ? <> Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
-            </p>
-            {!sealed && nextUp && (
-              <button className="finish" onClick={() => onNavigate(nextUp.page)}>
-                Finish your vault <ArrowRight size={13} />
-              </button>
-            )}
-          </div>
-
-          <div className="ess-grid">
-            {essentials.map(e => (
-              <button key={e.label} className="ess" onClick={() => onNavigate(e.page)}>
-                <span className={`ck ${e.done ? "done" : "todo"}`}>
-                  {e.done && <Check size={10} strokeWidth={3} />}
-                </span>
-                <span className="lbl">{e.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
-          {statCards.map(card => (
-            <button key={card.label} className={`kcell ${card.hl ? "hl" : ""}`} onClick={() => onNavigate(card.page)}>
-              <div className="khead">
-                <span className="klbl">{card.label}</span>
-                <span className="kico">{card.icon}</span>
+        {/* ── Hero row: readiness (wide) + at-a-glance stats (narrow) ── */}
+        <div className="hero-grid">
+          <div className="card ready glow-surface">
+            <div className="ring-col">
+              <div className="ring-wrap">
+                <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
+                  <defs>
+                    <linearGradient id="fpdRing" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={ACCENT2} />
+                      <stop offset="100%" stopColor={ACCENT} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx={RC} cy={RC} r={RR} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={RST} />
+                  <circle
+                    cx={RC} cy={RC} r={RR} fill="none" stroke="url(#fpdRing)" strokeWidth={RST}
+                    strokeLinecap="round" strokeDasharray={RCIRC} strokeDashoffset={ROFF}
+                    transform={`rotate(-90 ${RC} ${RC})`}
+                    style={{ transition: "stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)" }}
+                  />
+                </svg>
+                <div className="ring-center">
+                  <span className="ring-em"><Chip tone="good" size={36} iconSize={19}><ShieldCheck size={19} /></Chip></span>
+                  <b>{readyPct}%</b>
+                </div>
               </div>
-              <div className="kval">{card.value}</div>
-              <div className="ksub"><span className="dt" style={{ background: card.dot }} />{card.sub}</div>
-            </button>
-          ))}
+              <span className="ring-tag" style={{ color: sealed ? MINT : WARN }}>{sealed ? "Sealed" : "In progress"}</span>
+            </div>
+
+            <div className="ready-info">
+              <h2>{sealed ? "Vault fully prepared" : `Vault ${readyPct}% prepared`}</h2>
+              <p>
+                {sealed
+                  ? <>All {essentials.length} estate essentials are complete, encrypted &amp; sealed for those you love.</>
+                  : <>{doneCount} of {essentials.length} essentials in place.{nextUp ? <> Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
+              </p>
+              {!sealed && nextUp && (
+                <button className="finish" onClick={() => onNavigate(nextUp.page)}>
+                  Finish your vault <ArrowRight size={13} />
+                </button>
+              )}
+              <div className="ess-list">
+                {essentials.map(e => (
+                  <button key={e.label} className="ess" onClick={() => onNavigate(e.page)}>
+                    <Chip tone={e.done ? "good" : "accent"} size={18} iconSize={10}>
+                      {e.done && <Check size={10} strokeWidth={3} />}
+                    </Chip>
+                    <span className="lbl">{e.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card pad glow-surface">
+            <div className="kpi-stack">
+              {statCards.map(card => (
+                <button key={card.label} className={`kpi-mini ${card.hl ? "hl" : ""}`} onClick={() => onNavigate(card.page)}>
+                  <Chip tone={card.tone} size={36} iconSize={16}>{card.icon}</Chip>
+                  <div className="kpi-mini-txt">
+                    <div className="kpi-mini-val">{card.value}</div>
+                    <div className="kpi-mini-lbl">{card.label}</div>
+                    <div className="kpi-mini-sub"><span className="dt" style={{ background: card.dot }} />{card.sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* ── Bento: storage + documents (left) · notifications + quick actions (right) ── */}
-        <div className="bento">
-          {/* LEFT */}
-          <div className="col">
+        {/* ── Second row: Storage + Documents (left) · Quick Actions + Notifications (right) ── */}
+        <div className="tri-grid">
+          <div className="stack-col">
             {/* Storage & Usage */}
             <div className="card pad glow-surface">
               <div className="sec-head">
@@ -392,30 +400,28 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(146,156,188,0.22)" }} />
               </div>
               <div className="uf">
-                <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b><i>{pct}%</i></div>
-                <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b><i>{Math.max(0, 100 - pct)}%</i></div>
+                <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b></div>
+                <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b></div>
               </div>
-              <table className="leg">
-                <tbody>
-                  {breakdown.map(seg => (
-                    <tr key={seg.key}>
-                      <td className="sw"><span style={{ background: seg.color }} /></td>
-                      <td className="nm">{seg.label}</td>
-                      <td className="gb">{seg.gb.toFixed(1)} GB</td>
-                      <td className="pc">{((seg.gb / used) * 100).toFixed(1)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="leg">
+                {breakdown.map(seg => (
+                  <div key={seg.key} className="leg-row">
+                    <span className="sw" style={{ background: seg.color }} />
+                    <span className="nm">{seg.label}</span>
+                    <span className="gb">{seg.gb.toFixed(1)} GB</span>
+                    <span className="pc">{((seg.gb / used) * 100).toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
               <div className="trend">
                 <div className="trend-head">
                   <span className="t">Usage · last 6 months</span>
                   <span className="v">+{trendDelta} GB</span>
                 </div>
-                <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 104, display: "block" }}>
+                <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 96, display: "block" }}>
                   <defs>
                     <linearGradient id="fpdArea" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(91,110,225,0.30)" />
+                      <stop offset="0%" stopColor="rgba(91,110,225,0.32)" />
                       <stop offset="100%" stopColor="rgba(91,110,225,0)" />
                     </linearGradient>
                   </defs>
@@ -423,8 +429,9 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                     <line key={i} x1="0" y1={y.toFixed(1)} x2={CW} y2={y.toFixed(1)} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
                   ))}
                   <path d={areaPath} fill="url(#fpdArea)" />
-                  <path d={linePath.trim()} fill="none" stroke="#5BA7D6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-                  <circle cx={cx(vals.length - 1).toFixed(1)} cy={cy(vals[vals.length - 1]).toFixed(1)} r="3.4" fill="#0A0F1A" stroke={ACCENT2} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <path d={linePath.trim()} fill="none" stroke={ACCENT2} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+                  <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="7" fill="rgba(91,110,225,0.25)" />
+                  <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="3.6" fill={ACCENT2} />
                 </svg>
                 <div className="months">
                   {storageHistory.map(d => <span key={d.month}>{d.month}</span>)}
@@ -438,74 +445,62 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                 <h3 className="sec-title"><span className="tick" />Recent Documents</h3>
                 <button className="sec-link" onClick={() => onNavigate("file-cabinet")}>View all <ArrowRight size={12} /></button>
               </div>
-              <table className="tbl">
-                <thead>
-                  <tr><th>Document</th><th className="r">Size</th><th className="r">Uploaded</th><th className="r">Status</th></tr>
-                </thead>
-                <tbody>
-                  {docs.slice(0, 5).map(doc => {
-                    const ok = doc.status === "verified";
-                    const col = ok ? POS : WARN;
-                    return (
-                      <tr key={doc.id} className="drow" onClick={() => onNavigate("file-cabinet")}>
-                        <td>
-                          <div className="doc-c">
-                            <div className="doc-ico"><FileText size={14} /></div>
-                            <span className="doc-nm">{doc.name}</span>
-                          </div>
-                        </td>
-                        <td className="td-sz">{doc.size} {doc.sizeUnit}</td>
-                        <td className="td-dt">{doc.uploaded}</td>
-                        <td className="td-st">
-                          <span className="st-badge" style={{ color: col }}>
-                            <span className="dt" style={{ background: col }} />
-                            {ok ? "Verified" : "Pending"}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="doc-list">
+                {docs.slice(0, 5).map(doc => {
+                  const ok = doc.status === "verified";
+                  const tone = DOC_TONE[doc.category] ?? "accent";
+                  return (
+                    <button key={doc.id} className="doc-row" onClick={() => onNavigate("file-cabinet")}>
+                      <Chip tone={tone} size={36} iconSize={15}><FileText size={15} /></Chip>
+                      <div className="doc-info">
+                        <div className="doc-nm">{doc.name}</div>
+                        <div className="doc-meta">{doc.size} {doc.sizeUnit} · {doc.uploaded}</div>
+                      </div>
+                      <span className="doc-status" style={{ background: ok ? "rgba(95,190,145,0.15)" : "rgba(217,165,94,0.15)", color: ok ? POS : WARN }}>
+                        {ok ? "Verified" : "Pending"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="col">
-            {/* Notifications */}
-            <div className="card pad ncard glow-surface">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />Notifications</h3>
-                <span className="sec-link" style={{ cursor: "default", color: unread ? "#6FAE8B" : MUTED }}>
-                  <Bell size={12} /> {unread} new
-                </span>
-              </div>
-              <div className="notif-list">
-                {notifications.slice(0, 5).map(n => (
-                  <div key={n.id} className={`notif ${n.read ? "read" : ""}`}>
-                    <div className="d" style={{ background: n.read ? FAINT : (notifDot[n.type] ?? ACCENT2) }} />
-                    <div style={{ minWidth: 0 }}>
-                      <div className="nt">{n.title}</div>
-                      <div className="nm">{n.message}</div>
-                      <div className="ntime">{n.time}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+          <div className="stack-col">
             {/* Quick Actions */}
             <div className="card pad glow-surface">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Quick Actions</h3>
               </div>
-              <div className="qa">
+              <div className="qa-list">
                 {quickActions.map(a => (
                   <button key={a.label} className="qa-btn" onClick={() => onNavigate(a.page)}>
-                    <span className="qa-ico">{a.icon}</span>
-                    <span className="qt"><b>{a.label}</b><i>{a.sub}</i></span>
-                    <span className="qarrow"><ArrowRight size={14} /></span>
+                    <Chip tone={a.tone} size={36} iconSize={16}>{a.icon}</Chip>
+                    <span className="qa-txt"><b>{a.label}</b><i>{a.sub}</i></span>
+                    <span className="qa-arrow"><ArrowRight size={14} /></span>
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="card pad glow-surface">
+              <div className="sec-head">
+                <h3 className="sec-title"><span className="tick" />Notifications</h3>
+                <span className="sec-link" style={{ cursor: "default", color: unread ? MINT : SOFT }}>
+                  <Bell size={12} /> {unread} new
+                </span>
+              </div>
+              <div className="notif-list">
+                {notifications.slice(0, 5).map(n => (
+                  <div key={n.id} className={`notif ${n.read ? "read" : "unread"}`}>
+                    <Chip tone={NOTIF_TONE[n.type] ?? "sky"} size={32} iconSize={15}>{NOTIF_ICON[n.type] ?? <Bell size={15} />}</Chip>
+                    <div style={{ minWidth: 0 }}>
+                      <div className="notif-title">{n.title}</div>
+                      <div className="notif-msg">{n.message}</div>
+                      <div className="notif-time">{n.time}</div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

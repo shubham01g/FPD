@@ -221,7 +221,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         {!collapsed && <span style={{ fontSize: 13, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
         {!collapsed && item.badge && (
           <span style={{
-            fontSize: 8.5, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.04em",
+            fontSize: 9, fontWeight: 700, letterSpacing: "0.02em",
             background: active ? "rgba(255,255,255,0.22)" : "rgba(91,110,225,0.25)",
             color: active ? "#FFFFFF" : "#6FAE8B", padding: "2px 6px", borderRadius: 99,
           }}>{item.badge}</span>
@@ -298,7 +298,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
           {filteredGroups.map(group => (
             <div key={group.label} style={{ marginBottom: collapsed ? 6 : 14 }}>
               {!collapsed && (
-                <div style={{ fontSize: 9.5, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: FAINT, padding: "0 11px 6px" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: FAINT, padding: "0 11px 8px" }}>
                   {group.label}
                 </div>
               )}
@@ -343,7 +343,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               </div>
               <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}>
                 <div style={{ fontSize: 12.5, fontWeight: 650, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
-                <div style={{ fontSize: 10, color: "#6FAE8B", fontFamily: "var(--font-mono)" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
+                <div style={{ fontSize: 11, color: "#6FAE8B" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
               </div>
               <button onClick={onSignOut} title="Sign out" style={{ color: MUTED, display: "flex", flexShrink: 0 }}
                 onMouseEnter={e => e.currentTarget.style.color = "#FC8181"} onMouseLeave={e => e.currentTarget.style.color = MUTED}>
@@ -369,20 +369,20 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               {isMobile ? <Menu size={16}/> : collapsed ? <PanelLeft size={16}/> : <PanelLeftClose size={16}/>}
             </button>
             <div style={{ minWidth: 0 }}>
-              <div className="flex items-center gap-1.5" style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: FAINT, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              <div className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: FAINT }}>
                 <span>{meta.group}</span><ChevronRight size={10}/><span style={{ color: "#6FAE8B" }}>{meta.label}</span>
               </div>
-              <h1 style={{ fontSize: 17, fontWeight: 700, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
+              <h1 style={{ fontSize: 18, fontWeight: 600, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="hidden md:block" style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+            <div className="hidden md:block" style={{ color: MUTED, fontSize: 12, whiteSpace: "nowrap" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
             </div>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(72,187,120,0.1)", border: "1px solid rgba(72,187,120,0.25)" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: SUCCESS, boxShadow: `0 0 6px ${SUCCESS}` }}/>
-              <span style={{ color: "#D99A6B", fontSize: 10, fontFamily: "var(--font-mono)", fontWeight: 600 }}>VAULT ACTIVE</span>
+              <span style={{ color: "#D99A6B", fontSize: 11.5, fontWeight: 600 }}>Vault Active</span>
             </div>
 
             {onGoAdmin && (
@@ -440,7 +440,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                   <div style={{ height: "100%", width: `${storagePct}%`, borderRadius: 99, background: storagePct >= 90 ? "linear-gradient(90deg,#5B6EE1,#F6AD55)" : `linear-gradient(90deg,${ACCENT},${ACCENT2})` }}/>
                 </div>
               </div>
-              <span style={{ fontSize: 10.5, color: SOFT, fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{storagePct}%</span>
+              <span style={{ fontSize: 11.5, color: SOFT, whiteSpace: "nowrap" }}>{storagePct}%</span>
             </button>
           </div>
         </header>
