@@ -12,8 +12,14 @@
  * every title, date, amount and detail — is untouched; only the colours and
  * marker icons are restyled here so the calendar reads as one product with the
  * rest of the redesigned portal.
+ *
+ * Layout note: the "At a Glance" stat band and the month grid live in one
+ * left-hand column; the day panel and "Coming Up" rail live in a right-hand
+ * column pinned (via ResizeObserver) to exactly that column's real height —
+ * measured, not guessed — so neither side ever shows a stretched grid or a
+ * dead gap. The same pairing exists for the Agenda view's week list + rail.
  */
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, ChevronRight, ArrowRight, LayoutGrid, List, Info,
   CalendarDays, CalendarClock, AlertTriangle,
@@ -32,7 +38,6 @@ const FAINT  = "#929CBC";
 const ACCENT = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS    = "#5FBE91";
-const WARN   = "#D9A55E";
 const NEG    = "#D06B6B";
 
 /* Refined per-source treatment — one harmonised family instead of the old
@@ -50,6 +55,16 @@ const SRC: Record<EventSource, { color: string; Icon: IconCmp }> = {
   custom:    { color: "#97A2C6", Icon: Pin },         // slate blue
 };
 
+/* Icon-chip tone → colour, used for the "At a Glance" band — same gradient
+   language as the redesigned dashboard's stat chips. */
+const KPI_TONES: Record<string, { bg: string; fg: string }> = {
+  sky:      { bg: "linear-gradient(150deg, rgba(91,167,214,0.34), rgba(91,167,214,0.08))",   fg: "#9FD3EE" },
+  mint:     { bg: "linear-gradient(150deg, rgba(111,174,139,0.34), rgba(111,174,139,0.08))",  fg: "#A9DABC" },
+  good:     { bg: "linear-gradient(150deg, rgba(95,190,145,0.30), rgba(95,190,145,0.09))",    fg: "#A9E6C4" },
+  critical: { bg: "linear-gradient(150deg, rgba(208,107,107,0.32), rgba(208,107,107,0.08))",  fg: "#F0A9A9" },
+  violet:   { bg: "linear-gradient(150deg, rgba(126,107,216,0.34), rgba(126,107,216,0.08))",  fg: "#C9BFF0" },
+};
+
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const ALL_SOURCES = Object.keys(SOURCE_META) as EventSource[];
@@ -58,6 +73,31 @@ const fmtDate = (isoStr: string) => {
   const [y, m, d] = isoStr.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 };
+
+/** Every calendar cell across a month, including the leading/trailing days
+ *  borrowed from the previous/next month so week ranges always read correctly
+ *  (e.g. "Jun 28 – Jul 4"), then chunked into 7-day week rows. */
+function buildWeekRows(year: number, month: number): { label: string; isoDates: string[] }[] {
+  const lead = new Date(year, month, 1).getDay();
+  const total = daysInMonth(year, month);
+  const dates: Date[] = [];
+  for (let i = lead; i > 0; i--) dates.push(new Date(year, month, 1 - i));
+  for (let d = 1; d <= total; d++) dates.push(new Date(year, month, d));
+  while (dates.length % 7 !== 0) {
+    const last = dates[dates.length - 1];
+    dates.push(new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1));
+  }
+  const rows: { label: string; isoDates: string[] }[] = [];
+  for (let i = 0; i < dates.length; i += 7) {
+    const week = dates.slice(i, i + 7);
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    rows.push({
+      label: `${fmt(week[0])} – ${fmt(week[6])}`,
+      isoDates: week.map(d => iso(d.getFullYear(), d.getMonth(), d.getDate())),
+    });
+  }
+  return rows;
+}
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -68,7 +108,7 @@ const CAL_CSS = `
 .fpd-cal{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 62% -160px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-cal *{box-sizing:border-box;}
 .fpd-cal-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
-.fpd-cal .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+.fpd-cal .wrap{max-width:1360px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
 /* cards */
 .fpd-cal .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
@@ -89,82 +129,135 @@ const CAL_CSS = `
 
 /* segmented view toggle */
 .fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
-.fpd-cal .seg button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;text-transform:capitalize;}
+.fpd-cal .seg button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:14px;font-size:12px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;text-transform:capitalize;}
 .fpd-cal .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
-/* KPI ledger */
-.fpd-cal .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
-.fpd-cal .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
-.fpd-cal .kcell:first-child{border-left:none;}
-.fpd-cal .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-cal .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
-.fpd-cal .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-cal .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-cal .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
-.fpd-cal .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cal .kstrip{grid-template-columns:1fr 1fr;}.fpd-cal .kcell:nth-child(3){border-left:none;}.fpd-cal .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
+/* "At a Glance" band — plain flat card, same treatment as every other card.
+   A single clean cross-divider through the middle of the 2x2 grid instead of
+   per-cell borders (which misalign into broken segments). */
+.fpd-cal .band-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${FAINT};padding:20px 24px 2px;}
+.fpd-cal .kpi-grid{position:relative;display:grid;grid-template-columns:repeat(2,1fr);}
+.fpd-cal .kpi-grid::before{content:"";position:absolute;left:50%;top:10%;bottom:10%;width:1px;background:rgba(255,255,255,0.13);}
+.fpd-cal .kpi-grid::after{content:"";position:absolute;top:50%;left:24px;right:24px;height:1px;background:rgba(255,255,255,0.13);}
+.fpd-cal .kpi-col{padding:18px 24px;position:relative;}
+.fpd-cal .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;position:relative;}
+.fpd-cal .klbl{font-size:11.5px;font-weight:600;color:${MUTED};}
+.fpd-cal .kico{width:32px;height:32px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);position:relative;}
+.fpd-cal .kval{font-family:var(--font-display);font-size:23px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;position:relative;}
+.fpd-cal .ksub{font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;position:relative;}
+.fpd-cal .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:520px){.fpd-cal .kpi-grid{grid-template-columns:1fr;} .fpd-cal .kpi-grid::before,.fpd-cal .kpi-grid::after{display:none;} .fpd-cal .kpi-col:not(:first-child){border-top:1px solid rgba(255,255,255,0.13);}}
 
 /* filters */
 .fpd-cal .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.fpd-cal .filters .flabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:${FAINT};margin-right:2px;}
-.fpd-cal .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
+.fpd-cal .flabel{font-size:10.5px;font-weight:700;letter-spacing:0.1em;color:${FAINT};margin-right:2px;text-transform:uppercase;}
+.fpd-cal .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
 .fpd-cal .chip .cn{font-family:var(--font-mono);font-size:10.5px;opacity:.8;}
 .fpd-cal .chip.off{opacity:.48;}
 .fpd-cal .chip.off:hover{opacity:.72;}
 
-/* bento */
+/* bento — both sides sit in a .col. The right side's height is measured
+   from the left side (via ResizeObserver in JS) and applied directly, so the
+   two columns always match to the pixel with no CSS stretch/guesswork. */
 .fpd-cal .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:18px;align-items:start;}
-.fpd-cal .col{display:flex;flex-direction:column;gap:18px;min-width:0;}
-@media (max-width:1080px){.fpd-cal .bento{grid-template-columns:1fr;}}
+.fpd-cal .col{display:flex;flex-direction:column;gap:18px;min-width:0;overflow:hidden;}
+.fpd-cal .col>.card:last-child{flex:1;min-height:0;display:flex;flex-direction:column;}
+.fpd-cal .col>.card:last-child .evlist{flex:1;min-height:0;overflow-y:auto;padding-right:2px;margin-right:-2px;}
+@media (max-width:1080px){.fpd-cal .bento{grid-template-columns:1fr;} .fpd-cal .col{height:auto !important;} .fpd-cal .col>.card:last-child .evlist{overflow-y:visible;}}
 
-/* month grid */
+/* month grid — perfect squares. Width comes from the 7-column track; height
+   is locked to width via aspect-ratio, so cells can never be stretched
+   tall/narrow no matter what height the card around them ends up at. */
+.fpd-cal .gridcard{display:flex;flex-direction:column;}
 .fpd-cal .navbtn{width:32px;height:32px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
-.fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
-.fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
-.fpd-cal .dow span{text-align:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;color:${FAINT};padding:2px 0;}
-.fpd-cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
-.fpd-cal .cell:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.05);}
+.fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.45);color:#6FAE8B;}
+.fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:10px;}
+.fpd-cal .dow span{text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:${FAINT};padding:2px 0;}
+.fpd-cal .monthgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+.fpd-cal .cell{aspect-ratio:1/1;border-radius:20%;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.014);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s,transform .16s;overflow:hidden;padding:10%;position:relative;}
+.fpd-cal .cell:hover{border-color:rgba(91,110,225,0.36);background:rgba(91,110,225,0.055);transform:translateY(-1px);}
+.fpd-cal .cell.weekend{background:rgba(255,255,255,0.024);}
 .fpd-cal .cell.blank{background:none;border:1px solid transparent;cursor:default;}
-.fpd-cal .cell.today{border-color:rgba(95,190,145,0.5);box-shadow:inset 0 0 0 1px rgba(95,190,145,0.22),0 0 18px -8px rgba(95,190,145,0.5);}
-.fpd-cal .cell.sel{border-color:${ACCENT};background:rgba(91,110,225,0.15);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.5),0 6px 20px -8px rgba(91,110,225,0.55);}
-.fpd-cal .cell.today.sel{box-shadow:inset 0 0 0 1px rgba(91,110,225,0.5),0 6px 20px -8px rgba(91,110,225,0.55);}
+.fpd-cal .cell.blank:hover{transform:none;}
+.fpd-cal .cell.today{border-color:rgba(95,190,145,0.55);box-shadow:inset 0 0 0 1px rgba(95,190,145,0.24),0 0 20px -8px rgba(95,190,145,0.55);}
+.fpd-cal .cell.sel{border-color:${ACCENT};background:rgba(91,110,225,0.16);box-shadow:inset 0 0 0 1px rgba(91,110,225,0.55),0 8px 24px -10px rgba(91,110,225,0.6);}
+.fpd-cal .cell.today.sel{box-shadow:inset 0 0 0 1px rgba(91,110,225,0.55),0 8px 24px -10px rgba(91,110,225,0.6);}
 .fpd-cal .chead{display:flex;align-items:center;justify-content:space-between;}
-.fpd-cal .dnum{font-family:var(--font-mono);font-size:12px;font-variant-numeric:tabular-nums;color:${SOFT};}
-.fpd-cal .cell.today .dnum{color:#D99A6B;font-weight:700;}
-.fpd-cal .cell.sel .dnum{color:#fff;font-weight:700;}
-.fpd-cal .cmore{font-family:var(--font-mono);font-size:9px;color:${MUTED};}
-.fpd-cal .chips{display:flex;flex-direction:column;gap:3px;margin-top:5px;}
-.fpd-cal .cevt{display:flex;align-items:center;gap:5px;padding:2.5px 5px;border-radius:5px;font-size:10px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;}
-.fpd-cal .cevt .cbar{width:3px;height:9px;border-radius:2px;flex-shrink:0;}
+.fpd-cal .dnum{font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums;color:${SOFT};font-weight:500;}
+.fpd-cal .cell.today .dnum{color:#D99A6B;font-weight:800;}
+.fpd-cal .cell.sel .dnum{color:#fff;font-weight:800;}
+.fpd-cal .todaydot{font-size:8.5px;font-weight:800;letter-spacing:0.06em;color:#D99A6B;text-transform:uppercase;}
+.fpd-cal .cmore{font-family:var(--font-mono);font-size:9px;color:${MUTED};padding:2px 7px;border-radius:99px;background:rgba(255,255,255,0.05);}
+.fpd-cal .chips{display:flex;flex-direction:column;gap:4px;margin-top:7px;}
+.fpd-cal .cevt{display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:8px;font-size:10.5px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;}
+.fpd-cal .cevt svg{flex-shrink:0;opacity:.85;}
 .fpd-cal .cevt .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-/* event rows */
-.fpd-cal .evlist{display:flex;flex-direction:column;gap:9px;}
-.fpd-cal .evrow{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);}
-.fpd-cal .evico{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-cal .evbody{flex:1;min-width:0;}
-.fpd-cal .evtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.fpd-cal .evt{font-size:13px;font-weight:600;color:${TEXT};}
-.fpd-cal .evamt{font-family:var(--font-mono);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
-.fpd-cal .evmeta{font-family:var(--font-mono);font-size:10.5px;margin-top:3px;}
-.fpd-cal .evdet{color:${MUTED};font-size:11.5px;line-height:1.5;margin-top:3px;}
-.fpd-cal .evopen{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:16px;font-size:11px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
-.fpd-cal .evopen:hover{filter:brightness(1.14);}
+/* legend — real, useful content below the grid (which sources are active
+   this month); natural height, never expands to fill leftover space */
+.fpd-cal .grid-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);}
+.fpd-cal .legend-item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:${SOFT};font-weight:500;}
+.fpd-cal .legend-item .dt{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
-/* empty state */
+/* event rows (selected day + coming up + agenda) */
+.fpd-cal .evlist{display:flex;flex-direction:column;gap:11px;}
+.fpd-cal .evrow{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,0.024);border:1px solid rgba(255,255,255,0.08);}
+.fpd-cal .evico{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-cal .evbody{flex:1;min-width:0;}
+.fpd-cal .evtop{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.fpd-cal .evt{font-size:14px;font-weight:600;color:${TEXT};}
+.fpd-cal .evamt{font-family:var(--font-mono);font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+.fpd-cal .evmeta{font-size:11.5px;margin-top:5px;font-weight:600;}
+.fpd-cal .evdet{color:${MUTED};font-size:12px;line-height:1.55;margin-top:5px;}
+.fpd-cal .evopen{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:99px;font-size:11.5px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
+.fpd-cal .evopen:hover{filter:brightness(1.15);}
+
+/* calendar-themed hero — fills an empty day with a real-data teaser instead
+   of dead air, built from CSS/SVG (no external image assets in the app). */
+.fpd-cal .cal-hero{position:relative;overflow:hidden;border-radius:18px;padding:24px 22px;background:radial-gradient(420px 220px at 88% -30%,rgba(91,167,214,0.28),transparent 65%),radial-gradient(360px 260px at -10% 120%,rgba(126,107,216,0.24),transparent 60%),linear-gradient(160deg,#141b30 0%,#0d1220 65%,#0c111f 100%);border:1px solid rgba(91,110,225,0.2);}
+.fpd-cal .cal-hero-grid{position:absolute;inset:0;opacity:.22;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.09) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);}
+.fpd-cal .cal-hero-mark{position:absolute;right:-14px;top:-14px;opacity:.16;color:${ACCENT2};pointer-events:none;}
+.fpd-cal .cal-hero-body{position:relative;}
+.fpd-cal .cal-hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.36);color:#C9BFF0;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:13px;}
+.fpd-cal .cal-hero-h2{font-family:var(--font-display);font-size:20px;font-weight:700;color:${TEXT};line-height:1.2;letter-spacing:-0.01em;margin-bottom:8px;}
+.fpd-cal .cal-hero-h2 .accent{background:linear-gradient(90deg,${ACCENT2},#6FAE8B);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-cal .cal-hero-sub{color:${SOFT};font-size:12.5px;line-height:1.6;max-width:360px;margin-bottom:18px;}
+.fpd-cal .cal-hero-actions{display:flex;gap:9px;flex-wrap:wrap;}
+.fpd-cal .cal-hero-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .16s,filter .16s;}
+.fpd-cal .cal-hero-btn:hover{transform:translateY(-1px);}
+.fpd-cal .cal-hero-btn.primary{background:#fff;color:#12172A;}
+.fpd-cal .cal-hero-btn.ghost{background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.4);color:#fff;}
+.fpd-cal .cal-hero-next-wrap{margin-top:14px;}
+.fpd-cal .fallback-lbl{font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};margin-bottom:8px;}
+
+/* empty state (rare — filters hide everything) */
 .fpd-cal .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 12px;}
 .fpd-cal .empty .ei{width:46px;height:46px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-cal .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 .fpd-cal .empty .ed{color:${MUTED};font-size:12px;line-height:1.6;margin-top:5px;max-width:340px;}
 
-/* agenda */
-.fpd-cal .aggroup{margin-top:20px;}
-.fpd-cal .aggroup:first-child{margin-top:0;}
-.fpd-cal .agday{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.fpd-cal .agd{font-family:var(--font-mono);font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;}
-.fpd-cal .agline{flex:1;height:1px;background:rgba(255,255,255,0.07);}
-.fpd-cal .agtoday{padding:2px 7px;border-radius:6px;background:rgba(95,190,145,0.14);color:#D99A6B;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;}
+/* category breakdown — real, derived-from-data widget (Agenda view rail) */
+.fpd-cal .catlist{display:flex;flex-direction:column;gap:11px;}
+.fpd-cal .catrow{display:flex;align-items:center;gap:10px;}
+.fpd-cal .catico{width:26px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-cal .catbody{flex:1;min-width:0;}
+.fpd-cal .cattop{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.fpd-cal .catname{color:${SOFT};font-weight:600;}
+.fpd-cal .catnum{font-family:var(--font-mono);color:${MUTED};font-variant-numeric:tabular-nums;}
+.fpd-cal .catbar-track{height:6px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;}
+.fpd-cal .catbar-fill{height:100%;border-radius:99px;}
+
+/* agenda view — grouped by real week, every week shown (even quiet ones) */
+.fpd-cal .agenda-bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:18px;align-items:start;}
+@media (max-width:1080px){.fpd-cal .agenda-bento{grid-template-columns:1fr;} .fpd-cal .agenda-bento .col{height:auto !important;}}
+.fpd-cal .weekgroup{border-radius:16px;border:1px solid rgba(255,255,255,0.08);padding:14px 16px;margin-bottom:10px;}
+.fpd-cal .weekgroup:last-child{margin-bottom:0;}
+.fpd-cal .weekhead{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+.fpd-cal .weekrange{font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:${SOFT};}
+.fpd-cal .weekline{flex:1;height:1px;background:rgba(255,255,255,0.13);}
+.fpd-cal .weektag{padding:2px 8px;border-radius:6px;background:rgba(95,190,145,0.16);color:#D99A6B;font-size:9px;font-weight:700;letter-spacing:0.06em;}
+.fpd-cal .weekquiet{color:${FAINT};font-size:12px;padding:8px 2px 2px;font-style:italic;}
+.fpd-cal .week-evlist{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
 
 /* footnote */
 .fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
@@ -179,7 +272,7 @@ function EventRow({ ev, onNavigate, showDate }: { ev: CalendarEvent; onNavigate?
   return (
     <div className="evrow" style={{ borderColor: `${color}26` }}>
       <div className="evico" style={{ background: `${color}1C`, color }}>
-        <Icon size={16} />
+        <Icon size={18} />
       </div>
       <div className="evbody">
         <div className="evtop">
@@ -204,9 +297,42 @@ function EventRow({ ev, onNavigate, showDate }: { ev: CalendarEvent; onNavigate?
           title={`Open ${ev.linkLabel}`}
           style={{ background: `${color}18`, color }}
         >
-          Open <ArrowRight size={11} />
+          Open <ArrowRight size={12} />
         </button>
       )}
+    </div>
+  );
+}
+
+/* ── Calendar-themed hero — fills an empty day with real-data content
+   instead of a plain "nothing scheduled" box. Same eyebrow/heading/subtitle/
+   action-pair pattern used elsewhere in the product's hero banners. ── */
+function CalHero({
+  isToday, next, onNavigate, onViewAgenda, onJumpToNext,
+}: {
+  isToday: boolean; next: CalendarEvent;
+  onNavigate?: (p: string) => void; onViewAgenda: () => void; onJumpToNext: () => void;
+}) {
+  return (
+    <div className="cal-hero">
+      <div className="cal-hero-grid" />
+      <div className="cal-hero-mark"><CalendarDays size={96} /></div>
+      <div className="cal-hero-body">
+        <span className="cal-hero-eyebrow">{isToday ? "Today's clear" : "Quiet day"}</span>
+        <h4 className="cal-hero-h2">All Your Dates,<br /><span className="accent">One Place</span></h4>
+        <p className="cal-hero-sub">
+          Auto-pay charges, reminders, birthdays, warranties and appointments — nothing is scheduled{" "}
+          {isToday ? "today" : "on this day"}, so it&rsquo;s a good moment to look ahead.
+        </p>
+        <div className="cal-hero-actions">
+          <button className="cal-hero-btn primary" onClick={onViewAgenda}><List size={14} /> View Full Agenda</button>
+          <button className="cal-hero-btn ghost" onClick={onJumpToNext}><CalendarClock size={14} /> Jump to Next Event</button>
+        </div>
+      </div>
+      <div className="cal-hero-next-wrap">
+        <div className="fallback-lbl">Next up</div>
+        <EventRow ev={next} onNavigate={onNavigate} showDate />
+      </div>
     </div>
   );
 }
@@ -238,6 +364,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
   const upcoming = useMemo(() => upcomingEvents(6).filter(e => active.has(e.source)), [active]);
   const billingTotal = useMemo(() => monthlyBillingTotal(year, month), [year, month]);
   const selectedEvents = byDate.get(selected) ?? [];
+  const nextEvent = upcoming[0];
 
   const shift = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -269,6 +396,30 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
     return out;
   }, [year, month]);
 
+  /* Real week ranges (e.g. "Jun 28 – Jul 4") for the Agenda view, computed
+     from actual date arithmetic so it's correct for any month, not just July. */
+  const weekRows = useMemo(() => buildWeekRows(year, month), [year, month]);
+
+  /* Which sources actually have events this month — powers both the grid's
+     legend and the Agenda view's category breakdown. Real counts, no
+     invented rows: a source with zero events this month just doesn't appear. */
+  const categoryBreakdown = useMemo(() => {
+    const counts = new Map<EventSource, number>();
+    visible.forEach(e => counts.set(e.source, (counts.get(e.source) ?? 0) + 1));
+    return ALL_SOURCES
+      .filter(s => (counts.get(s) ?? 0) > 0)
+      .map(s => ({ source: s, count: counts.get(s)! }))
+      .sort((a, b) => b.count - a.count);
+  }, [visible]);
+
+  const jumpToNextEvent = () => {
+    if (!nextEvent) return;
+    const [ny, nm] = nextEvent.date.split("-").map(Number);
+    if (ny !== year || nm - 1 !== month) { setYear(ny); setMonth(nm - 1); }
+    setSelected(nextEvent.date);
+    setView("month");
+  };
+
   const overdueCount = monthEvents.filter(
     e => e.date < todayIso && (e.source === "warranty" || e.source === "document")
   ).length;
@@ -278,11 +429,38 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
   const todayLong = today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase();
 
   const kpis = [
-    { label: "Events This Month", value: monthEvents.length, sub: `${MONTHS[month]} ${year}`, dot: ACCENT2, icon: <CalendarDays size={14} /> },
-    { label: "Auto-Pay Scheduled", value: `$${billingTotal.toFixed(2)}`, sub: `${billingCount} charge${billingCount === 1 ? "" : "s"}`, dot: SRC.billing.color, icon: <CreditCard size={14} /> },
-    { label: "Needs Attention", value: overdueCount, sub: "Expired warranties & IDs", dot: overdueCount > 0 ? NEG : POS, icon: <AlertTriangle size={14} /> },
-    { label: "Next 6 Months", value: upcomingTotal, sub: "Upcoming entries", dot: ACCENT2, icon: <CalendarClock size={14} /> },
+    { label: "Events This Month", value: monthEvents.length, sub: `${MONTHS[month]} ${year}`, dot: ACCENT2, tone: "sky", icon: <CalendarDays size={16} /> },
+    { label: "Auto-Pay Scheduled", value: `$${billingTotal.toFixed(2)}`, sub: `${billingCount} charge${billingCount === 1 ? "" : "s"}`, dot: SRC.billing.color, tone: "mint", icon: <CreditCard size={16} /> },
+    { label: "Needs Attention", value: overdueCount, sub: "Expired warranties & IDs", dot: overdueCount > 0 ? NEG : POS, tone: overdueCount > 0 ? "critical" : "good", icon: <AlertTriangle size={16} /> },
+    { label: "Next 6 Months", value: upcomingTotal, sub: "Upcoming entries", dot: ACCENT2, tone: "violet", icon: <CalendarClock size={16} /> },
   ];
+
+  /* ── Keep the right rail pinned to exactly the left column's real height —
+     measured (ResizeObserver), not guessed, so the two sides always match to
+     the pixel with no leftover gap and no stretching of the square day cells.
+     Same pairing for the Agenda view's week list + its own rail. ── */
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const rightColRef = useRef<HTMLDivElement>(null);
+  const agendaCardRef = useRef<HTMLDivElement>(null);
+  const agendaColRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const pin = (source: HTMLDivElement | null, target: HTMLDivElement | null) => {
+      if (!source || !target) return;
+      if (window.innerWidth <= 1080) { target.style.height = ""; return; }
+      target.style.height = `${source.getBoundingClientRect().height}px`;
+    };
+    const run = () => {
+      pin(leftColRef.current, rightColRef.current);
+      pin(agendaCardRef.current, agendaColRef.current);
+    };
+    run();
+    window.addEventListener("resize", run);
+    const ro = new ResizeObserver(run);
+    if (leftColRef.current) ro.observe(leftColRef.current);
+    if (agendaCardRef.current) ro.observe(agendaCardRef.current);
+    return () => { window.removeEventListener("resize", run); ro.disconnect(); };
+  }, [view, year, month, selected, active]);
 
   return (
     <div className="fpd-cal">
@@ -320,22 +498,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
           </div>
         </div>
 
-        {/* ── KPI ledger ── */}
-        <div className="card kstrip">
-          {kpis.map(k => (
-            <div key={k.label} className="kcell">
-              <div className="khead">
-                <span className="klbl">{k.label}</span>
-                <span className="kico">{k.icon}</span>
-              </div>
-              <div className="kval">{k.value}</div>
-              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
-            </div>
-          ))}
-        </div>
-
         {/* ── Source filters ── */}
-        <div className="card pad">
+        <div className="card pad" style={{ padding: "18px 22px" }}>
           <div className="filters">
             <span className="flabel">FILTER</span>
             {ALL_SOURCES.map(s => {
@@ -364,70 +528,112 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
 
         {view === "month" ? (
           <div className="bento">
-            {/* Month grid */}
-            <div className="card pad">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year}</h3>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button className="navbtn" onClick={() => shift(-1)} title="Previous month"><ChevronLeft size={15} /></button>
-                  <button className="navbtn" onClick={() => shift(1)} title="Next month"><ChevronRight size={15} /></button>
+            {/* Left column — At a Glance band + month grid */}
+            <div className="col" ref={leftColRef}>
+              <div className="card">
+                <div className="band-eyebrow">At a Glance</div>
+                <div className="kpi-grid">
+                  {kpis.map(k => {
+                    const tone = KPI_TONES[k.tone] ?? KPI_TONES.sky;
+                    return (
+                      <div key={k.label} className="kpi-col">
+                        <div className="khead">
+                          <span className="klbl">{k.label}</span>
+                          <span className="kico" style={{ background: tone.bg, color: tone.fg }}>{k.icon}</span>
+                        </div>
+                        <div className="kval">{k.value}</div>
+                        <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="dow">
-                {DOW.map(d => <span key={d}>{d.toUpperCase()}</span>)}
-              </div>
+              <div className="card pad gridcard">
+                <div className="sec-head">
+                  <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year}</h3>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button className="navbtn" onClick={() => shift(-1)} title="Previous month"><ChevronLeft size={15} /></button>
+                    <button className="navbtn" onClick={() => shift(1)} title="Next month"><ChevronRight size={15} /></button>
+                  </div>
+                </div>
 
-              <div className="grid">
-                {cells.map((day, i) => {
-                  if (day === null) return <div key={`b${i}`} className="cell blank" />;
-                  const dIso = iso(year, month, day);
-                  const evs = byDate.get(dIso) ?? [];
-                  const isToday = dIso === todayIso;
-                  const isSel = dIso === selected;
-                  return (
-                    <button
-                      key={dIso}
-                      onClick={() => setSelected(dIso)}
-                      className={`cell ${isToday ? "today" : ""} ${isSel ? "sel" : ""}`}
-                    >
-                      <div className="chead">
-                        <span className="dnum">{day}</span>
-                        {evs.length > 2 && <span className="cmore">+{evs.length - 2}</span>}
-                      </div>
-                      <div className="chips">
-                        {evs.slice(0, 2).map(e => {
-                          const c = SRC[e.source].color;
-                          return (
-                            <div key={e.id} className="cevt" title={e.title} style={{ background: `${c}20`, color: c }}>
-                              <span className="cbar" style={{ background: c }} />
-                              <span className="ct">{e.title}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </button>
-                  );
-                })}
+                <div className="dow">
+                  {DOW.map(d => <span key={d}>{d.toUpperCase()}</span>)}
+                </div>
+
+                <div className="monthgrid">
+                  {cells.map((day, i) => {
+                    if (day === null) return <div key={`b${i}`} className="cell blank" />;
+                    const dIso = iso(year, month, day);
+                    const evs = byDate.get(dIso) ?? [];
+                    const isToday = dIso === todayIso;
+                    const isSel = dIso === selected;
+                    const isWeekend = i % 7 === 0 || i % 7 === 6;
+                    return (
+                      <button
+                        key={dIso}
+                        onClick={() => setSelected(dIso)}
+                        className={`cell ${isWeekend ? "weekend" : ""} ${isToday ? "today" : ""} ${isSel ? "sel" : ""}`}
+                      >
+                        <div className="chead">
+                          <span className="dnum">{day}</span>
+                          {isToday ? <span className="todaydot">Today</span> : (evs.length > 3 && <span className="cmore">+{evs.length - 3}</span>)}
+                        </div>
+                        <div className="chips">
+                          {evs.slice(0, 3).map(e => {
+                            const c = SRC[e.source].color;
+                            const Icon = SRC[e.source].Icon;
+                            return (
+                              <div key={e.id} className="cevt" title={e.title} style={{ background: `${c}20`, color: c }}>
+                                <Icon size={11} />
+                                <span className="ct">{e.title}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {categoryBreakdown.length > 0 && (
+                  <div className="grid-legend">
+                    {categoryBreakdown.map(({ source }) => (
+                      <span key={source} className="legend-item">
+                        <span className="dt" style={{ background: SRC[source].color }} />
+                        {SOURCE_META[source].label}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Right rail — selected day + upcoming */}
-            <div className="col">
+            {/* Right column — selected day + upcoming, pinned to the left column's height */}
+            <div className="col" ref={rightColRef}>
               <div className="card pad">
                 <div className="sec-head">
                   <h3 className="sec-title"><span className="tick" />{selected === todayIso ? "Today" : fmtDate(selected)}</h3>
                   <span className="sec-cnt">{selectedEvents.length} item{selectedEvents.length === 1 ? "" : "s"}</span>
                 </div>
-                {selectedEvents.length === 0 ? (
+                {selectedEvents.length > 0 ? (
+                  <div className="evlist">
+                    {selectedEvents.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} />)}
+                  </div>
+                ) : nextEvent ? (
+                  <CalHero
+                    isToday={selected === todayIso}
+                    next={nextEvent}
+                    onNavigate={onNavigate}
+                    onViewAgenda={() => setView("agenda")}
+                    onJumpToNext={jumpToNextEvent}
+                  />
+                ) : (
                   <div className="empty">
                     <div className="ei"><CalendarDays size={20} /></div>
                     <div className="et">Nothing scheduled</div>
-                    <div className="ed">This day is clear. Pick another date on the grid to see what's planned.</div>
-                  </div>
-                ) : (
-                  <div className="evlist">
-                    {selectedEvents.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} />)}
+                    <div className="ed">This day is clear, and nothing upcoming matches your active filters. Turn a few back on above.</div>
                   </div>
                 )}
               </div>
@@ -451,47 +657,81 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
             </div>
           </div>
         ) : (
-          /* ── Agenda view — flat chronological list for the month ── */
-          <div className="card pad">
-            <div className="sec-head">
-              <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year} — Agenda</h3>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button className="navbtn" onClick={() => shift(-1)} title="Previous month"><ChevronLeft size={14} /></button>
-                <button className="navbtn" onClick={() => shift(1)} title="Next month"><ChevronRight size={14} /></button>
+          /* ── Agenda view — chronological by week, every week shown ── */
+          <div className="agenda-bento">
+            <div className="card pad" ref={agendaCardRef}>
+              <div className="sec-head">
+                <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year} — Agenda</h3>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button className="navbtn" onClick={() => shift(-1)} title="Previous month"><ChevronLeft size={14} /></button>
+                  <button className="navbtn" onClick={() => shift(1)} title="Next month"><ChevronRight size={14} /></button>
+                </div>
               </div>
-            </div>
 
-            {visible.length === 0 ? (
-              <div className="empty">
-                <div className="ei"><CalendarDays size={20} /></div>
-                <div className="et">Nothing scheduled this month</div>
-                <div className="ed">Either this month is genuinely clear, or your source filters are hiding everything. Try turning filters back on above.</div>
-              </div>
-            ) : (
-              Object.entries(
-                visible.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
-                  (acc[e.date] ??= []).push(e);
-                  return acc;
-                }, {})
-              ).map(([date, evs]) => {
-                const isToday = date === todayIso;
-                const isPast = date < todayIso;
+              {weekRows.map(week => {
+                const evs = week.isoDates.flatMap(d => byDate.get(d) ?? []);
+                const hasToday = week.isoDates.includes(todayIso);
                 return (
-                  <div key={date} className="aggroup">
-                    <div className="agday">
-                      <span className="agd" style={{ color: isToday ? "#D99A6B" : isPast ? MUTED : SOFT }}>
-                        {fmtDate(date)}
-                      </span>
-                      {isToday && <span className="agtoday">TODAY</span>}
-                      <div className="agline" />
+                  <div key={week.label} className="weekgroup">
+                    <div className="weekhead">
+                      <span className="weekrange">{week.label}</span>
+                      {hasToday && <span className="weektag">This week</span>}
+                      <div className="weekline" />
                     </div>
-                    <div className="evlist" style={{ opacity: isPast ? 0.6 : 1 }}>
-                      {evs.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} />)}
-                    </div>
+                    {evs.length === 0 ? (
+                      <div className="weekquiet">Quiet week — nothing scheduled.</div>
+                    ) : (
+                      <div className="week-evlist">
+                        {evs.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} />)}
+                      </div>
+                    )}
                   </div>
                 );
-              })
-            )}
+              })}
+            </div>
+
+            <div className="col" ref={agendaColRef}>
+              <div className="card pad">
+                <div className="sec-head"><h3 className="sec-title"><span className="tick" />This Month by Category</h3></div>
+                {categoryBreakdown.length === 0 ? (
+                  <div className="empty">
+                    <div className="ei"><CalendarDays size={20} /></div>
+                    <div className="et">No categories match your filters</div>
+                  </div>
+                ) : (
+                  <div className="catlist">
+                    {categoryBreakdown.map(({ source, count }) => {
+                      const c = SRC[source].color;
+                      const Icon = SRC[source].Icon;
+                      const max = categoryBreakdown[0].count;
+                      return (
+                        <div key={source} className="catrow">
+                          <div className="catico" style={{ background: `${c}1C`, color: c }}><Icon size={13} /></div>
+                          <div className="catbody">
+                            <div className="cattop"><span className="catname">{SOURCE_META[source].label}</span><span className="catnum">{count}</span></div>
+                            <div className="catbar-track"><div className="catbar-fill" style={{ width: `${Math.round((count / max) * 100)}%`, background: c }} /></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="card pad">
+                <div className="sec-head"><h3 className="sec-title"><span className="tick" />Coming Up</h3></div>
+                {upcoming.length === 0 ? (
+                  <div className="empty">
+                    <div className="ei"><CalendarClock size={20} /></div>
+                    <div className="et">No upcoming events</div>
+                  </div>
+                ) : (
+                  <div className="evlist">
+                    {upcoming.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} showDate />)}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
