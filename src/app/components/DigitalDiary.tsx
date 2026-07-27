@@ -276,35 +276,35 @@ const DIARY_CSS = `
 .fpd-diary-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-diary .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-diary .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-diary .card.pad{padding:22px;}
-.fpd-diary .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-diary .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-diary .card.pad{padding:28px;}
+.fpd-diary .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-diary .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-diary .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-diary .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-diary .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* KPI ledger */
-.fpd-diary .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-diary .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-diary .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-diary .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-diary .kcell:first-child{border-left:none;}
 .fpd-diary .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-diary .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-diary .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-diary .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-diary .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-diary .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-diary .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-diary .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-diary .kstrip{grid-template-columns:1fr 1fr;}.fpd-diary .kcell:nth-child(3){border-left:none;}.fpd-diary .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:880px){.fpd-diary .kstrip{grid-template-columns:1fr 1fr;}.fpd-diary .kcell:nth-child(3){border-left:none;}.fpd-diary .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* search + filter toolbar */
 .fpd-diary .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
 .fpd-diary .search{display:flex;align-items:center;gap:8px;padding:11px 15px;flex:1;min-width:220px;}
 .fpd-diary .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
-.fpd-diary .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
-.fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-diary .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
+.fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:99px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-diary .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* bento layout */
@@ -315,7 +315,7 @@ const DIARY_CSS = `
 /* entry cards */
 .fpd-diary .ecard{padding:20px;cursor:pointer;transition:border-color .18s;}
 .fpd-diary .ecard.sel{border-color:rgba(91,110,225,0.5);}
-.fpd-diary .ethumb{border-radius:10px;overflow:hidden;margin-bottom:12px;height:120px;position:relative;}
+.fpd-diary .ethumb{border-radius:18px;overflow:hidden;margin-bottom:12px;height:120px;position:relative;}
 .fpd-diary .ethumb img{width:100%;height:100%;object-fit:cover;}
 .fpd-diary .ethumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.32);}
 .fpd-diary .ethumb-play{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
@@ -325,9 +325,9 @@ const DIARY_CSS = `
 .fpd-diary .type-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:10px;font-family:var(--font-mono);}
 .fpd-diary .private-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;background:rgba(208,107,107,0.14);color:${NEG};font-size:9px;font-family:var(--font-mono);}
 .fpd-diary .etitle{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);}
-.fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:11px;flex-shrink:0;font-size:11px;font-weight:500;}
+.fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:16px;flex-shrink:0;font-size:11px;font-weight:500;}
 .fpd-diary .ebody{color:${MUTED};font-size:13px;line-height:1.7;}
-.fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(91,110,225,0.07);}
+.fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:16px;background:rgba(91,110,225,0.07);}
 .fpd-diary .eaudio-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${ACCENT};color:#fff;border:none;cursor:pointer;flex-shrink:0;}
 .fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,110,225,0.2);}
 .fpd-diary .eaudio-fill{height:4px;border-radius:99px;background:${ACCENT};transition:width .3s;}
@@ -346,16 +346,16 @@ const DIARY_CSS = `
 .fpd-diary .dbadges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .fpd-diary .dtitle{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;margin-bottom:12px;}
 .fpd-diary .dbody{color:${SOFT};font-size:14px;line-height:1.9;white-space:pre-wrap;}
-.fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:12px;text-align:center;background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.16);}
-.fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-size:13px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-diary .dvideo{margin-top:16px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;}
+.fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:16px;text-align:center;background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.16);}
+.fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:18px;font-size:13px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .dvideo{margin-top:16px;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;}
 .fpd-diary .dvideo img,.fpd-diary .dvideo-placeholder{width:100%;height:140px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.09);}
 .fpd-diary .dvideo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.28);}
 .fpd-diary .dvideo-play{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
 
 /* diary stats mini panel */
 .fpd-diary .stats-hd{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:10px;font-family:var(--font-display);}
-.fpd-diary .stat-row{display:flex;justify-content:space-between;padding:9px 12px;border-radius:9px;background:#0F1624;}
+.fpd-diary .stat-row{display:flex;justify-content:space-between;padding:9px 12px;border-radius:99px;background:#0F1624;}
 .fpd-diary .stat-row + .stat-row{margin-top:6px;}
 .fpd-diary .stat-row span:first-child{color:${MUTED};font-size:12px;}
 .fpd-diary .stat-row span:last-child{color:#6FAE8B;font-size:12px;font-weight:600;font-family:var(--font-mono);}
@@ -373,35 +373,35 @@ const DIARY_CSS = `
 .fpd-diary .rec-live{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:99px;background:rgba(208,107,107,0.9);}
 .fpd-diary .rec-live-dot{width:8px;height:8px;border-radius:50%;background:#fff;}
 .fpd-diary .rec-live span{color:#fff;font-size:11px;font-family:var(--font-mono);}
-.fpd-diary .rec-record-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;font-weight:600;font-size:13px;background:${NEG};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-record-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:13px;background:${NEG};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .rec-record-dot{width:12px;height:12px;border-radius:50%;background:#fff;}
-.fpd-diary .rec-stop-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;font-weight:600;font-size:13px;background:#374669;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-diary .rec-cancel-btn{padding:10px 24px;border-radius:10px;font-size:13px;background:#0F1624;color:${MUTED};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-stop-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:13px;background:#374669;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-cancel-btn{padding:10px 24px;border-radius:18px;font-size:13px;background:#0F1624;color:${MUTED};border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* modal */
 .fpd-diary .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-diary .modal{width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
-.fpd-diary .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-diary .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-diary .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-diary .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-diary .modal-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
-.fpd-diary .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-diary .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-diary .field textarea{resize:none;line-height:1.8;}
 .fpd-diary .field input::placeholder,.fpd-diary .field textarea::placeholder{color:${FAINT};}
 .fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-diary .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:11px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
+.fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:16px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
 .fpd-diary .type-btn.on{background:rgba(91,110,225,0.14);border-color:${ACCENT};color:#6FAE8B;}
 .fpd-diary .type-btn:not(.on){color:${MUTED};}
 .fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.14);}
 .fpd-diary .record-done{padding:26px 0;text-align:center;}
 .fpd-diary .upload-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 0;border-radius:16px;border:2px dashed rgba(91,110,225,0.28);background:#0F1624;cursor:pointer;}
 .fpd-diary .mood-grid{display:flex;gap:8px;}
-.fpd-diary .mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:11px;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);background:#0F1624;}
-.fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
-.fpd-diary .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-diary .mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:16px;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);background:#0F1624;}
+.fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:16px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .fpd-diary .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -505,7 +505,7 @@ export function DigitalDiary() {
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -520,7 +520,7 @@ export function DigitalDiary() {
 
         {/* ── Search + filter ── */}
         <div className="toolbar">
-          <div className="card search glow-surface">
+          <div className="card search">
             <Search size={13} color={MUTED}/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search diary entries..."/>
           </div>
@@ -537,7 +537,7 @@ export function DigitalDiary() {
           {/* Entry list */}
           <div className="elist">
             {filtered.length === 0 && (
-              <div className="card empty glow-surface">
+              <div className="card empty">
                 <BookOpen size={36} className="ei"/>
                 <div className="et">No entries found. Start writing your story.</div>
               </div>
@@ -546,7 +546,7 @@ export function DigitalDiary() {
               const mood = entry.mood ? moodConfig[entry.mood] : null;
               return (
                 <div key={entry.id}
-                  className={`card ecard glow-surface ${selected?.id===entry.id ? "sel" : ""}`}
+                  className={`card ecard ${selected?.id===entry.id ? "sel" : ""}`}
                   onClick={() => setSelected(selected?.id===entry.id ? null : entry)}>
                   {entry.thumbnail && (
                     <div className="ethumb">
@@ -598,7 +598,7 @@ export function DigitalDiary() {
           {/* Selected detail / stats sidebar */}
           <div className="flex flex-col gap-4">
             {selected ? (
-              <div className="card pad glow-surface" style={{ position: "sticky", top: 16 }}>
+              <div className="card pad" style={{ position: "sticky", top: 16 }}>
                 <div className="dhead">
                   <div className="edate">{selected.date}</div>
                   <div className="dacts">
@@ -652,7 +652,7 @@ export function DigitalDiary() {
                 )}
               </div>
             ) : (
-              <div className="card pad glow-surface" style={{ textAlign: "center" }}>
+              <div className="card pad" style={{ textAlign: "center" }}>
                 <BookOpen size={28} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 13, marginBottom: 12 }}>Select an entry to read</div>
                 <div className="stats-hd" style={{ textAlign: "left" }}>Your Diary Stats</div>
@@ -675,7 +675,7 @@ export function DigitalDiary() {
       {/* ── New entry modal ── */}
       {creating && (
         <div className="backdrop">
-          <div className="card modal glow-surface">
+          <div className="card modal">
             <div className="modal-head">
               <h3>New Diary Entry</h3>
               <button onClick={() => setCreating(false)}><X size={16}/></button>

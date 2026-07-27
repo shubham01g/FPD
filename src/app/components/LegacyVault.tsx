@@ -195,20 +195,20 @@ const VAULT_CSS = `
 .fpd-vault-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-vault .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-vault .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-vault .card.pad{padding:22px;}
+.fpd-vault .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-vault .card.pad{padding:28px;}
 .fpd-vault .sec-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
 .fpd-vault .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-vault .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 .fpd-vault .sec-sub{color:${MUTED};font-size:12.5px;margin-top:4px;max-width:520px;line-height:1.6;}
-.fpd-vault .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-vault .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 /* header */
 .fpd-vault .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 6px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-vault .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.7;}
 
 /* two-condition gate */
-.fpd-vault .cond{display:flex;align-items:flex-start;gap:14px;padding:15px 16px;border-radius:12px;}
+.fpd-vault .cond{display:flex;align-items:flex-start;gap:14px;padding:15px 16px;border-radius:16px;}
 .fpd-vault .cond.met{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.24);}
 .fpd-vault .cond.unmet{background:rgba(217,165,94,0.05);border:1px solid rgba(217,165,94,0.2);}
 .fpd-vault .cond-badge{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;}
@@ -216,21 +216,21 @@ const VAULT_CSS = `
 .fpd-vault .cond-badge.unmet{background:rgba(217,165,94,0.14);color:${WARN};}
 .fpd-vault .cond-title{color:${TEXT};font-size:13.5px;font-weight:600;margin-bottom:3px;font-family:var(--font-display);}
 .fpd-vault .cond-desc{color:${MUTED};font-size:12px;line-height:1.6;}
-.fpd-vault .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:11px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.28);color:${WARN};font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);width:100%;transition:background .18s;}
+.fpd-vault .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:16px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.28);color:${WARN};font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);width:100%;transition:background .18s;}
 .fpd-vault .btn-ghost:hover{background:rgba(217,165,94,0.14);}
-.fpd-vault .status-row{display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:12px;}
+.fpd-vault .status-row{display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:16px;}
 .fpd-vault .status-row.ok{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.22);}
 .fpd-vault .status-row.no{background:rgba(208,107,107,0.05);border:1px solid rgba(208,107,107,0.2);}
-.fpd-vault .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:11px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 8px 22px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
+.fpd-vault .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:16px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 8px 22px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
 .fpd-vault .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
 /* section rows */
-.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
+.fpd-vault .btn-link{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;flex-shrink:0;}
 .fpd-vault .btn-link:hover{background:rgba(91,110,225,0.18);}
 .fpd-vault .psgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-.fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);transition:border-color .16s,background .16s;}
+.fpd-vault .psec{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);transition:border-color .16s,background .16s;}
 .fpd-vault .psec:hover{border-color:rgba(91,110,225,0.24);background:rgba(91,110,225,0.03);}
-.fpd-vault .psec-ico{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-vault .psec-ico{width:40px;height:40px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-vault .psec-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:3px;}
 .fpd-vault .psec-lbl{color:${TEXT};font-size:13px;font-weight:600;}
 .fpd-vault .psec-cnt{font-family:var(--font-mono);font-size:9.5px;padding:2px 8px;border-radius:6px;flex-shrink:0;}
@@ -238,7 +238,7 @@ const VAULT_CSS = `
 .fpd-vault .psec-acts{display:flex;gap:2px;flex-shrink:0;}
 .fpd-vault .psec-acts button{background:none;border:none;padding:5px;cursor:pointer;display:flex;color:${MUTED};transition:color .16s;}
 .fpd-vault .psec-acts button:hover{color:#6FAE8B;}
-.fpd-vault .showmore{width:100%;margin-top:12px;padding:13px;border-radius:14px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.008);color:${MUTED};font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:border-color .18s,color .18s;}
+.fpd-vault .showmore{width:100%;margin-top:12px;padding:13px;border-radius:18px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.008);color:${MUTED};font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-body);transition:border-color .18s,color .18s;}
 .fpd-vault .showmore:hover{border-color:rgba(91,110,225,0.35);color:#6FAE8B;}
 
 /* clone CTA */
@@ -247,13 +247,13 @@ const VAULT_CSS = `
 .fpd-vault .cta-title{font-family:var(--font-display);font-size:19px;font-weight:600;color:${TEXT};margin-bottom:10px;letter-spacing:-0.01em;}
 .fpd-vault .cta-desc{color:${MUTED};font-size:13px;line-height:1.7;max-width:480px;margin:0 auto 22px;}
 .fpd-vault .cta-btns{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
-.fpd-vault .cta-primary{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:13px;font-size:13.5px;font-weight:700;border:none;font-family:var(--font-body);cursor:pointer;transition:filter .18s,transform .18s;}
+.fpd-vault .cta-primary{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:16px;font-size:13.5px;font-weight:700;border:none;font-family:var(--font-body);cursor:pointer;transition:filter .18s,transform .18s;}
 .fpd-vault .cta-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:13px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.3);color:#6FAE8B;font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
+.fpd-vault .cta-secondary{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:16px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.3);color:#6FAE8B;font-size:13.5px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:background .18s;}
 .fpd-vault .cta-secondary:hover{background:rgba(91,110,225,0.18);}
 
 /* footnote */
-.fpd-vault .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
+.fpd-vault .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-vault .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
 .fpd-vault .foot .ft b{color:${SOFT};font-weight:600;}
 
@@ -321,7 +321,7 @@ export function LegacyVault() {
         </div>
 
         {/* ── Two-condition gate ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <h3 className="sec-title" style={{ marginBottom: 14 }}><span className="tick"/>Two Conditions Required to Unlock Downloads</h3>
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             <ConditionRow
@@ -366,7 +366,7 @@ export function LegacyVault() {
         </div>
 
         {/* ── What your legacy contacts receive ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <div className="sec-head">
             <div>
               <h3 className="sec-title"><span className="tick"/>What Your Legacy Contacts Receive</h3>
@@ -420,7 +420,7 @@ export function LegacyVault() {
         </div>
 
         {/* ── Legacy Vault Clone CTA ── */}
-        <div className="card cta glow-surface">
+        <div className="card cta">
           <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,110,225,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,110,225,0.26)"}` }}>
             {fullyUnlocked ? <Unlock size={26} color="#FFFFFF"/> : <Lock size={26} color="#FFFFFF"/>}
           </div>

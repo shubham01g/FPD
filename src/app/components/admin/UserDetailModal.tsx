@@ -39,7 +39,7 @@ const CARD: React.CSSProperties = {
   background: T.card,
   border: `1px solid ${T.border}`,
   boxShadow: "0 2px 12px rgba(91,110,225,0.06)",
-  borderRadius: 16,
+  borderRadius:22,
   padding: 22,
 };
 
@@ -460,14 +460,14 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <button onClick={toggleSuspend}
-              className="px-4 py-2 rounded-xl text-xs font-bold"
+              className="px-4 py-2 rounded-2xl text-xs font-bold"
               style={{ background:user.status==="suspended" ? T.greenBg : T.redBg,
                 color:user.status==="suspended" ? T.green : T.red,
                 border:`1px solid ${user.status==="suspended" ? T.greenBd : T.redBd}` }}>
               {user.status==="suspended" ? "Reinstate Account" : "Suspend Account"}
             </button>
             <button onClick={onClose}
-              className="px-3 py-2 rounded-xl text-sm font-semibold"
+              className="px-3 py-2 rounded-2xl text-sm font-semibold"
               style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
               Close ✕
             </button>
@@ -553,11 +553,11 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     </div>
                   ))}
                   <div className="grid grid-cols-2 gap-3 mt-4">
-                    <div className="px-3 py-2.5 rounded-xl text-center" style={{ background:T.card3 }}>
+                    <div className="px-3 py-2.5 rounded-2xl text-center" style={{ background:T.card3 }}>
                       <div style={{ color:warnStorage?T.red:T.primary, fontSize:18, fontWeight:700, ...DISPLAY }}>{storagePct}%</div>
                       <div style={{ color:T.muted, fontSize:10 }}>Used</div>
                     </div>
-                    <div className="px-3 py-2.5 rounded-xl text-center" style={{ background:T.card3 }}>
+                    <div className="px-3 py-2.5 rounded-2xl text-center" style={{ background:T.card3 }}>
                       <div style={{ color:T.green, fontSize:18, fontWeight:700, ...DISPLAY }}>{(user.storageTotal - user.storage).toFixed(1)}</div>
                       <div style={{ color:T.muted, fontSize:10 }}>GB Free</div>
                     </div>
@@ -590,18 +590,18 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
                   <div className="flex flex-col gap-2 mt-5">
                     <button onClick={() => toast.success("Upgrade flow opened")}
-                      className="w-full py-2.5 rounded-xl text-sm font-bold"
+                      className="w-full py-2.5 rounded-2xl text-sm font-bold"
                       style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
                         boxShadow:"0 4px 14px rgba(91,110,225,0.35)" }}>
                       Upgrade Plan
                     </button>
                     <button onClick={() => toast.info("Downgrade flow opened")}
-                      className="w-full py-2.5 rounded-xl text-sm font-semibold"
+                      className="w-full py-2.5 rounded-2xl text-sm font-semibold"
                       style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                       Downgrade Plan
                     </button>
                     <button onClick={() => setTab("billing")}
-                      className="w-full py-2.5 rounded-xl text-sm font-semibold"
+                      className="w-full py-2.5 rounded-2xl text-sm font-semibold"
                       style={{ background:T.amberBg, color:T.amber, border:`1px solid ${T.amberBd}` }}>
                       Waive Fee →
                     </button>
@@ -627,7 +627,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 </div>
                 <div className="space-y-2">
                   {user.securityEvents.slice(0,3).map((ev, i) => (
-                    <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                    <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                       style={{ background:ev.flag ? T.redBg : T.card3,
                         border:`1px solid ${ev.flag ? T.redBd : T.border}` }}>
                       <div style={{ width:7, height:7, borderRadius:"50%", flexShrink:0,
@@ -676,7 +676,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 <div className="space-y-2 mb-5">
                   {PLANS.map(p => (
                     <button key={p.id} onClick={() => setEPlan(p.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all"
                       style={{ background:ePlan===p.id?`${p.color}12`:T.card3,
                         border:`1.5px solid ${ePlan===p.id ? p.color : T.border}` }}>
                       <div className="flex items-center gap-3">
@@ -695,7 +695,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 </div>
 
                 {/* Auto-renew toggle */}
-                <div className="flex items-center justify-between p-3 rounded-xl"
+                <div className="flex items-center justify-between p-3 rounded-2xl"
                   style={{ background:T.card3, border:`1px solid ${T.border}` }}>
                   <div>
                     <div style={{ color:T.text, fontSize:13, fontWeight:500 }}>Auto-Renew</div>
@@ -716,12 +716,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setTab("overview")} className="px-6 py-3 rounded-xl text-sm font-semibold"
+                <button onClick={() => setTab("overview")} className="px-6 py-3 rounded-2xl text-sm font-semibold"
                   style={{ background:T.card3, color:T.sub, border:`1px solid ${T.border}` }}>
                   Cancel
                 </button>
                 <button onClick={saveEdit} disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
                   style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
                     boxShadow:"0 4px 16px rgba(91,110,225,0.35)", opacity:saving?0.7:1 }}>
                   <Save size={14}/>{saving ? "Saving…" : "Save All Changes"}
@@ -740,7 +740,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   <div className="flex items-center justify-between mb-4">
                     <SLabel>Payment Method</SLabel>
                     <button onClick={() => setEditCard(v => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
                       style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                       <Edit size={10}/>{editCard ? "Cancel" : "Update Card"}
                     </button>
@@ -813,7 +813,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                         <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>BILLING ZIP</label>
                         <input value={cardZip} onChange={e => setCardZip(e.target.value)} maxLength={10} style={INPUT}/>
                       </div>
-                      <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+                      <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                         style={{ background:T.primaryBg, border:`1px solid ${T.primaryBd}` }}>
                         <Lock size={11} color={T.primary} style={{ marginTop:2, flexShrink:0 }}/>
                         <span style={{ color:T.primary, fontSize:11 }}>
@@ -821,7 +821,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                         </span>
                       </div>
                       <button onClick={saveCard} disabled={savingCard}
-                        className="w-full py-2.5 rounded-xl font-bold text-sm"
+                        className="w-full py-2.5 rounded-2xl font-bold text-sm"
                         style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
                           boxShadow:"0 4px 14px rgba(91,110,225,0.3)", opacity:savingCard?0.7:1 }}>
                         {savingCard ? "Saving…" : "Save New Card"}
@@ -839,7 +839,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
                   {/* Active waiver notice */}
                   {user.subscriptionWaived && (
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl mb-4"
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-4"
                       style={{ background:T.amberBg, border:`1px solid ${T.amberBd}` }}>
                       <Gift size={14} color={T.amber}/>
                       <span style={{ color:T.amber, fontSize:12 }}>
@@ -854,7 +854,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <div className="grid gap-2" style={{ gridTemplateColumns:"repeat(6, 1fr)" }}>
                       {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
                         <button key={m} onClick={() => setWMonths(m)}
-                          className="py-2.5 rounded-xl font-bold text-sm transition-all"
+                          className="py-2.5 rounded-2xl font-bold text-sm transition-all"
                           style={{
                             background: wMonths===m ? T.primary : T.card3,
                             color: wMonths===m ? "#fff" : T.sub,
@@ -874,7 +874,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <div className="grid grid-cols-2 gap-2">
                       {WAIVE_REASONS.map(r => (
                         <button key={r.id} onClick={() => setWReason(r.id)}
-                          className="px-3 py-2 rounded-xl text-xs text-left transition-all"
+                          className="px-3 py-2 rounded-2xl text-xs text-left transition-all"
                           style={{
                             background: wReason===r.id ? T.primaryBg : T.card3,
                             border: `1px solid ${wReason===r.id ? T.primary : T.border}`,
@@ -896,7 +896,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   </div>
 
                   {/* Total */}
-                  <div className="flex items-center justify-between px-4 py-3 rounded-xl mb-4"
+                  <div className="flex items-center justify-between px-4 py-3 rounded-2xl mb-4"
                     style={{ background:T.card3, border:`1px solid ${T.border}` }}>
                     <span style={{ color:T.sub, fontSize:13 }}>Total Amount Waived</span>
                     <span style={{ color:T.primary, fontSize:24, fontWeight:800, ...DISPLAY }}>
@@ -905,7 +905,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   </div>
 
                   <button onClick={applyWaive} disabled={savingWaive}
-                    className="w-full py-3 rounded-xl font-bold text-sm"
+                    className="w-full py-3 rounded-2xl font-bold text-sm"
                     style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
                       boxShadow:"0 4px 16px rgba(91,110,225,0.35)", opacity:savingWaive?0.7:1 }}>
                     {savingWaive
@@ -920,12 +920,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 <div className="flex items-center justify-between mb-4">
                   <SLabel>Billing History</SLabel>
                   <button onClick={() => toast.success("CSV export downloaded")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
                     style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                     <Download size={10}/> Export CSV
                   </button>
                 </div>
-                <div className="rounded-xl overflow-hidden" style={{ border:`1px solid ${T.border}` }}>
+                <div className="rounded-2xl overflow-hidden" style={{ border:`1px solid ${T.border}` }}>
                   <div className="grid px-4 py-2.5"
                     style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
                       background:"rgba(10,20,40,0.9)" }}>
@@ -978,7 +978,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     </div>
                   </div>
                   <button onClick={() => { setUser(u=>({...u,mfa:false})); toast.success("2FA reset — user must re-enroll on next login"); }}
-                    className="w-full py-2.5 rounded-xl text-sm font-semibold"
+                    className="w-full py-2.5 rounded-2xl text-sm font-semibold"
                     style={{ background:T.redBg, color:T.red, border:`1px solid ${T.redBd}` }}>
                     Reset 2FA
                   </button>
@@ -991,7 +991,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     Send a password reset link to the user's registered email. The link expires in 24 hours.
                   </p>
                   <button onClick={() => toast.success(`Password reset email sent to ${user.email}`)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold"
                     style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                     <Lock size={13}/> Send Password Reset Email
                   </button>
@@ -1006,7 +1006,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       : "Account is in good standing. All features are accessible."}
                   </p>
                   <button onClick={toggleSuspend}
-                    className="w-full py-2.5 rounded-xl text-sm font-bold"
+                    className="w-full py-2.5 rounded-2xl text-sm font-bold"
                     style={{ background:user.status==="suspended" ? T.greenBg : T.redBg,
                       color:user.status==="suspended" ? T.green : T.red,
                       border:`1px solid ${user.status==="suspended" ? T.greenBd : T.redBd}` }}>
@@ -1020,7 +1020,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 <SLabel>Full Security Event Log</SLabel>
                 <div className="space-y-2">
                   {user.securityEvents.map((ev, i) => (
-                    <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-xl"
+                    <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-2xl"
                       style={{ background:ev.flag ? T.redBg : T.card3,
                         border:`1px solid ${ev.flag ? T.redBd : T.border}` }}>
                       <div style={{ width:8, height:8, borderRadius:"50%", flexShrink:0,

@@ -12,7 +12,7 @@ import {
 } from "../../services/wlPackages";
 import type { WLPackage, WLSale, PaymentProcessor, BillingModel } from "../../services/wlPackages";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = {
   background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)",
@@ -46,7 +46,7 @@ function BillingEditor({
         <div className="grid grid-cols-3 gap-2">
           {modelTypes.map(t => (
             <button key={t.id} onClick={() => switchModel(t.id)}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl transition-all"
+              className="flex flex-col items-center gap-1 p-3 rounded-2xl transition-all"
               style={{ background:billing.type===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                 border:`1px solid ${billing.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
                 color:billing.type===t.id?"#FFFFFF":"#8A9AB8" }}>
@@ -109,7 +109,7 @@ function BillingEditor({
       )}
 
       {/* Live charge preview */}
-      <div className="p-3 rounded-xl glow-surface" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+      <div className="p-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
         <div style={{ color:"#D99A6B", fontSize:9, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[50, 200, 1000].map(n => (
@@ -205,7 +205,7 @@ function PackageModal({ pkg, onClose, onSave }: {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
+          <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:12 }}>Billing Configuration</div>
             <BillingEditor billing={form.billing} onChange={b => setForm(p => ({ ...p, billing:b }))}/>
           </div>
@@ -214,7 +214,7 @@ function PackageModal({ pkg, onClose, onSave }: {
             <div className="flex items-center justify-between mb-3">
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>FEATURES LIST</label>
               <button onClick={() => setForm(p => ({ ...p, features:[...p.features,"New feature"] }))}
-                className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg"
+                className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={11}/> Add
               </button>
@@ -246,7 +246,7 @@ function PackageModal({ pkg, onClose, onSave }: {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-xl glow-surface"
+          <div className="flex items-center justify-between p-4 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <div>
               <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Package Active</div>
@@ -260,11 +260,11 @@ function PackageModal({ pkg, onClose, onSave }: {
 
           <div className="flex gap-3">
             <button onClick={save} disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:saving?0.7:1 }}>
               <Save size={14}/>{saving ? "Saving…" : isNew ? "Create Package" : "Save Changes"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
+            <button onClick={onClose} className="px-5 py-3 rounded-2xl text-sm"
               style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
               Cancel
             </button>
@@ -334,12 +334,12 @@ export function PartnerOnboardingAdmin() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => setCreating(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold text-sm"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
               <Plus size={14}/> New Package
             </button>
             <button onClick={() => setShowSend(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff", boxShadow:"0 4px 12px rgba(91,110,225,0.3)" }}>
               <Send size={14}/> Send Invite
             </button>
@@ -354,7 +354,7 @@ export function PartnerOnboardingAdmin() {
             { label:"WL Platform MRR",      value:`$${totalMRR.toLocaleString()}`,     color:"#6FAE8B" },
             { label:"Total WL Revenue",     value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
           ].map(s => (
-            <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
+            <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
               <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
             </div>
@@ -362,10 +362,10 @@ export function PartnerOnboardingAdmin() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
+        <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
               style={{ background:tab===t.id?"#5B6EE1":"transparent", color:tab===t.id?"#fff":"#8A9AB8" }}>
               {t.label}
             </button>
@@ -374,7 +374,7 @@ export function PartnerOnboardingAdmin() {
 
         {/* Search bar */}
         {(tab === "packages" || tab === "sales") && (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl glow-surface" style={CARD}>
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={CARD}>
             <Search size={13} color="#8A9AB8"/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
               style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:13, flex:1 }}/>
@@ -392,7 +392,7 @@ export function PartnerOnboardingAdmin() {
                   ? `$${b.perUserAmount}/user/mo (min $${b.minMonthly.toLocaleString()})`
                   : `${b.percentOfRevenue}% of revenue (min $${b.minMonthly.toLocaleString()})`;
               return (
-                <div key={pkg.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
+                <div key={pkg.id} className="p-5 rounded-2xl" style={CARD}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div style={{ width:36, height:36, borderRadius:10, background:`${pkg.color}15`, border:`1px solid ${pkg.color}40`, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -409,7 +409,7 @@ export function PartnerOnboardingAdmin() {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setEditPkg(pkg)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold"
                         style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                         <Edit2 size={11}/> Edit
                       </button>
@@ -417,7 +417,7 @@ export function PartnerOnboardingAdmin() {
                         await updatePackage(pkg.id, { active:!pkg.active });
                         reload();
                         toast.success(pkg.active ? "Package deactivated" : "Package activated — live on website");
-                      }} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                      }} className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                         style={{ background:pkg.active?"rgba(229,62,62,0.08)":"rgba(72,187,120,0.08)", color:pkg.active?"#FC8181":"#D99A6B" }}>
                         {pkg.active ? "Deactivate" : "Activate"}
                       </button>
@@ -425,15 +425,15 @@ export function PartnerOnboardingAdmin() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-3 mt-4">
-                    <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
+                    <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                       <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>BILLING MODEL</div>
                       <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:600, marginTop:2 }}>{billingStr}</div>
                     </div>
-                    <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
+                    <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                       <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>SETUP FEE</div>
                       <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:700, marginTop:2 }}>${b.setupFee.toLocaleString()}</div>
                     </div>
-                    <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(255,255,255,0.06)" }}>
+                    <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                       <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>STRIPE PRODUCT</div>
                       <div style={{ color:pkg.stripeProductId?"#6E90C9":"#FC8181", fontSize:11, ...MONO, marginTop:2 }}>
                         {pkg.stripeProductId ?? "⚠ Not linked"}
@@ -443,7 +443,7 @@ export function PartnerOnboardingAdmin() {
 
                   <div className="flex gap-3 mt-3">
                     {[50, 200, 1000].map(n => (
-                      <div key={n} className="flex-1 text-center px-2 py-1.5 rounded-lg" style={{ background:"rgba(91,110,225,0.05)" }}>
+                      <div key={n} className="flex-1 text-center px-2 py-1.5 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
                         <div style={{ color:"#8A9AB8", fontSize:8, ...MONO }}>{n} USERS</div>
                         <div style={{ color:pkg.color, fontSize:12, fontWeight:700 }}>
                           ${calcMonthlyCharge(pkg.billing, n).toLocaleString()}/mo
@@ -460,7 +460,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── WL Sales ── */}
         {tab === "sales" && (
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl glow-surface" style={CARD}>
+            <div className="p-5 rounded-2xl" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Revenue by Package</div>
               <div className="space-y-3">
                 {packages.map(pkg => {
@@ -525,7 +525,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── Onboarding Links ── */}
         {tab === "links" && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
+            <div className="flex items-start gap-3 p-4 rounded-2xl"
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <AlertCircle size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
               <p style={{ color:"#8A9AB8", fontSize:12 }}>
@@ -534,14 +534,14 @@ export function PartnerOnboardingAdmin() {
             </div>
 
             {packages.map(pkg => (
-              <div key={pkg.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
+              <div key={pkg.id} className="p-5 rounded-2xl" style={CARD}>
                 <div className="flex items-center gap-2 mb-3">
                   <div style={{ width:8, height:8, borderRadius:"50%", background:pkg.color }}/>
                   <span style={{ color:pkg.color, fontSize:11, fontWeight:700, ...MONO }}>{pkg.tier}</span>
                   <span style={{ color:"#E8EDF5", fontSize:14, fontWeight:500 }}>{pkg.name}</span>
                   {!pkg.active && <span style={{ color:"#8A9AB8", fontSize:10 }}>(inactive)</span>}
                 </div>
-                <div className="flex items-center gap-2 p-3 rounded-xl mb-3 glow-surface"
+                <div className="flex items-center gap-2 p-3 rounded-2xl mb-3"
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <Globe size={11} color="#8A9AB8"/>
                   <span style={{ color:"#8A9AB8", fontSize:11, ...MONO, flex:1 }} className="truncate">
@@ -550,12 +550,12 @@ export function PartnerOnboardingAdmin() {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => doCopy(pkg.id)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold flex-1"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold flex-1"
                     style={{ background:copiedId===pkg.id?"rgba(72,187,120,0.12)":`${pkg.color}12`, color:copiedId===pkg.id?"#D99A6B":pkg.color }}>
                     {copiedId===pkg.id ? <><CheckCircle size={11}/>Copied!</> : <><Copy size={11}/>Copy Unique Link</>}
                   </button>
                   <button onClick={() => { setSendPkgId(pkg.id); setShowSend(true); }}
-                    className="flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold"
+                    className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-semibold"
                     style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                     <Send size={11}/> Email Invite
                   </button>
@@ -568,7 +568,7 @@ export function PartnerOnboardingAdmin() {
         {/* ── Payment Processors ── */}
         {tab === "processors" && (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.15)" }}>
+            <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <p style={{ color:"#8A9AB8", fontSize:12 }}>
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
                 WL partners can also bring their own processor — configure a per-package override in the package editor.
@@ -576,7 +576,7 @@ export function PartnerOnboardingAdmin() {
             </div>
 
             {processors.map(proc => (
-              <div key={proc.id} className="p-5 rounded-2xl glow-surface" style={CARD}>
+              <div key={proc.id} className="p-5 rounded-2xl" style={CARD}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <span style={{ fontSize:28 }}>{proc.logo}</span>
@@ -596,7 +596,7 @@ export function PartnerOnboardingAdmin() {
                         await updateProcessor(proc.id, { isDefault:true });
                         setProcessors(await getProcessors());
                         toast.success(`${proc.name} set as default processor`);
-                      }} className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                      }} className="text-xs px-3 py-1.5 rounded-xl font-semibold"
                         style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                         Set Default
                       </button>
@@ -634,14 +634,14 @@ export function PartnerOnboardingAdmin() {
               </div>
             ))}
 
-            <div className="p-5 text-center rounded-2xl glow-surface"
-              style={{ border:"2px dashed rgba(91,110,225,0.2)", borderRadius:16 }}>
+            <div className="p-5 text-center rounded-2xl"
+              style={{ border:"2px dashed rgba(91,110,225,0.2)", borderRadius:22 }}>
               <div style={{ color:"#8A9AB8", fontSize:13, fontWeight:500, marginBottom:4 }}>Need a custom processor deal?</div>
               <div style={{ color:"#8A9AB8", fontSize:12, marginBottom:12 }}>
                 Contact integrations@finalpassdown.com to add a processor or integrate a WL partner's existing payment system.
               </div>
               <button onClick={() => toast.success("Request sent to integrations team")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={13}/> Request Custom Integration
               </button>
@@ -654,7 +654,7 @@ export function PartnerOnboardingAdmin() {
       {showSend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-md rounded-2xl p-7 glow-surface" style={CARD}>
+          <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
             <div className="flex items-center justify-between mb-5">
               <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
               <button onClick={() => setShowSend(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
@@ -665,7 +665,7 @@ export function PartnerOnboardingAdmin() {
                 <div className="flex flex-wrap gap-2">
                   {packages.filter(p => p.active).map(p => (
                     <button key={p.id} onClick={() => setSendPkgId(p.id)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                      className="px-3 py-1.5 rounded-2xl text-xs font-bold"
                       style={{ background:sendPkgId===p.id?`${p.color}15`:"rgba(91,110,225,0.04)",
                         border:`1px solid ${sendPkgId===p.id?p.color:"rgba(91,110,225,0.12)"}`,
                         color:sendPkgId===p.id?p.color:"#8A9AB8" }}>
@@ -684,11 +684,11 @@ export function PartnerOnboardingAdmin() {
                   if (!sendEmail) { toast.error("Email required"); return; }
                   toast.success(`Invite sent to ${sendEmail}`);
                   setSendEmail(""); setShowSend(false);
-                }} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
+                }} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
                   style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                   <Send size={14}/> Send Invite
                 </button>
-                <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-xl text-sm"
+                <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-2xl text-sm"
                   style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                   Cancel
                 </button>

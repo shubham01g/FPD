@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Shield, Settings, CheckCircle, Clock, DollarSign, Search, Eye, RefreshCw, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 const paidFees = [
@@ -56,7 +56,7 @@ export function ContinuationFeeAdmin() {
             { label:"Currently Activated", value:activated, color:"#6FAE8B" },
             { label:"Pending Activation", value:pending, color:"#F6AD55" },
           ].map(s => (
-            <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
+            <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
               <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
             </div>
@@ -64,7 +64,7 @@ export function ContinuationFeeAdmin() {
         </div>
 
         {/* Admin Configuration */}
-        <div className="p-6 rounded-2xl glow-surface" style={CARD}>
+        <div className="p-6 rounded-2xl" style={CARD}>
           <div className="flex items-center gap-2 mb-5">
             <Settings size={16} color="#FFFFFF"/>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Fee Configuration</h3>
@@ -73,7 +73,7 @@ export function ContinuationFeeAdmin() {
           <div className="grid md:grid-cols-3 gap-5">
             <div>
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ONE-TIME FEE AMOUNT ($)</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
                 <DollarSign size={15} color="#FFFFFF"/>
                 <input type="number" step="0.01" value={feeAmount} onChange={e => setFeeAmount(e.target.value)}
                   style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
@@ -82,7 +82,7 @@ export function ContinuationFeeAdmin() {
             </div>
             <div>
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ACTIVATION WINDOW (MONTHS)</label>
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
                 <Clock size={15} color="#FFFFFF"/>
                 <input type="number" step="1" min="1" max="120" value={periodMonths} onChange={e => setPeriodMonths(e.target.value)}
                   style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:18, fontWeight:700, ...MONO, width:"100%" }}/>
@@ -90,7 +90,7 @@ export function ContinuationFeeAdmin() {
               <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>How long vault stays active after death activation</div>
             </div>
             <div className="flex flex-col justify-end">
-              <button onClick={saveConfig} className="flex items-center gap-2 px-5 py-3.5 rounded-xl font-semibold text-sm"
+              <button onClick={saveConfig} className="flex items-center gap-2 px-5 py-3.5 rounded-2xl font-semibold text-sm"
                 style={{ background: savedConfig ? "rgba(72,187,120,0.12)" : "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: savedConfig ? "#D99A6B" : "#fff", border: savedConfig ? "1px solid rgba(72,187,120,0.3)" : "none", boxShadow: savedConfig ? "none" : "0 4px 12px rgba(91,110,225,0.3)" }}>
                 {savedConfig ? <CheckCircle size={15}/> : <Save size={15}/>}
                 {savedConfig ? "Configuration Saved!" : "Save Configuration"}
@@ -98,7 +98,7 @@ export function ContinuationFeeAdmin() {
               <div style={{ color:"#8A9AB8", fontSize:11, marginTop:6 }}>Changes update in real-time via Supabase</div>
             </div>
           </div>
-          <div className="mt-4 flex items-start gap-3 px-4 py-3 rounded-xl border" style={{ background:"rgba(246,173,85,0.05)", borderColor:"rgba(246,173,85,0.25)" }}>
+          <div className="mt-4 flex items-start gap-3 px-4 py-3 rounded-2xl border" style={{ background:"rgba(246,173,85,0.05)", borderColor:"rgba(246,173,85,0.25)" }}>
             <AlertTriangle size={14} color="#F6AD55" style={{ marginTop:2, flexShrink:0 }}/>
             <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
               <strong>Activation is a manual process.</strong> When a user is reported as no longer living, a legacy contact submits confirmation of passing — accepted documents include death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record. Review the submission, verify the document, then click "Activate" to begin the continuation window. Verification and admin approval are required, with a follow-up confirmation of death once received. The Stripe payment is non-refundable once processed.
@@ -110,7 +110,7 @@ export function ContinuationFeeAdmin() {
         <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
           <div className="flex items-center justify-between px-5 py-3 border-b" style={{ background:"rgba(255,255,255,0.08)", borderColor:"rgba(91,110,225,0.08)" }}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>Paid Legacy Continuation Fees</h3>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>
               <Search size={13} color="#8A9AB8"/>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:12, width:160 }}/>
             </div>
@@ -146,7 +146,7 @@ export function ContinuationFeeAdmin() {
               <div>
                 {!fee.activated ? (
                   <button onClick={() => activateFee(fee.id, fee.user)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-semibold"
                     style={{ background:"rgba(91,167,214,0.12)", color:"#6FAE8B", border:"1px solid rgba(91,167,214,0.25)" }}>
                     <Shield size={11}/> Activate
                   </button>

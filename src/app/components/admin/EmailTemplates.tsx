@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Mail, Edit2, Save, CheckCircle, Eye, X, Search, Tag, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background: "linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border: "1.5px solid rgba(91,110,225,0.35)", boxShadow: "0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius: 16 };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.03) 1px,transparent 1px)", backgroundSize: "50px 50px" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
@@ -558,7 +558,7 @@ export function EmailTemplates() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#E8EDF5" }}>Email Template Manager</h1>
           <p style={{ color: "#8A9AB8", fontSize: 13, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl glow-surface" style={GLASS}>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
           <span style={{ color: "#D99A6B", fontSize: 11, ...MONO }}>SENDGRID CONNECTED</span>
         </div>
@@ -566,10 +566,10 @@ export function EmailTemplates() {
 
       <div className="grid" style={{ gridTemplateColumns: "300px 1fr", gap: 16, minHeight: 700 }}>
         {/* Template list */}
-        <div className="rounded-2xl overflow-hidden flex flex-col glow-surface" style={GLASS}>
+        <div className="rounded-2xl overflow-hidden flex flex-col" style={GLASS}>
           {/* Search + filter */}
           <div className="p-3 border-b space-y-2" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)" }}>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)" }}>
               <Search size={12} color="#8A9AB8" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search templates..."
                 style={{ background: "transparent", border: "none", outline: "none", color: "#FFFFFF", fontSize: 12, width: "100%" }} />
@@ -577,7 +577,7 @@ export function EmailTemplates() {
             <div className="flex flex-wrap gap-1">
               {categories.map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)}
-                  className="px-2.5 py-1 rounded-lg text-xs transition-all"
+                  className="px-2.5 py-1 rounded-xl text-xs transition-all"
                   style={{ background: activeCategory === cat ? "#5B6EE1" : "rgba(91,110,225,0.06)", color: activeCategory === cat ? "#F0F4FA" : "#8A9AB8", fontWeight: activeCategory === cat ? 700 : 400 }}>
                   {cat}
                 </button>
@@ -602,7 +602,7 @@ export function EmailTemplates() {
 
         {/* Editor + Preview */}
         {selected && (
-          <div className="rounded-2xl overflow-hidden flex flex-col glow-surface" style={GLASS}>
+          <div className="rounded-2xl overflow-hidden flex flex-col" style={GLASS}>
             {/* Toolbar */}
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)", background: "rgba(3,7,16,0.6)" }}>
               <div>
@@ -611,23 +611,23 @@ export function EmailTemplates() {
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => setPreviewMode(!previewMode)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
                   style={{ background: previewMode ? "rgba(91,110,225,0.15)" : "rgba(91,110,225,0.06)", color: previewMode ? "#6E90C9" : "#8A9AB8", border: `1px solid ${previewMode ? "rgba(91,110,225,0.4)" : "rgba(91,110,225,0.15)"}` }}>
                   <Eye size={13} /> {previewMode ? "Edit" : "Preview"}
                 </button>
                 {!editing ? (
-                  <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
+                  <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
                     style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", border: "1px solid rgba(91,110,225,0.25)" }}>
                     <Edit2 size={13} /> Edit
                   </button>
                 ) : (
                   <>
-                    <button onClick={handleSave} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
+                    <button onClick={handleSave} className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
                       style={{ background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: saved ? "#D99A6B" : "#F0F4FA", fontWeight: 700 }}>
                       {saved ? <CheckCircle size={13} /> : <Save size={13} />}
                       {saved ? "Saved!" : "Save"}
                     </button>
-                    <button onClick={handleReset} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm"
+                    <button onClick={handleReset} className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
                       style={{ background: "rgba(246,173,85,0.08)", color: "#F6AD55", border: "1px solid rgba(246,173,85,0.2)" }}>
                       <RefreshCw size={12} /> Reset
                     </button>
@@ -654,7 +654,7 @@ export function EmailTemplates() {
               <div style={{ color: "#8A9AB8", fontSize: 10, ...MONO, marginBottom: 6 }}>SUBJECT LINE</div>
               {editing ? (
                 <input value={editSubject} onChange={e => setEditSubject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 14, outline: "none" }} />
+                  className="w-full px-3 py-2 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 14, outline: "none" }} />
               ) : (
                 <div style={{ color: "#E8EDF5", fontSize: 14 }}>{editSubject}</div>
               )}

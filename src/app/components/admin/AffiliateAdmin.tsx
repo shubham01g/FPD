@@ -44,7 +44,7 @@ export function AffiliateAdmin() {
           { label: "Jun Commission Pool", value: "$76,122", sub: "Unpaid + processing", color: "#D99A6B" },
           { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#6FAE8B" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -53,7 +53,7 @@ export function AffiliateAdmin() {
       </div>
 
       {/* Tier distribution */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Tier Distribution & Earnings</h3>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
@@ -96,7 +96,7 @@ export function AffiliateAdmin() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <Search size={14} color="var(--muted-foreground)" />
         <input
           value={search}
@@ -107,7 +107,7 @@ export function AffiliateAdmin() {
       </div>
 
       {/* Affiliates table */}
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}

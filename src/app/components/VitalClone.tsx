@@ -58,9 +58,9 @@ const VITAL_CSS = `
 .fpd-vital .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 .fpd-vital .wrap.wide{max-width:1900px;}
 
-.fpd-vital .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-vital .card.pad{padding:22px;}
-.fpd-vital .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-vital .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-vital .card.pad{padding:28px;}
+.fpd-vital .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 .fpd-vital .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:14px;font-weight:600;color:${TEXT};margin-bottom:16px;}
 .fpd-vital .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 
@@ -69,34 +69,34 @@ const VITAL_CSS = `
 .fpd-vital .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-vital .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
 .fpd-vital .head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
+.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
 .fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:#6FAE8B;}
 
 /* empty state */
 .fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
-.fpd-vital .empty-ico{width:52px;height:52px;border-radius:14px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fpd-vital .empty-ico{width:52px;height:52px;border-radius:18px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .fpd-vital .empty-title{color:${TEXT};font-size:15px;font-weight:600;}
 .fpd-vital .empty-desc{color:${MUTED};font-size:12.5px;max-width:440px;line-height:1.6;}
 
 /* requirement rows */
 .fpd-vital .reqs{display:flex;flex-direction:column;gap:10px;}
-.fpd-vital .req-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
-.fpd-vital .req-ico{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-vital .req-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
+.fpd-vital .req-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-vital .req-title{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:4px;}
 .fpd-vital .req-body{color:${MUTED};font-size:12px;line-height:1.7;}
 .fpd-vital .req-body code{font-family:var(--font-mono);color:${SOFT};}
 
 /* frame */
-.fpd-vital .frame-wrap{position:relative;border-radius:15px;overflow:hidden;border:1px solid rgba(255,255,255,0.34);background:#0B111D;}
+.fpd-vital .frame-wrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#0B111D;}
 .fpd-vital .frame-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0B111D;}
 .fpd-vital .frame-overlay .url{font-family:var(--font-mono);font-size:11px;color:${FAINT};opacity:.8;}
 .fpd-vital .spin{animation:fpdvitalspin 1s linear infinite;}
 @keyframes fpdvitalspin{to{transform:rotate(360deg);}}
 
 /* footer note */
-.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:12px;line-height:1.7;}
+.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:12px;line-height:1.7;}
 `;
 
 export function VitalClone() {
@@ -158,13 +158,13 @@ export function VitalClone() {
             </div>
           </div>
 
-          <div className="card pad glow-surface empty">
+          <div className="card pad empty">
             <div className="empty-ico"><Settings2 size={22} /></div>
             <div className="empty-title">VitalClone URL not configured</div>
             <div className="empty-desc">Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render VitalClone inline, with loading, reload and fullscreen controls already wired.</div>
           </div>
 
-          <div className="card pad glow-surface">
+          <div className="card pad">
             <div className="sec-title"><span className="tick" />What the integration needs</div>
             <div className="reqs">
               {reqs.map(r => (
@@ -251,7 +251,7 @@ export function VitalClone() {
           </div>
         </div>
 
-        <div className="glow-surface" style={{ borderRadius: 15 }}>{frame}</div>
+        <div style={{ borderRadius: 15 }}>{frame}</div>
 
         <div className="note">
           <ShieldCheck size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />

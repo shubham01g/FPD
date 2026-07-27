@@ -56,9 +56,9 @@ function billingLabel(b: BillingModel): { price: string; unit: string; setup: st
 /* ── Small building blocks ─────────────────────────────────────────── */
 function SectionCard({ icon, title, sub, children, step }: { icon: React.ReactNode; title: string; sub: string; children: React.ReactNode; step: number }) {
   return (
-    <div className="p-6 sm:p-7 glow-surface" style={GLASS}>
+    <div className="p-6 sm:p-7" style={GLASS}>
       <div className="flex items-start gap-3.5 mb-6">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.15)", color: "#6FAE8B" }}>{icon}</div>
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.15)", color: "#6FAE8B" }}>{icon}</div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span style={{ ...MONO, color: "#6FAE8B", fontSize: 11 }}>STEP {step}</span>
@@ -92,7 +92,7 @@ function UnlockBanner({ onPurchase }: { onPurchase?: () => void }) {
     <div className="p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 justify-between"
       style={{ background: "linear-gradient(135deg,rgba(91,110,225,0.14),rgba(91,110,225,0.06))", border: "1px solid rgba(91,167,214,0.32)" }}>
       <div className="flex items-start gap-3.5 min-w-0">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.2)", color: "#6FAE8B" }}><Lock size={18} /></div>
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.2)", color: "#6FAE8B" }}><Lock size={18} /></div>
         <div className="min-w-0">
           <div style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 700 }}>White Label is locked</div>
           <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6, marginTop: 3 }}>
@@ -101,7 +101,7 @@ function UnlockBanner({ onPurchase }: { onPurchase?: () => void }) {
         </div>
       </div>
       {onPurchase && (
-        <button onClick={onPurchase} className="flex-shrink-0 px-5 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
+        <button onClick={onPurchase} className="flex-shrink-0 px-5 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
           style={{ background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", boxShadow: "0 8px 26px rgba(91,110,225,0.4)" }}>
           <Rocket size={15} /> Unlock White Label
         </button>
@@ -118,9 +118,9 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
     <div>
       <div className="flex items-center justify-between mb-4">
         <span style={{ color: MUTED, fontSize: 11, ...MONO }}>LIVE PLATFORM PREVIEW</span>
-        <div className="flex gap-1 p-1 rounded-lg" style={{ background: "rgba(91,167,214,0.06)" }}>
+        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(91,167,214,0.06)" }}>
           {([["desktop", <Monitor size={13} key="d" />], ["mobile", <Smartphone size={13} key="m" />]] as const).map(([id, ic]) => (
-            <button key={id} onClick={() => setDevice(id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+            <button key={id} onClick={() => setDevice(id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all"
               style={{ background: device === id ? primary : "transparent", color: device === id ? "#fff" : MUTED, fontWeight: device === id ? 700 : 500 }}>
               {ic} {id.charAt(0).toUpperCase() + id.slice(1)}
             </button>
@@ -145,7 +145,7 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
           {device === "desktop" && (
             <div className="py-3 px-2 flex flex-col gap-1" style={{ width: 132, borderRight: `1px solid ${primary}18` }}>
               {navItems.map((n, i) => (
-                <div key={n} className="px-2.5 py-2 rounded-lg" style={{ background: i === 0 ? `${primary}22` : "transparent", color: i === 0 ? "#fff" : MUTED, fontSize: 11, fontWeight: i === 0 ? 600 : 400 }}>{n}</div>
+                <div key={n} className="px-2.5 py-2 rounded-xl" style={{ background: i === 0 ? `${primary}22` : "transparent", color: i === 0 ? "#fff" : MUTED, fontSize: 11, fontWeight: i === 0 ? 600 : 400 }}>{n}</div>
               ))}
             </div>
           )}
@@ -154,13 +154,13 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
             <div style={{ color: MUTED, fontSize: 10.5, marginBottom: 12 }}>Here's your legacy at a glance.</div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {["Documents", "Contacts", "Storage"].map((k, i) => (
-                <div key={k} className="rounded-xl p-2.5" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${primary}18` }}>
+                <div key={k} className="rounded-2xl p-2.5" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${primary}18` }}>
                   <div style={{ color: i === 0 ? primary : accent, fontSize: 15, fontWeight: 800, ...DISPLAY }}>{["128", "6", "62%"][i]}</div>
                   <div style={{ color: MUTED, fontSize: 8.5 }}>{k}</div>
                 </div>
               ))}
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg" style={{ background: `linear-gradient(135deg,${primary},${accent})`, color: "#fff", fontSize: 11, fontWeight: 700 }}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: `linear-gradient(135deg,${primary},${accent})`, color: "#fff", fontSize: 11, fontWeight: 700 }}>
               Add to Vault <ArrowRight size={12} />
             </div>
           </div>
@@ -218,7 +218,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
               <span key={t} className="flex items-center gap-2" style={{ color: MUTED, fontSize: 13 }}><CheckCircle size={14} color="#FFFFFF" /> {t}</span>
             ))}
           </div>
-          <div className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl" style={{ background: config.enabled ? "rgba(72,187,120,0.12)" : "rgba(91,167,214,0.08)", border: `1px solid ${config.enabled ? "rgba(72,187,120,0.35)" : "rgba(91,167,214,0.2)"}` }}>
+          <div className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl" style={{ background: config.enabled ? "rgba(72,187,120,0.12)" : "rgba(91,167,214,0.08)", border: `1px solid ${config.enabled ? "rgba(72,187,120,0.35)" : "rgba(91,167,214,0.2)"}` }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: config.enabled ? SUCCESS : MUTED, boxShadow: config.enabled ? `0 0 10px ${SUCCESS}` : "none" }} />
             <span style={{ color: config.enabled ? "#D99A6B" : MUTED, fontSize: 12.5, fontWeight: 600 }}>{config.enabled ? "White-label portal is LIVE" : "Draft — not published yet"}</span>
           </div>
@@ -253,7 +253,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                 return (
                   <button key={c.name} title={locked ? "Unlock White Label to change colors" : c.name} disabled={locked}
                     onClick={() => update({ primaryColor: c.primary, accentColor: c.accent })}
-                    className="aspect-square rounded-xl flex items-center justify-center transition-all"
+                    className="aspect-square rounded-2xl flex items-center justify-center transition-all"
                     style={{ background: `linear-gradient(135deg,${c.primary},${c.accent})`, border: on ? "2px solid #fff" : "2px solid transparent", boxShadow: on ? `0 0 16px ${c.primary}88` : "none", transform: on ? "scale(1.05)" : "none", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
                     {on && <Check size={16} color="#fff" />}
                   </button>
@@ -264,7 +264,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
               {([["Primary", "primaryColor"], ["Accent", "accentColor"]] as const).map(([lbl, key]) => (
                 <div key={key}>
                   <label style={{ color: MUTED, fontSize: 11, ...MONO, display: "block", marginBottom: 7 }}>{lbl.toUpperCase()} COLOR</label>
-                  <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2" style={{ background: "rgba(91,167,214,0.05)", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.5 : 1 }}>
+                  <div className="flex items-center gap-2.5 rounded-2xl px-2.5 py-2" style={{ background: "rgba(91,167,214,0.05)", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.5 : 1 }}>
                     <input type="color" value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)} disabled={locked}
                       style={{ width: 34, height: 34, border: "none", borderRadius: 8, background: "transparent", cursor: locked ? "not-allowed" : "pointer", padding: 0 }} />
                     <input value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)} disabled={locked}
@@ -282,7 +282,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
           {/* Domain */}
           <SectionCard step={3} icon={<Globe size={18} />} title="Custom domain" sub="Run the platform on your own web address. We'll issue the SSL certificate automatically.">
             <Field label="Portal domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourbrand.com" icon={<Globe size={15} />} disabled={locked} />
-            <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.15)" }}>
+            <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-2xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.15)" }}>
               <ShieldCheck size={15} color="#FFFFFF" style={{ marginTop: 1, flexShrink: 0 }} />
               <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.65 }}>
                 Point a <span style={{ color: SOFT, ...MONO }}>CNAME</span> record at <span style={{ color: "#6FAE8B", ...MONO }}>portals.finalpassdown.com</span> and we handle the rest — HTTPS, renewals, and routing. Your clients never see our name in the URL.
@@ -301,7 +301,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                     style={{ background: on ? "rgba(91,110,225,0.1)" : "rgba(255,255,255,0.02)", border: `1.5px solid ${on ? pkg.color : "rgba(91,167,214,0.15)"}`, boxShadow: on ? `0 0 26px ${pkg.color}30` : "none" }}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${pkg.color}22`, color: pkg.color }}>{TIER_ICON[pkg.tier] ?? <Star size={16} />}</div>
+                        <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${pkg.color}22`, color: pkg.color }}>{TIER_ICON[pkg.tier] ?? <Star size={16} />}</div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span style={{ ...DISPLAY, color: TEXT, fontSize: 15.5, fontWeight: 700 }}>{pkg.name}</span>
@@ -345,7 +345,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
 
         {/* ── Right: sticky preview + publish ── */}
         <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-6">
-          <div className="p-5 sm:p-6 glow-surface" style={GLASS}>
+          <div className="p-5 sm:p-6" style={GLASS}>
             <div className="flex items-center gap-2 mb-4">
               <Eye size={16} color="#FFFFFF" />
               <span style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 600 }}>Preview</span>
@@ -353,7 +353,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
             <LivePreview name={config.companyName} logo={config.logoText} tagline={config.tagline} primary={config.primaryColor} accent={config.accentColor} />
           </div>
 
-          <div className="p-5 sm:p-6 glow-surface" style={GLASS}>
+          <div className="p-5 sm:p-6" style={GLASS}>
             <div className="space-y-2.5 mb-5">
               {[
                 ["Brand name", config.companyName || "—"],
@@ -367,13 +367,13 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                 </div>
               ))}
             </div>
-            <button onClick={publish} className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
+            <button onClick={publish} className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 fpd-btn-lift"
               style={{ background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", boxShadow: "0 8px 26px rgba(91,110,225,0.4)" }}>
               {locked
                 ? <><Lock size={16} /> Unlock White Label</>
                 : <><Rocket size={16} /> {config.enabled ? "Update Live Portal" : "Publish White-Label Portal"}</>}
             </button>
-            <button onClick={() => toast.success("Draft saved (demo).")} disabled={locked} className="w-full py-2.5 mt-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+            <button onClick={() => toast.success("Draft saved (demo).")} disabled={locked} className="w-full py-2.5 mt-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
               style={{ background: "rgba(91,167,214,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
               <Save size={15} /> Save Draft
             </button>

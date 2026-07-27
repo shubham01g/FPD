@@ -49,9 +49,9 @@ const STORAGE_CSS = `
 .fpd-storage-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-storage .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-storage .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-storage .card.pad{padding:22px;}
-.fpd-storage .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-storage .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-storage .card.pad{padding:28px;}
+.fpd-storage .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-storage .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-storage .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
@@ -61,19 +61,19 @@ const STORAGE_CSS = `
 .fpd-storage .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 
 /* alert banner */
-.fpd-storage .alert-banner{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:14px;border:1px solid;}
+.fpd-storage .alert-banner{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:18px;border:1px solid;}
 
 /* KPI ledger */
-.fpd-storage .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-storage .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-storage .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-storage .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-storage .kcell:first-child{border-left:none;}
 .fpd-storage .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-storage .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-storage .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-storage .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-storage .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-storage .kcell .kval{font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-storage .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-storage .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-storage .kstrip{grid-template-columns:1fr 1fr;}.fpd-storage .kcell:nth-child(3){border-left:none;}.fpd-storage .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:880px){.fpd-storage .kstrip{grid-template-columns:1fr 1fr;}.fpd-storage .kcell:nth-child(3){border-left:none;}.fpd-storage .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* meter */
 .fpd-storage .meter-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -107,24 +107,24 @@ const STORAGE_CSS = `
 /* plans */
 .fpd-storage .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media (max-width:900px){.fpd-storage .plan-grid{grid-template-columns:1fr;}}
-.fpd-storage .plan-card{padding:20px;border-radius:13px;border:1px solid rgba(255,255,255,0.34);background:#0F1624;}
+.fpd-storage .plan-card{padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);background:#0F1624;}
 .fpd-storage .plan-card.current{background:rgba(91,110,225,0.08);border:2px solid ${ACCENT};}
 .fpd-storage .plan-tag{font-size:10px;font-family:var(--font-mono);color:#6FAE8B;margin-bottom:6px;}
 .fpd-storage .plan-name{font-family:var(--font-display);font-size:17px;color:${TEXT};margin-bottom:6px;}
 .fpd-storage .plan-price{font-size:22px;color:${TEXT};font-weight:700;}
 .fpd-storage .plan-price-sub{color:${MUTED};font-size:12px;}
 .fpd-storage .plan-detail{color:${MUTED};font-size:12.5px;}
-.fpd-storage .plan-btn{width:100%;padding:11px;border-radius:11px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-storage .plan-btn{width:100%;padding:11px;border-radius:16px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-storage .plan-btn.up{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.7);}
 .fpd-storage .plan-btn.down{background:#141B2E;color:${MUTED};}
 .fpd-storage .plan-btn.crypto{padding:9px;font-size:12px;background:rgba(247,147,26,0.1);color:#F7931A;border:1px solid rgba(247,147,26,0.3);}
-.fpd-storage .overage-note{margin-top:16px;padding:12px 16px;border-radius:11px;background:#0F1624;display:flex;align-items:center;gap:10px;}
+.fpd-storage .overage-note{margin-top:16px;padding:12px 16px;border-radius:16px;background:#0F1624;display:flex;align-items:center;gap:10px;}
 .fpd-storage .overage-note span{color:${MUTED};font-size:13px;}
 
 /* alert history */
-.fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:11px;background:#0F1624;}
+.fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#0F1624;}
 .fpd-storage .alert-row + .alert-row{margin-top:10px;}
-.fpd-storage .alert-tag{border-radius:8px;padding:4px 9px;font-family:var(--font-mono);font-size:11px;font-weight:700;flex-shrink:0;}
+.fpd-storage .alert-tag{border-radius:16px;padding:4px 9px;font-family:var(--font-mono);font-size:11px;font-weight:700;flex-shrink:0;}
 `;
 
 export function StorageUsage() {
@@ -186,7 +186,7 @@ export function StorageUsage() {
         )}
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -200,7 +200,7 @@ export function StorageUsage() {
         </div>
 
         {/* ── Storage meter ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <div className="meter-hd">
             <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Current Billing Cycle</h3>
             <div style={{ color: MUTED, fontSize: 12, fontFamily: "var(--font-mono)" }}>Resets Jul 1, 2026</div>
@@ -232,7 +232,7 @@ export function StorageUsage() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Usage by month — pure CSS bar chart */}
-          <div className="card pad glow-surface">
+          <div className="card pad">
             <h3 className="sec-title"><span className="tick"/>6-Month Usage History</h3>
             <div className="chart-wrap">
               <div className="chart-limit" style={{ bottom: Math.round((total/total)*120) }}>
@@ -256,7 +256,7 @@ export function StorageUsage() {
           </div>
 
           {/* Usage by category */}
-          <div className="card pad glow-surface">
+          <div className="card pad">
             <h3 className="sec-title"><span className="tick"/>Usage by Category</h3>
             <div>
               {usageByCategory.map(cat => (
@@ -275,7 +275,7 @@ export function StorageUsage() {
         </div>
 
         {/* ── Plan comparison + upgrade ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <h3 className="sec-title"><span className="tick"/>Your Plan & Upgrade Options</h3>
           <div className="plan-grid">
             {plans.map(plan => (
@@ -315,7 +315,7 @@ export function StorageUsage() {
         </div>
 
         {/* ── Alert history ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <h3 className="sec-title"><span className="tick"/>Notification History</h3>
           <div>
             {alertHistory.map((alert, i) => (

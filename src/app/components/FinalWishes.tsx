@@ -85,42 +85,42 @@ const WISHES_CSS = `
 .fpd-wishes-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wishes .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-wishes .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-wishes .card.pad{padding:22px;}
+.fpd-wishes .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-wishes .card.pad{padding:28px;}
 .fpd-wishes .sec-title{font-size:14.5px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:9px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
 .fpd-wishes .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
-.fpd-wishes .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-wishes .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 /* header */
 .fpd-wishes .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-wishes .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-wishes .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-wishes .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-wishes .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-wishes .btn-ghost:hover{background:rgba(91,110,225,0.18);}
-.fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
+.fpd-wishes .btn-pos{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:99px;background:rgba(95,190,145,0.12);color:#D99A6B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:background .18s;}
 .fpd-wishes .btn-pos:hover{background:rgba(95,190,145,0.2);}
-.fpd-wishes .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-wishes .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* segmented tabs */
-.fpd-wishes .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
-.fpd-wishes .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-wishes .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
+.fpd-wishes .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-wishes .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 .fpd-wishes .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .fpd-wishes .toolbar p{color:${MUTED};font-size:13px;line-height:1.6;}
 
 /* KPI ledger */
-.fpd-wishes .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-wishes .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-wishes .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-wishes .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-wishes .kcell:first-child{border-left:none;}
 .fpd-wishes .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-wishes .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-wishes .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-wishes .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-wishes .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-wishes .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-wishes .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-wishes .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-wishes .kstrip{grid-template-columns:1fr 1fr;}.fpd-wishes .kcell:nth-child(3){border-left:none;}.fpd-wishes .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:880px){.fpd-wishes .kstrip{grid-template-columns:1fr 1fr;}.fpd-wishes .kcell:nth-child(3){border-left:none;}.fpd-wishes .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* wish rows */
 .fpd-wishes .wlist{display:flex;flex-direction:column;gap:10px;}
@@ -138,16 +138,16 @@ const WISHES_CSS = `
 
 /* empty state */
 .fpd-wishes .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 12px;}
-.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
+.fpd-wishes .empty .ei{width:46px;height:46px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-wishes .empty .et{color:${SOFT};font-size:14px;font-weight:600;font-family:var(--font-display);margin-bottom:4px;}
 .fpd-wishes .empty .ed{color:${MUTED};font-size:12.5px;}
 
 /* funeral grid */
 .fpd-wishes .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.fpd-wishes .tile{padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
+.fpd-wishes .tile{padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-wishes .tile:not(:last-child){border-bottom-left-radius:0;border-bottom-right-radius:0;}
 .fpd-wishes .tile + .tile{border-top:none;border-top-left-radius:0;border-top-right-radius:0;}
-.fpd-wishes .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:6px;}
+.fpd-wishes .tile .tk{font-size:9.5px;font-weight:600;color:${MUTED};margin-bottom:6px;}
 .fpd-wishes .tile .tv{color:${TEXT};font-size:13px;line-height:1.55;}
 .fpd-wishes .tags{display:flex;flex-wrap:wrap;gap:7px;}
 .fpd-wishes .tag{padding:4px 10px;border-radius:7px;font-size:11.5px;font-weight:500;}
@@ -155,23 +155,23 @@ const WISHES_CSS = `
 .fpd-wishes .tag.read{background:rgba(126,107,216,0.14);color:#A98CC7;}
 
 /* obituary */
-.fpd-wishes .obit{padding:16px 18px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${SOFT};font-size:13.5px;line-height:1.85;white-space:pre-wrap;}
-.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:11px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:13.5px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
+.fpd-wishes .obit{padding:16px 18px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};font-size:13.5px;line-height:1.85;white-space:pre-wrap;}
+.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:13.5px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
 .fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
 
 /* questionnaire */
-.fpd-wishes .qcount{padding:7px 13px;border-radius:9px;background:rgba(91,110,225,0.10);color:#6FAE8B;font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
+.fpd-wishes .qcount{padding:7px 13px;border-radius:99px;background:rgba(91,110,225,0.10);color:#6FAE8B;font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
 .fpd-wishes .qbar{height:7px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-wishes .qbar i{display:block;height:100%;background:linear-gradient(90deg,${ACCENT2},${ACCENT});transition:width .4s cubic-bezier(.4,0,.2,1);}
-.fpd-wishes .qcat{border-radius:14px;overflow:hidden;}
+.fpd-wishes .qcat{border-radius:18px;overflow:hidden;}
 .fpd-wishes .qcat + .qcat{margin-top:10px;}
 .fpd-wishes .qhead{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:none;border:none;cursor:pointer;text-align:left;}
 .fpd-wishes .qhead .qtitle{font-family:var(--font-display);font-size:14.5px;color:${TEXT};font-weight:600;}
 .fpd-wishes .qhead .qright{display:flex;align-items:center;gap:12px;}
 .fpd-wishes .qhead .qn{color:${MUTED};font-size:11.5px;font-family:var(--font-mono);}
-.fpd-wishes .qbody{padding:6px 18px 18px;border-top:1px solid rgba(255,255,255,0.34);display:flex;flex-direction:column;gap:16px;}
+.fpd-wishes .qbody{padding:6px 18px 18px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:16px;}
 .fpd-wishes .qq{color:${TEXT};font-size:13.5px;font-weight:600;margin-bottom:8px;}
-.fpd-wishes .qans{position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);cursor:pointer;transition:border-color .16s;}
+.fpd-wishes .qans{position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:border-color .16s;}
 .fpd-wishes .qans:hover{border-color:rgba(91,110,225,0.3);}
 .fpd-wishes .qans::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;pointer-events:none;background:linear-gradient(90deg,#7E6BD8,#5B6EE1);transform:scaleX(0);transform-origin:left;transition:transform .2s ease;box-shadow:0 0 8px 0 rgba(126,107,216,0.65);}
 .fpd-wishes .qans:hover::after{transform:scaleX(1);}
@@ -184,15 +184,15 @@ const WISHES_CSS = `
 /* modal (shared pattern) */
 .fpd-wishes .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-wishes .modal{width:100%;max-width:520px;}
-.fpd-wishes .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-wishes .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-wishes .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-wishes .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-wishes .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
-.fpd-wishes .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-wishes .field input,.fpd-wishes .field select,.fpd-wishes .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-wishes .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-wishes .field input,.fpd-wishes .field select,.fpd-wishes .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-wishes .field input::placeholder,.fpd-wishes .field textarea::placeholder{color:${FAINT};}
 .fpd-wishes .field input:focus,.fpd-wishes .field select:focus,.fpd-wishes .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
-.fpd-wishes .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-wishes .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
 `;
 
 /* ── Add / edit a bequest ── */
@@ -221,7 +221,7 @@ function WishModal({ editing, onClose, onSave }: {
 
   return (
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="card modal glow-surface">
+      <div className="card modal">
         <div className="modal-head">
           <h3>{editing ? "Edit Wish" : "Add a Wish"}</h3>
           <button onClick={onClose}><X size={18} /></button>
@@ -319,7 +319,7 @@ export function FinalWishes() {
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -352,7 +352,7 @@ export function FinalWishes() {
             </div>
 
             {wishes.length === 0 && (
-              <div className="card empty glow-surface">
+              <div className="card empty">
                 <div className="ei"><Heart size={20} /></div>
                 <div className="et">No wishes recorded yet</div>
                 <div className="ed">Add the first item you want passed to someone specific.</div>
@@ -384,7 +384,7 @@ export function FinalWishes() {
         {tab === "funeral" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="fgrid">
-              <div className="card pad glow-surface">
+              <div className="card pad">
                 <h3 className="sec-title"><span className="tick" />Service Details</h3>
                 {[
                   { label: "Service Type", value: funeralPlan.serviceType },
@@ -400,7 +400,7 @@ export function FinalWishes() {
                 ))}
               </div>
 
-              <div className="card pad glow-surface">
+              <div className="card pad">
                 <h3 className="sec-title"><span className="tick" />Service Preferences</h3>
                 <div className="tile">
                   <div className="tk">Music</div>
@@ -425,7 +425,7 @@ export function FinalWishes() {
               </div>
             </div>
 
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <h3 className="sec-title"><span className="tick" />Obituary Draft</h3>
               {editingObit ? (
                 <>
@@ -463,7 +463,7 @@ export function FinalWishes() {
             <div className="qbar"><i style={{ width: `${(completedAnswers / totalQuestions) * 100}%` }} /></div>
 
             {questionnaireCategories.map((cat, ci) => (
-              <div key={ci} className="card qcat glow-surface">
+              <div key={ci} className="card qcat">
                 <button className="qhead" onClick={() => setExpandedCat(expandedCat === ci ? null : ci)}>
                   <span className="qtitle">{cat.title}</span>
                   <div className="qright">

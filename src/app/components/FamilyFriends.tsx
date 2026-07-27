@@ -62,7 +62,7 @@ function BlastEmailModal({
 
   return (
     <div className="backdrop">
-      <div className="card modal glow-surface">
+      <div className="card modal">
         <div className="modal-head">
           <div className="flex items-center gap-2">
             <Send size={16} color="#FFFFFF"/>
@@ -145,7 +145,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
 
   return (
     <div className="backdrop">
-      <div className="card modal glow-surface">
+      <div className="card modal">
         <div className="modal-head">
           <h3>Add Contact</h3>
           <button onClick={onClose}><X size={16}/></button>
@@ -203,18 +203,18 @@ const FF_CSS = `
 .fpd-ff-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-ff .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-ff .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-ff .card.pad{padding:22px;}
-.fpd-ff .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-ff .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-ff .card.pad{padding:28px;}
+.fpd-ff .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-ff .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-ff .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-ff .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-ff .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-ff .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-ff .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
+.fpd-ff .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;border:none;}
 .fpd-ff .btn-ghost.on{background:rgba(91,110,225,0.20);}
-.fpd-ff .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* group summary — clickable filter tiles */
 .fpd-ff .gstat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -224,8 +224,8 @@ const FF_CSS = `
 .fpd-ff .gstat-lbl{color:${TEXT};font-size:13px;font-weight:500;margin-top:2px;}
 
 /* segmented all/starred filter */
-.fpd-ff .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;}
-.fpd-ff .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
+.fpd-ff .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:99px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-ff .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* toolbar */
@@ -234,15 +234,15 @@ const FF_CSS = `
 .fpd-ff .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
 
 /* groups panel */
-.fpd-ff .gpanel-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.34);background:rgba(91,110,225,0.05);}
+.fpd-ff .gpanel-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(91,110,225,0.05);}
 .fpd-ff .gpanel-title{font-family:var(--font-display);font-size:15px;color:${TEXT};}
 .fpd-ff .gpanel-desc{color:${MUTED};font-size:12px;}
-.fpd-ff .grow{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-ff .grow{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-ff .gavatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--font-display);}
 .fpd-ff .gname{color:${TEXT};font-size:14px;font-weight:600;}
 .fpd-ff .gmeta{color:${MUTED};font-size:11px;}
 .fpd-ff .gmember-chip{padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(91,110,225,0.09);color:#6FAE8B;}
-.fpd-ff .gcreate{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.34);background:rgba(91,110,225,0.03);display:flex;flex-direction:column;gap:12px;}
+.fpd-ff .gcreate{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);background:rgba(91,110,225,0.03);display:flex;flex-direction:column;gap:12px;}
 .fpd-ff .gcreate-lbl{color:#6FAE8B;font-size:12px;font-weight:700;font-family:var(--font-mono);}
 .fpd-ff .swatch{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);cursor:pointer;}
 .fpd-ff .member-pick{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;}
@@ -272,38 +272,38 @@ const FF_CSS = `
 .fpd-ff .dphoto{position:relative;height:128px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .fpd-ff .dphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.8;}
 .fpd-ff .dphoto-init{font-family:var(--font-display);font-size:48px;opacity:0.4;}
-.fpd-ff .dphoto-btn{position:absolute;bottom:8px;right:8px;display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(13,20,33,0.9);color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .dphoto-btn{position:absolute;bottom:8px;right:8px;display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:16px;font-size:11px;font-weight:600;background:rgba(13,20,33,0.9);color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-ff .dname{font-family:var(--font-display);font-size:20px;color:${TEXT};margin-bottom:4px;}
 .fpd-ff .drel{font-size:13px;font-weight:500;margin-bottom:16px;}
 .fpd-ff .dfield{display:flex;align-items:center;gap:8px;color:${TEXT};font-size:13px;}
 .fpd-ff .dfield+.dfield{margin-top:10px;}
-.fpd-ff .dnotes{margin-top:16px;padding:12px;border-radius:11px;background:#0F1624;}
+.fpd-ff .dnotes{margin-top:16px;padding:12px;border-radius:16px;background:#0F1624;}
 .fpd-ff .dnotes-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:${MUTED};margin-bottom:4px;}
 .fpd-ff .dnotes-val{color:${SOFT};font-size:13px;line-height:1.7;}
-.fpd-ff .dedit{flex:1;padding:9px;border-radius:11px;font-size:13px;background:#141B2E;color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-ff .ddelete{padding:9px 13px;border-radius:11px;font-size:13px;background:rgba(208,107,107,0.12);color:${NEG};border:none;cursor:pointer;}
+.fpd-ff .dedit{flex:1;padding:9px;border-radius:16px;font-size:13px;background:#141B2E;color:#6FAE8B;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .ddelete{padding:9px 13px;border-radius:16px;font-size:13px;background:rgba(208,107,107,0.12);color:${NEG};border:none;cursor:pointer;}
 
 /* modal */
 .fpd-ff .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-ff .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
-.fpd-ff .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-ff .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-ff .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-ff .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-ff .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
-.fpd-ff .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-ff .field input,.fpd-ff .field select,.fpd-ff .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-ff .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-ff .field input,.fpd-ff .field select,.fpd-ff .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-ff .field textarea{resize:none;}
 .fpd-ff .field input::placeholder,.fpd-ff .field textarea::placeholder{color:${FAINT};}
 .fpd-ff .field input:focus,.fpd-ff .field select:focus,.fpd-ff .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
-.fpd-ff .recipients-box{padding:12px;border-radius:11px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
+.fpd-ff .recipients-box{padding:12px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-ff .rec-lbl{font-family:var(--font-mono);font-size:10.5px;color:${MUTED};margin-bottom:8px;}
 .fpd-ff .rec-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:99px;font-size:11px;}
 .fpd-ff .rec-chip.on{background:rgba(91,110,225,0.10);color:#6FAE8B;}
 .fpd-ff .rec-chip.off{background:rgba(140,151,180,0.10);color:${MUTED};}
-.fpd-ff .bcc-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.2);}
+.fpd-ff .bcc-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:16px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.2);}
 .fpd-ff .bcc-note p{color:#D99A6B;font-size:11px;line-height:1.6;}
-.fpd-ff .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-ff .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-ff .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-ff .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 `;
 
 export function FamilyFriends() {
@@ -367,7 +367,7 @@ export function FamilyFriends() {
 
         {/* ── Groups & Email Blast panel ── */}
         {showGroupsPanel && (
-          <div className="card glow-surface" style={{ overflow: "hidden" }}>
+          <div className="card" style={{ overflow: "hidden" }}>
             <div className="gpanel-hd">
               <div className="flex items-center gap-2">
                 <Layers size={15} color="#FFFFFF"/>
@@ -482,7 +482,7 @@ export function FamilyFriends() {
         <div className="gstat-grid">
           {(Object.entries(groupConfig) as [Contact["group"], typeof groupConfig[Contact["group"]]][]).map(([g, cfg]) => (
             <button key={g} onClick={() => setActiveGroup(activeGroup === g ? "all" : g)}
-              className="card gstat glow-surface" style={{ borderColor: activeGroup === g ? cfg.color : "rgba(255,255,255,0.065)" }}>
+              className="card gstat" style={{ borderColor: activeGroup === g ? cfg.color : "rgba(255,255,255,0.065)" }}>
               <div className="gstat-val" style={{ color: cfg.color }}>{byGroup(g).length}</div>
               <div className="gstat-lbl">{cfg.label}</div>
             </button>
@@ -491,7 +491,7 @@ export function FamilyFriends() {
 
         {/* ── Search + filter ── */}
         <div className="toolbar">
-          <div className="card search glow-surface">
+          <div className="card search">
             <Search size={13} color={MUTED}/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search family & friends..."/>
           </div>
@@ -506,7 +506,7 @@ export function FamilyFriends() {
           {/* Contact list */}
           <div className="clist">
             {filtered.length === 0 && (
-              <div className="card empty glow-surface">
+              <div className="card empty">
                 <Users size={32} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 14 }}>No contacts found.</div>
               </div>
@@ -548,7 +548,7 @@ export function FamilyFriends() {
           {/* Detail panel */}
           <div>
             {selected ? (
-              <div className="card glow-surface" style={{ overflow: "hidden", position: "sticky", top: 16 }}>
+              <div className="card" style={{ overflow: "hidden", position: "sticky", top: 16 }}>
                 <div className="dphoto" style={{ background:`${selected.color}1C` }}>
                   {selected.photo
                     ? <img src={selected.photo} alt={selected.name}/>
@@ -592,7 +592,7 @@ export function FamilyFriends() {
                 </div>
               </div>
             ) : (
-              <div className="card pad empty glow-surface">
+              <div className="card pad empty">
                 <Heart size={32} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
                 <div style={{ color: MUTED, fontSize: 14 }}>Select a contact to view details</div>
               </div>

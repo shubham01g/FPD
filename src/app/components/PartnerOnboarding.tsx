@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
-const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 
 /* ── Volume-based commission tiers ──────────────────────────────── */
 const VOLUME_TIERS = [
@@ -127,7 +127,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
           <p style={{ color:"#8A9AB8", fontSize:14, lineHeight:1.8, marginBottom:32 }}>
             You start at <strong style={{ color:"#6FAE8B" }}>Tier 1 (20% commission)</strong>. As you grow to 51+ accounts you automatically advance to Tier 2 (25%), and 101+ unlocks Tier 3 (30%).
           </p>
-          <div className="p-5 rounded-2xl mb-6 glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
+          <div className="p-5 rounded-2xl mb-6" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>YOUR PARTNER REFERENCE</div>
             <div style={{ ...MONO, fontSize:20, color:"#6E90C9", fontWeight:700, marginBottom:4 }}>{refCode}</div>
             <div style={{ color:"#4A5A7A", fontSize:11 }}>Your unique referral link will be emailed within 24 hours</div>
@@ -172,7 +172,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             {/* Setup fee card */}
-            <div className="rounded-2xl p-7 text-center glow-surface" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)", background:"rgba(91,110,225,0.02)" }}>
+            <div className="rounded-2xl p-7 text-center" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)", background:"rgba(91,110,225,0.02)" }}>
               <div style={{ color:"#4A5A7A", fontSize:11, ...MONO, marginBottom:8 }}>ONE-TIME SETUP FEE</div>
               <div style={{ ...DISPLAY, fontSize:56, color:"#6E90C9", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
               <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
@@ -182,7 +182,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   { icon:<Shield size={16}/>,   label:"Partner dashboard" },
                   { icon:<Zap size={16}/>,      label:"Referral tracking" },
                 ].map(f => (
-                  <div key={f.label} className="flex flex-col items-center gap-2 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.06)" }}>
+                  <div key={f.label} className="flex flex-col items-center gap-2 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.06)" }}>
                     <span style={{ color:"#FFFFFF" }}>{f.icon}</span>
                     <span style={{ color:"#8A9AB8", fontSize:11, fontWeight:600 }}>{f.label}</span>
                   </div>
@@ -208,7 +208,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             {/* Earnings estimate */}
-            <div className="rounded-2xl p-6 glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
+            <div className="rounded-2xl p-6" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <div style={{ color:"#6E90C9", fontSize:11, ...MONO, marginBottom:12 }}>ESTIMATED MONTHLY EARNINGS AT SCALE</div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 {[
@@ -244,13 +244,13 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               <h1 style={{ ...DISPLAY, fontSize:28, color:"#E8EDF5", marginBottom:6 }}>Your Organization</h1>
               <p style={{ color:"#8A9AB8", fontSize:14 }}>Tell us about your business so we can set up your partner account.</p>
             </div>
-            <div className="rounded-2xl p-8 space-y-5 glow-surface" style={GLASS}>
+            <div className="rounded-2xl p-8 space-y-5" style={GLASS}>
               <div>
                 <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:8 }}>ORGANIZATION TYPE</label>
                 <div className="flex flex-wrap gap-2">
                   {ORG_TYPES.map(t => (
                     <button key={t.id} onClick={() => setOrg(o=>({...o,type:t.id}))}
-                      className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                      className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
                       style={{ background:org.type===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${org.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:org.type===t.id?"#6E90C9":"#8A9AB8" }}>
                       {t.label}
                     </button>
@@ -267,7 +267,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 <div key={f.key}>
                   <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
                   <input type={f.type||"text"} value={(org as any)[f.key]} onChange={e=>setOrg(o=>({...o,[f.key]:e.target.value}))} placeholder={f.ph}
-                    className="w-full px-4 py-3 rounded-xl"
+                    className="w-full px-4 py-3 rounded-2xl"
                     style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
                 </div>
               ))}
@@ -275,7 +275,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>HOW WILL YOU REFER CLIENTS? (optional)</label>
                 <textarea value={org.why} onChange={e=>setOrg(o=>({...o,why:e.target.value}))} rows={2}
                   placeholder="e.g. I advise clients on estate planning and will recommend FPD to each one..."
-                  className="w-full px-4 py-3 rounded-xl resize-none"
+                  className="w-full px-4 py-3 rounded-2xl resize-none"
                   style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
               </div>
             </div>
@@ -301,7 +301,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
             <div className="space-y-4">
               {/* Summary */}
-              <div className="rounded-2xl p-6 glow-surface" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)" }}>
+              <div className="rounded-2xl p-6" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)" }}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div style={{ ...DISPLAY, fontSize:18, color:"#E8EDF5" }}>Final Pass Down Partner Setup</div>
@@ -327,35 +327,35 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               </div>
 
               {/* Payment form */}
-              <div className="rounded-2xl p-6 space-y-4 glow-surface" style={GLASS}>
+              <div className="rounded-2xl p-6 space-y-4" style={GLASS}>
                 <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>PAYMENT DETAILS — STRIPE SECURE CHECKOUT</div>
                 <div>
                   <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>CARDHOLDER NAME</label>
                   <input defaultValue={org.contact} placeholder="Name on card"
-                    className="w-full px-4 py-3 rounded-xl"
+                    className="w-full px-4 py-3 rounded-2xl"
                     style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none" }}/>
                 </div>
                 <div>
                   <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>CARD NUMBER</label>
                   <input placeholder="4242 4242 4242 4242" maxLength={19}
-                    className="w-full px-4 py-3 rounded-xl"
+                    className="w-full px-4 py-3 rounded-2xl"
                     style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none", ...MONO }}/>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>EXPIRY</label>
                     <input placeholder="MM / YY" maxLength={7}
-                      className="w-full px-4 py-3 rounded-xl"
+                      className="w-full px-4 py-3 rounded-2xl"
                       style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none", ...MONO }}/>
                   </div>
                   <div>
                     <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>CVC</label>
                     <input placeholder="•••" maxLength={4}
-                      className="w-full px-4 py-3 rounded-xl"
+                      className="w-full px-4 py-3 rounded-2xl"
                       style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14, outline:"none", ...MONO }}/>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
                   <Shield size={12} color="#FFFFFF"/>
                   <span style={{ color:"#D99A6B", fontSize:11 }}>256-bit SSL encryption · Processed by Stripe · No card data stored</span>
                 </div>
@@ -424,7 +424,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
         </div>
 
         {/* Tier badge */}
-        <div className="mx-2 my-2 px-3 py-2.5 rounded-xl" style={{ background:`${currentTier.color}18`, border:`1px solid ${currentTier.color}40` }}>
+        <div className="mx-2 my-2 px-3 py-2.5 rounded-2xl" style={{ background:`${currentTier.color}18`, border:`1px solid ${currentTier.color}40` }}>
           <div style={{ color:"#E8EDF5", fontSize:10, fontWeight:600 }}>Heritage Trust Co.</div>
           <div style={{ color:currentTier.color, fontSize:9, ...MONO, marginTop:2 }}>
             {currentTier.label.toUpperCase()} · {currentTier.rate}% COMMISSION
@@ -435,7 +435,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
         <nav className="flex-1 px-2 py-2 space-y-0.5">
           {navItems.map(item => (
             <button key={item.id} onClick={() => setTab(item.id)}
-              className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all text-left"
+              className="w-full flex items-center gap-2.5 rounded-2xl px-2.5 py-2 transition-all text-left"
               style={{ background:tab===item.id?"rgba(91,110,225,0.12)":"transparent", color:tab===item.id?"#FFFFFF":"#B0C0DC", borderLeft:`2px solid ${tab===item.id?"#5B6EE1":"transparent"}` }}>
               <span style={{ color:tab===item.id?"#FFFFFF":"inherit" }}>{item.icon}</span>
               <span style={{ fontSize:12, fontWeight:tab===item.id?600:400 }}>{item.label}</span>
@@ -444,7 +444,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
         </nav>
 
         <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
-          <button onClick={onSignOut} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl"
+          <button onClick={onSignOut} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-2xl"
             style={{ color:"#4A5A7A" }}>
             <LogOut size={13}/><span style={{ fontSize:12 }}>Exit Portal</span>
           </button>
@@ -484,7 +484,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { label:"Monthly Earned",  value:`$${stats.monthlyEarned.toLocaleString()}`, sub:"This month",  color:"#6FAE8B" },
                   { label:"Total Earned",    value:`$${stats.totalEarned.toLocaleString()}`,   sub:"All time",    color:"#F6AD55" },
                 ].map(kpi => (
-                  <div key={kpi.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
+                  <div key={kpi.label} className="p-4 rounded-2xl" style={GLASS}>
                     <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:6 }}>{kpi.label.toUpperCase()}</div>
                     <div style={{ ...DISPLAY, fontSize:22, color:"#E8EDF5", marginBottom:2 }}>{kpi.value}</div>
                     <div style={{ color:"#4A5A7A", fontSize:10 }}>{kpi.sub}</div>
@@ -517,7 +517,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
               )}
 
               {/* Commission bar chart */}
-              <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
+              <div className="p-5 rounded-2xl" style={GLASS}>
                 <div style={{ ...DISPLAY, fontSize:14, color:"#E8EDF5", marginBottom:2 }}>Monthly Commission Earnings</div>
                 <div style={{ color:"#4A5A7A", fontSize:10, marginBottom:14 }}>Last 6 months</div>
                 {(() => {
@@ -546,19 +546,19 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl glow-surface" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)", background:"rgba(72,187,120,0.03)" }}>
+                <div className="p-5 rounded-2xl" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)", background:"rgba(72,187,120,0.03)" }}>
                   <div style={{ color:"#D99A6B", fontSize:9, ...MONO, marginBottom:6 }}>NEXT PAYOUT</div>
                   <div style={{ ...DISPLAY, fontSize:24, color:"#E8EDF5", marginBottom:2 }}>${stats.pendingPayout.toLocaleString()}</div>
                   <div style={{ color:"#8A9AB8", fontSize:11 }}>Scheduled {stats.nextPayout} · Auto-deposit</div>
                 </div>
-                <div className="p-5 rounded-2xl space-y-2 glow-surface" style={GLASS}>
+                <div className="p-5 rounded-2xl space-y-2" style={GLASS}>
                   <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:4 }}>QUICK ACTIONS</div>
                   {[
                     { label:"Copy Referral Link", fn:()=>{ copyToClipboard("https://finalpassdown.com/ref/HTC-2026"); toast.success("Referral link copied!") } },
                     { label:"Download Payout Report", fn:()=>toast.success("Report downloading…") },
                     { label:"Marketing Kit", fn:()=>toast.success("Opening marketing kit…") },
                   ].map(a => (
-                    <button key={a.label} onClick={a.fn} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left"
+                    <button key={a.label} onClick={a.fn} className="w-full flex items-center gap-2 px-3 py-2 rounded-2xl text-left"
                       style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)", color:"#6E90C9" }}>
                       <Copy size={11}/><span style={{ fontSize:11, fontWeight:600 }}>{a.label}</span>
                       <ArrowRight size={10} style={{ marginLeft:"auto" }}/>
@@ -577,12 +577,12 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   <p style={{ color:"#8A9AB8", fontSize:11 }}>{stats.accounts} active · Earning at {currentTier.rate}% commission</p>
                 </div>
                 <button onClick={() => { copyToClipboard("https://finalpassdown.com/ref/HTC-2026"); toast.success("Referral link copied!") }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs"
+                  className="flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs"
                   style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                   <Copy size={12}/> Copy Referral Link
                 </button>
               </div>
-              <div className="rounded-2xl overflow-hidden glow-surface" style={GLASS}>
+              <div className="rounded-2xl overflow-hidden" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
@@ -623,13 +623,13 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { label:"Pending",       value:`$${stats.pendingPayout.toLocaleString()}`, color:"#F6AD55" },
                   { label:"Next Pay Date", value:stats.nextPayout, color:"#D99A6B" },
                 ].map(k => (
-                  <div key={k.label} className="p-4 rounded-2xl glow-surface" style={GLASS}>
+                  <div key={k.label} className="p-4 rounded-2xl" style={GLASS}>
                     <div style={{ color:"#4A5A7A", fontSize:9, ...MONO, marginBottom:5 }}>{k.label.toUpperCase()}</div>
                     <div style={{ ...DISPLAY, fontSize:20, color:k.color }}>{k.value}</div>
                   </div>
                 ))}
               </div>
-              <div className="rounded-2xl overflow-hidden glow-surface" style={GLASS}>
+              <div className="rounded-2xl overflow-hidden" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
@@ -668,13 +668,13 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   { title:"Client Onboarding Guide", desc:"Step-by-step guide to onboard clients onto FPD", emoji:"📋" },
                   { title:"Tier Advancement Guide",  desc:"How to move from Tier 1 → 2 → 3",              emoji:"📈" },
                 ].map(r => (
-                  <div key={r.title} className="p-5 rounded-2xl flex items-start gap-4 glow-surface" style={GLASS}>
+                  <div key={r.title} className="p-5 rounded-2xl flex items-start gap-4" style={GLASS}>
                     <span style={{ fontSize:26 }}>{r.emoji}</span>
                     <div className="flex-1">
                       <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:2 }}>{r.title}</div>
                       <div style={{ color:"#8A9AB8", fontSize:11, marginBottom:8 }}>{r.desc}</div>
                       <button onClick={() => toast.success(`${r.title} — opening…`)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold"
                         style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.15)" }}>
                         Open <ArrowRight size={10}/>
                       </button>
@@ -697,7 +697,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                 { label:"Setup Fee Paid",    value:"$599 · Jun 2025 · Confirmed" },
                 { label:"Current Tier",      value:`${currentTier.label} — ${currentTier.rate}% commission (${stats.accounts} accounts)` },
               ].map(f => (
-                <div key={f.label} className="flex items-center justify-between p-4 rounded-xl glow-surface" style={GLASS}>
+                <div key={f.label} className="flex items-center justify-between p-4 rounded-2xl" style={GLASS}>
                   <div>
                     <div style={{ color:"#4A5A7A", fontSize:9, ...MONO }}>{f.label.toUpperCase()}</div>
                     <div style={{ color:"#E8EDF5", fontSize:12, marginTop:2 }}>{f.value}</div>
@@ -730,7 +730,7 @@ export function PartnerOnboarding() {
           <span style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>· $599 one-time setup · Volume-based commission tiers</span>
         </div>
         <button onClick={() => setView(view === "dashboard" ? "onboarding" : "dashboard")}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold"
           style={{ background:"rgba(72,187,120,0.12)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.25)", ...MONO }}>
           <BarChart3 size={11}/>
           {view === "dashboard" ? "← Back to Onboarding" : "Skip → Partner Dashboard"}

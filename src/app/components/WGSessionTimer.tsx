@@ -160,7 +160,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
     setNotes("");
   }
 
-  const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+  const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
   const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   // ── Idle state ──
@@ -189,7 +189,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           <div className="flex gap-2">
             {[["phone","📞 Phone Call"],["video","📹 Video Call"]].map(([t,label]) => (
               <button key={t} onClick={() => setSessionType(t as "phone"|"video")}
-                className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
+                className="flex-1 py-2 rounded-2xl text-xs font-bold transition-all"
                 style={{ background:sessionType===t?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${sessionType===t?"#5B6EE1":"rgba(91,110,225,0.1)"}`,
                   color:sessionType===t?"#6E90C9":"#8A9AB8" }}>
@@ -198,14 +198,14 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             ))}
           </div>
           <button onClick={startSession} disabled={!hasCard}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
             style={{ background:hasCard?"linear-gradient(135deg,#5B6EE1,#5B6EE1)":"rgba(91,110,225,0.15)",
               color:hasCard?"#F0F4FA":"#8A9AB8",
               boxShadow:hasCard?"0 0 20px rgba(91,110,225,0.3)":"none" }}>
             <Play size={14}/> Start Session Timer
           </button>
           {!hasCard && (
-            <div className="flex items-start gap-2 px-3 py-2 rounded-xl"
+            <div className="flex items-start gap-2 px-3 py-2 rounded-2xl"
               style={{ background:"rgba(252,129,129,0.06)", border:"1px solid rgba(252,129,129,0.2)" }}>
               <AlertCircle size={12} color="#FC8181" style={{ marginTop:1, flexShrink:0 }}/>
               <span style={{ color:"#FC8181", fontSize:11 }}>
@@ -241,7 +241,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         </div>
 
         {/* Billing meter */}
-        <div className="mx-4 mb-4 p-3 rounded-xl glow-surface" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
+        <div className="mx-4 mb-4 p-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
           <div className="flex items-center justify-between mb-2">
             <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>CURRENT CHARGE</span>
             <span style={{ color:"#6E90C9", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>
@@ -251,7 +251,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           <div className="flex items-center gap-2 mb-2">
             {Array.from({length: Math.max(currentBlocks, 1)}).map((_, i) => (
               <div key={i} className="flex items-center gap-1">
-                <div className="flex items-center justify-center rounded-lg text-xs font-bold"
+                <div className="flex items-center justify-center rounded-xl text-xs font-bold"
                   style={{ width:44, height:28, background:i < currentBlocks?"#5B6EE1":"rgba(91,110,225,0.1)", color:i < currentBlocks?"#fff":"#8A9AB8", fontFamily:"var(--font-mono)", fontSize:10 }}>
                   {i < currentBlocks ? `$${RATE_PER_BLOCK}` : `$${RATE_PER_BLOCK}`}
                 </div>
@@ -272,7 +272,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         </div>
 
         {/* Billing rule reminder */}
-        <div className="mx-4 mb-3 px-3 py-2 rounded-xl"
+        <div className="mx-4 mb-3 px-3 py-2 rounded-2xl"
           style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.15)" }}>
           <span style={{ color:"#F6AD55", fontSize:11 }}>
             ⏱ Any time used counts as a full 30-min block ($25). Current session: {Math.ceil(elapsed/60)} min = {currentBlocks} block{currentBlocks!==1?"s":""} = <strong>${currentAmount}</strong>
@@ -283,19 +283,19 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         <div className="flex gap-2 px-4 pb-4">
           {state === "running" ? (
             <button onClick={pauseSession}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold"
               style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.25)" }}>
               ⏸ Pause
             </button>
           ) : (
             <button onClick={resumeSession}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
               <Play size={13}/> Resume
             </button>
           )}
           <button onClick={endSession}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm"
             style={{ background:"linear-gradient(135deg,#E53E3E,#FC8181)", color:"#fff" }}>
             <Square size={13}/> End Session & Bill ${currentAmount.toFixed(2)}
           </button>
@@ -340,18 +340,18 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
             </label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
               placeholder="Brief notes about what was accomplished this session..."
-              className="w-full resize-none px-3 py-2.5 rounded-xl"
+              className="w-full resize-none px-3 py-2.5 rounded-2xl"
               style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:12, outline:"none" }}/>
           </div>
 
           <div className="flex gap-3">
             <button onClick={confirmBilling}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(91,110,225,0.3)" }}>
               <CreditCard size={14}/> Charge ${amount.toFixed(2)} to Card
             </button>
             <button onClick={() => setState("running")}
-              className="px-4 py-3 rounded-xl text-sm"
+              className="px-4 py-3 rounded-2xl text-sm"
               style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
               Back
             </button>
@@ -363,7 +363,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
 
   // ── Done ──
   return (
-    <div className="rounded-2xl p-5 text-center glow-surface" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
+    <div className="rounded-2xl p-5 text-center" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
       <CheckCircle size={36} color="#FFFFFF" style={{ margin:"0 auto 12px" }}/>
       <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:700, marginBottom:4 }}>Session Complete</div>
       <div style={{ color:"#8A9AB8", fontSize:13, marginBottom:12 }}>
@@ -375,7 +375,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
           { label:"Blocks",    value:`${blocks} × 30 min` },
           { label:"Charged",   value:`$${amount.toFixed(2)}` },
         ].map(s => (
-          <div key={s.label} className="px-2 py-2 rounded-xl"
+          <div key={s.label} className="px-2 py-2 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.15)" }}>
             <div style={{ color:"#D99A6B", fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{s.label.toUpperCase()}</div>
@@ -383,7 +383,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
         ))}
       </div>
       <button onClick={resetTimer}
-        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold"
+        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-sm font-semibold"
         style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.15)" }}>
         <RefreshCw size={12}/> Start New Session
       </button>
@@ -400,7 +400,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
 
   if (records.length === 0) {
     return (
-      <div className="py-6 text-center rounded-xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="py-6 text-center rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
         <DollarSign size={24} color="rgba(91,110,225,0.2)" style={{ margin:"0 auto 8px" }}/>
         <div style={{ color:"#8A9AB8", fontSize:13 }}>No billing records yet.</div>
       </div>
@@ -420,7 +420,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
           </span>
         </div>
       </div>
-      <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
         <div className="grid px-4 py-2.5 border-b"
           style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"rgba(255,255,255,0.06)", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
           {["Date","Client","Type","Duration","Blocks","Charged"].map(h => (

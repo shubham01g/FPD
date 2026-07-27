@@ -93,7 +93,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
   if (compact) {
     if (hasCard) {
       return (
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl"
           style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", display:"inline-flex" }}>
           <CreditCard size={11} color="#FFFFFF"/>
           <span style={{ color:"#D99A6B", fontSize:11, fontWeight:700, ...MONO }}>
@@ -103,7 +103,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       );
     }
     return (
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl"
         style={{ background:"rgba(252,129,129,0.08)", border:"1px solid rgba(252,129,129,0.2)", display:"inline-flex" }}>
         <AlertCircle size={11} color="#FC8181"/>
         <span style={{ color:"#FC8181", fontSize:11, fontWeight:700, ...MONO }}>NO CARD ON FILE</span>
@@ -112,7 +112,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={{ border:"1px solid rgba(91,110,225,0.12)" }}>
+    <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.12)" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b"
         style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
         <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
         </div>
         {hasCard && !editing && (
           <button onClick={() => setEditing(true)}
-            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
+            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-xl"
             style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
             <Edit2 size={11}/> Update
           </button>
@@ -131,7 +131,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       {/* Show existing card */}
       {hasCard && !editing && (
         <div className="p-4 space-y-3">
-          <div className="flex items-center gap-4 px-4 py-4 rounded-xl"
+          <div className="flex items-center gap-4 px-4 py-4 rounded-2xl"
             style={{ background:"linear-gradient(135deg,#070A12,#141B2E)", border:"1px solid rgba(91,110,225,0.3)" }}>
             <div style={{ fontSize:28 }}>💳</div>
             <div className="flex-1">
@@ -147,7 +147,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+          <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <CheckCircle size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <p style={{ color:"#D99A6B", fontSize:12, lineHeight:1.6 }}>
@@ -155,7 +155,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
             </p>
           </div>
           <button onClick={removeCard}
-            className="text-xs px-3 py-1.5 rounded-lg"
+            className="text-xs px-3 py-1.5 rounded-xl"
             style={{ color:"#FC8181", background:"rgba(252,129,129,0.08)", border:"1px solid rgba(252,129,129,0.2)" }}>
             Remove Card
           </button>
@@ -166,7 +166,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       {editing && (
         <div className="p-4 space-y-4">
           {!hasCard && (
-            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
               style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
               <AlertCircle size={12} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
               <p style={{ color:"#F6AD55", fontSize:12, lineHeight:1.6 }}>
@@ -209,7 +209,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
+          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <Lock size={11} color="#8A9AB8"/>
             <span style={{ color:"#8A9AB8", fontSize:11 }}>256-bit SSL · Processed by Stripe · Card stored securely</span>
@@ -217,13 +217,13 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
 
           <div className="flex gap-3">
             <button onClick={saveCard} disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
                 boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:saving?0.7:1 }}>
               <CreditCard size={14}/>{saving ? "Saving…" : "Save Payment Method"}
             </button>
             {hasCard && (
-              <button onClick={() => setEditing(false)} className="px-4 py-3 rounded-xl text-sm"
+              <button onClick={() => setEditing(false)} className="px-4 py-3 rounded-2xl text-sm"
                 style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                 Cancel
               </button>

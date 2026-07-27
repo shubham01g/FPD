@@ -52,72 +52,72 @@ const JOB_CSS = `
 .fpd-job-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-job .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-job .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-job .card.pad{padding:22px;}
-.fpd-job .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-job .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-job .card.pad{padding:28px;}
+.fpd-job .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-job .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-job .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-job .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-job .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-job .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-job .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-job .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-job .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* KPI ledger */
-.fpd-job .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-job .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-job .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-job .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-job .kcell:first-child{border-left:none;}
 .fpd-job .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-job .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-job .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-job .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-job .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-job .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-job .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-job .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-job .kstrip{grid-template-columns:1fr 1fr;}.fpd-job .kcell:nth-child(3){border-left:none;}.fpd-job .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:880px){.fpd-job .kstrip{grid-template-columns:1fr 1fr;}.fpd-job .kcell:nth-child(3){border-left:none;}.fpd-job .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* job timeline cards */
 .fpd-job .jlist{display:flex;flex-direction:column;gap:14px;}
 .fpd-job .jcard{overflow:hidden;}
 .fpd-job .jhead{width:100%;text-align:left;padding:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-job .jico{width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-job .jico{width:48px;height:48px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-job .jtitle{font-family:var(--font-display);font-size:17px;color:${TEXT};font-weight:600;}
 .fpd-job .jbadge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.04em;}
 .fpd-job .jemployer{color:${SOFT};font-size:14px;font-weight:500;margin-top:2px;}
 .fpd-job .jmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;}
 .fpd-job .jmeta span{display:flex;align-items:center;gap:5px;font-size:11.5px;color:${MUTED};}
-.fpd-job .jbody{padding:0 20px 20px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-job .jgrid{display:grid;grid-template-columns:repeat(2,1fr);border-radius:11px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);overflow:hidden;margin-top:16px;}
-.fpd-job .jgrid .tile:nth-child(2n){border-left:1px solid rgba(255,255,255,0.34);}
-.fpd-job .jgrid .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-job .jbody{padding:0 20px 20px;border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-job .jgrid{display:grid;grid-template-columns:repeat(2,1fr);border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);overflow:hidden;margin-top:16px;}
+.fpd-job .jgrid .tile:nth-child(2n){border-left:1px solid rgba(255,255,255,0.08);}
+.fpd-job .jgrid .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-job .tile{padding:12px 14px;}
-.fpd-job .tile .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};margin-bottom:5px;}
+.fpd-job .tile .tk{font-size:9.5px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-job .tile .tv{color:${TEXT};font-size:13px;line-height:1.5;}
-.fpd-job .callout{padding:12px 14px;border-radius:11px;margin-top:14px;}
+.fpd-job .callout{padding:12px 14px;border-radius:16px;margin-top:14px;}
 .fpd-job .callout .ck{font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;margin-bottom:4px;}
 .fpd-job .callout .cv{color:${TEXT};font-size:13px;line-height:1.6;}
 .fpd-job .docs-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:${MUTED};margin-bottom:8px;margin-top:14px;}
-.fpd-job .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:10px;font-size:11.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
+.fpd-job .docchip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:18px;font-size:11.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);cursor:pointer;font-family:var(--font-body);}
 @media (max-width:640px){
 .fpd-job .jgrid{grid-template-columns:1fr;}
 .fpd-job .jgrid .tile:nth-child(2n){border-left:none;}
-.fpd-job .jgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.34);}
+.fpd-job .jgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
 }
 
 /* modal */
 .fpd-job .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-job .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
-.fpd-job .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-job .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-job .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-job .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-job .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
-.fpd-job .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-job .field input,.fpd-job .field select{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-job .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-job .field input,.fpd-job .field select{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-job .field input::placeholder{color:${FAINT};}
 .fpd-job .field input:focus,.fpd-job .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-job .checkrow{display:flex;align-items:center;gap:10px;padding:2px 0;}
 .fpd-job .checkrow label{color:${SOFT};font-size:13px;}
-.fpd-job .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-job .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-job .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-job .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-job .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -171,7 +171,7 @@ export function JobHistory() {
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -187,7 +187,7 @@ export function JobHistory() {
         {/* ── Timeline ── */}
         <div className="jlist">
           {jobs.map(job => (
-            <div key={job.id} className="card jcard glow-surface">
+            <div key={job.id} className="card jcard">
               <button className="jhead" onClick={() => setExpanded(expanded === job.id ? null : job.id)}>
                 <div className="flex items-start gap-4">
                   <div className="jico" style={{ background: job.current ? "rgba(95,190,145,0.14)" : "rgba(91,110,225,0.10)" }}>
@@ -266,7 +266,7 @@ export function JobHistory() {
         {/* ── Add modal ── */}
         {showAdd && (
           <div className="backdrop">
-            <div className="card modal glow-surface">
+            <div className="card modal">
               <div className="modal-head">
                 <h3>Add Employment Record</h3>
                 <button onClick={() => setShowAdd(false)}><X size={16} /></button>

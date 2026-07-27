@@ -128,7 +128,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
         <p style={{ marginBottom:10 }}>I authorize the designated Specialist to perform the following actions:</p>
         <div className="space-y-2">
           {waiver.specialistScope.map(scope => (
-            <div key={scope} className="flex items-start gap-2.5 px-4 py-2.5 rounded-xl"
+            <div key={scope} className="flex items-start gap-2.5 px-4 py-2.5 rounded-2xl"
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
               <CheckCircle size={13} color="#FFFFFF" style={{ marginTop:2, flexShrink:0 }}/>
               <span style={{ fontSize:13 }}>{SCOPE_LABELS[scope] ?? scope}</span>
@@ -265,7 +265,7 @@ function SignaturePad({ onSign }: { onSign: (dataUrl: string) => void }) {
 
   return (
     <div>
-      <div className="relative rounded-xl overflow-hidden" style={{ border:"2px solid rgba(91,110,225,0.25)", background:"#0F1A33", touchAction:"none" }}>
+      <div className="relative rounded-2xl overflow-hidden" style={{ border:"2px solid rgba(91,110,225,0.25)", background:"#0F1A33", touchAction:"none" }}>
         <canvas ref={canvasRef} width={560} height={120} style={{ width:"100%", height:120, display:"block", cursor:"crosshair" }}
           onMouseDown={start} onMouseMove={draw} onMouseUp={stop} onMouseLeave={stop}
           onTouchStart={start} onTouchMove={draw} onTouchEnd={stop}/>
@@ -339,7 +339,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
         <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, lineHeight:1.8, marginBottom:24 }}>
           Your White Glove Concierge Authorization has been recorded. {waiver.specialistName} can now begin setting up your Final Pass Down vault. You'll receive a call to schedule your first session.
         </p>
-        <div className="p-4 rounded-2xl mb-6 text-left space-y-2 glow-surface" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+        <div className="p-4 rounded-2xl mb-6 text-left space-y-2" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
           {[
             ["Document ID", waiver.id],
             ["Signed", waiverStore.find(w=>w.id===waiver.id)?.signedAt ?? waiver.signedAt ?? "Just now"],
@@ -365,9 +365,9 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl glow-surface"
+      <div className="flex items-center gap-4 p-5 rounded-2xl"
         style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
-        <div className="rounded-xl p-3 flex-shrink-0 glow-surface" style={{ background:"rgba(91,110,225,0.08)" }}>
+        <div className="rounded-2xl p-3 flex-shrink-0" style={{ background:"rgba(91,110,225,0.08)" }}>
           <FileText size={22} color="#FFFFFF"/>
         </div>
         <div>
@@ -407,12 +407,12 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
             <span style={{ color:"rgba(255,255,255,0.65)", fontSize:12 }}>Please read the entire agreement before signing.</span>
           </div>
           <div ref={readRef} onScroll={onScroll}
-            className="rounded-2xl p-6 overflow-y-auto glow-surface"
+            className="rounded-2xl p-6 overflow-y-auto"
             style={{ background:"#101728", border:"1px solid rgba(91,110,225,0.12)", maxHeight:500, boxShadow:"inset 0 -20px 20px -10px rgba(91,110,225,0.04)" }}>
             <WaiverText waiver={waiver}/>
           </div>
           {!scrolled && (
-            <div className="flex items-center gap-2 mt-3 px-4 py-2 rounded-xl"
+            <div className="flex items-center gap-2 mt-3 px-4 py-2 rounded-2xl"
               style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
               <AlertCircle size={13} color="#F6AD55"/>
               <span style={{ color:"#F6AD55", fontSize:12 }}>Please scroll to the bottom to read the full agreement</span>
@@ -432,10 +432,10 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           {/* Signature mode toggle */}
           <div>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, marginBottom:8 }}>SIGNATURE METHOD</div>
-            <div className="flex gap-2 p-1 rounded-xl w-fit" style={{ background:"rgba(91,110,225,0.06)" }}>
+            <div className="flex gap-2 p-1 rounded-2xl w-fit" style={{ background:"rgba(91,110,225,0.06)" }}>
               {[["type","Type Name"],["draw","Draw Signature"]].map(([id,label]) => (
                 <button key={id} onClick={() => setSigMode(id as "type"|"draw")}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
                   style={{ background:sigMode===id?"#5B6EE1":"transparent", color:sigMode===id?"#fff":"rgba(255,255,255,0.7)" }}>
                   {label}
                 </button>
@@ -448,7 +448,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
               <label style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>TYPE YOUR FULL LEGAL NAME TO SIGN</label>
               <input value={typedName} onChange={e => setTypedName(e.target.value)}
                 placeholder={waiver.userName}
-                className="w-full px-4 py-4 rounded-xl text-lg"
+                className="w-full px-4 py-4 rounded-2xl text-lg"
                 style={{ background:"#0F1A33", border:"2px solid rgba(91,110,225,0.25)", color:"#FFFFFF", outline:"none", fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:20 }}/>
               {typedName && (
                 <div style={{ color:"rgba(255,255,255,0.65)", fontSize:11, marginTop:4 }}>
@@ -464,7 +464,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           )}
 
           {/* Acknowledgment checkboxes */}
-          <div className="space-y-3 p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
+          <div className="space-y-3 p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:10, ...MONO, marginBottom:6 }}>ACKNOWLEDGMENTS</div>
             {[
               [checked1, setChecked1, `I am ${waiver.userName} or their legally authorized representative, and I have the authority to sign this agreement.`],
@@ -473,7 +473,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
             ].map(([checked, setChecked, label], i) => (
               <div key={i} className="flex items-start gap-3">
                 <button onClick={() => (setChecked as React.Dispatch<React.SetStateAction<boolean>>)(!checked)}
-                  className="flex items-center justify-center rounded-lg flex-shrink-0 mt-0.5 transition-all"
+                  className="flex items-center justify-center rounded-xl flex-shrink-0 mt-0.5 transition-all"
                   style={{ width:20, height:20, background:checked?"#5B6EE1":"#101728", border:`2px solid ${checked?"#5B6EE1":"rgba(91,110,225,0.3)"}` }}>
                   {checked && <CheckCircle size={12} color="#fff"/>}
                 </button>
@@ -483,7 +483,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
           </div>
 
           {/* Security notice */}
-          <div className="flex items-start gap-2 px-4 py-3 rounded-xl"
+          <div className="flex items-start gap-2 px-4 py-3 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <Lock size={13} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <p style={{ color:"#D99A6B", fontSize:11, lineHeight:1.6 }}>
@@ -555,7 +555,7 @@ export function WaiverManager() {
     );
   }
 
-  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.1)", boxShadow:"0 2px 12px rgba(91,110,225,0.06)", borderRadius:16 };
+  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.1)", boxShadow:"0 2px 12px rgba(91,110,225,0.06)", borderRadius:22 };
   const INPUT: React.CSSProperties = { background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
   return (
@@ -566,7 +566,7 @@ export function WaiverManager() {
           <h2 style={{ ...DISPLAY, fontSize:20, color:"#FFFFFF" }}>Concierge Authorization Waivers</h2>
         </div>
         <button onClick={() => setShowSend(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}>
           <Star size={14}/> Send Waiver
         </button>
@@ -580,7 +580,7 @@ export function WaiverManager() {
           { label:"Pending",       value:waivers.filter(w=>w.status==="pending").length, color:"#F6AD55" },
           { label:"Sign Rate",     value:`${Math.round(waivers.filter(w=>w.status==="signed").length/Math.max(waivers.length,1)*100)}%`, color:"#6FAE8B" },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl glow-surface" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
             <div style={{ ...DISPLAY, fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -616,20 +616,20 @@ export function WaiverManager() {
             </span>
             <div className="flex gap-2">
               <button onClick={() => setPreviewId(w.id)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Eye size={11}/> {w.status === "pending" ? "Preview" : "View"}
               </button>
               {w.status === "pending" && (
                 <button onClick={() => { toast.success(`Reminder sent to ${w.userEmail}`); }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                   style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55" }}>
                   Remind
                 </button>
               )}
               {w.status === "signed" && (
                 <button onClick={() => toast.success("Signed waiver PDF downloaded (demo)")}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                   style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B" }}>
                   <Download size={11}/>
                 </button>
@@ -674,7 +674,7 @@ export function WaiverManager() {
                       <button onClick={() => setSendForm(p => ({
                         ...p,
                         scope: p.scope.includes(key) ? p.scope.filter(s=>s!==key) : [...p.scope, key]
-                      }))} className="flex items-center justify-center rounded-lg flex-shrink-0"
+                      }))} className="flex items-center justify-center rounded-xl flex-shrink-0"
                         style={{ width:18, height:18, background:sendForm.scope.includes(key)?"#5B6EE1":"#101728", border:`2px solid ${sendForm.scope.includes(key)?"#5B6EE1":"rgba(91,110,225,0.3)"}` }}>
                         {sendForm.scope.includes(key) && <CheckCircle size={10} color="#fff"/>}
                       </button>
@@ -685,11 +685,11 @@ export function WaiverManager() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={sendWaiver} disabled={sending}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
                   style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:sending?0.7:1 }}>
                   <Star size={14}/>{sending ? "Sending…" : "Send Waiver via Email"}
                 </button>
-                <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-xl text-sm"
+                <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-2xl text-sm"
                   style={{ background:"rgba(91,110,225,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
               </div>
             </div>

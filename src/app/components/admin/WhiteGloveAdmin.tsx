@@ -12,7 +12,7 @@ import { WGCardOnFile } from "../WGCardOnFile";
 import { WGBillingHistory } from "../WGSessionTimer";
 import { subscribeToClients, addClient as storeAddClient, updateClient as storeUpdateClient, type WGClient as StoreWGClient } from "../../services/wgClientStore";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
@@ -79,7 +79,7 @@ function SessionRow({ session }: { session: WGSession }) {
   const statusColor = { scheduled:"#F6AD55", completed:"#48BB78", cancelled:"#FC8181", pending:"#8A9AB8" }[session.status];
   const typeIcon = { phone:<Phone size={12}/>, video:<MessageSquare size={12}/>, in_person:<Users size={12}/> }[session.type];
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background:session.status==="scheduled"?"rgba(246,173,85,0.06)":"rgba(91,110,225,0.04)", border:`1px solid ${statusColor}25` }}>
+    <div className="flex items-start gap-3 p-3 rounded-2xl" style={{ background:session.status==="scheduled"?"rgba(246,173,85,0.06)":"rgba(91,110,225,0.04)", border:`1px solid ${statusColor}25` }}>
       <div className="flex items-center justify-center rounded-full mt-0.5" style={{ width:26, height:26, background:`${statusColor}18`, color:statusColor, flexShrink:0 }}>
         {typeIcon}
       </div>
@@ -104,7 +104,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
   const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#5B6EE1", paused:"#8A9AB8" }[client.status];
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
+    <div className="rounded-2xl overflow-hidden" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
@@ -160,7 +160,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
                 { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`$${sessionCost} billed` },
                 { label:"Total Billed", value:`$${totalCost}`, color:"#D99A6B", sub:"to date" },
               ].map(s => (
-                <div key={s.label} className="px-3 py-2 rounded-xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
+                <div key={s.label} className="px-3 py-2 rounded-2xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
                   <div style={{ color:s.color, fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
                   <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{s.label.toUpperCase()}</div>
                   <div style={{ color:"#B0C0DC", fontSize:9 }}>{s.sub}</div>
@@ -172,7 +172,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
 
         {/* Next session */}
         {client.nextSession && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl mt-2" style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl mt-2" style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <Calendar size={12} color="#F6AD55"/>
             <span style={{ color:"#F6AD55", fontSize:11, fontWeight:600 }}>Next session:</span>
             <span style={{ color:"#8A9AB8", fontSize:11 }}>{client.nextSession}</span>
@@ -193,7 +193,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
             <div className="flex items-center justify-between mb-3">
               <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
               <button onClick={() => toast.success("Schedule session — opens calendar (demo)")}
-                className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg"
+                className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
                 <Plus size={10}/> Schedule Session
               </button>
@@ -207,7 +207,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           {client.notes && (
             <div>
               <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>SPECIALIST NOTES</div>
-              <div className="px-3 py-2.5 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
+              <div className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>{client.notes}</div>
               </div>
             </div>
@@ -225,15 +225,15 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
                     toast.success("Note added");
                   }
                   setNoteText(""); setAddingNote(false);
-                }} className="flex-1 py-2 rounded-xl text-xs font-semibold"
+                }} className="flex-1 py-2 rounded-2xl text-xs font-semibold"
                   style={{ background:"#5BA7D6", color:"#fff" }}>Save Note</button>
                 <button onClick={() => { setNoteText(""); setAddingNote(false); }}
-                  className="px-4 py-2 rounded-xl text-xs" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
+                  className="px-4 py-2 rounded-2xl text-xs" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
               </div>
             </div>
           ) : (
             <button onClick={() => setAddingNote(true)}
-              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl"
+              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-2xl"
               style={{ background:"rgba(91,110,225,0.05)", color:"#8A9AB8", border:"1px solid rgba(91,110,225,0.1)" }}>
               <Edit2 size={11}/> Add note
             </button>
@@ -242,12 +242,12 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           {/* Actions */}
           <div className="flex gap-2 pt-2">
             <button onClick={() => toast.success(`Sending check-in email to ${client.name}`)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-1"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold flex-1"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Send size={11}/> Send Check-in
             </button>
             <button onClick={() => { onUpdate(client.id, { completionPct:100, status:"completed", nextSession:undefined }); toast.success(`${client.name} marked as complete`); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B" }}>
               <CheckCircle size={11}/> Mark Complete
             </button>
@@ -322,27 +322,27 @@ export function WhiteGloveAdmin() {
           </p>
         </div>
         <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 20px rgba(91,167,214,0.35)" }}>
           <Plus size={14}/> Add WG Client
         </button>
       </div>
 
       {/* Main tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
-        <button onClick={() => setMainTab("clients")} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
+        <button onClick={() => setMainTab("clients")} className="px-5 py-2 rounded-xl text-sm font-semibold transition-all"
           style={{ background:mainTab==="clients"?"#5BA7D6":"transparent", color:mainTab==="clients"?"#fff":"#8A9AB8" }}>
           ⭐ Clients
         </button>
-        <button onClick={() => setMainTab("waivers")} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+        <button onClick={() => setMainTab("waivers")} className="px-5 py-2 rounded-xl text-sm font-semibold transition-all"
           style={{ background:mainTab==="waivers"?"#5BA7D6":"transparent", color:mainTab==="waivers"?"#fff":"#8A9AB8" }}>
           📄 Authorization Waivers
         </button>
-        <button onClick={() => setMainTab("staff")} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+        <button onClick={() => setMainTab("staff")} className="px-5 py-2 rounded-xl text-sm font-semibold transition-all"
           style={{ background:mainTab==="staff"?"#5BA7D6":"transparent", color:mainTab==="staff"?"#fff":"#8A9AB8" }}>
           👥 Concierge Staff
         </button>
-        <button onClick={() => setMainTab("billing")} className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+        <button onClick={() => setMainTab("billing")} className="px-5 py-2 rounded-xl text-sm font-semibold transition-all"
           style={{ background:mainTab==="billing"?"#5BA7D6":"transparent", color:mainTab==="billing"?"#fff":"#8A9AB8" }}>
           💳 Billing
         </button>
@@ -365,7 +365,7 @@ export function WhiteGloveAdmin() {
           <div className="space-y-4">
             <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>PAYMENT METHODS ON FILE</div>
             {clients.map(c => (
-              <div key={c.id} className="p-4 rounded-2xl glow-surface" style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)" }}>
+              <div key={c.id} className="p-4 rounded-2xl" style={{ background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" }}>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5", marginBottom:10 }}>{c.name}</div>
                 <WGCardOnFile clientId={c.id} clientName={c.name}/>
               </div>
@@ -385,7 +385,7 @@ export function WhiteGloveAdmin() {
           { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#6E90C9" },
           { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
         ].map(s => (
-          <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
+          <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -393,11 +393,11 @@ export function WhiteGloveAdmin() {
       </div>
 
       {/* Specialist roster */}
-      <div className="p-5 rounded-2xl glow-surface" style={CARD}>
+      <div className="p-5 rounded-2xl" style={CARD}>
         <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Specialist Roster</div>
         <div className="grid md:grid-cols-3 gap-4">
           {SPECIALISTS.map(s => (
-            <div key={s.id} className="flex items-center gap-3 p-4 rounded-xl"
+            <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl"
               style={{ background:`${s.color}08`, border:`1px solid ${s.color}25` }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
                 style={{ width:40, height:40, background:`${s.color}15`, color:s.color, fontSize:14, fontFamily:"var(--font-display)" }}>
@@ -417,10 +417,10 @@ export function WhiteGloveAdmin() {
       </div>
 
       {/* Filter + client list */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
+      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
         {([["all","All"],["intake","Intake"],["active","Active"],["completed","Completed"],["paused","Paused"]] as [ClientStatus|"all",string][]).map(([id,label]) => (
           <button key={id} onClick={() => setFilter(id)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{ background:filter===id?"#5BA7D6":"transparent", color:filter===id?"#fff":"#8A9AB8" }}>
             {label}
           </button>
@@ -429,7 +429,7 @@ export function WhiteGloveAdmin() {
 
       <div className="space-y-4">
         {filtered.length === 0 && (
-          <div className="py-12 text-center rounded-2xl glow-surface" style={CARD}>
+          <div className="py-12 text-center rounded-2xl" style={CARD}>
             <Star size={32} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>
             <div style={{ color:"#8A9AB8", fontSize:14 }}>No clients in this category</div>
           </div>
@@ -470,7 +470,7 @@ export function WhiteGloveAdmin() {
                 <div className="grid grid-cols-3 gap-2">
                   {SPECIALISTS.map(s => (
                     <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
-                      className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                      className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
                       style={{ background:newClient.specialist===s.id?`${s.color}12`:"rgba(91,110,225,0.04)",
                         border:`1px solid ${newClient.specialist===s.id?s.color:"rgba(91,110,225,0.12)"}`,
                         color:newClient.specialist===s.id?s.color:"#8A9AB8" }}>
@@ -495,7 +495,7 @@ export function WhiteGloveAdmin() {
                   placeholder="Why does this client need White Glove assistance?" className="w-full resize-none" style={INPUT}/>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-xl glow-surface"
+              <div className="flex items-center justify-between p-3 rounded-2xl"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <span style={{ color:"#E8EDF5", fontSize:13 }}>Waive subscription fee</span>
                 <button onClick={() => setNewClient(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
@@ -506,11 +506,11 @@ export function WhiteGloveAdmin() {
 
               <div className="flex gap-3">
                 <button onClick={addClient} disabled={adding}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
                   style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:adding?0.7:1 }}>
                   <Star size={14}/>{adding ? "Adding…" : "Add to White Glove Program"}
                 </button>
-                <button onClick={() => setShowAdd(false)} className="px-5 py-3 rounded-xl text-sm"
+                <button onClick={() => setShowAdd(false)} className="px-5 py-3 rounded-2xl text-sm"
                   style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
               </div>
             </div>

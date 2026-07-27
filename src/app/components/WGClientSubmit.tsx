@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
-const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" };
 
 /* ── Types ─────────────────────────────────────────────────────── */
 export interface SubmittedDocument {
@@ -214,7 +214,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
       <div className="max-w-lg mx-auto px-5 py-8 space-y-5">
 
         {/* Welcome card */}
-        <div className="p-5 rounded-2xl glow-surface"
+        <div className="p-5 rounded-2xl"
           style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", border:"1px solid rgba(91,167,214,0.3)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Star size={16} color="#FFFFFF" fill="rgba(111,158,148,0.3)"/>
@@ -228,7 +228,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
           <p style={{ color:"#8AA3C8", fontSize:13, lineHeight:1.7 }}>
             Your specialist <strong style={{ color:"#D68FA8" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
           </p>
-          <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl"
+          <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.1)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <Lock size={12} color="#FFFFFF"/>
             <span style={{ color:"#D99A6B", fontSize:11 }}>
@@ -238,14 +238,14 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
           <button onClick={() => setView("submit")}
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all"
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{ background:view==="submit"?"#5BA7D6":"transparent", color:view==="submit"?"#fff":"#8A9AB8" }}>
             📤 Send a Document
           </button>
           <button onClick={() => setView("status")}
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all"
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{ background:view==="status"?"#5BA7D6":"transparent", color:view==="status"?"#fff":"#8A9AB8" }}>
             📋 My Submissions {submissions.length > 0 && `(${submissions.length})`}
           </button>
@@ -256,7 +256,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
           <div className="space-y-4">
 
             {/* Step 1: Get the document */}
-            <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
+            <div className="p-5 rounded-2xl" style={GLASS}>
               <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 1 — GET YOUR DOCUMENT READY
               </div>
@@ -287,7 +287,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               ) : (
                 <div className="space-y-3">
                   {/* Preview */}
-                  <div className="relative rounded-xl overflow-hidden"
+                  <div className="relative rounded-2xl overflow-hidden"
                     style={{ border:"2px solid rgba(72,187,120,0.3)" }}>
                     {previewUrl && selectedFile.type.includes("image") ? (
                       <img src={previewUrl} alt="Document preview"
@@ -318,12 +318,12 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             </div>
 
             {/* Step 2: Label it */}
-            <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
+            <div className="p-5 rounded-2xl" style={GLASS}>
               <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 2 — WHAT KIND OF DOCUMENT IS THIS?
               </div>
               <button onClick={() => setShowCategoryPicker(!showCategoryPicker)}
-                className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl"
+                className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl"
                 style={{ background:category?"rgba(91,167,214,0.08)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${category?"rgba(91,167,214,0.4)":"rgba(91,110,225,0.15)"}`,
                   color:category?"#6FAE8B":"#8A9AB8" }}>
@@ -336,7 +336,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               </button>
 
               {showCategoryPicker && (
-                <div className="mt-2 rounded-xl overflow-hidden" style={{ border:"1px solid rgba(91,167,214,0.2)" }}>
+                <div className="mt-2 rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,167,214,0.2)" }}>
                   {DOCUMENT_CATEGORIES.map(cat => (
                     <button key={cat.id} onClick={() => { setCategory(cat.id); setShowCategoryPicker(false); }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-left border-b"
@@ -352,13 +352,13 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             </div>
 
             {/* Step 3: Notes */}
-            <div className="p-5 rounded-2xl glow-surface" style={GLASS}>
+            <div className="p-5 rounded-2xl" style={GLASS}>
               <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 3 — ADD A NOTE (OPTIONAL)
               </div>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
                 placeholder={`e.g. "This is from 2019" or "The policy number is on page 2" — anything that helps ${specialistName} understand the document`}
-                className="w-full resize-none px-4 py-3 rounded-xl"
+                className="w-full resize-none px-4 py-3 rounded-2xl"
                 style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
 
@@ -397,7 +397,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                 { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#6E90C9" },
                 { label:"In Vault", value:uploadedCount, color:"#D99A6B" },
               ].map(s => (
-                <div key={s.label} className="p-3 rounded-xl text-center glow-surface"
+                <div key={s.label} className="p-3 rounded-2xl text-center"
                   style={GLASS}>
                   <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
                   <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.label}</div>
@@ -417,10 +417,10 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             ) : (
               <div className="space-y-3">
                 {submissions.map(sub => (
-                  <div key={sub.id} className="p-4 rounded-2xl glow-surface"
+                  <div key={sub.id} className="p-4 rounded-2xl"
                     style={GLASS}>
                     <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center rounded-xl flex-shrink-0"
+                      <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
                         style={{ width:40, height:40, background:"rgba(91,167,214,0.08)", fontSize:20 }}>
                         {DOCUMENT_CATEGORIES.find(c=>sub.category.toLowerCase().includes(c.id))?.emoji ?? "📄"}
                       </div>
@@ -435,7 +435,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                     </div>
                     {sub.status === "needs_resubmit" && (
                       <button onClick={() => setView("submit")}
-                        className="mt-3 w-full py-2 rounded-xl text-xs font-semibold"
+                        className="mt-3 w-full py-2 rounded-2xl text-xs font-semibold"
                         style={{ background:"rgba(252,129,129,0.1)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.25)" }}>
                         📷 Resend This Document
                       </button>
@@ -446,7 +446,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
             )}
 
             {/* Help contact */}
-            <div className="p-4 rounded-2xl flex items-center gap-3 glow-surface"
+            <div className="p-4 rounded-2xl flex items-center gap-3"
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <Phone size={18} color="#FFFFFF" style={{ flexShrink:0 }}/>
               <div>

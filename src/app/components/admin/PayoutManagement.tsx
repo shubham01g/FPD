@@ -57,7 +57,7 @@ export function PayoutManagement() {
           <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Manage affiliate and partnership commission payouts. Payouts cycle on the 1st of each month.</p>
         </div>
         <button
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
           style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 14 }}
         >
           <Download size={14} /> Export CSV
@@ -66,7 +66,7 @@ export function PayoutManagement() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} color="#F6AD55" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Pending Payouts</span>
@@ -74,7 +74,7 @@ export function PayoutManagement() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#F6AD55" }}>${pendingTotal.toFixed(2)}</div>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "pending").length} recipients</div>
         </div>
-        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} color="#FFFFFF" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Processing</span>
@@ -82,7 +82,7 @@ export function PayoutManagement() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#6FAE8B" }}>${processingTotal.toFixed(2)}</div>
           <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "processing").length} in transit</div>
         </div>
-        <div className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} color="#FFFFFF" />
             <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Paid This Month</span>
@@ -94,10 +94,10 @@ export function PayoutManagement() {
 
       {/* Batch action bar */}
       {selectedPending.length > 0 && (
-        <div className="flex items-center gap-4 px-5 py-3 rounded-xl border" style={{ background: "rgba(72,187,120,0.08)", borderColor: "rgba(72,187,120,0.3)" }}>
+        <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border" style={{ background: "rgba(72,187,120,0.08)", borderColor: "rgba(72,187,120,0.3)" }}>
           <span style={{ color: "var(--foreground)", fontSize: 14 }}>{selectedPending.length} selected · ${selectedPending.reduce((s, p) => s + p.amount, 0).toFixed(2)} total</span>
           <button
-            className="flex items-center gap-2 px-5 py-2 rounded-xl ml-auto"
+            className="flex items-center gap-2 px-5 py-2 rounded-2xl ml-auto"
             style={{ background: "rgba(72,187,120,0.2)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.4)", fontWeight: 600, fontSize: 14 }}
           >
             <CheckCircle size={15} /> Process Selected Payouts
@@ -107,7 +107,7 @@ export function PayoutManagement() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--card)" }}>
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ background: "var(--card)" }}>
           {[
             { id: "all", label: "All Types" },
             { id: "affiliate", label: "Affiliate", icon: <Users size={12} /> },
@@ -116,26 +116,26 @@ export function PayoutManagement() {
             <button
               key={f.id}
               onClick={() => setTypeFilter(f.id as PayoutType)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all"
               style={{ background: typeFilter === f.id ? "var(--gold)" : "transparent", color: typeFilter === f.id ? "#070D1A" : "var(--muted-foreground)" }}
             >
               {f.icon} {f.label}
             </button>
           ))}
         </div>
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--card)" }}>
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ background: "var(--card)" }}>
           {["all", "pending", "processing", "paid"].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s as PayoutStatus)}
-              className="px-4 py-2 rounded-lg text-sm capitalize transition-all"
+              className="px-4 py-2 rounded-xl text-sm capitalize transition-all"
               style={{ background: statusFilter === s ? "var(--secondary)" : "transparent", color: statusFilter === s ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
               {s}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl flex-1 min-w-48" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl flex-1 min-w-48" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <Search size={14} color="var(--muted-foreground)" />
           <input
             value={search}
@@ -147,7 +147,7 @@ export function PayoutManagement() {
       </div>
 
       {/* Payout table */}
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
@@ -182,7 +182,7 @@ export function PayoutManagement() {
               <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{payout.period}</div>
               <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{payout.rate}%</div>
               <div style={{ color: "var(--gold)", fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600 }}>${payout.amount.toFixed(2)}</div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: statusCfg.bg, color: statusCfg.color, width: "fit-content" }}>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl" style={{ background: statusCfg.bg, color: statusCfg.color, width: "fit-content" }}>
                 {statusCfg.icon}
                 <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{statusCfg.label}</span>
               </div>

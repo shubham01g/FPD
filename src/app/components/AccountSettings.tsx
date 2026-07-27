@@ -39,43 +39,43 @@ const ACCT_CSS = `
 .fpd-acct-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-acct .wrap{max-width:900px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-.fpd-acct .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-acct .card.pad{padding:22px;}
+.fpd-acct .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-acct .card.pad{padding:28px;}
 .fpd-acct .sec-title{font-size:15px;font-weight:600;color:${TEXT};font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
-.fpd-acct .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-acct .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 /* header */
 .fpd-acct .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-acct .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-acct .pg-sub{color:${MUTED};font-size:13px;max-width:640px;line-height:1.6;}
-.fpd-acct .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:9px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-acct .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-acct .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-acct .btn-primary:disabled{opacity:.65;cursor:default;transform:none;}
-.fpd-acct .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
+.fpd-acct .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s;}
 .fpd-acct .btn-ghost:hover{background:rgba(91,110,225,0.18);}
 .fpd-acct .btn-ghost:disabled{opacity:.6;cursor:default;}
-.fpd-acct .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.34);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-acct .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* segmented tabs */
-.fpd-acct .seg{display:flex;gap:3px;padding:3px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);width:fit-content;flex-wrap:wrap;}
-.fpd-acct .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-acct .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;flex-wrap:wrap;}
+.fpd-acct .seg button{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-size:12.5px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-acct .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* KPI ledger */
-.fpd-acct .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-acct .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-acct .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-acct .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-acct .kcell:first-child{border-left:none;}
 .fpd-acct .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-acct .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-acct .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-acct .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-acct .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-acct .kcell .kval{font-family:var(--font-display);font-size:22px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-acct .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-acct .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:760px){.fpd-acct .kstrip{grid-template-columns:1fr 1fr;}.fpd-acct .kcell:nth-child(3){border-left:none;}.fpd-acct .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:760px){.fpd-acct .kstrip{grid-template-columns:1fr 1fr;}.fpd-acct .kcell:nth-child(3){border-left:none;}.fpd-acct .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* fields */
-.fpd-acct .field label{display:block;margin-bottom:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};}
-.fpd-acct .field input,.fpd-acct .field select,.fpd-acct .field textarea{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-acct .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-acct .field input,.fpd-acct .field select,.fpd-acct .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-acct .field input::placeholder,.fpd-acct .field textarea::placeholder{color:${FAINT};}
 .fpd-acct .field input:focus,.fpd-acct .field select:focus,.fpd-acct .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-acct .icon-field{position:relative;}
@@ -95,32 +95,32 @@ const ACCT_CSS = `
 .fpd-acct .avatar-email{color:${MUTED};font-size:12px;margin-top:2px;}
 
 /* banners */
-.fpd-acct .banner{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:13px;}
+.fpd-acct .banner{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:16px;}
 .fpd-acct .banner.pos{background:rgba(95,190,145,0.06);border:1px solid rgba(95,190,145,0.26);}
 .fpd-acct .banner.warn{background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.26);}
-.fpd-acct .banner .bicon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-acct .banner .bicon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .fpd-acct .banner .btitle{font-size:14px;font-weight:700;margin-bottom:3px;}
 .fpd-acct .banner .btext{color:${MUTED};font-size:12.5px;line-height:1.7;margin:0;}
 
 /* 2FA method cards */
 .fpd-acct .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.fpd-acct .mcard{padding:18px;border-radius:14px;position:relative;display:flex;flex-direction:column;background:#0F1624;border:2px solid rgba(255,255,255,0.34);transition:border-color .18s;}
+.fpd-acct .mcard{padding:18px;border-radius:18px;position:relative;display:flex;flex-direction:column;background:#0F1624;border:2px solid rgba(255,255,255,0.08);transition:border-color .18s;}
 .fpd-acct .mcard.active{background:rgba(91,110,225,0.05);}
 .fpd-acct .mcard .mtag-active{position:absolute;top:-11px;left:16px;padding:2px 9px;border-radius:99px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:#fff;}
 .fpd-acct .mcard .micon{margin-bottom:10px;}
 .fpd-acct .mcard .mlabel{color:${TEXT};font-size:13px;font-weight:700;margin-bottom:4px;}
 .fpd-acct .mcard .mdesc{color:${MUTED};font-size:12px;line-height:1.6;flex:1;}
 .fpd-acct .mcard .mtagline{font-family:var(--font-mono);font-size:10px;font-weight:700;margin-top:8px;}
-.fpd-acct .mcard .mbtn{margin-top:12px;padding:9px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
+.fpd-acct .mcard .mbtn{margin-top:12px;padding:9px;border-radius:18px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-acct .mcard .mbtn:hover{filter:brightness(1.1);}
 @media (max-width:760px){.fpd-acct .mgrid{grid-template-columns:1fr;}}
 
-.fpd-acct .active-note{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:11px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12px;}
+.fpd-acct .active-note{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:16px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12px;}
 .fpd-acct .active-note strong{font-weight:700;}
 
 /* steps (encryption how-it-works) */
 .fpd-acct .steps{display:flex;flex-direction:column;gap:10px;}
-.fpd-acct .step{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
+.fpd-acct .step{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-acct .step .snum{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;flex-shrink:0;}
 .fpd-acct .step .stitle{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:4px;}
 .fpd-acct .step .sdesc{color:${MUTED};font-size:12px;line-height:1.7;}
@@ -134,11 +134,11 @@ const ACCT_CSS = `
 @media (max-width:700px){.fpd-acct .stat3{grid-template-columns:1fr;}}
 
 /* encrypted file chips */
-.fpd-acct .filetag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${TEXT};font-size:12px;}
+.fpd-acct .filetag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:18px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${TEXT};font-size:12px;}
 .fpd-acct .filetag .fbadge{padding:2px 6px;border-radius:5px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;background:rgba(95,190,145,0.16);color:#D99A6B;}
 
 /* notification rows */
-.fpd-acct .nrow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.34);gap:16px;}
+.fpd-acct .nrow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08);gap:16px;}
 .fpd-acct .nrow:last-of-type{border-bottom:none;}
 .fpd-acct .nlabel{color:${TEXT};font-size:13px;font-weight:500;}
 .fpd-acct .nsub{color:${MUTED};font-size:11.5px;margin-top:2px;}
@@ -150,16 +150,16 @@ const ACCT_CSS = `
 /* modal */
 .fpd-acct .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-acct .modal{width:100%;max-width:400px;}
-.fpd-acct .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-acct .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-acct .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
 .fpd-acct .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-acct .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
 .fpd-acct .modal-body p{margin:0;}
-.fpd-acct .code-input{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};outline:none;font-family:var(--font-mono);text-align:center;font-size:24px;letter-spacing:0.3em;transition:border-color .18s,box-shadow .18s;}
+.fpd-acct .code-input{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};outline:none;font-family:var(--font-mono);text-align:center;font-size:24px;letter-spacing:0.3em;transition:border-color .18s,box-shadow .18s;}
 .fpd-acct .code-input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-acct .demo-note{color:${MUTED};font-size:11px;text-align:center;margin-top:8px;}
-.fpd-acct .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.34);}
-.fpd-acct .modal-foot .save{flex:1;padding:12px;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-acct .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-acct .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-acct .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-acct .modal-foot .save:disabled{opacity:.7;cursor:default;}
 `;
@@ -185,7 +185,7 @@ function OTPModal({ method, contact, onVerify, onClose }: {
 
   return (
     <div className="backdrop">
-      <div className="card modal glow-surface">
+      <div className="card modal">
         <div className="modal-head">
           <h3>Verify Your Identity</h3>
           <button onClick={onClose}><X size={16}/></button>
@@ -332,7 +332,7 @@ export function AccountSettings() {
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -359,7 +359,7 @@ export function AccountSettings() {
         {tab === "profile" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Avatar */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <h3 className="sec-title">Profile Photo</h3>
               <div className="avatar-row">
                 <div className="avatar-circle">
@@ -383,7 +383,7 @@ export function AccountSettings() {
             </div>
 
             {/* Profile fields */}
-            <div className="card pad glow-surface" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <h3 className="sec-title">Personal Information</h3>
               {[
                 { label:"FULL NAME",     value:name,  set:setName,  ph:"Your full name",     icon:<User size={14}/>,  type:"text" },
@@ -428,7 +428,7 @@ export function AccountSettings() {
             </div>
 
             {/* 2FA method selection */}
-            <div className="card pad glow-surface" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               <h3 className="sec-title" style={{ marginBottom: 0 }}>Two-Factor Authentication (2FA)</h3>
 
               <div className="mgrid">
@@ -493,7 +493,7 @@ export function AccountSettings() {
             </div>
 
             {/* Change password */}
-            <div className="card pad glow-surface" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <h3 className="sec-title" style={{ marginBottom: 0 }}>Change Password</h3>
               {[
                 { label:"CURRENT PASSWORD", value:currentPw, set:setCurrentPw, show:showCurrentPw, toggle:() => setShowCurrentPw(!showCurrentPw) },
@@ -544,7 +544,7 @@ export function AccountSettings() {
             </div>
 
             {/* How it works */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <h3 className="sec-title">How Your Files Are Protected</h3>
               <div className="steps">
                 {[
@@ -589,7 +589,7 @@ export function AccountSettings() {
                 { label:"Key Derivation",       value:"PBKDF2",      color:"#6FAE8B", sub:"100,000 iterations" },
                 { label:"Architecture",         value:"Zero-Knowledge", color:"#D99A6B", sub:"FPD cannot read your data" },
               ].map(s => (
-                <div key={s.label} className="card scell glow-surface">
+                <div key={s.label} className="card scell">
                   <div className="sval" style={{ color: s.color }}>{s.value}</div>
                   <div className="slbl">{s.label}</div>
                   <div className="ssub">{s.sub}</div>
@@ -598,7 +598,7 @@ export function AccountSettings() {
             </div>
 
             {/* Encrypted badge shown on all files */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="eyebrow" style={{ marginBottom: 10 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
@@ -619,7 +619,7 @@ export function AccountSettings() {
         {/* ── Notifications tab ── */}
         {tab === "notifications" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <h3 className="sec-title">Notification Preferences</h3>
               {[
                 { label:"Email Notifications",        sub:"Receive important updates to your email address",       value:notifEmail,          set:setNotifEmail },

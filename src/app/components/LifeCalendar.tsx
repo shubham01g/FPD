@@ -71,8 +71,8 @@ const CAL_CSS = `
 .fpd-cal .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
 /* cards */
-.fpd-cal .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);}
-.fpd-cal .card.pad{padding:22px;}
+.fpd-cal .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
+.fpd-cal .card.pad{padding:28px;}
 .fpd-cal .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
 .fpd-cal .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-cal .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
@@ -80,34 +80,34 @@ const CAL_CSS = `
 
 /* header */
 .fpd-cal .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.fpd-cal .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-cal .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 .fpd-cal .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-cal .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
 .fpd-cal .head-r{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
+.fpd-cal .btn-today{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.28);color:#6FAE8B;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,border-color .18s;}
 .fpd-cal .btn-today:hover{background:rgba(91,110,225,0.18);}
 
 /* segmented view toggle */
-.fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:10px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);}
+.fpd-cal .seg{display:flex;gap:3px;padding:3px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-cal .seg button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:600;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;text-transform:capitalize;}
 .fpd-cal .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* KPI ledger */
-.fpd-cal .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:15px;}
-.fpd-cal .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.34);position:relative;text-align:left;overflow:hidden;}
+.fpd-cal .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
+.fpd-cal .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-cal .kcell:first-child{border-left:none;}
 .fpd-cal .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-cal .kcell .klbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};}
-.fpd-cal .kcell .kico{width:27px;height:27px;border-radius:8px;border:1px solid rgba(255,255,255,0.34);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
+.fpd-cal .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-cal .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
 .fpd-cal .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-cal .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-cal .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cal .kstrip{grid-template-columns:1fr 1fr;}.fpd-cal .kcell:nth-child(3){border-left:none;}.fpd-cal .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.34);}}
+@media (max-width:880px){.fpd-cal .kstrip{grid-template-columns:1fr 1fr;}.fpd-cal .kcell:nth-child(3){border-left:none;}.fpd-cal .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* filters */
 .fpd-cal .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .fpd-cal .filters .flabel{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:${FAINT};margin-right:2px;}
-.fpd-cal .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
+.fpd-cal .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;transition:opacity .16s,background .16s,border-color .16s;}
 .fpd-cal .chip .cn{font-family:var(--font-mono);font-size:10.5px;opacity:.8;}
 .fpd-cal .chip.off{opacity:.48;}
 .fpd-cal .chip.off:hover{opacity:.72;}
@@ -118,12 +118,12 @@ const CAL_CSS = `
 @media (max-width:1080px){.fpd-cal .bento{grid-template-columns:1fr;}}
 
 /* month grid */
-.fpd-cal .navbtn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
+.fpd-cal .navbtn{width:32px;height:32px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};cursor:pointer;transition:border-color .18s,color .18s;}
 .fpd-cal .navbtn:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 .fpd-cal .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
 .fpd-cal .dow span{text-align:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.1em;color:${FAINT};padding:2px 0;}
 .fpd-cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.34);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
+.fpd-cal .cell{min-height:94px;padding:7px 7px 6px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.012);display:flex;flex-direction:column;align-items:stretch;text-align:left;cursor:pointer;transition:border-color .16s,background .16s;overflow:hidden;}
 .fpd-cal .cell:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.05);}
 .fpd-cal .cell.blank{background:none;border:1px solid transparent;cursor:default;}
 .fpd-cal .cell.today{border-color:rgba(95,190,145,0.5);box-shadow:inset 0 0 0 1px rgba(95,190,145,0.22),0 0 18px -8px rgba(95,190,145,0.5);}
@@ -141,20 +141,20 @@ const CAL_CSS = `
 
 /* event rows */
 .fpd-cal .evlist{display:flex;flex-direction:column;gap:9px;}
-.fpd-cal .evrow{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.34);}
-.fpd-cal .evico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-cal .evrow{display:flex;align-items:flex-start;gap:11px;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);}
+.fpd-cal .evico{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-cal .evbody{flex:1;min-width:0;}
 .fpd-cal .evtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .fpd-cal .evt{font-size:13px;font-weight:600;color:${TEXT};}
 .fpd-cal .evamt{font-family:var(--font-mono);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
 .fpd-cal .evmeta{font-family:var(--font-mono);font-size:10.5px;margin-top:3px;}
 .fpd-cal .evdet{color:${MUTED};font-size:11.5px;line-height:1.5;margin-top:3px;}
-.fpd-cal .evopen{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
+.fpd-cal .evopen{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:16px;font-size:11px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-cal .evopen:hover{filter:brightness(1.14);}
 
 /* empty state */
 .fpd-cal .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 12px;}
-.fpd-cal .empty .ei{width:46px;height:46px;border-radius:12px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
+.fpd-cal .empty .ei{width:46px;height:46px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-cal .empty .et{color:${SOFT};font-size:13px;font-weight:600;font-family:var(--font-display);}
 .fpd-cal .empty .ed{color:${MUTED};font-size:12px;line-height:1.6;margin-top:5px;max-width:340px;}
 
@@ -167,7 +167,7 @@ const CAL_CSS = `
 .fpd-cal .agtoday{padding:2px 7px;border-radius:6px;background:rgba(95,190,145,0.14);color:#D99A6B;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:0.06em;}
 
 /* footnote */
-.fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:13px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
+.fpd-cal .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
 .fpd-cal .foot .ft{color:${MUTED};font-size:12.5px;line-height:1.7;}
 .fpd-cal .foot .ft b{color:${SOFT};font-weight:600;}
 .fpd-cal .foot .ft em{color:#6FAE8B;font-style:normal;}
@@ -321,7 +321,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip glow-surface">
+        <div className="card kstrip">
           {kpis.map(k => (
             <div key={k.label} className="kcell">
               <div className="khead">
@@ -335,7 +335,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
         </div>
 
         {/* ── Source filters ── */}
-        <div className="card pad glow-surface">
+        <div className="card pad">
           <div className="filters">
             <span className="flabel">FILTER</span>
             {ALL_SOURCES.map(s => {
@@ -365,7 +365,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
         {view === "month" ? (
           <div className="bento">
             {/* Month grid */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year}</h3>
                 <div style={{ display: "flex", gap: 6 }}>
@@ -414,7 +414,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
 
             {/* Right rail — selected day + upcoming */}
             <div className="col">
-              <div className="card pad glow-surface">
+              <div className="card pad">
                 <div className="sec-head">
                   <h3 className="sec-title"><span className="tick" />{selected === todayIso ? "Today" : fmtDate(selected)}</h3>
                   <span className="sec-cnt">{selectedEvents.length} item{selectedEvents.length === 1 ? "" : "s"}</span>
@@ -432,7 +432,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                 )}
               </div>
 
-              <div className="card pad glow-surface">
+              <div className="card pad">
                 <div className="sec-head">
                   <h3 className="sec-title"><span className="tick" />Coming Up</h3>
                 </div>
@@ -452,7 +452,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
           </div>
         ) : (
           /* ── Agenda view — flat chronological list for the month ── */
-          <div className="card pad glow-surface">
+          <div className="card pad">
             <div className="sec-head">
               <h3 className="sec-title"><span className="tick" />{MONTHS[month]} {year} — Agenda</h3>
               <div style={{ display: "flex", gap: 6 }}>

@@ -225,7 +225,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 <div style={{ color:"#4A5A7A", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:8, textAlign:"center" }}>POWERED BY</div>
                 <div className="flex justify-center gap-4">
                   {PROCESSORS.filter(p=>p.status==="connected").map(p => (
-                    <div key={p.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+                    <div key={p.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl"
                       style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)" }}>
                       <span style={{ fontSize:14 }}>{p.logo}</span>
                       <span style={{ color:"#6B7FA8", fontSize:11 }}>{p.name}</span>
@@ -266,7 +266,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
 
               {/* QR code */}
               <div className="flex justify-center">
-                <div className="p-4 rounded-2xl glow-surface" style={{ background:"#FFFFFF" }}>
+                <div className="p-4 rounded-2xl" style={{ background:"#FFFFFF" }}>
                   <QRCode value={selectedCoin.address} color={selectedCoin.color} size={140}/>
                 </div>
               </div>
@@ -276,12 +276,12 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 <div style={{ color:"#6B7FA8", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:6 }}>
                   SEND EXACTLY {cryptoAmount} {selectedCoin.symbol} TO:
                 </div>
-                <div className="flex items-center gap-2 px-3 py-3 rounded-xl"
+                <div className="flex items-center gap-2 px-3 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)" }}>
                   <code style={{ color:"#E8EDF5", fontSize:11, flex:1, textAlign:"left", wordBreak:"break-all", fontFamily:"var(--font-mono)" }}>
                     {selectedCoin.address}
                   </code>
-                  <button onClick={() => doCopy(selectedCoin.address)} className="flex-shrink-0 p-1.5 rounded-lg"
+                  <button onClick={() => doCopy(selectedCoin.address)} className="flex-shrink-0 p-1.5 rounded-xl"
                     style={{ background: copied ? "rgba(72,187,120,0.15)" : "rgba(255,255,255,0.06)", color: copied ? "#D99A6B" : "#6B7FA8" }}>
                     {copied ? <CheckCircle size={14}/> : <Copy size={14}/>}
                   </button>
@@ -289,7 +289,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               </div>
 
               {/* Invoice ID */}
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl"
+              <div className="flex items-center justify-between px-3 py-2 rounded-2xl"
                 style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)" }}>
                 <span style={{ color:"#6B7FA8", fontSize:11, fontFamily:"var(--font-mono)" }}>INVOICE ID</span>
                 <span style={{ color:"#E8EDF5", fontSize:11, fontFamily:"var(--font-mono)" }}>{invoiceId}</span>
@@ -297,7 +297,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
 
               {/* Warnings */}
               <div className="space-y-2 text-left">
-                <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+                <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                   style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
                   <AlertCircle size={12} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
                   <p style={{ color:"#F6AD55", fontSize:11, lineHeight:1.6 }}>
@@ -305,7 +305,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                     Required confirmations: {selectedCoin.confirmations}.
                   </p>
                 </div>
-                <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+                <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                   style={{ background:"rgba(91,110,225,0.08)", border:"1px solid rgba(91,110,225,0.15)" }}>
                   <Shield size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
                   <p style={{ color:"#6FAE8B", fontSize:11, lineHeight:1.6 }}>
@@ -315,7 +315,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               </div>
 
               {/* Demo note */}
-              <div className="px-3 py-2 rounded-xl"
+              <div className="px-3 py-2 rounded-2xl"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
                 <span style={{ color:"#D99A6B", fontSize:10, fontFamily:"var(--font-mono)" }}>
                   DEMO MODE · Payment auto-simulates in ~8 seconds
@@ -338,19 +338,19 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+                <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
                   <span style={{ color:"#6B7FA8", fontSize:12 }}>Amount</span>
                   <span style={{ color:selectedCoin.color, fontSize:13, fontFamily:"var(--font-mono)", fontWeight:700 }}>
                     {cryptoAmount} {selectedCoin.symbol}
                   </span>
                 </div>
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+                <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
                   <span style={{ color:"#6B7FA8", fontSize:12 }}>Network</span>
                   <span style={{ color:"#E8EDF5", fontSize:12 }}>{selectedCoin.network}</span>
                 </div>
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+                <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
                   <span style={{ color:"#6B7FA8", fontSize:12 }}>TX Hash</span>
                   <span style={{ color:"#E8EDF5", fontSize:10, fontFamily:"var(--font-mono)" }}>
@@ -384,7 +384,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                   ["Invoice",    invoiceId],
                   ["Status",     "✓ Confirmed"],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between px-4 py-2.5 rounded-xl"
+                  <div key={k} className="flex justify-between px-4 py-2.5 rounded-2xl"
                     style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.12)" }}>
                     <span style={{ color:"#6B7FA8", fontSize:12 }}>{k}</span>
                     <span style={{ color: k==="Status" ? "#D99A6B" : "#E8EDF5", fontSize:12, fontFamily:k==="Invoice"?"var(--font-mono)":"inherit" }}>{v}</span>

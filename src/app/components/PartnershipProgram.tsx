@@ -39,9 +39,9 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partnership badge */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "linear-gradient(135deg, rgba(91,110,225,0.06), rgba(91,167,214,0.04))", borderColor: "var(--gold)" }}>
+      <div className="p-6 rounded-2xl border" style={{ background: "linear-gradient(135deg, rgba(91,110,225,0.06), rgba(91,167,214,0.04))", borderColor: "var(--gold)" }}>
         <div className="flex items-center gap-4">
-          <div className="rounded-2xl p-3 glow-surface" style={{ background: "rgba(91,110,225,0.15)" }}>
+          <div className="rounded-2xl p-3" style={{ background: "rgba(91,110,225,0.15)" }}>
             <Star size={28} color="var(--gold)" />
           </div>
           <div>
@@ -62,7 +62,7 @@ export function PartnershipProgram() {
         {tiers.map((t) => (
           <div
             key={t.tier}
-            className="p-5 rounded-xl border"
+            className="p-5 rounded-2xl border"
             style={{
               background: currentTier.tier === t.tier ? `${t.color}10` : "var(--card)",
               borderColor: currentTier.tier === t.tier ? t.color : "var(--border)",
@@ -90,7 +90,7 @@ export function PartnershipProgram() {
           { label: "Monthly Recurring", value: `$${totalMonthlyRevenue.toFixed(2)}`, sub: "This month's projection", color: "#D99A6B" },
           { label: "Lifetime Earned", value: `$${totalEarned.toLocaleString()}`, sub: "All time", color: "#6FAE8B" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13, fontWeight: 500 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -99,16 +99,16 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partner link */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Your Partner Referral Link</h3>
         <div className="flex gap-3">
-          <div className="flex items-center gap-3 flex-1 px-4 py-3 rounded-xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-3 flex-1 px-4 py-3 rounded-2xl border" style={{ background: "#EAF0FC", borderColor: "var(--border)" }}>
             <Link size={14} color="var(--gold)" />
             <span style={{ color: "var(--foreground)", fontSize: 13, fontFamily: "var(--font-mono)" }}>{partnerLink}</span>
           </div>
           <button
             onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl"
             style={{ background: copied ? "rgba(72, 187, 120, 0.15)" : "var(--gold)", color: copied ? "#D99A6B" : "#070D1A", fontWeight: 600, fontSize: 14 }}
           >
             {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
@@ -118,7 +118,7 @@ export function PartnershipProgram() {
       </div>
 
       {/* Recurring chart */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Monthly Recurring Revenue</h3>
           <div className="flex items-center gap-1" style={{ color: "#D99A6B", fontSize: 13 }}>
@@ -147,7 +147,7 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partner organizations table */}
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div className="px-5 py-3 border-b" style={{ background: "var(--muted)", borderColor: "var(--border)" }}>
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--foreground)" }}>Partner Organizations</h3>
         </div>
@@ -166,7 +166,7 @@ export function PartnershipProgram() {
             style={{ gridTemplateColumns: "1fr auto auto auto auto", background: i % 2 === 0 ? "#FFFFFF" : "#F5F8FE", borderColor: "var(--border)", gap: 16 }}
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg p-2" style={{ background: "rgba(91,110,225,0.1)" }}>
+              <div className="rounded-xl p-2" style={{ background: "rgba(91,110,225,0.1)" }}>
                 <Building size={14} color="var(--gold)" />
               </div>
               <div>
@@ -187,7 +187,7 @@ export function PartnershipProgram() {
         ))}
       </div>
 
-      <div className="flex gap-3 px-5 py-4 rounded-xl border" style={{ background: "rgba(91,110,225,0.05)", borderColor: "rgba(91,110,225,0.2)" }}>
+      <div className="flex gap-3 px-5 py-4 rounded-2xl border" style={{ background: "rgba(91,110,225,0.05)", borderColor: "rgba(91,110,225,0.2)" }}>
         <Info size={15} color="var(--gold)" style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ color: "var(--muted-foreground)", fontSize: 13, lineHeight: 1.7 }}>
           <strong style={{ color: "var(--foreground)" }}>Lifetime Recurring Commissions:</strong> Partnership commissions are paid every billing cycle for the lifetime of each referred account — no 12-month cap. As you grow your total account count, your tier upgrades automatically and applies to all existing accounts.

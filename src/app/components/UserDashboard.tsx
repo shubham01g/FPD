@@ -312,7 +312,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
         {/* ── Hero row: readiness (wide) + at-a-glance stats (narrow) ── */}
         <div className="hero-grid">
-          <div className="card ready glow-surface">
+          <div className="card ready">
             <div className="ring-col">
               <div className="ring-wrap">
                 <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
@@ -363,7 +363,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             </div>
           </div>
 
-          <div className="card pad glow-surface">
+          <div className="card pad">
             <div className="kpi-stack">
               {statCards.map(card => (
                 <button key={card.label} className={`kpi-mini ${card.hl ? "hl" : ""}`} onClick={() => onNavigate(card.page)}>
@@ -383,7 +383,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
         <div className="tri-grid">
           <div className="stack-col">
             {/* Storage & Usage */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Storage &amp; Usage</h3>
                 <button className="sec-link" onClick={() => onNavigate("storage-usage")}>Manage <ArrowRight size={12} /></button>
@@ -440,7 +440,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             </div>
 
             {/* Recent Documents */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Recent Documents</h3>
                 <button className="sec-link" onClick={() => onNavigate("file-cabinet")}>View all <ArrowRight size={12} /></button>
@@ -468,7 +468,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
           <div className="stack-col">
             {/* Quick Actions */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Quick Actions</h3>
               </div>
@@ -484,7 +484,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             </div>
 
             {/* Notifications */}
-            <div className="card pad glow-surface">
+            <div className="card pad">
               <div className="sec-head">
                 <h3 className="sec-title"><span className="tick" />Notifications</h3>
                 <span className="sec-link" style={{ cursor: "default", color: unread ? MINT : SOFT }}>

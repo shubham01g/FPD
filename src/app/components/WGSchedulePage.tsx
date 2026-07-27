@@ -82,7 +82,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
           {/* Confirmed slot */}
           {slot && (
-            <div className="p-5 rounded-2xl text-left glow-surface"
+            <div className="p-5 rounded-2xl text-left"
               style={{ background:"rgba(72,187,120,0.07)", border:"2px solid rgba(72,187,120,0.25)" }}>
               <div style={{ color:"#4A5A7A", fontSize:12, fontFamily:"var(--font-mono)", marginBottom:6 }}>
                 YOUR APPOINTMENT
@@ -96,7 +96,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
             </div>
           )}
 
-          <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
+          <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <div style={{ color:"#8A9AB8", fontSize:13, lineHeight:1.7 }}>
               <strong style={{ color:"#E8EDF5" }}>What to have ready:</strong><br/>
               Any documents you'd like to upload — wills, insurance policies, photos, medical records — have them nearby so your specialist can walk you through everything.
@@ -171,7 +171,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
                 cursor: selecting ? "not-allowed" : "pointer",
               }}>
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center rounded-xl flex-shrink-0"
+                <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
                   style={{ width:48, height:48, background: isSelecting ? "rgba(72,187,120,0.15)" : "rgba(91,110,225,0.06)" }}>
                   {isSelecting
                     ? <CheckCircle size={24} color="#FFFFFF"/>

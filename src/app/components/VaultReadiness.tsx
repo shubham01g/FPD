@@ -51,7 +51,7 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
 
   return (
     <div
-      className="fpd-fade-in-up glow-surface"
+      className="fpd-fade-in-up"
       style={{
         background: "linear-gradient(135deg,#0C1322 0%,#101A2E 55%,#0C1322 100%)",
         border: "1px solid rgba(91,110,225,0.22)",
@@ -142,7 +142,7 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
         <div
           style={{
             position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-            width: 54, height: 54, borderRadius: 16,
+            width: 54, height: 54, borderRadius:22,
             background: `linear-gradient(140deg,${ACCENT},${ACCENT2})`,
             boxShadow: `0 0 26px ${ACCENT}88, inset 0 1px 0 rgba(255,255,255,0.25)`,
             display: "flex", alignItems: "center", justifyContent: "center",

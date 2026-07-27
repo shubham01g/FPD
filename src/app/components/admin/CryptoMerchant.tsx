@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
@@ -145,7 +145,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
+    <div className="rounded-2xl overflow-hidden" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -171,12 +171,12 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setExpanded(!expanded)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               {expanded ? "Hide" : "Configure"}
             </button>
             <button onClick={connect}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:proc.status==="connected"?"rgba(252,129,129,0.1)":"rgba(72,187,120,0.1)", color:proc.status==="connected"?"#FC8181":"#D99A6B" }}>
               {proc.status === "connected" ? "Disconnect" : "Connect"}
             </button>
@@ -228,7 +228,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
             <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>SETTLEMENT OPTIONS</div>
             <div className="flex flex-wrap gap-2">
               {proc.settlementOptions.map(s => (
-                <span key={s} className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+                <span key={s} className="px-3 py-1.5 rounded-2xl text-xs font-semibold"
                   style={{ background:`${proc.color}10`, border:`1px solid ${proc.color}25`, color:"#E8EDF5" }}>
                   {s}
                 </span>
@@ -238,12 +238,12 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
 
           <div className="flex gap-2">
             <button onClick={() => { onUpdate(proc.id, { config: localConfig }); toast.success("Settings saved"); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Credentials
             </button>
             <button onClick={() => { copyToClipboard(`https://api.finalpassdown.com/webhooks/${proc.id}`); toast.success("Webhook URL copied"); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Copy size={11}/> Copy Webhook URL
             </button>
@@ -297,7 +297,7 @@ export function CryptoMerchant() {
           { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#6E90C9" },
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
-          <div key={s.label} className="p-5 rounded-2xl glow-surface" style={CARD}>
+          <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -305,7 +305,7 @@ export function CryptoMerchant() {
       </div>
 
       {/* Accepted coins strip */}
-      <div className="flex items-center gap-3 p-4 rounded-2xl glow-surface" style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
+      <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
         <span style={{ color:"#F7931A", fontSize:12, fontWeight:600 }}>Accepting:</span>
         <div className="flex flex-wrap gap-2 flex-1">
           {["BTC","ETH","USDC","USDT","SOL","BNB","XRP","LTC"].map(coin => (
@@ -319,10 +319,10 @@ export function CryptoMerchant() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
+      <div className="flex flex-wrap gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={{ background:tab===t.id?"#5B6EE1":"transparent", color:tab===t.id?"#fff":"#8A9AB8" }}>
             {t.label}
           </button>
@@ -332,7 +332,7 @@ export function CryptoMerchant() {
       {/* ── Processors tab ── */}
       {tab === "processors" && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
+          <div className="flex items-start gap-3 p-4 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
             <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div>
@@ -349,7 +349,7 @@ export function CryptoMerchant() {
       {tab === "transactions" && (
         <div className="space-y-4">
           {/* Volume by coin */}
-          <div className="p-5 rounded-2xl glow-surface" style={CARD}>
+          <div className="p-5 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Volume by Cryptocurrency</div>
             <div className="space-y-2.5">
               {(["BTC","ETH","USDC","USDT","SOL"] as const).map(coin => {
@@ -417,7 +417,7 @@ export function CryptoMerchant() {
       {/* ── Wallets tab ── */}
       {tab === "wallets" && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 rounded-2xl glow-surface"
+          <div className="flex items-start gap-3 p-4 rounded-2xl"
             style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
             <span style={{ fontSize:16 }}>🔐</span>
             <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
@@ -430,7 +430,7 @@ export function CryptoMerchant() {
             { coin:"ETH", emoji:"Ξ", color:"#627EEA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"0.8241 ETH", usd:"$2,707", custody:"Coinbase Commerce" },
             { coin:"USDC",emoji:"$", color:"#2775CA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"1,284.00 USDC", usd:"$1,284", custody:"BitPay" },
           ].map(w => (
-            <div key={w.coin} className="p-5 rounded-2xl glow-surface" style={CARD}>
+            <div key={w.coin} className="p-5 rounded-2xl" style={CARD}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center rounded-full font-bold"
@@ -447,7 +447,7 @@ export function CryptoMerchant() {
                   <div style={{ color:"#8A9AB8", fontSize:12 }}>{w.usd} USD</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-xl"
+              <div className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-2xl"
                 style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>ADDRESS:</span>
                 <code style={{ color:"#8A9AB8", fontSize:11, flex:1 }} className="truncate">{w.address}</code>
@@ -468,7 +468,7 @@ export function CryptoMerchant() {
       {/* ── Settings tab ── */}
       {tab === "settings" && (
         <div className="space-y-5 max-w-lg">
-          <div className="p-5 rounded-2xl space-y-4 glow-surface" style={CARD}>
+          <div className="p-5 rounded-2xl space-y-4" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:4 }}>Payment Preferences</div>
 
             {[
@@ -502,14 +502,14 @@ export function CryptoMerchant() {
             </div>
 
             <button onClick={() => toast.success("Crypto payment settings saved")}
-              className="w-full py-3 rounded-xl font-bold text-sm"
+              className="w-full py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Settings
             </button>
           </div>
 
           {/* Merchant verification */}
-          <div className="p-5 rounded-2xl glow-surface" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
+          <div className="p-5 rounded-2xl" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
             <div className="flex items-center gap-2 mb-3">
               <span style={{ fontSize:20 }}>₿</span>
               <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>Merchant Business Verification</span>
@@ -528,7 +528,7 @@ export function CryptoMerchant() {
               </div>
             ))}
             <button onClick={() => toast.success("Business verification — complete at nowpayments.io/merchant")}
-              className="flex items-center gap-1.5 mt-3 text-sm px-4 py-2 rounded-xl font-semibold"
+              className="flex items-center gap-1.5 mt-3 text-sm px-4 py-2 rounded-2xl font-semibold"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <ExternalLink size={12}/> Complete NOWPayments Verification
             </button>

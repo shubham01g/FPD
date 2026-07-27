@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", borderRadius:16, boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)" };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", borderRadius:22, boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#FFFFFF", outline:"none" };
 
@@ -295,11 +295,11 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
   const cat = CATEGORY_META[report.category];
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
+    <div className="rounded-2xl overflow-hidden" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
-            <div className="flex items-center justify-center rounded-xl flex-shrink-0"
+            <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
               style={{ width:40, height:40, background:`${report.color}15`, color:report.color }}>
               {report.icon}
             </div>
@@ -330,7 +330,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
           <div className="flex gap-1">
             {report.formats.map(f => (
               <button key={f} onClick={() => setFmt(f)}
-                className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
+                className="px-2.5 py-1 rounded-xl text-xs font-bold transition-all"
                 style={{ background:fmt===f?`${report.color}18`:"rgba(91,110,225,0.04)", color:fmt===f?report.color:"#8A9AB8", border:`1px solid ${fmt===f?report.color+"30":"rgba(91,110,225,0.1)"}` }}>
                 {f}
               </button>
@@ -347,7 +347,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
             <option value="custom">Custom range…</option>
           </select>
           <button onClick={() => onGenerate(report, fmt, range)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold ml-auto"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold ml-auto"
             style={{ background:`linear-gradient(135deg,${report.color},${report.color}CC)`, color:"#fff", boxShadow:`0 2px 10px ${report.color}30` }}>
             <Download size={12}/> Generate & Download
           </button>
@@ -360,7 +360,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
           <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>INCLUDED FIELDS ({report.fields.length})</div>
           <div className="flex flex-wrap gap-1.5">
             {report.fields.map(f => (
-              <span key={f} className="px-2 py-1 rounded-lg text-xs"
+              <span key={f} className="px-2 py-1 rounded-xl text-xs"
                 style={{ background:"rgba(91,110,225,0.04)", color:"#8A9AB8", border:"1px solid rgba(91,110,225,0.08)" }}>
                 {f}
               </span>
@@ -437,7 +437,7 @@ export function ReportsDownloads() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -445,10 +445,10 @@ export function ReportsDownloads() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
         {([["reports","📋 Report Catalog"],["history","📥 Download History"]] as const).map(([id, label]) => (
           <button key={id} onClick={() => setActiveTab(id)}
-            className="px-5 py-2 rounded-lg text-sm font-semibold"
+            className="px-5 py-2 rounded-xl text-sm font-semibold"
             style={{ background:activeTab===id?"#5B6EE1":"transparent", color:activeTab===id?"#fff":"#8A9AB8" }}>
             {label}
           </button>
@@ -464,13 +464,13 @@ export function ReportsDownloads() {
               placeholder="Search reports…" style={{ ...INPUT, width:220, padding:"8px 12px" }}/>
             <div className="flex gap-1 flex-wrap">
               <button onClick={() => setActiveCategory("all")}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                 style={{ background:activeCategory==="all"?"#5B6EE1":"rgba(91,110,225,0.04)", color:activeCategory==="all"?"#fff":"#8A9AB8", border:"1px solid rgba(91,110,225,0.1)" }}>
                 All
               </button>
               {(Object.entries(CATEGORY_META) as [ReportDef["category"], typeof CATEGORY_META[ReportDef["category"]]][]).map(([key, meta]) => (
                 <button key={key} onClick={() => setActiveCategory(key)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold"
                   style={{ background:activeCategory===key?`${meta.color}18`:"rgba(91,110,225,0.04)", color:activeCategory===key?meta.color:"#8A9AB8", border:`1px solid ${activeCategory===key?meta.color+"30":"rgba(91,110,225,0.1)"}` }}>
                   {meta.icon} {meta.label}
                 </button>
@@ -496,13 +496,13 @@ export function ReportsDownloads() {
           <div className="flex items-center justify-between">
             <div style={{ color:"#8A9AB8", fontSize:13 }}>{downloads.length} exports generated</div>
             <button onClick={() => toast.success("Download history cleared")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs"
               style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.2)" }}>
               <X size={11}/> Clear History
             </button>
           </div>
 
-          <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
+          <div className="rounded-2xl overflow-hidden" style={CARD}>
             <table className="w-full text-sm" style={{ borderCollapse:"collapse" }}>
               <thead>
                 <tr style={{ background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
@@ -531,7 +531,7 @@ export function ReportsDownloads() {
                       <td style={{ padding:"12px 16px" }}>
                         {dl.status === "ready" ? (
                           <button onClick={() => toast.success(`Downloading ${dl.reportName}.${dl.format.toLowerCase()}…`)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-semibold"
                             style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                             <Download size={11}/> Download
                           </button>
@@ -553,7 +553,7 @@ export function ReportsDownloads() {
           </div>
 
           {/* Info banner */}
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
+          <div className="flex items-start gap-3 px-4 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.6 }}>
               All reports are generated in real time from the live database. Files are retained for 30 days. Reports containing PII are access-logged per your admin audit policy. GDPR data requests are archived separately for 7 years per compliance requirements.

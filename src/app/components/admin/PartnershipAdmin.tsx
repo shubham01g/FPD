@@ -21,7 +21,7 @@ const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" };
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
-const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 
 function SendInviteModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
@@ -52,7 +52,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-lg rounded-2xl p-7 glow-surface" style={GLASS}>
+      <div className="w-full max-w-lg rounded-2xl p-7" style={GLASS}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
@@ -67,7 +67,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             <div className="flex flex-wrap gap-2">
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                  className="px-3 py-1.5 rounded-2xl text-xs font-bold transition-all"
                   style={{ background:orgType===t.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)", border:`1px solid ${orgType===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`, color:orgType===t.id?"#6E90C9":"#8A9AB8" }}>
                   {t.label}
                 </button>
@@ -82,7 +82,7 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             <div key={f.label}>
               <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
               <input type={f.type||"text"} value={f.value} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
-                className="w-full px-4 py-3 rounded-xl"
+                className="w-full px-4 py-3 rounded-2xl"
                 style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
             </div>
           ))}
@@ -91,12 +91,12 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
               placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
-              className="w-full px-4 py-3 rounded-xl resize-none"
+              className="w-full px-4 py-3 rounded-2xl resize-none"
               style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
           </div>
 
           {/* Preview link */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
             <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
             <span style={{ color:"#6E90C9", fontSize:10, flex:1 }} className="truncate">{onboardingLink}</span>
             <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
@@ -105,11 +105,11 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
 
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending…" : "Send Invite Email"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
+            <button onClick={onClose} className="px-5 py-3 rounded-2xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
           </div>
         </div>
       </div>
@@ -142,7 +142,7 @@ export function PartnershipAdmin() {
             <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Monitor strategic partners, account growth, and lifetime recurring commissions.</p>
           </div>
           <button onClick={() => setShowInvite(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm flex-shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm flex-shrink-0"
             style={{ background:"linear-gradient(135deg,#5BA7D6,#7E6BD8)", color:"#04080F", boxShadow:"0 0 20px rgba(91,167,214,0.35)" }}>
             <Send size={14}/> Send Onboarding Invite
           </button>
@@ -158,7 +158,7 @@ export function PartnershipAdmin() {
           { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#D99A6B" },
           { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#6FAE8B" },
         ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
             <div style={{ color: "var(--foreground)", fontSize: 13 }}>{stat.label}</div>
             <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
@@ -167,7 +167,7 @@ export function PartnershipAdmin() {
       </div>
 
       {/* MRR chart — pure CSS, no recharts */}
-      <div className="p-6 rounded-xl border glow-surface" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+      <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
           <div style={{ color: "#D99A6B", fontSize: 13 }}>+264% in 6 months</div>
@@ -200,7 +200,7 @@ export function PartnershipAdmin() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <Search size={14} color="var(--muted-foreground)" />
         <input
           value={search}
@@ -211,7 +211,7 @@ export function PartnershipAdmin() {
       </div>
 
       {/* Partners table */}
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
@@ -228,7 +228,7 @@ export function PartnershipAdmin() {
           >
             <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
+              <div className="rounded-xl p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
                 <Building size={13} color="#FFFFFF" />
               </div>
               <div>

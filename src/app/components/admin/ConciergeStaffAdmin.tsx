@@ -10,7 +10,7 @@ import {
   type ConciergeEmployee, type StaffRole, ROLE_LABELS, ROLE_COLORS,
 } from "../../services/conciergeStaff";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
@@ -56,7 +56,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
 
         <div className="p-6 space-y-4">
           {/* Info banner */}
-          <div className="flex items-start gap-2 p-3 rounded-xl glow-surface"
+          <div className="flex items-start gap-2 p-3 rounded-2xl"
             style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.2)" }}>
             <Shield size={12} color="#FFFFFF" style={{ marginTop:1 }}/>
             <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.6 }}>
@@ -82,7 +82,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
             <div className="grid grid-cols-3 gap-2">
               {(Object.entries(ROLE_LABELS) as [StaffRole, string][]).map(([id, label]) => (
                 <button key={id} onClick={() => setForm(p => ({ ...p, role:id }))}
-                  className="px-3 py-2.5 rounded-xl text-xs font-bold text-center transition-all"
+                  className="px-3 py-2.5 rounded-2xl text-xs font-bold text-center transition-all"
                   style={{ background:form.role===id?`${ROLE_COLORS[id]}15`:"rgba(91,167,214,0.04)",
                     border:`1px solid ${form.role===id?ROLE_COLORS[id]:"rgba(91,167,214,0.12)"}`,
                     color:form.role===id?ROLE_COLORS[id]:"#8A9AB8" }}>
@@ -106,7 +106,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
                       ? p.assignedClientIds.filter(id => id !== c.id)
                       : [...p.assignedClientIds, c.id]
                   }))}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-left"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all text-left"
                     style={{ background:isAssigned?"rgba(91,167,214,0.08)":"rgba(91,167,214,0.03)",
                       border:`1px solid ${isAssigned?"rgba(91,167,214,0.35)":"rgba(91,167,214,0.1)"}` }}>
                     <div className="flex items-center justify-center rounded-full"
@@ -136,11 +136,11 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
 
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:sending?0.7:1 }}>
               <Send size={14}/>{sending ? "Sending Invite…" : "Send Concierge Invite"}
             </button>
-            <button onClick={onClose} className="px-5 py-3 rounded-xl text-sm"
+            <button onClick={onClose} className="px-5 py-3 rounded-2xl text-sm"
               style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
           </div>
         </div>
@@ -181,12 +181,12 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setExpanded(!expanded)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               {expanded ? "Hide" : "Manage"}
             </button>
             <button onClick={() => { revokeEmployee(emp.id); onUpdate(); toast.success(`${emp.name}'s access ${emp.status==="suspended"?"restored":"suspended"}`); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:emp.status==="suspended"?"rgba(72,187,120,0.1)":"rgba(252,129,129,0.1)", color:emp.status==="suspended"?"#D99A6B":"#FC8181" }}>
               {emp.status === "suspended" ? "Restore" : "Suspend"}
             </button>
@@ -226,7 +226,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
                     onUpdate();
                     toast.success(isAssigned ? `${c.name} removed from ${emp.name}` : `${c.name} assigned to ${emp.name}`);
                   }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-2xl transition-all text-left"
                     style={{ background:isAssigned?"rgba(91,167,214,0.08)":"rgba(91,167,214,0.03)",
                       border:`1px solid ${isAssigned?"rgba(91,167,214,0.3)":"rgba(91,167,214,0.1)"}` }}>
                     <div className="flex items-center justify-center rounded-full"
@@ -247,7 +247,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
           {/* Portal login link */}
           <div>
             <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>CONCIERGE PORTAL LOGIN LINK</div>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl"
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flex:1 }} className="truncate">{portalLink}</span>
               <button onClick={() => { copyToClipboard(portalLink); toast.success("Portal link copied"); }}
@@ -260,12 +260,12 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
 
           <div className="flex gap-2">
             <button onClick={() => { copyToClipboard(`Login: ${emp.email}\nPassword: ${emp.password}\nPortal: ${portalLink}`); toast.success("Credentials copied"); }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold flex-1"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold flex-1"
               style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               <Key size={11}/> Copy Full Credentials
             </button>
             <button onClick={() => toast.success(`Invite email resent to ${emp.email}`)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
               <Send size={11}/> Resend Invite
             </button>
@@ -299,7 +299,7 @@ export function ConciergeStaffAdmin() {
           </p>
         </div>
         <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}>
           <Plus size={14}/> Invite Employee
         </button>
@@ -312,7 +312,7 @@ export function ConciergeStaffAdmin() {
           { label:"Pending Invite", value:invited,   color:"#F6AD55" },
           { label:"Suspended",      value:suspended, color:"#FC8181" },
         ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl glow-surface" style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)" }}>
+          <div key={s.label} className="p-4 rounded-2xl" style={{ background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" }}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
           </div>
@@ -320,7 +320,7 @@ export function ConciergeStaffAdmin() {
       </div>
 
       {/* How it works banner */}
-      <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.2)" }}>
+      <div className="p-4 rounded-2xl" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.2)" }}>
         <div style={{ color:"#6FAE8B", fontSize:11, fontWeight:700, ...MONO, marginBottom:8 }}>HOW CONCIERGE ACCESS WORKS</div>
         <div className="grid md:grid-cols-4 gap-3">
           {[

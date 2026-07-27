@@ -178,7 +178,7 @@ const WG_CSS = `
 
 /* body */
 .fpd-wg .body{position:relative;max-width:900px;margin:0 auto;padding:64px 24px;display:flex;flex-direction:column;gap:60px;z-index:1;}
-.fpd-wg .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.34);border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 14px 40px -20px rgba(0,0,0,0.7);}
+.fpd-wg .card{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 14px 40px -20px rgba(0,0,0,0.7);}
 
 /* pricing */
 .fpd-wg .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
@@ -205,7 +205,7 @@ const WG_CSS = `
 .fpd-wg .step-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media (max-width:700px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
 .fpd-wg .step-card{display:flex;align-items:flex-start;gap:16px;padding:20px;}
-.fpd-wg .step-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:#FFFFFF;}
+.fpd-wg .step-ico{width:48px;height:48px;border-radius:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:#FFFFFF;}
 .fpd-wg .step-num{color:#6FAE8B;font-size:10px;font-weight:700;font-family:var(--font-mono);}
 .fpd-wg .step-title{font-family:var(--font-display);font-size:16px;color:${TEXT};margin:2px 0 4px;}
 .fpd-wg .step-desc{color:${MUTED};font-size:13px;line-height:1.7;}
@@ -227,10 +227,10 @@ const WG_CSS = `
 .fpd-wg .intake-hd p{color:${MUTED};font-size:14px;max-width:400px;margin:0 auto;}
 .fpd-wg .intake-form{display:flex;flex-direction:column;gap:16px;}
 .fpd-wg .field label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:${MUTED};}
-.fpd-wg .field input,.fpd-wg .field textarea{width:100%;padding:10px 14px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.34);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
+.fpd-wg .field input,.fpd-wg .field textarea{width:100%;padding:10px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
 .fpd-wg .field textarea{resize:none;}
 .fpd-wg .field input::placeholder,.fpd-wg .field textarea::placeholder{color:${FAINT};}
-.fpd-wg .pick-btn{padding:10px 12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:1px solid;}
+.fpd-wg .pick-btn{padding:10px 12px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:1px solid;}
 .fpd-wg .btn-primary-lg{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;border-radius:16px;font-weight:700;font-size:15px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 0 32px rgba(91,110,225,0.4);font-family:var(--font-body);}
 .fpd-wg .reassure-line{color:${MUTED};font-size:11px;text-align:center;}
 .fpd-wg .submitted{text-align:center;padding:32px 16px;}
@@ -245,7 +245,7 @@ const WG_CSS = `
 
 /* faq */
 .fpd-wg .faq-list{display:flex;flex-direction:column;gap:12px;}
-.fpd-wg .faq-item{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.34);}
+.fpd-wg .faq-item{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
 .fpd-wg .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;text-align:left;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-wg .faq-q span{color:${TEXT};font-size:14px;font-weight:500;}
 .fpd-wg .faq-a{padding:0 20px 18px;background:rgba(91,110,225,0.02);}
@@ -262,10 +262,10 @@ const WG_CSS = `
 /* modal */
 .fpd-wg .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,6,12,0.75);backdrop-filter:blur(8px);}
 .fpd-wg .modal{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
-.fpd-wg .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.34);}
+.fpd-wg .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-wg .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};}
 .fpd-wg .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
-.fpd-wg .modal-body{padding:22px;}
+.fpd-wg .modal-body{padding:28px;}
 `;
 
 /* ── Main page ───────────────────────────────────────────────────── */
@@ -304,7 +304,7 @@ export function WhiteGloveService() {
 
         {/* Pricing */}
         <div className="pricing-grid">
-          <div className="card price-card featured glow-surface">
+          <div className="card price-card featured">
             <div className="price-eyebrow">ONE-TIME SETUP FEE</div>
             <div className="price-big">${PRICING.setupFee}</div>
             <div className="price-sub">Paid once · Gets you started</div>
@@ -315,7 +315,7 @@ export function WhiteGloveService() {
             </div>
           </div>
 
-          <div className="card price-card glow-surface">
+          <div className="card price-card">
             <div className="price-eyebrow" style={{ color: "#6FAE8B" }}>SESSION RATE</div>
             <div className="price-big">${PRICING.sessionRate}</div>
             <div className="price-sub">per {PRICING.sessionLength} minutes · Only pay for what you use</div>
@@ -340,7 +340,7 @@ export function WhiteGloveService() {
           </div>
           <div className="step-grid">
             {STEPS.map((s, i) => (
-              <div key={i} className="card step-card glow-surface">
+              <div key={i} className="card step-card">
                 <div className="step-ico">{s.icon}</div>
                 <div>
                   <div className="step-num">STEP {i+1}</div>
@@ -353,7 +353,7 @@ export function WhiteGloveService() {
         </div>
 
         {/* What's included */}
-        <div className="card includes-card glow-surface">
+        <div className="card includes-card">
           <div className="includes-title">Everything Is Included</div>
           <div className="includes-grid">
             {INCLUDES.map(f => (
@@ -368,7 +368,7 @@ export function WhiteGloveService() {
         </div>
 
         {/* Inline form */}
-        <div className="card intake-card glow-surface">
+        <div className="card intake-card">
           <div className="intake-hd">
             <Star size={28} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
             <h2>Ready to Get Started?</h2>
@@ -394,7 +394,7 @@ export function WhiteGloveService() {
             { icon:<Heart size={20}/>,   title:"Real People, Always", desc:"No bots, no automated systems. A real FPD specialist handles your account." },
             { icon:<Clock size={20}/>,   title:"Your Pace, Always",   desc:"Sessions happen when you're ready. We never rush. Most complete in 1–2 weeks." },
           ].map(r => (
-            <div key={r.title} className="card reassure-card glow-surface">
+            <div key={r.title} className="card reassure-card">
               <div className="ri">{r.icon}</div>
               <div className="rt">{r.title}</div>
               <div className="rd">{r.desc}</div>
@@ -406,7 +406,7 @@ export function WhiteGloveService() {
       {/* Request modal */}
       {showModal && (
         <div className="backdrop">
-          <div className="card modal glow-surface">
+          <div className="card modal">
             <div className="modal-head">
               <div className="flex items-center gap-2">
                 <Star size={16} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>

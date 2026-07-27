@@ -12,7 +12,7 @@ import { toast } from "sonner";
 /* ── Design tokens ─────────────────────────────────────────────── */
 const T = {
   bg:       "rgba(255,255,255,0.05)",
-  card:     "linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)",
+  card:     "#101728",
   card2:    "rgba(255,255,255,0.06)",
   card3:    "rgba(255,255,255,0.08)",
   primary:  "#5B6EE1",
@@ -37,8 +37,8 @@ const T = {
 const MONO:    React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily:"var(--font-display)" };
 const CARD:    React.CSSProperties = {
-  background: T.card, border:"1.5px solid rgba(91,110,225,0.35)",
-  boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16, padding:22,
+  background: T.card, border:"1px solid rgba(255,255,255,0.06)",
+  boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22, padding:22,
 };
 const INPUT:   React.CSSProperties = {
   background:"#141B2E", border:`1px solid rgba(91,110,225,0.3)`,
@@ -446,7 +446,7 @@ export function SystemHealth() {
             </div>
           )}
           <button onClick={() => toast.success("Status refreshed")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
             style={{ background:T.primBg, color:T.primary, border:`1px solid ${T.primBd}` }}>
             <RefreshCw size={11}/> Refresh
           </button>
@@ -457,7 +457,7 @@ export function SystemHealth() {
       <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)", width:"fit-content" }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm transition-all"
             style={{ background:activeTab===t.id?"#5B6EE1":"transparent",
               color:activeTab===t.id?"#fff":T.sub, fontWeight:activeTab===t.id?700:400 }}>
             {t.label}
@@ -506,10 +506,10 @@ export function SystemHealth() {
                     const live = liveLatency(svc.latencyMs);
                     const sc = svcColor(svc.status);
                     return (
-                      <div key={svc.id} className="flex items-center gap-4 px-4 py-3 rounded-xl"
+                      <div key={svc.id} className="flex items-center gap-4 px-4 py-3 rounded-2xl"
                         style={{ background:svcBg(svc.status), border:`1px solid ${svcBd(svc.status)}` }}>
                         {/* Icon */}
-                        <div className="flex items-center justify-center rounded-xl flex-shrink-0"
+                        <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
                           style={{ width:36, height:36, background:`${sc}18`, color:sc }}>
                           {svc.icon}
                         </div>
@@ -555,7 +555,7 @@ export function SystemHealth() {
             <button onClick={() => {
               setServices(prev => prev.map(s => s.id === "email" ? { ...s, status:"maintenance" } : s));
               toast.success("Email service set to maintenance mode · Alert recipients notified");
-            }} className="px-4 py-2.5 rounded-xl text-sm font-bold"
+            }} className="px-4 py-2.5 rounded-2xl text-sm font-bold"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff",
                 boxShadow:"0 4px 14px rgba(91,110,225,0.3)" }}>
               <Wrench size={13} style={{ display:"inline", marginRight:6 }}/>
@@ -828,7 +828,7 @@ function IncidentsPanel({
           </div>
         </div>
         <button onClick={() => setCreating(v => !v)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background: creating ? T.redBg : "linear-gradient(135deg,#5B6EE1,#5B6EE1)",
             color: creating ? T.red : "#fff",
             border: creating ? `1px solid ${T.redBd}` : "none",
@@ -854,7 +854,7 @@ function IncidentsPanel({
                 <div className="flex gap-2">
                   {(["critical","major","minor","info"] as IncidentSeverity[]).map(s => (
                     <button key={s} onClick={() => setForm(p=>({...p,severity:s}))}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold capitalize"
+                      className="flex-1 py-2 rounded-2xl text-xs font-bold capitalize"
                       style={{ background:form.severity===s?`${incColor(s)}18`:"rgba(91,110,225,0.04)",
                         border:`1px solid ${form.severity===s?incColor(s):T.border}`,
                         color:form.severity===s?incColor(s):T.muted }}>
@@ -873,7 +873,7 @@ function IncidentsPanel({
                         ? p.affectedServices.filter(x=>x!==s.id)
                         : [...p.affectedServices, s.id]
                     }))}
-                      className="px-2 py-1 rounded-lg text-xs"
+                      className="px-2 py-1 rounded-xl text-xs"
                       style={{ background:form.affectedServices.includes(s.id)?T.primBg:"rgba(91,110,225,0.04)",
                         border:`1px solid ${form.affectedServices.includes(s.id)?T.primary:T.border}`,
                         color:form.affectedServices.includes(s.id)?T.primary:T.muted }}>
@@ -890,7 +890,7 @@ function IncidentsPanel({
                 className="w-full resize-none" style={INPUT}/>
             </div>
             <button onClick={createIncident}
-              className="w-full py-3 rounded-xl font-bold text-sm"
+              className="w-full py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff",
                 boxShadow:"0 4px 14px rgba(91,110,225,0.35)" }}>
               Create Incident & Notify Recipients
@@ -950,7 +950,7 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
 
   return (
     <div style={{ background:T.card, border:`1px solid ${resolved ? T.greenBd : sc+"40"}`,
-      boxShadow:`0 2px 12px ${sc}10`, borderRadius:16, overflow:"hidden" }}>
+      boxShadow:`0 2px 12px ${sc}10`, borderRadius:22, overflow:"hidden" }}>
       {/* Header row */}
       <div className="flex items-start gap-4 px-5 py-4 cursor-pointer" onClick={onToggle}>
         {/* Severity dot */}
@@ -1038,7 +1038,7 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
                 <span style={{ color:T.muted, fontSize:11 }}>Update status to:</span>
                 {updateStatuses.filter(s => s.id !== "investigating").map(s => (
                   <button key={s.id} onClick={() => setSelectedStatus(s.id)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                    className="px-3 py-1.5 rounded-2xl text-xs font-bold"
                     style={{ background:selectedStatus===s.id?`${stColor(s.id)}18`:"rgba(91,110,225,0.04)",
                       border:`1px solid ${selectedStatus===s.id?stColor(s.id):T.border}`,
                       color:selectedStatus===s.id?stColor(s.id):T.muted }}>
@@ -1046,7 +1046,7 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
                   </button>
                 ))}
                 <button onClick={() => onAddUpdate(inc.id, selectedStatus)}
-                  className="ml-auto flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold"
+                  className="ml-auto flex items-center gap-1.5 px-4 py-1.5 rounded-2xl text-xs font-bold"
                   style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff" }}>
                   <Send size={11}/> Post Update
                 </button>
@@ -1106,13 +1106,13 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
           <SLabel>Maintenance Team Roster</SLabel>
           <div className="space-y-3">
             {team.map(m => (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all"
+              <div key={m.id} className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all"
                 onClick={() => setSelectedMembers(prev =>
                   prev.includes(m.id) ? prev.filter(x=>x!==m.id) : [...prev,m.id])}
                 style={{ background:selectedMembers.includes(m.id)?T.primBg:T.card3,
                   border:`1.5px solid ${selectedMembers.includes(m.id)?T.primary:T.border}` }}>
                 {/* Avatar */}
-                <div className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold text-sm"
+                <div className="flex items-center justify-center rounded-2xl flex-shrink-0 font-bold text-sm"
                   style={{ width:38, height:38, background:`linear-gradient(135deg,#5B6EE1,#5B6EE1)`, color:"#fff" }}>
                   {m.name.split(" ").map(n=>n[0]).join("")}
                 </div>
@@ -1144,7 +1144,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
             <SLabel>Compose Maintenance Email</SLabel>
             {activeIncident && (
               <button onClick={prefill}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
                 style={{ background:T.amberBg, color:T.amber, border:`1px solid ${T.amberBd}` }}>
                 <AlertCircle size={10}/> Pre-fill from Active Incident
               </button>
@@ -1158,7 +1158,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
               {services.slice(0,10).map(s => (
                 <button key={s.id} onClick={() => setAffectedSvcs(prev =>
                   prev.includes(s.id)?prev.filter(x=>x!==s.id):[...prev,s.id])}
-                  className="px-2 py-1 rounded-lg text-xs transition-all"
+                  className="px-2 py-1 rounded-xl text-xs transition-all"
                   style={{ background:affectedSvcs.includes(s.id)?T.redBg:T.card3,
                     border:`1px solid ${affectedSvcs.includes(s.id)?T.redBd:T.border}`,
                     color:affectedSvcs.includes(s.id)?T.red:T.muted }}>
@@ -1174,7 +1174,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
             <div className="flex gap-2">
               {(["critical","major","minor","info"] as IncidentSeverity[]).map(s => (
                 <button key={s} onClick={() => setSeverity(s)}
-                  className="flex-1 py-2 rounded-xl text-xs font-bold capitalize"
+                  className="flex-1 py-2 rounded-2xl text-xs font-bold capitalize"
                   style={{ background:severity===s?`${incColor(s)}18`:"rgba(91,110,225,0.04)",
                     border:`1px solid ${severity===s?incColor(s):T.border}`,
                     color:severity===s?incColor(s):T.muted }}>
@@ -1201,7 +1201,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
 
           {/* Preview of recipients */}
           {selectedMembers.length > 0 && (
-            <div className="px-4 py-3 rounded-xl mb-4"
+            <div className="px-4 py-3 rounded-2xl mb-4"
               style={{ background:T.primBg, border:`1px solid ${T.primBd}` }}>
               <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:6 }}>SENDING TO</div>
               <div className="flex flex-wrap gap-2">
@@ -1221,7 +1221,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
           )}
 
           <button onClick={sendEmail} disabled={sending}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
             style={{ background:sent?"rgba(72,187,120,0.15)":"linear-gradient(135deg,#5B6EE1,#5B6EE1)",
               color:sent?T.green:"#fff",
               border:sent?`1px solid ${T.greenBd}`:"none",
@@ -1296,7 +1296,7 @@ function AlertRecipientsPanel({
           </div>
         </div>
         <button onClick={() => setAdding(v=>!v)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:adding?T.redBg:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",
             color:adding?T.red:"#fff", border:adding?`1px solid ${T.redBd}`:"none",
             boxShadow:adding?"none":"0 4px 14px rgba(91,110,225,0.35)" }}>
@@ -1344,7 +1344,7 @@ function AlertRecipientsPanel({
                 <button key={l} onClick={() => setForm(p=>({
                   ...p, notifyOn:p.notifyOn.includes(l)?p.notifyOn.filter(x=>x!==l):[...p.notifyOn,l]
                 }))}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold text-sm"
                   style={{ background:form.notifyOn.includes(l)?`${levelColor(l)}15`:"rgba(91,110,225,0.04)",
                     border:`1.5px solid ${form.notifyOn.includes(l)?levelColor(l):T.border}`,
                     color:form.notifyOn.includes(l)?levelColor(l):T.muted }}>
@@ -1355,7 +1355,7 @@ function AlertRecipientsPanel({
             </div>
           </div>
           <button onClick={addRecipient}
-            className="px-6 py-2.5 rounded-xl font-bold text-sm"
+            className="px-6 py-2.5 rounded-2xl font-bold text-sm"
             style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff",
               boxShadow:"0 4px 14px rgba(91,110,225,0.3)" }}>
             Add Recipient
@@ -1401,7 +1401,7 @@ function AlertRecipientsPanel({
             </button>
             {/* Remove */}
             <button onClick={() => removeRecipient(r.id)}
-              className="p-1.5 rounded-lg"
+              className="p-1.5 rounded-xl"
               style={{ color:T.red, background:T.redBg, border:`1px solid ${T.redBd}` }}>
               <X size={12}/>
             </button>
@@ -1419,7 +1419,7 @@ function AlertRecipientsPanel({
           </div>
         </div>
         <button onClick={() => toast.success(`Test alert sent to ${recipients.filter(r=>r.active).length} active recipients`)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold"
           style={{ background:T.primBg, color:T.primary, border:`1px solid ${T.primBd}` }}>
           <Bell size={13}/> Send Test Alert
         </button>
@@ -1578,20 +1578,20 @@ function ApiMonitorPanel() {
         <div className="flex items-center gap-2">
           {/* Auto-refresh toggle */}
           <button onClick={() => setAutoRefresh(v=>!v)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+            className="flex items-center gap-2 px-3 py-2 rounded-2xl text-xs font-semibold"
             style={{ background:autoRefresh?T.greenBg:T.redBg,
               color:autoRefresh?T.green:T.red,
               border:`1px solid ${autoRefresh?T.greenBd:T.redBd}` }}>
             {autoRefresh ? <><ToggleRight size={14}/> Auto-refresh ON</> : <><ToggleLeft size={14}/> Auto-refresh OFF</>}
           </button>
           <button onClick={runAllChecks}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold"
             style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff",
               boxShadow:"0 4px 14px rgba(91,110,225,0.3)" }}>
             <RefreshCw size={13}/> Check All Now
           </button>
           <button onClick={() => setAddingEp(v=>!v)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
             style={{ background:addingEp?T.redBg:T.primBg, color:addingEp?T.red:T.primary,
               border:`1px solid ${addingEp?T.redBd:T.primBd}` }}>
             {addingEp ? <><X size={13}/> Cancel</> : <><Plus size={13}/> Add Endpoint</>}
@@ -1627,7 +1627,7 @@ function ApiMonitorPanel() {
               <div className="flex gap-2">
                 {["GET","POST","PUT","PATCH","DELETE"].map(m => (
                   <button key={m} onClick={() => setNewEp(p=>({...p,method:m}))}
-                    className="flex-1 py-2 rounded-xl text-xs font-bold"
+                    className="flex-1 py-2 rounded-2xl text-xs font-bold"
                     style={{ background:newEp.method===m?`${METHOD_COLORS[m]}18`:"rgba(91,110,225,0.04)",
                       border:`1px solid ${newEp.method===m?METHOD_COLORS[m]:T.border}`,
                       color:newEp.method===m?METHOD_COLORS[m]:T.muted }}>
@@ -1662,7 +1662,7 @@ function ApiMonitorPanel() {
             </div>
           </div>
           <button onClick={addEndpoint}
-            className="px-6 py-2.5 rounded-xl font-bold text-sm"
+            className="px-6 py-2.5 rounded-2xl font-bold text-sm"
             style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff",
               boxShadow:"0 4px 14px rgba(91,110,225,0.3)" }}>
             Add & Start Monitoring
@@ -1675,7 +1675,7 @@ function ApiMonitorPanel() {
         <span style={{ color:T.muted, fontSize:12 }}>Filter:</span>
         {(["all","up","slow","degraded","down"] as const).map(s => (
           <button key={s} onClick={() => setFilterStatus(s)}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold capitalize"
+            className="px-3 py-1.5 rounded-2xl text-xs font-bold capitalize"
             style={{ background: filterStatus===s
                 ? s==="all" ? T.primary : checkStatusColor(s as CheckStatus)
                 : "rgba(91,110,225,0.05)",
@@ -1688,7 +1688,7 @@ function ApiMonitorPanel() {
         ))}
         <div className="ml-auto flex items-center gap-2">
           {autoRefresh && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl"
               style={{ background:T.greenBg, border:`1px solid ${T.greenBd}` }}>
               <div style={{ width:6, height:6, borderRadius:"50%", background:T.green,
                 animation:"pulse 1.5s infinite" }}/>
@@ -1777,13 +1777,13 @@ function ApiMonitorPanel() {
                   {/* Actions */}
                   <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                     <button onClick={() => runCheck(ep.id)} disabled={isCk}
-                      className="p-1.5 rounded-lg transition-all"
+                      className="p-1.5 rounded-xl transition-all"
                       style={{ background:T.primBg, color:T.primary, border:`1px solid ${T.primBd}`,
                         opacity:isCk?0.5:1 }}>
                       <RefreshCw size={11} style={{ animation:isCk?"spin 1s linear infinite":"none" }}/>
                     </button>
                     <button onClick={() => toggleEnabled(ep.id)}
-                      className="p-1.5 rounded-lg"
+                      className="p-1.5 rounded-xl"
                       style={{ background:ep.enabled?T.greenBg:T.redBg,
                         color:ep.enabled?T.green:T.red,
                         border:`1px solid ${ep.enabled?T.greenBd:T.redBd}` }}>
@@ -1824,7 +1824,7 @@ function ApiMonitorPanel() {
               </div>
 
               {/* Current status */}
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5"
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl mb-5"
                 style={{ background:checkStatusBg(selectedEp.status), border:`1px solid ${checkStatusBd(selectedEp.status)}` }}>
                 <div style={{ width:10, height:10, borderRadius:"50%", background:checkStatusColor(selectedEp.status),
                   boxShadow:`0 0 8px ${checkStatusColor(selectedEp.status)}`, flexShrink:0 }}/>
@@ -1842,7 +1842,7 @@ function ApiMonitorPanel() {
                   </div>
                 </div>
                 <button onClick={() => runCheck(selectedEp.id)}
-                  className="ml-auto px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5"
+                  className="ml-auto px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5"
                   style={{ background:T.primBg, color:T.primary, border:`1px solid ${T.primBd}` }}>
                   <RefreshCw size={11}/> Check Now
                 </button>
@@ -1859,7 +1859,7 @@ function ApiMonitorPanel() {
                   { label:"HTTP Status",    value:selectedEp.httpStatus||"—",          color:httpColor(selectedEp.httpStatus) },
                   { label:"Enabled",        value:selectedEp.enabled?"Yes":"Paused",  color:selectedEp.enabled?T.green:T.muted },
                 ].map(s => (
-                  <div key={s.label} className="px-3 py-2.5 rounded-xl text-center"
+                  <div key={s.label} className="px-3 py-2.5 rounded-2xl text-center"
                     style={{ background:T.card3, border:`1px solid ${T.border}` }}>
                     <div style={{ ...DISPLAY, fontSize:18, color:s.color, lineHeight:1 }}>{s.value}</div>
                     <div style={{ color:T.muted, fontSize:10, marginTop:4 }}>{s.label}</div>
@@ -1922,7 +1922,7 @@ function ApiMonitorPanel() {
                 <SLabel>Recent Check Log</SLabel>
                 <div className="space-y-1.5" style={{ maxHeight:200, overflowY:"auto" }}>
                   {[...selectedEp.history].reverse().slice(0,12).map((h, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-xl"
+                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-2xl"
                       style={{ background:h.status==="up"?T.card3:checkStatusBg(h.status),
                         border:`1px solid ${h.status==="up"?T.border:checkStatusBd(h.status)}` }}>
                       <div style={{ width:6, height:6, borderRadius:"50%", flexShrink:0,
@@ -1965,7 +1965,7 @@ function ApiMonitorPanel() {
                   </div>
                 </div>
                 <button onClick={() => toast.success("Thresholds saved")}
-                  className="mt-3 px-5 py-2 rounded-xl text-xs font-bold"
+                  className="mt-3 px-5 py-2 rounded-2xl text-xs font-bold"
                   style={{ background:T.primBg, color:T.primary, border:`1px solid ${T.primBd}` }}>
                   Save Thresholds
                 </button>
@@ -1987,7 +1987,7 @@ function ApiMonitorPanel() {
             { tier:"Legacy Vault",   rps:1000, burst:5000,  daily:500000, color:"#D99A6B" },
             { tier:"Admin / API Key",rps:5000, burst:10000, daily:999999, color:"#F6AD55" },
           ].map(r => (
-            <div key={r.tier} className="px-4 py-3 rounded-xl"
+            <div key={r.tier} className="px-4 py-3 rounded-2xl"
               style={{ background:T.card3, border:`1px solid ${T.border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <div style={{ width:8, height:8, borderRadius:"50%", background:r.color, flexShrink:0 }}/>

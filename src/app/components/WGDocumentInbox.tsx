@@ -16,7 +16,7 @@ import { copyToClipboard } from "../utils/clipboard";
 import { submissionStore, subscribeToSubmissions, notifyListeners, type SubmittedDocument } from "./WGClientSubmit";
 import { type ConciergeEmployee } from "../services/conciergeStaff";
 
-const GLASS: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:16 };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 /* ── Every platform destination a document can go ───────────────── */
@@ -209,7 +209,7 @@ function UploadToAccountModal({
 
         <div className="p-6 space-y-5 overflow-y-auto" style={{ maxHeight:"calc(90vh - 70px)" }}>
           {/* Document summary */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             {doc.fileType === "image" ? <Image size={18} color="#FFFFFF"/> : <FileText size={18} color="#FFFFFF"/>}
             <div className="flex-1">
@@ -219,7 +219,7 @@ function UploadToAccountModal({
           </div>
 
           {doc.notes && (
-            <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
+            <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
               <div style={{ color:"#F6AD55", fontSize:10, ...MONO, marginBottom:2 }}>CLIENT NOTE</div>
               <div style={{ color:"#8A9AB8", fontSize:12 }}>"{doc.notes}"</div>
             </div>
@@ -233,7 +233,7 @@ function UploadToAccountModal({
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {PLATFORM_SECTIONS.map(s => (
                 <button key={s.section} onClick={() => { setSelectedSection(s.section); setSelectedSub(s.subOptions[0]?.id ?? ""); }}
-                  className="flex flex-col items-start gap-1 px-3 py-3 rounded-xl text-left transition-all"
+                  className="flex flex-col items-start gap-1 px-3 py-3 rounded-2xl text-left transition-all"
                   style={{ background:selectedSection===s.section?`${s.color}12`:"rgba(91,110,225,0.03)",
                     border:`1.5px solid ${selectedSection===s.section?s.color:"rgba(91,110,225,0.1)"}` }}>
                   <div style={{ fontSize:20 }}>{s.emoji}</div>
@@ -253,7 +253,7 @@ function UploadToAccountModal({
               <div className="grid grid-cols-2 gap-2">
                 {activeSection.subOptions.map(sub => (
                   <button key={sub.id} onClick={() => setSelectedSub(sub.id)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-2xl text-left transition-all"
                     style={{ background:selectedSub===sub.id?`${activeSection.color}12`:"rgba(91,110,225,0.03)",
                       border:`1.5px solid ${selectedSub===sub.id?activeSection.color:"rgba(91,110,225,0.1)"}` }}>
                     <span style={{ fontSize:16 }}>{sub.emoji}</span>
@@ -269,7 +269,7 @@ function UploadToAccountModal({
 
           {/* Destination summary */}
           {destination && (
-            <div className="flex items-center gap-2 px-4 py-3 rounded-xl"
+            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl"
               style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
               <CheckCircle size={14} color="#FFFFFF"/>
               <div>
@@ -281,7 +281,7 @@ function UploadToAccountModal({
 
           <div className="flex gap-3">
             <button onClick={doUpload} disabled={uploading || !destination}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
                 boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:uploading||!destination?0.5:1 }}>
               {uploading
@@ -289,7 +289,7 @@ function UploadToAccountModal({
                 : <><Upload size={14}/> Save to {clientName.split(" ")[0]}'s Account</>
               }
             </button>
-            <button onClick={onClose} className="px-4 py-3 rounded-xl text-sm"
+            <button onClick={onClose} className="px-4 py-3 rounded-2xl text-sm"
               style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
               Cancel
             </button>
@@ -322,7 +322,7 @@ function SendLinkModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background:"rgba(0,0,0,0.55)", backdropFilter:"blur(8px)" }}>
-      <div className="w-full max-w-md rounded-2xl overflow-hidden glow-surface" style={GLASS}>
+      <div className="w-full max-w-md rounded-2xl overflow-hidden" style={GLASS}>
         <div className="flex items-center justify-between px-6 py-4 border-b"
           style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ function SendLinkModal({
           </p>
 
           {/* The link */}
-          <div className="flex items-center gap-2 px-3 py-3 rounded-xl"
+          <div className="flex items-center gap-2 px-3 py-3 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
             <ExternalLink size={12} color="#8A9AB8" style={{ flexShrink:0 }}/>
             <span style={{ color:"#6E90C9", fontSize:11, ...MONO, flex:1 }} className="truncate">{link}</span>
@@ -352,19 +352,19 @@ function SendLinkModal({
           <div className="space-y-2">
             <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:4 }}>SEND TO CLIENT VIA</div>
             <button onClick={sendViaEmail} disabled={sent}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               <Send size={14}/>
               {sent ? "Sending…" : `Email to ${clientEmail}`}
             </button>
             <button onClick={() => { window.open(`sms:?body=Here is your secure document upload link: ${link}`); onClose(); }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm"
               style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.25)" }}>
               💬 Send via SMS Text Message
             </button>
           </div>
 
-          <div className="px-3 py-2 rounded-xl"
+          <div className="px-3 py-2 rounded-2xl"
             style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <p style={{ color:"#F6AD55", fontSize:11, lineHeight:1.6 }}>
               <strong>Tip for non-tech clients:</strong> Tell them to just tap the link in their email or text, then take a photo of each document like they're texting a picture.
@@ -484,7 +484,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       </div>
 
       {/* Send link buttons per client */}
-      <div className="p-4 rounded-2xl space-y-3 glow-surface" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.15)" }}>
+      <div className="p-4 rounded-2xl space-y-3" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.15)" }}>
         <div style={{ color:"#6FAE8B", fontSize:11, fontWeight:700, ...MONO }}>SEND UPLOAD LINK TO CLIENT</div>
         <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
           Send each client a simple link they can open on their phone to photograph and upload their documents. No app or login required.
@@ -492,7 +492,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
         <div className="flex flex-wrap gap-2">
           {assignedClientIds.map(id => (
             <button key={id} onClick={() => setLinkModal(id)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold"
               style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F" }}>
               <Link size={13}/> Send Link to {CLIENT_NAMES[id]?.split(" ")[0] ?? id}
             </button>
@@ -501,7 +501,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
+      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,167,214,0.3)" }}>
         {[
           { id:"all",      label:`All (${allDocs.length})` },
           { id:"pending",  label:`Pending (${allDocs.filter(d=>d.status==="pending").length})` },
@@ -509,7 +509,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
           { id:"uploaded", label:`In Account (${allDocs.filter(d=>d.status==="uploaded_to_vault").length})` },
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id as any)}
-            className="px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+            className="px-3 py-2 rounded-xl text-xs font-semibold transition-all"
             style={{ background:filter===f.id?"#5B6EE1":"transparent", color:filter===f.id?"#fff":"#8A9AB8" }}>
             {f.label}
           </button>
@@ -518,7 +518,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
 
       {/* Document list */}
       {filtered.length === 0 ? (
-        <div className="py-12 text-center rounded-2xl glow-surface" style={GLASS}>
+        <div className="py-12 text-center rounded-2xl" style={GLASS}>
           <Inbox size={36} color="rgba(91,110,225,0.2)" style={{ margin:"0 auto 12px" }}/>
           <div style={{ color:"#8A9AB8", fontSize:14 }}>
             {filter === "all" ? "No documents submitted yet." : `No ${filter} documents.`}
@@ -539,10 +539,10 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
             }[doc.status];
 
             return (
-              <div key={doc.id} className="p-5 rounded-2xl glow-surface" style={GLASS}>
+              <div key={doc.id} className="p-5 rounded-2xl" style={GLASS}>
                 <div className="flex items-start gap-4">
                   {/* Thumbnail or icon */}
-                  <div className="flex items-center justify-center rounded-xl flex-shrink-0"
+                  <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
                     style={{ width:56, height:56, background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.1)", overflow:"hidden" }}>
                     {doc.previewUrl && doc.fileType === "image"
                       ? <img src={doc.previewUrl} alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
@@ -568,7 +568,7 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
                     </div>
 
                     {doc.notes && (
-                      <div className="mt-2 px-3 py-2 rounded-xl"
+                      <div className="mt-2 px-3 py-2 rounded-2xl"
                         style={{ background:"rgba(246,173,85,0.05)", border:"1px solid rgba(246,173,85,0.15)" }}>
                         <span style={{ color:"#F6AD55", fontSize:10, ...MONO }}>CLIENT NOTE: </span>
                         <span style={{ color:"#8A9AB8", fontSize:12 }}>"{doc.notes}"</span>
@@ -578,19 +578,19 @@ export function WGDocumentInbox({ employee, assignedClientIds }: InboxProps) {
                     {doc.status !== "uploaded_to_vault" && (
                       <div className="flex gap-2 mt-3 flex-wrap">
                         <button onClick={() => setUploadModal({ doc, clientId: doc.clientId })}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold"
                           style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                           <Upload size={11}/> Save to Account
                         </button>
                         {doc.fileType === "image" && doc.previewUrl && (
                           <button onClick={() => window.open(doc.previewUrl!)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold"
                             style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                             <Eye size={11}/> Preview
                           </button>
                         )}
                         <button onClick={() => requestResubmit(doc.clientId, doc.id)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold"
                           style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181" }}>
                           <AlertCircle size={11}/> Request Resend
                         </button>

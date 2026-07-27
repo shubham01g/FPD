@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", borderRadius:16, boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 8px 24px rgba(0,0,0,0.35)" };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", borderRadius:22, boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:13, color:"#FFFFFF", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
@@ -197,7 +197,7 @@ function PermissionRow({
   locked: boolean;
 }) {
   return (
-    <div className="grid items-center gap-2 py-2 px-3 rounded-xl" style={{ gridTemplateColumns:"1fr auto auto auto", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
+    <div className="grid items-center gap-2 py-2 px-3 rounded-2xl" style={{ gridTemplateColumns:"1fr auto auto auto", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
       <div className="flex items-center gap-2">
         <span style={{ color:"#8A9AB8" }}>{perm.icon}</span>
         <span style={{ fontSize:12, color:"#E8EDF5" }}>{perm.label}</span>
@@ -211,7 +211,7 @@ function PermissionRow({
             key={key}
             disabled={locked}
             onClick={() => onChange({ [key]: !active })}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-all"
+            className="flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-semibold transition-all"
             style={{
               background: active ? `${colors[key]}18` : "rgba(91,110,225,0.04)",
               color: active ? colors[key] : "#B0C0DC",
@@ -260,7 +260,7 @@ function AdminCard({
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden glow-surface" style={CARD}>
+    <div className="rounded-2xl overflow-hidden" style={CARD}>
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -289,21 +289,21 @@ function AdminCard({
           <div className="flex items-center gap-2">
             {!isSelf && !isSuper && admin.status !== "suspended" && (
               <button onClick={() => { onRevoke(admin.id); toast.success(`${admin.name} suspended`); }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.2)" }}>
                 <UserX size={11}/> Suspend
               </button>
             )}
             {admin.status === "suspended" && (
               <button onClick={() => { onUpdate(admin.id, { status:"active" }); toast.success(`${admin.name} reactivated`); }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <Unlock size={11}/> Reactivate
               </button>
             )}
             {admin.status === "invited" && (
               <button onClick={() => toast.success(`Invite resent to ${admin.email}`)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(246,173,85,0.08)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.2)" }}>
                 <Send size={11}/> Resend Invite
               </button>
@@ -339,7 +339,7 @@ function AdminCard({
 
           {/* Notes */}
           {admin.notes && (
-            <div className="px-3 py-2.5 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
+            <div className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
               <span style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>NOTES · </span>
               <span style={{ color:"#8A9AB8", fontSize:12 }}>{admin.notes}</span>
             </div>
@@ -354,7 +354,7 @@ function AdminCard({
                   .filter(([k]) => k !== "super_admin")
                   .map(([key, r]) => (
                     <button key={key} onClick={() => applyPreset(key)}
-                      className="p-3 rounded-xl text-left transition-all"
+                      className="p-3 rounded-2xl text-left transition-all"
                       style={{
                         background: admin.role === key ? `${r.color}12` : "rgba(91,110,225,0.03)",
                         border: `1px solid ${admin.role === key ? r.color + "40" : "rgba(91,110,225,0.1)"}`,
@@ -377,18 +377,18 @@ function AdminCard({
                   {editingPerms ? (
                     <>
                       <button onClick={savePerms}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs font-semibold"
                         style={{ background:"#5B6EE1", color:"#fff" }}>
                         <Save size={11}/> Save
                       </button>
                       <button onClick={() => { setLocalPerms(admin.permissions); setEditingPerms(false); }}
-                        className="px-3 py-1.5 rounded-xl text-xs" style={{ background:"rgba(91,110,225,0.05)", color:"#8A9AB8" }}>
+                        className="px-3 py-1.5 rounded-2xl text-xs" style={{ background:"rgba(91,110,225,0.05)", color:"#8A9AB8" }}>
                         Cancel
                       </button>
                     </>
                   ) : (
                     <button onClick={() => setEditingPerms(true)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                       style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
                       <Edit2 size={11}/> Edit Permissions
                     </button>
@@ -398,14 +398,14 @@ function AdminCard({
             </div>
 
             {isSuper && (
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl mb-3"
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-3"
                 style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.15)" }}>
                 <Crown size={14} color="#FFFFFF"/>
                 <span style={{ color:"#6E90C9", fontSize:12, fontWeight:600 }}>Super Admin has unrestricted access to all modules and cannot be limited.</span>
               </div>
             )}
 
-            <div className="rounded-xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.08)" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.08)" }}>
               <div className="grid px-3 py-2" style={{ gridTemplateColumns:"1fr auto auto auto", background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
                 <span style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>MODULE</span>
                 {["VIEW","EDIT","DELETE"].map(h => (
@@ -514,7 +514,7 @@ export function AdminRoles() {
           </p>
         </div>
         <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(91,110,225,0.3)" }}>
           <Plus size={14}/> Invite Admin
         </button>
@@ -523,7 +523,7 @@ export function AdminRoles() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
-          <div key={s.label} className="p-4 rounded-2xl text-center glow-surface" style={CARD}>
+          <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
             <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
@@ -531,11 +531,11 @@ export function AdminRoles() {
       </div>
 
       {/* Role reference */}
-      <div className="p-4 rounded-2xl glow-surface" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
         <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:10 }}>ROLE PRESETS — QUICK REFERENCE</div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][]).map(([key, r]) => (
-            <div key={key} className="flex items-start gap-2 p-3 rounded-xl" style={{ background:"rgba(255,255,255,0.05)", border:`1px solid ${r.color}25` }}>
+            <div key={key} className="flex items-start gap-2 p-3 rounded-2xl" style={{ background:"rgba(255,255,255,0.05)", border:`1px solid ${r.color}25` }}>
               <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background:r.color }}/>
               <div>
                 <div style={{ fontSize:12, fontWeight:700, color:r.color }}>{r.label}</div>
@@ -548,10 +548,10 @@ export function AdminRoles() {
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
           {(["all","active","invited","suspended"] as const).map(s => (
             <button key={s} onClick={() => setFilterStatus(s)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:filterStatus===s?"#5B6EE1":"transparent", color:filterStatus===s?"#fff":"#8A9AB8" }}>
               {s.charAt(0).toUpperCase()+s.slice(1)}
             </button>
@@ -580,7 +580,7 @@ export function AdminRoles() {
       {showInvite && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4"
           style={{ background:"rgba(7,13,26,0.75)", backdropFilter:"blur(6px)" }}>
-          <div className="w-full max-w-xl rounded-2xl overflow-hidden" style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,110,225,0.35)", boxShadow:"0 0 0 1px rgba(91,110,225,0.1), 0 32px 80px rgba(0,0,0,0.5)", maxHeight:"90vh", display:"flex", flexDirection:"column" }}>
+          <div className="w-full max-w-xl rounded-2xl overflow-hidden" style={{ background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 24px 60px -20px rgba(0,0,0,0.55)", maxHeight:"90vh", display:"flex", flexDirection:"column" }}>
 
             {/* Step bar */}
             <div className="flex border-b flex-shrink-0" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
@@ -631,7 +631,7 @@ export function AdminRoles() {
                         .filter(([k]) => k !== "super_admin")
                         .map(([key, r]) => (
                           <button key={key} onClick={() => setNewAdmin(p => ({ ...p, role:key }))}
-                            className="p-3 rounded-xl text-left transition-all"
+                            className="p-3 rounded-2xl text-left transition-all"
                             style={{ background:newAdmin.role===key?`${r.color}12`:"rgba(91,110,225,0.03)", border:`1px solid ${newAdmin.role===key?r.color+"40":"rgba(91,110,225,0.1)"}` }}>
                             <div style={{ fontSize:12, fontWeight:700, color:r.color }}>{r.label}</div>
                             <div style={{ fontSize:10, color:"#8A9AB8", marginTop:2, lineHeight:1.3 }}>{r.description}</div>
@@ -648,13 +648,13 @@ export function AdminRoles() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {ROLE_PRESETS[newAdmin.role].permissions.filter(p => p.canView).map(p => (
-                        <span key={p.module} className="px-2 py-1 rounded-lg text-xs flex items-center gap-1"
+                        <span key={p.module} className="px-2 py-1 rounded-xl text-xs flex items-center gap-1"
                           style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                           <CheckCircle size={8}/>{p.label}
                         </span>
                       ))}
                       {ROLE_PRESETS[newAdmin.role].permissions.filter(p => !p.canView).map(p => (
-                        <span key={p.module} className="px-2 py-1 rounded-lg text-xs flex items-center gap-1"
+                        <span key={p.module} className="px-2 py-1 rounded-xl text-xs flex items-center gap-1"
                           style={{ background:"rgba(91,110,225,0.04)", color:"#B0C0DC", border:"1px solid rgba(91,110,225,0.08)" }}>
                           <Lock size={8}/>{p.label}
                         </span>
@@ -671,11 +671,11 @@ export function AdminRoles() {
                 </div>
                 <div className="flex gap-3 px-6 pb-6">
                   <button onClick={sendInvite}
-                    className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                    className="flex-1 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
                     style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 4px 16px rgba(91,110,225,0.3)" }}>
                     <Send size={14}/> Send Invite Email
                   </button>
-                  <button onClick={closeModal} className="px-5 py-3 rounded-xl text-sm"
+                  <button onClick={closeModal} className="px-5 py-3 rounded-2xl text-sm"
                     style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                     Cancel
                   </button>
@@ -753,7 +753,7 @@ export function AdminRoles() {
                         Click below to set your password and access the Command Center. This link expires in <strong>72 hours</strong> and is single-use.
                       </div>
                       <div className="flex justify-center mb-4">
-                        <div className="px-5 py-2.5 rounded-xl text-sm font-bold"
+                        <div className="px-5 py-2.5 rounded-2xl text-sm font-bold"
                           style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff", display:"inline-block" }}>
                           Accept Invitation & Set Password →
                         </div>
@@ -768,12 +768,12 @@ export function AdminRoles() {
                   <div>
                     <div style={{ color:"#8A9AB8", fontSize:11, fontWeight:600, marginBottom:6, ...MONO }}>ONE-TIME LOGIN LINK (DEMO)</div>
                     <div className="flex gap-2">
-                      <div className="flex-1 px-3 py-2.5 rounded-xl truncate text-xs"
+                      <div className="flex-1 px-3 py-2.5 rounded-2xl truncate text-xs"
                         style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)", color:"#8A9AB8", ...MONO }}>
                         admin.finalpassdown.com/accept?id={createdAdmin.id}&token=DEMO_…
                       </div>
                       <button onClick={copyLink}
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold flex-shrink-0"
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-bold flex-shrink-0"
                         style={{ background:linkCopied?"rgba(72,187,120,0.1)":"rgba(91,110,225,0.08)", color:linkCopied?"#D99A6B":"#6E90C9", border:`1px solid ${linkCopied?"rgba(72,187,120,0.3)":"rgba(91,110,225,0.15)"}` }}>
                         {linkCopied ? <><CheckCircle size={11}/> Copied!</> : <><Copy size={11}/> Copy</>}
                       </button>
@@ -788,7 +788,7 @@ export function AdminRoles() {
                       { label:"Status",         value:"Invited — awaiting first login" },
                       { label:"Link Expires",   value:"72 hours from now" },
                     ].map(r => (
-                      <div key={r.label} className="px-3 py-2.5 rounded-xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
+                      <div key={r.label} className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
                         <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{r.label.toUpperCase()}</div>
                         <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:600, marginTop:2 }}>{r.value}</div>
                       </div>
@@ -797,11 +797,11 @@ export function AdminRoles() {
 
                   <div className="flex gap-3">
                     <button onClick={() => { setInviteStep("form"); setNewAdmin({ name:"", email:"", role:"support_agent", notes:"" }); setCreatedAdmin(null); setLinkCopied(false); }}
-                      className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                      className="flex-1 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
                       style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                       <Plus size={14}/> Invite Another Admin
                     </button>
-                    <button onClick={closeModal} className="px-6 py-3 rounded-xl text-sm font-semibold"
+                    <button onClick={closeModal} className="px-6 py-3 rounded-2xl text-sm font-semibold"
                       style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Done</button>
                   </div>
                 </div>
