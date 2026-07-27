@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Send, X, Minimize2, Maximize2, Sparkles, RefreshCw, Plus, Info, ArrowUpRight,
   Compass, Users, DollarSign, Shield, Layers, Star,
-  BookOpen, LayoutGrid, Zap, Clock,
+  BookOpen, LayoutGrid, Zap, Clock, MessageCircle, List,
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 
@@ -14,9 +14,16 @@ const FAINT   = "#929CBC";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const PURPLE  = "#7E6BD8";
-const INDIGO  = "#5B6EE1";
-const CYAN    = ACCENT2;
 const GREEN   = "#6FAE8B";
+
+/* Icon-chip tone → colour, identical map to the Dashboard's Chip / Calendar's
+   KPI_TONES, so the stat cards read as the same component family. */
+const KPI_TONES: Record<string, { bg: string; fg: string }> = {
+  sky:    { bg: "linear-gradient(150deg, rgba(91,167,214,0.34), rgba(91,167,214,0.08))",  fg: "#9FD3EE" },
+  mint:   { bg: "linear-gradient(150deg, rgba(111,174,139,0.34), rgba(111,174,139,0.08))", fg: "#A9DABC" },
+  good:   { bg: "linear-gradient(150deg, rgba(95,190,145,0.30), rgba(95,190,145,0.09))",   fg: "#A9E6C4" },
+  violet: { bg: "linear-gradient(150deg, rgba(126,107,216,0.34), rgba(126,107,216,0.08))",  fg: "#C9BFF0" },
+};
 
 interface Message { id: string; role: "user"|"agent"; text: string; time: string; }
 
@@ -255,24 +262,21 @@ const SUGGESTIONS = [
 
 /* ── Page-mode side rail: popular questions (each fires the matcher) ─── */
 type IconCmp = React.ComponentType<{ size?: number; className?: string }>;
-const POPULAR: { q: string; Icon: IconCmp }[] = [
-  { q: "How do I navigate the platform?",        Icon: Compass },
-  { q: "What is a Legacy Contact?",              Icon: Users },
-  { q: "How does the $199 fee work?",            Icon: DollarSign },
-  { q: "How do I set up 2FA?",                   Icon: Shield },
-  { q: "What's the difference between plans?",   Icon: Layers },
-  { q: "How does White Glove work?",             Icon: Star },
+const POPULAR: { q: string; Icon: IconCmp; tone: string }[] = [
+  { q: "How do I navigate the platform?",        Icon: Compass,    tone: "sky"    },
+  { q: "What is a Legacy Contact?",              Icon: Users,      tone: "violet" },
+  { q: "How does the $199 fee work?",            Icon: DollarSign, tone: "mint"   },
+  { q: "How do I set up 2FA?",                   Icon: Shield,     tone: "good"   },
+  { q: "What's the difference between plans?",   Icon: Layers,     tone: "sky"    },
+  { q: "How does White Glove work?",             Icon: Star,       tone: "violet" },
 ];
 
-/* ── Page-mode KPI ledger (mirrors the dashboard / calendar stat strip) ───
-   Each column is assigned one of the site's 5 accent colors, giving the
-   ledger the same colored-column identity used across the rest of the
-   portal instead of one flat repeated tint. */
-const STATS: { label: string; value: string; sub: string; Icon: IconCmp; color: string }[] = [
-  { label: "Topics Covered",   value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   color: "purple" },
-  { label: "Platform Sections",value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, color: "indigo" },
-  { label: "Response Time",    value: "<1s",  sub: "Instant answers",          Icon: Zap,        color: "cyan"   },
-  { label: "Availability",     value: "24/7", sub: "Always on",                Icon: Clock,      color: "green"  },
+/* ── Page-mode KPI band (mirrors the Dashboard / Calendar stat cards) ── */
+const STATS: { label: string; value: string; sub: string; Icon: IconCmp; tone: string; dot: string }[] = [
+  { label: "Topics Covered",    value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   tone: "violet", dot: PURPLE  },
+  { label: "Platform Sections", value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, tone: "sky",    dot: ACCENT2 },
+  { label: "Response Time",     value: "<1s",  sub: "Instant answers",          Icon: Zap,        tone: "mint",   dot: GREEN   },
+  { label: "Availability",      value: "24/7", sub: "Always on",                Icon: Clock,      tone: "good",   dot: POS     },
 ];
 
 /* ── Markdown renderer — styled through the scoped .fpd-ai classes ───
@@ -355,7 +359,7 @@ const GRAIN =
 /* All styling scoped under .fpd-ai so nothing else in the app is affected. */
 const AI_CSS = `
 .fpd-ai *{box-sizing:border-box;}
-.fpd-ai.page{position:relative;height:100%;padding:22px;box-sizing:border-box;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
+.fpd-ai.page{position:relative;min-height:100%;padding:22px;box-sizing:border-box;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-ai .grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 
 /* launcher pill */
@@ -381,7 +385,7 @@ const AI_CSS = `
 .fpd-ai .icon-btn:hover{color:#FFFFFF;border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.08);}
 
 /* ── Page chrome (mirrors the Dashboard / Calendar layout) ── */
-.fpd-ai .wrap{max-width:1320px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
+.fpd-ai .wrap{max-width:1320px;margin:0 auto;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
 .fpd-ai .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;flex-shrink:0;}
 .fpd-ai .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 .fpd-ai .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
@@ -397,48 +401,64 @@ const AI_CSS = `
 .fpd-ai .sec-title{font-size:14px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-ai .sec-title .tick{width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},#5B6EE1);}
 
-/* KPI ledger — each column carries one of the 5 site accent colors and
-   ignites into a glowing "laser" divider on hover. (A repeating animated
-   sweep beam used to run through this divider — removed per feedback,
-   it read as a distracting blinking light rather than a hover cue.) */
-.fpd-ai .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;flex-shrink:0;overflow:hidden;}
-.fpd-ai .kcell{--c:${INDIGO};position:relative;padding:18px 20px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 7%,transparent),transparent 55%);}
-.fpd-ai .kcell.c-purple{--c:${PURPLE};}
-.fpd-ai .kcell.c-indigo{--c:${INDIGO};}
-.fpd-ai .kcell.c-cyan{--c:${CYAN};}
-.fpd-ai .kcell.c-green{--c:${GREEN};}
-.fpd-ai .kcell::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 80%,transparent) 50%,color-mix(in srgb,var(--c) 22%,transparent));transition:width .25s ease,top .25s ease,bottom .25s ease,box-shadow .25s ease;}
-.fpd-ai .kcell:first-child::before{display:none;}
-.fpd-ai .kcell .kbar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,var(--c),transparent);transform:scaleX(0);transform-origin:left;transition:transform .22s ease;}
-.fpd-ai .kcell:hover .kbar{transform:scaleX(1);}
-.fpd-ai .kcell .khead{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.fpd-ai .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};transition:color .2s;}
-.fpd-ai .kcell:hover .klbl{color:color-mix(in srgb,var(--c) 70%,${SOFT});}
-.fpd-ai .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};transition:border-color .2s,color .2s,background .2s;}
-.fpd-ai .kcell:hover .kico{border-color:color-mix(in srgb,var(--c) 45%,transparent);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#0F1624);}
-.fpd-ai .kcell .kval{position:relative;z-index:1;font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;transition:color .2s;}
-.fpd-ai .kcell:hover .kval{color:var(--c);}
-.fpd-ai .kcell .ksub{position:relative;z-index:1;font-size:11px;color:${MUTED};margin-top:8px;display:flex;align-items:center;gap:6px;}
-.fpd-ai .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--c);box-shadow:0 0 6px color-mix(in srgb,var(--c) 70%,transparent);}
+/* KPI band — individual chip cards, same kpi-mini pattern as the Dashboard
+   and Calendar (flat card, Chip-style icon, hover lift), replacing the old
+   4-column bordered ledger so all three pages share one stat-card language. */
+.fpd-ai .kpi-stack{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex-shrink:0;}
+.fpd-ai .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-ai .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
+.fpd-ai .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-ai .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-ai .kpi-mini-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-ai .kpi-mini-lbl{font-size:11.5px;color:${MUTED};margin-top:4px;}
+.fpd-ai .kpi-mini-sub{font-size:11px;color:${SOFT};margin-top:5px;display:flex;align-items:center;gap:6px;}
+.fpd-ai .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* AI hero — the same themed-hero component as the Calendar's real cal-hero
+   (gradient glow pair, grid overlay, watermark mark, eyebrow/heading/
+   subtitle/action-pair, "next up"-style real-content row), carrying AI
+   Assistant content instead of a calendar day. */
+.fpd-ai .hero{position:relative;overflow:hidden;border-radius:18px;padding:24px 22px;background:radial-gradient(420px 220px at 88% -30%,rgba(91,167,214,0.28),transparent 65%),radial-gradient(360px 260px at -10% 120%,rgba(126,107,216,0.24),transparent 60%),linear-gradient(160deg,#141b30 0%,#0d1220 65%,#0c111f 100%);border:1px solid rgba(91,110,225,0.2);flex-shrink:0;}
+.fpd-ai .hero-grid{position:absolute;inset:0;opacity:.22;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.09) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);}
+.fpd-ai .hero-mark{position:absolute;right:-14px;top:-14px;opacity:.16;color:${ACCENT2};pointer-events:none;}
+.fpd-ai .hero-body{position:relative;}
+.fpd-ai .hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.36);color:#C9BFF0;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:13px;}
+.fpd-ai .hero-h2{font-family:var(--font-display);font-size:20px;font-weight:700;color:${TEXT};line-height:1.2;letter-spacing:-0.01em;margin-bottom:8px;}
+.fpd-ai .hero-h2 .accent{background:linear-gradient(90deg,${ACCENT2},${GREEN});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-ai .hero-sub{color:${SOFT};font-size:12.5px;line-height:1.6;max-width:380px;margin-bottom:18px;}
+.fpd-ai .hero-actions{display:flex;gap:9px;flex-wrap:wrap;}
+.fpd-ai .hero-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .16s,filter .16s;}
+.fpd-ai .hero-btn:hover{transform:translateY(-1px);}
+.fpd-ai .hero-btn.primary{background:#fff;color:#12172A;}
+.fpd-ai .hero-btn.ghost{background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.4);color:#fff;}
+.fpd-ai .hero-next-wrap{position:relative;margin-top:14px;}
+.fpd-ai .hero-lbl{font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};margin-bottom:8px;}
+.fpd-ai .hero-evrow{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,0.024);border:1px solid rgba(91,167,214,0.15);}
+.fpd-ai .hero-evico{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,167,214,0.11);color:${ACCENT2};}
+.fpd-ai .hero-evbody{flex:1;min-width:0;}
+.fpd-ai .hero-evt{font-size:14px;font-weight:600;color:${TEXT};}
+.fpd-ai .hero-evdet{color:${MUTED};font-size:12px;line-height:1.55;margin-top:5px;}
+.fpd-ai .hero-evopen{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:99px;font-size:11.5px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);background:rgba(91,167,214,0.14);color:${ACCENT2};align-self:center;transition:filter .18s;}
+.fpd-ai .hero-evopen:hover{filter:brightness(1.15);}
 
 /* bento */
-.fpd-ai .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;flex:1;min-height:0;}
-.fpd-ai .col{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow-y:auto;}
+.fpd-ai .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
+.fpd-ai .col{display:flex;flex-direction:column;gap:16px;min-width:0;}
 
 /* chat card (page mode) */
-.fpd-ai .chatcard{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden;}
+.fpd-ai .chatcard{display:flex;flex-direction:column;height:620px;overflow:hidden;}
 .fpd-ai .chat-hd{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
 .fpd-ai .chat-status{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:${MUTED};}
 .fpd-ai .chat-status .d{width:6px;height:6px;border-radius:50%;background:${POS};box-shadow:0 0 8px ${POS};animation:fpd-ai-pulse 2.2s ease-in-out infinite;}
 
-/* topic rows */
-.fpd-ai .qrow{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;margin-bottom:8px;}
-.fpd-ai .qrow:last-child{margin-bottom:0;}
-.fpd-ai .qrow:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
-.fpd-ai .qrow .qico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.22);color:#FFFFFF;}
+/* topic rows — same Quick Actions pattern as the Dashboard: flat row, Chip
+   icon, hover background + indent, instead of a bordered pill row. */
+.fpd-ai .qrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:11px 9px;border-radius:14px;background:none;border:none;cursor:pointer;font-family:var(--font-body);color:inherit;transition:background .15s,padding-left .15s;}
+.fpd-ai .qrow:hover{background:#101728;padding-left:11px;}
+.fpd-ai .qrow .qico{width:32px;height:32px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);}
 .fpd-ai .qrow .qtxt{flex:1;font-size:12.5px;color:${SOFT};font-weight:500;line-height:1.4;}
-.fpd-ai .qrow .qarr{color:${FAINT};flex-shrink:0;}
-.fpd-ai .qrow:hover .qarr{color:#6FAE8B;}
+.fpd-ai .qrow .qarr{color:${FAINT};flex-shrink:0;transition:color .15s,transform .15s;}
+.fpd-ai .qrow:hover .qarr{color:#6FAE8B;transform:translateX(2px);}
 
 /* footnote */
 .fpd-ai .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
@@ -499,18 +519,17 @@ const AI_CSS = `
 .fpd-ai .send.off{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${FAINT};cursor:default;}
 
 @media (max-width:1080px){
-  .fpd-ai.page{height:auto;min-height:100%;overflow-y:auto;}
-  .fpd-ai .wrap{height:auto;}
-  .fpd-ai .bento{grid-template-columns:1fr;flex:none;}
-  .fpd-ai .chatcard{height:600px;}
-  .fpd-ai .col{overflow:visible;}
-  .fpd-ai .kstrip{grid-template-columns:1fr 1fr;}
-  .fpd-ai .kcell:nth-child(3)::before{display:none;}
-  .fpd-ai .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}
+  .fpd-ai .bento{grid-template-columns:1fr;}
+  .fpd-ai .chatcard{height:560px;}
+  .fpd-ai .kpi-stack{grid-template-columns:1fr 1fr;}
+  .fpd-ai .hero-next-wrap{margin-top:16px;}
+}
+@media (max-width:520px){
+  .fpd-ai .kpi-stack{grid-template-columns:1fr;}
 }
 @media (prefers-reduced-motion:reduce){
   .fpd-ai .typing .dot,.fpd-ai .hd-status .d,.fpd-ai .chat-status .d,.fpd-ai-launch,.fpd-ai .send.on{animation:none!important;transition:none!important;}
-  .fpd-ai .kcell::before,.fpd-ai .kcell .kbar,.fpd-ai .kcell .klbl,.fpd-ai .kcell .kico,.fpd-ai .kcell .kval{transition:none!important;}
+  .fpd-ai .kpi-mini,.fpd-ai .qrow,.fpd-ai .hero-btn{transition:none!important;}
 }
 `;
 
@@ -529,6 +548,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
   const [typing, setTyping] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const popularRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, typing]);
 
@@ -602,19 +622,57 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             </div>
           </div>
 
-          {/* KPI ledger */}
-          <div className="card kstrip">
-            {STATS.map(s => (
-              <div key={s.label} className={`kcell c-${s.color}`}>
-                <div className="khead">
-                  <span className="klbl">{s.label}</span>
-                  <span className="kico"><s.Icon size={14}/></span>
-                </div>
-                <div className="kval">{s.value}</div>
-                <div className="ksub"><span className="dt"/>{s.sub}</div>
-                <span className="kbar"/>
+          {/* AI hero — same themed-hero component as the Calendar's real
+              cal-hero (gradient glow pair, grid overlay, watermark mark,
+              eyebrow/heading/subtitle/action-pair, real-content row below),
+              carrying AI Assistant content instead of a calendar day. */}
+          <div className="card hero">
+            <div className="hero-grid" />
+            <div className="hero-mark"><MessageCircle size={96}/></div>
+            <div className="hero-body">
+              <span className="hero-eyebrow">Online Now</span>
+              <h4 className="hero-h2">Every Answer,<br/><span className="accent">One Conversation</span></h4>
+              <p className="hero-sub">
+                The Legacy Vault, the Activate Legacy Access fee, White Glove, security, plans — ask in plain
+                English and get the exact next step.
+              </p>
+              <div className="hero-actions">
+                <button className="hero-btn primary" onClick={() => inputRef.current?.focus()}>
+                  <Send size={14}/> Start a Conversation
+                </button>
+                <button className="hero-btn ghost" onClick={() => popularRef.current?.scrollIntoView({ behavior:"smooth", block:"nearest" })}>
+                  <List size={14}/> See Popular Questions
+                </button>
               </div>
-            ))}
+            </div>
+            <div className="hero-next-wrap">
+              <div className="hero-lbl">Try asking</div>
+              <div className="hero-evrow">
+                <div className="hero-evico"><Users size={18}/></div>
+                <div className="hero-evbody">
+                  <span className="hero-evt">"What is a Legacy Contact?"</span>
+                  <div className="hero-evdet">Legacy Contacts are the people who receive access to your complete vault after your verified passing.</div>
+                </div>
+                <button className="hero-evopen" onClick={() => send("What is a Legacy Contact?")}>Ask <ArrowUpRight size={12}/></button>
+              </div>
+            </div>
+          </div>
+
+          {/* KPI band */}
+          <div className="kpi-stack">
+            {STATS.map(s => {
+              const tone = KPI_TONES[s.tone] ?? KPI_TONES.sky;
+              return (
+                <div key={s.label} className="kpi-mini">
+                  <span className="kpi-mini-ico" style={{ background: tone.bg, color: tone.fg }}><s.Icon size={18}/></span>
+                  <div className="kpi-mini-txt">
+                    <div className="kpi-mini-val">{s.value}</div>
+                    <div className="kpi-mini-lbl">{s.label}</div>
+                    <div className="kpi-mini-sub"><span className="dt" style={{ background: s.dot }}/>{s.sub}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Bento — conversation + side rail */}
@@ -629,17 +687,20 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             </div>
 
             <div className="col">
-              <div className="card pad">
+              <div className="card pad" ref={popularRef}>
                 <div className="sec-head">
                   <h3 className="sec-title"><span className="tick"/>Popular Questions</h3>
                 </div>
-                {POPULAR.map(p => (
-                  <button key={p.q} className="qrow" onClick={() => send(p.q)}>
-                    <span className="qico"><p.Icon size={15}/></span>
-                    <span className="qtxt">{p.q}</span>
-                    <ArrowUpRight size={15} className="qarr"/>
-                  </button>
-                ))}
+                {POPULAR.map(p => {
+                  const tone = KPI_TONES[p.tone] ?? KPI_TONES.sky;
+                  return (
+                    <button key={p.q} className="qrow" onClick={() => send(p.q)}>
+                      <span className="qico" style={{ background: tone.bg, color: tone.fg }}><p.Icon size={15}/></span>
+                      <span className="qtxt">{p.q}</span>
+                      <ArrowUpRight size={15} className="qarr"/>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="foot">
