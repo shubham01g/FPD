@@ -57,16 +57,16 @@ export function SubscriptionConfig() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Settings size={16} color="var(--gold)" />
-            <span style={{ color: "var(--gold)", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · CONFIG</span>
+            <span style={{ color: "var(--gold)", fontSize: 13.5, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · CONFIG</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)" }}>Subscription Configuration</h1>
-          <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "var(--foreground)" }}>Subscription Configuration</h1>
+          <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginTop: 4 }}>
             Changes here update pricing and thresholds in real time on the frontend. Changes take effect immediately for new subscribers.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {dirty && (
-            <div className="flex items-center gap-2" style={{ color: "#F6AD55", fontSize: 13 }}>
+            <div className="flex items-center gap-2" style={{ color: "#F6AD55", fontSize: 14.5 }}>
               <AlertTriangle size={14} /> Unsaved changes
             </div>
           )}
@@ -77,7 +77,7 @@ export function SubscriptionConfig() {
               background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #5B6EE1, #5B6EE1)",
               color: saved ? "#D99A6B" : "#070D1A",
               border: saved ? "1px solid rgba(72,187,120,0.3)" : "none",
-              fontWeight: 600, fontSize: 14,
+              fontWeight: 600, fontSize: 15.5,
             }}
           >
             {saved ? <CheckCircle size={15} /> : <Save size={15} />}
@@ -89,19 +89,19 @@ export function SubscriptionConfig() {
       {/* Live preview notice */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
         <RefreshCw size={14} color="#FFFFFF" />
-        <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>
+        <span style={{ color: "var(--muted-foreground)", fontSize: 14.5 }}>
           Pricing changes propagate to the public pricing page in real time via API. No deployment required.
         </span>
       </div>
 
       {/* Plan pricing */}
       <div className="space-y-4">
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)" }}>Subscription Plans</h2>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)" }}>Subscription Plans</h2>
         {plans.map((plan) => (
           <div key={plan.id} className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-xl w-3 h-3 rounded-full" style={{ background: plan.color }} />
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>{plan.name}</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--foreground)" }}>{plan.name}</h3>
               <div className="ml-auto text-sm px-3 py-1 rounded-xl" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
                 ID: {plan.id}
               </div>
@@ -109,7 +109,7 @@ export function SubscriptionConfig() {
             <div className="grid md:grid-cols-3 gap-6">
               {/* Monthly price */}
               <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MONTHLY PRICE ($)</label>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>MONTHLY PRICE ($)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="var(--gold)" />
                   <input
@@ -117,17 +117,17 @@ export function SubscriptionConfig() {
                     step="0.01"
                     value={plan.price}
                     onChange={(e) => updatePlan(plan.id, "price", parseFloat(e.target.value))}
-                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 18, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                 </div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 4 }}>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginTop: 4 }}>
                   Annual price: ${(plan.price * 12 * (1 - plan.annualDiscount / 100)).toFixed(2)}/yr
                 </div>
               </div>
 
               {/* Annual discount */}
               <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>ANNUAL DISCOUNT (%)</label>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>ANNUAL DISCOUNT (%)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
@@ -136,7 +136,7 @@ export function SubscriptionConfig() {
                     max="50"
                     value={plan.annualDiscount}
                     onChange={(e) => updatePlan(plan.id, "annualDiscount", parseInt(e.target.value))}
-                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 18, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                   <span style={{ color: "var(--muted-foreground)" }}>%</span>
                 </div>
@@ -144,7 +144,7 @@ export function SubscriptionConfig() {
 
               {/* Storage */}
               <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>STORAGE ALLOWANCE (GB)</label>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>STORAGE ALLOWANCE (GB)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <HardDrive size={14} color="var(--gold)" />
                   <input
@@ -153,7 +153,7 @@ export function SubscriptionConfig() {
                     min="1"
                     value={plan.storage}
                     onChange={(e) => updatePlan(plan.id, "storage", parseInt(e.target.value))}
-                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 18, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                   <span style={{ color: "var(--muted-foreground)" }}>GB</span>
                 </div>
@@ -161,7 +161,7 @@ export function SubscriptionConfig() {
 
               {/* Overage rate */}
               <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>OVERAGE RATE ($/GB)</label>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>OVERAGE RATE ($/GB)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="#FC8181" />
                   <input
@@ -170,16 +170,16 @@ export function SubscriptionConfig() {
                     min="0"
                     value={plan.overageRate}
                     onChange={(e) => updatePlan(plan.id, "overageRate", parseFloat(e.target.value))}
-                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 18, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                   <span style={{ color: "var(--muted-foreground)" }}>/GB</span>
                 </div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 4 }}>Applied after storage limit is exceeded</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginTop: 4 }}>Applied after storage limit is exceeded</div>
               </div>
 
               {/* Max contacts */}
               <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>MAX LEGACY CONTACTS</label>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>MAX LEGACY CONTACTS</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <input
                     type="number"
@@ -187,17 +187,17 @@ export function SubscriptionConfig() {
                     min="1"
                     value={plan.maxContacts === 999 ? "Unlimited" : plan.maxContacts}
                     onChange={(e) => updatePlan(plan.id, "maxContacts", parseInt(e.target.value) || 999)}
-                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 18, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
                 </div>
-                {plan.maxContacts === 999 && <div style={{ color: "#D99A6B", fontSize: 11, marginTop: 4 }}>Unlimited contacts</div>}
+                {plan.maxContacts === 999 && <div style={{ color: "#D99A6B", fontSize: 12.5, marginTop: 4 }}>Unlimited contacts</div>}
               </div>
 
               {/* Preview */}
               <div className="flex items-center justify-center rounded-2xl border" style={{ borderColor: plan.color, background: `${plan.color}08` }}>
                 <div className="text-center">
-                  <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700 }}>${plan.price}/mo</div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{plan.storage} GB · ${plan.overageRate}/GB overage</div>
+                  <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 31.5, fontWeight: 700 }}>${plan.price}/mo</div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 13.5 }}>{plan.storage} GB · ${plan.overageRate}/GB overage</div>
                 </div>
               </div>
             </div>
@@ -207,8 +207,8 @@ export function SubscriptionConfig() {
 
       {/* Notification thresholds */}
       <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)", marginBottom: 6 }}>Storage Notification Thresholds</h2>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 13, marginBottom: 20 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)", marginBottom: 6 }}>Storage Notification Thresholds</h2>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 14.5, marginBottom: 20 }}>
           Automatic email alerts are sent to users when their storage crosses these thresholds. All values are percentages of plan storage limit.
         </p>
         <div className="grid md:grid-cols-4 gap-6">
@@ -219,7 +219,7 @@ export function SubscriptionConfig() {
             { key: "overage", label: "Overage Begins", color: "#E53E3E", desc: "Overage billing triggered" },
           ].map((t) => (
             <div key={t.key}>
-              <label style={{ color: "var(--muted-foreground)", fontSize: 12, display: "block", marginBottom: 8 }}>{t.label.toUpperCase()}</label>
+              <label style={{ color: "var(--muted-foreground)", fontSize: 13.5, display: "block", marginBottom: 8 }}>{t.label.toUpperCase()}</label>
               <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border mb-2" style={{ background: "rgba(255,255,255,0.08)", borderColor: `${t.color}40` }}>
                 <Bell size={14} color={t.color} />
                 <input
@@ -228,11 +228,11 @@ export function SubscriptionConfig() {
                   max="100"
                   value={(thresholds as any)[t.key]}
                   onChange={(e) => updateThreshold(t.key as keyof AlertThresholds, parseInt(e.target.value))}
-                  style={{ background: "transparent", border: "none", outline: "none", color: t.color, fontSize: 20, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                  style={{ background: "transparent", border: "none", outline: "none", color: t.color, fontSize: 22.5, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                 />
                 <span style={{ color: "var(--muted-foreground)" }}>%</span>
               </div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{t.desc}</div>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 12.5 }}>{t.desc}</div>
             </div>
           ))}
         </div>
@@ -243,7 +243,7 @@ export function SubscriptionConfig() {
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-8 py-3 rounded-2xl"
-          style={{ background: "linear-gradient(135deg, #5B6EE1, #5B6EE1)", color: "#070D1A", fontWeight: 700, fontSize: 15 }}
+          style={{ background: "linear-gradient(135deg, #5B6EE1, #5B6EE1)", color: "#070D1A", fontWeight: 700, fontSize: 17 }}
         >
           <Save size={16} /> Save All Configuration
         </button>

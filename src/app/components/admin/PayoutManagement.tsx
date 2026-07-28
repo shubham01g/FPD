@@ -51,14 +51,14 @@ export function PayoutManagement() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign size={16} color="var(--gold)" />
-            <span style={{ color: "var(--gold)", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PAYOUTS</span>
+            <span style={{ color: "var(--gold)", fontSize: 13.5, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PAYOUTS</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)" }}>Payout Management</h1>
-          <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Manage affiliate and partnership commission payouts. Payouts cycle on the 1st of each month.</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "var(--foreground)" }}>Payout Management</h1>
+          <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginTop: 4 }}>Manage affiliate and partnership commission payouts. Payouts cycle on the 1st of each month.</p>
         </div>
         <button
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
-          style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 14 }}
+          style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 15.5 }}
         >
           <Download size={14} /> Export CSV
         </button>
@@ -69,36 +69,36 @@ export function PayoutManagement() {
         <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} color="#F6AD55" />
-            <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Pending Payouts</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 13.5 }}>Pending Payouts</span>
           </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#F6AD55" }}>${pendingTotal.toFixed(2)}</div>
-          <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "pending").length} recipients</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "#F6AD55" }}>${pendingTotal.toFixed(2)}</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 13.5, marginTop: 2 }}>{payouts.filter(p => p.status === "pending").length} recipients</div>
         </div>
         <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={16} color="#FFFFFF" />
-            <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Processing</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 13.5 }}>Processing</span>
           </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#6FAE8B" }}>${processingTotal.toFixed(2)}</div>
-          <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "processing").length} in transit</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "#6FAE8B" }}>${processingTotal.toFixed(2)}</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 13.5, marginTop: 2 }}>{payouts.filter(p => p.status === "processing").length} in transit</div>
         </div>
         <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} color="#FFFFFF" />
-            <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>Paid This Month</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 13.5 }}>Paid This Month</span>
           </div>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#D99A6B" }}>${paidTotal.toFixed(2)}</div>
-          <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{payouts.filter(p => p.status === "paid").length} recipients</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "#D99A6B" }}>${paidTotal.toFixed(2)}</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 13.5, marginTop: 2 }}>{payouts.filter(p => p.status === "paid").length} recipients</div>
         </div>
       </div>
 
       {/* Batch action bar */}
       {selectedPending.length > 0 && (
         <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border" style={{ background: "rgba(72,187,120,0.08)", borderColor: "rgba(72,187,120,0.3)" }}>
-          <span style={{ color: "var(--foreground)", fontSize: 14 }}>{selectedPending.length} selected · ${selectedPending.reduce((s, p) => s + p.amount, 0).toFixed(2)} total</span>
+          <span style={{ color: "var(--foreground)", fontSize: 15.5 }}>{selectedPending.length} selected · ${selectedPending.reduce((s, p) => s + p.amount, 0).toFixed(2)} total</span>
           <button
             className="flex items-center gap-2 px-5 py-2 rounded-2xl ml-auto"
-            style={{ background: "rgba(72,187,120,0.2)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.4)", fontWeight: 600, fontSize: 14 }}
+            style={{ background: "rgba(72,187,120,0.2)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.4)", fontWeight: 600, fontSize: 15.5 }}
           >
             <CheckCircle size={15} /> Process Selected Payouts
           </button>
@@ -141,7 +141,7 @@ export function PayoutManagement() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search recipient or payout ID..."
-            style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 13, width: "100%" }}
+            style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 14.5, width: "100%" }}
           />
         </div>
       </div>
@@ -154,7 +154,7 @@ export function PayoutManagement() {
         >
           <div />
           {["Recipient", "Type", "Period", "Rate", "Amount", "Status"].map((h) => (
-            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
+            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
           ))}
         </div>
         {filtered.map((payout, i) => {
@@ -172,19 +172,19 @@ export function PayoutManagement() {
                 style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
               />
               <div>
-                <div style={{ color: "var(--foreground)", fontSize: 13 }}>{payout.recipient}</div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{payout.email} · {payout.id}</div>
+                <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{payout.recipient}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5 }}>{payout.email} · {payout.id}</div>
               </div>
               <div className="flex items-center gap-1.5">
                 {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#FFFFFF" />}
-                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#6FAE8B", fontSize: 12, textTransform: "capitalize" }}>{payout.type}</span>
+                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#6FAE8B", fontSize: 13.5, textTransform: "capitalize" }}>{payout.type}</span>
               </div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{payout.period}</div>
-              <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{payout.rate}%</div>
-              <div style={{ color: "var(--gold)", fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600 }}>${payout.amount.toFixed(2)}</div>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 14.5 }}>{payout.period}</div>
+              <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>{payout.rate}%</div>
+              <div style={{ color: "var(--gold)", fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600 }}>${payout.amount.toFixed(2)}</div>
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl" style={{ background: statusCfg.bg, color: statusCfg.color, width: "fit-content" }}>
                 {statusCfg.icon}
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{statusCfg.label}</span>
+                <span style={{ fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{statusCfg.label}</span>
               </div>
             </div>
           );

@@ -218,10 +218,10 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(91,110,225,0.12)"; }}
         onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
         <span style={{ flexShrink: 0, color: "#FFFFFF", display: "flex" }}>{item.icon}</span>
-        {!collapsed && <span style={{ fontSize: 13, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
+        {!collapsed && <span style={{ fontSize: 14.5, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
         {!collapsed && item.badge && (
           <span style={{
-            fontSize: 9, fontWeight: 700, letterSpacing: "0.02em",
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.02em",
             background: active ? "rgba(255,255,255,0.22)" : "rgba(91,110,225,0.25)",
             color: active ? "#FFFFFF" : "#6FAE8B", padding: "2px 6px", borderRadius: 99,
           }}>{item.badge}</span>
@@ -271,7 +271,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             <div style={{ overflow: "hidden" }}>
               <img src={fpdSquareLogo} alt="Final Pass Down"
                 style={{ height: 38, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
-              <div style={{ fontSize: 9.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
+              <div style={{ fontSize: 10.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
                 MY LIFE · MY WISHES · MY WAY
               </div>
             </div>
@@ -287,7 +287,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             }}>
               <Search size={14} style={{ color: MUTED, flexShrink: 0 }}/>
               <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search sections…"
-                style={{ background: "transparent", border: "none", outline: "none", color: TEXT, fontSize: 12.5, width: "100%", fontFamily: "var(--font-body)" }}/>
+                style={{ background: "transparent", border: "none", outline: "none", color: TEXT, fontSize: 14, width: "100%", fontFamily: "var(--font-body)" }}/>
               {query && <button onClick={() => setQuery("")} style={{ color: MUTED, display: "flex" }}><X size={13}/></button>}
             </div>
           </div>
@@ -298,7 +298,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
           {filteredGroups.map(group => (
             <div key={group.label} style={{ marginBottom: collapsed ? 6 : 14 }}>
               {!collapsed && (
-                <div style={{ fontSize: 11, fontWeight: 600, color: FAINT, padding: "0 11px 8px" }}>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: FAINT, padding: "0 11px 8px" }}>
                   {group.label}
                 </div>
               )}
@@ -308,7 +308,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             </div>
           ))}
           {filteredGroups.length === 0 && (
-            <div style={{ color: MUTED, fontSize: 12, textAlign: "center", padding: "24px 8px" }}>
+            <div style={{ color: MUTED, fontSize: 13.5, textAlign: "center", padding: "24px 8px" }}>
               No sections match “{query}”.
             </div>
           )}
@@ -326,24 +326,24 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"}
             onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
             <Copy size={16} style={{ color: "#6FAE8B", flexShrink: 0 }}/>
-            {!collapsed && <span style={{ fontSize: 12.5, fontWeight: 600 }}>Legacy Vault Clone</span>}
+            {!collapsed && <span style={{ fontSize: 14, fontWeight: 600 }}>Legacy Vault Clone</span>}
           </button>
 
           {collapsed ? (
             <button onClick={() => onNavigate("account-settings")} title={`${user.name} · Account`}
               className="w-full flex justify-center">
-              <div className="flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 12, fontWeight: 700 }}>
+              <div className="flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 13.5, fontWeight: 700 }}>
                 {user.avatar}
               </div>
             </button>
           ) : (
             <div className="flex items-center gap-2.5 rounded-xl" style={{ padding: "8px 9px", background: "rgba(91,110,225,0.07)", border: `1px solid ${BORDER}` }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 12, fontWeight: 700 }}>
+              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 13.5, fontWeight: 700 }}>
                 {user.avatar}
               </div>
               <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 650, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
-                <div style={{ fontSize: 11, color: "#6FAE8B" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
+                <div style={{ fontSize: 14, fontWeight: 650, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
+                <div style={{ fontSize: 12.5, color: "#6FAE8B" }}>{PLAN_LABEL[user.plan] ?? user.plan}</div>
               </div>
               <button onClick={onSignOut} title="Sign out" style={{ color: MUTED, display: "flex", flexShrink: 0 }}
                 onMouseEnter={e => e.currentTarget.style.color = "#FC8181"} onMouseLeave={e => e.currentTarget.style.color = MUTED}>
@@ -369,20 +369,20 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               {isMobile ? <Menu size={16}/> : collapsed ? <PanelLeft size={16}/> : <PanelLeftClose size={16}/>}
             </button>
             <div style={{ minWidth: 0 }}>
-              <div className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: FAINT }}>
+              <div className="flex items-center gap-1.5" style={{ fontSize: 13, color: FAINT }}>
                 <span>{meta.group}</span><ChevronRight size={10}/><span style={{ color: "#6FAE8B" }}>{meta.label}</span>
               </div>
-              <h1 style={{ fontSize: 18, fontWeight: 600, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
+              <h1 style={{ fontSize: 20, fontWeight: 600, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="hidden md:block" style={{ color: MUTED, fontSize: 12, whiteSpace: "nowrap" }}>
+            <div className="hidden md:block" style={{ color: MUTED, fontSize: 13.5, whiteSpace: "nowrap" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
             </div>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(72,187,120,0.1)", border: "1px solid rgba(72,187,120,0.25)" }}>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: SUCCESS, boxShadow: `0 0 6px ${SUCCESS}` }}/>
-              <span style={{ color: "#D99A6B", fontSize: 11.5, fontWeight: 600 }}>Vault Active</span>
+              <span style={{ color: "#D99A6B", fontSize: 13, fontWeight: 600 }}>Vault Active</span>
             </div>
 
             {onGoAdmin && (
@@ -400,7 +400,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                 style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
                 <Bell size={16}/>
                 {unreadCount > 0 && (
-                  <span className="absolute flex items-center justify-center rounded-full" style={{ top: -5, right: -5, minWidth: 16, height: 16, padding: "0 4px", background: "#E53E3E", color: "#fff", fontSize: 9, fontWeight: 700, border: `2px solid ${BG}` }}>
+                  <span className="absolute flex items-center justify-center rounded-full" style={{ top: -5, right: -5, minWidth: 16, height: 16, padding: "0 4px", background: "#E53E3E", color: "#fff", fontSize: 10, fontWeight: 700, border: `2px solid ${BG}` }}>
                     {unreadCount}
                   </span>
                 )}
@@ -408,11 +408,11 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               {notifOpen && (
                 <div className="absolute rounded-2xl fpd-fade-in-up" style={{ top: "calc(100% + 10px)", right: 0, width: 340, background: PANEL, border: `1px solid ${BORDER_S}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)", zIndex: 60, overflow: "hidden" }}>
                   <div className="flex items-center justify-between" style={{ padding: "13px 15px", borderBottom: `1px solid ${BORDER}` }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Notifications</span>
-                    {unreadCount > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: "#6FAE8B", fontWeight: 600 }}>Mark all read</button>}
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: TEXT }}>Notifications</span>
+                    {unreadCount > 0 && <button onClick={markAllRead} style={{ fontSize: 12.5, color: "#6FAE8B", fontWeight: 600 }}>Mark all read</button>}
                   </div>
                   <div className="fpd-scroll" style={{ maxHeight: 360, overflowY: "auto" }}>
-                    {notifications.length === 0 && <div style={{ padding: 24, textAlign: "center", color: MUTED, fontSize: 12 }}>You're all caught up.</div>}
+                    {notifications.length === 0 && <div style={{ padding: 24, textAlign: "center", color: MUTED, fontSize: 13.5 }}>You're all caught up.</div>}
                     {notifications.slice(0, 12).map(n => (
                       <button key={n.id} onClick={() => markNotifRead(n.id)} className="w-full flex gap-2.5 text-left transition-colors"
                         style={{ padding: "11px 15px", borderBottom: `1px solid ${BORDER}`, background: n.read ? "transparent" : "rgba(91,110,225,0.06)" }}
@@ -420,9 +420,9 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                         onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "rgba(91,110,225,0.06)"}>
                         <div style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 5, flexShrink: 0, background: n.read ? "transparent" : ACCENT2 }}/>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: TEXT }}>{n.title}</div>
-                          <div style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.45, marginTop: 1 }}>{n.message}</div>
-                          <div style={{ fontSize: 10, color: FAINT, fontFamily: "var(--font-mono)", marginTop: 3 }}>{n.time}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>{n.title}</div>
+                          <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.45, marginTop: 1 }}>{n.message}</div>
+                          <div style={{ fontSize: 11, color: FAINT, fontFamily: "var(--font-mono)", marginTop: 3 }}>{n.time}</div>
                         </div>
                       </button>
                     ))}
@@ -440,7 +440,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                   <div style={{ height: "100%", width: `${storagePct}%`, borderRadius: 99, background: storagePct >= 90 ? "linear-gradient(90deg,#5B6EE1,#F6AD55)" : `linear-gradient(90deg,${ACCENT},${ACCENT2})` }}/>
                 </div>
               </div>
-              <span style={{ fontSize: 11.5, color: SOFT, whiteSpace: "nowrap" }}>{storagePct}%</span>
+              <span style={{ fontSize: 13, color: SOFT, whiteSpace: "nowrap" }}>{storagePct}%</span>
             </button>
           </div>
         </header>

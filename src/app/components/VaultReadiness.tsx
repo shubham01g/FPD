@@ -159,16 +159,16 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
             className="fpd-pulse-dot"
             style={{ width: 7, height: 7, borderRadius: "50%", background: statusColor, boxShadow: `0 0 8px ${statusColor}` }}
           />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.18em", color: statusColor, fontWeight: 700 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.18em", color: statusColor, fontWeight: 700 }}>
             {sealed ? "SECURED & SEALED" : "SEALING IN PROGRESS"}
           </span>
         </div>
 
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 34, lineHeight: 1.12, color: TEXT, letterSpacing: "-0.02em", marginBottom: 8 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 38, lineHeight: 1.12, color: TEXT, letterSpacing: "-0.02em", marginBottom: 8 }}>
           Vault {pct}% Prepared
         </h2>
 
-        <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.55, maxWidth: 420 }}>
+        <p style={{ color: MUTED, fontSize: 15.5, lineHeight: 1.55, maxWidth: 420 }}>
           {sealed
             ? <>All {total} essentials in place, encrypted end-to-end.</>
             : <>{done} of {total} essentials in place. {nextUp ? <>Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
@@ -185,7 +185,7 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
                 gap: 6, padding: "6px 11px", borderRadius: 999,
                 background: item.done ? "rgba(72,187,120,0.10)" : "rgba(255,255,255,0.04)",
                 border: `1px solid ${item.done ? "rgba(72,187,120,0.26)" : "rgba(91,167,214,0.16)"}`,
-                color: item.done ? SOFT : MUTED, fontSize: 11.5,
+                color: item.done ? SOFT : MUTED, fontSize: 13,
               }}
             >
               <span
@@ -210,7 +210,7 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
             style={{
               gap: 6, marginTop: 16, padding: "9px 16px", borderRadius: 12,
               background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`,
-              color: "#fff", fontSize: 12.5, fontWeight: 650,
+              color: "#fff", fontSize: 14, fontWeight: 650,
             }}
           >
             Finish your vault <ArrowRight size={13} />

@@ -58,7 +58,7 @@ export function AttachDocumentField({
 
   return (
     <div>
-      <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:6, fontFamily:"var(--font-mono)" }}>
+      <label style={{ color:"var(--muted-foreground)", fontSize:11, display:"block", marginBottom:6, fontFamily:"var(--font-mono)" }}>
         {label.toUpperCase()}
       </label>
 
@@ -67,7 +67,7 @@ export function AttachDocumentField({
           style={{ background:"rgba(72,187,120,0.07)", border:"1px solid rgba(72,187,120,0.25)" }}>
           <div className="flex items-center gap-2">
             <CheckCircle size={14} color="#FFFFFF"/>
-            <span style={{ color:"var(--foreground)", fontSize:13 }}>{value}</span>
+            <span style={{ color:"var(--foreground)", fontSize:14.5 }}>{value}</span>
           </div>
           <button onClick={() => onChange(null)} style={{ color:"#FC8181" }}><X size={13}/></button>
         </div>
@@ -91,7 +91,7 @@ export function AttachDocumentField({
       )}
 
       {!value && (
-        <p style={{ color:"var(--muted-foreground)", fontSize:11, marginTop:5, lineHeight:1.5 }}>
+        <p style={{ color:"var(--muted-foreground)", fontSize:12.5, marginTop:5, lineHeight:1.5 }}>
           Upload or scan the actual document — automatically saved to the File Cabinet alongside this record.
         </p>
       )}

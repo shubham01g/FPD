@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
 import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
 
@@ -62,15 +62,15 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
           <div className="flex items-center gap-3 mb-16">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.3)" }}/>
             <div>
-              <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:13, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#34456A", fontSize:9, letterSpacing:"0.15em", ...MONO }}>PLATFORM ADMINISTRATION</div>
+              <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:14.5, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ color:"#34456A", fontSize:10, letterSpacing:"0.15em", ...MONO }}>PLATFORM ADMINISTRATION</div>
             </div>
           </div>
           <Crown size={56} color="#FFFFFF" style={{ marginBottom:24, opacity:0.8 }}/>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(2rem,4vw,3rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:20 }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(2.2rem,4.5vw,3.4rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:20 }}>
             Admin<br /><span style={{ color:"#6FAE8B" }}>Command Center</span>
           </h1>
-          <p style={{ color:"#6B7FA8", fontSize:15, lineHeight:1.8, maxWidth:380 }}>
+          <p style={{ color:"#6B7FA8", fontSize:17, lineHeight:1.8, maxWidth:380 }}>
             Full platform oversight — user management, revenue analytics, ID verification, payout controls, email templates, and white label configuration.
           </p>
         </div>
@@ -84,8 +84,8 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
           ].map(item => (
             <div key={item.label} className="flex items-center gap-3 px-4 py-3 rounded-xl"
               style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.15)" }}>
-              <span style={{ fontSize:18 }}>{item.icon}</span>
-              <span style={{ color:"#B8C8E0", fontSize:13 }}>{item.label}</span>
+              <span style={{ fontSize:20 }}>{item.icon}</span>
+              <span style={{ color:"#B8C8E0", fontSize:14.5 }}>{item.label}</span>
             </div>
           ))}
         </div>
@@ -97,48 +97,48 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
           {/* Mobile logo */}
           <div className="flex items-center gap-3 mb-10 lg:hidden">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
-            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:12, fontWeight:700, letterSpacing:"0.06em" }}>ADMIN PORTAL</div>
+            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:13.5, fontWeight:700, letterSpacing:"0.06em" }}>ADMIN PORTAL</div>
           </div>
 
           {!mfa ? (
             <>
               <div className="mb-8">
-                <h2 style={{ fontFamily:"var(--font-display)", fontSize:28, color:"#E8EDF5", marginBottom:8 }}>Administrator Sign In</h2>
-                <p style={{ color:"#6B7FA8", fontSize:14 }}>This portal is restricted to authorised Final Pass Down administrators.</p>
+                <h2 style={{ fontFamily:"var(--font-display)", fontSize:31.5, color:"#E8EDF5", marginBottom:8 }}>Administrator Sign In</h2>
+                <p style={{ color:"#6B7FA8", fontSize:15.5 }}>This portal is restricted to authorised Final Pass Down administrators.</p>
               </div>
 
               {error && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
                   <AlertCircle size={15} color="#FC8181"/>
-                  <span style={{ color:"#FC8181", fontSize:13 }}>{error}</span>
+                  <span style={{ color:"#FC8181", fontSize:14.5 }}>{error}</span>
                 </div>
               )}
 
               <div className="mb-3 px-4 py-3 rounded-xl" style={{ background:"rgba(91,167,214,0.08)", border:"1px solid rgba(91,167,214,0.2)" }}>
-                <p style={{ color:"#6FAE8B", fontSize:11, ...MONO }}>DEMO CREDENTIALS</p>
-                <p style={{ color:"#B8C8E0", fontSize:12, marginTop:2 }}>admin@finalpassdown.com / Admin2026!</p>
+                <p style={{ color:"#6FAE8B", fontSize:12.5, ...MONO }}>DEMO CREDENTIALS</p>
+                <p style={{ color:"#B8C8E0", fontSize:13.5, marginTop:2 }}>admin@finalpassdown.com / Admin2026!</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label style={{ color:"#6B7FA8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ADMIN EMAIL</label>
+                  <label style={{ color:"#6B7FA8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>ADMIN EMAIL</label>
                   <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="admin@finalpassdown.com"
                     className="w-full px-4 py-3.5 rounded-xl"
-                    style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
+                    style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:15.5, outline:"none" }}/>
                 </div>
                 <div>
-                  <label style={{ color:"#6B7FA8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>PASSWORD</label>
+                  <label style={{ color:"#6B7FA8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>PASSWORD</label>
                   <div className="relative">
                     <input type={showPw?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••••"
                       className="w-full px-4 py-3.5 rounded-xl pr-12"
-                      style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
+                      style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:15.5, outline:"none" }}/>
                     <button type="button" onClick={()=>setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color:"#6B7FA8" }}>
                       {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
                     </button>
                   </div>
                 </div>
                 <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-sm mt-2"
-                  style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: loading ? "#6FAE8B" : "#04080F", fontSize:15, boxShadow: loading ? "none" : "0 0 30px rgba(91,167,214,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>
+                  style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: loading ? "#6FAE8B" : "#04080F", fontSize:17, boxShadow: loading ? "none" : "0 0 30px rgba(91,167,214,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>
                   {loading ? "Authenticating..." : "Sign In to Admin Portal"}
                 </button>
               </form>
@@ -150,22 +150,22 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                   style={{ background:"rgba(91,167,214,0.12)", border:"1px solid rgba(91,167,214,0.3)", boxShadow:"0 0 30px rgba(91,167,214,0.15)" }}>
                   <Lock size={28} color="#FFFFFF"/>
                 </div>
-                <h2 style={{ fontFamily:"var(--font-display)", fontSize:24, color:"#E8EDF5", marginBottom:8 }}>Two-Factor Verification</h2>
-                <p style={{ color:"#6B7FA8", fontSize:14 }}>Enter the 6-digit code from your authenticator app.</p>
-                <p style={{ color:"#6FAE8B", fontSize:12, marginTop:6, ...MONO }}>Demo: use any 6 digits</p>
+                <h2 style={{ fontFamily:"var(--font-display)", fontSize:27, color:"#E8EDF5", marginBottom:8 }}>Two-Factor Verification</h2>
+                <p style={{ color:"#6B7FA8", fontSize:15.5 }}>Enter the 6-digit code from your authenticator app.</p>
+                <p style={{ color:"#6FAE8B", fontSize:13.5, marginTop:6, ...MONO }}>Demo: use any 6 digits</p>
               </div>
               {error && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
                   <AlertCircle size={15} color="#FC8181"/>
-                  <span style={{ color:"#FC8181", fontSize:13 }}>{error}</span>
+                  <span style={{ color:"#FC8181", fontSize:14.5 }}>{error}</span>
                 </div>
               )}
               <form onSubmit={handleMfa}>
                 <input type="text" value={mfaCode} onChange={e=>setMfaCode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="000000" maxLength={6}
                   className="w-full px-6 py-5 rounded-xl text-center mb-5"
-                  style={{ background:"rgba(91,167,214,0.06)", border:"2px solid rgba(91,167,214,0.3)", color:"#6FAE8B", fontSize:32, outline:"none", letterSpacing:"0.5em", ...MONO }}/>
+                  style={{ background:"rgba(91,167,214,0.06)", border:"2px solid rgba(91,167,214,0.3)", color:"#6FAE8B", fontSize:36, outline:"none", letterSpacing:"0.5em", ...MONO }}/>
                 <button type="submit" disabled={loading || mfaCode.length < 6} className="w-full py-4 rounded-xl font-bold text-sm"
-                  style={{ background: (loading || mfaCode.length < 6) ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color:(loading || mfaCode.length < 6)?"#6FAE8B":"#04080F", fontSize:15, boxShadow:(loading || mfaCode.length < 6)?"none":"0 0 30px rgba(91,167,214,0.35)" }}>
+                  style={{ background: (loading || mfaCode.length < 6) ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color:(loading || mfaCode.length < 6)?"#6FAE8B":"#04080F", fontSize:17, boxShadow:(loading || mfaCode.length < 6)?"none":"0 0 30px rgba(91,167,214,0.35)" }}>
                   {loading ? "Verifying..." : "Verify & Enter Admin Portal"}
                 </button>
               </form>

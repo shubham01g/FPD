@@ -205,10 +205,10 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
     <div>
       <div className="flex items-center justify-between mb-1">
         <div>
-          <span style={{ color:"#E8EDF5", fontSize:13 }}>{label}</span>
-          {subtext && <span style={{ color:"#8A9AB8", fontSize:11, marginLeft:6 }}>{subtext}</span>}
+          <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{label}</span>
+          {subtext && <span style={{ color:"#8A9AB8", fontSize:12.5, marginLeft:6 }}>{subtext}</span>}
         </div>
-        <span style={{ color, fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+        <span style={{ color, fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>
           {value !== undefined ? value : `${pct}%`}
         </span>
       </div>
@@ -222,9 +222,9 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
 function StatChip({ label, value, sub, color }: { label:string; value:string|number; sub?:string; color:string }) {
   return (
     <div className="p-4 rounded-2xl" style={{ background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" }}>
-      <div style={{ fontFamily:"var(--font-display)", fontSize:26, color, lineHeight:1 }}>{value}</div>
-      <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:500, marginTop:4 }}>{label}</div>
-      {sub && <div style={{ color:"#8A9AB8", fontSize:10, marginTop:2 }}>{sub}</div>}
+      <div style={{ fontFamily:"var(--font-display)", fontSize:29, color, lineHeight:1 }}>{value}</div>
+      <div style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:500, marginTop:4 }}>{label}</div>
+      {sub && <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>{sub}</div>}
     </div>
   );
 }
@@ -232,8 +232,8 @@ function StatChip({ label, value, sub, color }: { label:string; value:string|num
 function SectionHead({ title, sub }: { title:string; sub?:string }) {
   return (
     <div className="flex items-baseline gap-3 mb-4">
-      <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>{title}</div>
-      {sub && <div style={{ color:"#8A9AB8", fontSize:12 }}>{sub}</div>}
+      <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>{title}</div>
+      {sub && <div style={{ color:"#8A9AB8", fontSize:13.5 }}>{sub}</div>}
     </div>
   );
 }
@@ -251,11 +251,11 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
   const h = Math.round((pct / 100) * 120);
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-      {topLabel && <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{topLabel}</span>}
+      {topLabel && <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>{topLabel}</span>}
       <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
         <div style={{ width:"100%", height:h, background:color, borderRadius:"4px 4px 0 0" }}/>
       </div>
-      <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)", textAlign:"center", lineHeight:1.2 }}>{label}</span>
+      <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)", textAlign:"center", lineHeight:1.2 }}>{label}</span>
     </div>
   );
 }
@@ -323,7 +323,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
   }
 
   const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
-  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   return (
@@ -337,8 +337,8 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               <UserPlus size={16} color="#FFFFFF"/>
             </div>
             <div>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Manually Onboard User</div>
-              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO_S }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Manually Onboard User</div>
+              <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S }}>
                 {step === "info" ? "1 · Contact Information" : step === "plan" ? "2 · Package & Billing" : "3 · Review & Create"}
               </div>
             </div>
@@ -357,7 +357,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 { label:"PHONE NUMBER",   key:"phone", ph:"+1 (555) 000-0000",         type:"tel" },
               ].map(f => (
                 <div key={f.key}>
-                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>{f.label}</label>
+                  <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:5 }}>{f.label}</label>
                   <input type={f.type} value={(form as any)[f.key]} placeholder={f.ph}
                     onChange={e => setForm(p => ({ ...p, [f.key]:e.target.value }))} style={INPUT}/>
                 </div>
@@ -368,9 +368,9 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 <div>
                   <div className="flex items-center gap-2">
                     <Star size={14} color="#FFFFFF"/>
-                    <span style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>White Glove Service</span>
+                    <span style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>White Glove Service</span>
                   </div>
-                  <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Assign a dedicated FPD concierge to assist this user</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:2 }}>Assign a dedicated FPD concierge to assist this user</div>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, whiteGlove:!p.whiteGlove, subscriptionWaived: !p.whiteGlove || p.subscriptionWaived }))}
                   style={{ color:form.whiteGlove?"#6FAE8B":"#8A9AB8" }}>
@@ -379,7 +379,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               </div>
 
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>ADMIN NOTES (optional)</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:5 }}>ADMIN NOTES (optional)</label>
                 <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes:e.target.value }))} rows={2}
                   placeholder="e.g. Client's daughter called on their behalf. Needs full setup assistance."
                   className="w-full resize-none" style={INPUT}/>
@@ -399,7 +399,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
           {step === "plan" && (
             <>
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:10 }}>SELECT SUBSCRIPTION PACKAGE</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:10 }}>SELECT SUBSCRIPTION PACKAGE</label>
                 <div className="space-y-2">
                   {PLANS.map(plan => (
                     <button key={plan.id} onClick={() => setForm(p => ({ ...p, plan:plan.id }))}
@@ -409,13 +409,13 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                       <div className="flex items-center gap-3">
                         <div style={{ width:10, height:10, borderRadius:"50%", background:plan.color, flexShrink:0 }}/>
                         <div className="text-left">
-                          <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{plan.name}</div>
-                          <div style={{ color:"#8A9AB8", fontSize:11 }}>{plan.storage} storage</div>
+                          <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>{plan.name}</div>
+                          <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{plan.storage} storage</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div style={{ color:plan.color, fontFamily:"var(--font-display)", fontSize:16, fontWeight:700 }}>
-                          {form.subscriptionWaived ? <span style={{ textDecoration:"line-through", color:"#8A9AB8", fontSize:13 }}>${plan.price}/mo</span> : `$${plan.price}/mo`}
+                        <div style={{ color:plan.color, fontFamily:"var(--font-display)", fontSize:18, fontWeight:700 }}>
+                          {form.subscriptionWaived ? <span style={{ textDecoration:"line-through", color:"#8A9AB8", fontSize:14.5 }}>${plan.price}/mo</span> : `$${plan.price}/mo`}
                         </div>
                         {form.plan===plan.id && <CheckCircle size={14} color={plan.color}/>}
                       </div>
@@ -431,8 +431,8 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   <div className="flex items-center gap-2">
                     <Gift size={15} color={form.subscriptionWaived?"#48BB78":"#5B6EE1"}/>
                     <div>
-                      <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>Waive Subscription Fee</div>
-                      <div style={{ color:"#8A9AB8", fontSize:11 }}>User gets full access at $0/mo</div>
+                      <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>Waive Subscription Fee</div>
+                      <div style={{ color:"#8A9AB8", fontSize:12.5 }}>User gets full access at $0/mo</div>
                     </div>
                   </div>
                   <button onClick={() => setForm(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
@@ -442,7 +442,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 </div>
                 {form.subscriptionWaived && (
                   <div className="px-4 py-3 border-t" style={{ borderColor:"rgba(72,187,120,0.2)" }}>
-                    <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:6 }}>WAIVER REASON</label>
+                    <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:6 }}>WAIVER REASON</label>
                     <div className="grid grid-cols-2 gap-2">
                       {WAIVE_REASONS.map(r => (
                         <button key={r.id} onClick={() => setForm(p => ({ ...p, waiveReason:r.id }))}
@@ -462,7 +462,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
               <div className="flex items-center justify-between p-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
                 <div className="flex items-center gap-2">
                   <Send size={13} color="#FFFFFF"/>
-                  <span style={{ color:"#E8EDF5", fontSize:13 }}>Send welcome email to user</span>
+                  <span style={{ color:"#E8EDF5", fontSize:14.5 }}>Send welcome email to user</span>
                 </div>
                 <button onClick={() => setForm(p => ({ ...p, sendWelcome:!p.sendWelcome }))}
                   style={{ color:form.sendWelcome?"#6E90C9":"#8A9AB8" }}>
@@ -497,23 +497,23 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 ].map((row, i) => (
                   <div key={row.label} className="flex items-center px-4 py-3"
                     style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
-                    <span style={{ color:"#8A9AB8", fontSize:11, width:120, flexShrink:0, ...MONO_S }}>{row.label.toUpperCase()}</span>
-                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#D99A6B":row.label==="White Glove"&&form.whiteGlove?"#6FAE8B":"#E8EDF5", fontSize:13, fontWeight:500 }}>{row.value}</span>
+                    <span style={{ color:"#8A9AB8", fontSize:12.5, width:120, flexShrink:0, ...MONO_S }}>{row.label.toUpperCase()}</span>
+                    <span style={{ color:row.label==="Monthly"&&form.subscriptionWaived?"#D99A6B":row.label==="White Glove"&&form.whiteGlove?"#6FAE8B":"#E8EDF5", fontSize:14.5, fontWeight:500 }}>{row.value}</span>
                   </div>
                 ))}
               </div>
 
               {form.notes && (
                 <div className="px-4 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
-                  <div style={{ color:"#8A9AB8", fontSize:10, ...MONO_S, marginBottom:4 }}>ADMIN NOTES</div>
-                  <div style={{ color:"#8A9AB8", fontSize:12 }}>{form.notes}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, marginBottom:4 }}>ADMIN NOTES</div>
+                  <div style={{ color:"#8A9AB8", fontSize:13.5 }}>{form.notes}</div>
                 </div>
               )}
 
               {form.subscriptionWaived && (
                 <div className="flex items-start gap-2 px-4 py-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
                   <Gift size={13} color="#FFFFFF" style={{ marginTop:1 }}/>
-                  <p style={{ color:"#D99A6B", fontSize:12 }}>
+                  <p style={{ color:"#D99A6B", fontSize:13.5 }}>
                     <strong>Subscription waived.</strong> This account will be created with full {selectedPlan.name} access at $0/mo. The waiver and reason are logged in the audit trail.
                   </p>
                 </div>
@@ -591,7 +591,7 @@ function PushNotificationCenter() {
   const [channel, setChannel] = useState<"push"|"email"|"both">("push");
 
   const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
-  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
   const recipientCount = TARGET_COUNTS[target];
@@ -632,8 +632,8 @@ function PushNotificationCenter() {
           { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:29, color:s.color }}>{s.value}</div>
+            <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -654,11 +654,11 @@ function PushNotificationCenter() {
         <div className="grid md:grid-cols-2 gap-5">
           {/* Form */}
           <div className="p-6 rounded-2xl space-y-4" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Compose Push Notification</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Compose Push Notification</div>
 
             {/* Type */}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>NOTIFICATION TYPE</label>
+              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:7 }}>NOTIFICATION TYPE</label>
               <div className="flex flex-wrap gap-2">
                 {(Object.entries(NOTIF_TYPE_COLORS) as [NotifType,string][]).map(([id, color]) => (
                   <button key={id} onClick={() => setType(id)}
@@ -674,7 +674,7 @@ function PushNotificationCenter() {
 
             {/* Target audience */}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>TARGET AUDIENCE</label>
+              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:7 }}>TARGET AUDIENCE</label>
               <div className="flex flex-wrap gap-2">
                 {(Object.entries(TARGET_LABELS) as [NotifTarget,string][]).map(([id, label]) => (
                   <button key={id} onClick={() => setTarget(id)}
@@ -686,14 +686,14 @@ function PushNotificationCenter() {
                   </button>
                 ))}
               </div>
-              <div style={{ color:"#D99A6B", fontSize:11, marginTop:6 }}>
+              <div style={{ color:"#D99A6B", fontSize:12.5, marginTop:6 }}>
                 📣 Will reach <strong>{TARGET_COUNTS[target].toLocaleString()}</strong> users
               </div>
             </div>
 
             {/* Delivery channel */}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
+              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
               <div className="grid grid-cols-3 gap-2">
                 {([
                   { id:"push",  label:"Push Only",  icon:"🔔", desc:"In-app + device notification" },
@@ -703,9 +703,9 @@ function PushNotificationCenter() {
                   <button key={ch.id} onClick={() => setChannel(ch.id)}
                     className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl text-center transition-all"
                     style={{ background:channel===ch.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.03)", border:`1px solid ${channel===ch.id?"#5B6EE1":"rgba(91,110,225,0.12)"}` }}>
-                    <span style={{ fontSize:18 }}>{ch.icon}</span>
-                    <span style={{ fontSize:11, fontWeight:700, color:channel===ch.id?"#6E90C9":"#8A9AB8" }}>{ch.label}</span>
-                    <span style={{ fontSize:9, color:"#8A9AB8", lineHeight:1.3 }}>{ch.desc}</span>
+                    <span style={{ fontSize:20 }}>{ch.icon}</span>
+                    <span style={{ fontSize:12.5, fontWeight:700, color:channel===ch.id?"#6E90C9":"#8A9AB8" }}>{ch.label}</span>
+                    <span style={{ fontSize:10, color:"#8A9AB8", lineHeight:1.3 }}>{ch.desc}</span>
                   </button>
                 ))}
               </div>
@@ -720,7 +720,7 @@ function PushNotificationCenter() {
 
             {/* Title */}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
+              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:5 }}>
                 NOTIFICATION TITLE * <span style={{ color:"#8A9AB8" }}>({title.length}/65 chars)</span>
               </label>
               <input value={title} onChange={e => setTitle(e.target.value.slice(0,65))}
@@ -729,7 +729,7 @@ function PushNotificationCenter() {
 
             {/* Body */}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>
+              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:5 }}>
                 MESSAGE * <span style={{ color:"#8A9AB8" }}>({body.length}/240 chars)</span>
               </label>
               <textarea value={body} onChange={e => setBody(e.target.value.slice(0,240))} rows={4}
@@ -741,8 +741,8 @@ function PushNotificationCenter() {
             <div className="flex items-center justify-between p-3 rounded-2xl"
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Schedule for later</div>
-                <div style={{ color:"#8A9AB8", fontSize:11 }}>Send at a specific date and time</div>
+                <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>Schedule for later</div>
+                <div style={{ color:"#8A9AB8", fontSize:12.5 }}>Send at a specific date and time</div>
               </div>
               <button onClick={() => setScheduleMode(!scheduleMode)}
                 style={{ color:scheduleMode?"#6E90C9":"#8A9AB8" }}>
@@ -751,7 +751,7 @@ function PushNotificationCenter() {
             </div>
             {scheduleMode && (
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO_S, display:"block", marginBottom:5 }}>SCHEDULE DATE & TIME</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO_S, display:"block", marginBottom:5 }}>SCHEDULE DATE & TIME</label>
                 <input type="datetime-local" value={scheduleDate}
                   onChange={e => setScheduleDate(e.target.value)} style={INPUT}/>
               </div>
@@ -778,11 +778,11 @@ function PushNotificationCenter() {
           {/* Live preview */}
           <div className="space-y-4">
             <div className="p-5 rounded-2xl" style={CARD}>
-              <div style={{ color:"#8A9AB8", fontSize:12, fontFamily:"var(--font-mono)", marginBottom:12 }}>LIVE PREVIEW</div>
+              <div style={{ color:"#8A9AB8", fontSize:13.5, fontFamily:"var(--font-mono)", marginBottom:12 }}>LIVE PREVIEW</div>
 
               {/* Mobile push notification mockup */}
               <div className="rounded-2xl p-4 space-y-3" style={{ background:"#1A1A2E", border:"1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, fontFamily:"var(--font-mono)" }}>LOCK SCREEN NOTIFICATION</div>
+                <div style={{ color:"rgba(255,255,255,0.4)", fontSize:11, fontFamily:"var(--font-mono)" }}>LOCK SCREEN NOTIFICATION</div>
                 <div className="flex items-start gap-3 p-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.08)", backdropFilter:"blur(10px)" }}>
                   <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
@@ -790,13 +790,13 @@ function PushNotificationCenter() {
                     <Bell size={18} color="#fff"/>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:2 }}>
+                    <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600, marginBottom:2 }}>
                       {title || "Notification Title"}
                     </div>
-                    <div style={{ color:"rgba(255,255,255,0.6)", fontSize:12, lineHeight:1.5 }} className="line-clamp-2">
+                    <div style={{ color:"rgba(255,255,255,0.6)", fontSize:13.5, lineHeight:1.5 }} className="line-clamp-2">
                       {body || "Your notification message will appear here…"}
                     </div>
-                    <div style={{ color:"rgba(255,255,255,0.3)", fontSize:10, marginTop:4 }}>
+                    <div style={{ color:"rgba(255,255,255,0.3)", fontSize:11, marginTop:4 }}>
                       Final Pass Down · now
                     </div>
                   </div>
@@ -805,15 +805,15 @@ function PushNotificationCenter() {
 
               {/* In-app notification preview */}
               <div className="mt-4 rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(91,110,225,0.25)" }}>
-                <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
+                <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
                 <div className="flex items-start gap-3 px-4 py-3 rounded-2xl"
                   style={{ background:"#fff", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <div className="rounded-full flex-shrink-0"
                     style={{ width:8, height:8, marginTop:5, background:NOTIF_TYPE_COLORS[type], boxShadow:`0 0 8px ${NOTIF_TYPE_COLORS[type]}` }}/>
                   <div>
-                    <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{title || "Notification Title"}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{body || "Message preview…"}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:10, marginTop:4 }}>just now</div>
+                    <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>{title || "Notification Title"}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{body || "Message preview…"}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>just now</div>
                   </div>
                 </div>
               </div>
@@ -821,7 +821,7 @@ function PushNotificationCenter() {
 
             {/* Tips */}
             <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)" }}>
-              <div style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
+              <div style={{ color:"#6E90C9", fontSize:12.5, fontFamily:"var(--font-mono)", fontWeight:700, marginBottom:8 }}>BEST PRACTICES</div>
               <ul className="space-y-1.5">
                 {[
                   "Keep titles under 50 characters for full display on all devices",
@@ -832,7 +832,7 @@ function PushNotificationCenter() {
                 ].map(tip => (
                   <li key={tip} className="flex items-start gap-2">
                     <div style={{ width:4, height:4, borderRadius:"50%", background:"#5B6EE1", marginTop:6, flexShrink:0 }}/>
-                    <span style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.6 }}>{tip}</span>
+                    <span style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.6 }}>{tip}</span>
                   </li>
                 ))}
               </ul>
@@ -854,7 +854,7 @@ function PushNotificationCenter() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>{n.title}</span>
+                      <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>{n.title}</span>
                       <span className="px-2 py-0.5 rounded-full text-xs font-bold capitalize"
                         style={{ background:`${NOTIF_TYPE_COLORS[n.type]}15`, color:NOTIF_TYPE_COLORS[n.type], fontFamily:"var(--font-mono)" }}>
                         {n.type}
@@ -866,8 +866,8 @@ function PushNotificationCenter() {
                         </span>
                       )}
                     </div>
-                    <div style={{ color:"#8A9AB8", fontSize:12, marginTop:3, lineHeight:1.5 }}>{n.body}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:11, marginTop:4 }}>
+                    <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:3, lineHeight:1.5 }}>{n.body}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:4 }}>
                       Sent: {n.sentAt} · Target: {TARGET_LABELS[n.target]}
                     </div>
                   </div>
@@ -875,16 +875,16 @@ function PushNotificationCenter() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                  <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>DELIVERED</div>
-                  <div style={{ color:"#6E90C9", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>DELIVERED</div>
+                  <div style={{ color:"#6E90C9", fontSize:18, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
                 </div>
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                  <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPENED</div>
-                  <div style={{ color:"#D99A6B", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>OPENED</div>
+                  <div style={{ color:"#D99A6B", fontSize:18, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.opened.toLocaleString()}</div>
                 </div>
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                  <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>OPEN RATE</div>
-                  <div style={{ color:n.openRate > 50 ? "#D99A6B" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>
+                  <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>OPEN RATE</div>
+                  <div style={{ color:n.openRate > 50 ? "#D99A6B" : n.openRate > 30 ? "#F6AD55" : "#FC8181", fontSize:18, fontWeight:700, fontFamily:"var(--font-display)" }}>
                     {n.openRate}%
                   </div>
                 </div>
@@ -934,10 +934,10 @@ export function MasterAdmin() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Crown size={15} color="#FFFFFF" />
-            <span style={{ color:"#6E90C9", fontSize:11, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
+            <span style={{ color:"#6E90C9", fontSize:12.5, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#E8EDF5" }}>Platform Command Center</h1>
-          <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>Platform Command Center</h1>
+          <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowOnboard(true)}
@@ -947,7 +947,7 @@ export function MasterAdmin() {
           </button>
           <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
             <Activity size={13} color="#FFFFFF" />
-            <span style={{ color:"#D99A6B", fontSize:11, ...MONO }}>LIVE · Jun 24, 2026</span>
+            <span style={{ color:"#D99A6B", fontSize:12.5, ...MONO }}>LIVE · Jun 24, 2026</span>
           </div>
         </div>
       </div>
@@ -956,7 +956,7 @@ export function MasterAdmin() {
       {manualUsers.length > 0 && (
         <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
           <UserPlus size={14} color="#FFFFFF"/>
-          <span style={{ color:"#6E90C9", fontSize:12, fontWeight:600 }}>Manually Onboarded:</span>
+          <span style={{ color:"#6E90C9", fontSize:13.5, fontWeight:600 }}>Manually Onboarded:</span>
           <div className="flex flex-wrap gap-2 flex-1">
             {manualUsers.slice(0,4).map(u => (
               <span key={u.id} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
@@ -966,9 +966,9 @@ export function MasterAdmin() {
                 {u.subscriptionWaived && <Gift size={9} color="#FFFFFF"/>}
               </span>
             ))}
-            {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:12 }}>+{manualUsers.length-4} more</span>}
+            {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:13.5 }}>+{manualUsers.length-4} more</span>}
           </div>
-          <button onClick={() => setTab("users")} style={{ color:"#6E90C9", fontSize:11, fontWeight:600 }}>View all →</button>
+          <button onClick={() => setTab("users")} style={{ color:"#6E90C9", fontSize:12.5, fontWeight:600 }}>View all →</button>
         </div>
       )}
 
@@ -977,15 +977,15 @@ export function MasterAdmin() {
         {topMetrics.map(m => (
           <div key={m.label} className="p-4 rounded-2xl" style={GLASS}>
             <div className="flex items-center justify-between mb-2">
-              <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
+              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
                 style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
-                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#D99A6B" : "#FC8181", fontSize:9, ...MONO }}>
+                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#D99A6B" : "#FC8181", fontSize:10, ...MONO }}>
                 {m.change>0 ? <ArrowUp size={8}/> : <ArrowDown size={8}/>}
                 {Math.abs(m.change)}%
               </div>
             </div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:m.color }}>{m.value}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:m.color }}>{m.value}</div>
           </div>
         ))}
       </div>
@@ -1056,11 +1056,11 @@ export function MasterAdmin() {
                     const h = Math.round((a.count/maxCount)*120);
                     return (
                       <div key={a.range} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-                        <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{a.pct}%</span>
+                        <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>{a.pct}%</span>
                         <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
                           <div style={{ width:"100%", height:h, background:a.color, borderRadius:"4px 4px 0 0", opacity:0.85 }}/>
                         </div>
-                        <span style={{ color:"#8A9AB8", fontSize:8, fontFamily:"var(--font-mono)", textAlign:"center", lineHeight:1.2 }}>{a.range}</span>
+                        <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)", textAlign:"center", lineHeight:1.2 }}>{a.range}</span>
                       </div>
                     );
                   })}
@@ -1072,12 +1072,12 @@ export function MasterAdmin() {
                   <div key={a.range} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
                     <div className="flex items-center gap-2">
                       <div style={{ width:8, height:8, borderRadius:"50%", background:a.color, flexShrink:0 }}/>
-                      <span style={{ color:"#E8EDF5", fontSize:12 }}>{a.range}</span>
+                      <span style={{ color:"#E8EDF5", fontSize:13.5 }}>{a.range}</span>
                     </div>
                     <div className="flex items-center gap-4 text-right">
-                      <span style={{ color:a.color, fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700 }}>{a.pct}%</span>
-                      <span style={{ color:"#8A9AB8", fontSize:11 }}>{a.count.toLocaleString()} users</span>
-                      <span style={{ color:"#8A9AB8", fontSize:10, fontStyle:"italic" }}>avg: {a.avgPlan}</span>
+                      <span style={{ color:a.color, fontSize:12.5, fontFamily:"var(--font-mono)", fontWeight:700 }}>{a.pct}%</span>
+                      <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{a.count.toLocaleString()} users</span>
+                      <span style={{ color:"#8A9AB8", fontSize:11, fontStyle:"italic" }}>avg: {a.avgPlan}</span>
                     </div>
                   </div>
                 ))}
@@ -1096,13 +1096,13 @@ export function MasterAdmin() {
                     <div key={s.state}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)", width:16, textAlign:"right" }}>{i+1}</span>
-                          <span style={{ color:"#E8EDF5", fontSize:13 }}>{s.state}</span>
-                          <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>({s.abbr})</span>
+                          <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)", width:16, textAlign:"right" }}>{i+1}</span>
+                          <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{s.state}</span>
+                          <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>({s.abbr})</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span style={{ color:"#8A9AB8", fontSize:11 }}>{s.users.toLocaleString()}</span>
-                          <span style={{ color:s.color, fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{s.pct}%</span>
+                          <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.users.toLocaleString()}</span>
+                          <span style={{ color:s.color, fontSize:12.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>{s.pct}%</span>
                         </div>
                       </div>
                       <div className="h-1.5 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
@@ -1136,12 +1136,12 @@ export function MasterAdmin() {
                   {cityData.map((c, i) => (
                     <div key={c.city} className="flex items-center justify-between py-1.5 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
                       <div className="flex items-center gap-2">
-                        <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)", width:14, textAlign:"right" }}>{i+1}</span>
-                        <span style={{ color:"#E8EDF5", fontSize:12 }}>{c.city}</span>
+                        <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)", width:14, textAlign:"right" }}>{i+1}</span>
+                        <span style={{ color:"#E8EDF5", fontSize:13.5 }}>{c.city}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span style={{ color:"#8A9AB8", fontSize:11 }}>{c.users.toLocaleString()}</span>
-                        <span style={{ color:"#6E90C9", fontSize:11, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
+                        <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{c.users.toLocaleString()}</span>
+                        <span style={{ color:"#6E90C9", fontSize:12.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>{c.pct}%</span>
                       </div>
                     </div>
                   ))}
@@ -1171,8 +1171,8 @@ export function MasterAdmin() {
                   { label:"PWA Installed", value:"34.2%", color:"#D99A6B" },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)" }}>
-                    <div style={{ color:s.color, fontSize:16, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:10 }}>{s.label}</div>
+                    <div style={{ color:s.color, fontSize:18, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -1226,12 +1226,12 @@ export function MasterAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                  <div style={{ color:"#D99A6B", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
-                  <div style={{ color:"#8A9AB8", fontSize:11 }}>Fully complete vaults</div>
+                  <div style={{ color:"#D99A6B", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>10.9%</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12.5 }}>Fully complete vaults</div>
                 </div>
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.15)" }}>
-                  <div style={{ color:"#F6AD55", fontSize:18, fontFamily:"var(--font-display)", fontWeight:700 }}>16.0%</div>
-                  <div style={{ color:"#8A9AB8", fontSize:11 }}>Just started (drop-off risk)</div>
+                  <div style={{ color:"#F6AD55", fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>16.0%</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12.5 }}>Just started (drop-off risk)</div>
                 </div>
               </div>
             </Card>
@@ -1244,11 +1244,11 @@ export function MasterAdmin() {
                   const h = Math.round((d.dau/maxDAU)*110);
                   return (
                     <div key={d.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-                      <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{(d.dau/1000).toFixed(1)}k</span>
+                      <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>{(d.dau/1000).toFixed(1)}k</span>
                       <div style={{ width:"100%", height:110, display:"flex", alignItems:"flex-end" }}>
                         <div style={{ width:"100%", height:h, background:"#5B6EE1", borderRadius:"4px 4px 0 0", opacity:d.month==="Jun"?1:0.6 }}/>
                       </div>
-                      <span style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>{d.month}</span>
+                      <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                     </div>
                   );
                 })}
@@ -1260,8 +1260,8 @@ export function MasterAdmin() {
                   { label:"Avg Session",     value:"10.2 min", color:"#D99A6B" },
                 ].map(s => (
                   <div key={s.label} className="text-center px-2 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)" }}>
-                    <div style={{ color:s.color, fontSize:15, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:10 }}>{s.label}</div>
+                    <div style={{ color:s.color, fontSize:17, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
+                    <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -1276,8 +1276,8 @@ export function MasterAdmin() {
                 {retentionData.map(r => (
                   <div key={r.month}>
                     <div className="flex items-center justify-between mb-1">
-                      <span style={{ color:"#E8EDF5", fontSize:13 }}>{r.month}</span>
-                      <span style={{ color:r.color, fontSize:13, fontWeight:700, fontFamily:"var(--font-mono)" }}>{r.retained}%</span>
+                      <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{r.month}</span>
+                      <span style={{ color:r.color, fontSize:14.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>{r.retained}%</span>
                     </div>
                     <div className="h-3 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                       <div className="h-3 rounded-full" style={{ width:`${r.retained}%`, background:r.color }}/>
@@ -1285,7 +1285,7 @@ export function MasterAdmin() {
                   </div>
                 ))}
                 <div className="px-3 py-2 rounded-2xl mt-2" style={{ background:"rgba(91,110,225,0.05)" }}>
-                  <span style={{ color:"#8A9AB8", fontSize:12 }}>
+                  <span style={{ color:"#8A9AB8", fontSize:13.5 }}>
                     Industry benchmark (legacy planning): 58–65% at Month 12. FPD at <strong style={{ color:"#D99A6B" }}>68.2%</strong> — above average.
                   </span>
                 </div>
@@ -1296,11 +1296,11 @@ export function MasterAdmin() {
               <SectionHead title="Net Promoter Score (NPS)" sub={`Score: ${npsData.score} — Industry avg: 32`}/>
               {/* NPS gauge */}
               <div className="text-center py-4">
-                <div style={{ fontFamily:"var(--font-display)", fontSize:64, lineHeight:1,
+                <div style={{ fontFamily:"var(--font-display)", fontSize:71.5, lineHeight:1,
                   color: npsData.score >= 50 ? "#D99A6B" : npsData.score >= 30 ? "#F6AD55" : "#FC8181" }}>
                   {npsData.score}
                 </div>
-                <div style={{ color:"#D99A6B", fontSize:14, fontWeight:600, marginTop:4 }}>
+                <div style={{ color:"#D99A6B", fontSize:15.5, fontWeight:600, marginTop:4 }}>
                   {npsData.score >= 50 ? "Excellent" : npsData.score >= 30 ? "Good" : "Needs Improvement"}
                 </div>
               </div>
@@ -1340,9 +1340,9 @@ export function MasterAdmin() {
                 { label:"2FA Enabled",              value:"44.1%",     sub:"Security adoption",     color:"#D99A6B" },
               ].map(m => (
                 <div key={m.label} className="p-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
-                  <div style={{ color:m.color, fontSize:20, fontFamily:"var(--font-display)", fontWeight:700 }}>{m.value}</div>
-                  <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:500, marginTop:2 }}>{m.label}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:10, marginTop:1 }}>{m.sub}</div>
+                  <div style={{ color:m.color, fontSize:22.5, fontFamily:"var(--font-display)", fontWeight:700 }}>{m.value}</div>
+                  <div style={{ color:"#E8EDF5", fontSize:12.5, fontWeight:500, marginTop:2 }}>{m.label}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1 }}>{m.sub}</div>
                 </div>
               ))}
             </div>
@@ -1356,10 +1356,10 @@ export function MasterAdmin() {
         <div className="space-y-5">
           <div className="grid lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:8 }}>Revenue — 6 Months (MRR + Overage)</h3>
               <div className="flex items-center gap-4 mb-4">
                 {[{color:"#6E90C9",label:"MRR"},{color:"#6FAE8B",label:"Overage"}].map(l=>(
-                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
+                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:13.5}}>{l.label}</span></div>
                 ))}
               </div>
               <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180 }}>
@@ -1373,14 +1373,14 @@ export function MasterAdmin() {
                         <div style={{flex:1,background:"#5B6EE1",borderRadius:"3px 3px 0 0",height:mrrH,opacity:0.85}}/>
                         <div style={{flex:1,background:"#5BA7D6",borderRadius:"3px 3px 0 0",height:ovH,opacity:0.85}}/>
                       </div>
-                      <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
+                      <span style={{color:"#8A9AB8",fontSize:11,...MONO}}>{d.month}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:16 }}>Plan Distribution</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:16 }}>Plan Distribution</h3>
               <div className="space-y-3">
                 {planDist.map(p => {
                   const total = planDist.reduce((s,x)=>s+x.value,0);
@@ -1388,8 +1388,8 @@ export function MasterAdmin() {
                   return (
                     <div key={p.name}>
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2"><div style={{width:8,height:8,borderRadius:2,background:p.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{p.name}</span></div>
-                        <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{p.value.toLocaleString()} · {pct}%</span>
+                        <div className="flex items-center gap-2"><div style={{width:8,height:8,borderRadius:2,background:p.color}}/><span style={{color:"#8A9AB8",fontSize:13.5}}>{p.name}</span></div>
+                        <span style={{color:"#E8EDF5",fontSize:13.5,...MONO}}>{p.value.toLocaleString()} · {pct}%</span>
                       </div>
                       <div className="h-2 rounded-full" style={{background:"rgba(255,255,255,0.08)"}}>
                         <div className="h-2 rounded-full" style={{width:`${pct}%`,background:p.color}}/>
@@ -1402,10 +1402,10 @@ export function MasterAdmin() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:8 }}>User Growth vs Churn</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:8 }}>User Growth vs Churn</h3>
               <div className="flex items-center gap-4 mb-4">
                 {[{color:"#6E90C9",label:"New Users"},{color:"#FC8181",label:"Churned"}].map(l=>(
-                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
+                  <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:13.5}}>{l.label}</span></div>
                 ))}
               </div>
               <div style={{ display:"flex", alignItems:"flex-end", gap:4, height:160 }}>
@@ -1417,26 +1417,26 @@ export function MasterAdmin() {
                         <div style={{flex:1,background:"#5B6EE1",borderRadius:"3px 3px 0 0",height:Math.round((d.new/maxNew)*130),opacity:0.85}}/>
                         <div style={{flex:1,background:"#FC8181",borderRadius:"3px 3px 0 0",height:Math.round((d.churn/maxNew)*130),opacity:0.85}}/>
                       </div>
-                      <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
+                      <span style={{color:"#8A9AB8",fontSize:11,...MONO}}>{d.month}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:16 }}>ID Verification Queue</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:16 }}>ID Verification Queue</h3>
               {pendingVerifications.length > 0 && (
                 <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-2xl" style={{background:"rgba(246,173,85,0.08)",border:"1px solid rgba(246,173,85,0.25)"}}>
                   <Clock size={13} color="#F6AD55"/>
-                  <span style={{color:"#F6AD55",fontSize:13}}>{pendingVerifications.length} contacts awaiting ID review</span>
+                  <span style={{color:"#F6AD55",fontSize:14.5}}>{pendingVerifications.length} contacts awaiting ID review</span>
                 </div>
               )}
               <div className="space-y-2">
                 {pendingVerifications.map(v=>(
                   <div key={v.id} className="flex items-center justify-between p-3 rounded-2xl" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                     <div>
-                      <div style={{color:"#E8EDF5",fontSize:13}}>{v.contact}</div>
-                      <div style={{color:"#8A9AB8",fontSize:11}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
+                      <div style={{color:"#E8EDF5",fontSize:14.5}}>{v.contact}</div>
+                      <div style={{color:"#8A9AB8",fontSize:12.5}}>For: {v.forUser} · {v.type} · {v.submitted}</div>
                     </div>
                     <div className="flex gap-2">
                       <button className="px-3 py-1 rounded-xl text-xs" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B",fontWeight:700}}>Approve</button>
@@ -1456,7 +1456,7 @@ export function MasterAdmin() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl flex-1" style={GLASS}>
               <Search size={13} color="#8A9AB8"/>
-              <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:13,width:"100%"}}/>
+              <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:14.5,width:"100%"}}/>
             </div>
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={GLASS}>
               <Filter size={13} color="#8A9AB8"/><span style={{color:"#8A9AB8"}}>Filter</span>
@@ -1468,21 +1468,21 @@ export function MasterAdmin() {
           <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
             <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
               {["ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map(h=>(
-                <div key={h} style={{color:"#8A9AB8",fontSize:10,...MONO}}>{h.toUpperCase()}</div>
+                <div key={h} style={{color:"#8A9AB8",fontSize:11,...MONO}}>{h.toUpperCase()}</div>
               ))}
             </div>
             {filteredUsers.map((user,i)=>(
               <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
-                <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{user.id}</span>
+                <span style={{color:"#8A9AB8",fontSize:11,...MONO}}>{user.id}</span>
                 <div>
-                  <div style={{color:"#E8EDF5",fontSize:13}}>{user.name}</div>
-                  <div style={{color:"#8A9AB8",fontSize:11}}>{user.email}</div>
+                  <div style={{color:"#E8EDF5",fontSize:14.5}}>{user.name}</div>
+                  <div style={{color:"#8A9AB8",fontSize:12.5}}>{user.email}</div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:10}}>{user.plan}</span>
-                <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{user.storage} GB</span>
-                <span style={{color:"#E8EDF5",fontSize:12,...MONO}}>{user.contacts}</span>
-                <span style={{color:"#6E90C9",fontSize:12,...MONO}}>{user.referrals}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#D99A6B":"#FC8181",...MONO,fontSize:9}}>{user.status.toUpperCase()}</span>
+                <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:11}}>{user.plan}</span>
+                <span style={{color:"#E8EDF5",fontSize:13.5,...MONO}}>{user.storage} GB</span>
+                <span style={{color:"#E8EDF5",fontSize:13.5,...MONO}}>{user.contacts}</span>
+                <span style={{color:"#6E90C9",fontSize:13.5,...MONO}}>{user.referrals}</span>
+                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#D99A6B":"#FC8181",...MONO,fontSize:10}}>{user.status.toUpperCase()}</span>
                 <div className="flex items-center gap-2">
                   <button onClick={()=>setSelectedUser(user)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
                   <button style={{color:"#8A9AB8"}}><Edit size={13}/></button>
@@ -1491,7 +1491,7 @@ export function MasterAdmin() {
               </div>
             ))}
           </div>
-          <div style={{color:"#8A9AB8",fontSize:12,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
+          <div style={{color:"#8A9AB8",fontSize:13.5,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
 
           {/* User detail modal — Overview / Edit Account / Billing / Security */}
           {selectedUser && (
@@ -1506,17 +1506,17 @@ export function MasterAdmin() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#6E90C9"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#6FAE8B"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#D99A6B"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
-                <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
-                <div style={{color:"#E8EDF5",fontSize:13,marginTop:4}}>{s.label}</div>
-                <div style={{color:"#8A9AB8",fontSize:11,marginTop:2,...MONO}}>{s.sub}</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:29,color:s.color}}>{s.value}</div>
+                <div style={{color:"#E8EDF5",fontSize:14.5,marginTop:4}}>{s.label}</div>
+                <div style={{color:"#8A9AB8",fontSize:12.5,marginTop:2,...MONO}}>{s.sub}</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:17,color:"#E8EDF5",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
             <div className="flex items-center gap-4 mb-4">
               {[{color:"#6E90C9",label:"Subscriptions"},{color:"#6FAE8B",label:"Overage"},{color:"#D99A6B",label:"Affiliates"}].map(l=>(
-                <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:12}}>{l.label}</span></div>
+                <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:13.5}}>{l.label}</span></div>
               ))}
             </div>
             <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:200 }}>
@@ -1529,7 +1529,7 @@ export function MasterAdmin() {
                       <div style={{flex:1,background:"#5BA7D6",borderRadius:"3px 3px 0 0",height:Math.round((d.overage/maxV)*160),opacity:0.85}}/>
                       <div style={{flex:1,background:"#48BB78",borderRadius:"3px 3px 0 0",height:Math.round((d.affiliates/maxV)*160),opacity:0.85}}/>
                     </div>
-                    <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{d.month}</span>
+                    <span style={{color:"#8A9AB8",fontSize:11,...MONO}}>{d.month}</span>
                   </div>
                 );
               })}
@@ -1544,23 +1544,23 @@ export function MasterAdmin() {
           <div className="grid md:grid-cols-3 gap-5">
             {storageByPlan.map(s=>(
               <div key={s.plan} className="p-6 rounded-2xl" style={GLASS}>
-                <div style={{color:"#6E90C9",fontSize:11,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
-                <div style={{fontFamily:"var(--font-display)",fontSize:28,color:"#E8EDF5"}}>{s.avgUsed} GB</div>
-                <div style={{color:"#8A9AB8",fontSize:13,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
+                <div style={{color:"#6E90C9",fontSize:12.5,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:31.5,color:"#E8EDF5"}}>{s.avgUsed} GB</div>
+                <div style={{color:"#8A9AB8",fontSize:14.5,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
                 <div className="h-2 rounded-full" style={{background:"rgba(91,110,225,0.1)"}}>
                   <div className="h-2 rounded-full" style={{width:`${(s.avgUsed/s.limit)*100}%`,background:"linear-gradient(90deg,#5B6EE1,#5B6EE1)",boxShadow:"0 0 8px rgba(91,110,225,0.4)"}}/>
                 </div>
-                <div style={{color:"#8A9AB8",fontSize:11,marginTop:6,...MONO}}>{Math.round((s.avgUsed/s.limit)*100)}% average utilization</div>
+                <div style={{color:"#8A9AB8",fontSize:12.5,marginTop:6,...MONO}}>{Math.round((s.avgUsed/s.limit)*100)}% average utilization</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:17,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals</h3>
             <div className="grid grid-cols-4 gap-4">
               {[{label:"Total Data Stored",value:"428.4 TB",color:"#6E90C9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6FAE8B"},{label:"Avg per User",value:"12.4 GB",color:"#D99A6B"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
                 <div key={s.label} className="p-4 rounded-2xl" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
-                  <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
-                  <div style={{color:"#8A9AB8",fontSize:12,marginTop:4}}>{s.label}</div>
+                  <div style={{fontFamily:"var(--font-display)",fontSize:24.5,color:s.color}}>{s.value}</div>
+                  <div style={{color:"#8A9AB8",fontSize:13.5,marginTop:4}}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -1574,8 +1574,8 @@ export function MasterAdmin() {
           <div className="grid grid-cols-4 gap-4">
             {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#D99A6B"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#6E90C9"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
-                <div style={{fontFamily:"var(--font-display)",fontSize:28,color:s.color}}>{s.value}</div>
-                <div style={{color:"#8A9AB8",fontSize:13,marginTop:4}}>{s.label}</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:31.5,color:s.color}}>{s.value}</div>
+                <div style={{color:"#8A9AB8",fontSize:14.5,marginTop:4}}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -1583,13 +1583,13 @@ export function MasterAdmin() {
             <div key={v.id} className="p-6 rounded-2xl" style={GLASS}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <div style={{fontFamily:"var(--font-display)",fontSize:16,color:"#E8EDF5",marginBottom:2}}>{v.contact}</div>
-                  <div style={{color:"#8A9AB8",fontSize:13}}>Submitted for: <strong style={{color:"#E8EDF5"}}>{v.forUser}</strong> · {v.type} · Submitted {v.submitted}</div>
+                  <div style={{fontFamily:"var(--font-display)",fontSize:18,color:"#E8EDF5",marginBottom:2}}>{v.contact}</div>
+                  <div style={{color:"#8A9AB8",fontSize:14.5}}>Submitted for: <strong style={{color:"#E8EDF5"}}>{v.forUser}</strong> · {v.type} · Submitted {v.submitted}</div>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs" style={{background:"rgba(246,173,85,0.12)",color:"#F6AD55",...MONO,fontWeight:700}}>PENDING REVIEW</span>
               </div>
               <div className="flex items-center gap-2 mb-4 p-4 rounded-2xl" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
-                <div style={{color:"#8A9AB8",fontSize:13}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
+                <div style={{color:"#8A9AB8",fontSize:14.5}}>⚠ Government ID document is uploaded and waiting for admin review. Click "View Document" to inspect the submitted ID.</div>
               </div>
               <div className="flex gap-3">
                 <button className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",border:"1px solid rgba(72,187,120,0.25)"}}>
@@ -1613,25 +1613,25 @@ export function MasterAdmin() {
           <div className="grid grid-cols-3 gap-4">
             {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#6E90C9"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#D99A6B"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
-                <div style={{fontFamily:"var(--font-display)",fontSize:26,color:s.color}}>{s.value}</div>
-                <div style={{color:"#E8EDF5",fontSize:13,marginTop:4}}>{s.label}</div>
-                <div style={{color:"#8A9AB8",fontSize:11,marginTop:2,...MONO}}>{s.n} recipients</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:29,color:s.color}}>{s.value}</div>
+                <div style={{color:"#E8EDF5",fontSize:14.5,marginTop:4}}>{s.label}</div>
+                <div style={{color:"#8A9AB8",fontSize:12.5,marginTop:2,...MONO}}>{s.n} recipients</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
             <div className="flex items-center justify-between mb-4">
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>Pending Payouts</h3>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:17,color:"#E8EDF5"}}>Pending Payouts</h3>
               <button className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm" style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(91,110,225,0.3)"}}>Process All Pending</button>
             </div>
             {[{id:"PAY-0912",name:"James Doe",type:"Affiliate",amount:189.50,method:"ACH"},{id:"PAY-0911",name:"Sarah Chen",type:"Affiliate",amount:847.20,method:"ACH"},{id:"PAY-0910",name:"Greenfield Law Offices",type:"Partnership",amount:3359.88,method:"Wire"}].map((p,i)=>(
               <div key={p.id} className="flex items-center justify-between p-4 rounded-2xl mb-2" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.08)"}}>
                 <div>
-                  <div style={{color:"#E8EDF5",fontSize:13}}>{p.name}</div>
-                  <div style={{color:"#8A9AB8",fontSize:11,...MONO}}>{p.id} · {p.type} · {p.method}</div>
+                  <div style={{color:"#E8EDF5",fontSize:14.5}}>{p.name}</div>
+                  <div style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{p.id} · {p.type} · {p.method}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{fontFamily:"var(--font-display)",fontSize:18,color:"#6E90C9"}}>${p.amount.toFixed(2)}</span>
+                  <span style={{fontFamily:"var(--font-display)",fontSize:20,color:"#6E90C9"}}>${p.amount.toFixed(2)}</span>
                   <button className="px-3 py-1.5 rounded-xl text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B"}}>Process</button>
                 </div>
               </div>
@@ -1644,19 +1644,19 @@ export function MasterAdmin() {
       {tab === "audit" && (
         <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
           <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(91,110,225,0.1)"}}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>System Audit Log</h3>
-            <button className="flex items-center gap-2 text-sm" style={{color:"#6E90C9",...MONO,fontSize:12}}><Download size={13}/> Export</button>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:17,color:"#E8EDF5"}}>System Audit Log</h3>
+            <button className="flex items-center gap-2 text-sm" style={{color:"#6E90C9",...MONO,fontSize:13.5}}><Download size={13}/> Export</button>
           </div>
           {auditLogs.map((log,i)=>{
             const sc = {info:"#8A9AB8",warning:"#F6AD55",critical:"#FC8181"}[log.severity] ?? "#8A9AB8";
             return (
               <div key={log.id} className="flex items-center gap-4 px-5 py-3.5 border-b" style={{background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)"}}>
                 <div style={{width:7,height:7,borderRadius:"50%",background:sc,boxShadow:`0 0 6px ${sc}`,flexShrink:0}}/>
-                <div style={{color:"#8A9AB8",fontSize:10,...MONO,flexShrink:0,minWidth:80}}>{log.id}</div>
-                <div style={{color:"#8A9AB8",fontSize:12,flexShrink:0,minWidth:140,...MONO}}>{log.user}</div>
-                <div style={{color:"#E8EDF5",fontSize:13,flex:1}}>{log.action}</div>
-                <div style={{color:"#8A9AB8",fontSize:12,...MONO,flexShrink:0}}>{log.target}</div>
-                <div style={{color:"#8A9AB8",fontSize:11,...MONO,flexShrink:0}}>{log.time}</div>
+                <div style={{color:"#8A9AB8",fontSize:11,...MONO,flexShrink:0,minWidth:80}}>{log.id}</div>
+                <div style={{color:"#8A9AB8",fontSize:13.5,flexShrink:0,minWidth:140,...MONO}}>{log.user}</div>
+                <div style={{color:"#E8EDF5",fontSize:14.5,flex:1}}>{log.action}</div>
+                <div style={{color:"#8A9AB8",fontSize:13.5,...MONO,flexShrink:0}}>{log.target}</div>
+                <div style={{color:"#8A9AB8",fontSize:12.5,...MONO,flexShrink:0}}>{log.time}</div>
               </div>
             );
           })}
@@ -1670,30 +1670,30 @@ export function MasterAdmin() {
           <div className="p-6 rounded-2xl" style={GLASS}>
             <div className="flex items-center gap-2 mb-5">
               <DollarSign size={16} color="#FFFFFF"/>
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:16,color:"#E8EDF5"}}>Legacy Continuation Fee Configuration</h3>
-              <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{background:"rgba(246,173,85,0.1)",color:"#F6AD55",border:"1px solid rgba(246,173,85,0.25)",...MONO,fontSize:9}}>REAL-TIME — UPDATES VIA SUPABASE</span>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:18,color:"#E8EDF5"}}>Legacy Continuation Fee Configuration</h3>
+              <span className="ml-2 px-2 py-0.5 rounded text-xs" style={{background:"rgba(246,173,85,0.1)",color:"#F6AD55",border:"1px solid rgba(246,173,85,0.25)",...MONO,fontSize:10}}>REAL-TIME — UPDATES VIA SUPABASE</span>
             </div>
             <div className="grid md:grid-cols-3 gap-5 mb-5">
               {[{label:"Current Fee Amount",value:"$199.00",color:"#6E90C9"},{label:"Activation Window",value:"24 Months",color:"#D99A6B"},{label:"Total Revenue Collected",value:"$597.00",color:"#6FAE8B"}].map(s=>(
                 <div key={s.label} className="p-4 rounded-2xl" style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(91,110,225,0.1)"}}>
-                  <div style={{fontFamily:"var(--font-display)",fontSize:22,color:s.color}}>{s.value}</div>
-                  <div style={{color:"#8A9AB8",fontSize:12,marginTop:2}}>{s.label}</div>
+                  <div style={{fontFamily:"var(--font-display)",fontSize:24.5,color:s.color}}>{s.value}</div>
+                  <div style={{color:"#8A9AB8",fontSize:13.5,marginTop:2}}>{s.label}</div>
                 </div>
               ))}
             </div>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>FEE AMOUNT ($) — Shown to users on payment page</label>
+                <label style={{color:"#8A9AB8",fontSize:11,...MONO,display:"block",marginBottom:4}}>FEE AMOUNT ($) — Shown to users on payment page</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{background:"rgba(255,255,255,0.06)",border:"2px solid rgba(91,110,225,0.2)"}}>
                   <DollarSign size={14} color="#FFFFFF"/>
-                  <input defaultValue="199.00" type="number" step="0.01" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update fee amount in Supabase")}/>
+                  <input defaultValue="199.00" type="number" step="0.01" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:20,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update fee amount in Supabase")}/>
                 </div>
               </div>
               <div>
-                <label style={{color:"#8A9AB8",fontSize:10,...MONO,display:"block",marginBottom:4}}>ACTIVATION WINDOW (MONTHS) — After death certification</label>
+                <label style={{color:"#8A9AB8",fontSize:11,...MONO,display:"block",marginBottom:4}}>ACTIVATION WINDOW (MONTHS) — After death certification</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{background:"rgba(255,255,255,0.06)",border:"2px solid rgba(91,110,225,0.2)"}}>
                   <Clock size={14} color="#FFFFFF"/>
-                  <input defaultValue="24" type="number" step="1" min="1" max="120" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:18,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update period in Supabase")}/>
+                  <input defaultValue="24" type="number" step="1" min="1" max="120" style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:20,fontWeight:700,...MONO,width:"100%"}} onChange={() => toast.info("Save to update period in Supabase")}/>
                 </div>
               </div>
             </div>
@@ -1707,11 +1707,11 @@ export function MasterAdmin() {
           {/* Paid fees table */}
           <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.1)"}}>
             <div className="px-5 py-3 border-b" style={{background:"rgba(255,255,255,0.08)",borderColor:"rgba(91,110,225,0.08)"}}>
-              <h3 style={{fontFamily:"var(--font-display)",fontSize:15,color:"#E8EDF5"}}>All Legacy Continuation Fee Payments</h3>
+              <h3 style={{fontFamily:"var(--font-display)",fontSize:17,color:"#E8EDF5"}}>All Legacy Continuation Fee Payments</h3>
             </div>
             <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:"rgba(255,255,255,0.06)",borderBottom:"1px solid rgba(91,110,225,0.2)",gap:16,alignItems:"center"}}>
               {["ID","User","Paid By","Date","Amount","Status","Action"].map(h=>(
-                <div key={h} style={{color:"#8A9AB8",fontSize:10,...MONO}}>{h.toUpperCase()}</div>
+                <div key={h} style={{color:"#8A9AB8",fontSize:11,...MONO}}>{h.toUpperCase()}</div>
               ))}
             </div>
             {[
@@ -1720,18 +1720,18 @@ export function MasterAdmin() {
               {id:"LCF-0010",user:"Robert Kim",email:"r.kim@email.com",plan:"Foundation",paidBy:"Account Owner",date:"Apr 10, 2026",amount:"$199",status:"activated",activated:true,expires:"Apr 10, 2028"},
             ].map((fee,i) => (
               <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:16}}>
-                <span style={{color:"#8A9AB8",fontSize:10,...MONO}}>{fee.id}</span>
+                <span style={{color:"#8A9AB8",fontSize:11,...MONO}}>{fee.id}</span>
                 <div>
-                  <div style={{color:"#E8EDF5",fontSize:13,fontWeight:500}}>{fee.user}</div>
-                  <div style={{color:"#8A9AB8",fontSize:11}}>{fee.email} · {fee.plan}</div>
+                  <div style={{color:"#E8EDF5",fontSize:14.5,fontWeight:500}}>{fee.user}</div>
+                  <div style={{color:"#8A9AB8",fontSize:12.5}}>{fee.email} · {fee.plan}</div>
                 </div>
-                <span style={{color:"#8A9AB8",fontSize:12}}>{fee.paidBy}</span>
-                <span style={{color:"#8A9AB8",fontSize:12}}>{fee.date}</span>
-                <span style={{color:"#6E90C9",fontSize:13,fontWeight:700,...MONO}}>{fee.amount}</span>
+                <span style={{color:"#8A9AB8",fontSize:13.5}}>{fee.paidBy}</span>
+                <span style={{color:"#8A9AB8",fontSize:13.5}}>{fee.date}</span>
+                <span style={{color:"#6E90C9",fontSize:14.5,fontWeight:700,...MONO}}>{fee.amount}</span>
                 <div>
                   {fee.activated
-                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",...MONO,fontSize:9}}>ACTIVATED · Expires {fee.expires}</span>
-                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",...MONO,fontSize:9}}>PAID · AWAITING ACTIVATION</span>
+                    ? <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",...MONO,fontSize:10}}>ACTIVATED · Expires {fee.expires}</span>
+                    : <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:"rgba(72,187,120,0.12)",color:"#D99A6B",...MONO,fontSize:10}}>PAID · AWAITING ACTIVATION</span>
                   }
                 </div>
                 {!fee.activated
@@ -1740,14 +1740,14 @@ export function MasterAdmin() {
                       style={{background:"rgba(91,167,214,0.12)",color:"#6FAE8B",border:"1px solid rgba(91,167,214,0.25)"}}>
                       🛡 Activate
                     </button>
-                  : <span style={{color:"#8A9AB8",fontSize:11}}>Active ✓</span>
+                  : <span style={{color:"#8A9AB8",fontSize:12.5}}>Active ✓</span>
                 }
               </div>
             ))}
           </div>
           <div className="px-4 py-3 rounded-2xl border" style={{background:"rgba(91,110,225,0.03)",borderColor:"rgba(91,110,225,0.12)"}}>
-            <div style={{color:"#6E90C9",fontSize:11,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
-            <div style={{color:"#8A9AB8",fontSize:12,lineHeight:1.8}}>1. User or legacy contact pays the $199 fee via Stripe. 2. Admin receives notification. 3. When a death certificate is submitted and verified, admin clicks "Activate" above. 4. The vault stays fully accessible to all verified legacy contacts for the configured period. 5. Stripe webhook updates the Supabase <code>legacy_continuation_fees</code> table automatically.</div>
+            <div style={{color:"#6E90C9",fontSize:12.5,...MONO,fontWeight:700,marginBottom:4}}>ACTIVATION PROCESS</div>
+            <div style={{color:"#8A9AB8",fontSize:13.5,lineHeight:1.8}}>1. User or legacy contact pays the $199 fee via Stripe. 2. Admin receives notification. 3. When a death certificate is submitted and verified, admin clicks "Activate" above. 4. The vault stays fully accessible to all verified legacy contacts for the configured period. 5. Stripe webhook updates the Supabase <code>legacy_continuation_fees</code> table automatically.</div>
           </div>
         </div>
       )}
@@ -1758,10 +1758,10 @@ export function MasterAdmin() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Bell size={16} color="#FFFFFF"/>
-              <span style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
+              <span style={{ color:"#6E90C9", fontSize:12.5, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · PUSH NOTIFICATIONS</span>
             </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#E8EDF5" }}>Push Notification Center</h2>
-            <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:24.5, color:"#E8EDF5" }}>Push Notification Center</h2>
+            <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
               Send in-app and device push notifications to all users or specific plan segments. Track delivery and open rates.
             </p>
           </div>
@@ -1778,10 +1778,10 @@ export function MasterAdmin() {
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-2">
               <Bot size={16} color="#FFFFFF"/>
-              <span style={{ color:"#6FAE8B", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
+              <span style={{ color:"#6FAE8B", fontSize:12.5, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
             </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22, color:"#E8EDF5" }}>Admin AI Assistant</h2>
-            <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:24.5, color:"#E8EDF5" }}>Admin AI Assistant</h2>
+            <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
               Your Command Center expert. Ask anything about tabs, workflows, reports, ID verification, vault activation, team roles, White Glove billing, or getting started as a new hire.
             </p>
           </div>
@@ -1796,7 +1796,7 @@ export function MasterAdmin() {
             style={{ background:"rgba(91,110,225,0.05)", borderColor:"rgba(91,110,225,0.12)" }}>
             <div className="flex items-center gap-2">
               <UserPlus size={15} color="#FFFFFF"/>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>Manually Onboarded Accounts</span>
+              <span style={{ fontFamily:"var(--font-display)", fontSize:15.5, color:"#E8EDF5" }}>Manually Onboarded Accounts</span>
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                 style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
             </div>
@@ -1811,28 +1811,28 @@ export function MasterAdmin() {
             return (
               <div key={u.id} className="flex items-center gap-4 px-5 py-4 border-b"
                 style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>
-                <span style={{ color:"#6E90C9", fontSize:10, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
+                <span style={{ color:"#6E90C9", fontSize:11, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>{u.name}</span>
+                    <span style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>{u.name}</span>
                     {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
                   </div>
-                  <div style={{ color:"#8A9AB8", fontSize:11 }}>{u.email} · {u.onboardedAt}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{u.email} · {u.onboardedAt}</div>
                 </div>
                 <div className="text-center">
-                  <div style={{ color:plan.color, fontSize:12, fontWeight:700 }}>{plan.name}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:10 }}>{plan.storage}</div>
+                  <div style={{ color:plan.color, fontSize:13.5, fontWeight:700 }}>{plan.name}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:11 }}>{plan.storage}</div>
                 </div>
                 <div className="text-center">
                   {u.subscriptionWaived ? (
                     <div>
-                      <div style={{ color:"#D99A6B", fontSize:12, fontWeight:700 }}>$0.00/mo</div>
-                      <div style={{ color:"#D99A6B", fontSize:9, fontFamily:"var(--font-mono)" }}>WAIVED</div>
+                      <div style={{ color:"#D99A6B", fontSize:13.5, fontWeight:700 }}>$0.00/mo</div>
+                      <div style={{ color:"#D99A6B", fontSize:10, fontFamily:"var(--font-mono)" }}>WAIVED</div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ color:"#E8EDF5", fontSize:12, fontWeight:700 }}>${plan.price}/mo</div>
-                      <div style={{ color:"#8A9AB8", fontSize:9, fontFamily:"var(--font-mono)" }}>BILLING</div>
+                      <div style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:700 }}>${plan.price}/mo</div>
+                      <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>BILLING</div>
                     </div>
                   )}
                 </div>

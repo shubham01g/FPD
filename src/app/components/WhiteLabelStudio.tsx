@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import {
   Layers, Palette, Globe, Mail, Eye, Save, CheckCircle, Check,
   Monitor, Smartphone, Sparkles, Crown, Building2, ArrowRight,
@@ -14,7 +14,7 @@ import { toast } from "sonner";
 const GLASS: React.CSSProperties = { background: "#101728", border: "1px solid rgba(91,167,214,0.15)", boxShadow: "0 4px 24px rgba(91,167,214,0.08)", borderRadius: 20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
-const INPUT: React.CSSProperties = { background: "rgba(91,167,214,0.05)", border: "1px solid rgba(91,167,214,0.2)", color: "#FFFFFF", fontSize: 14, outline: "none", borderRadius: 12, padding: "11px 14px", width: "100%" };
+const INPUT: React.CSSProperties = { background: "rgba(91,167,214,0.05)", border: "1px solid rgba(91,167,214,0.2)", color: "#FFFFFF", fontSize: 15.5, outline: "none", borderRadius: 12, padding: "11px 14px", width: "100%" };
 
 const TEXT = "#FFFFFF";
 const SOFT = "rgba(255,255,255,0.72)";
@@ -61,10 +61,10 @@ function SectionCard({ icon, title, sub, children, step }: { icon: React.ReactNo
         <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.15)", color: "#6FAE8B" }}>{icon}</div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span style={{ ...MONO, color: "#6FAE8B", fontSize: 11 }}>STEP {step}</span>
+            <span style={{ ...MONO, color: "#6FAE8B", fontSize: 12.5 }}>STEP {step}</span>
           </div>
-          <h3 style={{ ...DISPLAY, fontSize: 18, color: TEXT, fontWeight: 600, marginTop: 2 }}>{title}</h3>
-          <p style={{ color: MUTED, fontSize: 13, marginTop: 3, lineHeight: 1.6 }}>{sub}</p>
+          <h3 style={{ ...DISPLAY, fontSize: 20, color: TEXT, fontWeight: 600, marginTop: 2 }}>{title}</h3>
+          <p style={{ color: MUTED, fontSize: 14.5, marginTop: 3, lineHeight: 1.6 }}>{sub}</p>
         </div>
       </div>
       {children}
@@ -75,7 +75,7 @@ function SectionCard({ icon, title, sub, children, step }: { icon: React.ReactNo
 function Field({ label, value, onChange, placeholder, icon, disabled }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; icon?: React.ReactNode; disabled?: boolean }) {
   return (
     <div>
-      <label style={{ color: MUTED, fontSize: 11, ...MONO, display: "block", marginBottom: 7 }}>{label.toUpperCase()}</label>
+      <label style={{ color: MUTED, fontSize: 12.5, ...MONO, display: "block", marginBottom: 7 }}>{label.toUpperCase()}</label>
       <div className="relative">
         {icon && <span style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{icon}</span>}
         <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
@@ -94,8 +94,8 @@ function UnlockBanner({ onPurchase }: { onPurchase?: () => void }) {
       <div className="flex items-start gap-3.5 min-w-0">
         <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(91,110,225,0.2)", color: "#6FAE8B" }}><Lock size={18} /></div>
         <div className="min-w-0">
-          <div style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 700 }}>White Label is locked</div>
-          <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6, marginTop: 3 }}>
+          <div style={{ ...DISPLAY, color: TEXT, fontSize: 18, fontWeight: 700 }}>White Label is locked</div>
+          <p style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.6, marginTop: 3 }}>
             Pick the partner package you want below, then activate to unlock branding, colors, and your custom domain.
           </p>
         </div>
@@ -117,7 +117,7 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <span style={{ color: MUTED, fontSize: 11, ...MONO }}>LIVE PLATFORM PREVIEW</span>
+        <span style={{ color: MUTED, fontSize: 12.5, ...MONO }}>LIVE PLATFORM PREVIEW</span>
         <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(91,167,214,0.06)" }}>
           {([["desktop", <Monitor size={13} key="d" />], ["mobile", <Smartphone size={13} key="m" />]] as const).map(([id, ic]) => (
             <button key={id} onClick={() => setDevice(id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all"
@@ -132,10 +132,10 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
         {/* branded top bar */}
         <div className="flex items-center justify-between px-4 py-3" style={{ background: "linear-gradient(90deg,rgba(91,110,225,0.10),transparent)", borderBottom: `1px solid ${primary}22` }}>
           <div className="flex items-center gap-2.5">
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: `linear-gradient(135deg,${primary},${accent})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff", ...DISPLAY }}>{(logo || "WL").slice(0, 3)}</div>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: `linear-gradient(135deg,${primary},${accent})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, fontWeight: 800, color: "#fff", ...DISPLAY }}>{(logo || "WL").slice(0, 3)}</div>
             <div className="min-w-0">
-              <div style={{ color: TEXT, fontSize: 13, fontWeight: 700, ...DISPLAY, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name || "Your Brand"}</div>
-              {device === "desktop" && <div style={{ color: MUTED, fontSize: 9.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{tagline || "Your tagline here"}</div>}
+              <div style={{ color: TEXT, fontSize: 14.5, fontWeight: 700, ...DISPLAY, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name || "Your Brand"}</div>
+              {device === "desktop" && <div style={{ color: MUTED, fontSize: 10.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{tagline || "Your tagline here"}</div>}
             </div>
           </div>
           <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${accent}33`, border: `1px solid ${accent}55` }} />
@@ -145,22 +145,22 @@ function LivePreview({ name, logo, tagline, primary, accent }: { name: string; l
           {device === "desktop" && (
             <div className="py-3 px-2 flex flex-col gap-1" style={{ width: 132, borderRight: `1px solid ${primary}18` }}>
               {navItems.map((n, i) => (
-                <div key={n} className="px-2.5 py-2 rounded-xl" style={{ background: i === 0 ? `${primary}22` : "transparent", color: i === 0 ? "#fff" : MUTED, fontSize: 11, fontWeight: i === 0 ? 600 : 400 }}>{n}</div>
+                <div key={n} className="px-2.5 py-2 rounded-xl" style={{ background: i === 0 ? `${primary}22` : "transparent", color: i === 0 ? "#fff" : MUTED, fontSize: 12.5, fontWeight: i === 0 ? 600 : 400 }}>{n}</div>
               ))}
             </div>
           )}
           <div className="flex-1 p-4">
-            <div style={{ color: TEXT, fontSize: 14, fontWeight: 700, ...DISPLAY, marginBottom: 3 }}>Welcome back</div>
-            <div style={{ color: MUTED, fontSize: 10.5, marginBottom: 12 }}>Here's your legacy at a glance.</div>
+            <div style={{ color: TEXT, fontSize: 15.5, fontWeight: 700, ...DISPLAY, marginBottom: 3 }}>Welcome back</div>
+            <div style={{ color: MUTED, fontSize: 12, marginBottom: 12 }}>Here's your legacy at a glance.</div>
             <div className="grid grid-cols-3 gap-2 mb-3">
               {["Documents", "Contacts", "Storage"].map((k, i) => (
                 <div key={k} className="rounded-2xl p-2.5" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${primary}18` }}>
-                  <div style={{ color: i === 0 ? primary : accent, fontSize: 15, fontWeight: 800, ...DISPLAY }}>{["128", "6", "62%"][i]}</div>
-                  <div style={{ color: MUTED, fontSize: 8.5 }}>{k}</div>
+                  <div style={{ color: i === 0 ? primary : accent, fontSize: 17, fontWeight: 800, ...DISPLAY }}>{["128", "6", "62%"][i]}</div>
+                  <div style={{ color: MUTED, fontSize: 9.5 }}>{k}</div>
                 </div>
               ))}
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: `linear-gradient(135deg,${primary},${accent})`, color: "#fff", fontSize: 11, fontWeight: 700 }}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: `linear-gradient(135deg,${primary},${accent})`, color: "#fff", fontSize: 12.5, fontWeight: 700 }}>
               Add to Vault <ArrowRight size={12} />
             </div>
           </div>
@@ -205,22 +205,22 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
         <div className="relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style={{ background: "rgba(91,110,225,0.12)", border: "1px solid rgba(91,110,225,0.3)" }}>
             <Layers size={13} color="#FFFFFF" />
-            <span style={{ color: "#6FAE8B", fontSize: 11, letterSpacing: "0.12em", ...MONO }}>WHITE LABEL STUDIO</span>
+            <span style={{ color: "#6FAE8B", fontSize: 12.5, letterSpacing: "0.12em", ...MONO }}>WHITE LABEL STUDIO</span>
           </div>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(1.7rem,3.4vw,2.5rem)", fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 640 }}>
+          <h1 style={{ ...DISPLAY, fontSize: "clamp(1.9rem,3.8vw,2.8rem)", fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 640 }}>
             Offer Final Pass Down under <span style={{ background: `linear-gradient(120deg,${ACCENT2},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>your own brand</span>
           </h1>
-          <p style={{ color: SOFT, fontSize: 15.5, lineHeight: 1.7, maxWidth: 560, marginTop: 12 }}>
+          <p style={{ color: SOFT, fontSize: 17.5, lineHeight: 1.7, maxWidth: 560, marginTop: 12 }}>
             Turn the entire platform into your product. Add your logo, colors, and domain, pick a partner package, and give your clients a fully-branded legacy vault — powered by us, badged as you.
           </p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6">
             {["Your domain & branding", "Lifetime recurring commission", "Dedicated onboarding"].map(t => (
-              <span key={t} className="flex items-center gap-2" style={{ color: MUTED, fontSize: 13 }}><CheckCircle size={14} color="#FFFFFF" /> {t}</span>
+              <span key={t} className="flex items-center gap-2" style={{ color: MUTED, fontSize: 14.5 }}><CheckCircle size={14} color="#FFFFFF" /> {t}</span>
             ))}
           </div>
           <div className="mt-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl" style={{ background: config.enabled ? "rgba(72,187,120,0.12)" : "rgba(91,167,214,0.08)", border: `1px solid ${config.enabled ? "rgba(72,187,120,0.35)" : "rgba(91,167,214,0.2)"}` }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: config.enabled ? SUCCESS : MUTED, boxShadow: config.enabled ? `0 0 10px ${SUCCESS}` : "none" }} />
-            <span style={{ color: config.enabled ? "#D99A6B" : MUTED, fontSize: 12.5, fontWeight: 600 }}>{config.enabled ? "White-label portal is LIVE" : "Draft — not published yet"}</span>
+            <span style={{ color: config.enabled ? "#D99A6B" : MUTED, fontSize: 14, fontWeight: 600 }}>{config.enabled ? "White-label portal is LIVE" : "Draft — not published yet"}</span>
           </div>
         </div>
       </div>
@@ -263,7 +263,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
             <div className="grid sm:grid-cols-2 gap-4">
               {([["Primary", "primaryColor"], ["Accent", "accentColor"]] as const).map(([lbl, key]) => (
                 <div key={key}>
-                  <label style={{ color: MUTED, fontSize: 11, ...MONO, display: "block", marginBottom: 7 }}>{lbl.toUpperCase()} COLOR</label>
+                  <label style={{ color: MUTED, fontSize: 12.5, ...MONO, display: "block", marginBottom: 7 }}>{lbl.toUpperCase()} COLOR</label>
                   <div className="flex items-center gap-2.5 rounded-2xl px-2.5 py-2" style={{ background: "rgba(91,167,214,0.05)", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.5 : 1 }}>
                     <input type="color" value={(config as any)[key]} onChange={e => update({ [key]: e.target.value } as any)} disabled={locked}
                       style={{ width: 34, height: 34, border: "none", borderRadius: 8, background: "transparent", cursor: locked ? "not-allowed" : "pointer", padding: 0 }} />
@@ -284,7 +284,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
             <Field label="Portal domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourbrand.com" icon={<Globe size={15} />} disabled={locked} />
             <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-2xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.15)" }}>
               <ShieldCheck size={15} color="#FFFFFF" style={{ marginTop: 1, flexShrink: 0 }} />
-              <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.65 }}>
+              <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.65 }}>
                 Point a <span style={{ color: SOFT, ...MONO }}>CNAME</span> record at <span style={{ color: "#6FAE8B", ...MONO }}>portals.finalpassdown.com</span> and we handle the rest — HTTPS, renewals, and routing. Your clients never see our name in the URL.
               </p>
             </div>
@@ -304,16 +304,16 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                         <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${pkg.color}22`, color: pkg.color }}>{TIER_ICON[pkg.tier] ?? <Star size={16} />}</div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span style={{ ...DISPLAY, color: TEXT, fontSize: 15.5, fontWeight: 700 }}>{pkg.name}</span>
-                            {pkg.badge && <span className="px-2 py-0.5 rounded-full" style={{ background: `${pkg.color}22`, color: pkg.color, fontSize: 10, fontWeight: 700, ...MONO }}>{pkg.badge}</span>}
+                            <span style={{ ...DISPLAY, color: TEXT, fontSize: 17.5, fontWeight: 700 }}>{pkg.name}</span>
+                            {pkg.badge && <span className="px-2 py-0.5 rounded-full" style={{ background: `${pkg.color}22`, color: pkg.color, fontSize: 11, fontWeight: 700, ...MONO }}>{pkg.badge}</span>}
                           </div>
-                          <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>{pkg.userLimitLabel} · <span style={{ color: "#D99A6B" }}>{pkg.commission}% lifetime commission</span></div>
-                          <div style={{ color: MUTED, fontSize: 11, marginTop: 3, ...MONO }}>{bl.setup}</div>
+                          <div style={{ color: MUTED, fontSize: 13.5, marginTop: 2 }}>{pkg.userLimitLabel} · <span style={{ color: "#D99A6B" }}>{pkg.commission}% lifetime commission</span></div>
+                          <div style={{ color: MUTED, fontSize: 12.5, marginTop: 3, ...MONO }}>{bl.setup}</div>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div style={{ ...DISPLAY, color: on ? pkg.color : TEXT, fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{bl.price}</div>
-                        <div style={{ color: MUTED, fontSize: 10.5, marginTop: 2 }}>{bl.unit}</div>
+                        <div style={{ ...DISPLAY, color: on ? pkg.color : TEXT, fontSize: 22.5, fontWeight: 800, lineHeight: 1 }}>{bl.price}</div>
+                        <div style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>{bl.unit}</div>
                         <div className="mt-2 flex justify-end">
                           <span className="w-5 h-5 rounded-full flex items-center justify-center" style={{ border: `1.5px solid ${on ? pkg.color : "rgba(255,255,255,0.25)"}`, background: on ? pkg.color : "transparent" }}>
                             {on && <Check size={12} color="#fff" />}
@@ -326,7 +326,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                         {pkg.features.map(f => (
                           <div key={f} className="flex items-start gap-2">
                             <CheckCircle size={13} color={pkg.color} style={{ marginTop: 2, flexShrink: 0 }} />
-                            <span style={{ color: SOFT, fontSize: 12.5, lineHeight: 1.5 }}>{f}</span>
+                            <span style={{ color: SOFT, fontSize: 14, lineHeight: 1.5 }}>{f}</span>
                           </div>
                         ))}
                       </div>
@@ -336,7 +336,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
               })}
               {!activePackages.length && (
                 <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(91,167,214,0.25)" }}>
-                  <p style={{ color: MUTED, fontSize: 13 }}>No partner packages are available right now. Contact our team to build a custom plan.</p>
+                  <p style={{ color: MUTED, fontSize: 14.5 }}>No partner packages are available right now. Contact our team to build a custom plan.</p>
                 </div>
               )}
             </div>
@@ -348,7 +348,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
           <div className="p-5 sm:p-6" style={GLASS}>
             <div className="flex items-center gap-2 mb-4">
               <Eye size={16} color="#FFFFFF" />
-              <span style={{ ...DISPLAY, color: TEXT, fontSize: 16, fontWeight: 600 }}>Preview</span>
+              <span style={{ ...DISPLAY, color: TEXT, fontSize: 18, fontWeight: 600 }}>Preview</span>
             </div>
             <LivePreview name={config.companyName} logo={config.logoText} tagline={config.tagline} primary={config.primaryColor} accent={config.accentColor} />
           </div>
@@ -362,8 +362,8 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
                 ["Commission", selectedTier ? `${activePackages.find(p => p.id === selectedTier)?.commission ?? 0}% lifetime` : "—"],
               ].map(([k, v]) => (
                 <div key={k as string} className="flex items-center justify-between gap-3 py-1.5" style={{ borderBottom: "1px solid rgba(91,167,214,0.1)" }}>
-                  <span style={{ color: MUTED, fontSize: 12.5 }}>{k}</span>
-                  <span style={{ color: SOFT, fontSize: 12.5, fontWeight: 600, textAlign: "right", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
+                  <span style={{ color: MUTED, fontSize: 14 }}>{k}</span>
+                  <span style={{ color: SOFT, fontSize: 14, fontWeight: 600, textAlign: "right", maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</span>
                 </div>
               ))}
             </div>
@@ -377,7 +377,7 @@ export function WhiteLabelStudio({ onPurchase }: { onPurchase?: () => void } = {
               style={{ background: "rgba(91,167,214,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,167,214,0.2)", opacity: locked ? 0.45 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
               <Save size={15} /> Save Draft
             </button>
-            <p style={{ color: MUTED, fontSize: 11, lineHeight: 1.6, marginTop: 14, textAlign: "center" }}>
+            <p style={{ color: MUTED, fontSize: 12.5, lineHeight: 1.6, marginTop: 14, textAlign: "center" }}>
               {locked
                 ? "Branding, colors, and your custom domain unlock as soon as your partner payment clears."
                 : "Publishing notifies your onboarding manager. Setup and first-month billing begin once your package is confirmed."}

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 
 const CARD: React.CSSProperties = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:22 };
-const INPUT: React.CSSProperties = { background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", borderRadius:10, padding:"10px 14px", color:"var(--foreground)", fontSize:14, outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", borderRadius:10, padding:"10px 14px", color:"var(--foreground)", fontSize:15.5, outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 type VerifStatus = "verified" | "pending" | "id_submitted" | "rejected";
@@ -82,13 +82,13 @@ export function LegacyVerification() {
     <div className="p-6 space-y-6" style={{ maxWidth:900 }}>
       <div className="flex items-start justify-between">
         <div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"var(--foreground)", marginBottom:4 }}>Contact Verification</h1>
-          <p style={{ color:"var(--muted-foreground)", fontSize:14 }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"var(--foreground)", marginBottom:4 }}>Contact Verification</h1>
+          <p style={{ color:"var(--muted-foreground)", fontSize:15.5 }}>
             Every legacy contact must verify their identity with a government-issued ID before vault access is granted. Our compliance team reviews each submission within 1–2 business days.
           </p>
         </div>
         <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-          style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#070D1A", fontWeight:600, fontSize:14 }}>
+          style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#070D1A", fontWeight:600, fontSize:15.5 }}>
           <Plus size={16}/> Add Contact
         </button>
       </div>
@@ -102,8 +102,8 @@ export function LegacyVerification() {
           { label:"Rejected",        value:contacts.filter(c=>c.status==="rejected").length, color:"#FC8181" },
         ].map(s=>(
           <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO }}>{s.label.toUpperCase()}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:31.5, color:s.color, fontWeight:700 }}>{s.value}</div>
+            <div style={{ color:"var(--muted-foreground)", fontSize:12.5, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
         ))}
       </div>
@@ -111,7 +111,7 @@ export function LegacyVerification() {
       {/* Info banner */}
       <div className="flex gap-3 px-5 py-4 rounded-2xl border" style={{ background:"rgba(91,167,214,0.06)", borderColor:"rgba(91,167,214,0.25)" }}>
         <Shield size={16} color="#FFFFFF" style={{ flexShrink:0, marginTop:2 }}/>
-        <div style={{ color:"var(--muted-foreground)", fontSize:13, lineHeight:1.7 }}>
+        <div style={{ color:"var(--muted-foreground)", fontSize:14.5, lineHeight:1.7 }}>
           Legacy contacts must submit a government-issued photo ID (driver's license, passport, or state ID). Until verified, contacts cannot access your vault under any circumstances. Click <strong style={{ color:"var(--foreground)" }}>Simulate Verify</strong> on any pending contact to see the full demo flow.
         </div>
       </div>
@@ -125,17 +125,17 @@ export function LegacyVerification() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center justify-center rounded-full font-semibold flex-shrink-0"
-                    style={{ width:48, height:48, background:"rgba(91,110,225,0.1)", color:"var(--primary)", fontSize:16, fontFamily:"var(--font-display)" }}>
+                    style={{ width:48, height:48, background:"rgba(91,110,225,0.1)", color:"var(--primary)", fontSize:18, fontFamily:"var(--font-display)" }}>
                     {contact.avatar}
                   </div>
                   <div>
-                    <div style={{ color:"var(--foreground)", fontSize:16, fontWeight:500 }}>{contact.name}</div>
-                    <div style={{ color:"var(--muted-foreground)", fontSize:13 }}>{contact.relationship}</div>
+                    <div style={{ color:"var(--foreground)", fontSize:18, fontWeight:500 }}>{contact.name}</div>
+                    <div style={{ color:"var(--muted-foreground)", fontSize:14.5 }}>{contact.relationship}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ background:sc.bg, color:sc.color }}>
-                    {sc.icon}<span style={{ fontSize:11, ...MONO, fontWeight:600 }}>{sc.label}</span>
+                    {sc.icon}<span style={{ fontSize:12.5, ...MONO, fontWeight:600 }}>{sc.label}</span>
                   </div>
                   <button onClick={() => removeContact(contact.id)} className="p-1.5 rounded-xl" style={{ color:"#FC8181" }}>
                     <Trash2 size={13}/>
@@ -144,18 +144,18 @@ export function LegacyVerification() {
               </div>
 
               <div className="grid md:grid-cols-3 gap-4 mt-4">
-                <div className="flex items-center gap-2"><Mail size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:13 }}>{contact.email}</span></div>
-                <div className="flex items-center gap-2"><Phone size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:13 }}>{contact.phone}</span></div>
-                <div className="flex items-center gap-2"><UserCheck size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:13 }}>{contact.idType}</span></div>
+                <div className="flex items-center gap-2"><Mail size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:14.5 }}>{contact.email}</span></div>
+                <div className="flex items-center gap-2"><Phone size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:14.5 }}>{contact.phone}</span></div>
+                <div className="flex items-center gap-2"><UserCheck size={13} color="var(--muted-foreground)"/><span style={{ color:"var(--muted-foreground)", fontSize:14.5 }}>{contact.idType}</span></div>
               </div>
 
               <div className="mt-3 px-4 py-3 rounded-2xl" style={{ background:"#EAF0FC" }}>
-                <div style={{ color:"var(--muted-foreground)", fontSize:11, ...MONO, marginBottom:2 }}>ACCESS TRIGGER</div>
-                <div style={{ color:"var(--foreground)", fontSize:13 }}>{contact.accessTrigger}</div>
+                <div style={{ color:"var(--muted-foreground)", fontSize:12.5, ...MONO, marginBottom:2 }}>ACCESS TRIGGER</div>
+                <div style={{ color:"var(--foreground)", fontSize:14.5 }}>{contact.accessTrigger}</div>
               </div>
 
               {contact.notes && (
-                <div style={{ color:"var(--muted-foreground)", fontSize:12, marginTop:8, fontStyle:"italic" }}>{contact.notes}</div>
+                <div style={{ color:"var(--muted-foreground)", fontSize:13.5, marginTop:8, fontStyle:"italic" }}>{contact.notes}</div>
               )}
 
               <div className="mt-3 flex items-center gap-3 flex-wrap">
@@ -203,7 +203,7 @@ export function LegacyVerification() {
 
       {/* Process steps */}
       <div className="p-6 rounded-2xl" style={CARD}>
-        <h3 style={{ fontFamily:"var(--font-display)", fontSize:16, color:"var(--foreground)", marginBottom:16 }}>Verification Process</h3>
+        <h3 style={{ fontFamily:"var(--font-display)", fontSize:18, color:"var(--foreground)", marginBottom:16 }}>Verification Process</h3>
         <div className="grid md:grid-cols-4 gap-4">
           {[
             { step:"1", label:"Add Contact",    desc:"Enter their details and set access conditions" },
@@ -216,8 +216,8 @@ export function LegacyVerification() {
                 style={{ width:36, height:36, background:"rgba(91,110,225,0.12)", color:"var(--primary)", fontFamily:"var(--font-display)", fontWeight:700 }}>
                 {s.step}
               </div>
-              <div style={{ color:"var(--foreground)", fontSize:14, fontWeight:500, marginBottom:4 }}>{s.label}</div>
-              <div style={{ color:"var(--muted-foreground)", fontSize:12 }}>{s.desc}</div>
+              <div style={{ color:"var(--foreground)", fontSize:15.5, fontWeight:500, marginBottom:4 }}>{s.label}</div>
+              <div style={{ color:"var(--muted-foreground)", fontSize:13.5 }}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -228,7 +228,7 @@ export function LegacyVerification() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.7)", backdropFilter:"blur(4px)" }}>
           <div className="w-full max-w-lg rounded-2xl p-7 overflow-y-auto" style={{ ...CARD, maxHeight:"90vh" }}>
             <div className="flex items-center justify-between mb-6">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"var(--foreground)" }}>Add Legacy Contact</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"var(--foreground)" }}>Add Legacy Contact</h3>
               <button onClick={() => setShowAdd(false)} style={{ color:"var(--muted-foreground)" }}><X size={18}/></button>
             </div>
             <div className="space-y-4">
@@ -241,20 +241,20 @@ export function LegacyVerification() {
                 { key:"notes",        label:"Notes (optional)", placeholder:"Any additional context" },
               ].map(f => (
                 <div key={f.key}>
-                  <label style={{ color:"var(--muted-foreground)", fontSize:12, display:"block", marginBottom:6 }}>{f.label}</label>
+                  <label style={{ color:"var(--muted-foreground)", fontSize:13.5, display:"block", marginBottom:6 }}>{f.label}</label>
                   <input value={(form as any)[f.key]} onChange={F(f.key)} placeholder={f.placeholder} style={INPUT}/>
                 </div>
               ))}
               <div>
-                <label style={{ color:"var(--muted-foreground)", fontSize:12, display:"block", marginBottom:6 }}>ID TYPE THEY WILL SUBMIT</label>
+                <label style={{ color:"var(--muted-foreground)", fontSize:13.5, display:"block", marginBottom:6 }}>ID TYPE THEY WILL SUBMIT</label>
                 <select value={form.idType} onChange={F("idType")} style={INPUT}>
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
               <div className="border-2 border-dashed rounded-2xl p-5 text-center" style={{ borderColor:"rgba(91,110,225,0.3)" }}>
                 <Upload size={22} color="var(--primary)" style={{ margin:"0 auto 8px" }}/>
-                <div style={{ color:"var(--foreground)", fontSize:13, marginBottom:4 }}>Upload or Scan Their ID Now (optional)</div>
-                <div style={{ color:"var(--muted-foreground)", fontSize:12, marginBottom:12 }}>Driver's License, Passport, or State ID</div>
+                <div style={{ color:"var(--foreground)", fontSize:14.5, marginBottom:4 }}>Upload or Scan Their ID Now (optional)</div>
+                <div style={{ color:"var(--muted-foreground)", fontSize:13.5, marginBottom:12 }}>Driver's License, Passport, or State ID</div>
                 <div className="flex justify-center">
                   <ScanButton folder="legal" onUpload={doc => toast.success(`"${doc.name}" scanned and attached`)} size="sm" label="Scan ID with Camera"/>
                 </div>
@@ -262,11 +262,11 @@ export function LegacyVerification() {
               <div className="flex gap-3 pt-2">
                 <button onClick={addContact}
                   className="flex-1 py-3 rounded-2xl font-semibold"
-                  style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#070D1A", fontSize:14 }}>
+                  style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#070D1A", fontSize:15.5 }}>
                   Send Verification Invite
                 </button>
                 <button onClick={() => setShowAdd(false)} className="px-6 py-3 rounded-2xl"
-                  style={{ background:"var(--secondary)", color:"var(--foreground)", fontSize:14 }}>
+                  style={{ background:"var(--secondary)", color:"var(--foreground)", fontSize:15.5 }}>
                   Cancel
                 </button>
               </div>

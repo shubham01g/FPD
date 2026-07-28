@@ -51,7 +51,7 @@ const INPUT: React.CSSProperties = {
   borderRadius: 10,
   padding: "10px 14px",
   width: "100%",
-  fontSize: 13,
+  fontSize: 14.5,
 };
 
 /* ── Plans — single source of truth for prices ──────────────────── */
@@ -303,7 +303,7 @@ type ModalTab = "overview" | "edit" | "billing" | "security";
 /* ── Helpers ────────────────────────────────────────────────────── */
 function SLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ color:T.muted, fontSize:10, ...MONO, letterSpacing:"0.1em",
+    <div style={{ color:T.muted, fontSize:11, ...MONO, letterSpacing:"0.1em",
       textTransform:"uppercase" as const, marginBottom:10 }}>
       {children}
     </div>
@@ -314,8 +314,8 @@ function DRow({ label, value, accent }: { label:string; value:React.ReactNode; a
   return (
     <div className="flex items-center justify-between py-2.5 border-b"
       style={{ borderColor:"rgba(91,110,225,0.06)" }}>
-      <span style={{ color:T.sub, fontSize:12 }}>{label}</span>
-      <span style={{ color:accent ?? T.text, fontSize:12, ...MONO }}>{value}</span>
+      <span style={{ color:T.sub, fontSize:13.5 }}>{label}</span>
+      <span style={{ color:accent ?? T.text, fontSize:13.5, ...MONO }}>{value}</span>
     </div>
   );
 }
@@ -430,7 +430,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span style={{ color:T.text, fontSize:22, fontWeight:700, ...DISPLAY }}>{user.name}</span>
+              <span style={{ color:T.text, fontSize:24.5, fontWeight:700, ...DISPLAY }}>{user.name}</span>
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                 style={{ background:statusBg, color:statusColor, border:`1px solid ${statusBd}`, ...MONO }}>
                 {user.status.toUpperCase()}
@@ -452,8 +452,8 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 </span>
               )}
             </div>
-            <div style={{ color:T.sub, fontSize:13 }}>{user.email} · {user.phone} · {user.id}</div>
-            <div style={{ color:T.muted, fontSize:11, marginTop:2, ...MONO }}>
+            <div style={{ color:T.sub, fontSize:14.5 }}>{user.email} · {user.phone} · {user.id}</div>
+            <div style={{ color:T.muted, fontSize:12.5, marginTop:2, ...MONO }}>
               Joined {user.joined} · Last login: {user.lastLogin}
             </div>
           </div>
@@ -524,10 +524,10 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 <div style={CARD}>
                   <SLabel>Storage Usage</SLabel>
                   <div className="flex items-end gap-2 mb-1">
-                    <span style={{ color:T.text, fontSize:30, fontWeight:700, ...DISPLAY, lineHeight:1 }}>{user.storage}</span>
-                    <span style={{ color:T.sub, fontSize:13, marginBottom:4 }}>GB of {user.storageTotal} GB</span>
+                    <span style={{ color:T.text, fontSize:33.5, fontWeight:700, ...DISPLAY, lineHeight:1 }}>{user.storage}</span>
+                    <span style={{ color:T.sub, fontSize:14.5, marginBottom:4 }}>GB of {user.storageTotal} GB</span>
                   </div>
-                  <div style={{ color:warnStorage ? T.red : T.primary, fontSize:11, ...MONO, marginBottom:14 }}>
+                  <div style={{ color:warnStorage ? T.red : T.primary, fontSize:12.5, ...MONO, marginBottom:14 }}>
                     {storagePct}% used {warnStorage && "· ⚠ Near limit"}
                   </div>
 
@@ -547,19 +547,19 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <div key={s.label} className="flex items-center justify-between py-1.5">
                       <div className="flex items-center gap-2">
                         <div style={{ width:9, height:9, borderRadius:2, background:s.color }}/>
-                        <span style={{ color:T.sub, fontSize:12 }}>{s.label}</span>
+                        <span style={{ color:T.sub, fontSize:13.5 }}>{s.label}</span>
                       </div>
-                      <span style={{ color:T.text, fontSize:12, ...MONO }}>{s.val} GB</span>
+                      <span style={{ color:T.text, fontSize:13.5, ...MONO }}>{s.val} GB</span>
                     </div>
                   ))}
                   <div className="grid grid-cols-2 gap-3 mt-4">
                     <div className="px-3 py-2.5 rounded-2xl text-center" style={{ background:T.card3 }}>
-                      <div style={{ color:warnStorage?T.red:T.primary, fontSize:18, fontWeight:700, ...DISPLAY }}>{storagePct}%</div>
-                      <div style={{ color:T.muted, fontSize:10 }}>Used</div>
+                      <div style={{ color:warnStorage?T.red:T.primary, fontSize:20, fontWeight:700, ...DISPLAY }}>{storagePct}%</div>
+                      <div style={{ color:T.muted, fontSize:11 }}>Used</div>
                     </div>
                     <div className="px-3 py-2.5 rounded-2xl text-center" style={{ background:T.card3 }}>
-                      <div style={{ color:T.green, fontSize:18, fontWeight:700, ...DISPLAY }}>{(user.storageTotal - user.storage).toFixed(1)}</div>
-                      <div style={{ color:T.muted, fontSize:10 }}>GB Free</div>
+                      <div style={{ color:T.green, fontSize:20, fontWeight:700, ...DISPLAY }}>{(user.storageTotal - user.storage).toFixed(1)}</div>
+                      <div style={{ color:T.muted, fontSize:11 }}>GB Free</div>
                     </div>
                   </div>
                 </div>
@@ -571,7 +571,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   <DRow label="Monthly Price" value={
                     user.subscriptionWaived
                       ? <span className="flex items-center gap-2">
-                          <span style={{ textDecoration:"line-through", color:T.muted, fontSize:11 }}>${price.toFixed(2)}</span>
+                          <span style={{ textDecoration:"line-through", color:T.muted, fontSize:12.5 }}>${price.toFixed(2)}</span>
                           <span style={{ color:T.green, fontWeight:700 }}>$0.00 WAIVED</span>
                         </span>
                       : <span style={{ color:T.primary, fontWeight:700 }}>${price.toFixed(2)}/mo</span>
@@ -612,8 +612,8 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
               {/* Admin Notes */}
               {user.adminNotes && (
                 <div className="px-5 py-4 rounded-2xl" style={{ background:T.amberBg, border:`1px solid ${T.amberBd}` }}>
-                  <div style={{ color:T.amber, fontSize:10, ...MONO, marginBottom:5 }}>ADMIN NOTES</div>
-                  <div style={{ color:T.text, fontSize:13, lineHeight:1.7 }}>{user.adminNotes}</div>
+                  <div style={{ color:T.amber, fontSize:11, ...MONO, marginBottom:5 }}>ADMIN NOTES</div>
+                  <div style={{ color:T.text, fontSize:14.5, lineHeight:1.7 }}>{user.adminNotes}</div>
                 </div>
               )}
 
@@ -621,7 +621,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
               <div style={CARD}>
                 <div className="flex items-center justify-between mb-3">
                   <SLabel>Recent Security Events</SLabel>
-                  <button onClick={() => setTab("security")} style={{ color:T.primary, fontSize:12, fontWeight:600 }}>
+                  <button onClick={() => setTab("security")} style={{ color:T.primary, fontSize:13.5, fontWeight:600 }}>
                     View all →
                   </button>
                 </div>
@@ -634,10 +634,10 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                         background:ev.flag ? T.red : T.green,
                         boxShadow:`0 0 6px ${ev.flag ? T.red : T.green}88` }}/>
                       <div className="flex-1">
-                        <span style={{ color:T.text, fontSize:13 }}>{ev.event}</span>
-                        <span style={{ color:T.sub, fontSize:11, marginLeft:8 }}>· {ev.device}</span>
+                        <span style={{ color:T.text, fontSize:14.5 }}>{ev.event}</span>
+                        <span style={{ color:T.sub, fontSize:12.5, marginLeft:8 }}>· {ev.device}</span>
                       </div>
-                      <span style={{ color:T.muted, fontSize:11, ...MONO }}>{ev.time}</span>
+                      <span style={{ color:T.muted, fontSize:12.5, ...MONO }}>{ev.time}</span>
                     </div>
                   ))}
                 </div>
@@ -648,7 +648,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
           {/* ── EDIT ACCOUNT ────────────────────────────────────── */}
           {tab === "edit" && (
             <div className="space-y-5 max-w-2xl">
-              <p style={{ color:T.sub, fontSize:13 }}>
+              <p style={{ color:T.sub, fontSize:14.5 }}>
                 Changes save immediately and are logged in the audit trail.
               </p>
 
@@ -662,7 +662,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     { label:"PHONE NUMBER",    val:ePhone,  set:setEPhone, type:"tel",   ph:"+1 (555) 000-0000" },
                   ].map(f => (
                     <div key={f.label}>
-                      <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
+                      <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
                       <input type={f.type} value={f.val} onChange={e => f.set(e.target.value)}
                         placeholder={f.ph} style={INPUT}/>
                     </div>
@@ -682,12 +682,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       <div className="flex items-center gap-3">
                         <div style={{ width:10, height:10, borderRadius:"50%", background:p.color }}/>
                         <div className="text-left">
-                          <div style={{ color:T.text, fontSize:13, fontWeight:600 }}>{p.name}</div>
-                          <div style={{ color:T.muted, fontSize:11 }}>{p.storage} storage</div>
+                          <div style={{ color:T.text, fontSize:14.5, fontWeight:600 }}>{p.name}</div>
+                          <div style={{ color:T.muted, fontSize:12.5 }}>{p.storage} storage</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span style={{ color:p.color, fontWeight:700, ...DISPLAY, fontSize:16 }}>${p.price.toFixed(2)}/mo</span>
+                        <span style={{ color:p.color, fontWeight:700, ...DISPLAY, fontSize:18 }}>${p.price.toFixed(2)}/mo</span>
                         {ePlan===p.id && <CheckCircle size={14} color={p.color}/>}
                       </div>
                     </button>
@@ -698,8 +698,8 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 <div className="flex items-center justify-between p-3 rounded-2xl"
                   style={{ background:T.card3, border:`1px solid ${T.border}` }}>
                   <div>
-                    <div style={{ color:T.text, fontSize:13, fontWeight:500 }}>Auto-Renew</div>
-                    <div style={{ color:T.muted, fontSize:11 }}>Charge card automatically on billing date</div>
+                    <div style={{ color:T.text, fontSize:14.5, fontWeight:500 }}>Auto-Renew</div>
+                    <div style={{ color:T.muted, fontSize:12.5 }}>Charge card automatically on billing date</div>
                   </div>
                   <button onClick={() => setERenew(v => !v)} style={{ color:eRenew ? T.green : T.muted }}>
                     {eRenew ? <ToggleRight size={30}/> : <ToggleLeft size={30}/>}
@@ -755,26 +755,26 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       borderRadius:"50%", background:"rgba(255,255,255,0.04)" }}/>
                     <div className="flex items-center justify-between mb-6">
                       <div style={{ width:40, height:28, background:"rgba(255,215,100,0.85)", borderRadius:6 }}/>
-                      <span style={{ color:"rgba(255,255,255,0.85)", fontSize:14, fontWeight:800, ...MONO }}>
+                      <span style={{ color:"rgba(255,255,255,0.85)", fontSize:15.5, fontWeight:800, ...MONO }}>
                         {user.cardBrand.toUpperCase()}
                       </span>
                     </div>
-                    <div style={{ color:"rgba(255,255,255,0.55)", fontSize:17, ...MONO,
+                    <div style={{ color:"rgba(255,255,255,0.55)", fontSize:19, ...MONO,
                       letterSpacing:"0.22em", marginBottom:18 }}>
                       ●●●● &nbsp; ●●●● &nbsp; ●●●● &nbsp; {user.cardLast4}
                     </div>
                     <div className="flex items-end gap-8">
                       <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:8, ...MONO, letterSpacing:"0.1em" }}>CARD HOLDER</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:12 }}>{user.cardHolder}</div>
+                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:9, ...MONO, letterSpacing:"0.1em" }}>CARD HOLDER</div>
+                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:13.5 }}>{user.cardHolder}</div>
                       </div>
                       <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:8, ...MONO, letterSpacing:"0.1em" }}>EXPIRES</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:12, ...MONO }}>{user.cardExpiry}</div>
+                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:9, ...MONO, letterSpacing:"0.1em" }}>EXPIRES</div>
+                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:13.5, ...MONO }}>{user.cardExpiry}</div>
                       </div>
                       <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:8, ...MONO, letterSpacing:"0.1em" }}>ZIP</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:12, ...MONO }}>{user.billingZip}</div>
+                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:9, ...MONO, letterSpacing:"0.1em" }}>ZIP</div>
+                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:13.5, ...MONO }}>{user.billingZip}</div>
                       </div>
                     </div>
                   </div>
@@ -783,17 +783,17 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   {editCard && (
                     <div className="space-y-3 pt-4 border-t" style={{ borderColor:T.border }}>
                       <div>
-                        <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>NEW CARD NUMBER</label>
+                        <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>NEW CARD NUMBER</label>
                         <input value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g,"").slice(0,16))}
                           placeholder="●●●● ●●●● ●●●● ●●●●" style={INPUT}/>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
+                          <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
                           <input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" style={INPUT}/>
                         </div>
                         <div>
-                          <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
+                          <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
                           <div className="relative">
                             <input value={cardCvv} type={showCvv?"text":"password"} maxLength={4}
                               onChange={e => setCardCvv(e.target.value)} placeholder="●●●"
@@ -806,17 +806,17 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                         </div>
                       </div>
                       <div>
-                        <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
+                        <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
                         <input value={cardName} onChange={e => setCardName(e.target.value)} style={INPUT}/>
                       </div>
                       <div>
-                        <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>BILLING ZIP</label>
+                        <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>BILLING ZIP</label>
                         <input value={cardZip} onChange={e => setCardZip(e.target.value)} maxLength={10} style={INPUT}/>
                       </div>
                       <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                         style={{ background:T.primaryBg, border:`1px solid ${T.primaryBd}` }}>
                         <Lock size={11} color={T.primary} style={{ marginTop:2, flexShrink:0 }}/>
-                        <span style={{ color:T.primary, fontSize:11 }}>
+                        <span style={{ color:T.primary, fontSize:12.5 }}>
                           Transmitted via Stripe PCI vault. Only the last 4 digits and expiry are stored.
                         </span>
                       </div>
@@ -833,7 +833,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 {/* Waive Fee */}
                 <div style={CARD}>
                   <SLabel>Waive Subscription Fee</SLabel>
-                  <p style={{ color:T.sub, fontSize:12, marginBottom:16, lineHeight:1.7 }}>
+                  <p style={{ color:T.sub, fontSize:13.5, marginBottom:16, lineHeight:1.7 }}>
                     Choose the number of months to waive, a reason, and confirm. The waiver is logged in the audit trail and takes effect immediately.
                   </p>
 
@@ -842,7 +842,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-4"
                       style={{ background:T.amberBg, border:`1px solid ${T.amberBd}` }}>
                       <Gift size={14} color={T.amber}/>
-                      <span style={{ color:T.amber, fontSize:12 }}>
+                      <span style={{ color:T.amber, fontSize:13.5 }}>
                         Active waiver: <strong>{user.waiveMonths} months</strong> · {WAIVE_REASONS.find(r=>r.id===user.waiveReason)?.label ?? "—"}
                       </span>
                     </div>
@@ -850,7 +850,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
                   {/* 1–12 month pills */}
                   <div style={{ marginBottom:16 }}>
-                    <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:10 }}>MONTHS TO WAIVE</div>
+                    <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:10 }}>MONTHS TO WAIVE</div>
                     <div className="grid gap-2" style={{ gridTemplateColumns:"repeat(6, 1fr)" }}>
                       {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
                         <button key={m} onClick={() => setWMonths(m)}
@@ -870,7 +870,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
                   {/* Reason grid */}
                   <div style={{ marginBottom:14 }}>
-                    <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:8 }}>REASON FOR WAIVER *</div>
+                    <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:8 }}>REASON FOR WAIVER *</div>
                     <div className="grid grid-cols-2 gap-2">
                       {WAIVE_REASONS.map(r => (
                         <button key={r.id} onClick={() => setWReason(r.id)}
@@ -889,7 +889,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
 
                   {/* Optional note */}
                   <div style={{ marginBottom:14 }}>
-                    <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:6 }}>ADDITIONAL NOTE (optional)</div>
+                    <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:6 }}>ADDITIONAL NOTE (optional)</div>
                     <textarea value={wNote} onChange={e => setWNote(e.target.value)} rows={2}
                       placeholder="E.g. Per phone call on Jul 15, 2026 — approved by management…"
                       className="w-full resize-none" style={INPUT}/>
@@ -898,8 +898,8 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   {/* Total */}
                   <div className="flex items-center justify-between px-4 py-3 rounded-2xl mb-4"
                     style={{ background:T.card3, border:`1px solid ${T.border}` }}>
-                    <span style={{ color:T.sub, fontSize:13 }}>Total Amount Waived</span>
-                    <span style={{ color:T.primary, fontSize:24, fontWeight:800, ...DISPLAY }}>
+                    <span style={{ color:T.sub, fontSize:14.5 }}>Total Amount Waived</span>
+                    <span style={{ color:T.primary, fontSize:27, fontWeight:800, ...DISPLAY }}>
                       ${(price * wMonths).toFixed(2)}
                     </span>
                   </div>
@@ -930,7 +930,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
                       background:"rgba(10,20,40,0.9)" }}>
                     {["Invoice","Description","Date","Amount","Status"].map(h => (
-                      <span key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</span>
+                      <span key={h} style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{h.toUpperCase()}</span>
                     ))}
                   </div>
                   {user.billingHistory.map((row, i) => {
@@ -939,12 +939,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       <div key={row.id} className="grid items-center px-4 py-3 border-t"
                         style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
                           background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.06)" }}>
-                        <span style={{ color:T.muted, fontSize:10, ...MONO }}>{row.id}</span>
-                        <span style={{ color:T.text, fontSize:12 }}>{row.description}</span>
-                        <span style={{ color:T.sub, fontSize:12, ...MONO }}>{row.date}</span>
-                        <span style={{ color:T.primary, fontSize:13, fontWeight:700, ...MONO }}>{row.amount}</span>
+                        <span style={{ color:T.muted, fontSize:11, ...MONO }}>{row.id}</span>
+                        <span style={{ color:T.text, fontSize:13.5 }}>{row.description}</span>
+                        <span style={{ color:T.sub, fontSize:13.5, ...MONO }}>{row.date}</span>
+                        <span style={{ color:T.primary, fontSize:14.5, fontWeight:700, ...MONO }}>{row.amount}</span>
                         <span className="px-2 py-0.5 rounded text-xs font-bold"
-                          style={{ background:`${sc}18`, color:sc, ...MONO, fontSize:9 }}>
+                          style={{ background:`${sc}18`, color:sc, ...MONO, fontSize:10 }}>
                           {row.status.toUpperCase()}
                         </span>
                       </div>
@@ -965,8 +965,8 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   <SLabel>Two-Factor Authentication</SLabel>
                   <div className="flex items-center justify-between mb-5">
                     <div>
-                      <div style={{ color:T.text, fontSize:16, fontWeight:700 }}>{user.mfa ? "Enabled" : "Disabled"}</div>
-                      <div style={{ color:T.sub, fontSize:12, marginTop:2 }}>
+                      <div style={{ color:T.text, fontSize:18, fontWeight:700 }}>{user.mfa ? "Enabled" : "Disabled"}</div>
+                      <div style={{ color:T.sub, fontSize:13.5, marginTop:2 }}>
                         {user.mfa ? "TOTP authenticator active" : "No 2FA configured"}
                       </div>
                     </div>
@@ -987,7 +987,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 {/* Password */}
                 <div style={CARD}>
                   <SLabel>Password</SLabel>
-                  <p style={{ color:T.sub, fontSize:12, marginBottom:20, lineHeight:1.7 }}>
+                  <p style={{ color:T.sub, fontSize:13.5, marginBottom:20, lineHeight:1.7 }}>
                     Send a password reset link to the user's registered email. The link expires in 24 hours.
                   </p>
                   <button onClick={() => toast.success(`Password reset email sent to ${user.email}`)}
@@ -1000,7 +1000,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                 {/* Account status */}
                 <div style={CARD}>
                   <SLabel>Account Status</SLabel>
-                  <p style={{ color:T.sub, fontSize:12, marginBottom:20, lineHeight:1.7 }}>
+                  <p style={{ color:T.sub, fontSize:13.5, marginBottom:20, lineHeight:1.7 }}>
                     {user.status==="suspended"
                       ? "This account is currently suspended. The user cannot log in or access their vault."
                       : "Account is in good standing. All features are accessible."}
@@ -1027,12 +1027,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                         background:ev.flag ? T.red : T.green,
                         boxShadow:`0 0 6px ${ev.flag ? T.red : T.green}88` }}/>
                       <div className="flex-1">
-                        <span style={{ color:ev.flag ? T.red : T.text, fontSize:13, fontWeight:ev.flag?600:400 }}>
+                        <span style={{ color:ev.flag ? T.red : T.text, fontSize:14.5, fontWeight:ev.flag?600:400 }}>
                           {ev.flag && "⚠ "}{ev.event}
                         </span>
-                        <span style={{ color:T.sub, fontSize:11, marginLeft:8 }}>· {ev.device} · IP: {ev.ip}</span>
+                        <span style={{ color:T.sub, fontSize:12.5, marginLeft:8 }}>· {ev.device} · IP: {ev.ip}</span>
                       </div>
-                      <span style={{ color:T.muted, fontSize:11, ...MONO, flexShrink:0 }}>{ev.time}</span>
+                      <span style={{ color:T.muted, fontSize:12.5, ...MONO, flexShrink:0 }}>{ev.time}</span>
                     </div>
                   ))}
                 </div>

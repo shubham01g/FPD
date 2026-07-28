@@ -285,47 +285,47 @@ const DIARY_CSS = `
 .fpd-diary .hbanner:hover .art{transform:scale(1.08);}
 .fpd-diary .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
 .fpd-diary .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
-.fpd-diary .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
-.fpd-diary .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-diary .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:11px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-diary .hbanner h1{font-family:var(--font-display);font-size:32.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
 .fpd-diary .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
-.fpd-diary .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-diary .hbanner p{color:${SOFT};font-size:15px;line-height:1.6;max-width:400px;margin:0 0 20px;}
 .fpd-diary .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
-.fpd-diary .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-diary .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
 .fpd-diary .hbanner .hbtn:hover{transform:translateY(-1px);}
 .fpd-diary .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
 .fpd-diary .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
 .fpd-diary .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
-@media (max-width:640px){.fpd-diary .hbanner{min-height:auto;} .fpd-diary .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-diary .hbanner h1{font-size:23px;}}
+@media (max-width:640px){.fpd-diary .hbanner{min-height:auto;} .fpd-diary .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-diary .hbanner h1{font-size:26px;}}
 
 .fpd-diary .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-diary .card.pad{padding:28px;}
-.fpd-diary .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-diary .eyebrow{font-size:11px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-diary .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.fpd-diary .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-diary .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-diary .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-diary .pg-sub{color:${MUTED};font-size:14.5px;max-width:660px;line-height:1.6;}
+.fpd-diary .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-diary .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* KPI ledger */
 .fpd-diary .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
 .fpd-diary .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-diary .kcell:first-child{border-left:none;}
 .fpd-diary .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-diary .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-diary .kcell .klbl{font-size:10.5px;font-weight:600;color:${MUTED};}
 .fpd-diary .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-diary .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-diary .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-diary .kcell .kval{font-family:var(--font-display);font-size:29px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-diary .kcell .ksub{font-size:13px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-diary .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:880px){.fpd-diary .kstrip{grid-template-columns:1fr 1fr;}.fpd-diary .kcell:nth-child(3){border-left:none;}.fpd-diary .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* search + filter toolbar */
 .fpd-diary .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
 .fpd-diary .search{display:flex;align-items:center;gap:8px;padding:11px 15px;flex:1;min-width:220px;}
-.fpd-diary .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:13px;width:100%;font-family:var(--font-body);}
+.fpd-diary .search input{background:transparent;border:none;outline:none;color:${TEXT};font-size:14.5px;width:100%;font-family:var(--font-body);}
 .fpd-diary .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
-.fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:99px;font-size:13px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
+.fpd-diary .seg button{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:99px;font-size:14.5px;color:${MUTED};background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:color .18s,background .18s;}
 .fpd-diary .seg button.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
 
 /* bento layout */
@@ -340,20 +340,20 @@ const DIARY_CSS = `
 .fpd-diary .ethumb img{width:100%;height:100%;object-fit:cover;}
 .fpd-diary .ethumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.32);}
 .fpd-diary .ethumb-play{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
-.fpd-diary .ethumb-dur{position:absolute;bottom:8px;right:8px;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:11px;font-family:var(--font-mono);}
+.fpd-diary .ethumb-dur{position:absolute;bottom:8px;right:8px;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.65);color:#fff;font-size:12.5px;font-family:var(--font-mono);}
 .fpd-diary .etop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
-.fpd-diary .edate{color:${MUTED};font-size:11px;font-family:var(--font-mono);}
-.fpd-diary .type-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:10px;font-family:var(--font-mono);}
-.fpd-diary .private-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;background:rgba(208,107,107,0.14);color:${NEG};font-size:9px;font-family:var(--font-mono);}
-.fpd-diary .etitle{color:${TEXT};font-size:15px;font-weight:600;font-family:var(--font-display);}
-.fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:16px;flex-shrink:0;font-size:11px;font-weight:500;}
-.fpd-diary .ebody{color:${MUTED};font-size:13px;line-height:1.7;}
+.fpd-diary .edate{color:${MUTED};font-size:12.5px;font-family:var(--font-mono);}
+.fpd-diary .type-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:11px;font-family:var(--font-mono);}
+.fpd-diary .private-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;background:rgba(208,107,107,0.14);color:${NEG};font-size:10px;font-family:var(--font-mono);}
+.fpd-diary .etitle{color:${TEXT};font-size:17px;font-weight:600;font-family:var(--font-display);}
+.fpd-diary .emood{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:16px;flex-shrink:0;font-size:12.5px;font-weight:500;}
+.fpd-diary .ebody{color:${MUTED};font-size:14.5px;line-height:1.7;}
 .fpd-diary .eaudio{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:16px;background:rgba(91,110,225,0.07);}
 .fpd-diary .eaudio-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${ACCENT};color:#fff;border:none;cursor:pointer;flex-shrink:0;}
 .fpd-diary .eaudio-track{flex:1;height:4px;border-radius:99px;background:rgba(91,110,225,0.2);}
 .fpd-diary .eaudio-fill{height:4px;border-radius:99px;background:${ACCENT};transition:width .3s;}
 .fpd-diary .etags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
-.fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:11px;background:#141B2E;color:#6FAE8B;}
+.fpd-diary .etag{padding:2px 9px;border-radius:99px;font-size:12.5px;background:#141B2E;color:#6FAE8B;}
 
 /* empty state */
 .fpd-diary .empty{padding:52px 12px;text-align:center;}
@@ -365,54 +365,54 @@ const DIARY_CSS = `
 .fpd-diary .dacts{display:flex;gap:2px;}
 .fpd-diary .dacts button{background:none;border:none;cursor:pointer;padding:5px;display:flex;color:${MUTED};}
 .fpd-diary .dbadges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-.fpd-diary .dtitle{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;margin-bottom:12px;}
-.fpd-diary .dbody{color:${SOFT};font-size:14px;line-height:1.9;white-space:pre-wrap;}
+.fpd-diary .dtitle{font-family:var(--font-display);font-size:20px;color:${TEXT};font-weight:600;margin-bottom:12px;}
+.fpd-diary .dbody{color:${SOFT};font-size:15.5px;line-height:1.9;white-space:pre-wrap;}
 .fpd-diary .daudio{margin-top:16px;padding:18px;border-radius:16px;text-align:center;background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.16);}
-.fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:18px;font-size:13px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .daudio-btn{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:18px;font-size:14.5px;background:${ACCENT};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .dvideo{margin-top:16px;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;}
 .fpd-diary .dvideo img,.fpd-diary .dvideo-placeholder{width:100%;height:140px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.09);}
 .fpd-diary .dvideo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.28);}
 .fpd-diary .dvideo-play{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(13,20,33,0.92);}
 
 /* diary stats mini panel */
-.fpd-diary .stats-hd{color:${TEXT};font-size:13px;font-weight:600;margin-bottom:10px;font-family:var(--font-display);}
+.fpd-diary .stats-hd{color:${TEXT};font-size:14.5px;font-weight:600;margin-bottom:10px;font-family:var(--font-display);}
 .fpd-diary .stat-row{display:flex;justify-content:space-between;padding:9px 12px;border-radius:99px;background:#0F1624;}
 .fpd-diary .stat-row + .stat-row{margin-top:6px;}
-.fpd-diary .stat-row span:first-child{color:${MUTED};font-size:12px;}
-.fpd-diary .stat-row span:last-child{color:#6FAE8B;font-size:12px;font-weight:600;font-family:var(--font-mono);}
+.fpd-diary .stat-row span:first-child{color:${MUTED};font-size:13.5px;}
+.fpd-diary .stat-row span:last-child{color:#6FAE8B;font-size:13.5px;font-weight:600;font-family:var(--font-mono);}
 
 /* recorder panel (used inside modal) */
 .fpd-diary .recorder{display:flex;flex-direction:column;align-items:center;gap:18px;padding:32px 20px;}
 .fpd-diary .rec-dial{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid;position:relative;transition:all .3s;}
 .fpd-diary .rec-ping{position:absolute;inset:0;border-radius:50%;background:rgba(208,107,107,0.16);animation:fpd-diary-ping 1.4s cubic-bezier(0,0,0.2,1) infinite;}
 @keyframes fpd-diary-ping{75%,100%{transform:scale(1.6);opacity:0;}}
-.fpd-diary .rec-time{font-family:var(--font-mono);font-size:24px;color:${TEXT};font-weight:700;}
-.fpd-diary .rec-hint{color:${MUTED};font-size:13px;}
-.fpd-diary .rec-btn{padding:12px 32px;border-radius:16px;font-weight:600;font-size:13px;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);box-shadow:0 4px 16px rgba(91,110,225,0.35);}
+.fpd-diary .rec-time{font-family:var(--font-mono);font-size:27px;color:${TEXT};font-weight:700;}
+.fpd-diary .rec-hint{color:${MUTED};font-size:14.5px;}
+.fpd-diary .rec-btn{padding:12px 32px;border-radius:16px;font-weight:600;font-size:14.5px;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);box-shadow:0 4px 16px rgba(91,110,225,0.35);}
 .fpd-diary .rec-video-wrap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#000;max-height:280px;}
 .fpd-diary .rec-video{width:100%;max-height:280px;object-fit:cover;display:block;}
 .fpd-diary .rec-live{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:99px;background:rgba(208,107,107,0.9);}
 .fpd-diary .rec-live-dot{width:8px;height:8px;border-radius:50%;background:#fff;}
-.fpd-diary .rec-live span{color:#fff;font-size:11px;font-family:var(--font-mono);}
-.fpd-diary .rec-record-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:13px;background:${NEG};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-live span{color:#fff;font-size:12.5px;font-family:var(--font-mono);}
+.fpd-diary .rec-record-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:14.5px;background:${NEG};color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .rec-record-dot{width:12px;height:12px;border-radius:50%;background:#fff;}
-.fpd-diary .rec-stop-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:13px;background:#374669;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
-.fpd-diary .rec-cancel-btn{padding:10px 24px;border-radius:18px;font-size:13px;background:#0F1624;color:${MUTED};border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-stop-btn{display:flex;align-items:center;gap:8px;padding:10px 24px;border-radius:18px;font-weight:600;font-size:14.5px;background:#374669;color:#fff;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .rec-cancel-btn{padding:10px 24px;border-radius:18px;font-size:14.5px;background:#0F1624;color:${MUTED};border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* modal */
 .fpd-diary .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-diary .modal{width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
 .fpd-diary .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.fpd-diary .modal-head h3{font-family:var(--font-display);font-size:16px;color:${TEXT};font-weight:600;}
+.fpd-diary .modal-head h3{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;}
 .fpd-diary .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-diary .modal-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
-.fpd-diary .field label{display:block;margin-bottom:6px;font-size:9.5px;font-weight:600;color:${MUTED};}
-.fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:13px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-diary .field label{display:block;margin-bottom:6px;font-size:10.5px;font-weight:600;color:${MUTED};}
+.fpd-diary .field input,.fpd-diary .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14.5px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-diary .field textarea{resize:none;line-height:1.8;}
 .fpd-diary .field input::placeholder,.fpd-diary .field textarea::placeholder{color:${FAINT};}
 .fpd-diary .field input:focus,.fpd-diary .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-diary .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:16px;font-size:11px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
+.fpd-diary .type-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:16px;font-size:12.5px;background:#0F1624;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);transition:all .18s;}
 .fpd-diary .type-btn.on{background:rgba(91,110,225,0.14);border-color:${ACCENT};color:#6FAE8B;}
 .fpd-diary .type-btn:not(.on){color:${MUTED};}
 .fpd-diary .record-box{border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.14);}
@@ -420,9 +420,9 @@ const DIARY_CSS = `
 .fpd-diary .upload-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 0;border-radius:16px;border:2px dashed rgba(91,110,225,0.28);background:#0F1624;cursor:pointer;}
 .fpd-diary .mood-grid{display:flex;gap:8px;}
 .fpd-diary .mood-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border-radius:16px;border:2px solid transparent;cursor:pointer;font-family:var(--font-body);background:#0F1624;}
-.fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:16px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.fpd-diary .privacy-btn{width:100%;display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:16px;font-size:14.5px;cursor:pointer;font-family:var(--font-body);}
 .fpd-diary .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
-.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:13px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.fpd-diary .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:14.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .fpd-diary .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
@@ -669,7 +669,7 @@ export function DigitalDiary() {
                 {selected.type === "audio" && (
                   <div className="daudio">
                     <Mic size={24} color="#FFFFFF" style={{ margin:"0 auto 8px" }}/>
-                    <div style={{ color: TEXT, fontSize: 13 }}>Voice Recording · {selected.duration}</div>
+                    <div style={{ color: TEXT, fontSize: 14.5 }}>Voice Recording · {selected.duration}</div>
                     <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="daudio-btn">
                       <Play size={13}/> Play Recording
                     </button>
@@ -695,7 +695,7 @@ export function DigitalDiary() {
             ) : (
               <div className="card pad" style={{ textAlign: "center" }}>
                 <BookOpen size={28} color="rgba(91,110,225,0.3)" style={{ margin:"0 auto 12px" }}/>
-                <div style={{ color: MUTED, fontSize: 13, marginBottom: 12 }}>Select an entry to read</div>
+                <div style={{ color: MUTED, fontSize: 14.5, marginBottom: 12 }}>Select an entry to read</div>
                 <div className="stats-hd" style={{ textAlign: "left" }}>Your Diary Stats</div>
                 <div>
                   {[
@@ -733,7 +733,7 @@ export function DigitalDiary() {
 
               <div className="field">
                 <label>TITLE</label>
-                <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))} placeholder="What's on your mind today?" style={{ fontFamily: "var(--font-display)", fontSize: 15 }}/>
+                <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))} placeholder="What's on your mind today?" style={{ fontFamily: "var(--font-display)", fontSize: 17 }}/>
               </div>
 
               {newType === "written" && (
@@ -746,7 +746,7 @@ export function DigitalDiary() {
               {newType === "audio" && (
                 <div className="record-box">
                   {audioSaved
-                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Audio recorded successfully</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 27, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Audio recorded successfully</div></div>
                     : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); toast.success(`Recorded ${dur} of audio`); }}/>}
                 </div>
               )}
@@ -754,7 +754,7 @@ export function DigitalDiary() {
               {newType === "video" && (
                 <div className="record-box" style={{ padding: 16 }}>
                   {videoDuration
-                    ? <div className="record-done"><div style={{ fontSize: 24, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
+                    ? <div className="record-done"><div style={{ fontSize: 27, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
                     : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
                 </div>
               )}
@@ -767,8 +767,8 @@ export function DigitalDiary() {
                   }}/>
                   <div onClick={() => fileRef.current?.click()} className="upload-box">
                     <Upload size={28} color="#FFFFFF" style={{ opacity:0.7 }}/>
-                    <div style={{ color: MUTED, fontSize: 13 }}>Upload video, photo, or audio file</div>
-                    <div style={{ color: FAINT, fontSize: 11 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
+                    <div style={{ color: MUTED, fontSize: 14.5 }}>Upload video, photo, or audio file</div>
+                    <div style={{ color: FAINT, fontSize: 12.5 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
                   </div>
                   <div className="flex justify-center" style={{ marginTop: 12 }}>
                     <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" attached to diary entry`)} size="sm" label="Or Scan Document"/>
@@ -783,7 +783,7 @@ export function DigitalDiary() {
                     <button key={k} onClick={() => setForm(p=>({...p,mood:k}))} className="mood-btn"
                       style={{ background: form.mood===k ? `${cfg.color}1C` : "#0F1624", borderColor: form.mood===k ? cfg.color : "transparent", color: cfg.color }}>
                       {cfg.icon}
-                      <span style={{ fontSize: 10 }}>{cfg.label}</span>
+                      <span style={{ fontSize: 11 }}>{cfg.label}</span>
                     </button>
                   ))}
                 </div>

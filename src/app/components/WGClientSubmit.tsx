@@ -201,10 +201,10 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>
+            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:12.5, fontWeight:700, letterSpacing:"0.06em" }}>
               FINAL PASS DOWN
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>
+            <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>
               WHITE GLOVE DOCUMENT SUBMISSION
             </div>
           </div>
@@ -218,20 +218,20 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
           style={{ background:"linear-gradient(135deg,#060B16,#0A1020)", border:"1px solid rgba(91,167,214,0.3)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Star size={16} color="#FFFFFF" fill="rgba(111,158,148,0.3)"/>
-            <span style={{ color:"#D68FA8", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+            <span style={{ color:"#D68FA8", fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>
               WHITE GLOVE CONCIERGE
             </span>
           </div>
-          <div style={{ color:"#E8EDF5", fontSize:16, fontFamily:"var(--font-display)", marginBottom:6 }}>
+          <div style={{ color:"#E8EDF5", fontSize:18, fontFamily:"var(--font-display)", marginBottom:6 }}>
             Hello, {clientName.split(" ")[0]}! 👋
           </div>
-          <p style={{ color:"#8AA3C8", fontSize:13, lineHeight:1.7 }}>
+          <p style={{ color:"#8AA3C8", fontSize:14.5, lineHeight:1.7 }}>
             Your specialist <strong style={{ color:"#D68FA8" }}>{specialistName}</strong> is ready to build your vault. Use this page to send your documents — take a photo with your phone or upload a file. It's just like sending a photo in a text message.
           </p>
           <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.1)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <Lock size={12} color="#FFFFFF"/>
-            <span style={{ color:"#D99A6B", fontSize:11 }}>
+            <span style={{ color:"#D99A6B", fontSize:12.5 }}>
               Secure · Encrypted · Only your specialist can see these
             </span>
           </div>
@@ -257,7 +257,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 1: Get the document */}
             <div className="p-5 rounded-2xl" style={GLASS}>
-              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 1 — GET YOUR DOCUMENT READY
               </div>
 
@@ -270,7 +270,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                     size="lg"
                     label="📷  Take a Photo of Your Document"
                   />
-                  <div style={{ textAlign:"center", color:"#8A9AB8", fontSize:12 }}>— or —</div>
+                  <div style={{ textAlign:"center", color:"#8A9AB8", fontSize:13.5 }}>— or —</div>
                   {/* File upload fallback */}
                   <button onClick={() => fileRef.current?.click()}
                     className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold text-sm"
@@ -280,7 +280,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                   <input ref={fileRef} type="file"
                     accept="image/*,application/pdf,.doc,.docx"
                     className="hidden" onChange={handleFileSelect}/>
-                  <p style={{ color:"#8A9AB8", fontSize:11, textAlign:"center", lineHeight:1.6 }}>
+                  <p style={{ color:"#8A9AB8", fontSize:12.5, textAlign:"center", lineHeight:1.6 }}>
                     Works with photos, PDFs, and document files up to 20 MB
                   </p>
                 </div>
@@ -297,8 +297,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                         style={{ background:"rgba(91,110,225,0.04)" }}>
                         <FileText size={28} color="#FFFFFF"/>
                         <div>
-                          <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>{selectedFile.name}</div>
-                          <div style={{ color:"#8A9AB8", fontSize:11 }}>{selectedFile.type} · {Math.round(selectedFile.size/1024)}KB</div>
+                          <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>{selectedFile.name}</div>
+                          <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{selectedFile.type} · {Math.round(selectedFile.size/1024)}KB</div>
                         </div>
                       </div>
                     )}
@@ -310,7 +310,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                     <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full"
                       style={{ background:"rgba(72,187,120,0.9)" }}>
                       <CheckCircle size={10} color="#fff"/>
-                      <span style={{ color:"#fff", fontSize:10, fontWeight:700 }}>Ready to send</span>
+                      <span style={{ color:"#fff", fontSize:11, fontWeight:700 }}>Ready to send</span>
                     </div>
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 2: Label it */}
             <div className="p-5 rounded-2xl" style={GLASS}>
-              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 2 — WHAT KIND OF DOCUMENT IS THIS?
               </div>
               <button onClick={() => setShowCategoryPicker(!showCategoryPicker)}
@@ -327,7 +327,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                 style={{ background:category?"rgba(91,167,214,0.08)":"rgba(91,110,225,0.04)",
                   border:`1.5px solid ${category?"rgba(91,167,214,0.4)":"rgba(91,110,225,0.15)"}`,
                   color:category?"#6FAE8B":"#8A9AB8" }}>
-                <span style={{ fontSize:14 }}>
+                <span style={{ fontSize:15.5 }}>
                   {category
                     ? DOCUMENT_CATEGORIES.find(c=>c.id===category)?.emoji + " " + DOCUMENT_CATEGORIES.find(c=>c.id===category)?.label
                     : "Tap to choose the document type..."}
@@ -342,8 +342,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                       className="w-full flex items-center gap-3 px-4 py-3 text-left border-b"
                       style={{ background:category===cat.id?"rgba(91,167,214,0.08)":"#0A0F1A",
                         borderColor:"rgba(91,167,214,0.15)", color:"#E8EDF5" }}>
-                      <span style={{ fontSize:20 }}>{cat.emoji}</span>
-                      <span style={{ fontSize:14 }}>{cat.label}</span>
+                      <span style={{ fontSize:22.5 }}>{cat.emoji}</span>
+                      <span style={{ fontSize:15.5 }}>{cat.label}</span>
                       {category===cat.id && <CheckCircle size={14} color="#FFFFFF" style={{ marginLeft:"auto" }}/>}
                     </button>
                   ))}
@@ -353,13 +353,13 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             {/* Step 3: Notes */}
             <div className="p-5 rounded-2xl" style={GLASS}>
-              <div style={{ color:"#6FAE8B", fontSize:12, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
+              <div style={{ color:"#6FAE8B", fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)", marginBottom:12 }}>
                 STEP 3 — ADD A NOTE (OPTIONAL)
               </div>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
                 placeholder={`e.g. "This is from 2019" or "The policy number is on page 2" — anything that helps ${specialistName} understand the document`}
                 className="w-full resize-none px-4 py-3 rounded-2xl"
-                style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13, outline:"none" }}/>
+                style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none" }}/>
             </div>
 
             {/* Send button */}
@@ -370,7 +370,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                   : "linear-gradient(135deg,#5BA7D6,#6F9E94)",
                 color: uploading || !selectedFile || !category ? "#8A9AB8" : "#04080F",
                 boxShadow: uploading || !selectedFile || !category ? "none" : "0 0 32px rgba(91,167,214,0.4)",
-                fontSize:16 }}>
+                fontSize:18 }}>
               {uploading
                 ? <><div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid rgba(255,255,255,0.3)", borderTopColor:"#fff", animation:"spin 0.8s linear infinite" }}/> Sending securely…</>
                 : <><Send size={18}/> Send to {specialistName}</>
@@ -379,7 +379,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
 
             <div className="flex items-center justify-center gap-2">
               <Lock size={11} color="#8A9AB8"/>
-              <span style={{ color:"#8A9AB8", fontSize:11 }}>
+              <span style={{ color:"#8A9AB8", fontSize:12.5 }}>
                 256-bit encrypted · Only {specialistName} can see your documents
               </span>
             </div>
@@ -399,8 +399,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               ].map(s => (
                 <div key={s.label} className="p-3 rounded-2xl text-center"
                   style={GLASS}>
-                  <div style={{ fontFamily:"var(--font-display)", fontSize:26, color:s.color }}>{s.value}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.label}</div>
+                  <div style={{ fontFamily:"var(--font-display)", fontSize:29, color:s.color }}>{s.value}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -409,8 +409,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               <div className="py-12 text-center rounded-2xl"
                 style={GLASS}>
                 <Star size={36} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>
-                <div style={{ color:"#8A9AB8", fontSize:14 }}>No documents sent yet.</div>
-                <div style={{ color:"#B0C0DC", fontSize:12, marginTop:4 }}>
+                <div style={{ color:"#8A9AB8", fontSize:15.5 }}>No documents sent yet.</div>
+                <div style={{ color:"#B0C0DC", fontSize:13.5, marginTop:4 }}>
                   Tap "Send a Document" to get started.
                 </div>
               </div>
@@ -421,15 +421,15 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
                     style={GLASS}>
                     <div className="flex items-start gap-3">
                       <div className="flex items-center justify-center rounded-2xl flex-shrink-0"
-                        style={{ width:40, height:40, background:"rgba(91,167,214,0.08)", fontSize:20 }}>
+                        style={{ width:40, height:40, background:"rgba(91,167,214,0.08)", fontSize:22.5 }}>
                         {DOCUMENT_CATEGORIES.find(c=>sub.category.toLowerCase().includes(c.id))?.emoji ?? "📄"}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600, marginBottom:3 }}>{sub.category}</div>
-                        <div style={{ color:"#8A9AB8", fontSize:11, marginBottom:6 }}>
+                        <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600, marginBottom:3 }}>{sub.category}</div>
+                        <div style={{ color:"#8A9AB8", fontSize:12.5, marginBottom:6 }}>
                           {sub.fileName} · {sub.fileSizeMB} MB · {sub.submittedAt}
                         </div>
-                        {sub.notes && <div style={{ color:"#8A9AB8", fontSize:12, fontStyle:"italic", marginBottom:6 }}>"{sub.notes}"</div>}
+                        {sub.notes && <div style={{ color:"#8A9AB8", fontSize:13.5, fontStyle:"italic", marginBottom:6 }}>"{sub.notes}"</div>}
                         <StatusBadge status={sub.status}/>
                       </div>
                     </div>
@@ -450,8 +450,8 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <Phone size={18} color="#FFFFFF" style={{ flexShrink:0 }}/>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Need help sending documents?</div>
-                <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>
+                <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>Need help sending documents?</div>
+                <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>
                   Call your specialist {specialistName} directly — they can walk you through it over the phone.
                 </div>
               </div>

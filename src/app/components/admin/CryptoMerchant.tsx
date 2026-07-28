@@ -10,7 +10,7 @@ import { copyToClipboard } from "../../utils/clipboard";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
 type Tab = "processors" | "transactions" | "wallets" | "settings";
 
@@ -155,16 +155,16 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>{proc.name}</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>{proc.name}</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{ background:statusBg, color:statusColor, ...MONO }}>
                   {proc.status.toUpperCase()}
                 </span>
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>
+              <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>
                 {proc.fees} · Settles to: {proc.settlementOptions[0]}
               </div>
-              <a href="#" style={{ color:proc.color, fontSize:11, display:"flex", alignItems:"center", gap:3, marginTop:2 }}>
+              <a href="#" style={{ color:proc.color, fontSize:12.5, display:"flex", alignItems:"center", gap:3, marginTop:2 }}>
                 {proc.website} <ExternalLink size={10}/>
               </a>
             </div>
@@ -183,7 +183,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           </div>
         </div>
 
-        <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7, marginTop:10 }}>{proc.description}</p>
+        <p style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7, marginTop:10 }}>{proc.description}</p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           {proc.features.map(f => (
@@ -198,11 +198,11 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
       {expanded && (
         <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"rgba(91,110,225,0.08)" }}>
           <div className="pt-4">
-            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:10 }}>API CREDENTIALS</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:10 }}>API CREDENTIALS</div>
             <div className="space-y-3">
               {Object.entries(localConfig).map(([key, val]) => (
                 <div key={key}>
-                  <label style={{ color:"#8A9AB8", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>
+                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>
                     {key.replace(/([A-Z])/g, " $1").toUpperCase()}
                   </label>
                   <div className="flex gap-2">
@@ -225,7 +225,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           </div>
 
           <div>
-            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>SETTLEMENT OPTIONS</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:6 }}>SETTLEMENT OPTIONS</div>
             <div className="flex flex-wrap gap-2">
               {proc.settlementOptions.map(s => (
                 <span key={s} className="px-3 py-1.5 rounded-2xl text-xs font-semibold"
@@ -280,11 +280,11 @@ export function CryptoMerchant() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span style={{ fontSize:18 }}>₿</span>
-          <span style={{ color:"#F7931A", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · CRYPTO MERCHANT CENTER</span>
+          <span style={{ fontSize:20 }}>₿</span>
+          <span style={{ color:"#F7931A", fontSize:12.5, ...MONO, letterSpacing:"0.1em" }}>ADMIN · CRYPTO MERCHANT CENTER</span>
         </div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#E8EDF5" }}>Crypto Payment Merchant</h1>
-        <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
+        <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>Crypto Payment Merchant</h1>
+        <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
           Configure crypto payment processors, manage merchant accounts, track all crypto transactions, and set up settlement preferences.
         </p>
       </div>
@@ -298,15 +298,15 @@ export function CryptoMerchant() {
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:24, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:27, color:s.color }}>{s.value}</div>
+            <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Accepted coins strip */}
       <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
-        <span style={{ color:"#F7931A", fontSize:12, fontWeight:600 }}>Accepting:</span>
+        <span style={{ color:"#F7931A", fontSize:13.5, fontWeight:600 }}>Accepting:</span>
         <div className="flex flex-wrap gap-2 flex-1">
           {["BTC","ETH","USDC","USDT","SOL","BNB","XRP","LTC"].map(coin => (
             <span key={coin} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
@@ -315,7 +315,7 @@ export function CryptoMerchant() {
             </span>
           ))}
         </div>
-        <span style={{ color:"#8A9AB8", fontSize:11 }}>via connected processors</span>
+        <span style={{ color:"#8A9AB8", fontSize:12.5 }}>via connected processors</span>
       </div>
 
       {/* Tabs */}
@@ -336,7 +336,7 @@ export function CryptoMerchant() {
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
             <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
             <div>
-              <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
+              <p style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>
                 <strong style={{ color:"#E8EDF5" }}>Become a crypto merchant:</strong> Connect one or more processors below. Each processor handles payment routing, fraud screening, and automatic USD settlement so you never hold volatile crypto. We recommend Coinbase Commerce + BitPay for maximum coin coverage.
               </p>
             </div>
@@ -350,7 +350,7 @@ export function CryptoMerchant() {
         <div className="space-y-4">
           {/* Volume by coin */}
           <div className="p-5 rounded-2xl" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Volume by Cryptocurrency</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:14 }}>Volume by Cryptocurrency</div>
             <div className="space-y-2.5">
               {(["BTC","ETH","USDC","USDT","SOL"] as const).map(coin => {
                 const vol = MOCK_TXS.filter(t=>t.coin===coin&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0);
@@ -361,9 +361,9 @@ export function CryptoMerchant() {
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <span style={{ color:COIN_COLORS[coin], fontWeight:700 }}>{COIN_LOGOS[coin]}</span>
-                        <span style={{ color:"#E8EDF5", fontSize:13 }}>{coin}</span>
+                        <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{coin}</span>
                       </div>
-                      <span style={{ color:COIN_COLORS[coin], fontSize:12, fontWeight:700, ...MONO }}>${vol.toLocaleString()}</span>
+                      <span style={{ color:COIN_COLORS[coin], fontSize:13.5, fontWeight:700, ...MONO }}>${vol.toLocaleString()}</span>
                     </div>
                     <div className="h-2 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                       <div className="h-2 rounded-full" style={{ width:`${(vol/max)*100}%`, background:COIN_COLORS[coin] }}/>
@@ -380,26 +380,26 @@ export function CryptoMerchant() {
               <thead>
                 <tr style={{ background:"rgba(255,255,255,0.08)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
                   {["TXN ID","User","Type","Coin","Amount (Crypto)","USD Value","Processor","Date","Status"].map(h => (
-                    <th key={h} className="px-4 py-3 text-left whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h}</th>
+                    <th key={h} className="px-4 py-3 text-left whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {MOCK_TXS.map((tx, i) => (
                   <tr key={tx.id} style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#6E90C9", fontSize:10, ...MONO }}>{tx.id}</td>
-                    <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:12, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
-                    <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:11, whiteSpace:"nowrap" }}>{tx.type}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#6E90C9", fontSize:11, ...MONO }}>{tx.id}</td>
+                    <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
+                    <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:12.5, whiteSpace:"nowrap" }}>{tx.type}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <span style={{ color:COIN_COLORS[tx.coin] ?? "#8A9AB8", fontWeight:700 }}>{COIN_LOGOS[tx.coin] ?? "●"}</span>
-                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#8A9AB8", fontSize:11, fontWeight:700, ...MONO }}>{tx.coin}</span>
+                        <span style={{ color:COIN_COLORS[tx.coin] ?? "#8A9AB8", fontSize:12.5, fontWeight:700, ...MONO }}>{tx.coin}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#E8EDF5", fontSize:11, ...MONO }}>{tx.amount}</td>
-                    <td className="px-4 py-3" style={{ color:"#D99A6B", fontSize:12, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:11 }}>{tx.processor}</td>
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:11 }}>{tx.date}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#E8EDF5", fontSize:12.5, ...MONO }}>{tx.amount}</td>
+                    <td className="px-4 py-3" style={{ color:"#D99A6B", fontSize:13.5, fontWeight:700, ...MONO }}>${tx.usd.toFixed(2)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:12.5 }}>{tx.processor}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#8A9AB8", fontSize:12.5 }}>{tx.date}</td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded text-xs font-bold"
                         style={{ background:tx.status==="confirmed"?"rgba(72,187,120,0.1)":"rgba(246,173,85,0.1)", color:tx.status==="confirmed"?"#D99A6B":"#F6AD55", ...MONO }}>
@@ -419,8 +419,8 @@ export function CryptoMerchant() {
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-2xl"
             style={{ background:"rgba(247,147,26,0.05)", border:"1px solid rgba(247,147,26,0.2)" }}>
-            <span style={{ fontSize:16 }}>🔐</span>
-            <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>
+            <span style={{ fontSize:18 }}>🔐</span>
+            <p style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>
               <strong style={{ color:"#E8EDF5" }}>Merchant wallets</strong> are managed by your connected payment processors — you never need to manage private keys directly. If you choose to hold crypto instead of auto-converting to USD, processor custodial wallets are used. For self-custody, configure your own wallet addresses below.
             </p>
           </div>
@@ -434,23 +434,23 @@ export function CryptoMerchant() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center rounded-full font-bold"
-                    style={{ width:44, height:44, background:`${w.color}15`, color:w.color, fontSize:20 }}>
+                    style={{ width:44, height:44, background:`${w.color}15`, color:w.color, fontSize:22.5 }}>
                     {w.emoji}
                   </div>
                   <div>
-                    <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600 }}>{w.coin} Merchant Wallet</div>
-                    <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Custodied by {w.custody}</div>
+                    <div style={{ color:"#E8EDF5", fontSize:17, fontWeight:600 }}>{w.coin} Merchant Wallet</div>
+                    <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:2 }}>Custodied by {w.custody}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div style={{ color:w.color, fontSize:18, fontWeight:700, fontFamily:"var(--font-display)" }}>{w.balance}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:12 }}>{w.usd} USD</div>
+                  <div style={{ color:w.color, fontSize:20, fontWeight:700, fontFamily:"var(--font-display)" }}>{w.balance}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:13.5 }}>{w.usd} USD</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-2xl"
                 style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
-                <span style={{ color:"#8A9AB8", fontSize:10, ...MONO, flexShrink:0 }}>ADDRESS:</span>
-                <code style={{ color:"#8A9AB8", fontSize:11, flex:1 }} className="truncate">{w.address}</code>
+                <span style={{ color:"#8A9AB8", fontSize:11, ...MONO, flexShrink:0 }}>ADDRESS:</span>
+                <code style={{ color:"#8A9AB8", fontSize:12.5, flex:1 }} className="truncate">{w.address}</code>
                 <button onClick={() => { copyToClipboard(w.address); toast.success(`${w.coin} address copied`); }}
                   style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={13}/></button>
               </div>
@@ -469,7 +469,7 @@ export function CryptoMerchant() {
       {tab === "settings" && (
         <div className="space-y-5 max-w-lg">
           <div className="p-5 rounded-2xl space-y-4" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:4 }}>Payment Preferences</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:4 }}>Payment Preferences</div>
 
             {[
               { label:"Default processor for new payments", value:"Coinbase Commerce", type:"select", options:["Coinbase Commerce","BitPay","NOWPayments"] },
@@ -480,7 +480,7 @@ export function CryptoMerchant() {
               { label:"Maximum crypto payment (USD)", value:"9999.00", type:"input" },
             ].map(f => (
               <div key={f.label}>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>
                   {f.label.toUpperCase()}
                 </label>
                 {f.type === "select" ? (
@@ -495,8 +495,8 @@ export function CryptoMerchant() {
 
             <div className="flex items-center justify-between pt-2">
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:500 }}>Show crypto payment option to all users</div>
-                <div style={{ color:"#8A9AB8", fontSize:11 }}>When off, crypto is only shown for $199 continuation fee</div>
+                <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>Show crypto payment option to all users</div>
+                <div style={{ color:"#8A9AB8", fontSize:12.5 }}>When off, crypto is only shown for $199 continuation fee</div>
               </div>
               <ToggleRight size={28} color="#FFFFFF"/>
             </div>
@@ -511,10 +511,10 @@ export function CryptoMerchant() {
           {/* Merchant verification */}
           <div className="p-5 rounded-2xl" style={{ ...CARD, border:"1px solid rgba(247,147,26,0.3)", background:"rgba(247,147,26,0.03)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <span style={{ fontSize:20 }}>₿</span>
-              <span style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5" }}>Merchant Business Verification</span>
+              <span style={{ fontSize:22.5 }}>₿</span>
+              <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>Merchant Business Verification</span>
             </div>
-            <p style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7, marginBottom:12 }}>
+            <p style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7, marginBottom:12 }}>
               To unlock higher transaction limits and lower fees, complete business verification with each processor. Required for: transactions over $10,000/day, international payments, and institutional settlement.
             </p>
             {[
@@ -523,8 +523,8 @@ export function CryptoMerchant() {
               { name:"NOWPayments",        status:"Not started",     color:"#8A9AB8" },
             ].map(v => (
               <div key={v.name} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
-                <span style={{ color:"#E8EDF5", fontSize:13 }}>{v.name}</span>
-                <span style={{ color:v.color, fontSize:12, fontWeight:600 }}>{v.status}</span>
+                <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{v.name}</span>
+                <span style={{ color:v.color, fontSize:13.5, fontWeight:600 }}>{v.status}</span>
               </div>
             ))}
             <button onClick={() => toast.success("Business verification — complete at nowpayments.io/merchant")}

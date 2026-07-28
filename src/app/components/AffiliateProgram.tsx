@@ -44,10 +44,10 @@ const AFF_CSS = `
 
 .fpd-aff .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-aff .card.pad{padding:28px;}
-.fpd-aff .eyebrow{font-size:10px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
-.fpd-aff .pg-h1{font-size:24px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-aff .pg-sub{color:${MUTED};font-size:13px;max-width:660px;line-height:1.6;}
-.fpd-aff .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
+.fpd-aff .eyebrow{font-size:11px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-aff .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-aff .pg-sub{color:${MUTED};font-size:14.5px;max-width:660px;line-height:1.6;}
+.fpd-aff .sec-title{font-size:17px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
 .fpd-aff .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 
 /* tier badges */
@@ -55,10 +55,10 @@ const AFF_CSS = `
 .fpd-aff .tier-badge{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:18px;flex:1;min-width:180px;border:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);}
 .fpd-aff .tier-badge.current{border:2px solid;}
 .fpd-aff .tier-ico{border-radius:16px;padding:8px;display:flex;}
-.fpd-aff .tier-lbl{font-family:var(--font-mono);font-size:11px;font-weight:700;}
-.fpd-aff .tier-rate{font-size:18px;font-weight:700;font-family:var(--font-display);color:${TEXT};}
-.fpd-aff .tier-range{color:${MUTED};font-size:11px;}
-.fpd-aff .tier-current-tag{margin-left:auto;font-size:10px;padding:4px 9px;border-radius:99px;font-family:var(--font-mono);}
+.fpd-aff .tier-lbl{font-family:var(--font-mono);font-size:12.5px;font-weight:700;}
+.fpd-aff .tier-rate{font-size:20px;font-weight:700;font-family:var(--font-display);color:${TEXT};}
+.fpd-aff .tier-range{color:${MUTED};font-size:12.5px;}
+.fpd-aff .tier-current-tag{margin-left:auto;font-size:11px;padding:4px 9px;border-radius:99px;font-family:var(--font-mono);}
 
 /* progress */
 .fpd-aff .progress-track{height:12px;border-radius:99px;background:#0F1624;}
@@ -69,25 +69,25 @@ const AFF_CSS = `
 .fpd-aff .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-aff .kcell:first-child{border-left:none;}
 .fpd-aff .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-aff .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
+.fpd-aff .kcell .klbl{font-size:10.5px;font-weight:600;color:${MUTED};}
 .fpd-aff .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-aff .kcell .kval{font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-aff .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-aff .kcell .kval{font-family:var(--font-display);font-size:27px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-aff .kcell .ksub{font-size:13px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-aff .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:880px){.fpd-aff .kstrip{grid-template-columns:1fr 1fr;}.fpd-aff .kcell:nth-child(3){border-left:none;}.fpd-aff .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
 /* referral link */
 .fpd-aff .link-row{display:flex;gap:10px;flex-wrap:wrap;}
 .fpd-aff .link-box{display:flex;align-items:center;gap:10px;flex:1;min-width:220px;padding:13px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
-.fpd-aff .link-box span{color:${TEXT};font-size:13px;font-family:var(--font-mono);}
-.fpd-aff .copy-btn{display:flex;align-items:center;gap:8px;padding:13px 20px;border-radius:16px;font-weight:600;font-size:13px;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-aff .link-box span{color:${TEXT};font-size:14.5px;font-family:var(--font-mono);}
+.fpd-aff .copy-btn{display:flex;align-items:center;gap:8px;padding:13px 20px;border-radius:16px;font-weight:600;font-size:14.5px;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-aff .share-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
-.fpd-aff .share-btn{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:12.5px;cursor:pointer;font-family:var(--font-body);}
+.fpd-aff .share-btn{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14px;cursor:pointer;font-family:var(--font-body);}
 
 /* earnings chart */
 .fpd-aff .echart{display:flex;align-items:flex-end;gap:10px;height:160px;}
 .fpd-aff .echart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.fpd-aff .echart-val{color:${MUTED};font-size:9px;font-family:var(--font-mono);}
+.fpd-aff .echart-val{color:${MUTED};font-size:10px;font-family:var(--font-mono);}
 .fpd-aff .echart-bar-wrap{width:100%;height:120px;display:flex;align-items:flex-end;}
 .fpd-aff .echart-bar{width:100%;border-radius:4px 4px 0 0;background:${ACCENT};}
 
@@ -95,13 +95,13 @@ const AFF_CSS = `
 .fpd-aff .table-hd{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-aff .trow{display:grid;grid-template-columns:1fr auto auto auto auto;gap:16px;align-items:center;padding:14px 20px;}
 .fpd-aff .trow.head{background:rgba(255,255,255,0.02);}
-.fpd-aff .trow.head span{color:${MUTED};font-size:11px;font-family:var(--font-mono);}
+.fpd-aff .trow.head span{color:${MUTED};font-size:12.5px;font-family:var(--font-mono);}
 .fpd-aff .trow.body{border-top:1px solid rgba(255,255,255,0.08);}
-.fpd-aff .status-pill{padding:4px 10px;border-radius:99px;font-size:11px;font-family:var(--font-mono);}
+.fpd-aff .status-pill{padding:4px 10px;border-radius:99px;font-size:12.5px;font-family:var(--font-mono);}
 
 /* cap notice */
 .fpd-aff .notice{display:flex;gap:12px;padding:16px 20px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
-.fpd-aff .notice p{color:${MUTED};font-size:13px;line-height:1.7;}
+.fpd-aff .notice p{color:${MUTED};font-size:14.5px;line-height:1.7;}
 `;
 
 export function AffiliateProgram() {
@@ -164,13 +164,13 @@ export function AffiliateProgram() {
         {nextTier && (
           <div className="card pad">
             <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-              <span style={{ color: TEXT, fontSize: 14, fontWeight: 500 }}>Progress to {nextTier.label} ({nextTier.rate}%)</span>
-              <span style={{ color: nextTier.color, fontFamily: "var(--font-mono)", fontSize: 13 }}>{activeReferrals} / {nextTier.tier === 2 ? 25 : 75} active referrals</span>
+              <span style={{ color: TEXT, fontSize: 15.5, fontWeight: 500 }}>Progress to {nextTier.label} ({nextTier.rate}%)</span>
+              <span style={{ color: nextTier.color, fontFamily: "var(--font-mono)", fontSize: 14.5 }}>{activeReferrals} / {nextTier.tier === 2 ? 25 : 75} active referrals</span>
             </div>
             <div className="progress-track">
               <div className="progress-fill" style={{ width: `${Math.min(100, (activeReferrals / (nextTier.tier === 2 ? 25 : 75)) * 100)}%`, background: `linear-gradient(90deg, ${currentTier?.color ?? "#5BA7D6"}, ${nextTier.color})` }}/>
             </div>
-            <div style={{ color: MUTED, fontSize: 12, marginTop: 8 }}>
+            <div style={{ color: MUTED, fontSize: 13.5, marginTop: 8 }}>
               {(nextTier.tier === 2 ? 25 : 75) - activeReferrals} more referrals needed to reach {nextTier.label} ({nextTier.rate}% commission)
             </div>
           </div>
@@ -244,7 +244,7 @@ export function AffiliateProgram() {
         {/* ── Referral table ── */}
         <div className="card" style={{ overflow: "hidden" }}>
           <div className="table-hd">
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: TEXT }}>My Referrals</h3>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: TEXT }}>My Referrals</h3>
           </div>
           <div>
             <div className="trow head">
@@ -253,15 +253,15 @@ export function AffiliateProgram() {
             {referrals.map((ref, i) => (
               <div key={i} className="trow body">
                 <div>
-                  <div style={{ color: TEXT, fontSize: 13 }}>{ref.name}</div>
-                  <div style={{ color: MUTED, fontSize: 11 }}>{ref.email}</div>
+                  <div style={{ color: TEXT, fontSize: 14.5 }}>{ref.name}</div>
+                  <div style={{ color: MUTED, fontSize: 12.5 }}>{ref.email}</div>
                 </div>
-                <div style={{ color: TEXT, fontSize: 13 }}>{ref.plan}</div>
-                <div style={{ color: MUTED, fontSize: 12 }}>{ref.joined}</div>
-                <div style={{ color: ref.withinCap ? WARN : MUTED, fontFamily: "var(--font-mono)", fontSize: 13 }}>
+                <div style={{ color: TEXT, fontSize: 14.5 }}>{ref.plan}</div>
+                <div style={{ color: MUTED, fontSize: 13.5 }}>{ref.joined}</div>
+                <div style={{ color: ref.withinCap ? WARN : MUTED, fontFamily: "var(--font-mono)", fontSize: 14.5 }}>
                   {ref.withinCap ? `$${ref.commission.toFixed(2)}` : "—"}
                   {ref.withinCap && ref.monthsLeft <= 3 && (
-                    <span style={{ color: WARN, fontSize: 10, marginLeft: 4 }}>{ref.monthsLeft}mo left</span>
+                    <span style={{ color: WARN, fontSize: 11, marginLeft: 4 }}>{ref.monthsLeft}mo left</span>
                   )}
                 </div>
                 <div>

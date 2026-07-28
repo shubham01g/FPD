@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Eye, EyeOff, Star, AlertCircle, Shield, Lock } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { authenticateConcierge, type ConciergeEmployee } from "../services/conciergeStaff";
@@ -50,16 +50,16 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
           <div className="flex items-center gap-3 mb-16">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.25)" }}/>
             <div>
-              <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:12, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#34456A", fontSize:9, letterSpacing:"0.15em", ...MONO }}>CONCIERGE STAFF PORTAL</div>
+              <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:13.5, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ color:"#34456A", fontSize:10, letterSpacing:"0.15em", ...MONO }}>CONCIERGE STAFF PORTAL</div>
             </div>
           </div>
 
           <Star size={52} color="#F7931A" fill="rgba(247,147,26,0.2)" style={{ marginBottom:24, opacity:0.9 }}/>
-          <h1 style={{ ...DISPLAY, fontSize:"clamp(1.8rem,3.5vw,2.6rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:16 }}>
+          <h1 style={{ ...DISPLAY, fontSize:"clamp(2rem,3.9vw,2.9rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:16 }}>
             White Glove<br /><span style={{ color:"#D68FA8" }}>Concierge Portal</span>
           </h1>
-          <p style={{ color:"#6B7FA8", fontSize:14, lineHeight:1.8, maxWidth:340 }}>
+          <p style={{ color:"#6B7FA8", fontSize:15.5, lineHeight:1.8, maxWidth:340 }}>
             This portal is exclusively for authorized Final Pass Down White Glove Concierge staff. You can only access the clients assigned to you by your administrator.
           </p>
         </div>
@@ -73,8 +73,8 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
           ].map(item => (
             <div key={item.label} className="flex items-center gap-3 px-4 py-3 rounded-xl"
               style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.12)" }}>
-              <span style={{ fontSize:16 }}>{item.icon}</span>
-              <span style={{ color:"#B8C8E0", fontSize:12 }}>{item.label}</span>
+              <span style={{ fontSize:18 }}>{item.icon}</span>
+              <span style={{ color:"#B8C8E0", fontSize:13.5 }}>{item.label}</span>
             </div>
           ))}
         </div>
@@ -86,46 +86,46 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
           {/* Mobile logo */}
           <div className="flex items-center gap-3 mb-10 lg:hidden">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
-            <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:12, fontWeight:700, letterSpacing:"0.06em" }}>CONCIERGE PORTAL</div>
+            <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:13.5, fontWeight:700, letterSpacing:"0.06em" }}>CONCIERGE PORTAL</div>
           </div>
 
           <div className="mb-8">
-            <h2 style={{ ...DISPLAY, fontSize:26, color:"#E8EDF5", marginBottom:8 }}>Staff Sign In</h2>
-            <p style={{ color:"#6B7FA8", fontSize:14 }}>Sign in with the credentials provided by your Final Pass Down administrator.</p>
+            <h2 style={{ ...DISPLAY, fontSize:29, color:"#E8EDF5", marginBottom:8 }}>Staff Sign In</h2>
+            <p style={{ color:"#6B7FA8", fontSize:15.5 }}>Sign in with the credentials provided by your Final Pass Down administrator.</p>
           </div>
 
           {/* Demo hint */}
           <div className="mb-5 px-4 py-3 rounded-xl" style={{ background:"rgba(247,147,26,0.08)", border:"1px solid rgba(247,147,26,0.2)" }}>
-            <p style={{ color:"#F7931A", fontSize:11, ...MONO }}>DEMO STAFF CREDENTIALS</p>
-            <p style={{ color:"#B8C8E0", fontSize:12, marginTop:3 }}>marcus.williams@finalpassdown.com</p>
-            <p style={{ color:"#B8C8E0", fontSize:12 }}>patricia.chen@finalpassdown.com</p>
-            <p style={{ color:"#B8C8E0", fontSize:12 }}>james.rivera@finalpassdown.com</p>
-            <p style={{ color:"#6B7FA8", fontSize:11, marginTop:3 }}>All passwords: Concierge2026!</p>
+            <p style={{ color:"#F7931A", fontSize:12.5, ...MONO }}>DEMO STAFF CREDENTIALS</p>
+            <p style={{ color:"#B8C8E0", fontSize:13.5, marginTop:3 }}>marcus.williams@finalpassdown.com</p>
+            <p style={{ color:"#B8C8E0", fontSize:13.5 }}>patricia.chen@finalpassdown.com</p>
+            <p style={{ color:"#B8C8E0", fontSize:13.5 }}>james.rivera@finalpassdown.com</p>
+            <p style={{ color:"#6B7FA8", fontSize:12.5, marginTop:3 }}>All passwords: Concierge2026!</p>
           </div>
 
           {error && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5"
               style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
               <AlertCircle size={14} color="#FC8181"/>
-              <span style={{ color:"#FC8181", fontSize:13 }}>{error}</span>
+              <span style={{ color:"#FC8181", fontSize:14.5 }}>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label style={{ color:"#6B7FA8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>STAFF EMAIL</label>
+              <label style={{ color:"#6B7FA8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>STAFF EMAIL</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="yourname@finalpassdown.com"
                 className="w-full px-4 py-3.5 rounded-xl"
-                style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
+                style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:15.5, outline:"none" }}/>
             </div>
             <div>
-              <label style={{ color:"#6B7FA8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>PASSWORD</label>
+              <label style={{ color:"#6B7FA8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>PASSWORD</label>
               <div className="relative">
                 <input type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••••"
                   className="w-full px-4 py-3.5 rounded-xl pr-12"
-                  style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:14, outline:"none" }}/>
+                  style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:15.5, outline:"none" }}/>
                 <button type="button" onClick={() => setShowPw(!showPw)}
                   className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color:"#6B7FA8" }}>
                   {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
@@ -143,11 +143,11 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
 
           <div className="flex items-center justify-center gap-2 mt-6">
             <Lock size={11} color="#4A5A7A"/>
-            <span style={{ color:"#4A5A7A", fontSize:11 }}>Restricted access · All sessions are logged</span>
+            <span style={{ color:"#4A5A7A", fontSize:12.5 }}>Restricted access · All sessions are logged</span>
           </div>
 
           <div className="text-center mt-4">
-            <button onClick={onBackToSite} style={{ color:"#4A5A7A", fontSize:12 }}>
+            <button onClick={onBackToSite} style={{ color:"#4A5A7A", fontSize:13.5 }}>
               ← Back to finalpassdown.com
             </button>
           </div>

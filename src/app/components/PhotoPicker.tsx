@@ -25,7 +25,7 @@ export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio 
 
   return (
     <div>
-      <label style={{ color:"var(--muted-foreground)", fontSize:10, display:"block", marginBottom:6, fontFamily:"var(--font-mono)" }}>
+      <label style={{ color:"var(--muted-foreground)", fontSize:11, display:"block", marginBottom:6, fontFamily:"var(--font-mono)" }}>
         {label.toUpperCase()}
       </label>
 
@@ -63,8 +63,8 @@ export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio 
             <ImageIcon size={20} color="var(--primary)"/>
           </div>
           <div>
-            <div style={{ fontSize:13, fontWeight:600, color:"var(--primary)" }}>Click to add photo</div>
-            <div style={{ fontSize:11, marginTop:2 }}>JPG, PNG, HEIC — from camera or files</div>
+            <div style={{ fontSize:14.5, fontWeight:600, color:"var(--primary)" }}>Click to add photo</div>
+            <div style={{ fontSize:12.5, marginTop:2 }}>JPG, PNG, HEIC — from camera or files</div>
           </div>
         </button>
       )}

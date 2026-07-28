@@ -51,7 +51,7 @@ const adminGroups: { label: string; items: AdminNavItem[] }[] = [
       { id: "white-label",             label: "White Label",         icon: <Layers size={14}/> },
       { id: "continuation-fee-admin",  label: "$199 Legacy Fee",     icon: <Shield size={14}/> },
       { id: "partner-onboarding-admin",label: "WL Onboarding Control", icon: <Handshake size={14}/> },
-      { id: "crypto-merchant",         label: "Crypto Payments",     icon: <span style={{fontSize:11,fontWeight:900,lineHeight:1}}>₿</span> },
+      { id: "crypto-merchant",         label: "Crypto Payments",     icon: <span style={{fontSize:12.5,fontWeight:900,lineHeight:1}}>₿</span> },
     ],
   },
 ];
@@ -81,9 +81,9 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
       <span style={{ flexShrink:0, color: isActive(item.id) ? "#FFFFFF" : "inherit" }}>{item.icon}</span>
       {open && (
         <>
-          <span style={{ fontSize:12, fontWeight: isActive(item.id) ? 600 : 400, color: isActive(item.id) ? "#FFFFFF" : "inherit", flex:1, textAlign:"left" }}>{item.label}</span>
+          <span style={{ fontSize:13.5, fontWeight: isActive(item.id) ? 600 : 400, color: isActive(item.id) ? "#FFFFFF" : "inherit", flex:1, textAlign:"left" }}>{item.label}</span>
           {item.badge && (
-            <span style={{ fontSize:9, fontFamily:"var(--font-mono)", background:"rgba(229,62,62,0.18)", color:"#FC8181", padding:"1px 5px", borderRadius:99, fontWeight:700 }}>
+            <span style={{ fontSize:10, fontFamily:"var(--font-mono)", background:"rgba(229,62,62,0.18)", color:"#FC8181", padding:"1px 5px", borderRadius:99, fontWeight:700 }}>
               {item.badge}
             </span>
           )}
@@ -103,8 +103,8 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
           <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:7, objectFit:"contain", flexShrink:0, boxShadow:"0 0 16px rgba(91,110,225,0.35)" }}/>
           {open && (
             <div className="flex-1 min-w-0">
-              <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:10, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>
-              <div style={{ color:"rgba(255,255,255,0.35)", fontSize:7.5, letterSpacing:"0.15em", marginTop:1, fontFamily:"var(--font-mono)" }}>FINAL PASS DOWN · RESTRICTED</div>
+              <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:11, fontWeight:700, letterSpacing:"0.06em", whiteSpace:"nowrap" }}>ADMIN PORTAL</div>
+              <div style={{ color:"rgba(255,255,255,0.35)", fontSize:8.5, letterSpacing:"0.15em", marginTop:1, fontFamily:"var(--font-mono)" }}>FINAL PASS DOWN · RESTRICTED</div>
             </div>
           )}
           <button onClick={() => setOpen(!open)} style={{ color:"rgba(255,255,255,0.35)", flexShrink:0 }}>
@@ -118,8 +118,8 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
             style={{ background:"rgba(91,110,225,0.12)", border:"1px solid rgba(91,110,225,0.3)" }}>
             <Crown size={13} color="#FFFFFF"/>
             <div>
-              <div style={{ color:"#E8EDF5", fontSize:11, fontWeight:600 }}>Admin Session</div>
-              <div style={{ color:"#6FAE8B", fontSize:9, fontFamily:"var(--font-mono)" }}>admin@finalpassdown.com</div>
+              <div style={{ color:"#E8EDF5", fontSize:12.5, fontWeight:600 }}>Admin Session</div>
+              <div style={{ color:"#6FAE8B", fontSize:10, fontFamily:"var(--font-mono)" }}>admin@finalpassdown.com</div>
             </div>
           </div>
         )}
@@ -128,7 +128,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-3" style={{ scrollbarWidth:"none" }}>
           {adminGroups.map(group => (
             <div key={group.label}>
-              {open && <div style={{ color:"rgba(255,255,255,0.38)", fontSize:8.5, letterSpacing:"0.14em", paddingLeft:8, paddingBottom:3, paddingTop:3, fontFamily:"var(--font-mono)" }}>{group.label.toUpperCase()}</div>}
+              {open && <div style={{ color:"rgba(255,255,255,0.38)", fontSize:9.5, letterSpacing:"0.14em", paddingLeft:8, paddingBottom:3, paddingTop:3, fontFamily:"var(--font-mono)" }}>{group.label.toUpperCase()}</div>}
               <div className="space-y-0.5">
                 {group.items.map(item => <NavBtn key={item.id} item={item}/>)}
               </div>
@@ -141,7 +141,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
           <button onClick={onSignOut} className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 transition-all"
             style={{ color:"rgba(255,255,255,0.55)", justifyContent: open ? "flex-start" : "center", background:"rgba(229,62,62,0.06)" }}>
             <LogOut size={13}/>
-            {open && <span style={{ fontSize:12 }}>Exit Admin Portal</span>}
+            {open && <span style={{ fontSize:13.5 }}>Exit Admin Portal</span>}
           </button>
         </div>
       </aside>
@@ -152,28 +152,28 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
         <header className="flex items-center justify-between px-5 py-2.5 border-b flex-shrink-0"
           style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,110,225,0.16)", backdropFilter:"blur(16px)" }}>
           <div className="flex items-center gap-3">
-            <div style={{ color:"rgba(255,255,255,0.35)", fontSize:11, fontFamily:"var(--font-mono)" }}>
+            <div style={{ color:"rgba(255,255,255,0.35)", fontSize:12.5, fontFamily:"var(--font-mono)" }}>
               {new Date().toLocaleDateString("en-US",{ weekday:"long", year:"numeric", month:"long", day:"numeric" })}
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full"
               style={{ background:"rgba(91,110,225,0.12)", border:"1px solid rgba(91,110,225,0.3)" }}>
               <Activity size={10} color="#FFFFFF"/>
-              <span style={{ color:"#6FAE8B", fontSize:9, fontFamily:"var(--font-mono)", fontWeight:700 }}>ADMIN SESSION ACTIVE</span>
+              <span style={{ color:"#6FAE8B", fontSize:10, fontFamily:"var(--font-mono)", fontWeight:700 }}>ADMIN SESSION ACTIVE</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
               style={{ background:"rgba(229,62,62,0.08)", border:"1px solid rgba(229,62,62,0.2)" }}>
               <Shield size={11} color="#FC8181"/>
-              <span style={{ color:"#FC8181", fontSize:10, fontFamily:"var(--font-mono)", fontWeight:700 }}>RESTRICTED ACCESS</span>
+              <span style={{ color:"#FC8181", fontSize:11, fontFamily:"var(--font-mono)", fontWeight:700 }}>RESTRICTED ACCESS</span>
             </div>
             <button className="relative" style={{ color:"#8A9AB8" }}>
               <Bell size={15}/>
               <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full"
-                style={{ width:13, height:13, background:"#E53E3E", color:"#fff", fontSize:8, fontWeight:700 }}>3</span>
+                style={{ width:13, height:13, background:"#E53E3E", color:"#fff", fontSize:9, fontWeight:700 }}>3</span>
             </button>
             <div className="flex items-center justify-center rounded-full"
-              style={{ width:28, height:28, background:"rgba(91,110,225,0.18)", color:"#6FAE8B", fontSize:11, fontWeight:700 }}>A</div>
+              style={{ width:28, height:28, background:"rgba(91,110,225,0.18)", color:"#6FAE8B", fontSize:12.5, fontWeight:700 }}>A</div>
           </div>
         </header>
 

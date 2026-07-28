@@ -30,24 +30,24 @@ const templates: EmailTemplate[] = [
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:linear-gradient(135deg,#060F1E,#0A1628);padding:40px;text-align:center;border-bottom:1px solid rgba(91,110,225,0.15)">
     <img src="https://finalpassdown.com/logo.png" alt="Final Pass Down" style="height:50px;margin-bottom:16px"/>
-    <h1 style="color:#6E90C9;font-size:22px;margin:0;font-weight:700">Welcome to Final Pass Down</h1>
-    <p style="color:#6B7FA8;margin-top:8px;font-size:14px">My Life · My Wishes · My Way</p>
+    <h1 style="color:#6E90C9;font-size:24.5px;margin:0;font-weight:700">Welcome to Final Pass Down</h1>
+    <p style="color:#6B7FA8;margin-top:8px;font-size:15.5px">My Life · My Wishes · My Way</p>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Welcome to Final Pass Down — you've taken the most important step in protecting your family's future. Your <strong style="color:#6E90C9">{{plan_name}}</strong> vault is now active and ready.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Welcome to Final Pass Down — you've taken the most important step in protecting your family's future. Your <strong style="color:#6E90C9">{{plan_name}}</strong> vault is now active and ready.</p>
     <div style="background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);border-radius:12px;padding:24px;margin:24px 0">
-      <p style="color:#6E90C9;font-size:13px;font-weight:700;margin:0 0 12px;letter-spacing:0.08em">GET STARTED IN 3 STEPS</p>
-      <p style="color:#B8C8E0;font-size:14px;margin:8px 0">📁 <strong>Upload your first document</strong> — start with a will or insurance policy</p>
-      <p style="color:#B8C8E0;font-size:14px;margin:8px 0">👥 <strong>Add a Legacy Contact</strong> — someone who will receive your vault</p>
-      <p style="color:#B8C8E0;font-size:14px;margin:8px 0">❤️ <strong>Record your final wishes</strong> — what you want done with your life's work</p>
+      <p style="color:#6E90C9;font-size:14.5px;font-weight:700;margin:0 0 12px;letter-spacing:0.08em">GET STARTED IN 3 STEPS</p>
+      <p style="color:#B8C8E0;font-size:15.5px;margin:8px 0">📁 <strong>Upload your first document</strong> — start with a will or insurance policy</p>
+      <p style="color:#B8C8E0;font-size:15.5px;margin:8px 0">👥 <strong>Add a Legacy Contact</strong> — someone who will receive your vault</p>
+      <p style="color:#B8C8E0;font-size:15.5px;margin:8px 0">❤️ <strong>Record your final wishes</strong> — what you want done with your life's work</p>
     </div>
     <div style="text-align:center;margin:32px 0">
-      <a href="{{login_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:15px;box-shadow:0 0 30px rgba(91,110,225,0.35)">Open My Vault →</a>
+      <a href="{{login_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:17px;box-shadow:0 0 30px rgba(91,110,225,0.35)">Open My Vault →</a>
     </div>
   </div>
   <div style="background:rgba(0,0,0,0.3);padding:24px;text-align:center;border-top:1px solid rgba(91,110,225,0.1)">
-    <p style="color:#4A5A7A;font-size:11px;margin:0">© 2026 Final Pass Down Inc. · <a href="#" style="color:#6E90C9">Privacy</a> · <a href="#" style="color:#6E90C9">Unsubscribe</a></p>#6E90C9">Unsubscribe</a></p>
+    <p style="color:#4A5A7A;font-size:12.5px;margin:0">© 2026 Final Pass Down Inc. · <a href="#" style="color:#6E90C9">Privacy</a> · <a href="#" style="color:#6E90C9">Unsubscribe</a></p>#6E90C9">Unsubscribe</a></p>
   </div>
 </div>`,
   },
@@ -60,15 +60,15 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{otp_code}}", "{{expires_in}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:linear-gradient(135deg,#060F1E,#0A1628);padding:32px;text-align:center;border-bottom:1px solid rgba(91,110,225,0.15)">
-    <h1 style="color:#6E90C9;font-size:20px;margin:0">Security Verification</h1>
+    <h1 style="color:#6E90C9;font-size:22.5px;margin:0">Security Verification</h1>
   </div>
   <div style="padding:40px;text-align:center">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>, your one-time code is:</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>, your one-time code is:</p>
     <div style="background:rgba(91,110,225,0.08);border:2px solid rgba(91,110,225,0.4);border-radius:16px;padding:32px;margin:24px auto;display:inline-block;min-width:200px">
-      <span style="font-family:monospace;font-size:42px;font-weight:700;color:#6E90C9;letter-spacing:12px">{{otp_code}}</span>
+      <span style="font-family:monospace;font-size:47px;font-weight:700;color:#6E90C9;letter-spacing:12px">{{otp_code}}</span>
     </div>
-    <p style="color:#6B7FA8;font-size:13px">This code expires in <strong style="color:#F6AD55">{{expires_in}} minutes</strong>. Do not share it with anyone.</p>
-    <p style="color:#4A5A7A;font-size:12px;margin-top:24px">If you did not request this code, your account may be at risk. <a href="#" style="color:#FC8181">Report unauthorized access</a></p>
+    <p style="color:#6B7FA8;font-size:14.5px">This code expires in <strong style="color:#F6AD55">{{expires_in}} minutes</strong>. Do not share it with anyone.</p>
+    <p style="color:#4A5A7A;font-size:13.5px;margin-top:24px">If you did not request this code, your account may be at risk. <a href="#" style="color:#FC8181">Report unauthorized access</a></p>
   </div>
 </div>`,
   },
@@ -81,16 +81,16 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{reset_url}}", "{{expires_in}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:linear-gradient(135deg,#060F1E,#0A1628);padding:32px;text-align:center;border-bottom:1px solid rgba(91,110,225,0.15)">
-    <h1 style="color:#E8EDF5;font-size:20px;margin:0">Password Reset Request</h1>
+    <h1 style="color:#E8EDF5;font-size:22.5px;margin:0">Password Reset Request</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">We received a request to reset your Final Pass Down password. Click the button below to create a new password. This link expires in <strong style="color:#F6AD55">{{expires_in}}</strong>.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">We received a request to reset your Final Pass Down password. Click the button below to create a new password. This link expires in <strong style="color:#F6AD55">{{expires_in}}</strong>.</p>
     <div style="text-align:center;margin:32px 0">
-      <a href="{{reset_url}}" style="display:inline-block;background:rgba(91,110,225,0.15);color:#6E90C9;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:15px;border:1px solid rgba(91,110,225,0.4)">Reset My Password</a>
+      <a href="{{reset_url}}" style="display:inline-block;background:rgba(91,110,225,0.15);color:#6E90C9;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:17px;border:1px solid rgba(91,110,225,0.4)">Reset My Password</a>
     </div>
     <div style="background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.25);border-radius:10px;padding:16px">
-      <p style="color:#FC8181;font-size:13px;margin:0">⚠ If you did not request this, please ignore this email. Your password will not change.</p>
+      <p style="color:#FC8181;font-size:14.5px;margin:0">⚠ If you did not request this, please ignore this email. Your password will not change.</p>
     </div>
   </div>
 </div>`,
@@ -104,18 +104,18 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{used_gb}}", "{{limit_gb}}", "{{plan_name}}", "{{upgrade_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(246,173,85,0.25)">
   <div style="background:rgba(246,173,85,0.12);padding:32px;text-align:center;border-bottom:1px solid rgba(246,173,85,0.2)">
-    <p style="color:#F6AD55;font-size:48px;margin:0">⚠</p>
-    <h1 style="color:#F6AD55;font-size:20px;margin:8px 0">Storage at 80%</h1>
+    <p style="color:#F6AD55;font-size:54px;margin:0">⚠</p>
+    <h1 style="color:#F6AD55;font-size:22.5px;margin:8px 0">Storage at 80%</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Your <strong>{{plan_name}}</strong> vault has used <strong style="color:#F6AD55">{{used_gb}} GB</strong> of your <strong>{{limit_gb}} GB</strong> monthly allowance.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Your <strong>{{plan_name}}</strong> vault has used <strong style="color:#F6AD55">{{used_gb}} GB</strong> of your <strong>{{limit_gb}} GB</strong> monthly allowance.</p>
     <div style="background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;height:12px;margin:20px 0">
       <div style="width:80%;height:100%;background:linear-gradient(90deg,#5B6EE1,#F6AD55);border-radius:8px"></div>
     </div>
-    <p style="color:#6B7FA8;font-size:13px">Remember: Unused storage does not carry forward. Your allowance resets at the start of your next billing cycle.</p>
+    <p style="color:#6B7FA8;font-size:14.5px">Remember: Unused storage does not carry forward. Your allowance resets at the start of your next billing cycle.</p>
     <div style="text-align:center;margin:28px 0">
-      <a href="{{upgrade_url}}" style="display:inline-block;background:linear-gradient(135deg,#F6AD55,#ED8936);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">Upgrade My Plan</a>
+      <a href="{{upgrade_url}}" style="display:inline-block;background:linear-gradient(135deg,#F6AD55,#ED8936);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px">Upgrade My Plan</a>
     </div>
   </div>
 </div>`,
@@ -129,14 +129,14 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{used_gb}}", "{{limit_gb}}", "{{upgrade_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(252,129,129,0.3)">
   <div style="background:rgba(252,129,129,0.12);padding:32px;text-align:center;border-bottom:1px solid rgba(252,129,129,0.2)">
-    <p style="color:#FC8181;font-size:48px;margin:0">🚨</p>
-    <h1 style="color:#FC8181;font-size:20px;margin:8px 0">Upgrade Recommended — Storage at 90%</h1>
+    <p style="color:#FC8181;font-size:54px;margin:0">🚨</p>
+    <h1 style="color:#FC8181;font-size:22.5px;margin:8px 0">Upgrade Recommended — Storage at 90%</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">You are at <strong style="color:#FC8181">{{used_gb}} GB / {{limit_gb}} GB</strong>. At 100%, overage billing begins automatically at <strong>$0.10 per GB</strong>.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">You are at <strong style="color:#FC8181">{{used_gb}} GB / {{limit_gb}} GB</strong>. At 100%, overage billing begins automatically at <strong>$0.10 per GB</strong>.</p>
     <div style="text-align:center;margin:28px 0">
-      <a href="{{upgrade_url}}" style="display:inline-block;background:linear-gradient(135deg,#FC8181,#E53E3E);color:#fff;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">Upgrade Now — Avoid Overage</a>
+      <a href="{{upgrade_url}}" style="display:inline-block;background:linear-gradient(135deg,#FC8181,#E53E3E);color:#fff;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px">Upgrade Now — Avoid Overage</a>
     </div>
   </div>
 </div>`,
@@ -150,13 +150,13 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{used_gb}}", "{{limit_gb}}", "{{upgrade_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#0A0000;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:2px solid #E53E3E">
   <div style="background:rgba(229,62,62,0.25);padding:32px;text-align:center">
-    <h1 style="color:#FC8181;font-size:22px;margin:0">🔴 CRITICAL: Storage at 95%</h1>
+    <h1 style="color:#FC8181;font-size:24.5px;margin:0">🔴 CRITICAL: Storage at 95%</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong> — immediate action required.</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Your vault is at <strong style="color:#FC8181">{{used_gb}} GB / {{limit_gb}} GB</strong>. The next file upload will trigger overage billing. Upgrade now to avoid unexpected charges.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong> — immediate action required.</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Your vault is at <strong style="color:#FC8181">{{used_gb}} GB / {{limit_gb}} GB</strong>. The next file upload will trigger overage billing. Upgrade now to avoid unexpected charges.</p>
     <div style="text-align:center;margin:28px 0">
-      <a href="{{upgrade_url}}" style="display:inline-block;background:#E53E3E;color:#fff;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:15px;box-shadow:0 0 20px rgba(229,62,62,0.4)">Upgrade Immediately</a>
+      <a href="{{upgrade_url}}" style="display:inline-block;background:#E53E3E;color:#fff;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:17px;box-shadow:0 0 20px rgba(229,62,62,0.4)">Upgrade Immediately</a>
     </div>
   </div>
 </div>`,
@@ -170,24 +170,24 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{overage_gb}}", "{{overage_charge}}", "{{billing_date}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:#060F1E;padding:32px;border-bottom:1px solid rgba(91,110,225,0.1)">
-    <h1 style="color:#E8EDF5;font-size:20px;margin:0">Storage Overage Invoice</h1>
+    <h1 style="color:#E8EDF5;font-size:22.5px;margin:0">Storage Overage Invoice</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px">An overage charge has been applied to your account for storage used beyond your plan limit.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px">An overage charge has been applied to your account for storage used beyond your plan limit.</p>
     <div style="background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.2);border-radius:12px;padding:24px;margin:24px 0">
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <span style="color:#6B7FA8;font-size:13px">Overage Used</span><span style="color:#E8EDF5;font-weight:700">{{overage_gb}} GB</span>
+        <span style="color:#6B7FA8;font-size:14.5px">Overage Used</span><span style="color:#E8EDF5;font-weight:700">{{overage_gb}} GB</span>
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <span style="color:#6B7FA8;font-size:13px">Rate</span><span style="color:#E8EDF5;font-weight:700">$0.10 / GB</span>
+        <span style="color:#6B7FA8;font-size:14.5px">Rate</span><span style="color:#E8EDF5;font-weight:700">$0.10 / GB</span>
       </div>
       <div style="height:1px;background:rgba(91,110,225,0.15);margin:12px 0"></div>
       <div style="display:flex;justify-content:space-between">
-        <span style="color:#E8EDF5;font-size:15px;font-weight:700">Total Charged</span><span style="color:#6E90C9;font-size:18px;font-weight:700">{{overage_charge}}</span>
+        <span style="color:#E8EDF5;font-size:17px;font-weight:700">Total Charged</span><span style="color:#6E90C9;font-size:20px;font-weight:700">{{overage_charge}}</span>
       </div>
     </div>
-    <p style="color:#4A5A7A;font-size:12px">Billed on {{billing_date}}. Consider upgrading your plan to avoid future overage charges.</p>
+    <p style="color:#4A5A7A;font-size:13.5px">Billed on {{billing_date}}. Consider upgrading your plan to avoid future overage charges.</p>
   </div>
 </div>`,
   },
@@ -200,21 +200,21 @@ const templates: EmailTemplate[] = [
     variables: ["{{contact_name}}", "{{owner_name}}", "{{verify_url}}", "{{access_level}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:linear-gradient(135deg,#060F1E,#0A1628);padding:40px;text-align:center;border-bottom:1px solid rgba(91,110,225,0.15)">
-    <p style="font-size:40px;margin:0">🛡️</p>
-    <h1 style="color:#6E90C9;font-size:22px;margin:12px 0">You're a Trusted Legacy Contact</h1>
+    <p style="font-size:45px;margin:0">🛡️</p>
+    <h1 style="color:#6E90C9;font-size:24.5px;margin:12px 0">You're a Trusted Legacy Contact</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Dear <strong>{{contact_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8"><strong style="color:#E8EDF5">{{owner_name}}</strong> has designated you as a <strong style="color:#6E90C9">Legacy Contact</strong> on their Final Pass Down vault. This means you will receive access to their important documents and final wishes when the time comes.</p>#6E90C9">Legacy Contact</strong> on their Final Pass Down vault. This means you will receive access to their important documents and final wishes when the time comes.</p>
+    <p style="color:#E8EDF5;font-size:18px">Dear <strong>{{contact_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8"><strong style="color:#E8EDF5">{{owner_name}}</strong> has designated you as a <strong style="color:#6E90C9">Legacy Contact</strong> on their Final Pass Down vault. This means you will receive access to their important documents and final wishes when the time comes.</p>#6E90C9">Legacy Contact</strong> on their Final Pass Down vault. This means you will receive access to their important documents and final wishes when the time comes.</p>
     <div style="background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);border-radius:12px;padding:20px;margin:24px 0">
-      <p style="color:#6B7FA8;font-size:12px;margin:0 0 6px;letter-spacing:0.08em">YOUR ACCESS LEVEL</p>
-      <p style="color:#6E90C9;font-size:15px;font-weight:600;margin:0">{{access_level}}</p>
+      <p style="color:#6B7FA8;font-size:13.5px;margin:0 0 6px;letter-spacing:0.08em">YOUR ACCESS LEVEL</p>
+      <p style="color:#6E90C9;font-size:17px;font-weight:600;margin:0">{{access_level}}</p>
     </div>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">To complete your designation, you must verify your identity by uploading a government-issued photo ID. This ensures only you can access the vault.</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">To complete your designation, you must verify your identity by uploading a government-issued photo ID. This ensures only you can access the vault.</p>
     <div style="text-align:center;margin:32px 0">
-      <a href="{{verify_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:15px;box-shadow:0 0 30px rgba(91,110,225,0.35)">Complete Verification →</a>
+      <a href="{{verify_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:16px 40px;border-radius:12px;text-decoration:none;font-size:17px;box-shadow:0 0 30px rgba(91,110,225,0.35)">Complete Verification →</a>
     </div>
-    <p style="color:#4A5A7A;font-size:12px;text-align:center">Verification takes 1–2 business days. Your ID is reviewed by our compliance team and never shared.</p>
+    <p style="color:#4A5A7A;font-size:13.5px;text-align:center">Verification takes 1–2 business days. Your ID is reviewed by our compliance team and never shared.</p>
   </div>
 </div>`,
   },
@@ -227,15 +227,15 @@ const templates: EmailTemplate[] = [
     variables: ["{{contact_name}}", "{{owner_name}}", "{{access_level}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(72,187,120,0.25)">
   <div style="background:rgba(72,187,120,0.1);padding:40px;text-align:center;border-bottom:1px solid rgba(72,187,120,0.2)">
-    <p style="font-size:40px;margin:0">✅</p>
-    <h1 style="color:#D99A6B;font-size:22px;margin:12px 0">Identity Verified Successfully</h1>
+    <p style="font-size:45px;margin:0">✅</p>
+    <h1 style="color:#D99A6B;font-size:24.5px;margin:12px 0">Identity Verified Successfully</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{contact_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Your identity has been verified and you are now an active Legacy Contact for <strong style="color:#E8EDF5">{{owner_name}}</strong>'s vault. You will receive access when the designated conditions are met.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{contact_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Your identity has been verified and you are now an active Legacy Contact for <strong style="color:#E8EDF5">{{owner_name}}</strong>'s vault. You will receive access when the designated conditions are met.</p>
     <div style="background:rgba(72,187,120,0.08);border:1px solid rgba(72,187,120,0.2);border-radius:12px;padding:20px;margin:24px 0">
-      <p style="color:#D99A6B;font-size:13px;font-weight:700;margin:0 0 8px">ACCESS LEVEL: {{access_level}}</p>
-      <p style="color:#8AA3C8;font-size:13px;margin:0">You will be notified when access is granted. No action is required from you at this time.</p>
+      <p style="color:#D99A6B;font-size:14.5px;font-weight:700;margin:0 0 8px">ACCESS LEVEL: {{access_level}}</p>
+      <p style="color:#8AA3C8;font-size:14.5px;margin:0">You will be notified when access is granted. No action is required from you at this time.</p>
     </div>
   </div>
 </div>`,
@@ -249,33 +249,33 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{affiliate_link}}", "{{affiliate_code}}", "{{dashboard_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:linear-gradient(135deg,#060F1E,#0A1628);padding:40px;text-align:center;border-bottom:1px solid rgba(91,110,225,0.15)">
-    <p style="font-size:36px;margin:0">💰</p>
-    <h1 style="color:#6E90C9;font-size:22px;margin:12px 0">You're Now an Affiliate!</h1>
-    <p style="color:#6B7FA8;font-size:14px">Start earning up to 30% commission</p>
+    <p style="font-size:40.5px;margin:0">💰</p>
+    <h1 style="color:#6E90C9;font-size:24.5px;margin:12px 0">You're Now an Affiliate!</h1>
+    <p style="color:#6B7FA8;font-size:15.5px">Start earning up to 30% commission</p>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Your affiliate account is active. Share your unique link and earn monthly commissions for every person you refer who stays subscribed.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Your affiliate account is active. Share your unique link and earn monthly commissions for every person you refer who stays subscribed.</p>
     <div style="background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.25);border-radius:12px;padding:20px;margin:24px 0">
-      <p style="color:#6B7FA8;font-size:11px;margin:0 0 8px;letter-spacing:0.08em">YOUR REFERRAL LINK</p>
-      <p style="color:#6E90C9;font-size:14px;font-weight:700;font-family:monospace;word-break:break-all;margin:0">{{affiliate_link}}</p>
+      <p style="color:#6B7FA8;font-size:12.5px;margin:0 0 8px;letter-spacing:0.08em">YOUR REFERRAL LINK</p>
+      <p style="color:#6E90C9;font-size:15.5px;font-weight:700;font-family:monospace;word-break:break-all;margin:0">{{affiliate_link}}</p>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:24px 0">
       <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:16px;text-align:center">
-        <p style="color:#6E90C9;font-size:24px;font-weight:700;margin:0">20%</p>
-        <p style="color:#6B7FA8;font-size:11px;margin:4px 0 0">Tier 1: 5–24 refs</p>
+        <p style="color:#6E90C9;font-size:27px;font-weight:700;margin:0">20%</p>
+        <p style="color:#6B7FA8;font-size:12.5px;margin:4px 0 0">Tier 1: 5–24 refs</p>
       </div>
       <div style="background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);border-radius:8px;padding:16px;text-align:center">
-        <p style="color:#6E90C9;font-size:24px;font-weight:700;margin:0">25%</p>
-        <p style="color:#6B7FA8;font-size:11px;margin:4px 0 0">Tier 2: 25–74 refs</p>
+        <p style="color:#6E90C9;font-size:27px;font-weight:700;margin:0">25%</p>
+        <p style="color:#6B7FA8;font-size:12.5px;margin:4px 0 0">Tier 2: 25–74 refs</p>
       </div>
       <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:16px;text-align:center">
-        <p style="color:#6E90C9;font-size:24px;font-weight:700;margin:0">30%</p>
-        <p style="color:#6B7FA8;font-size:11px;margin:4px 0 0">Tier 3: 74+ refs</p>
+        <p style="color:#6E90C9;font-size:27px;font-weight:700;margin:0">30%</p>
+        <p style="color:#6B7FA8;font-size:12.5px;margin:4px 0 0">Tier 3: 74+ refs</p>
       </div>
     </div>
     <div style="text-align:center">
-      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">View My Dashboard →</a>
+      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px">View My Dashboard →</a>
     </div>
   </div>
 </div>`,
@@ -289,18 +289,18 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{commission_amount}}", "{{referrals_count}}", "{{tier}}", "{{payout_date}}", "{{dashboard_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(72,187,120,0.25)">
   <div style="background:rgba(72,187,120,0.1);padding:40px;text-align:center;border-bottom:1px solid rgba(72,187,120,0.2)">
-    <p style="font-size:36px;margin:0">🎉</p>
-    <h1 style="color:#D99A6B;font-size:22px;margin:12px 0">Commission Earned!</h1>
+    <p style="font-size:40.5px;margin:0">🎉</p>
+    <h1 style="color:#D99A6B;font-size:24.5px;margin:12px 0">Commission Earned!</h1>
   </div>
   <div style="padding:40px;text-align:center">
-    <p style="color:#8AA3C8;font-size:14px">Hi <strong style="color:#E8EDF5">{{user_name}}</strong>, your monthly commission is ready:</p>
+    <p style="color:#8AA3C8;font-size:15.5px">Hi <strong style="color:#E8EDF5">{{user_name}}</strong>, your monthly commission is ready:</p>
     <div style="margin:32px auto">
-      <p style="color:#6B7FA8;font-size:12px;letter-spacing:0.1em;margin:0">COMMISSION THIS MONTH</p>
-      <p style="color:#D99A6B;font-size:52px;font-weight:700;margin:8px 0;font-family:monospace">{{commission_amount}}</p>
-      <p style="color:#6B7FA8;font-size:13px">from {{referrals_count}} active referrals · {{tier}}</p>
+      <p style="color:#6B7FA8;font-size:13.5px;letter-spacing:0.1em;margin:0">COMMISSION THIS MONTH</p>
+      <p style="color:#D99A6B;font-size:58px;font-weight:700;margin:8px 0;font-family:monospace">{{commission_amount}}</p>
+      <p style="color:#6B7FA8;font-size:14.5px">from {{referrals_count}} active referrals · {{tier}}</p>
     </div>
-    <p style="color:#8AA3C8;font-size:13px">Payout scheduled: <strong style="color:#E8EDF5">{{payout_date}}</strong></p>
-    <a href="{{dashboard_url}}" style="display:inline-block;margin-top:24px;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">View Earnings Dashboard</a>
+    <p style="color:#8AA3C8;font-size:14.5px">Payout scheduled: <strong style="color:#E8EDF5">{{payout_date}}</strong></p>
+    <a href="{{dashboard_url}}" style="display:inline-block;margin-top:24px;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px">View Earnings Dashboard</a>
   </div>
 </div>`,
   },
@@ -313,17 +313,17 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{new_tier}}", "{{new_rate}}", "{{referrals_count}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.25)">
   <div style="background:linear-gradient(135deg,#5B6EE1,#5B6EE1);padding:40px;text-align:center">
-    <p style="font-size:40px;margin:0">🏆</p>
-    <h1 style="color:#04080F;font-size:24px;margin:12px 0;font-weight:900">Tier Upgrade!</h1>
-    <p style="color:rgba(4,8,15,0.7);font-size:15px;margin:0">Your commission rate just increased</p>
+    <p style="font-size:45px;margin:0">🏆</p>
+    <h1 style="color:#04080F;font-size:27px;margin:12px 0;font-weight:900">Tier Upgrade!</h1>
+    <p style="color:rgba(4,8,15,0.7);font-size:17px;margin:0">Your commission rate just increased</p>
   </div>
   <div style="padding:40px;text-align:center">
-    <p style="color:#8AA3C8;font-size:14px">Hi <strong style="color:#E8EDF5">{{user_name}}</strong>, with <strong style="color:#6E90C9">{{referrals_count}}</strong> active referrals, you've reached:</p>
+    <p style="color:#8AA3C8;font-size:15.5px">Hi <strong style="color:#E8EDF5">{{user_name}}</strong>, with <strong style="color:#6E90C9">{{referrals_count}}</strong> active referrals, you've reached:</p>
     <div style="margin:32px auto">
-      <p style="color:#6B7FA8;font-size:12px;letter-spacing:0.1em">NEW TIER</p>
-      <p style="color:#6E90C9;font-size:28px;font-weight:700;margin:8px 0">{{new_tier}}</p>
-      <p style="color:#E8EDF5;font-size:52px;font-weight:900;color:#6E90C9;margin:0;font-family:monospace">{{new_rate}}%</p>
-      <p style="color:#6B7FA8;font-size:13px">commission on all active referrals</p>
+      <p style="color:#6B7FA8;font-size:13.5px;letter-spacing:0.1em">NEW TIER</p>
+      <p style="color:#6E90C9;font-size:31.5px;font-weight:700;margin:8px 0">{{new_tier}}</p>
+      <p style="color:#E8EDF5;font-size:58px;font-weight:900;color:#6E90C9;margin:0;font-family:monospace">{{new_rate}}%</p>
+      <p style="color:#6B7FA8;font-size:14.5px">commission on all active referrals</p>
     </div>
   </div>
 </div>`,
@@ -337,32 +337,32 @@ const templates: EmailTemplate[] = [
     variables: ["{{partner_name}}", "{{organization}}", "{{partner_link}}", "{{initial_tier}}", "{{dashboard_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,167,214,0.25)">
   <div style="background:linear-gradient(135deg,#1A0A3A,#2A1450);padding:40px;text-align:center;border-bottom:1px solid rgba(91,167,214,0.2)">
-    <p style="font-size:36px;margin:0">🤝</p>
-    <h1 style="color:#6FAE8B;font-size:22px;margin:12px 0">Strategic Partnership Activated</h1>
-    <p style="color:#6B7FA8;font-size:14px">Lifetime recurring commissions · No cap</p>
+    <p style="font-size:40.5px;margin:0">🤝</p>
+    <h1 style="color:#6FAE8B;font-size:24.5px;margin:12px 0">Strategic Partnership Activated</h1>
+    <p style="color:#6B7FA8;font-size:15.5px">Lifetime recurring commissions · No cap</p>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Dear <strong>{{partner_name}}</strong> at <strong>{{organization}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">Your Strategic Partnership with Final Pass Down is now active. You will earn <strong style="color:#6FAE8B">recurring lifetime commissions</strong> on every account you refer — with no time cap and automatic tier upgrades as your network grows.</p>
+    <p style="color:#E8EDF5;font-size:18px">Dear <strong>{{partner_name}}</strong> at <strong>{{organization}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">Your Strategic Partnership with Final Pass Down is now active. You will earn <strong style="color:#6FAE8B">recurring lifetime commissions</strong> on every account you refer — with no time cap and automatic tier upgrades as your network grows.</p>
     <div style="background:rgba(91,167,214,0.08);border:1px solid rgba(91,167,214,0.25);border-radius:12px;padding:20px;margin:24px 0">
-      <p style="color:#6FAE8B;font-size:12px;font-weight:700;margin:0 0 6px;letter-spacing:0.08em">STARTING TIER: {{initial_tier}} — RECURRING LIFETIME</p>
+      <p style="color:#6FAE8B;font-size:13.5px;font-weight:700;margin:0 0 6px;letter-spacing:0.08em">STARTING TIER: {{initial_tier}} — RECURRING LIFETIME</p>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
         <div style="text-align:center;background:rgba(0,0,0,0.3);border-radius:8px;padding:12px">
-          <p style="color:#6FAE8B;font-size:20px;font-weight:700;margin:0">20%</p>
-          <p style="color:#6B7FA8;font-size:10px;margin:2px 0 0">0–50 accounts</p>
+          <p style="color:#6FAE8B;font-size:22.5px;font-weight:700;margin:0">20%</p>
+          <p style="color:#6B7FA8;font-size:11px;margin:2px 0 0">0–50 accounts</p>
         </div>
         <div style="text-align:center;background:rgba(91,167,214,0.1);border:1px solid rgba(91,167,214,0.3);border-radius:8px;padding:12px">
-          <p style="color:#6FAE8B;font-size:20px;font-weight:700;margin:0">25%</p>
-          <p style="color:#6B7FA8;font-size:10px;margin:2px 0 0">51–100 accounts</p>
+          <p style="color:#6FAE8B;font-size:22.5px;font-weight:700;margin:0">25%</p>
+          <p style="color:#6B7FA8;font-size:11px;margin:2px 0 0">51–100 accounts</p>
         </div>
         <div style="text-align:center;background:rgba(0,0,0,0.3);border-radius:8px;padding:12px">
-          <p style="color:#6FAE8B;font-size:20px;font-weight:700;margin:0">30%</p>
-          <p style="color:#6B7FA8;font-size:10px;margin:2px 0 0">101+ accounts</p>
+          <p style="color:#6FAE8B;font-size:22.5px;font-weight:700;margin:0">30%</p>
+          <p style="color:#6B7FA8;font-size:11px;margin:2px 0 0">101+ accounts</p>
         </div>
       </div>
     </div>
     <div style="text-align:center">
-      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px;box-shadow:0 0 20px rgba(91,167,214,0.3)">Access Partner Dashboard →</a>
+      <a href="{{dashboard_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px;box-shadow:0 0 20px rgba(91,167,214,0.3)">Access Partner Dashboard →</a>
     </div>
   </div>
 </div>`,
@@ -376,24 +376,24 @@ const templates: EmailTemplate[] = [
     variables: ["{{contact_name}}", "{{organization}}", "{{setup_url}}", "{{account_manager}}", "{{launch_date}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,167,214,0.3)">
   <div style="background:linear-gradient(135deg,#5BA7D6,#5B6EE1);padding:40px;text-align:center">
-    <p style="font-size:36px;margin:0">🚀</p>
-    <h1 style="color:#fff;font-size:22px;margin:12px 0;font-weight:900">White Label Setup Initiated</h1>
-    <p style="color:rgba(255,255,255,0.7);font-size:14px;margin:0">Welcome to the Final Pass Down White Label Program</p>
+    <p style="font-size:40.5px;margin:0">🚀</p>
+    <h1 style="color:#fff;font-size:24.5px;margin:12px 0;font-weight:900">White Label Setup Initiated</h1>
+    <p style="color:rgba(255,255,255,0.7);font-size:15.5px;margin:0">Welcome to the Final Pass Down White Label Program</p>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:16px">Hi <strong>{{contact_name}}</strong> at <strong>{{organization}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">We've received your white label agreement. Your dedicated account manager <strong style="color:#E8EDF5">{{account_manager}}</strong> will reach out within 24 hours to begin the customization process. Estimated launch: <strong style="color:#6FAE8B">{{launch_date}}</strong>.</p>#6FAE8B">{{launch_date}}</strong>.</p>
+    <p style="color:#E8EDF5;font-size:18px">Hi <strong>{{contact_name}}</strong> at <strong>{{organization}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">We've received your white label agreement. Your dedicated account manager <strong style="color:#E8EDF5">{{account_manager}}</strong> will reach out within 24 hours to begin the customization process. Estimated launch: <strong style="color:#6FAE8B">{{launch_date}}</strong>.</p>#6FAE8B">{{launch_date}}</strong>.</p>
     <div style="background:rgba(91,167,214,0.08);border:1px solid rgba(91,167,214,0.2);border-radius:12px;padding:24px;margin:24px 0">
-      <p style="color:#6FAE8B;font-size:12px;font-weight:700;margin:0 0 12px;letter-spacing:0.08em">WHAT HAPPENS NEXT</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Custom domain configuration</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Logo and brand color integration</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Custom email template configuration</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Data migration assistance</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ API key provisioning</p>
-      <p style="color:#B8C8E0;font-size:13px;margin:6px 0">✅ Staff training session</p>
+      <p style="color:#6FAE8B;font-size:13.5px;font-weight:700;margin:0 0 12px;letter-spacing:0.08em">WHAT HAPPENS NEXT</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ Custom domain configuration</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ Logo and brand color integration</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ Custom email template configuration</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ Data migration assistance</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ API key provisioning</p>
+      <p style="color:#B8C8E0;font-size:14.5px;margin:6px 0">✅ Staff training session</p>
     </div>
     <div style="text-align:center">
-      <a href="{{setup_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:14px">Begin Setup Portal →</a>
+      <a href="{{setup_url}}" style="display:inline-block;background:linear-gradient(135deg,#5BA7D6,#6F9E94);color:#04080F;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;font-size:15.5px">Begin Setup Portal →</a>
     </div>
   </div>
 </div>`,
@@ -408,30 +408,30 @@ const templates: EmailTemplate[] = [
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(91,110,225,0.15)">
   <div style="background:#060F1E;padding:32px;border-bottom:1px solid rgba(91,110,225,0.1)">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h1 style="color:#E8EDF5;font-size:20px;margin:0">Payment Receipt</h1>
-      <span style="color:#D99A6B;background:rgba(72,187,120,0.12);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700">PAID</span>
+      <h1 style="color:#E8EDF5;font-size:22.5px;margin:0">Payment Receipt</h1>
+      <span style="color:#D99A6B;background:rgba(72,187,120,0.12);padding:6px 12px;border-radius:20px;font-size:13.5px;font-weight:700">PAID</span>
     </div>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:15px">Hi <strong>{{user_name}}</strong>, thank you for your payment.</p>
+    <p style="color:#E8EDF5;font-size:17px">Hi <strong>{{user_name}}</strong>, thank you for your payment.</p>
     <div style="background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.15);border-radius:12px;padding:24px;margin:24px 0">
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <span style="color:#6B7FA8;font-size:13px">Plan</span><span style="color:#E8EDF5;font-weight:600">{{plan_name}}</span>
+        <span style="color:#6B7FA8;font-size:14.5px">Plan</span><span style="color:#E8EDF5;font-weight:600">{{plan_name}}</span>
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <span style="color:#6B7FA8;font-size:13px">Billing Date</span><span style="color:#E8EDF5">{{billing_date}}</span>
+        <span style="color:#6B7FA8;font-size:14.5px">Billing Date</span><span style="color:#E8EDF5">{{billing_date}}</span>
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <span style="color:#6B7FA8;font-size:13px">Next Billing</span><span style="color:#E8EDF5">{{next_billing}}</span>
+        <span style="color:#6B7FA8;font-size:14.5px">Next Billing</span><span style="color:#E8EDF5">{{next_billing}}</span>
       </div>
       <div style="height:1px;background:rgba(91,110,225,0.1);margin:16px 0"></div>
       <div style="display:flex;justify-content:space-between">
-        <span style="color:#E8EDF5;font-size:16px;font-weight:700">Total</span>
-        <span style="color:#6E90C9;font-size:20px;font-weight:700">{{amount}}</span>
+        <span style="color:#E8EDF5;font-size:18px;font-weight:700">Total</span>
+        <span style="color:#6E90C9;font-size:22.5px;font-weight:700">{{amount}}</span>
       </div>
     </div>
     <div style="text-align:center">
-      <a href="{{invoice_url}}" style="display:inline-block;background:rgba(91,110,225,0.1);color:#6E90C9;font-weight:600;padding:12px 30px;border-radius:10px;text-decoration:none;font-size:13px;border:1px solid rgba(91,110,225,0.3)">Download Invoice</a>
+      <a href="{{invoice_url}}" style="display:inline-block;background:rgba(91,110,225,0.1);color:#6E90C9;font-weight:600;padding:12px 30px;border-radius:10px;text-decoration:none;font-size:14.5px;border:1px solid rgba(91,110,225,0.3)">Download Invoice</a>
     </div>
   </div>
 </div>`,
@@ -445,20 +445,20 @@ const templates: EmailTemplate[] = [
     variables: ["{{user_name}}", "{{device}}", "{{location}}", "{{time}}", "{{secure_url}}"],
     html: `<div style="font-family:'DM Sans',sans-serif;background:#04080F;color:#E8EDF5;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(246,173,85,0.3)">
   <div style="background:rgba(246,173,85,0.12);padding:32px;text-align:center;border-bottom:1px solid rgba(246,173,85,0.2)">
-    <p style="font-size:36px;margin:0">🔐</p>
-    <h1 style="color:#F6AD55;font-size:20px;margin:12px 0">New Login Detected</h1>
+    <p style="font-size:40.5px;margin:0">🔐</p>
+    <h1 style="color:#F6AD55;font-size:22.5px;margin:12px 0">New Login Detected</h1>
   </div>
   <div style="padding:40px">
-    <p style="color:#E8EDF5;font-size:15px">Hi <strong>{{user_name}}</strong>,</p>
-    <p style="color:#8AA3C8;font-size:14px;line-height:1.8">A new login to your vault was detected. If this was you, no action is needed.</p>
+    <p style="color:#E8EDF5;font-size:17px">Hi <strong>{{user_name}}</strong>,</p>
+    <p style="color:#8AA3C8;font-size:15.5px;line-height:1.8">A new login to your vault was detected. If this was you, no action is needed.</p>
     <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:20px;margin:20px 0">
-      <p style="color:#6B7FA8;font-size:12px;margin:0 0 12px;letter-spacing:0.08em">LOGIN DETAILS</p>
-      <p style="color:#E8EDF5;font-size:13px;margin:4px 0">📱 Device: <strong>{{device}}</strong></p>
-      <p style="color:#E8EDF5;font-size:13px;margin:4px 0">📍 Location: <strong>{{location}}</strong></p>
-      <p style="color:#E8EDF5;font-size:13px;margin:4px 0">🕐 Time: <strong>{{time}}</strong></p>
+      <p style="color:#6B7FA8;font-size:13.5px;margin:0 0 12px;letter-spacing:0.08em">LOGIN DETAILS</p>
+      <p style="color:#E8EDF5;font-size:14.5px;margin:4px 0">📱 Device: <strong>{{device}}</strong></p>
+      <p style="color:#E8EDF5;font-size:14.5px;margin:4px 0">📍 Location: <strong>{{location}}</strong></p>
+      <p style="color:#E8EDF5;font-size:14.5px;margin:4px 0">🕐 Time: <strong>{{time}}</strong></p>
     </div>
     <div style="text-align:center">
-      <a href="{{secure_url}}" style="display:inline-block;background:rgba(229,62,62,0.15);color:#FC8181;font-weight:700;padding:14px 30px;border-radius:12px;text-decoration:none;font-size:14px;border:1px solid rgba(229,62,62,0.3)">This wasn't me — Secure my account</a>
+      <a href="{{secure_url}}" style="display:inline-block;background:rgba(229,62,62,0.15);color:#FC8181;font-weight:700;padding:14px 30px;border-radius:12px;text-decoration:none;font-size:15.5px;border:1px solid rgba(229,62,62,0.3)">This wasn't me — Secure my account</a>
     </div>
   </div>
 </div>`,
@@ -553,14 +553,14 @@ export function EmailTemplates() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Mail size={15} color="#FFFFFF" />
-            <span style={{ color: "#6E90C9", fontSize: 11, ...MONO, letterSpacing: "0.12em" }}>ADMIN · EMAIL TEMPLATES</span>
+            <span style={{ color: "#6E90C9", fontSize: 12.5, ...MONO, letterSpacing: "0.12em" }}>ADMIN · EMAIL TEMPLATES</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "#E8EDF5" }}>Email Template Manager</h1>
-          <p style={{ color: "#8A9AB8", fontSize: 13, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "#E8EDF5" }}>Email Template Manager</h1>
+          <p style={{ color: "#8A9AB8", fontSize: 14.5, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
-          <span style={{ color: "#D99A6B", fontSize: 11, ...MONO }}>SENDGRID CONNECTED</span>
+          <span style={{ color: "#D99A6B", fontSize: 12.5, ...MONO }}>SENDGRID CONNECTED</span>
         </div>
       </div>
 
@@ -572,7 +572,7 @@ export function EmailTemplates() {
             <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)" }}>
               <Search size={12} color="#8A9AB8" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search templates..."
-                style={{ background: "transparent", border: "none", outline: "none", color: "#FFFFFF", fontSize: 12, width: "100%" }} />
+                style={{ background: "transparent", border: "none", outline: "none", color: "#FFFFFF", fontSize: 13.5, width: "100%" }} />
             </div>
             <div className="flex flex-wrap gap-1">
               {categories.map(cat => (
@@ -591,10 +591,10 @@ export function EmailTemplates() {
                 className="w-full text-left px-4 py-3 border-b transition-all"
                 style={{ borderColor: "rgba(91,110,225,0.06)", background: selected?.id === t.id ? "rgba(91,110,225,0.1)" : "transparent", borderLeft: selected?.id === t.id ? "2px solid #5B6EE1" : "2px solid transparent" }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 9, ...MONO }}>{t.category.toUpperCase()}</span>
+                  <span className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 10, ...MONO }}>{t.category.toUpperCase()}</span>
                 </div>
-                <div style={{ color: selected?.id === t.id ? "#E8EDF5" : "#8A9AB8", fontSize: 13, fontWeight: 500 }}>{t.name}</div>
-                <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 2 }}>{t.trigger}</div>
+                <div style={{ color: selected?.id === t.id ? "#E8EDF5" : "#8A9AB8", fontSize: 14.5, fontWeight: 500 }}>{t.name}</div>
+                <div style={{ color: "#8A9AB8", fontSize: 12.5, marginTop: 2 }}>{t.trigger}</div>
               </button>
             ))}
           </div>
@@ -606,8 +606,8 @@ export function EmailTemplates() {
             {/* Toolbar */}
             <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)", background: "rgba(3,7,16,0.6)" }}>
               <div>
-                <div style={{ color: "#E8EDF5", fontSize: 15, fontWeight: 600 }}>{selected.name}</div>
-                <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 2 }}>Trigger: {selected.trigger}</div>
+                <div style={{ color: "#E8EDF5", fontSize: 17, fontWeight: 600 }}>{selected.name}</div>
+                <div style={{ color: "#8A9AB8", fontSize: 12.5, marginTop: 2 }}>Trigger: {selected.trigger}</div>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => setPreviewMode(!previewMode)}
@@ -640,10 +640,10 @@ export function EmailTemplates() {
 
             {/* Variables */}
             <div className="px-5 py-2 border-b flex flex-wrap gap-2" style={{ borderColor: "rgba(91,110,225,0.06)", background: "rgba(91,110,225,0.04)" }}>
-              <span style={{ color: "#8A9AB8", fontSize: 10, ...MONO, alignSelf: "center" }}>VARIABLES:</span>
+              <span style={{ color: "#8A9AB8", fontSize: 11, ...MONO, alignSelf: "center" }}>VARIABLES:</span>
               {selected.variables.map(v => (
                 <span key={v} className="px-2 py-0.5 rounded cursor-pointer" onClick={() => toast.info(`Variable: ${v}`)}
-                  style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 10, ...MONO }}>
+                  style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 11, ...MONO }}>
                   {v}
                 </span>
               ))}
@@ -651,12 +651,12 @@ export function EmailTemplates() {
 
             {/* Subject line */}
             <div className="px-5 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.08)" }}>
-              <div style={{ color: "#8A9AB8", fontSize: 10, ...MONO, marginBottom: 6 }}>SUBJECT LINE</div>
+              <div style={{ color: "#8A9AB8", fontSize: 11, ...MONO, marginBottom: 6 }}>SUBJECT LINE</div>
               {editing ? (
                 <input value={editSubject} onChange={e => setEditSubject(e.target.value)}
-                  className="w-full px-3 py-2 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 14, outline: "none" }} />
+                  className="w-full px-3 py-2 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 15.5, outline: "none" }} />
               ) : (
-                <div style={{ color: "#E8EDF5", fontSize: 14 }}>{editSubject}</div>
+                <div style={{ color: "#E8EDF5", fontSize: 15.5 }}>{editSubject}</div>
               )}
             </div>
 
@@ -676,11 +676,11 @@ export function EmailTemplates() {
                   value={editBody}
                   onChange={e => setEditBody(e.target.value)}
                   className="w-full h-full p-5"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "#68D391", fontSize: 12, ...MONO, outline: "none", resize: "none", lineHeight: 1.7 }}
+                  style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "#68D391", fontSize: 13.5, ...MONO, outline: "none", resize: "none", lineHeight: 1.7 }}
                 />
               ) : (
                 <div className="overflow-y-auto h-full p-5">
-                  <pre style={{ color: "#68D391", fontSize: 12, ...MONO, whiteSpace: "pre-wrap", lineHeight: 1.7, margin: 0 }}>
+                  <pre style={{ color: "#68D391", fontSize: 13.5, ...MONO, whiteSpace: "pre-wrap", lineHeight: 1.7, margin: 0 }}>
                     {editBody}
                   </pre>
                 </div>

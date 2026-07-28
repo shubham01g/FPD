@@ -42,7 +42,7 @@ const CARD:    React.CSSProperties = {
 };
 const INPUT:   React.CSSProperties = {
   background:"#141B2E", border:`1px solid rgba(91,110,225,0.3)`,
-  color:T.text, outline:"none", borderRadius:10, padding:"9px 13px", width:"100%", fontSize:13,
+  color:T.text, outline:"none", borderRadius:10, padding:"9px 13px", width:"100%", fontSize:14.5,
 };
 
 /* ── Types ─────────────────────────────────────────────────────── */
@@ -352,7 +352,7 @@ function MiniBar({ values, colors, height=48 }: { values:number[]; colors:string
 /* ── Section label ──────────────────────────────────────────────── */
 function SLabel({ children }: { children:React.ReactNode }) {
   return (
-    <div style={{ color:T.muted, fontSize:10, ...MONO, letterSpacing:"0.1em",
+    <div style={{ color:T.muted, fontSize:11, ...MONO, letterSpacing:"0.1em",
       textTransform:"uppercase" as const, marginBottom:12 }}>
       {children}
     </div>
@@ -411,10 +411,10 @@ export function SystemHealth() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Activity size={15} color={T.primary}/>
-          <span style={{ color:T.primary, fontSize:11, ...MONO, letterSpacing:"0.12em" }}>COMMAND CENTER · SYSTEM HEALTH</span>
+          <span style={{ color:T.primary, fontSize:12.5, ...MONO, letterSpacing:"0.12em" }}>COMMAND CENTER · SYSTEM HEALTH</span>
         </div>
-        <h2 style={{ ...DISPLAY, fontSize:22, color:T.text }}>System Health & Infrastructure</h2>
-        <p style={{ color:T.sub, fontSize:13, marginTop:4 }}>
+        <h2 style={{ ...DISPLAY, fontSize:24.5, color:T.text }}>System Health & Infrastructure</h2>
+        <p style={{ color:T.sub, fontSize:14.5, marginTop:4 }}>
           Real-time service status, performance metrics, incident tracking, and maintenance coordination.
         </p>
       </div>
@@ -425,24 +425,24 @@ export function SystemHealth() {
         <div className="flex items-center gap-3">
           <div style={{ width:10, height:10, borderRadius:"50%", background:bannerColor,
             boxShadow:`0 0 10px ${bannerColor}`, animation: overallOk ? "none" : "pulse 1.5s infinite" }}/>
-          <span style={{ color:bannerColor, fontSize:14, fontWeight:700 }}>{bannerText}</span>
-          {!overallOk && <span style={{ color:T.sub, fontSize:12 }}>· Jul 21, 2026 · 12:31 PM</span>}
+          <span style={{ color:bannerColor, fontSize:15.5, fontWeight:700 }}>{bannerText}</span>
+          {!overallOk && <span style={{ color:T.sub, fontSize:13.5 }}>· Jul 21, 2026 · 12:31 PM</span>}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div style={{ width:8, height:8, borderRadius:"50%", background:T.green }}/>
-            <span style={{ color:T.sub, fontSize:12 }}>{operationalCount} operational</span>
+            <span style={{ color:T.sub, fontSize:13.5 }}>{operationalCount} operational</span>
           </div>
           {degradedCount > 0 && (
             <div className="flex items-center gap-1.5">
               <div style={{ width:8, height:8, borderRadius:"50%", background:T.amber }}/>
-              <span style={{ color:T.amber, fontSize:12, fontWeight:600 }}>{degradedCount} degraded</span>
+              <span style={{ color:T.amber, fontSize:13.5, fontWeight:600 }}>{degradedCount} degraded</span>
             </div>
           )}
           {outageCount > 0 && (
             <div className="flex items-center gap-1.5">
               <div style={{ width:8, height:8, borderRadius:"50%", background:T.red }}/>
-              <span style={{ color:T.red, fontSize:12, fontWeight:600 }}>{outageCount} outage</span>
+              <span style={{ color:T.red, fontSize:13.5, fontWeight:600 }}>{outageCount} outage</span>
             </div>
           )}
           <button onClick={() => toast.success("Status refreshed")}
@@ -464,7 +464,7 @@ export function SystemHealth() {
             {t.badge && (
               <span className="px-1.5 rounded-full text-xs font-bold"
                 style={{ background:activeTab===t.id?"rgba(255,255,255,0.25)":"rgba(252,129,129,0.15)",
-                  color:activeTab===t.id?"#fff":T.red, fontSize:9 }}>
+                  color:activeTab===t.id?"#fff":T.red, fontSize:10 }}>
                 {t.badge}
               </span>
             )}
@@ -487,9 +487,9 @@ export function SystemHealth() {
               { label:"Open Incidents",    value:openIncidents.length, sub:openIncidents.length>0?"Requires attention":"No active incidents", color:openIncidents.length>0?T.red:T.green },
             ].map(s => (
               <div key={s.label} style={CARD}>
-                <div style={{ ...DISPLAY, fontSize:28, color:s.color, lineHeight:1 }}>{s.value}</div>
-                <div style={{ color:T.text, fontSize:13, fontWeight:500, marginTop:6 }}>{s.label}</div>
-                <div style={{ color:T.muted, fontSize:11, marginTop:3 }}>{s.sub}</div>
+                <div style={{ ...DISPLAY, fontSize:31.5, color:s.color, lineHeight:1 }}>{s.value}</div>
+                <div style={{ color:T.text, fontSize:14.5, fontWeight:500, marginTop:6 }}>{s.label}</div>
+                <div style={{ color:T.muted, fontSize:12.5, marginTop:3 }}>{s.sub}</div>
               </div>
             ))}
           </div>
@@ -516,16 +516,16 @@ export function SystemHealth() {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <span style={{ color:T.text, fontSize:13, fontWeight:600 }}>{svc.name}</span>
+                            <span style={{ color:T.text, fontSize:14.5, fontWeight:600 }}>{svc.name}</span>
                             <span className="px-1.5 py-0.5 rounded text-xs font-bold"
-                              style={{ background:`${sc}18`, color:sc, fontSize:8, ...MONO }}>
+                              style={{ background:`${sc}18`, color:sc, fontSize:9, ...MONO }}>
                               {svc.status.toUpperCase()}
                             </span>
                           </div>
-                          <div style={{ color:T.sub, fontSize:11 }}>{svc.description}</div>
+                          <div style={{ color:T.sub, fontSize:12.5 }}>{svc.description}</div>
                           <div className="flex items-center gap-4 mt-1">
-                            <span style={{ color:T.muted, fontSize:10, ...MONO }}>{svc.uptime}% uptime</span>
-                            <span style={{ color:live > svc.latencyMs*1.2 ? T.amber : sc, fontSize:10, ...MONO }}>
+                            <span style={{ color:T.muted, fontSize:11, ...MONO }}>{svc.uptime}% uptime</span>
+                            <span style={{ color:live > svc.latencyMs*1.2 ? T.amber : sc, fontSize:11, ...MONO }}>
                               {live} ms
                             </span>
                           </div>
@@ -549,8 +549,8 @@ export function SystemHealth() {
           <div className="flex items-center justify-between px-5 py-4 rounded-2xl"
             style={{ background:T.primBg, border:`1px solid ${T.primBd}` }}>
             <div>
-              <div style={{ color:T.text, fontSize:14, fontWeight:600 }}>Mark Service as Under Maintenance</div>
-              <div style={{ color:T.sub, fontSize:12, marginTop:2 }}>Temporarily set any service to "maintenance" mode and alert recipients</div>
+              <div style={{ color:T.text, fontSize:15.5, fontWeight:600 }}>Mark Service as Under Maintenance</div>
+              <div style={{ color:T.sub, fontSize:13.5, marginTop:2 }}>Temporarily set any service to "maintenance" mode and alert recipients</div>
             </div>
             <button onClick={() => {
               setServices(prev => prev.map(s => s.id === "email" ? { ...s, status:"maintenance" } : s));
@@ -594,8 +594,8 @@ export function SystemHealth() {
               { label:"Req / Second",  value:"1,024",    color:T.primary },
             ].map(s => (
               <div key={s.label} style={CARD}>
-                <div style={{ ...DISPLAY, fontSize:26, color:s.color, lineHeight:1 }}>{s.value}</div>
-                <div style={{ color:T.sub, fontSize:12, marginTop:6 }}>{s.label}</div>
+                <div style={{ ...DISPLAY, fontSize:29, color:s.color, lineHeight:1 }}>{s.value}</div>
+                <div style={{ color:T.sub, fontSize:13.5, marginTop:6 }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -608,7 +608,7 @@ export function SystemHealth() {
                 {[{ color:T.primary, label:"p50" }, { color:T.amber, label:"p95" }, { color:T.red, label:"p99" }].map(l => (
                   <div key={l.label} className="flex items-center gap-1.5">
                     <div style={{ width:8, height:3, background:l.color, borderRadius:2 }}/>
-                    <span style={{ color:T.sub, fontSize:11 }}>{l.label}</span>
+                    <span style={{ color:T.sub, fontSize:12.5 }}>{l.label}</span>
                   </div>
                 ))}
               </div>
@@ -617,7 +617,7 @@ export function SystemHealth() {
               {/* Y axis labels */}
               {[400, 300, 200, 100, 0].map(v => (
                 <div key={v} style={{ position:"absolute", left:0, top:`${((400-v)/400)*100}%`,
-                  color:T.muted, fontSize:9, ...MONO, transform:"translateY(-50%)" }}>
+                  color:T.muted, fontSize:10, ...MONO, transform:"translateY(-50%)" }}>
                   {v}ms
                 </div>
               ))}
@@ -639,7 +639,7 @@ export function SystemHealth() {
                         <div style={{ position:"relative", width:"100%", marginTop:-((d.p95/400)*140), height:`${(d.p50/400)*140}px`,
                           background:T.primary, opacity:0.85, borderRadius:"3px 3px 0 0" }}/>
                       </div>
-                      <span style={{ color:T.muted, fontSize:8, ...MONO }}>{d.t}</span>
+                      <span style={{ color:T.muted, fontSize:9, ...MONO }}>{d.t}</span>
                     </div>
                   ))}
                 </div>
@@ -666,8 +666,8 @@ export function SystemHealth() {
                 })}
               </div>
               <div className="flex items-center justify-between mt-2">
-                <span style={{ color:T.sub, fontSize:11 }}>Current</span>
-                <span style={{ color:T.green, fontSize:14, fontWeight:700, ...MONO }}>0.07%</span>
+                <span style={{ color:T.sub, fontSize:12.5 }}>Current</span>
+                <span style={{ color:T.green, fontSize:15.5, fontWeight:700, ...MONO }}>0.07%</span>
               </div>
             </div>
             <div style={CARD}>
@@ -687,8 +687,8 @@ export function SystemHealth() {
                 })}
               </div>
               <div className="flex items-center justify-between mt-2">
-                <span style={{ color:T.sub, fontSize:11 }}>Current</span>
-                <span style={{ color:T.primary, fontSize:14, fontWeight:700, ...MONO }}>1,024 rps</span>
+                <span style={{ color:T.sub, fontSize:12.5 }}>Current</span>
+                <span style={{ color:T.primary, fontSize:15.5, fontWeight:700, ...MONO }}>1,024 rps</span>
               </div>
             </div>
           </div>
@@ -699,7 +699,7 @@ export function SystemHealth() {
             <div className="space-y-3">
               {services.slice(0, 8).map(svc => (
                 <div key={svc.id} className="flex items-center gap-4">
-                  <div style={{ color:T.sub, fontSize:12, width:160, flexShrink:0 }}>{svc.name}</div>
+                  <div style={{ color:T.sub, fontSize:13.5, width:160, flexShrink:0 }}>{svc.name}</div>
                   {/* Uptime blocks — 90 day simulation */}
                   <div className="flex gap-0.5 flex-1">
                     {Array.from({ length:90 }, (_, i) => {
@@ -709,15 +709,15 @@ export function SystemHealth() {
                         background: ok ? T.green : rand > 0.005 ? T.amber : T.red, opacity:ok?0.7:1 }}/>;
                     })}
                   </div>
-                  <span style={{ color:svcColor(svc.status), fontSize:11, fontWeight:700, ...MONO, width:52, textAlign:"right" }}>
+                  <span style={{ color:svcColor(svc.status), fontSize:12.5, fontWeight:700, ...MONO, width:52, textAlign:"right" }}>
                     {svc.uptime}%
                   </span>
                 </div>
               ))}
-              <div style={{ color:T.muted, fontSize:11, marginTop:4 }}>
-                <span style={{ background:T.greenBg, color:T.green, padding:"1px 6px", borderRadius:4, marginRight:8, fontSize:9 }}>■ Operational</span>
-                <span style={{ background:T.amberBg, color:T.amber, padding:"1px 6px", borderRadius:4, marginRight:8, fontSize:9 }}>■ Degraded</span>
-                <span style={{ background:T.redBg,   color:T.red,   padding:"1px 6px", borderRadius:4, fontSize:9 }}>■ Outage</span>
+              <div style={{ color:T.muted, fontSize:12.5, marginTop:4 }}>
+                <span style={{ background:T.greenBg, color:T.green, padding:"1px 6px", borderRadius:4, marginRight:8, fontSize:10 }}>■ Operational</span>
+                <span style={{ background:T.amberBg, color:T.amber, padding:"1px 6px", borderRadius:4, marginRight:8, fontSize:10 }}>■ Degraded</span>
+                <span style={{ background:T.redBg,   color:T.red,   padding:"1px 6px", borderRadius:4, fontSize:10 }}>■ Outage</span>
               </div>
             </div>
           </div>
@@ -822,8 +822,8 @@ function IncidentsPanel({
       {/* Header + create btn */}
       <div className="flex items-center justify-between">
         <div>
-          <div style={{ color:T.text, fontSize:16, fontWeight:700, ...DISPLAY }}>Incident Management</div>
-          <div style={{ color:T.sub, fontSize:13, marginTop:2 }}>
+          <div style={{ color:T.text, fontSize:18, fontWeight:700, ...DISPLAY }}>Incident Management</div>
+          <div style={{ color:T.sub, fontSize:14.5, marginTop:2 }}>
             {open.length} open · {resolved.length} resolved
           </div>
         </div>
@@ -843,14 +843,14 @@ function IncidentsPanel({
           <SLabel>New Incident Report</SLabel>
           <div className="space-y-4">
             <div>
-              <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>INCIDENT TITLE *</label>
+              <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>INCIDENT TITLE *</label>
               <input value={form.title} onChange={e => setForm(p=>({...p,title:e.target.value}))}
                 placeholder="e.g. Database query latency spike — p99 > 2s" style={INPUT}/>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {/* Severity */}
               <div>
-                <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:8 }}>SEVERITY</label>
+                <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:8 }}>SEVERITY</label>
                 <div className="flex gap-2">
                   {(["critical","major","minor","info"] as IncidentSeverity[]).map(s => (
                     <button key={s} onClick={() => setForm(p=>({...p,severity:s}))}
@@ -865,7 +865,7 @@ function IncidentsPanel({
               </div>
               {/* Affected services */}
               <div>
-                <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:8 }}>AFFECTED SERVICES</label>
+                <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:8 }}>AFFECTED SERVICES</label>
                 <div className="flex flex-wrap gap-1.5">
                   {services.slice(0,8).map(s => (
                     <button key={s.id} onClick={() => setForm(p=>({
@@ -884,7 +884,7 @@ function IncidentsPanel({
               </div>
             </div>
             <div>
-              <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION *</label>
+              <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION *</label>
               <textarea value={form.description} onChange={e => setForm(p=>({...p,description:e.target.value}))}
                 rows={3} placeholder="Describe the impact, what services are affected, and what users are experiencing…"
                 className="w-full resize-none" style={INPUT}/>
@@ -902,7 +902,7 @@ function IncidentsPanel({
       {/* Open incidents */}
       {open.length > 0 && (
         <div>
-          <div style={{ color:T.red, fontSize:11, fontWeight:700, ...MONO, marginBottom:10 }}>
+          <div style={{ color:T.red, fontSize:12.5, fontWeight:700, ...MONO, marginBottom:10 }}>
             ● ACTIVE INCIDENTS ({open.length})
           </div>
           <div className="space-y-3">
@@ -920,7 +920,7 @@ function IncidentsPanel({
       {/* Resolved incidents */}
       {resolved.length > 0 && (
         <div>
-          <div style={{ color:T.green, fontSize:11, fontWeight:700, ...MONO, marginBottom:10, marginTop:16 }}>
+          <div style={{ color:T.green, fontSize:12.5, fontWeight:700, ...MONO, marginBottom:10, marginTop:16 }}>
             ✓ RESOLVED INCIDENTS ({resolved.length})
           </div>
           <div className="space-y-3">
@@ -958,17 +958,17 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
           boxShadow:`0 0 8px ${sc}`, marginTop:6 }}/>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span style={{ ...DISPLAY, fontSize:15, color:T.text }}>{inc.title}</span>
+            <span style={{ ...DISPLAY, fontSize:17, color:T.text }}>{inc.title}</span>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-              style={{ background:incBg(inc.severity), color:sc, ...MONO, fontSize:9 }}>
+              style={{ background:incBg(inc.severity), color:sc, ...MONO, fontSize:10 }}>
               {inc.severity.toUpperCase()}
             </span>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-              style={{ background:`${stColor(inc.status)}15`, color:stColor(inc.status), ...MONO, fontSize:9 }}>
+              style={{ background:`${stColor(inc.status)}15`, color:stColor(inc.status), ...MONO, fontSize:10 }}>
               {inc.status.toUpperCase()}
             </span>
           </div>
-          <div style={{ color:T.sub, fontSize:12 }}>
+          <div style={{ color:T.sub, fontSize:13.5 }}>
             {inc.id} · {inc.createdAt}
             {inc.resolvedAt && <span style={{ color:T.green }}> → Resolved {inc.resolvedAt}</span>}
           </div>
@@ -979,7 +979,7 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
                 const svc = services.find(s => s.id === sid);
                 return svc ? (
                   <span key={sid} className="px-2 py-0.5 rounded text-xs"
-                    style={{ background:T.card3, color:T.sub, border:`1px solid ${T.border}`, ...MONO, fontSize:9 }}>
+                    style={{ background:T.card3, color:T.sub, border:`1px solid ${T.border}`, ...MONO, fontSize:10 }}>
                     {svc.name}
                   </span>
                 ) : null;
@@ -997,13 +997,13 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
         <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:T.border }}>
           {/* Description */}
           <div className="pt-4">
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:6 }}>DESCRIPTION</div>
-            <p style={{ color:T.sub, fontSize:13, lineHeight:1.7 }}>{inc.description}</p>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:6 }}>DESCRIPTION</div>
+            <p style={{ color:T.sub, fontSize:14.5, lineHeight:1.7 }}>{inc.description}</p>
           </div>
 
           {/* Timeline */}
           <div>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:10 }}>INCIDENT TIMELINE</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:10 }}>INCIDENT TIMELINE</div>
             <div className="space-y-3">
               {inc.updates.map((u, i) => (
                 <div key={i} className="flex gap-3">
@@ -1013,14 +1013,14 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
                   </div>
                   <div className="pb-2">
                     <div className="flex items-center gap-2 mb-1">
-                      <span style={{ color:T.muted, fontSize:11, ...MONO }}>{u.time}</span>
+                      <span style={{ color:T.muted, fontSize:12.5, ...MONO }}>{u.time}</span>
                       <span className="px-1.5 py-0.5 rounded text-xs font-bold"
-                        style={{ background:`${stColor(u.status)}15`, color:stColor(u.status), fontSize:9, ...MONO }}>
+                        style={{ background:`${stColor(u.status)}15`, color:stColor(u.status), fontSize:10, ...MONO }}>
                         {u.status}
                       </span>
-                      <span style={{ color:T.muted, fontSize:11 }}>· {u.author}</span>
+                      <span style={{ color:T.muted, fontSize:12.5 }}>· {u.author}</span>
                     </div>
-                    <p style={{ color:T.text, fontSize:13 }}>{u.message}</p>
+                    <p style={{ color:T.text, fontSize:14.5 }}>{u.message}</p>
                   </div>
                 </div>
               ))}
@@ -1030,12 +1030,12 @@ function IncidentCard({ inc, services, expanded, onToggle, updateText, onUpdateT
           {/* Add update */}
           {!resolved && (
             <div className="pt-2 border-t" style={{ borderColor:T.border }}>
-              <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:8 }}>POST UPDATE</div>
+              <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:8 }}>POST UPDATE</div>
               <textarea value={updateText} onChange={e => onUpdateText(e.target.value)} rows={2}
                 placeholder="Describe what's been found, what actions were taken, or current status…"
                 className="w-full resize-none mb-3" style={INPUT}/>
               <div className="flex items-center gap-2 flex-wrap">
-                <span style={{ color:T.muted, fontSize:11 }}>Update status to:</span>
+                <span style={{ color:T.muted, fontSize:12.5 }}>Update status to:</span>
                 {updateStatuses.filter(s => s.id !== "investigating").map(s => (
                   <button key={s.id} onClick={() => setSelectedStatus(s.id)}
                     className="px-3 py-1.5 rounded-2xl text-xs font-bold"
@@ -1118,12 +1118,12 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span style={{ color:T.text, fontSize:13, fontWeight:600 }}>{m.name}</span>
+                    <span style={{ color:T.text, fontSize:14.5, fontWeight:600 }}>{m.name}</span>
                     <div style={{ width:7, height:7, borderRadius:"50%", background:m.available?T.green:T.muted,
                       flexShrink:0 }}/>
                   </div>
-                  <div style={{ color:T.sub, fontSize:11 }}>{m.specialty}</div>
-                  <div style={{ color:T.muted, fontSize:10, ...MONO }}>{m.email}</div>
+                  <div style={{ color:T.sub, fontSize:12.5 }}>{m.specialty}</div>
+                  <div style={{ color:T.muted, fontSize:11, ...MONO }}>{m.email}</div>
                 </div>
                 <div>
                   {selectedMembers.includes(m.id)
@@ -1133,7 +1133,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
               </div>
             ))}
           </div>
-          <div style={{ color:T.muted, fontSize:11, marginTop:8 }}>
+          <div style={{ color:T.muted, fontSize:12.5, marginTop:8 }}>
             {selectedMembers.length} of {team.length} selected · click to toggle
           </div>
         </div>
@@ -1153,7 +1153,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
 
           {/* Affected services chips */}
           <div style={{ marginBottom:14 }}>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:8 }}>AFFECTED SERVICES</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:8 }}>AFFECTED SERVICES</div>
             <div className="flex flex-wrap gap-1.5">
               {services.slice(0,10).map(s => (
                 <button key={s.id} onClick={() => setAffectedSvcs(prev =>
@@ -1170,7 +1170,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
 
           {/* Severity */}
           <div style={{ marginBottom:14 }}>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:8 }}>SEVERITY</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:8 }}>SEVERITY</div>
             <div className="flex gap-2">
               {(["critical","major","minor","info"] as IncidentSeverity[]).map(s => (
                 <button key={s} onClick={() => setSeverity(s)}
@@ -1186,14 +1186,14 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
 
           {/* Subject */}
           <div style={{ marginBottom:12 }}>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:5 }}>SUBJECT *</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:5 }}>SUBJECT *</div>
             <input value={subject} onChange={e=>setSubject(e.target.value)}
               placeholder="[INCIDENT] Brief description of the issue" style={INPUT}/>
           </div>
 
           {/* Body */}
           <div style={{ marginBottom:16 }}>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:5 }}>MESSAGE *</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:5 }}>MESSAGE *</div>
             <textarea value={body} onChange={e=>setBody(e.target.value)} rows={7}
               placeholder="Describe the issue, affected services, current status, and what the maintenance team needs to do…"
               className="w-full resize-none" style={INPUT}/>
@@ -1203,7 +1203,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
           {selectedMembers.length > 0 && (
             <div className="px-4 py-3 rounded-2xl mb-4"
               style={{ background:T.primBg, border:`1px solid ${T.primBd}` }}>
-              <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:6 }}>SENDING TO</div>
+              <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:6 }}>SENDING TO</div>
               <div className="flex flex-wrap gap-2">
                 {team.filter(m=>selectedMembers.includes(m.id)).map(m => (
                   <span key={m.id} className="px-2 py-0.5 rounded text-xs"
@@ -1213,7 +1213,7 @@ function MaintenancePanel({ services, incidents }: { services:Service[]; inciden
                 ))}
               </div>
               {affectedSvcs.length > 0 && (
-                <div style={{ color:T.sub, fontSize:11, marginTop:8 }}>
+                <div style={{ color:T.sub, fontSize:12.5, marginTop:8 }}>
                   Affected: {affectedSvcs.map(id=>services.find(s=>s.id===id)?.name).filter(Boolean).join(", ")}
                 </div>
               )}
@@ -1290,8 +1290,8 @@ function AlertRecipientsPanel({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <div style={{ ...DISPLAY, fontSize:16, color:T.text }}>Alert Notification Recipients</div>
-          <div style={{ color:T.sub, fontSize:13, marginTop:2 }}>
+          <div style={{ ...DISPLAY, fontSize:18, color:T.text }}>Alert Notification Recipients</div>
+          <div style={{ color:T.sub, fontSize:14.5, marginTop:2 }}>
             {recipients.filter(r=>r.active).length} active recipients · notified automatically when incidents occur
           </div>
         </div>
@@ -1309,8 +1309,8 @@ function AlertRecipientsPanel({
         style={{ background:T.primBg, border:`1px solid ${T.primBd}` }}>
         <Bell size={16} color={T.primary} style={{ flexShrink:0, marginTop:1 }}/>
         <div>
-          <div style={{ color:T.text, fontSize:13, fontWeight:600, marginBottom:4 }}>How Alert Notifications Work</div>
-          <div style={{ color:T.sub, fontSize:12, lineHeight:1.7 }}>
+          <div style={{ color:T.text, fontSize:14.5, fontWeight:600, marginBottom:4 }}>How Alert Notifications Work</div>
+          <div style={{ color:T.sub, fontSize:13.5, lineHeight:1.7 }}>
             Recipients are automatically emailed when a new incident is created or status is updated.
             Each recipient can be configured to receive <span style={{ color:T.red, fontWeight:600 }}>critical</span>,{" "}
             <span style={{ color:T.amber, fontWeight:600 }}>major</span>, and/or{" "}
@@ -1331,14 +1331,14 @@ function AlertRecipientsPanel({
               { label:"ROLE",        key:"role",  ph:"e.g. Backend Engineer" },
             ].map(f => (
               <div key={f.key}>
-                <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
+                <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
                 <input value={(form as any)[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}
                   placeholder={f.ph} style={INPUT}/>
               </div>
             ))}
           </div>
           <div style={{ marginBottom:16 }}>
-            <div style={{ color:T.muted, fontSize:10, ...MONO, marginBottom:8 }}>NOTIFY ON</div>
+            <div style={{ color:T.muted, fontSize:11, ...MONO, marginBottom:8 }}>NOTIFY ON</div>
             <div className="flex gap-3">
               {LEVELS.map(l => (
                 <button key={l} onClick={() => setForm(p=>({
@@ -1369,7 +1369,7 @@ function AlertRecipientsPanel({
           style={{ gridTemplateColumns:"1fr auto auto auto auto", gap:16,
             background:"rgba(10,20,40,0.9)", borderBottom:`1px solid ${T.border}` }}>
           {["Recipient","Role","Notify On","Status","Actions"].map(h => (
-            <span key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</span>
+            <span key={h} style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{h.toUpperCase()}</span>
           ))}
         </div>
         {recipients.map((r, i) => (
@@ -1378,11 +1378,11 @@ function AlertRecipientsPanel({
               background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.05)" }}>
             {/* Recipient */}
             <div>
-              <div style={{ color:T.text, fontSize:13, fontWeight:500 }}>{r.name}</div>
-              <div style={{ color:T.muted, fontSize:11, ...MONO }}>{r.email}</div>
+              <div style={{ color:T.text, fontSize:14.5, fontWeight:500 }}>{r.name}</div>
+              <div style={{ color:T.muted, fontSize:12.5, ...MONO }}>{r.email}</div>
             </div>
             {/* Role */}
-            <span style={{ color:T.sub, fontSize:12, whiteSpace:"nowrap" }}>{r.role || "—"}</span>
+            <span style={{ color:T.sub, fontSize:13.5, whiteSpace:"nowrap" }}>{r.role || "—"}</span>
             {/* Notify levels */}
             <div className="flex gap-1.5">
               {LEVELS.map(l => (
@@ -1390,7 +1390,7 @@ function AlertRecipientsPanel({
                   className="px-2 py-1 rounded text-xs font-bold"
                   style={{ background:r.notifyOn.includes(l)?`${levelColor(l)}18`:"rgba(91,110,225,0.04)",
                     border:`1px solid ${r.notifyOn.includes(l)?levelColor(l):T.border}`,
-                    color:r.notifyOn.includes(l)?levelColor(l):T.muted, fontSize:9, ...MONO }}>
+                    color:r.notifyOn.includes(l)?levelColor(l):T.muted, fontSize:10, ...MONO }}>
                   {l}
                 </button>
               ))}
@@ -1413,8 +1413,8 @@ function AlertRecipientsPanel({
       <div className="flex items-center justify-between px-5 py-4 rounded-2xl"
         style={{ background:T.card3, border:`1px solid ${T.border}` }}>
         <div>
-          <div style={{ color:T.text, fontSize:13, fontWeight:600 }}>Send Test Alert</div>
-          <div style={{ color:T.sub, fontSize:12, marginTop:2 }}>
+          <div style={{ color:T.text, fontSize:14.5, fontWeight:600 }}>Send Test Alert</div>
+          <div style={{ color:T.sub, fontSize:13.5, marginTop:2 }}>
             Sends a test email to all active recipients to verify delivery
           </div>
         </div>
@@ -1570,8 +1570,8 @@ function ApiMonitorPanel() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <div style={{ ...DISPLAY, fontSize:16, color:T.text }}>API Monitor</div>
-          <div style={{ color:T.sub, fontSize:13, marginTop:2 }}>
+          <div style={{ ...DISPLAY, fontSize:18, color:T.text }}>API Monitor</div>
+          <div style={{ color:T.sub, fontSize:14.5, marginTop:2 }}>
             Live health checks on all platform endpoints — auto-refreshes every 15 seconds
           </div>
         </div>
@@ -1609,9 +1609,9 @@ function ApiMonitorPanel() {
           { label:"24h Avg Uptime",    value:`${avgUptime}%`,                  sub:"All endpoints",     color:T.green  },
         ].map(s => (
           <div key={s.label} style={CARD}>
-            <div style={{ ...DISPLAY, fontSize:26, color:s.color, lineHeight:1 }}>{s.value}</div>
-            <div style={{ color:T.text, fontSize:12, fontWeight:500, marginTop:6 }}>{s.label}</div>
-            <div style={{ color:T.muted, fontSize:11, marginTop:2 }}>{s.sub}</div>
+            <div style={{ ...DISPLAY, fontSize:29, color:s.color, lineHeight:1 }}>{s.value}</div>
+            <div style={{ color:T.text, fontSize:13.5, fontWeight:500, marginTop:6 }}>{s.label}</div>
+            <div style={{ color:T.muted, fontSize:12.5, marginTop:2 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1623,7 +1623,7 @@ function ApiMonitorPanel() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             {/* Method picker */}
             <div>
-              <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:8 }}>METHOD</label>
+              <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:8 }}>METHOD</label>
               <div className="flex gap-2">
                 {["GET","POST","PUT","PATCH","DELETE"].map(m => (
                   <button key={m} onClick={() => setNewEp(p=>({...p,method:m}))}
@@ -1637,12 +1637,12 @@ function ApiMonitorPanel() {
               </div>
             </div>
             <div>
-              <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>PATH *</label>
+              <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>PATH *</label>
               <input value={newEp.path} onChange={e=>setNewEp(p=>({...p,path:e.target.value}))}
                 placeholder="/api/v1/your-endpoint" style={INPUT}/>
             </div>
             <div>
-              <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION</label>
+              <label style={{ color:T.muted, fontSize:11, ...MONO, display:"block", marginBottom:5 }}>DESCRIPTION</label>
               <input value={newEp.description} onChange={e=>setNewEp(p=>({...p,description:e.target.value}))}
                 placeholder="What this endpoint does" style={INPUT}/>
             </div>
@@ -1653,7 +1653,7 @@ function ApiMonitorPanel() {
                 { label:"CHECK INTERVAL (s)",  key:"checkIntervalSec",ph:"60" },
               ].map(f => (
                 <div key={f.key}>
-                  <label style={{ color:T.muted, fontSize:9, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
+                  <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
                   <input type="number" value={(newEp as any)[f.key]}
                     onChange={e=>setNewEp(p=>({...p,[f.key]:e.target.value}))}
                     placeholder={f.ph} style={{...INPUT,padding:"8px 10px"}}/>
@@ -1672,7 +1672,7 @@ function ApiMonitorPanel() {
 
       {/* ── Filter bar ──────────────────────────────────────────── */}
       <div className="flex items-center gap-2">
-        <span style={{ color:T.muted, fontSize:12 }}>Filter:</span>
+        <span style={{ color:T.muted, fontSize:13.5 }}>Filter:</span>
         {(["all","up","slow","degraded","down"] as const).map(s => (
           <button key={s} onClick={() => setFilterStatus(s)}
             className="px-3 py-1.5 rounded-2xl text-xs font-bold capitalize"
@@ -1692,7 +1692,7 @@ function ApiMonitorPanel() {
               style={{ background:T.greenBg, border:`1px solid ${T.greenBd}` }}>
               <div style={{ width:6, height:6, borderRadius:"50%", background:T.green,
                 animation:"pulse 1.5s infinite" }}/>
-              <span style={{ color:T.green, fontSize:11, ...MONO }}>LIVE · checks every 15s</span>
+              <span style={{ color:T.green, fontSize:12.5, ...MONO }}>LIVE · checks every 15s</span>
             </div>
           )}
         </div>
@@ -1709,7 +1709,7 @@ function ApiMonitorPanel() {
               style={{ gridTemplateColumns:"56px 1fr 80px 80px 90px 70px 80px", gap:12,
                 background:"rgba(10,20,40,0.9)", borderBottom:`1px solid ${T.border}` }}>
               {["Method","Endpoint","Status","Latency","HTTP","Uptime","Actions"].map(h => (
-                <span key={h} style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{h.toUpperCase()}</span>
+                <span key={h} style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{h.toUpperCase()}</span>
               ))}
             </div>
 
@@ -1731,15 +1731,15 @@ function ApiMonitorPanel() {
                   {/* Method badge */}
                   <span className="px-2 py-0.5 rounded text-center font-bold"
                     style={{ background:`${METHOD_COLORS[ep.method] ?? T.muted}18`,
-                      color:METHOD_COLORS[ep.method] ?? T.muted, fontSize:8, ...MONO }}>
+                      color:METHOD_COLORS[ep.method] ?? T.muted, fontSize:9, ...MONO }}>
                     {ep.method}
                   </span>
 
                   {/* Path + description */}
                   <div className="min-w-0">
-                    <div style={{ color:T.text, fontSize:12, ...MONO, overflow:"hidden",
+                    <div style={{ color:T.text, fontSize:13.5, ...MONO, overflow:"hidden",
                       textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{ep.path}</div>
-                    <div style={{ color:T.muted, fontSize:10, overflow:"hidden",
+                    <div style={{ color:T.muted, fontSize:11, overflow:"hidden",
                       textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{ep.description}</div>
                   </div>
 
@@ -1747,7 +1747,7 @@ function ApiMonitorPanel() {
                   <span className="px-2 py-0.5 rounded-full text-center font-bold"
                     style={{ background:isCk?T.card3:checkStatusBg(ep.status),
                       color:isCk?T.muted:sc, border:`1px solid ${isCk?T.border:checkStatusBd(ep.status)}`,
-                      fontSize:8, ...MONO }}>
+                      fontSize:9, ...MONO }}>
                     {isCk ? "CHECKING" : ep.status.toUpperCase()}
                   </span>
 
@@ -1755,7 +1755,7 @@ function ApiMonitorPanel() {
                   <div className="flex items-center gap-1.5">
                     <span style={{ color: ep.latencyMs > ep.thresholdDownMs ? T.red
                         : ep.latencyMs > ep.thresholdWarnMs ? T.amber : T.green,
-                      fontSize:11, fontWeight:700, ...MONO, flexShrink:0 }}>
+                      fontSize:12.5, fontWeight:700, ...MONO, flexShrink:0 }}>
                       {ep.latencyMs >= 1000 ? `${(ep.latencyMs/1000).toFixed(1)}s` : `${ep.latencyMs}ms`}
                     </span>
                     <Sparkline
@@ -1764,13 +1764,13 @@ function ApiMonitorPanel() {
                   </div>
 
                   {/* HTTP status */}
-                  <span style={{ color:httpColor(ep.httpStatus), fontSize:11, fontWeight:700, ...MONO }}>
+                  <span style={{ color:httpColor(ep.httpStatus), fontSize:12.5, fontWeight:700, ...MONO }}>
                     {isCk ? "—" : ep.httpStatus || "—"}
                   </span>
 
                   {/* Uptime */}
                   <span style={{ color: ep.uptime24h >= 99.9 ? T.green : ep.uptime24h >= 99 ? T.amber : T.red,
-                    fontSize:11, fontWeight:700, ...MONO }}>
+                    fontSize:12.5, fontWeight:700, ...MONO }}>
                     {ep.uptime24h}%
                   </span>
 
@@ -1795,7 +1795,7 @@ function ApiMonitorPanel() {
             })}
           </div>
           {filtered.length === 0 && (
-            <div className="text-center py-10" style={{ color:T.muted, fontSize:13 }}>
+            <div className="text-center py-10" style={{ color:T.muted, fontSize:14.5 }}>
               No endpoints match this filter
             </div>
           )}
@@ -1814,9 +1814,9 @@ function ApiMonitorPanel() {
                         color:METHOD_COLORS[selectedEp.method]??T.muted, ...MONO }}>
                       {selectedEp.method}
                     </span>
-                    <span style={{ ...MONO, color:T.text, fontSize:13, fontWeight:600 }}>{selectedEp.path}</span>
+                    <span style={{ ...MONO, color:T.text, fontSize:14.5, fontWeight:600 }}>{selectedEp.path}</span>
                   </div>
-                  <div style={{ color:T.sub, fontSize:12 }}>{selectedEp.description}</div>
+                  <div style={{ color:T.sub, fontSize:13.5 }}>{selectedEp.description}</div>
                 </div>
                 <button onClick={() => setSelected(null)} style={{ color:T.muted }}>
                   <X size={15}/>
@@ -1829,15 +1829,15 @@ function ApiMonitorPanel() {
                 <div style={{ width:10, height:10, borderRadius:"50%", background:checkStatusColor(selectedEp.status),
                   boxShadow:`0 0 8px ${checkStatusColor(selectedEp.status)}`, flexShrink:0 }}/>
                 <div>
-                  <div style={{ color:checkStatusColor(selectedEp.status), fontSize:14, fontWeight:700 }}>
+                  <div style={{ color:checkStatusColor(selectedEp.status), fontSize:15.5, fontWeight:700 }}>
                     {selectedEp.status.toUpperCase()}
                     {selectedEp.consecutiveFails > 0 && (
-                      <span style={{ color:T.red, fontSize:11, fontWeight:400, marginLeft:8 }}>
+                      <span style={{ color:T.red, fontSize:12.5, fontWeight:400, marginLeft:8 }}>
                         · {selectedEp.consecutiveFails} consecutive fail{selectedEp.consecutiveFails>1?"s":""}
                       </span>
                     )}
                   </div>
-                  <div style={{ color:T.sub, fontSize:11 }}>
+                  <div style={{ color:T.sub, fontSize:12.5 }}>
                     {selectedEp.latencyMs}ms · HTTP {selectedEp.httpStatus} · Last checked: {selectedEp.lastChecked}
                   </div>
                 </div>
@@ -1861,8 +1861,8 @@ function ApiMonitorPanel() {
                 ].map(s => (
                   <div key={s.label} className="px-3 py-2.5 rounded-2xl text-center"
                     style={{ background:T.card3, border:`1px solid ${T.border}` }}>
-                    <div style={{ ...DISPLAY, fontSize:18, color:s.color, lineHeight:1 }}>{s.value}</div>
-                    <div style={{ color:T.muted, fontSize:10, marginTop:4 }}>{s.label}</div>
+                    <div style={{ ...DISPLAY, fontSize:20, color:s.color, lineHeight:1 }}>{s.value}</div>
+                    <div style={{ color:T.muted, fontSize:11, marginTop:4 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -1893,27 +1893,27 @@ function ApiMonitorPanel() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <span style={{ color:T.muted, fontSize:9, ...MONO }}>
+                      <span style={{ color:T.muted, fontSize:10, ...MONO }}>
                         {selectedEp.history[0]?.ts}
                       </span>
-                      <span style={{ color:T.muted, fontSize:9, ...MONO }}>
+                      <span style={{ color:T.muted, fontSize:10, ...MONO }}>
                         {selectedEp.history[selectedEp.history.length-1]?.ts}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 mt-2">
-                      <span style={{ color:T.muted, fontSize:10 }}>
+                      <span style={{ color:T.muted, fontSize:11 }}>
                         Min: <strong style={{ color:T.green }}>{Math.min(...selectedEp.history.map(h=>h.latencyMs))}ms</strong>
                       </span>
-                      <span style={{ color:T.muted, fontSize:10 }}>
+                      <span style={{ color:T.muted, fontSize:11 }}>
                         Max: <strong style={{ color:T.red }}>{Math.max(...selectedEp.history.map(h=>h.latencyMs))}ms</strong>
                       </span>
-                      <span style={{ color:T.muted, fontSize:10 }}>
+                      <span style={{ color:T.muted, fontSize:11 }}>
                         Avg: <strong style={{ color:T.primary }}>{Math.round(selectedEp.history.reduce((s,h)=>s+h.latencyMs,0)/selectedEp.history.length)}ms</strong>
                       </span>
                     </div>
                   </>
                 ) : (
-                  <div style={{ color:T.muted, fontSize:12, padding:"16px 0" }}>No history yet — run a check first</div>
+                  <div style={{ color:T.muted, fontSize:13.5, padding:"16px 0" }}>No history yet — run a check first</div>
                 )}
               </div>
 
@@ -1928,12 +1928,12 @@ function ApiMonitorPanel() {
                       <div style={{ width:6, height:6, borderRadius:"50%", flexShrink:0,
                         background:checkStatusColor(h.status),
                         boxShadow:`0 0 5px ${checkStatusColor(h.status)}` }}/>
-                      <span style={{ color:T.muted, fontSize:10, ...MONO, flexShrink:0, width:64 }}>{h.ts}</span>
-                      <span className="flex-1" style={{ color:checkStatusColor(h.status), fontSize:11, fontWeight:600, ...MONO }}>
+                      <span style={{ color:T.muted, fontSize:11, ...MONO, flexShrink:0, width:64 }}>{h.ts}</span>
+                      <span className="flex-1" style={{ color:checkStatusColor(h.status), fontSize:12.5, fontWeight:600, ...MONO }}>
                         {h.status.toUpperCase()}
                       </span>
-                      <span style={{ color:T.text, fontSize:11, ...MONO }}>{h.latencyMs}ms</span>
-                      <span style={{ color:httpColor(h.httpStatus), fontSize:10, fontWeight:700, ...MONO }}>
+                      <span style={{ color:T.text, fontSize:12.5, ...MONO }}>{h.latencyMs}ms</span>
+                      <span style={{ color:httpColor(h.httpStatus), fontSize:11, fontWeight:700, ...MONO }}>
                         {h.httpStatus}
                       </span>
                     </div>
@@ -1946,7 +1946,7 @@ function ApiMonitorPanel() {
                 <SLabel>Alert Thresholds</SLabel>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label style={{ color:T.muted, fontSize:9, ...MONO, display:"block", marginBottom:4 }}>
+                    <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:4 }}>
                       WARN WHEN LATENCY &gt; (ms)
                     </label>
                     <input type="number" defaultValue={selectedEp.thresholdWarnMs}
@@ -1955,7 +1955,7 @@ function ApiMonitorPanel() {
                       style={{...INPUT,padding:"7px 10px"}}/>
                   </div>
                   <div>
-                    <label style={{ color:T.muted, fontSize:9, ...MONO, display:"block", marginBottom:4 }}>
+                    <label style={{ color:T.muted, fontSize:10, ...MONO, display:"block", marginBottom:4 }}>
                       DOWN WHEN LATENCY &gt; (ms)
                     </label>
                     <input type="number" defaultValue={selectedEp.thresholdDownMs}
@@ -1991,7 +1991,7 @@ function ApiMonitorPanel() {
               style={{ background:T.card3, border:`1px solid ${T.border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <div style={{ width:8, height:8, borderRadius:"50%", background:r.color, flexShrink:0 }}/>
-                <span style={{ color:T.text, fontSize:12, fontWeight:600 }}>{r.tier}</span>
+                <span style={{ color:T.text, fontSize:13.5, fontWeight:600 }}>{r.tier}</span>
               </div>
               {[
                 { label:"Req / sec", value:r.rps.toLocaleString(), color:r.color },
@@ -2000,8 +2000,8 @@ function ApiMonitorPanel() {
               ].map(row => (
                 <div key={row.label} className="flex justify-between py-1 border-b"
                   style={{ borderColor:"rgba(91,110,225,0.06)" }}>
-                  <span style={{ color:T.muted, fontSize:11 }}>{row.label}</span>
-                  <span style={{ color:row.color, fontSize:11, fontWeight:700, ...MONO }}>{row.value}</span>
+                  <span style={{ color:T.muted, fontSize:12.5 }}>{row.label}</span>
+                  <span style={{ color:row.color, fontSize:12.5, fontWeight:700, ...MONO }}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -2012,18 +2012,18 @@ function ApiMonitorPanel() {
       {/* ── Legend ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-5 px-5 py-3 rounded-2xl"
         style={{ background:T.card3, border:`1px solid ${T.border}` }}>
-        <span style={{ color:T.muted, fontSize:11 }}>Status key:</span>
+        <span style={{ color:T.muted, fontSize:12.5 }}>Status key:</span>
         {([["up",T.green,"Response within normal thresholds"],
            ["slow",T.amber,"Response exceeded warn threshold"],
            ["degraded",T.amber,"Error rate elevated"],
            ["down",T.red,"Response timeout or server error"]] as const).map(([s,c,desc]) => (
           <div key={s} className="flex items-center gap-1.5">
             <div style={{ width:7, height:7, borderRadius:"50%", background:c, boxShadow:`0 0 5px ${c}` }}/>
-            <span style={{ color:T.sub, fontSize:11, fontWeight:600 }}>{s}</span>
-            <span style={{ color:T.muted, fontSize:10 }}>— {desc}</span>
+            <span style={{ color:T.sub, fontSize:12.5, fontWeight:600 }}>{s}</span>
+            <span style={{ color:T.muted, fontSize:11 }}>— {desc}</span>
           </div>
         ))}
-        <span style={{ color:T.muted, fontSize:10, marginLeft:"auto" }}>
+        <span style={{ color:T.muted, fontSize:11, marginLeft:"auto" }}>
           Click any row to inspect · Click refresh to run a manual check
         </span>
       </div>

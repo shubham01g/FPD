@@ -48,14 +48,14 @@ export function IDVerification() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Shield size={16} color="var(--gold)" />
-            <span style={{ color: "var(--gold)", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · COMPLIANCE</span>
+            <span style={{ color: "var(--gold)", fontSize: 13.5, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · COMPLIANCE</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)" }}>Legacy Contact ID Verification</h1>
-          <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Review government-issued IDs submitted by legacy contacts. Identities must be confirmed before access is granted.</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "var(--foreground)" }}>Legacy Contact ID Verification</h1>
+          <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginTop: 4 }}>Review government-issued IDs submitted by legacy contacts. Identities must be confirmed before access is granted.</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: "rgba(246,173,85,0.1)", border: "1px solid rgba(246,173,85,0.3)" }}>
           <Clock size={14} color="#F6AD55" />
-          <span style={{ color: "#F6AD55", fontSize: 13 }}>{pendingVerifications.length} Pending Review</span>
+          <span style={{ color: "#F6AD55", fontSize: 14.5 }}>{pendingVerifications.length} Pending Review</span>
         </div>
       </div>
 
@@ -71,15 +71,15 @@ export function IDVerification() {
             <div className="rounded-xl p-2 mb-3" style={{ background: `${stat.color}15`, color: stat.color, width: "fit-content" }}>
               {stat.icon}
             </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color }}>{stat.value}</div>
-            <div style={{ color: "var(--muted-foreground)", fontSize: 12, marginTop: 2 }}>{stat.label}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 27, color: stat.color }}>{stat.value}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 13.5, marginTop: 2 }}>{stat.label}</div>
           </div>
         ))}
       </div>
 
       {/* Pending verifications */}
       <div className="space-y-4">
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)" }}>Pending Verifications</h3>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)" }}>Pending Verifications</h3>
         {pendingVerifications.map((verif) => (
           <div key={verif.id} className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div className="flex items-start justify-between gap-4">
@@ -89,13 +89,13 @@ export function IDVerification() {
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                    <span style={{ color: "var(--foreground)", fontSize: 16, fontWeight: 500 }}>{verif.contactName}</span>
-                    <span className="px-2 py-0.5 rounded" style={{ background: "rgba(246,173,85,0.12)", color: "#F6AD55", fontSize: 11, fontFamily: "var(--font-mono)" }}>PENDING</span>
+                    <span style={{ color: "var(--foreground)", fontSize: 18, fontWeight: 500 }}>{verif.contactName}</span>
+                    <span className="px-2 py-0.5 rounded" style={{ background: "rgba(246,173,85,0.12)", color: "#F6AD55", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>PENDING</span>
                   </div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{verif.relationship} of <strong style={{ color: "var(--foreground)" }}>{verif.userAccount}</strong></div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 14.5 }}>{verif.relationship} of <strong style={{ color: "var(--foreground)" }}>{verif.userAccount}</strong></div>
                 </div>
               </div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 12, textAlign: "right", flexShrink: 0 }}>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 13.5, textAlign: "right", flexShrink: 0 }}>
                 <div style={{ fontFamily: "var(--font-mono)" }}>{verif.id}</div>
                 <div>Submitted {verif.submittedDate}</div>
               </div>
@@ -103,20 +103,20 @@ export function IDVerification() {
 
             <div className="grid md:grid-cols-4 gap-4 mt-5">
               <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID TYPE</div>
-                <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.idType}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginBottom: 3 }}>ID TYPE</div>
+                <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{verif.idType}</div>
               </div>
               <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>DATE OF BIRTH</div>
-                <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.dob}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginBottom: 3 }}>DATE OF BIRTH</div>
+                <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{verif.dob}</div>
               </div>
               <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID EXPIRY</div>
-                <div style={{ color: "var(--foreground)", fontSize: 13 }}>{verif.expiryDate}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginBottom: 3 }}>ID EXPIRY</div>
+                <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{verif.expiryDate}</div>
               </div>
               <div className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginBottom: 3 }}>ID NUMBER (MASKED)</div>
-                <div style={{ color: "var(--foreground)", fontSize: 13, fontFamily: "var(--font-mono)" }}>{verif.idNumber}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginBottom: 3 }}>ID NUMBER (MASKED)</div>
+                <div style={{ color: "var(--foreground)", fontSize: 14.5, fontFamily: "var(--font-mono)" }}>{verif.idNumber}</div>
               </div>
             </div>
 
@@ -129,7 +129,7 @@ export function IDVerification() {
               >
                 <div className="text-center">
                   <ZoomIn size={18} color="var(--gold)" style={{ margin: "0 auto 6px" }} />
-                  <div style={{ color: "var(--gold)", fontSize: 12 }}>View ID Front</div>
+                  <div style={{ color: "var(--gold)", fontSize: 13.5 }}>View ID Front</div>
                 </div>
               </div>
               {verif.idBack && (
@@ -140,7 +140,7 @@ export function IDVerification() {
                 >
                   <div className="text-center">
                     <ZoomIn size={18} color="var(--gold)" style={{ margin: "0 auto 6px" }} />
-                    <div style={{ color: "var(--gold)", fontSize: 12 }}>View ID Back</div>
+                    <div style={{ color: "var(--gold)", fontSize: 13.5 }}>View ID Back</div>
                   </div>
                 </div>
               )}
@@ -150,20 +150,20 @@ export function IDVerification() {
               <button
                 onClick={() => handleApprove(verif.id)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-                style={{ background: "rgba(72,187,120,0.15)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.3)", fontWeight: 600, fontSize: 14 }}
+                style={{ background: "rgba(72,187,120,0.15)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.3)", fontWeight: 600, fontSize: 15.5 }}
               >
                 <CheckCircle size={15} /> Approve Verification
               </button>
               <button
                 onClick={() => setSelectedVerif(verif)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-                style={{ background: "rgba(252,129,129,0.12)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.25)", fontWeight: 600, fontSize: 14 }}
+                style={{ background: "rgba(252,129,129,0.12)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.25)", fontWeight: 600, fontSize: 15.5 }}
               >
                 <XCircle size={15} /> Reject
               </button>
               <button
                 className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
-                style={{ background: "var(--secondary)", color: "var(--muted-foreground)", fontSize: 14 }}
+                style={{ background: "var(--secondary)", color: "var(--muted-foreground)", fontSize: 15.5 }}
               >
                 <Eye size={15} /> View Full Record
               </button>
@@ -175,7 +175,7 @@ export function IDVerification() {
       {/* Recently processed */}
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
         <div className="px-5 py-3 border-b" style={{ background: "var(--muted)", borderColor: "var(--border)" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--foreground)" }}>Recently Processed</h3>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: "var(--foreground)" }}>Recently Processed</h3>
         </div>
         {recentlyProcessed.map((r, i) => (
           <div
@@ -184,14 +184,14 @@ export function IDVerification() {
             style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)" }}
           >
             <div>
-              <div style={{ color: "var(--foreground)", fontSize: 13 }}>{r.name}</div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{r.id}</div>
+              <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{r.name}</div>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{r.id}</div>
             </div>
-            <div style={{ color: "var(--muted-foreground)", fontSize: 12 }}>{r.processedDate}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 13.5 }}>{r.processedDate}</div>
             <div className="flex items-center gap-2">
               {r.status === "approved"
-                ? <><CheckCircle size={14} color="#FFFFFF" /><span style={{ color: "#D99A6B", fontSize: 13 }}>Approved</span></>
-                : <><XCircle size={14} color="#FC8181" /><span style={{ color: "#FC8181", fontSize: 13 }}>Rejected{r.reason ? ` — ${r.reason}` : ""}</span></>
+                ? <><CheckCircle size={14} color="#FFFFFF" /><span style={{ color: "#D99A6B", fontSize: 14.5 }}>Approved</span></>
+                : <><XCircle size={14} color="#FC8181" /><span style={{ color: "#FC8181", fontSize: 14.5 }}>Rejected{r.reason ? ` — ${r.reason}` : ""}</span></>
               }
             </div>
           </div>
@@ -202,8 +202,8 @@ export function IDVerification() {
       {selectedVerif && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
           <div className="w-full max-w-md rounded-2xl border p-7" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)", marginBottom: 16 }}>Reject Verification</h3>
-            <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 16 }}>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)", marginBottom: 16 }}>Reject Verification</h3>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginBottom: 16 }}>
               You are rejecting the ID verification for <strong style={{ color: "var(--foreground)" }}>{selectedVerif.contactName}</strong>. Please provide a reason.
             </p>
             <div className="space-y-2 mb-4">
@@ -216,7 +216,7 @@ export function IDVerification() {
                     background: rejectionReason === reason ? "rgba(252,129,129,0.1)" : "rgba(255,255,255,0.08)",
                     borderColor: rejectionReason === reason ? "rgba(252,129,129,0.4)" : "var(--border)",
                     color: rejectionReason === reason ? "#FC8181" : "var(--foreground)",
-                    fontSize: 13,
+                    fontSize: 14.5,
                   }}
                 >
                   {reason}
@@ -227,14 +227,14 @@ export function IDVerification() {
               <button
                 onClick={() => handleReject(selectedVerif.id)}
                 className="flex-1 py-3 rounded-2xl font-semibold"
-                style={{ background: "rgba(252,129,129,0.15)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.3)", fontSize: 14 }}
+                style={{ background: "rgba(252,129,129,0.15)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.3)", fontSize: 15.5 }}
               >
                 Confirm Rejection
               </button>
               <button
                 onClick={() => setSelectedVerif(null)}
                 className="px-5 py-3 rounded-2xl"
-                style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 14 }}
+                style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 15.5 }}
               >
                 Cancel
               </button>

@@ -157,10 +157,10 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
             <Phone size={20} color="#FFFFFF"/>
           </div>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:15.5, color:"#E8EDF5" }}>
               Start a Session with {clientName}
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:11 }}>
+            <div style={{ color:"#8A9AB8", fontSize:12.5 }}>
               Choose how you'd like to connect — billing timer starts automatically
             </div>
           </div>
@@ -170,7 +170,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
           <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
             style={{ background:"rgba(252,129,129,0.08)", border:"1px solid rgba(252,129,129,0.2)" }}>
             <AlertTriangle size={13} color="#FC8181" style={{ marginTop:1, flexShrink:0 }}/>
-            <span style={{ color:"#FC8181", fontSize:12, lineHeight:1.5 }}>{cameraError}</span>
+            <span style={{ color:"#FC8181", fontSize:13.5, lineHeight:1.5 }}>{cameraError}</span>
           </div>
         )}
 
@@ -186,10 +186,10 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
               <Video size={22} color="#FFFFFF"/>
             </div>
             <div className="text-center">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#E8EDF5", fontWeight:700 }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:14.5, color:"#E8EDF5", fontWeight:700 }}>
                 Video Call
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:10, marginTop:3, lineHeight:1.5 }}>
+              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:3, lineHeight:1.5 }}>
                 See each other on camera while uploading documents together
               </div>
             </div>
@@ -215,10 +215,10 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
               <Phone size={22} color="#FFFFFF"/>
             </div>
             <div className="text-center">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:13, color:"#E8EDF5", fontWeight:700 }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:14.5, color:"#E8EDF5", fontWeight:700 }}>
                 Phone Call
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:10, marginTop:3, lineHeight:1.5 }}>
+              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:3, lineHeight:1.5 }}>
                 Traditional phone call while you handle everything on their behalf
               </div>
             </div>
@@ -239,7 +239,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
           style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
           <Clock size={11} color="#8A9AB8"/>
-          <span style={{ color:"#8A9AB8", fontSize:11 }}>
+          <span style={{ color:"#8A9AB8", fontSize:12.5 }}>
             Billing starts when the session begins · $25 per 30-minute block · charged to card on file
           </span>
         </div>
@@ -257,10 +257,10 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
           style={{ width:60, height:60, background:isVideo?"rgba(91,167,214,0.15)":"rgba(91,167,214,0.15)", border:`2px solid ${isVideo?"rgba(91,167,214,0.4)":"rgba(91,167,214,0.4)"}` }}>
           {isVideo ? <Video size={24} color="#FFFFFF"/> : <Phone size={24} color="#FFFFFF"/>}
         </div>
-        <div style={{ color:"#E8EDF5", fontFamily:"var(--font-display)", fontSize:16 }}>
+        <div style={{ color:"#E8EDF5", fontFamily:"var(--font-display)", fontSize:18 }}>
           {isVideo ? "Starting video call…" : "Connecting phone call…"}
         </div>
-        <div style={{ color:"#8A9AB8", fontSize:12, textAlign:"center" }}>
+        <div style={{ color:"#8A9AB8", fontSize:13.5, textAlign:"center" }}>
           {isVideo
             ? `Requesting camera · connecting to ${clientName}`
             : `Dialing ${clientName} · please have them pick up`}
@@ -283,15 +283,15 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
         <div className="flex items-center gap-3">
           <CheckCircle size={20} color="#FFFFFF"/>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5" }}>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:15.5, color:"#E8EDF5" }}>
               {callMode === "video" ? "Video Session" : "Phone Call"} Complete
             </div>
-            <div style={{ color:"#8A9AB8", fontSize:12 }}>Duration: {formatTime(elapsed)} · ${charge} billed to card on file</div>
+            <div style={{ color:"#8A9AB8", fontSize:13.5 }}>Duration: {formatTime(elapsed)} · ${charge} billed to card on file</div>
           </div>
         </div>
         {docsUploaded.length > 0 && (
           <div>
-            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>UPLOADED THIS SESSION</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:4 }}>UPLOADED THIS SESSION</div>
             <div className="space-y-1">
               {docsUploaded.map(d => (
                 <div key={d} className="flex items-center gap-2 text-xs" style={{ color:"#8A9AB8" }}>
@@ -326,14 +326,14 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
             style={{ background:"rgba(252,129,129,0.15)", border:"1px solid rgba(252,129,129,0.35)" }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background:"#FC8181", animation:"pulse 1s ease-in-out infinite" }}/>
-            <span style={{ color:"#FC8181", fontSize:10, fontWeight:700, ...MONO }}>
+            <span style={{ color:"#FC8181", fontSize:11, fontWeight:700, ...MONO }}>
               {isVideo ? "VIDEO" : "PHONE"}
             </span>
           </div>
           {/* Timer */}
           <div className="flex items-center gap-1.5" style={{ color:"#E8EDF5" }}>
             <Clock size={12} color="#FFFFFF"/>
-            <span style={{ fontSize:14, fontWeight:700, ...MONO }}>{formatTime(elapsed)}</span>
+            <span style={{ fontSize:15.5, fontWeight:700, ...MONO }}>{formatTime(elapsed)}</span>
           </div>
           {/* Billing */}
           <div className="px-2 py-0.5 rounded text-xs" style={{ background:"rgba(91,167,214,0.15)", color:"#D68FA8", ...MONO }}>
@@ -366,22 +366,22 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
                     style={{ background:"linear-gradient(135deg,#1a1f36,#0f1626)" }}>
                     <div className="flex items-center justify-center rounded-full font-bold"
-                      style={{ width:72, height:72, background:"rgba(91,167,214,0.2)", color:"#D68FA8", fontSize:28, fontFamily:"var(--font-display)" }}>
+                      style={{ width:72, height:72, background:"rgba(91,167,214,0.2)", color:"#D68FA8", fontSize:31.5, fontFamily:"var(--font-display)" }}>
                       {clientName.split(" ").map(w=>w[0]).join("").slice(0,2)}
                     </div>
-                    <div style={{ color:"#E8EDF5", fontSize:14, fontFamily:"var(--font-display)" }}>{clientName}</div>
+                    <div style={{ color:"#E8EDF5", fontSize:15.5, fontFamily:"var(--font-display)" }}>{clientName}</div>
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full"
                       style={{ background:"rgba(72,187,120,0.12)", border:"1px solid rgba(72,187,120,0.25)" }}>
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background:"#48BB78" }}/>
-                      <span style={{ color:"#D99A6B", fontSize:11 }}>Connected · camera on</span>
+                      <span style={{ color:"#D99A6B", fontSize:12.5 }}>Connected · camera on</span>
                     </div>
-                    <div style={{ color:"#5A6A88", fontSize:11 }}>Client video feed · WebRTC in production</div>
+                    <div style={{ color:"#5A6A88", fontSize:12.5 }}>Client video feed · WebRTC in production</div>
                   </div>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ background:"#0f1626" }}>
                     <Users size={32} color="#374151"/>
-                    <div style={{ color:"#5A6A88", fontSize:13 }}>Waiting for {clientName} to join…</div>
-                    <div style={{ color:"#374151", fontSize:11 }}>Client received a video join link</div>
+                    <div style={{ color:"#5A6A88", fontSize:14.5 }}>Waiting for {clientName} to join…</div>
+                    <div style={{ color:"#374151", fontSize:12.5 }}>Client received a video join link</div>
                     <div className="flex gap-1.5 mt-2">
                       {[0,1,2].map(i => (
                         <div key={i} className="w-2 h-2 rounded-full"
@@ -405,7 +405,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                     </div>
                   )}
                   <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded"
-                    style={{ background:"rgba(0,0,0,0.7)", color:"#E8EDF5", fontSize:9, ...MONO }}>You</div>
+                    style={{ background:"rgba(0,0,0,0.7)", color:"#E8EDF5", fontSize:10, ...MONO }}>You</div>
                 </div>
               </div>
 
@@ -418,19 +418,19 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                   <div className="absolute rounded-full" style={{ width:100, height:100, border:"2px solid rgba(91,167,214,0.15)", animation:"pulse 2s ease-in-out infinite" }}/>
                   <div className="absolute rounded-full" style={{ width:80, height:80, border:"2px solid rgba(91,167,214,0.25)", animation:"pulse 2s ease-in-out 0.5s infinite" }}/>
                   <div className="flex items-center justify-center rounded-full font-bold"
-                    style={{ width:64, height:64, background:"rgba(91,167,214,0.2)", color:"#6FAE8B", fontSize:22, fontFamily:"var(--font-display)", border:"2px solid rgba(91,167,214,0.4)", position:"relative" }}>
+                    style={{ width:64, height:64, background:"rgba(91,167,214,0.2)", color:"#6FAE8B", fontSize:24.5, fontFamily:"var(--font-display)", border:"2px solid rgba(91,167,214,0.4)", position:"relative" }}>
                     {clientName.split(" ").map(w=>w[0]).join("").slice(0,2)}
                   </div>
                 </div>
-                <div style={{ color:"#E8EDF5", fontFamily:"var(--font-display)", fontSize:16 }}>{clientName}</div>
+                <div style={{ color:"#E8EDF5", fontFamily:"var(--font-display)", fontSize:18 }}>{clientName}</div>
                 {clientConnected ? (
                   <div className="flex items-center gap-2 px-4 py-1.5 rounded-full"
                     style={{ background:"rgba(72,187,120,0.12)", border:"1px solid rgba(72,187,120,0.25)" }}>
                     <div className="w-2 h-2 rounded-full" style={{ background:"#48BB78", animation:"pulse 1s ease-in-out infinite" }}/>
-                    <span style={{ color:"#D99A6B", fontSize:12, fontWeight:600 }}>On the line · audio only</span>
+                    <span style={{ color:"#D99A6B", fontSize:13.5, fontWeight:600 }}>On the line · audio only</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2" style={{ color:"#5A6A88", fontSize:12 }}>
+                  <div className="flex items-center gap-2" style={{ color:"#5A6A88", fontSize:13.5 }}>
                     <div className="flex gap-1">
                       {[0,1,2].map(i => (
                         <div key={i} className="w-1.5 h-1.5 rounded-full"
@@ -440,7 +440,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                     Dialing {clientName}…
                   </div>
                 )}
-                <div style={{ color:"#374151", fontSize:11, textAlign:"center" }}>
+                <div style={{ color:"#374151", fontSize:12.5, textAlign:"center" }}>
                   You are uploading documents on their behalf during this call
                 </div>
               </div>
@@ -455,7 +455,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
 
                 {/* Quick upload */}
                 <div>
-                  <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:6 }}>UPLOAD DURING CALL</div>
+                  <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>UPLOAD DURING CALL</div>
                   <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-xs font-semibold cursor-pointer"
                     style={{ background:"rgba(91,167,214,0.15)", color:"#D68FA8", border:"1px dashed rgba(91,167,214,0.4)" }}>
                     <Upload size={12}/> Upload Document
@@ -471,7 +471,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
 
                 {/* Vault section picker */}
                 <div>
-                  <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:6 }}>SAVE TO VAULT SECTION</div>
+                  <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>SAVE TO VAULT SECTION</div>
                   <div className="space-y-1">
                     {VAULT_SECTIONS.map(sec => (
                       <button key={sec.id}
@@ -485,7 +485,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                           color: activeSection===sec.id ? "#FFFFFF" : "#9CA3AF",
                           border: `1px solid ${activeSection===sec.id ? "rgba(91,167,214,0.4)" : "transparent"}`,
                         }}>
-                        <span style={{ fontSize:14 }}>{sec.icon}</span>
+                        <span style={{ fontSize:15.5 }}>{sec.icon}</span>
                         <span style={{ flex:1 }}>{sec.label}</span>
                         {activeSection===sec.id && <ChevronRight size={10} color="#FFFFFF"/>}
                       </button>
@@ -496,7 +496,7 @@ export function WGVideoSession({ clientName, clientId, specialistName, onEnd }: 
                 {/* Uploaded this session */}
                 {docsUploaded.length > 0 && (
                   <div>
-                    <div style={{ color:"#8A9AB8", fontSize:9, ...MONO, marginBottom:6 }}>
+                    <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>
                       UPLOADED ({docsUploaded.length})
                     </div>
                     <div className="space-y-1">

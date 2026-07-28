@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CryptoPayment
  * ─────────────
  * Reusable crypto checkout modal.
@@ -91,10 +91,10 @@ function Countdown({ seconds, onExpire }: { seconds: number; onExpire: () => voi
   const color = remaining < 120 ? "#FC8181" : remaining < 300 ? "#F6AD55" : "#48BB78";
   return (
     <div className="text-center">
-      <div style={{ color, fontSize:28, fontFamily:"var(--font-mono)", fontWeight:700, lineHeight:1 }}>
+      <div style={{ color, fontSize:31.5, fontFamily:"var(--font-mono)", fontWeight:700, lineHeight:1 }}>
         {String(m).padStart(2,"0")}:{String(s).padStart(2,"0")}
       </div>
-      <div style={{ color:"#8A9AB8", fontSize:10, marginTop:2 }}>Payment window remaining</div>
+      <div style={{ color:"#8A9AB8", fontSize:11, marginTop:2 }}>Payment window remaining</div>
       <div className="h-1.5 rounded-full mt-2" style={{ background:"rgba(255,255,255,0.1)" }}>
         <div className="h-1.5 rounded-full transition-all" style={{ width:`${pct}%`, background:color }}/>
       </div>
@@ -173,8 +173,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
           <div className="flex items-center gap-3">
             <div className="text-2xl">₿</div>
             <div>
-              <div style={{ color:"#E8EDF5", fontSize:14, fontWeight:600 }}>Pay with Crypto</div>
-              <div style={{ color:"#4A5A7A", fontSize:11, fontFamily:"var(--font-mono)" }}>{label} · ${amountUSD.toFixed(2)} USD</div>
+              <div style={{ color:"#E8EDF5", fontSize:15.5, fontWeight:600 }}>Pay with Crypto</div>
+              <div style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)" }}>{label} · ${amountUSD.toFixed(2)} USD</div>
             </div>
           </div>
           {step !== "success" && step !== "confirming" && (
@@ -188,7 +188,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
           {/* ── Step: Select coin ── */}
           {step === "select" && (
             <div className="space-y-4">
-              <div style={{ color:"#6B7FA8", fontSize:12, textAlign:"center" }}>
+              <div style={{ color:"#6B7FA8", fontSize:13.5, textAlign:"center" }}>
                 Choose your cryptocurrency to pay <strong style={{ color:"#E8EDF5" }}>${amountUSD.toFixed(2)} USD</strong>
               </div>
 
@@ -202,18 +202,18 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                       className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all"
                       style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)" }}>
                       <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                        style={{ width:40, height:40, background:`${coin.color}20`, color:coin.color, fontSize:18 }}>
+                        style={{ width:40, height:40, background:`${coin.color}20`, color:coin.color, fontSize:20 }}>
                         {coin.logoChar}
                       </div>
                       <div className="flex-1 text-left">
-                        <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{coin.name}</div>
-                        <div style={{ color:"#4A5A7A", fontSize:11 }}>{coin.network}</div>
+                        <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>{coin.name}</div>
+                        <div style={{ color:"#4A5A7A", fontSize:12.5 }}>{coin.network}</div>
                       </div>
                       <div className="text-right">
-                        <div style={{ color:coin.color, fontSize:13, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+                        <div style={{ color:coin.color, fontSize:14.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>
                           {amt} {coin.symbol}
                         </div>
-                        <div style={{ color:"#4A5A7A", fontSize:10 }}>${coin.demoRate.toLocaleString()}/{coin.symbol}</div>
+                        <div style={{ color:"#4A5A7A", fontSize:11 }}>${coin.demoRate.toLocaleString()}/{coin.symbol}</div>
                       </div>
                     </button>
                   );
@@ -222,17 +222,17 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
 
               {/* Processor strip */}
               <div className="pt-2 border-t" style={{ borderColor:"rgba(255,255,255,0.06)" }}>
-                <div style={{ color:"#4A5A7A", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:8, textAlign:"center" }}>POWERED BY</div>
+                <div style={{ color:"#4A5A7A", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:8, textAlign:"center" }}>POWERED BY</div>
                 <div className="flex justify-center gap-4">
                   {PROCESSORS.filter(p=>p.status==="connected").map(p => (
                     <div key={p.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl"
                       style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)" }}>
-                      <span style={{ fontSize:14 }}>{p.logo}</span>
-                      <span style={{ color:"#6B7FA8", fontSize:11 }}>{p.name}</span>
+                      <span style={{ fontSize:15.5 }}>{p.logo}</span>
+                      <span style={{ color:"#6B7FA8", fontSize:12.5 }}>{p.name}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{ color:"#4A5A7A", fontSize:10, textAlign:"center", marginTop:8 }}>
+                <div style={{ color:"#4A5A7A", fontSize:11, textAlign:"center", marginTop:8 }}>
                   All crypto payments settle to USD automatically
                 </div>
               </div>
@@ -253,14 +253,14 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               {/* Coin header */}
               <div className="flex items-center justify-center gap-3">
                 <div className="flex items-center justify-center rounded-full font-bold"
-                  style={{ width:48, height:48, background:`${selectedCoin.color}20`, color:selectedCoin.color, fontSize:22 }}>
+                  style={{ width:48, height:48, background:`${selectedCoin.color}20`, color:selectedCoin.color, fontSize:24.5 }}>
                   {selectedCoin.logoChar}
                 </div>
                 <div className="text-left">
-                  <div style={{ color:"#E8EDF5", fontSize:22, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+                  <div style={{ color:"#E8EDF5", fontSize:24.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>
                     {cryptoAmount} {selectedCoin.symbol}
                   </div>
-                  <div style={{ color:"#6B7FA8", fontSize:12 }}>${amountUSD.toFixed(2)} USD · {selectedCoin.network}</div>
+                  <div style={{ color:"#6B7FA8", fontSize:13.5 }}>${amountUSD.toFixed(2)} USD · {selectedCoin.network}</div>
                 </div>
               </div>
 
@@ -273,12 +273,12 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
 
               {/* Wallet address */}
               <div>
-                <div style={{ color:"#6B7FA8", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:6 }}>
+                <div style={{ color:"#6B7FA8", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:6 }}>
                   SEND EXACTLY {cryptoAmount} {selectedCoin.symbol} TO:
                 </div>
                 <div className="flex items-center gap-2 px-3 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.08)" }}>
-                  <code style={{ color:"#E8EDF5", fontSize:11, flex:1, textAlign:"left", wordBreak:"break-all", fontFamily:"var(--font-mono)" }}>
+                  <code style={{ color:"#E8EDF5", fontSize:12.5, flex:1, textAlign:"left", wordBreak:"break-all", fontFamily:"var(--font-mono)" }}>
                     {selectedCoin.address}
                   </code>
                   <button onClick={() => doCopy(selectedCoin.address)} className="flex-shrink-0 p-1.5 rounded-xl"
@@ -291,8 +291,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               {/* Invoice ID */}
               <div className="flex items-center justify-between px-3 py-2 rounded-2xl"
                 style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.06)" }}>
-                <span style={{ color:"#6B7FA8", fontSize:11, fontFamily:"var(--font-mono)" }}>INVOICE ID</span>
-                <span style={{ color:"#E8EDF5", fontSize:11, fontFamily:"var(--font-mono)" }}>{invoiceId}</span>
+                <span style={{ color:"#6B7FA8", fontSize:12.5, fontFamily:"var(--font-mono)" }}>INVOICE ID</span>
+                <span style={{ color:"#E8EDF5", fontSize:12.5, fontFamily:"var(--font-mono)" }}>{invoiceId}</span>
               </div>
 
               {/* Warnings */}
@@ -300,7 +300,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                   style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
                   <AlertCircle size={12} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
-                  <p style={{ color:"#F6AD55", fontSize:11, lineHeight:1.6 }}>
+                  <p style={{ color:"#F6AD55", fontSize:12.5, lineHeight:1.6 }}>
                     Send <strong>exactly</strong> {cryptoAmount} {selectedCoin.symbol}. Incorrect amounts cannot be auto-matched.
                     Required confirmations: {selectedCoin.confirmations}.
                   </p>
@@ -308,7 +308,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
                   style={{ background:"rgba(91,110,225,0.08)", border:"1px solid rgba(91,110,225,0.15)" }}>
                   <Shield size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
-                  <p style={{ color:"#6FAE8B", fontSize:11, lineHeight:1.6 }}>
+                  <p style={{ color:"#6FAE8B", fontSize:12.5, lineHeight:1.6 }}>
                     Only send {selectedCoin.symbol} on the {selectedCoin.network} network. Sending on wrong network will result in permanent loss.
                   </p>
                 </div>
@@ -317,7 +317,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               {/* Demo note */}
               <div className="px-3 py-2 rounded-2xl"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.15)" }}>
-                <span style={{ color:"#D99A6B", fontSize:10, fontFamily:"var(--font-mono)" }}>
+                <span style={{ color:"#D99A6B", fontSize:11, fontFamily:"var(--font-mono)" }}>
                   DEMO MODE · Payment auto-simulates in ~8 seconds
                 </span>
               </div>
@@ -331,8 +331,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 <div style={{ width:64, height:64, borderRadius:"50%", border:`3px solid ${selectedCoin.color}`, borderTopColor:"transparent" }}/>
               </div>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:18, fontWeight:600, marginBottom:6 }}>Payment Detected</div>
-                <div style={{ color:"#6B7FA8", fontSize:13, lineHeight:1.8 }}>
+                <div style={{ color:"#E8EDF5", fontSize:20, fontWeight:600, marginBottom:6 }}>Payment Detected</div>
+                <div style={{ color:"#6B7FA8", fontSize:14.5, lineHeight:1.8 }}>
                   We received your {selectedCoin.symbol} payment.<br/>
                   Waiting for {selectedCoin.confirmations} blockchain confirmation{selectedCoin.confirmations > 1 ? "s" : ""}…
                 </div>
@@ -340,20 +340,20 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
-                  <span style={{ color:"#6B7FA8", fontSize:12 }}>Amount</span>
-                  <span style={{ color:selectedCoin.color, fontSize:13, fontFamily:"var(--font-mono)", fontWeight:700 }}>
+                  <span style={{ color:"#6B7FA8", fontSize:13.5 }}>Amount</span>
+                  <span style={{ color:selectedCoin.color, fontSize:14.5, fontFamily:"var(--font-mono)", fontWeight:700 }}>
                     {cryptoAmount} {selectedCoin.symbol}
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
-                  <span style={{ color:"#6B7FA8", fontSize:12 }}>Network</span>
-                  <span style={{ color:"#E8EDF5", fontSize:12 }}>{selectedCoin.network}</span>
+                  <span style={{ color:"#6B7FA8", fontSize:13.5 }}>Network</span>
+                  <span style={{ color:"#E8EDF5", fontSize:13.5 }}>{selectedCoin.network}</span>
                 </div>
                 <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                   style={{ background:"rgba(255,255,255,0.04)" }}>
-                  <span style={{ color:"#6B7FA8", fontSize:12 }}>TX Hash</span>
-                  <span style={{ color:"#E8EDF5", fontSize:10, fontFamily:"var(--font-mono)" }}>
+                  <span style={{ color:"#6B7FA8", fontSize:13.5 }}>TX Hash</span>
+                  <span style={{ color:"#E8EDF5", fontSize:11, fontFamily:"var(--font-mono)" }}>
                     {txHash.slice(0,12)}…{txHash.slice(-6)}
                   </span>
                 </div>
@@ -370,8 +370,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 </div>
               </div>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:22, fontWeight:700, marginBottom:6 }}>Payment Confirmed!</div>
-                <div style={{ color:"#6B7FA8", fontSize:13, lineHeight:1.8 }}>
+                <div style={{ color:"#E8EDF5", fontSize:24.5, fontWeight:700, marginBottom:6 }}>Payment Confirmed!</div>
+                <div style={{ color:"#6B7FA8", fontSize:14.5, lineHeight:1.8 }}>
                   {cryptoAmount} {selectedCoin.symbol} received and confirmed.<br/>
                   Your payment has been applied to your account.
                 </div>
@@ -386,8 +386,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between px-4 py-2.5 rounded-2xl"
                     style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.12)" }}>
-                    <span style={{ color:"#6B7FA8", fontSize:12 }}>{k}</span>
-                    <span style={{ color: k==="Status" ? "#D99A6B" : "#E8EDF5", fontSize:12, fontFamily:k==="Invoice"?"var(--font-mono)":"inherit" }}>{v}</span>
+                    <span style={{ color:"#6B7FA8", fontSize:13.5 }}>{k}</span>
+                    <span style={{ color: k==="Status" ? "#D99A6B" : "#E8EDF5", fontSize:13.5, fontFamily:k==="Invoice"?"var(--font-mono)":"inherit" }}>{v}</span>
                   </div>
                 ))}
               </div>
@@ -399,8 +399,8 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
             <div className="text-center py-8 space-y-5">
               <Clock size={52} color="#FC8181" style={{ margin:"0 auto" }}/>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:20, fontWeight:600, marginBottom:6 }}>Payment Window Expired</div>
-                <div style={{ color:"#6B7FA8", fontSize:13, lineHeight:1.8 }}>
+                <div style={{ color:"#E8EDF5", fontSize:22.5, fontWeight:600, marginBottom:6 }}>Payment Window Expired</div>
+                <div style={{ color:"#6B7FA8", fontSize:14.5, lineHeight:1.8 }}>
                   The 30-minute payment window has closed. If you already sent payment, contact support@finalpassdown.com with your transaction hash.
                 </div>
               </div>
@@ -427,16 +427,16 @@ export function CryptoPayButton({
 }) {
   const [open, setOpen] = useState(false);
   const styles: Record<string, React.CSSProperties> = {
-    sm: { padding:"6px 12px", fontSize:11, borderRadius:10 },
-    md: { padding:"10px 18px", fontSize:13, borderRadius:12 },
-    lg: { padding:"14px 28px", fontSize:15, borderRadius:14 },
+    sm: { padding:"6px 12px", fontSize:12.5, borderRadius:10 },
+    md: { padding:"10px 18px", fontSize:14.5, borderRadius:12 },
+    lg: { padding:"14px 28px", fontSize:17, borderRadius:14 },
   };
   return (
     <>
       <button onClick={() => setOpen(true)}
         className="flex items-center gap-2 font-semibold transition-all"
         style={{ ...styles[size], background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)" }}>
-        <span style={{ fontSize: size === "sm" ? 13 : size === "lg" ? 20 : 16 }}>₿</span>
+        <span style={{ fontSize: size === "sm" ? 14.5 : size === "lg" ? 22.5 : 18 }}>₿</span>
         Pay with Crypto
       </button>
       <CryptoPayment

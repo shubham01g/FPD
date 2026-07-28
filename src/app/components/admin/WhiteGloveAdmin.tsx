@@ -14,7 +14,7 @@ import { subscribeToClients, addClient as storeAddClient, updateClient as storeU
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
+const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
 const SPECIALISTS = [
   { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#6E90C9" },
@@ -85,11 +85,11 @@ function SessionRow({ session }: { session: WGSession }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span style={{ color:"#E8EDF5", fontSize:12, fontWeight:500 }}>{session.date} · {session.time}</span>
+          <span style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:500 }}>{session.date} · {session.time}</span>
           <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background:`${statusColor}18`, color:statusColor, ...MONO }}>{session.status.toUpperCase()}</span>
-          {session.duration !== "—" && <span style={{ color:"#8A9AB8", fontSize:11 }}>{session.duration}</span>}
+          {session.duration !== "—" && <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{session.duration}</span>}
         </div>
-        {session.notes && <div style={{ color:"#8A9AB8", fontSize:11, marginTop:3, lineHeight:1.5 }}>{session.notes}</div>}
+        {session.notes && <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:3, lineHeight:1.5 }}>{session.notes}</div>}
       </div>
     </div>
   );
@@ -109,19 +109,19 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
             <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#6FAE8B", fontSize:16, fontFamily:"var(--font-display)" }}>
+              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#6FAE8B", fontSize:18, fontFamily:"var(--font-display)" }}>
               {client.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>{client.name}</span>
-                {client.age && <span style={{ color:"#8A9AB8", fontSize:12 }}>Age {client.age}</span>}
+                <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>{client.name}</span>
+                {client.age && <span style={{ color:"#8A9AB8", fontSize:13.5 }}>Age {client.age}</span>}
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:`${statusColor}18`, color:statusColor, ...MONO }}>{client.status.toUpperCase()}</span>
                 {client.subscriptionWaived && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", ...MONO }}>WAIVED</span>}
                 <WGCardOnFile clientId={client.id} clientName={client.name} compact={true}/>
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{client.email} · {client.phone}</div>
-              <div style={{ color:"#8A9AB8", fontSize:11, marginTop:1 }}>
+              <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{client.email} · {client.phone}</div>
+              <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:1 }}>
                 {client.plan} plan · Intake: {client.intakeDate} · Specialist: {specialist?.name}
               </div>
             </div>
@@ -134,8 +134,8 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
         {/* Progress bar */}
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span style={{ color:"#8A9AB8", fontSize:11 }}>Vault Setup Progress</span>
-            <span style={{ color:"#6FAE8B", fontSize:11, fontWeight:700 }}>{client.completionPct}%</span>
+            <span style={{ color:"#8A9AB8", fontSize:12.5 }}>Vault Setup Progress</span>
+            <span style={{ color:"#6FAE8B", fontSize:12.5, fontWeight:700 }}>{client.completionPct}%</span>
           </div>
           <div className="h-2 rounded-full" style={{ background:"rgba(91,167,214,0.1)" }}>
             <div className="h-2 rounded-full" style={{ width:`${client.completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#6F9E94)" }}/>
@@ -161,9 +161,9 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
                 { label:"Total Billed", value:`$${totalCost}`, color:"#D99A6B", sub:"to date" },
               ].map(s => (
                 <div key={s.label} className="px-3 py-2 rounded-2xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
-                  <div style={{ color:s.color, fontSize:14, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{s.label.toUpperCase()}</div>
-                  <div style={{ color:"#B0C0DC", fontSize:9 }}>{s.sub}</div>
+                  <div style={{ color:s.color, fontSize:15.5, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{s.label.toUpperCase()}</div>
+                  <div style={{ color:"#B0C0DC", fontSize:10 }}>{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -174,8 +174,8 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
         {client.nextSession && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-2xl mt-2" style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <Calendar size={12} color="#F6AD55"/>
-            <span style={{ color:"#F6AD55", fontSize:11, fontWeight:600 }}>Next session:</span>
-            <span style={{ color:"#8A9AB8", fontSize:11 }}>{client.nextSession}</span>
+            <span style={{ color:"#F6AD55", fontSize:12.5, fontWeight:600 }}>Next session:</span>
+            <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{client.nextSession}</span>
           </div>
         )}
       </div>
@@ -184,14 +184,14 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
       {expanded && (
         <div className="px-5 pb-5 space-y-4 border-t" style={{ borderColor:"rgba(91,167,214,0.12)" }}>
           <div className="pt-4">
-            <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:6 }}>INTAKE REASON</div>
-            <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>{client.reason}</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:6 }}>INTAKE REASON</div>
+            <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>{client.reason}</div>
           </div>
 
           {/* Sessions */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
+              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
               <button onClick={() => toast.success("Schedule session — opens calendar (demo)")}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
@@ -206,9 +206,9 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           {/* Notes */}
           {client.notes && (
             <div>
-              <div style={{ color:"#8A9AB8", fontSize:10, ...MONO, marginBottom:4 }}>SPECIALIST NOTES</div>
+              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:4 }}>SPECIALIST NOTES</div>
               <div className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
-                <div style={{ color:"#8A9AB8", fontSize:12, lineHeight:1.7 }}>{client.notes}</div>
+                <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>{client.notes}</div>
               </div>
             </div>
           )}
@@ -255,7 +255,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
 
           {/* Payment method */}
           <div>
-            <div style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)", marginBottom:8 }}>PAYMENT METHOD</div>
+            <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)", marginBottom:8 }}>PAYMENT METHOD</div>
             <WGCardOnFile clientId={client.id} clientName={client.name}/>
           </div>
 
@@ -314,10 +314,10 @@ export function WhiteGloveAdmin() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Star size={15} color="#FFFFFF"/>
-            <span style={{ color:"#6FAE8B", fontSize:11, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WHITE GLOVE SERVICE</span>
+            <span style={{ color:"#6FAE8B", fontSize:12.5, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WHITE GLOVE SERVICE</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#E8EDF5" }}>White Glove Concierge</h1>
-          <p style={{ color:"#8A9AB8", fontSize:13, marginTop:4 }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>White Glove Concierge</h1>
+          <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
             Hands-on onboarding for clients who need personal assistance. Each client is assigned a dedicated FPD specialist.
           </p>
         </div>
@@ -353,20 +353,20 @@ export function WhiteGloveAdmin() {
       {mainTab === "billing"  && (
         <div className="space-y-5">
           <div>
-            <div style={{ color:"#6FAE8B", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.1em", marginBottom:4 }}>
+            <div style={{ color:"#6FAE8B", fontSize:12.5, fontFamily:"var(--font-mono)", letterSpacing:"0.1em", marginBottom:4 }}>
               WHITE GLOVE · BILLING
             </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Session Billing</h2>
-            <p style={{ color:"#8A9AB8", fontSize:12, marginTop:4 }}>
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Session Billing</h2>
+            <p style={{ color:"#8A9AB8", fontSize:13.5, marginTop:4 }}>
               $99 one-time setup fee · $25 per 30-minute block · Cards charged automatically after each session.
             </p>
           </div>
           {/* Cards on file per client */}
           <div className="space-y-4">
-            <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>PAYMENT METHODS ON FILE</div>
+            <div style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)" }}>PAYMENT METHODS ON FILE</div>
             {clients.map(c => (
               <div key={c.id} className="p-4 rounded-2xl" style={{ background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" }}>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:14, color:"#E8EDF5", marginBottom:10 }}>{c.name}</div>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:15.5, color:"#E8EDF5", marginBottom:10 }}>{c.name}</div>
                 <WGCardOnFile clientId={c.id} clientName={c.name}/>
               </div>
             ))}
@@ -386,29 +386,29 @@ export function WhiteGloveAdmin() {
           { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:28, color:s.color }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:12, marginTop:2 }}>{s.label}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:31.5, color:s.color }}>{s.value}</div>
+            <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Specialist roster */}
       <div className="p-5 rounded-2xl" style={CARD}>
-        <div style={{ fontFamily:"var(--font-display)", fontSize:15, color:"#E8EDF5", marginBottom:14 }}>Specialist Roster</div>
+        <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:14 }}>Specialist Roster</div>
         <div className="grid md:grid-cols-3 gap-4">
           {SPECIALISTS.map(s => (
             <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl"
               style={{ background:`${s.color}08`, border:`1px solid ${s.color}25` }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:40, height:40, background:`${s.color}15`, color:s.color, fontSize:14, fontFamily:"var(--font-display)" }}>
+                style={{ width:40, height:40, background:`${s.color}15`, color:s.color, fontSize:15.5, fontFamily:"var(--font-display)" }}>
                 {s.avatar}
               </div>
               <div>
-                <div style={{ color:"#E8EDF5", fontSize:13, fontWeight:600 }}>{s.name}</div>
-                <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.title}</div>
+                <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600 }}>{s.name}</div>
+                <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.title}</div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span style={{ color:s.color, fontSize:11, fontWeight:700 }}>{s.clients} clients</span>
-                  <span style={{ color:"#F6AD55", fontSize:11 }}>★ {s.rating}</span>
+                  <span style={{ color:s.color, fontSize:12.5, fontWeight:700 }}>{s.clients} clients</span>
+                  <span style={{ color:"#F6AD55", fontSize:12.5 }}>★ {s.rating}</span>
                 </div>
               </div>
             </div>
@@ -431,7 +431,7 @@ export function WhiteGloveAdmin() {
         {filtered.length === 0 && (
           <div className="py-12 text-center rounded-2xl" style={CARD}>
             <Star size={32} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>
-            <div style={{ color:"#8A9AB8", fontSize:14 }}>No clients in this category</div>
+            <div style={{ color:"#8A9AB8", fontSize:15.5 }}>No clients in this category</div>
           </div>
         )}
         {filtered.map(c => <ClientCard key={c.id} client={c} onUpdate={updateClient}/>)}
@@ -447,7 +447,7 @@ export function WhiteGloveAdmin() {
               style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
               <div className="flex items-center gap-2">
                 <Star size={16} color="#FFFFFF"/>
-                <span style={{ fontFamily:"var(--font-display)", fontSize:16, color:"#E8EDF5" }}>Add White Glove Client</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>Add White Glove Client</span>
               </div>
               <button onClick={() => setShowAdd(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
             </div>
@@ -459,14 +459,14 @@ export function WhiteGloveAdmin() {
                 { label:"AGE (optional)", key:"age",   ph:"e.g. 78",               type:"number" },
               ].map(f => (
                 <div key={f.key}>
-                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
+                  <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
                   <input type={f.type} value={(newClient as any)[f.key]} placeholder={f.ph}
                     onChange={e => setNewClient(p => ({ ...p, [f.key]:e.target.value }))} style={INPUT}/>
                 </div>
               ))}
 
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
                 <div className="grid grid-cols-3 gap-2">
                   {SPECIALISTS.map(s => (
                     <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
@@ -481,7 +481,7 @@ export function WhiteGloveAdmin() {
               </div>
 
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>PLAN</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>PLAN</label>
                 <select value={newClient.plan} onChange={e => setNewClient(p => ({ ...p, plan:e.target.value }))} style={INPUT}>
                   {["starter","essential","premium","legacy_pro","enterprise"].map(p => (
                     <option key={p} value={p}>{p.replace("_"," ").replace(/\b\w/g, l=>l.toUpperCase())}</option>
@@ -490,14 +490,14 @@ export function WhiteGloveAdmin() {
               </div>
 
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:5 }}>INTAKE REASON *</label>
+                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>INTAKE REASON *</label>
                 <textarea value={newClient.reason} onChange={e => setNewClient(p => ({ ...p, reason:e.target.value }))} rows={2}
                   placeholder="Why does this client need White Glove assistance?" className="w-full resize-none" style={INPUT}/>
               </div>
 
               <div className="flex items-center justify-between p-3 rounded-2xl"
                 style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                <span style={{ color:"#E8EDF5", fontSize:13 }}>Waive subscription fee</span>
+                <span style={{ color:"#E8EDF5", fontSize:14.5 }}>Waive subscription fee</span>
                 <button onClick={() => setNewClient(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
                   style={{ color:newClient.subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
                   {newClient.subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}

@@ -30,10 +30,10 @@ export function AffiliateAdmin() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Users size={16} color="var(--gold)" />
-          <span style={{ color: "var(--gold)", fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · AFFILIATE PROGRAM</span>
+          <span style={{ color: "var(--gold)", fontSize: 13.5, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · AFFILIATE PROGRAM</span>
         </div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)" }}>Affiliate Management</h1>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Monitor all affiliates, tier progression, and commission activity.</p>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "var(--foreground)" }}>Affiliate Management</h1>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginTop: 4 }}>Monitor all affiliates, tier progression, and commission activity.</p>
       </div>
 
       {/* Summary */}
@@ -45,25 +45,25 @@ export function AffiliateAdmin() {
           { label: "Avg Earn/Affiliate", value: "$421", sub: "Monthly average", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 24, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
-            <div style={{ color: "var(--foreground)", fontSize: 13 }}>{stat.label}</div>
-            <div style={{ color: "var(--muted-foreground)", fontSize: 11, marginTop: 2 }}>{stat.sub}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 27, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
+            <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{stat.label}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginTop: 2 }}>{stat.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Tier distribution */}
       <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--foreground)", marginBottom: 16 }}>Tier Distribution & Earnings</h3>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)", marginBottom: 16 }}>Tier Distribution & Earnings</h3>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
             {tierDistribution.map((t, i) => (
               <div key={i}>
                 <div className="flex items-center justify-between mb-1">
-                  <span style={{ color: "var(--foreground)", fontSize: 13 }}>{t.tier}</span>
+                  <span style={{ color: "var(--foreground)", fontSize: 14.5 }}>{t.tier}</span>
                   <div>
-                    <span style={{ color: "var(--muted-foreground)", fontSize: 12, fontFamily: "var(--font-mono)" }}>{t.affiliates} affiliates · </span>
-                    <span style={{ color: "var(--gold)", fontFamily: "var(--font-mono)", fontSize: 12 }}>${t.earn.toLocaleString()}/mo</span>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13.5, fontFamily: "var(--font-mono)" }}>{t.affiliates} affiliates · </span>
+                    <span style={{ color: "var(--gold)", fontFamily: "var(--font-mono)", fontSize: 13.5 }}>${t.earn.toLocaleString()}/mo</span>
                   </div>
                 </div>
                 <div className="h-3 rounded-full" style={{ background: "var(--secondary)" }}>
@@ -83,11 +83,11 @@ export function AffiliateAdmin() {
               const colors = ["#5BA7D6","#5B6EE1","#48BB78"];
               return (
                 <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                  <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)" }}>${(t.earn/1000).toFixed(1)}k</span>
+                  <span style={{ color:"var(--muted-foreground)", fontSize:10, fontFamily:"var(--font-mono)" }}>${(t.earn/1000).toFixed(1)}k</span>
                   <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
                     <div style={{ width:"100%", height:h, background:colors[i], borderRadius:"4px 4px 0 0", opacity:0.8 }}/>
                   </div>
-                  <span style={{ color:"var(--muted-foreground)", fontSize:9, fontFamily:"var(--font-mono)", textAlign:"center" }}>{t.tier.split(" ")[0]}</span>
+                  <span style={{ color:"var(--muted-foreground)", fontSize:10, fontFamily:"var(--font-mono)", textAlign:"center" }}>{t.tier.split(" ")[0]}</span>
                 </div>
               );
             })}
@@ -102,7 +102,7 @@ export function AffiliateAdmin() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search affiliates by name, email, or ID..."
-          style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 14, width: "100%" }}
+          style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 15.5, width: "100%" }}
         />
       </div>
 
@@ -113,7 +113,7 @@ export function AffiliateAdmin() {
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
           {["ID", "Affiliate", "Tier", "Active Refs", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
-            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
+            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
           ))}
         </div>
         {filtered.map((aff, i) => (
@@ -122,24 +122,24 @@ export function AffiliateAdmin() {
             className="grid px-5 py-3 items-center border-b"
             style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
-            <span style={{ color: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" }}>{aff.id}</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{aff.id}</span>
             <div>
-              <div style={{ color: "var(--foreground)", fontSize: 13 }}>{aff.name}</div>
-              <div style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{aff.email}</div>
+              <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{aff.name}</div>
+              <div style={{ color: "var(--muted-foreground)", fontSize: 12.5 }}>{aff.email}</div>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="rounded-full" style={{ width: 8, height: 8, background: (tierColors as any)[aff.tier] }} />
-              <span style={{ color: (tierColors as any)[aff.tier], fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[aff.tier]} · {aff.rate}%</span>
+              <span style={{ color: (tierColors as any)[aff.tier], fontSize: 13.5, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[aff.tier]} · {aff.rate}%</span>
             </div>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{aff.activeReferrals}</span>
-            <span style={{ color: "var(--gold)", fontFamily: "var(--font-mono)", fontSize: 13 }}>${aff.monthlyEarn.toFixed(2)}</span>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 13 }}>${aff.totalEarned.toLocaleString()}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>{aff.activeReferrals}</span>
+            <span style={{ color: "var(--gold)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>${aff.monthlyEarn.toFixed(2)}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>${aff.totalEarned.toLocaleString()}</span>
             <div
               className="px-2 py-1 rounded"
               style={{
                 background: aff.status === "active" ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
                 color: aff.status === "active" ? "#D99A6B" : "#FC8181",
-                fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
+                fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
               }}
             >
               {aff.status.toUpperCase()}
