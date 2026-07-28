@@ -6,6 +6,7 @@ import {
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
+import purposePhoto from "../../imports/dashboard_purpose_photo.png";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -190,12 +191,15 @@ const DASH_CSS = `
 .fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
 .fpd-dash .months span{font-size:10px;color:${FAINT};}
 
-.fpd-dash .purpose{position:relative;overflow:hidden;padding:26px 24px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 55%,#0C1322 100%);border-color:rgba(91,110,225,0.18);display:flex;flex-direction:column;gap:16px;}
-.fpd-dash .purpose-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;align-self:flex-start;font-family:var(--font-mono);}
+.fpd-dash .purpose{position:relative;overflow:hidden;border-color:rgba(91,110,225,0.18);display:flex;flex-direction:column;justify-content:flex-end;padding:0;isolation:isolate;min-height:280px;}
+.fpd-dash .purpose .art{position:absolute;inset:-6%;z-index:0;background-size:cover;background-position:center;transition:transform .7s cubic-bezier(.16,1,.3,1);pointer-events:none;}
+.fpd-dash .purpose:hover .art{transform:scale(1.06);}
+.fpd-dash .purpose .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(7,10,18,0.08) 0%,rgba(7,10,18,0.55) 55%,rgba(7,10,18,0.94) 100%);pointer-events:none;}
+.fpd-dash .purpose-body{position:relative;z-index:2;padding:24px 24px 26px;display:flex;flex-direction:column;gap:12px;}
+.fpd-dash .purpose-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.4);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;align-self:flex-start;font-family:var(--font-mono);}
 .fpd-dash .purpose h2{font-family:var(--font-display);font-size:18.5px;font-weight:600;color:${TEXT};margin:0;letter-spacing:-0.01em;line-height:1.28;}
 .fpd-dash .purpose h2 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
 .fpd-dash .purpose p{color:${SOFT};font-size:12.5px;line-height:1.65;margin:0;}
-.fpd-dash .purpose-art{width:100%;max-width:210px;margin:4px auto 0;aspect-ratio:1/1;}
 
 /* ── Row 4 — recent documents + notifications (shared evrow pattern, same
    colour-coded-card language LifeCalendar uses for its event rows) ── */
@@ -494,36 +498,13 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
 
           <div className="card purpose">
-            <span className="purpose-eyebrow">What This Page Is For</span>
-            <h2>One vault, <span className="accent">everything that matters</span>, in a single view.</h2>
-            <p>This dashboard is the control center for your digital legacy — every document, contact, wish and memory verified, encrypted and connected in one place, ready for the people you trust to find exactly what they need, exactly when they need it.</p>
-            <svg className="purpose-art" viewBox="0 0 300 300" fill="none">
-              <defs>
-                <radialGradient id="fpdPurposeGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#5B6EE1" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#5B6EE1" stopOpacity="0" />
-                </radialGradient>
-                <linearGradient id="fpdPurposeCore" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#5BA7D6" />
-                  <stop offset="100%" stopColor="#5B6EE1" />
-                </linearGradient>
-              </defs>
-              <circle cx="150" cy="150" r="130" fill="url(#fpdPurposeGlow)" />
-              <line x1="150" y1="150" x2="150" y2="55" stroke="#6E90C9" strokeWidth="1.4" strokeOpacity="0.55" />
-              <line x1="150" y1="150" x2="238" y2="103" stroke="#6FAE8B" strokeWidth="1.4" strokeOpacity="0.55" />
-              <line x1="150" y1="150" x2="238" y2="197" stroke="#D99A6B" strokeWidth="1.4" strokeOpacity="0.55" />
-              <line x1="150" y1="150" x2="150" y2="245" stroke="#A98CC7" strokeWidth="1.4" strokeOpacity="0.55" />
-              <line x1="150" y1="150" x2="62" y2="197" stroke="#97A2C6" strokeWidth="1.4" strokeOpacity="0.55" />
-              <line x1="150" y1="150" x2="62" y2="103" stroke="#5BA7D6" strokeWidth="1.4" strokeOpacity="0.55" />
-              <circle cx="150" cy="150" r="30" fill="#0C1322" stroke="url(#fpdPurposeCore)" strokeWidth="2.5" />
-              <path d="M150 136 l13 5.5 v11.5 c0 9.5 -5.5 15.5 -13 19.5 c-7.5 -4 -13 -10 -13 -19.5 v-11.5 z" fill="none" stroke="url(#fpdPurposeCore)" strokeWidth="2" />
-              <circle cx="150" cy="55" r="13" fill="#6E90C91C" stroke="#6E90C9" strokeWidth="1.6" />
-              <circle cx="238" cy="103" r="13" fill="#6FAE8B1C" stroke="#6FAE8B" strokeWidth="1.6" />
-              <circle cx="238" cy="197" r="13" fill="#D99A6B1C" stroke="#D99A6B" strokeWidth="1.6" />
-              <circle cx="150" cy="245" r="13" fill="#A98CC71C" stroke="#A98CC7" strokeWidth="1.6" />
-              <circle cx="62" cy="197" r="13" fill="#97A2C61C" stroke="#97A2C6" strokeWidth="1.6" />
-              <circle cx="62" cy="103" r="13" fill="#5BA7D61C" stroke="#5BA7D6" strokeWidth="1.6" />
-            </svg>
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.28), rgba(91,167,214,0.12)), url(${purposePhoto})` }} />
+            <div className="scrim" />
+            <div className="purpose-body">
+              <span className="purpose-eyebrow">What This Page Is For</span>
+              <h2>One vault, <span className="accent">everything that matters</span>, in a single view.</h2>
+              <p>This dashboard is the control center for your digital legacy — every document, contact, wish and memory verified, encrypted and connected in one place, ready for the people you trust to find exactly what they need, exactly when they need it.</p>
+            </div>
           </div>
         </div>
 
