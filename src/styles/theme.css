@@ -1,7 +1,7 @@
 ﻿@custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 18px;
+  --font-size: 20px;
 
   /* ── FPD Brand — Royal Vault Blue (logo-matched, dark mode) ── */
   --background:        #070A12;

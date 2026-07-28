@@ -247,14 +247,14 @@ export function EnterpriseAPI() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Code size={15} color="#FFFFFF" />
-            <span style={{ color: "#6E90C9", fontSize: 12.5, ...MONO, letterSpacing: "0.12em" }}>ENTERPRISE</span>
+            <span style={{ color: "#6E90C9", fontSize: 14, ...MONO, letterSpacing: "0.12em" }}>ENTERPRISE</span>
           </div>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 31.5, color: "#E8EDF5", marginBottom: 6 }}>API Reference & Developer Hub</h1>
-          <p style={{ color: "#8A9AB8", fontSize: 15.5 }}>RESTful API · Laravel Sanctum Auth · JSON responses · Rate limited: 1000 req/min</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 35.5, color: "#E8EDF5", marginBottom: 6 }}>API Reference & Developer Hub</h1>
+          <p style={{ color: "#8A9AB8", fontSize: 17.5 }}>RESTful API · Laravel Sanctum Auth · JSON responses · Rate limited: 1000 req/min</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={{ ...GLASS }}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
-          <span style={{ color: "#D99A6B", fontSize: 13.5, ...MONO }}>API STATUS: OPERATIONAL</span>
+          <span style={{ color: "#D99A6B", fontSize: 15, ...MONO }}>API STATUS: OPERATIONAL</span>
         </div>
       </div>
 
@@ -275,17 +275,17 @@ export function EnterpriseAPI() {
           {/* sidebar */}
           <div className="rounded-2xl overflow-hidden" style={GLASS}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
-              <div style={{ color: "#8A9AB8", fontSize: 11, ...MONO, letterSpacing: "0.1em" }}>BASE URL</div>
-              <div style={{ color: "#6E90C9", fontSize: 12.5, ...MONO, marginTop: 2 }}>https://api.finalpassdown.com</div>
+              <div style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, letterSpacing: "0.1em" }}>BASE URL</div>
+              <div style={{ color: "#6E90C9", fontSize: 14, ...MONO, marginTop: 2 }}>https://api.finalpassdown.com</div>
             </div>
             <div className="overflow-y-auto" style={{ maxHeight: 700 }}>
               {apiGroups.map((group, gi) => (
                 <div key={gi}>
                   <button className="w-full flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.06)", background: expandedGroup===gi ? "rgba(91,110,225,0.06)" : "transparent" }}
                     onClick={() => setExpandedGroup(expandedGroup===gi ? null : gi)}>
-                    <span style={{ color: "#E8EDF5", fontSize: 14.5, fontWeight: 500 }}>{group.label}</span>
+                    <span style={{ color: "#E8EDF5", fontSize: 16, fontWeight: 500 }}>{group.label}</span>
                     <div className="flex items-center gap-2">
-                      <span style={{ color: "#8A9AB8", fontSize: 11, ...MONO }}>{group.endpoints.length}</span>
+                      <span style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO }}>{group.endpoints.length}</span>
                       {expandedGroup===gi ? <ChevronDown size={12} color="#8A9AB8" /> : <ChevronRight size={12} color="#8A9AB8" />}
                     </div>
                   </button>
@@ -293,8 +293,8 @@ export function EnterpriseAPI() {
                     <button key={ei} className="w-full flex items-start gap-2 px-4 py-2.5 border-b text-left"
                       style={{ borderColor: "rgba(91,110,225,0.04)", background: activeEndpoint===ep ? "rgba(91,110,225,0.1)" : "transparent" }}
                       onClick={() => setActiveEndpoint(ep)}>
-                      <span style={{ ...MONO, fontSize: 10, fontWeight: 700, color: mc(ep.method), flexShrink:0, marginTop: 3, minWidth: 40 }}>{ep.method}</span>
-                      <span style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, lineHeight: 1.4, wordBreak: "break-all" }}>{ep.path}</span>
+                      <span style={{ ...MONO, fontSize: 11, fontWeight: 700, color: mc(ep.method), flexShrink:0, marginTop: 3, minWidth: 40 }}>{ep.method}</span>
+                      <span style={{ color: "#8A9AB8", fontSize: 14, ...MONO, lineHeight: 1.4, wordBreak: "break-all" }}>{ep.path}</span>
                     </button>
                   ))}
                 </div>
@@ -307,30 +307,30 @@ export function EnterpriseAPI() {
             {!activeEndpoint ? (
               <div className="h-full flex flex-col items-center justify-center text-center">
                 <Code size={40} color="rgba(91,110,225,0.2)" style={{ marginBottom: 16 }} />
-                <div style={{ color: "#8A9AB8", fontSize: 17 }}>Select an endpoint to view details and test it</div>
-                <div style={{ color: "#8A9AB8", fontSize: 14.5, marginTop: 8 }}>{apiGroups.reduce((s,g)=>s+g.endpoints.length,0)} endpoints across {apiGroups.length} modules</div>
+                <div style={{ color: "#8A9AB8", fontSize: 19 }}>Select an endpoint to view details and test it</div>
+                <div style={{ color: "#8A9AB8", fontSize: 16, marginTop: 8 }}>{apiGroups.reduce((s,g)=>s+g.endpoints.length,0)} endpoints across {apiGroups.length} modules</div>
               </div>
             ) : (
               <div className="space-y-5">
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1 rounded-xl text-sm font-bold" style={{ background: `${mc(activeEndpoint.method)}18`, color: mc(activeEndpoint.method), ...MONO }}>{activeEndpoint.method}</span>
-                  <code style={{ color: "#E8EDF5", fontSize: 17, ...MONO }}>{activeEndpoint.path}</code>
+                  <code style={{ color: "#E8EDF5", fontSize: 19, ...MONO }}>{activeEndpoint.path}</code>
                 </div>
-                <p style={{ color: "#8AA3C8", fontSize: 15.5, lineHeight: 1.7 }}>{activeEndpoint.desc}</p>
+                <p style={{ color: "#8AA3C8", fontSize: 17.5, lineHeight: 1.7 }}>{activeEndpoint.desc}</p>
 
                 {activeEndpoint.body && (
                   <div>
-                    <div style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>REQUEST BODY</div>
+                    <div style={{ color: "#8A9AB8", fontSize: 14, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>REQUEST BODY</div>
                     <div className="p-4 rounded-2xl overflow-x-auto" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(91,110,225,0.15)" }}>
-                      <pre style={{ color: "#6E90C9", fontSize: 13.5, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.body}</pre>
+                      <pre style={{ color: "#6E90C9", fontSize: 15, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.body}</pre>
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <div style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>RESPONSE</div>
+                  <div style={{ color: "#8A9AB8", fontSize: 14, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>RESPONSE</div>
                   <div className="p-4 rounded-2xl overflow-x-auto" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(72,187,120,0.2)" }}>
-                    <pre style={{ color: "#68D391", fontSize: 13.5, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.response}</pre>
+                    <pre style={{ color: "#68D391", fontSize: 15, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{activeEndpoint.response}</pre>
                   </div>
                 </div>
 
@@ -341,14 +341,14 @@ export function EnterpriseAPI() {
                     <Play size={14} fill="currentColor" />
                     {testing ? "Running..." : "Run Live Test"}
                   </button>
-                  <span style={{ color: "#8A9AB8", fontSize: 13.5 }}>Uses sandbox credentials</span>
+                  <span style={{ color: "#8A9AB8", fontSize: 15 }}>Uses sandbox credentials</span>
                 </div>
 
                 {testResponse && (
                   <div>
-                    <div style={{ color: "#D99A6B", fontSize: 12.5, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>✓ LIVE RESPONSE (200 OK)</div>
+                    <div style={{ color: "#D99A6B", fontSize: 14, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>✓ LIVE RESPONSE (200 OK)</div>
                     <div className="p-4 rounded-2xl overflow-x-auto" style={{ background: "rgba(72,187,120,0.04)", border: "1px solid rgba(72,187,120,0.2)" }}>
-                      <pre style={{ color: "#68D391", fontSize: 13.5, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{testResponse}</pre>
+                      <pre style={{ color: "#68D391", fontSize: 15, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{testResponse}</pre>
                     </div>
                   </div>
                 )}
@@ -372,12 +372,12 @@ export function EnterpriseAPI() {
           </div>
           <div className="p-6 rounded-2xl" style={{ ...GLASS }}>
             <div className="flex items-center justify-between mb-4">
-              <div style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO }}>
+              <div style={{ color: "#8A9AB8", fontSize: 14, ...MONO }}>
                 {sdkLang === "javascript" ? "npm install @finalpassdown/sdk" : sdkLang === "python" ? "pip install finalpassdown" : sdkLang === "php" ? "composer require finalpassdown/sdk" : "curl / HTTP"}
               </div>
-              <button style={{ color: "#6E90C9", fontSize: 13.5 }}>Copy</button>
+              <button style={{ color: "#6E90C9", fontSize: 15 }}>Copy</button>
             </div>
-            <pre className="overflow-x-auto" style={{ color: "#E8EDF5", fontSize: 14.5, ...MONO, lineHeight: 1.8, whiteSpace: "pre-wrap", margin: 0 }}>
+            <pre className="overflow-x-auto" style={{ color: "#E8EDF5", fontSize: 16, ...MONO, lineHeight: 1.8, whiteSpace: "pre-wrap", margin: 0 }}>
               {sdkExamples[sdkLang]}
             </pre>
           </div>
@@ -388,8 +388,8 @@ export function EnterpriseAPI() {
               { title:"Versioning", desc:"API version is included in the base URL: /v1/. Breaking changes release on new versions.", color:"#6FAE8B" },
             ].map(info => (
               <div key={info.title} className="p-5 rounded-2xl" style={GLASS}>
-                <div style={{ color: info.color, fontSize: 15.5, fontWeight: 600, marginBottom: 8 }}>{info.title}</div>
-                <p style={{ color: "#8A9AB8", fontSize: 14.5, lineHeight: 1.7 }}>{info.desc}</p>
+                <div style={{ color: info.color, fontSize: 17.5, fontWeight: 600, marginBottom: 8 }}>{info.title}</div>
+                <p style={{ color: "#8A9AB8", fontSize: 16, lineHeight: 1.7 }}>{info.desc}</p>
               </div>
             ))}
           </div>
@@ -401,22 +401,22 @@ export function EnterpriseAPI() {
         <div className="space-y-5">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Configured Webhooks</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Configured Webhooks</h3>
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
-                  <div style={{ color: "#E8EDF5", fontSize: 14.5, marginBottom: 4 }}>https://yourapp.com/fpd-webhook</div>
+                  <div style={{ color: "#E8EDF5", fontSize: 16, marginBottom: 4 }}>https://yourapp.com/fpd-webhook</div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {["vault.document.uploaded","contact.verified","storage.warning.80"].map(ev => (
-                      <span key={ev} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.1)", color: "#6E90C9", ...MONO, fontSize: 10 }}>{ev}</span>
+                      <span key={ev} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.1)", color: "#6E90C9", ...MONO, fontSize: 11 }}>{ev}</span>
                     ))}
                   </div>
-                  <div style={{ color: "#D99A6B", fontSize: 12.5, marginTop: 8 }}>● Active · 0 failures</div>
+                  <div style={{ color: "#D99A6B", fontSize: 14, marginTop: 8 }}>● Active · 0 failures</div>
                 </div>
                 <button className="w-full py-3 rounded-2xl text-sm" style={{ border: "1px dashed rgba(91,110,225,0.3)", color: "#6E90C9" }}>+ Add Webhook Endpoint</button>
               </div>
             </div>
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Webhook Signature Verification</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Webhook Signature Verification</h3>
               <pre className="p-4 rounded-2xl overflow-x-auto text-xs" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(91,110,225,0.15)", color: "#68D391", ...MONO, whiteSpace: "pre-wrap" }}>
 {`const crypto = require('crypto');
 
@@ -442,14 +442,14 @@ app.post('/fpd-webhook', (req, res) => {
             </div>
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Available Events</h3>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Available Events</h3>
             <div className="grid sm:grid-cols-2 gap-2">
               {webhookEvents.map(ev => (
                 <div key={ev.event} className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: "rgba(91,110,225,0.04)" }}>
                   <Zap size={13} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                   <div>
-                    <div style={{ color: "#6E90C9", fontSize: 13.5, ...MONO }}>{ev.event}</div>
-                    <div style={{ color: "#8A9AB8", fontSize: 12.5, marginTop: 2 }}>{ev.desc}</div>
+                    <div style={{ color: "#6E90C9", fontSize: 15, ...MONO }}>{ev.event}</div>
+                    <div style={{ color: "#8A9AB8", fontSize: 14, marginTop: 2 }}>{ev.desc}</div>
                   </div>
                 </div>
               ))}
@@ -463,14 +463,14 @@ app.post('/fpd-webhook', (req, res) => {
         <div className="space-y-5">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Live API Keys</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Live API Keys</h3>
               <div className="space-y-3">
                 {[{ label:"Live Secret Key", key:"fpd_live_sk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }, { label:"Live Publishable Key", key:"fpd_live_pk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }].map(k => (
                   <div key={k.label}>
-                    <div style={{ color: "#8A9AB8", fontSize: 12.5, marginBottom: 6 }}>{k.label}</div>
+                    <div style={{ color: "#8A9AB8", fontSize: 14, marginBottom: 6 }}>{k.label}</div>
                     <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(91,110,225,0.2)" }}>
                       <Lock size={12} color="#8A9AB8" />
-                      <span style={{ color: "#8A9AB8", fontSize: 13.5, ...MONO, flex: 1 }}>{k.key}</span>
+                      <span style={{ color: "#8A9AB8", fontSize: 15, ...MONO, flex: 1 }}>{k.key}</span>
                       <button onClick={copyKey} style={{ color: "#6E90C9" }}>{keyCopied ? <CheckCircle size={13} /> : <Copy size={13} />}</button>
                     </div>
                   </div>
@@ -478,32 +478,32 @@ app.post('/fpd-webhook', (req, res) => {
               </div>
             </div>
             <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Sandbox API Keys</h3>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Sandbox API Keys</h3>
               <div className="space-y-3">
                 {[{ label:"Sandbox Secret Key", key:"fpd_test_sk_xxxxxxxxxxxxxxxxxxxxxxxx" }, { label:"Sandbox Publishable Key", key:"fpd_test_pk_xxxxxxxxxxxxxxxxxxxxxxxx" }].map(k => (
                   <div key={k.label}>
-                    <div style={{ color: "#8A9AB8", fontSize: 12.5, marginBottom: 6 }}>{k.label}</div>
+                    <div style={{ color: "#8A9AB8", fontSize: 14, marginBottom: 6 }}>{k.label}</div>
                     <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(246,173,85,0.2)" }}>
                       <Lock size={12} color="#F6AD55" />
-                      <span style={{ color: "#8A9AB8", fontSize: 13.5, ...MONO, flex: 1 }}>{k.key}</span>
+                      <span style={{ color: "#8A9AB8", fontSize: 15, ...MONO, flex: 1 }}>{k.key}</span>
                       <button style={{ color: "#F6AD55" }}><Copy size={13} /></button>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="mt-4 px-4 py-3 rounded-2xl" style={{ background: "rgba(246,173,85,0.06)", border: "1px solid rgba(246,173,85,0.2)" }}>
-                <span style={{ color: "#F6AD55", fontSize: 13.5 }}>Sandbox keys never charge real money and use isolated test data.</span>
+                <span style={{ color: "#F6AD55", fontSize: 15 }}>Sandbox keys never charge real money and use isolated test data.</span>
               </div>
             </div>
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "#E8EDF5", marginBottom: 16 }}>Usage This Month</h3>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Usage This Month</h3>
             <div className="grid grid-cols-4 gap-4">
               {[{ label:"API Calls", value:"84,291", limit:"1M included", color:"#6E90C9" }, { label:"Webhooks Sent", value:"12,841", limit:"Unlimited", color:"#D99A6B" }, { label:"Documents Accessed", value:"2,190", limit:"Unlimited", color:"#6FAE8B" }, { label:"Rate Limit Hits", value:"0", limit:"1,000/min", color:"#F6AD55" }].map(stat => (
                 <div key={stat.label} className="p-4 rounded-2xl" style={{ background: "rgba(91,110,225,0.04)", border: "1px solid rgba(91,110,225,0.1)" }}>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 24.5, color: stat.color }}>{stat.value}</div>
-                  <div style={{ color: "#E8EDF5", fontSize: 13.5, marginTop: 4 }}>{stat.label}</div>
-                  <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 2, ...MONO }}>{stat.limit}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 27.5, color: stat.color }}>{stat.value}</div>
+                  <div style={{ color: "#E8EDF5", fontSize: 15, marginTop: 4 }}>{stat.label}</div>
+                  <div style={{ color: "#8A9AB8", fontSize: 12.5, marginTop: 2, ...MONO }}>{stat.limit}</div>
                 </div>
               ))}
             </div>

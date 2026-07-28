@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", borderRadius:22, boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:14.5, color:"#FFFFFF", outline:"none" };
+const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none" };
 
 /* ── Report catalog ──────────────────────────────────────────────── */
 interface ReportDef {
@@ -305,15 +305,15 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>{report.name}</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>{report.name}</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1"
                   style={{ background:`${cat.color}12`, color:cat.color, ...MONO }}>
                   {cat.icon}{cat.label}
                 </span>
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.5 }}>{report.description}</div>
+              <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.5 }}>{report.description}</div>
               {report.estimatedRows && (
-                <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:4 }}>
+                <div style={{ color:"#8A9AB8", fontSize:14, marginTop:4 }}>
                   <span style={MONO}>~{report.estimatedRows}</span>
                 </div>
               )}
@@ -338,7 +338,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
           </div>
           {/* Date range */}
           <select value={range} onChange={e => setRange(e.target.value)}
-            style={{ ...INPUT, padding:"5px 10px", fontSize:12.5, width:"auto" }}>
+            style={{ ...INPUT, padding:"5px 10px", fontSize:14, width:"auto" }}>
             <option value="last_7">Last 7 days</option>
             <option value="last_30">Last 30 days</option>
             <option value="last_90">Last 90 days</option>
@@ -357,7 +357,7 @@ function ReportCard({ report, onGenerate }: { report: ReportDef; onGenerate: (r:
       {/* Expanded — field list */}
       {expanded && (
         <div className="px-5 pb-5 border-t pt-4 space-y-3" style={{ borderColor:"rgba(91,110,225,0.08)" }}>
-          <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>INCLUDED FIELDS ({report.fields.length})</div>
+          <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>INCLUDED FIELDS ({report.fields.length})</div>
           <div className="flex flex-wrap gap-1.5">
             {report.fields.map(f => (
               <span key={f} className="px-2 py-1 rounded-xl text-xs"
@@ -426,10 +426,10 @@ export function ReportsDownloads() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Download size={15} color="#FFFFFF"/>
-          <span style={{ color:"#6E90C9", fontSize:12.5, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
+          <span style={{ color:"#6E90C9", fontSize:14, ...MONO, letterSpacing:"0.1em" }}>COMMAND CENTER · REPORTS & DOWNLOADS</span>
         </div>
-        <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>Reports & Downloads</h1>
-        <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
+        <h1 style={{ fontFamily:"var(--font-display)", fontSize:32.5, color:"#E8EDF5" }}>Reports & Downloads</h1>
+        <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
           Generate and download platform data in CSV, PDF, XLSX, or JSON format. All exports are scoped to your admin permissions.
         </p>
       </div>
@@ -438,8 +438,8 @@ export function ReportsDownloads() {
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:31.5, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{s.label.toUpperCase()}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:s.color, fontWeight:700 }}>{s.value}</div>
+            <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
         ))}
       </div>
@@ -494,7 +494,7 @@ export function ReportsDownloads() {
       {activeTab === "history" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div style={{ color:"#8A9AB8", fontSize:14.5 }}>{downloads.length} exports generated</div>
+            <div style={{ color:"#8A9AB8", fontSize:16 }}>{downloads.length} exports generated</div>
             <button onClick={() => toast.success("Download history cleared")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs"
               style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.2)" }}>
@@ -507,7 +507,7 @@ export function ReportsDownloads() {
               <thead>
                 <tr style={{ background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
                   {["Report","Format","Generated","By","Size","Rows","Action"].map(h => (
-                    <th key={h} style={{ padding:"12px 16px", textAlign:"left", color:"#8A9AB8", fontSize:11, ...MONO, fontWeight:600 }}>{h}</th>
+                    <th key={h} style={{ padding:"12px 16px", textAlign:"left", color:"#8A9AB8", fontSize:12.5, ...MONO, fontWeight:600 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -518,16 +518,16 @@ export function ReportsDownloads() {
                   return (
                     <tr key={dl.id} style={{ borderBottom: i < downloads.length-1 ? "1px solid rgba(91,110,225,0.06)" : "none" }}>
                       <td style={{ padding:"12px 16px" }}>
-                        <div style={{ color:"#E8EDF5", fontWeight:500, fontSize:14.5 }}>{dl.reportName}</div>
-                        <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{dl.id}</div>
+                        <div style={{ color:"#E8EDF5", fontWeight:500, fontSize:16 }}>{dl.reportName}</div>
+                        <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>{dl.id}</div>
                       </td>
                       <td style={{ padding:"12px 16px" }}>
                         <span className="px-2 py-0.5 rounded font-bold text-xs" style={{ background:`${color}15`, color, ...MONO }}>{dl.format}</span>
                       </td>
-                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:13.5 }}>{dl.generatedAt}</td>
-                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:13.5 }}>{dl.generatedBy}</td>
-                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:13.5, ...MONO }}>{dl.size}</td>
-                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:13.5, ...MONO }}>{dl.rows}</td>
+                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:15 }}>{dl.generatedAt}</td>
+                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:15 }}>{dl.generatedBy}</td>
+                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:15, ...MONO }}>{dl.size}</td>
+                      <td style={{ padding:"12px 16px", color:"#8A9AB8", fontSize:15, ...MONO }}>{dl.rows}</td>
                       <td style={{ padding:"12px 16px" }}>
                         {dl.status === "ready" ? (
                           <button onClick={() => toast.success(`Downloading ${dl.reportName}.${dl.format.toLowerCase()}…`)}
@@ -555,7 +555,7 @@ export function ReportsDownloads() {
           {/* Info banner */}
           <div className="flex items-start gap-3 px-4 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <Shield size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
-            <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.6 }}>
+            <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.6 }}>
               All reports are generated in real time from the live database. Files are retained for 30 days. Reports containing PII are access-logged per your admin audit policy. GDPR data requests are archived separately for 7 years per compliance requirements.
             </div>
           </div>

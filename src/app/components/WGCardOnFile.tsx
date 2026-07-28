@@ -16,7 +16,7 @@ import { cardsOnFile } from "./WGSessionTimer";
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = {
   background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)",
-  color:"#FFFFFF", fontSize:15.5, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%",
+  color:"#FFFFFF", fontSize:17.5, outline:"none", borderRadius:12, padding:"10px 14px", width:"100%",
 };
 
 function detectBrand(num: string): string {
@@ -96,7 +96,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl"
           style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)", display:"inline-flex" }}>
           <CreditCard size={11} color="#FFFFFF"/>
-          <span style={{ color:"#D99A6B", fontSize:12.5, fontWeight:700, ...MONO }}>
+          <span style={{ color:"#D99A6B", fontSize:14, fontWeight:700, ...MONO }}>
             {existing.brand} ****{existing.last4}
           </span>
         </div>
@@ -106,7 +106,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
       <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl"
         style={{ background:"rgba(252,129,129,0.08)", border:"1px solid rgba(252,129,129,0.2)", display:"inline-flex" }}>
         <AlertCircle size={11} color="#FC8181"/>
-        <span style={{ color:"#FC8181", fontSize:12.5, fontWeight:700, ...MONO }}>NO CARD ON FILE</span>
+        <span style={{ color:"#FC8181", fontSize:14, fontWeight:700, ...MONO }}>NO CARD ON FILE</span>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
         style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
         <div className="flex items-center gap-2">
           <CreditCard size={14} color="#FFFFFF"/>
-          <span style={{ color:"#6E90C9", fontSize:13.5, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
+          <span style={{ color:"#6E90C9", fontSize:15, fontWeight:700, ...MONO }}>PAYMENT METHOD ON FILE</span>
         </div>
         {hasCard && !editing && (
           <button onClick={() => setEditing(true)}
@@ -133,24 +133,24 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
         <div className="p-4 space-y-3">
           <div className="flex items-center gap-4 px-4 py-4 rounded-2xl"
             style={{ background:"linear-gradient(135deg,#070A12,#141B2E)", border:"1px solid rgba(91,110,225,0.3)" }}>
-            <div style={{ fontSize:31.5 }}>💳</div>
+            <div style={{ fontSize:35.5 }}>💳</div>
             <div className="flex-1">
-              <div style={{ color:brandColor(existing.brand), fontSize:13.5, fontWeight:700, ...MONO }}>
+              <div style={{ color:brandColor(existing.brand), fontSize:15, fontWeight:700, ...MONO }}>
                 {existing.brand.toUpperCase()}
               </div>
-              <div style={{ color:"#E8EDF5", fontSize:20, fontWeight:700, letterSpacing:"0.1em", ...MONO, marginTop:2 }}>
+              <div style={{ color:"#E8EDF5", fontSize:22.5, fontWeight:700, letterSpacing:"0.1em", ...MONO, marginTop:2 }}>
                 •••• •••• •••• {existing.last4}
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div style={{ color:"#6B7FA8", fontSize:12.5 }}>{existing.name}</div>
-                <div style={{ color:"#6B7FA8", fontSize:12.5, ...MONO }}>Exp {existing.expiry}</div>
+                <div style={{ color:"#6B7FA8", fontSize:14 }}>{existing.name}</div>
+                <div style={{ color:"#6B7FA8", fontSize:14, ...MONO }}>Exp {existing.expiry}</div>
               </div>
             </div>
           </div>
           <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <CheckCircle size={12} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
-            <p style={{ color:"#D99A6B", fontSize:13.5, lineHeight:1.6 }}>
+            <p style={{ color:"#D99A6B", fontSize:15, lineHeight:1.6 }}>
               This card will be automatically charged after each session at $25 per 30 minutes, rounded up. The client will receive an email receipt after each charge.
             </p>
           </div>
@@ -169,21 +169,21 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
               style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
               <AlertCircle size={12} color="#F6AD55" style={{ marginTop:1, flexShrink:0 }}/>
-              <p style={{ color:"#F6AD55", fontSize:13.5, lineHeight:1.6 }}>
+              <p style={{ color:"#F6AD55", fontSize:15, lineHeight:1.6 }}>
                 A payment method is required before sessions can begin. The card will be charged at <strong>$25 per 30-minute block</strong> after each call.
               </p>
             </div>
           )}
 
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Name on card" style={INPUT}/>
           </div>
 
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>
               CARD NUMBER
-              {cardNum && <span style={{ color:brandColor(brand), marginLeft:8, fontSize:11 }}>{brand}</span>}
+              {cardNum && <span style={{ color:brandColor(brand), marginLeft:8, fontSize:12.5 }}>{brand}</span>}
             </label>
             <input value={cardNum} onChange={e => setCardNum(formatCard(e.target.value))}
               placeholder="1234 5678 9012 3456" maxLength={19} style={{ ...INPUT, fontFamily:"var(--font-mono)" }}/>
@@ -191,12 +191,12 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
               <input value={expiry} onChange={e => setExpiry(formatExpiry(e.target.value))}
                 placeholder="MM/YY" maxLength={5} style={{ ...INPUT, fontFamily:"var(--font-mono)" }}/>
             </div>
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
               <div className="relative">
                 <input type={showCvv?"text":"password"} value={cvv}
                   onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))}
@@ -212,7 +212,7 @@ export function WGCardOnFile({ clientId, clientName, onSaved, compact = false }:
           <div className="flex items-center gap-2 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <Lock size={11} color="#8A9AB8"/>
-            <span style={{ color:"#8A9AB8", fontSize:12.5 }}>256-bit SSL · Processed by Stripe · Card stored securely</span>
+            <span style={{ color:"#8A9AB8", fontSize:14 }}>256-bit SSL · Processed by Stripe · Card stored securely</span>
           </div>
 
           <div className="flex gap-3">

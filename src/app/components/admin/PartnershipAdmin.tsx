@@ -55,15 +55,15 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-lg rounded-2xl p-7" style={GLASS}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
-            <p style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>Client receives a unique link to start their white label partner application.</p>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
+            <p style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>Client receives a unique link to start their white label partner application.</p>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>ORGANIZATION TYPE</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ORGANIZATION TYPE</label>
             <div className="flex flex-wrap gap-2">
               {orgTypes.map(t => (
                 <button key={t.id} onClick={() => setOrgType(t.id)}
@@ -80,25 +80,25 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
             { label:"RECIPIENT EMAIL",   value:email,   set:setEmail,   ph:"contact@organization.com", type:"email" },
           ].map(f => (
             <div key={f.label}>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>{f.label}</label>
               <input type={f.type||"text"} value={f.value} onChange={e=>f.set(e.target.value)} placeholder={f.ph}
                 className="w-full px-4 py-3 rounded-2xl"
-                style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none" }}/>
+                style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none" }}/>
             </div>
           ))}
 
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
               placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
               className="w-full px-4 py-3 rounded-2xl resize-none"
-              style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:14.5, outline:"none" }}/>
+              style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none" }}/>
           </div>
 
           {/* Preview link */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
-            <span style={{ color:"#8A9AB8", fontSize:11, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
-            <span style={{ color:"#6E90C9", fontSize:11, flex:1 }} className="truncate">{onboardingLink}</span>
+            <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
+            <span style={{ color:"#6E90C9", fontSize:12.5, flex:1 }} className="truncate">{onboardingLink}</span>
             <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
               style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={12}/></button>
           </div>
@@ -134,12 +134,12 @@ export function PartnershipAdmin() {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Handshake size={16} color="#FFFFFF" />
-          <span style={{ color: "#6FAE8B", fontSize: 13.5, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
+          <span style={{ color: "#6FAE8B", fontSize: 15, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PARTNERSHIP PROGRAM</span>
         </div>
         <div className="flex items-start justify-between">
           <div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 29, color: "var(--foreground)" }}>Partnership Management</h1>
-            <p style={{ color: "var(--muted-foreground)", fontSize: 15.5, marginTop: 4 }}>Monitor strategic partners, account growth, and lifetime recurring commissions.</p>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "var(--foreground)" }}>Partnership Management</h1>
+            <p style={{ color: "var(--muted-foreground)", fontSize: 17.5, marginTop: 4 }}>Monitor strategic partners, account growth, and lifetime recurring commissions.</p>
           </div>
           <button onClick={() => setShowInvite(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm flex-shrink-0"
@@ -159,9 +159,9 @@ export function PartnershipAdmin() {
           { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 27, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
-            <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{stat.label}</div>
-            <div style={{ color: "var(--muted-foreground)", fontSize: 12.5, marginTop: 2 }}>{stat.sub}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 30, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
+            <div style={{ color: "var(--foreground)", fontSize: 16 }}>{stat.label}</div>
+            <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 2 }}>{stat.sub}</div>
           </div>
         ))}
       </div>
@@ -169,8 +169,8 @@ export function PartnershipAdmin() {
       {/* MRR chart — pure CSS, no recharts */}
       <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
-          <div style={{ color: "#D99A6B", fontSize: 14.5 }}>+264% in 6 months</div>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
+          <div style={{ color: "#D99A6B", fontSize: 16 }}>+264% in 6 months</div>
         </div>
         {(() => {
           const maxMrr = Math.max(...mrrGrowth.map(d => d.mrr));
@@ -181,7 +181,7 @@ export function PartnershipAdmin() {
                 const isLast = i === mrrGrowth.length - 1;
                 return (
                   <div key={d.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                    <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>${(d.mrr/1000).toFixed(1)}k</span>
+                    <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>${(d.mrr/1000).toFixed(1)}k</span>
                     <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
                       <div style={{
                         width:"100%", height:barH,
@@ -190,7 +190,7 @@ export function PartnershipAdmin() {
                         transition:"height 0.3s",
                       }}/>
                     </div>
-                    <span style={{ color:"#8A9AB8", fontSize:10, fontFamily:"var(--font-mono)" }}>{d.month}</span>
+                    <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>{d.month}</span>
                   </div>
                 );
               })}
@@ -206,7 +206,7 @@ export function PartnershipAdmin() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search partners by name, email, or ID..."
-          style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 15.5, width: "100%" }}
+          style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 17.5, width: "100%" }}
         />
       </div>
 
@@ -217,7 +217,7 @@ export function PartnershipAdmin() {
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
           {["ID", "Organization", "Tier", "Accounts", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
-            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
+            <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
           ))}
         </div>
         {filtered.map((partner, i) => (
@@ -226,29 +226,29 @@ export function PartnershipAdmin() {
             className="grid px-5 py-3 items-center border-b"
             style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
-            <span style={{ color: "var(--muted-foreground)", fontSize: 12.5, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
             <div className="flex items-center gap-3">
               <div className="rounded-xl p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
                 <Building size={13} color="#FFFFFF" />
               </div>
               <div>
-                <div style={{ color: "var(--foreground)", fontSize: 14.5 }}>{partner.name}</div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 12.5 }}>{partner.type} · {partner.email}</div>
+                <div style={{ color: "var(--foreground)", fontSize: 16 }}>{partner.name}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{partner.type} · {partner.email}</div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="rounded-full" style={{ width: 8, height: 8, background: (tierColors as any)[partner.tier] }} />
-              <span style={{ color: (tierColors as any)[partner.tier], fontSize: 13.5, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[partner.tier]}</span>
+              <span style={{ color: (tierColors as any)[partner.tier], fontSize: 15, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[partner.tier]}</span>
             </div>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>{partner.accounts}</span>
-            <span style={{ color: "#6FAE8B", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>${partner.monthlyEarn.toFixed(2)}</span>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 14.5 }}>${partner.totalEarned.toLocaleString()}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{partner.accounts}</span>
+            <span style={{ color: "#6FAE8B", fontFamily: "var(--font-mono)", fontSize: 16 }}>${partner.monthlyEarn.toFixed(2)}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>${partner.totalEarned.toLocaleString()}</span>
             <div
               className="px-2 py-1 rounded"
               style={{
                 background: partner.status === "active" ? "rgba(72,187,120,0.12)" : "rgba(107,114,128,0.12)",
                 color: partner.status === "active" ? "#D99A6B" : "var(--muted-foreground)",
-                fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
+                fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
               }}
             >
               {partner.status.toUpperCase()}

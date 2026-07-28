@@ -46,63 +46,63 @@ const VCLONE_CSS = `
 .fpd-vclone .close-btn{position:absolute;top:20px;right:20px;z-index:10;color:${MUTED};background:none;border:none;cursor:pointer;display:flex;}
 .fpd-vclone .modal-head{padding:28px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
 .fpd-vclone .head-ico{width:40px;height:40px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.16);color:#FFFFFF;}
-.fpd-vclone .head-title{font-family:var(--font-display);font-size:20px;color:${TEXT};}
-.fpd-vclone .head-sub{color:${MUTED};font-size:13.5px;margin-top:2px;}
+.fpd-vclone .head-title{font-family:var(--font-display);font-size:22.5px;color:${TEXT};}
+.fpd-vclone .head-sub{color:${MUTED};font-size:15px;margin-top:2px;}
 .fpd-vclone .modal-body{padding:24px 28px;overflow-y:auto;max-height:75vh;display:flex;flex-direction:column;gap:18px;}
 
 .fpd-vclone .panel{border-radius:16px;padding:20px;}
 .fpd-vclone .panel-locked{text-align:center;background:rgba(208,107,107,0.10);border:2px solid rgba(208,107,107,0.3);}
-.fpd-vclone .panel-locked .lock-title{color:${NEG};font-size:18px;font-family:var(--font-display);margin:12px 0 8px;}
-.fpd-vclone .panel-locked p{color:${MUTED};font-size:14.5px;line-height:1.7;}
+.fpd-vclone .panel-locked .lock-title{color:${NEG};font-size:20px;font-family:var(--font-display);margin:12px 0 8px;}
+.fpd-vclone .panel-locked p{color:${MUTED};font-size:16px;line-height:1.7;}
 .fpd-vclone .cond-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:99px;background:rgba(208,107,107,0.10);}
-.fpd-vclone .cond-row span{color:${MUTED};font-size:13.5px;}
+.fpd-vclone .cond-row span{color:${MUTED};font-size:15px;}
 .fpd-vclone .panel-info{background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.18);}
-.fpd-vclone .panel-info-lbl{color:#6FAE8B;font-size:13.5px;font-weight:700;font-family:var(--font-mono);margin-bottom:8px;}
-.fpd-vclone .panel-info p{color:${MUTED};font-size:14.5px;line-height:1.7;}
+.fpd-vclone .panel-info-lbl{color:#6FAE8B;font-size:15px;font-weight:700;font-family:var(--font-mono);margin-bottom:8px;}
+.fpd-vclone .panel-info p{color:${MUTED};font-size:16px;line-height:1.7;}
 .fpd-vclone .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
 .fpd-vclone .preview-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:99px;background:rgba(255,255,255,0.03);}
-.fpd-vclone .preview-chip span{color:${MUTED};font-size:12.5px;}
-.fpd-vclone .btn-close{width:100%;padding:13px;border-radius:16px;font-size:14.5px;font-weight:600;background:rgba(91,110,225,0.10);color:#6FAE8B;border:1px solid rgba(91,110,225,0.24);cursor:pointer;font-family:var(--font-body);}
+.fpd-vclone .preview-chip span{color:${MUTED};font-size:14px;}
+.fpd-vclone .btn-close{width:100%;padding:13px;border-radius:16px;font-size:16px;font-weight:600;background:rgba(91,110,225,0.10);color:#6FAE8B;border:1px solid rgba(91,110,225,0.24);cursor:pointer;font-family:var(--font-body);}
 
 .fpd-vclone .panel-unlocked{display:flex;align-items:flex-start;gap:12px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.28);}
-.fpd-vclone .panel-unlocked-title{color:#D99A6B;font-size:14.5px;font-weight:600;margin-bottom:3px;}
-.fpd-vclone .panel-unlocked p{color:${MUTED};font-size:13.5px;line-height:1.6;}
+.fpd-vclone .panel-unlocked-title{color:#D99A6B;font-size:16px;font-weight:600;margin-bottom:3px;}
+.fpd-vclone .panel-unlocked p{color:${MUTED};font-size:15px;line-height:1.6;}
 
-.fpd-vclone .contents-lbl{color:${MUTED};font-size:12.5px;font-family:var(--font-mono);margin-bottom:10px;}
+.fpd-vclone .contents-lbl{color:${MUTED};font-size:14px;font-family:var(--font-mono);margin-bottom:10px;}
 .fpd-vclone .content-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);}
 .fpd-vclone .content-row + .content-row{margin-top:6px;}
-.fpd-vclone .content-label{color:${SOFT};font-size:13.5px;font-weight:500;}
-.fpd-vclone .content-desc{color:${MUTED};font-size:12.5px;margin-left:6px;}
-.fpd-vclone .content-count{color:inherit;font-size:11px;font-family:var(--font-mono);flex-shrink:0;}
+.fpd-vclone .content-label{color:${SOFT};font-size:15px;font-weight:500;}
+.fpd-vclone .content-desc{color:${MUTED};font-size:14px;margin-left:6px;}
+.fpd-vclone .content-count{color:inherit;font-size:12.5px;font-family:var(--font-mono);flex-shrink:0;}
 
 .fpd-vclone .secret-toggle{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px;border-radius:16px;background:rgba(208,107,107,0.07);border:1px solid rgba(208,107,107,0.2);}
-.fpd-vclone .secret-toggle .st-title{color:${TEXT};font-size:14.5px;}
-.fpd-vclone .secret-toggle .st-sub{color:${NEG};font-size:12.5px;margin-top:2px;}
+.fpd-vclone .secret-toggle .st-title{color:${TEXT};font-size:16px;}
+.fpd-vclone .secret-toggle .st-sub{color:${NEG};font-size:14px;margin-top:2px;}
 
-.fpd-vclone .btn-primary{width:100%;padding:15px;border-radius:16px;font-weight:700;font-size:16px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 26px -8px rgba(91,110,225,0.55);font-family:var(--font-body);}
+.fpd-vclone .btn-primary{width:100%;padding:15px;border-radius:16px;font-weight:700;font-size:18px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 26px -8px rgba(91,110,225,0.55);font-family:var(--font-body);}
 
 .fpd-vclone .summary-panel{background:rgba(91,110,225,0.07);border:1px solid rgba(91,110,225,0.18);}
 .fpd-vclone .summary-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
-.fpd-vclone .summary-row span:first-child{color:${MUTED};font-size:13.5px;}
-.fpd-vclone .summary-row span:last-child{color:${SOFT};font-size:13.5px;}
-.fpd-vclone .btn-back{flex:1;padding:13px;border-radius:16px;font-size:14.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.22);cursor:pointer;font-family:var(--font-body);}
+.fpd-vclone .summary-row span:first-child{color:${MUTED};font-size:15px;}
+.fpd-vclone .summary-row span:last-child{color:${SOFT};font-size:15px;}
+.fpd-vclone .btn-back{flex:1;padding:13px;border-radius:16px;font-size:16px;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.22);cursor:pointer;font-family:var(--font-body);}
 
 .fpd-vclone .center{text-align:center;padding:24px 0;display:flex;flex-direction:column;gap:18px;align-items:center;}
 .fpd-vclone .icon-circle{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;}
-.fpd-vclone .status-title{font-family:var(--font-display);font-size:20px;color:${TEXT};margin-bottom:6px;}
-.fpd-vclone .status-sub{color:${MUTED};font-size:14.5px;}
+.fpd-vclone .status-title{font-family:var(--font-display);font-size:22.5px;color:${TEXT};margin-bottom:6px;}
+.fpd-vclone .status-sub{color:${MUTED};font-size:16px;}
 .fpd-vclone .progress-track{height:8px;border-radius:99px;background:rgba(91,110,225,0.14);max-width:320px;width:100%;margin:0 auto;}
 .fpd-vclone .progress-fill{height:8px;border-radius:99px;background:linear-gradient(90deg,#5B6EE1,#5B6EE1);box-shadow:0 0 12px rgba(91,110,225,0.5);transition:width .3s;}
-.fpd-vclone .progress-pct{color:#6FAE8B;font-size:15.5px;font-family:var(--font-mono);}
+.fpd-vclone .progress-pct{color:#6FAE8B;font-size:17.5px;font-family:var(--font-mono);}
 
 .fpd-vclone .ref-box{padding:14px 16px;border-radius:16px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.24);width:100%;}
-.fpd-vclone .ref-lbl{color:#D99A6B;font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
-.fpd-vclone .ref-val{color:#D99A6B;font-family:var(--font-mono);font-size:17px;font-weight:700;}
+.fpd-vclone .ref-lbl{color:#D99A6B;font-size:12.5px;font-family:var(--font-mono);margin-bottom:4px;}
+.fpd-vclone .ref-val{color:#D99A6B;font-family:var(--font-mono);font-size:19px;font-weight:700;}
 .fpd-vclone .important-box{padding:16px;border-radius:18px;text-align:left;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);width:100%;}
-.fpd-vclone .important-lbl{color:${WARN};font-size:12.5px;font-weight:700;font-family:var(--font-mono);margin-bottom:6px;}
-.fpd-vclone .important-box p{color:${MUTED};font-size:13.5px;line-height:1.7;}
+.fpd-vclone .important-lbl{color:${WARN};font-size:14px;font-weight:700;font-family:var(--font-mono);margin-bottom:6px;}
+.fpd-vclone .important-box p{color:${MUTED};font-size:15px;line-height:1.7;}
 .fpd-vclone .btn-row{display:flex;gap:10px;width:100%;}
-.fpd-vclone .btn-save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;font-weight:700;font-size:14.5px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 20px -8px rgba(91,110,225,0.5);font-family:var(--font-body);}
+.fpd-vclone .btn-save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;font-weight:700;font-size:16px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 20px -8px rgba(91,110,225,0.5);font-family:var(--font-body);}
 `;
 
 export function VaultClone({ onClose, mode }: VaultCloneProps) {
@@ -239,9 +239,9 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div className="panel" style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.24)" }}>
                 <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
                   <AlertTriangle size={16} color={WARN}/>
-                  <span style={{ color: WARN, fontSize: 14.5, fontWeight: 700 }}>Confirm Complete Download</span>
+                  <span style={{ color: WARN, fontSize: 16, fontWeight: 700 }}>Confirm Complete Download</span>
                 </div>
-                <p style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.7 }}>
+                <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>
                   You are about to download a complete encrypted package of this account. This includes{" "}
                   <strong style={{ color: TEXT }}>all documents, records, memories, diary entries, financial information, medical records, and personal data</strong>{" "}
                   that was saved to this Final Pass Down account. {includeSecretVault && <strong style={{ color: NEG }}>Secret Vault items are included.</strong>}
@@ -282,7 +282,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 <div className="progress-fill" style={{ width:`${progress}%` }}/>
               </div>
               <div className="progress-pct">{Math.round(progress)}%</div>
-              <div style={{ color: MUTED, fontSize: 12.5 }}>
+              <div style={{ color: MUTED, fontSize: 14 }}>
                 {progress < 30 ? "Gathering documents and records..." :
                  progress < 60 ? "Packaging memories and media..." :
                  progress < 85 ? "Encrypting complete package..." :
@@ -299,7 +299,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               </div>
               <div>
                 <div className="status-title">Legacy Package Ready</div>
-                <p style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.7 }}>The complete account package has been prepared. This encrypted file contains everything saved to this Final Pass Down account.</p>
+                <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>The complete account package has been prepared. This encrypted file contains everything saved to this Final Pass Down account.</p>
               </div>
 
               <div className="ref-box">

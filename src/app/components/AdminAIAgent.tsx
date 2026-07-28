@@ -133,7 +133,7 @@ function renderMarkdown(text: string) {
     }
     const parts = line.split(/\*\*([^*]+)\*\*/g);
     return (
-      <p key={i} style={{ color:"#8A9AB8", fontSize:14.5, lineHeight:1.7, margin:"2px 0" }}>
+      <p key={i} style={{ color:"#8A9AB8", fontSize:16, lineHeight:1.7, margin:"2px 0" }}>
         {parts.map((p,j) => j%2===1 ? <strong key={j} style={{ color:"#E8EDF5" }}>{p}</strong> : p)}
       </p>
     );
@@ -201,10 +201,10 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
             <Crown size={18} color="#fff"/>
           </div>
           <div>
-            <div style={{ color:"#fff", fontSize:14.5, fontWeight:700 }}>Admin AI Assistant</div>
+            <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>Admin AI Assistant</div>
             <div className="flex items-center gap-1">
               <div style={{ width:6, height:6, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 6px #48BB78" }}/>
-              <span style={{ color:"rgba(255,255,255,0.7)", fontSize:11, ...MONO }}>Command Center Expert</span>
+              <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12.5, ...MONO }}>Command Center Expert</span>
             </div>
           </div>
         </div>
@@ -222,8 +222,8 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
             {messages.map(msg => (
               <div key={msg.id} className={`flex ${msg.role==="user"?"justify-end":"justify-start"}`}>
                 <div style={{ maxWidth:"88%", background:msg.role==="user"?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"#141B2E", color:msg.role==="user"?"#fff":undefined, borderRadius:msg.role==="user"?"16px 16px 4px 16px":"16px 16px 16px 4px", padding:"10px 14px", boxShadow:msg.role==="agent"?"0 2px 8px rgba(0,0,0,0.3)":undefined, border:msg.role==="agent"?"1px solid rgba(91,167,214,0.25)":undefined }}>
-                  {msg.role==="agent" ? <div className="space-y-1">{renderMarkdown(msg.text)}</div> : <p style={{ fontSize:14.5, lineHeight:1.5 }}>{msg.text}</p>}
-                  <div style={{ fontSize:11, opacity:0.5, marginTop:4, textAlign:"right", ...MONO }}>{msg.time}</div>
+                  {msg.role==="agent" ? <div className="space-y-1">{renderMarkdown(msg.text)}</div> : <p style={{ fontSize:16, lineHeight:1.5 }}>{msg.text}</p>}
+                  <div style={{ fontSize:12.5, opacity:0.5, marginTop:4, textAlign:"right", ...MONO }}>{msg.time}</div>
                 </div>
               </div>
             ))}
@@ -247,7 +247,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
             <input value={input} onChange={e=>setInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&send(input)}
               placeholder="Ask anything about the Command Center…"
-              style={{ flex:1, border:"1px solid rgba(91,167,214,0.3)", borderRadius:12, padding:"8px 14px", fontSize:14.5, outline:"none", background:"#141B2E", color:"#FFFFFF" }}/>
+              style={{ flex:1, border:"1px solid rgba(91,167,214,0.3)", borderRadius:12, padding:"8px 14px", fontSize:16, outline:"none", background:"#141B2E", color:"#FFFFFF" }}/>
             <button onClick={()=>send(input)} disabled={!input.trim()}
               className="flex items-center justify-center rounded-2xl flex-shrink-0"
               style={{ width:38, height:38, background:input.trim()?"linear-gradient(135deg,#5BA7D6,#5B6EE1)":"rgba(91,167,214,0.15)", color:input.trim()?"#fff":"#D68FA8" }}>

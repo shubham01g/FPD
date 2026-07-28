@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", borderRadius:22, boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" };
-const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:14.5, color:"#FFFFFF", outline:"none", width:"100%" };
+const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none", width:"100%" };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
 /* ── Permission modules ──────────────────────────────────────────── */
@@ -200,7 +200,7 @@ function PermissionRow({
     <div className="grid items-center gap-2 py-2 px-3 rounded-2xl" style={{ gridTemplateColumns:"1fr auto auto auto", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
       <div className="flex items-center gap-2">
         <span style={{ color:"#8A9AB8" }}>{perm.icon}</span>
-        <span style={{ fontSize:13.5, color:"#E8EDF5" }}>{perm.label}</span>
+        <span style={{ fontSize:15, color:"#E8EDF5" }}>{perm.label}</span>
       </div>
       {(["canView","canEdit","canDelete"] as const).map(key => {
         const labels = { canView:"View", canEdit:"Edit", canDelete:"Delete" };
@@ -265,12 +265,12 @@ function AdminCard({
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-              style={{ width:46, height:46, background:`${preset.color}18`, color:preset.color, fontSize:17, fontFamily:"var(--font-display)" }}>
+              style={{ width:46, height:46, background:`${preset.color}18`, color:preset.color, fontSize:19, fontFamily:"var(--font-display)" }}>
               {admin.avatar}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>{admin.name}</span>
+                <span style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>{admin.name}</span>
                 {isSelf && <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>YOU</span>}
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:`${preset.color}15`, color:preset.color, ...MONO }}>
                   {preset.label.toUpperCase()}
@@ -279,8 +279,8 @@ function AdminCard({
                   {admin.status.toUpperCase()}
                 </span>
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:13.5 }}>{admin.email}</div>
-              <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:2 }}>
+              <div style={{ color:"#8A9AB8", fontSize:15 }}>{admin.email}</div>
+              <div style={{ color:"#8A9AB8", fontSize:14, marginTop:2 }}>
                 Added {admin.createdAt} by {admin.invitedBy}
                 {admin.lastLogin && ` · Last login: ${admin.lastLogin}`}
               </div>
@@ -340,15 +340,15 @@ function AdminCard({
           {/* Notes */}
           {admin.notes && (
             <div className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
-              <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>NOTES · </span>
-              <span style={{ color:"#8A9AB8", fontSize:13.5 }}>{admin.notes}</span>
+              <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>NOTES · </span>
+              <span style={{ color:"#8A9AB8", fontSize:15 }}>{admin.notes}</span>
             </div>
           )}
 
           {/* Role preset selector */}
           {!isSuper && (
             <div>
-              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:8 }}>APPLY ROLE PRESET</div>
+              <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:8 }}>APPLY ROLE PRESET</div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][])
                   .filter(([k]) => k !== "super_admin")
@@ -359,8 +359,8 @@ function AdminCard({
                         background: admin.role === key ? `${r.color}12` : "rgba(91,110,225,0.03)",
                         border: `1px solid ${admin.role === key ? r.color + "40" : "rgba(91,110,225,0.1)"}`,
                       }}>
-                      <div style={{ fontSize:13.5, fontWeight:700, color:r.color }}>{r.label}</div>
-                      <div style={{ fontSize:11, color:"#8A9AB8", marginTop:2, lineHeight:1.4 }}>{r.description}</div>
+                      <div style={{ fontSize:15, fontWeight:700, color:r.color }}>{r.label}</div>
+                      <div style={{ fontSize:12.5, color:"#8A9AB8", marginTop:2, lineHeight:1.4 }}>{r.description}</div>
                     </button>
                   ))
                 }
@@ -371,7 +371,7 @@ function AdminCard({
           {/* Permission matrix */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>PERMISSIONS — VIEW · EDIT · DELETE</div>
+              <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>PERMISSIONS — VIEW · EDIT · DELETE</div>
               {!isSuper && (
                 <div className="flex gap-2">
                   {editingPerms ? (
@@ -401,15 +401,15 @@ function AdminCard({
               <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-3"
                 style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.15)" }}>
                 <Crown size={14} color="#FFFFFF"/>
-                <span style={{ color:"#6E90C9", fontSize:13.5, fontWeight:600 }}>Super Admin has unrestricted access to all modules and cannot be limited.</span>
+                <span style={{ color:"#6E90C9", fontSize:15, fontWeight:600 }}>Super Admin has unrestricted access to all modules and cannot be limited.</span>
               </div>
             )}
 
             <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.08)" }}>
               <div className="grid px-3 py-2" style={{ gridTemplateColumns:"1fr auto auto auto", background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
-                <span style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>MODULE</span>
+                <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>MODULE</span>
                 {["VIEW","EDIT","DELETE"].map(h => (
-                  <span key={h} className="text-center" style={{ color:"#8A9AB8", fontSize:11, ...MONO, minWidth:60 }}>{h}</span>
+                  <span key={h} className="text-center" style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, minWidth:60 }}>{h}</span>
                 ))}
               </div>
               {(editingPerms ? localPerms : admin.permissions).map((perm, i) => (
@@ -506,10 +506,10 @@ export function AdminRoles() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Shield size={15} color="#FFFFFF"/>
-            <span style={{ color:"#6E90C9", fontSize:12.5, ...MONO, letterSpacing:"0.1em" }}>ADMIN · TEAM & ROLES</span>
+            <span style={{ color:"#6E90C9", fontSize:14, ...MONO, letterSpacing:"0.1em" }}>ADMIN · TEAM & ROLES</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>Admin Team & Permissions</h1>
-          <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:32.5, color:"#E8EDF5" }}>Admin Team & Permissions</h1>
+          <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
             Create administrator accounts for your team. Control exactly what each person can view, edit, and delete across every module.
           </p>
         </div>
@@ -524,22 +524,22 @@ export function AdminRoles() {
       <div className="grid grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:31.5, color:s.color, fontWeight:700 }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{s.label.toUpperCase()}</div>
+            <div style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:s.color, fontWeight:700 }}>{s.value}</div>
+            <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>{s.label.toUpperCase()}</div>
           </div>
         ))}
       </div>
 
       {/* Role reference */}
       <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
-        <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:10 }}>ROLE PRESETS — QUICK REFERENCE</div>
+        <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:10 }}>ROLE PRESETS — QUICK REFERENCE</div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][]).map(([key, r]) => (
             <div key={key} className="flex items-start gap-2 p-3 rounded-2xl" style={{ background:"rgba(255,255,255,0.05)", border:`1px solid ${r.color}25` }}>
               <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background:r.color }}/>
               <div>
-                <div style={{ fontSize:13.5, fontWeight:700, color:r.color }}>{r.label}</div>
-                <div style={{ fontSize:11, color:"#8A9AB8", lineHeight:1.4, marginTop:1 }}>{r.description}</div>
+                <div style={{ fontSize:15, fontWeight:700, color:r.color }}>{r.label}</div>
+                <div style={{ fontSize:12.5, color:"#8A9AB8", lineHeight:1.4, marginTop:1 }}>{r.description}</div>
               </div>
             </div>
           ))}
@@ -558,7 +558,7 @@ export function AdminRoles() {
           ))}
         </div>
         <select value={filterRole} onChange={e => setFilterRole(e.target.value as AdminRole | "all")}
-          style={{ ...INPUT, width:"auto", padding:"6px 12px", fontSize:13.5 }}>
+          style={{ ...INPUT, width:"auto", padding:"6px 12px", fontSize:15 }}>
           <option value="all">All Roles</option>
           {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][]).map(([k,r]) => (
             <option key={k} value={k}>{r.label}</option>
@@ -594,7 +594,7 @@ export function AdminRoles() {
                       style={{ width:20, height:20, background:done?"#48BB78":active?"#5B6EE1":"rgba(91,110,225,0.1)", color:done||active?"#fff":"#8A9AB8" }}>
                       {done ? <CheckCircle size={11}/> : i+1}
                     </div>
-                    <span style={{ fontSize:11, fontWeight:600, color:active?"#6E90C9":done?"#D99A6B":"#8A9AB8", ...MONO }}>{label.toUpperCase()}</span>
+                    <span style={{ fontSize:12.5, fontWeight:600, color:active?"#6E90C9":done?"#D99A6B":"#8A9AB8", ...MONO }}>{label.toUpperCase()}</span>
                   </div>
                 );
               })}
@@ -606,8 +606,8 @@ export function AdminRoles() {
               <div style={{ overflowY:"auto", flex:1 }}>
                 <div className="p-6 space-y-4">
                   <div>
-                    <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Invite a New Administrator</div>
-                    <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>
+                    <div style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Invite a New Administrator</div>
+                    <div style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>
                       They'll receive an email with a secure one-time login link. Permissions auto-apply from the role you choose and can be fine-tuned afterward.
                     </div>
                   </div>
@@ -617,7 +617,7 @@ export function AdminRoles() {
                     { label:"Work Email",  key:"email", placeholder:"jordan@finalpassdown.com",          type:"email" },
                   ].map(f => (
                     <div key={f.key}>
-                      <label style={{ color:"#8A9AB8", fontSize:13.5, fontWeight:600, display:"block", marginBottom:4 }}>{f.label}</label>
+                      <label style={{ color:"#8A9AB8", fontSize:15, fontWeight:600, display:"block", marginBottom:4 }}>{f.label}</label>
                       <input type={f.type} value={(newAdmin as any)[f.key]} placeholder={f.placeholder}
                         onChange={e => setNewAdmin(p => ({ ...p, [f.key]:e.target.value }))}
                         style={{ ...INPUT, width:"100%", display:"block" }}/>
@@ -625,7 +625,7 @@ export function AdminRoles() {
                   ))}
 
                   <div>
-                    <label style={{ color:"#8A9AB8", fontSize:13.5, fontWeight:600, display:"block", marginBottom:6 }}>Role & Access Level</label>
+                    <label style={{ color:"#8A9AB8", fontSize:15, fontWeight:600, display:"block", marginBottom:6 }}>Role & Access Level</label>
                     <div className="grid grid-cols-2 gap-2">
                       {(Object.entries(ROLE_PRESETS) as [AdminRole, typeof ROLE_PRESETS[AdminRole]][])
                         .filter(([k]) => k !== "super_admin")
@@ -633,8 +633,8 @@ export function AdminRoles() {
                           <button key={key} onClick={() => setNewAdmin(p => ({ ...p, role:key }))}
                             className="p-3 rounded-2xl text-left transition-all"
                             style={{ background:newAdmin.role===key?`${r.color}12`:"rgba(91,110,225,0.03)", border:`1px solid ${newAdmin.role===key?r.color+"40":"rgba(91,110,225,0.1)"}` }}>
-                            <div style={{ fontSize:13.5, fontWeight:700, color:r.color }}>{r.label}</div>
-                            <div style={{ fontSize:11, color:"#8A9AB8", marginTop:2, lineHeight:1.3 }}>{r.description}</div>
+                            <div style={{ fontSize:15, fontWeight:700, color:r.color }}>{r.label}</div>
+                            <div style={{ fontSize:12.5, color:"#8A9AB8", marginTop:2, lineHeight:1.3 }}>{r.description}</div>
                           </button>
                         ))
                       }
@@ -643,7 +643,7 @@ export function AdminRoles() {
 
                   {/* Live permission preview */}
                   <div>
-                    <div style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginBottom:6 }}>
+                    <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:6 }}>
                       ACCESS PREVIEW — {ROLE_PRESETS[newAdmin.role].label.toUpperCase()}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -663,7 +663,7 @@ export function AdminRoles() {
                   </div>
 
                   <div>
-                    <label style={{ color:"#8A9AB8", fontSize:13.5, fontWeight:600, display:"block", marginBottom:4 }}>Internal Notes (optional)</label>
+                    <label style={{ color:"#8A9AB8", fontSize:15, fontWeight:600, display:"block", marginBottom:4 }}>Internal Notes (optional)</label>
                     <textarea value={newAdmin.notes} onChange={e => setNewAdmin(p => ({ ...p, notes:e.target.value }))}
                       rows={2} placeholder="e.g. Handles WG billing, reports to Simone Carter"
                       className="resize-none" style={{ ...INPUT, width:"100%", display:"block" }}/>
@@ -696,10 +696,10 @@ export function AdminRoles() {
                     <RefreshCw size={11} color="#fff" style={{ animation:"spin 1s linear infinite" }}/>
                   </div>
                 </div>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5", textAlign:"center" }}>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5", textAlign:"center" }}>
                   Creating Administrator Account…
                 </div>
-                <div style={{ color:"#8A9AB8", fontSize:14.5, textAlign:"center", lineHeight:1.6 }}>
+                <div style={{ color:"#8A9AB8", fontSize:16, textAlign:"center", lineHeight:1.6 }}>
                   Sending invite to <strong style={{ color:"#6E90C9" }}>{newAdmin.email}</strong>
                 </div>
                 <div className="w-full max-w-xs space-y-2.5 mt-2">
@@ -709,7 +709,7 @@ export function AdminRoles() {
                         style={{ width:20, height:20, background:"rgba(72,187,120,0.15)" }}>
                         <CheckCircle size={11} color="#FFFFFF"/>
                       </div>
-                      <span style={{ fontSize:13.5, color:"#8A9AB8" }}>{step}</span>
+                      <span style={{ fontSize:15, color:"#8A9AB8" }}>{step}</span>
                     </div>
                   ))}
                 </div>
@@ -727,8 +727,8 @@ export function AdminRoles() {
                       <CheckCircle size={26} color="#FFFFFF"/>
                     </div>
                     <div>
-                      <div style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Invite Sent!</div>
-                      <div style={{ color:"#8A9AB8", fontSize:14.5, marginTop:3 }}>
+                      <div style={{ fontFamily:"var(--font-display)", fontSize:25, color:"#E8EDF5" }}>Invite Sent!</div>
+                      <div style={{ color:"#8A9AB8", fontSize:16, marginTop:3 }}>
                         <strong style={{ color:"#E8EDF5" }}>{createdAdmin.name}</strong> invited as{" "}
                         <strong style={{ color:ROLE_PRESETS[createdAdmin.role].color }}>{ROLE_PRESETS[createdAdmin.role].label}</strong>
                       </div>
@@ -741,13 +741,13 @@ export function AdminRoles() {
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#FC8181" }}/>
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#F6AD55" }}/>
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#48BB78" }}/>
-                      <span style={{ color:"#8A9AB8", fontSize:11, ...MONO, marginLeft:8 }}>EMAIL PREVIEW · SENT TO {createdAdmin.email.toUpperCase()}</span>
+                      <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginLeft:8 }}>EMAIL PREVIEW · SENT TO {createdAdmin.email.toUpperCase()}</span>
                     </div>
                     <div className="p-5" style={{ background:"#fff" }}>
-                      <div style={{ color:"#8A9AB8", fontSize:12.5, marginBottom:2 }}>From: <strong>noreply@finalpassdown.com</strong></div>
-                      <div style={{ color:"#8A9AB8", fontSize:12.5, marginBottom:12 }}>Subject: <strong>You've been invited to the Final Pass Down Admin Portal</strong></div>
-                      <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:8 }}>Hi {createdAdmin.name.split(" ")[0]},</div>
-                      <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7, marginBottom:14 }}>
+                      <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:2 }}>From: <strong>noreply@finalpassdown.com</strong></div>
+                      <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:12 }}>Subject: <strong>You've been invited to the Final Pass Down Admin Portal</strong></div>
+                      <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:8 }}>Hi {createdAdmin.name.split(" ")[0]},</div>
+                      <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7, marginBottom:14 }}>
                         <strong style={{ color:"#E8EDF5" }}>Alex Johnson</strong> has invited you to join the Final Pass Down admin team as{" "}
                         <strong>{ROLE_PRESETS[createdAdmin.role].label}</strong>.<br/><br/>
                         Click below to set your password and access the Command Center. This link expires in <strong>72 hours</strong> and is single-use.
@@ -758,7 +758,7 @@ export function AdminRoles() {
                           Accept Invitation & Set Password →
                         </div>
                       </div>
-                      <div style={{ color:"#B0C0DC", fontSize:11, textAlign:"center" }}>
+                      <div style={{ color:"#B0C0DC", fontSize:12.5, textAlign:"center" }}>
                         Single-use link · Expires 72 hours after sending · Ignore if unexpected
                       </div>
                     </div>
@@ -766,7 +766,7 @@ export function AdminRoles() {
 
                   {/* Copy login link */}
                   <div>
-                    <div style={{ color:"#8A9AB8", fontSize:12.5, fontWeight:600, marginBottom:6, ...MONO }}>ONE-TIME LOGIN LINK (DEMO)</div>
+                    <div style={{ color:"#8A9AB8", fontSize:14, fontWeight:600, marginBottom:6, ...MONO }}>ONE-TIME LOGIN LINK (DEMO)</div>
                     <div className="flex gap-2">
                       <div className="flex-1 px-3 py-2.5 rounded-2xl truncate text-xs"
                         style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.12)", color:"#8A9AB8", ...MONO }}>
@@ -789,8 +789,8 @@ export function AdminRoles() {
                       { label:"Link Expires",   value:"72 hours from now" },
                     ].map(r => (
                       <div key={r.label} className="px-3 py-2.5 rounded-2xl" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.08)" }}>
-                        <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{r.label.toUpperCase()}</div>
-                        <div style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:600, marginTop:2 }}>{r.value}</div>
+                        <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{r.label.toUpperCase()}</div>
+                        <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:600, marginTop:2 }}>{r.value}</div>
                       </div>
                     ))}
                   </div>

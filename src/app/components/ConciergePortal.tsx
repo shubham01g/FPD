@@ -95,7 +95,7 @@ const DEFAULT_SLOTS = (clientName: string) => {
 function MissedCallModal({ client, specialistName, onClose, onSent }: {
   client: WGClient; specialistName: string; onClose: () => void; onSent: (token: string) => void;
 }) {
-  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:14.5, color:"#FFFFFF", outline:"none", width:"100%" };
+  const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none", width:"100%" };
   const [slots, setSlots] = useState<string[]>(DEFAULT_SLOTS(client.name));
   const [customSlot, setCustomSlot] = useState("");
   const [emailNote, setEmailNote] = useState("");
@@ -150,8 +150,8 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
               <PhoneMissed size={18} color="#F6AD55"/>
             </div>
             <div>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>Missed Call — Send Scheduling Link</div>
-              <div style={{ color:"#4A5A7A", fontSize:13.5, marginTop:1 }}>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:21.5, color:"#E8EDF5" }}>Missed Call — Send Scheduling Link</div>
+              <div style={{ color:"#4A5A7A", fontSize:15, marginTop:1 }}>
                 {client.name} will tap a link and pick the best time to call back
               </div>
             </div>
@@ -165,7 +165,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
 
               {/* Email preview */}
               <div>
-                <div style={{ color:"#8A9AB8", fontSize:12.5, fontWeight:600, fontFamily:"var(--font-mono)", marginBottom:8 }}>
+                <div style={{ color:"#8A9AB8", fontSize:14, fontWeight:600, fontFamily:"var(--font-mono)", marginBottom:8 }}>
                   EMAIL PREVIEW
                 </div>
                 <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.12)" }}>
@@ -174,15 +174,15 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#FC8181" }}/>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#F6AD55" }}/>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background:"#48BB78" }}/>
-                    <span style={{ color:"#4A5A7A", fontSize:11, fontFamily:"var(--font-mono)", marginLeft:8 }}>
+                    <span style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)", marginLeft:8 }}>
                       TO: {client.email}
                     </span>
                   </div>
                   <div className="p-4" style={{ background:"#fff" }}>
-                    <div style={{ color:"#8A9AB8", fontSize:12.5, marginBottom:10 }}>
+                    <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:10 }}>
                       Subject: <strong>We tried to reach you — pick a time that works!</strong>
                     </div>
-                    <div style={{ color:"#0D1428", fontSize:14.5, lineHeight:1.7 }}>
+                    <div style={{ color:"#0D1428", fontSize:16, lineHeight:1.7 }}>
                       Hi <strong>{client.name.split(" ")[0]}</strong>,<br/><br/>
                       This is <strong>{specialistName}</strong> from the Final Pass Down White Glove team.
                       I tried to reach you today but wasn't able to connect — no worries at all!<br/><br/>
@@ -195,7 +195,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                         Choose Your Callback Time →
                       </div>
                     </div>
-                    <div style={{ color:"#8A9AB8", fontSize:12.5, textAlign:"center" }}>
+                    <div style={{ color:"#8A9AB8", fontSize:14, textAlign:"center" }}>
                       Questions? Call us at (800) 555-0199
                     </div>
                   </div>
@@ -204,7 +204,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
 
               {/* Optional personal note */}
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:13.5, fontWeight:600, display:"block", marginBottom:4 }}>
+                <label style={{ color:"#8A9AB8", fontSize:15, fontWeight:600, display:"block", marginBottom:4 }}>
                   Add a personal note (optional)
                 </label>
                 <textarea value={emailNote} onChange={e => setEmailNote(e.target.value)} rows={2}
@@ -214,7 +214,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
 
               {/* Time slots */}
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:13.5, fontWeight:600, display:"block", marginBottom:6 }}>
+                <label style={{ color:"#8A9AB8", fontSize:15, fontWeight:600, display:"block", marginBottom:6 }}>
                   Available time slots (client picks one)
                 </label>
                 <div className="space-y-2">
@@ -262,8 +262,8 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
                 <CheckCircle size={28} color="#FFFFFF"/>
               </div>
               <div>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Email Sent!</div>
-                <div style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
+                <div style={{ fontFamily:"var(--font-display)", fontSize:25, color:"#E8EDF5" }}>Email Sent!</div>
+                <div style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
                   <strong style={{ color:"#E8EDF5" }}>{client.name}</strong> will receive the scheduling link shortly.
                   When they pick a time, it will appear on their client card automatically.
                 </div>
@@ -272,7 +272,7 @@ function MissedCallModal({ client, specialistName, onClose, onSent }: {
 
             {/* Copy link */}
             <div>
-              <div style={{ color:"#8A9AB8", fontSize:12.5, fontWeight:600, fontFamily:"var(--font-mono)", marginBottom:6 }}>
+              <div style={{ color:"#8A9AB8", fontSize:14, fontWeight:600, fontFamily:"var(--font-mono)", marginBottom:6 }}>
                 SCHEDULING LINK (share directly if needed)
               </div>
               <div className="flex gap-2">
@@ -336,13 +336,13 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#6FAE8B", fontSize:18, ...DISPLAY }}>
+              style={{ width:44, height:44, background:"rgba(91,167,214,0.12)", color:"#6FAE8B", fontSize:20, ...DISPLAY }}>
               {client.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span style={{ ...DISPLAY, fontSize:18, color:"#E8EDF5" }}>{client.name}</span>
-                {client.age && <span style={{ color:"#4A5A7A", fontSize:13.5 }}>Age {client.age}</span>}
+                <span style={{ ...DISPLAY, fontSize:20, color:"#E8EDF5" }}>{client.name}</span>
+                {client.age && <span style={{ color:"#4A5A7A", fontSize:15 }}>Age {client.age}</span>}
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{ background:`${statusColor}15`, color:statusColor, ...MONO }}>
                   {client.status.toUpperCase()}
@@ -352,8 +352,8 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
                     style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", ...MONO }}>WAIVED</span>
                 )}
               </div>
-              <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{client.email} · {client.phone}</div>
-              <div style={{ color:"#4A5A7A", fontSize:12.5, marginTop:1 }}>{client.plan} · Intake: {client.intakeDate}</div>
+              <div style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>{client.email} · {client.phone}</div>
+              <div style={{ color:"#4A5A7A", fontSize:14, marginTop:1 }}>{client.plan} · Intake: {client.intakeDate}</div>
             </div>
           </div>
           <button onClick={() => setOpen(!open)} style={{ color:"#4A5A7A" }}>
@@ -364,8 +364,8 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
         {/* Progress */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-1">
-            <span style={{ color:"#8A9AB8", fontSize:12.5 }}>Vault completion</span>
-            <span style={{ color:"#6FAE8B", fontSize:12.5, fontWeight:700 }}>{completionPct}%</span>
+            <span style={{ color:"#8A9AB8", fontSize:14 }}>Vault completion</span>
+            <span style={{ color:"#6FAE8B", fontSize:14, fontWeight:700 }}>{completionPct}%</span>
           </div>
           <div className="h-2 rounded-full" style={{ background:"rgba(91,167,214,0.1)" }}>
             <div className="h-2 rounded-full" style={{ width:`${completionPct}%`, background:"linear-gradient(90deg,#5BA7D6,#6F9E94)" }}/>
@@ -377,8 +377,8 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
           <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(246,173,85,0.07)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <Clock size={11} color="#F6AD55"/>
-            <span style={{ color:"#F6AD55", fontSize:12.5, fontWeight:600 }}>Next:</span>
-            <span style={{ color:"#8A9AB8", fontSize:12.5 }}>{client.nextSession}</span>
+            <span style={{ color:"#F6AD55", fontSize:14, fontWeight:600 }}>Next:</span>
+            <span style={{ color:"#8A9AB8", fontSize:14 }}>{client.nextSession}</span>
           </div>
         )}
 
@@ -388,15 +388,15 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
             className="flex items-center gap-2 w-full mt-3 px-3 py-2.5 rounded-2xl text-left"
             style={{ background:"rgba(252,129,129,0.07)", border:"1px solid rgba(252,129,129,0.25)" }}>
             <AlertCircle size={12} color="#FC8181"/>
-            <span style={{ color:"#FC8181", fontSize:12.5, fontWeight:600 }}>Authorization waiver not yet signed</span>
-            <span style={{ color:"#FC8181", fontSize:12.5, marginLeft:"auto" }}>View →</span>
+            <span style={{ color:"#FC8181", fontSize:14, fontWeight:600 }}>Authorization waiver not yet signed</span>
+            <span style={{ color:"#FC8181", fontSize:14, marginLeft:"auto" }}>View →</span>
           </button>
         )}
         {signedWaiver && (
           <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-2xl"
             style={{ background:"rgba(72,187,120,0.07)", border:"1px solid rgba(72,187,120,0.2)" }}>
             <Shield size={11} color="#FFFFFF"/>
-            <span style={{ color:"#D99A6B", fontSize:12.5, fontWeight:600 }}>Authorization waiver signed · Access granted</span>
+            <span style={{ color:"#D99A6B", fontSize:14, fontWeight:600 }}>Authorization waiver signed · Access granted</span>
           </div>
         )}
       </div>
@@ -406,14 +406,14 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
         <div className="px-5 pb-5 border-t space-y-4" style={{ borderColor:"rgba(91,167,214,0.1)" }}>
           {/* Reason */}
           <div className="pt-4">
-            <div style={{ color:"#4A5A7A", fontSize:11, ...MONO, marginBottom:4 }}>INTAKE REASON</div>
-            <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>{client.reason}</div>
+            <div style={{ color:"#4A5A7A", fontSize:12.5, ...MONO, marginBottom:4 }}>INTAKE REASON</div>
+            <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7 }}>{client.reason}</div>
           </div>
 
           {/* Sessions */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div style={{ color:"#4A5A7A", fontSize:11, ...MONO }}>SESSIONS ({client.sessions.length})</div>
+              <div style={{ color:"#4A5A7A", fontSize:12.5, ...MONO }}>SESSIONS ({client.sessions.length})</div>
               <button onClick={() => toast.success("Session scheduled — calendar invite sent (demo)")}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
@@ -429,12 +429,12 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
                     <SessionBadge type={s.type}/>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:500 }}>{s.date} · {s.time}</span>
+                        <span style={{ color:"#E8EDF5", fontSize:15, fontWeight:500 }}>{s.date} · {s.time}</span>
                         <span className="px-1.5 py-0.5 rounded text-xs font-bold"
                           style={{ background:`${sc}15`, color:sc, ...MONO }}>{s.status.toUpperCase()}</span>
-                        {s.duration !== "—" && <span style={{ color:"#4A5A7A", fontSize:11 }}>{s.duration}</span>}
+                        {s.duration !== "—" && <span style={{ color:"#4A5A7A", fontSize:12.5 }}>{s.duration}</span>}
                       </div>
-                      {s.notes && <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:3, lineHeight:1.5 }}>{s.notes}</div>}
+                      {s.notes && <div style={{ color:"#8A9AB8", fontSize:14, marginTop:3, lineHeight:1.5 }}>{s.notes}</div>}
                     </div>
                   </div>
                 );
@@ -444,17 +444,17 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
 
           {/* Notes */}
           <div>
-            <div style={{ color:"#4A5A7A", fontSize:11, ...MONO, marginBottom:4 }}>MY NOTES</div>
+            <div style={{ color:"#4A5A7A", fontSize:12.5, ...MONO, marginBottom:4 }}>MY NOTES</div>
             {notes && (
               <div className="px-3 py-2.5 rounded-2xl mb-2" style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.1)" }}>
-                <div style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>{notes}</div>
+                <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7 }}>{notes}</div>
               </div>
             )}
             {addNote ? (
               <div className="space-y-2">
                 <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={2}
                   placeholder="Add a session note…" className="w-full resize-none px-3 py-2 rounded-2xl"
-                  style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:13.5, outline:"none" }}/>
+                  style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:15, outline:"none" }}/>
                 <div className="flex gap-2">
                   <button onClick={() => { if(noteText.trim()) { setNotes(n => n ? n+"\n\n"+noteText.trim() : noteText.trim()); toast.success("Note saved"); } setNoteText(""); setAddNote(false); }}
                     className="flex-1 py-2 rounded-2xl text-xs font-semibold" style={{ background:"#5BA7D6", color:"#fff" }}>
@@ -540,7 +540,7 @@ function ClientCard({ client, specialistName }: { client: WGClient; specialistNa
         <div className="mx-5 mb-4 flex items-center gap-2 px-3 py-2.5 rounded-2xl"
           style={{ background:"rgba(246,173,85,0.07)", border:"1px solid rgba(246,173,85,0.2)" }}>
           <Link size={11} color="#F6AD55"/>
-          <span style={{ color:"#F6AD55", fontSize:12.5 }}>Scheduling link sent — waiting for {client.name.split(" ")[0]} to pick a time</span>
+          <span style={{ color:"#F6AD55", fontSize:14 }}>Scheduling link sent — waiting for {client.name.split(" ")[0]} to pick a time</span>
         </div>
       )}
     </div>
@@ -582,8 +582,8 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           <div className="flex items-center gap-2.5">
             <img src={fpdSquareLogo} alt="FPD" style={{ width:30, height:30, borderRadius:7, objectFit:"contain" }}/>
             <div>
-              <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:10, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#34456A", fontSize:8, letterSpacing:"0.12em", ...MONO }}>CONCIERGE PORTAL</div>
+              <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
+              <div style={{ color:"#34456A", fontSize:9, letterSpacing:"0.12em", ...MONO }}>CONCIERGE PORTAL</div>
             </div>
           </div>
         </div>
@@ -593,12 +593,12 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           style={{ background:`${roleColor}15`, border:`1px solid ${roleColor}30` }}>
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-              style={{ width:32, height:32, background:`${roleColor}25`, color:roleColor, fontSize:13.5, ...DISPLAY }}>
+              style={{ width:32, height:32, background:`${roleColor}25`, color:roleColor, fontSize:15, ...DISPLAY }}>
               {employee.avatar}
             </div>
             <div>
-              <div style={{ color:"#E8EDF5", fontSize:12.5, fontWeight:600 }}>{employee.name}</div>
-              <div style={{ color:roleColor, fontSize:9, ...MONO }}>{ROLE_LABELS[employee.role].toUpperCase()}</div>
+              <div style={{ color:"#E8EDF5", fontSize:14, fontWeight:600 }}>{employee.name}</div>
+              <div style={{ color:roleColor, fontSize:10, ...MONO }}>{ROLE_LABELS[employee.role].toUpperCase()}</div>
             </div>
           </div>
         </div>
@@ -617,10 +617,10 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                 color:tab===item.id?"#FFFFFF":"#B0C0DC",
                 borderLeft:`2px solid ${tab===item.id?"#5BA7D6":"transparent"}` }}>
               <span style={{ color:tab===item.id?"#FFFFFF":"inherit" }}>{item.icon}</span>
-              <span style={{ fontSize:13.5, fontWeight:tab===item.id?600:400, flex:1 }}>{item.label}</span>
+              <span style={{ fontSize:15, fontWeight:tab===item.id?600:400, flex:1 }}>{item.label}</span>
               {item.badge !== undefined && (
                 <span className="px-1.5 py-0.5 rounded-full text-xs font-bold"
-                  style={{ background:tab===item.id?"rgba(255,255,255,0.15)":"rgba(91,167,214,0.2)", color:tab===item.id?"#fff":"#D68FA8", ...MONO, fontSize:10 }}>
+                  style={{ background:tab===item.id?"rgba(255,255,255,0.15)":"rgba(91,167,214,0.2)", color:tab===item.id?"#fff":"#D68FA8", ...MONO, fontSize:11 }}>
                   {item.badge}
                 </span>
               )}
@@ -633,9 +633,9 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           style={{ background:"rgba(252,129,129,0.05)", border:"1px solid rgba(252,129,129,0.15)" }}>
           <div className="flex items-center gap-1.5">
             <Shield size={10} color="#FC8181"/>
-            <span style={{ color:"#FC8181", fontSize:10, ...MONO }}>RESTRICTED ACCESS</span>
+            <span style={{ color:"#FC8181", fontSize:11, ...MONO }}>RESTRICTED ACCESS</span>
           </div>
-          <p style={{ color:"#6B7FA8", fontSize:10, lineHeight:1.5, marginTop:2 }}>
+          <p style={{ color:"#6B7FA8", fontSize:11, lineHeight:1.5, marginTop:2 }}>
             You can only access your {myClients.length} assigned client{myClients.length!==1?"s":""}.
           </p>
         </div>
@@ -643,7 +643,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
         <div className="px-2 py-3 border-t" style={{ borderColor:"rgba(91,167,214,0.1)" }}>
           <button onClick={onSignOut} className="w-full flex items-center gap-2 px-2.5 py-2 rounded-2xl"
             style={{ color:"#4A5A7A" }}>
-            <LogOut size={13}/><span style={{ fontSize:13.5 }}>Sign Out</span>
+            <LogOut size={13}/><span style={{ fontSize:15 }}>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -654,10 +654,10 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
         <header className="flex items-center justify-between px-5 py-3 border-b flex-shrink-0"
           style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,167,214,0.16)" }}>
           <div>
-            <h1 style={{ ...DISPLAY, fontSize:20, color:"#E8EDF5" }}>
+            <h1 style={{ ...DISPLAY, fontSize:22.5, color:"#E8EDF5" }}>
               {tab === "clients" ? "My Assigned Clients" : tab === "inbox" ? "Document Inbox" : tab === "schedule" ? "Upcoming Sessions" : "Authorization Waivers"}
             </h1>
-            <div style={{ color:"#4A5A7A", fontSize:11, ...MONO }}>
+            <div style={{ color:"#4A5A7A", fontSize:12.5, ...MONO }}>
               {employee.name} · {ROLE_LABELS[employee.role]} · Last login: {employee.lastLogin ?? "Now"}
             </div>
           </div>
@@ -665,7 +665,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
               style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.2)" }}>
               <div style={{ width:5, height:5, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 6px #48BB78" }}/>
-              <span style={{ color:"#D99A6B", fontSize:11, ...MONO, fontWeight:700 }}>ONLINE</span>
+              <span style={{ color:"#D99A6B", fontSize:12.5, ...MONO, fontWeight:700 }}>ONLINE</span>
             </div>
             <button style={{ color:"#4A5A7A" }}><Bell size={15}/></button>
           </div>
@@ -679,8 +679,8 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
               {myClients.length === 0 && (
                 <div className="py-16 text-center rounded-2xl" style={GLASS}>
                   <Star size={40} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>
-                  <div style={{ color:"#4A5A7A", fontSize:15.5 }}>No clients assigned yet.</div>
-                  <div style={{ color:"#6B7FA8", fontSize:13.5, marginTop:4 }}>Your administrator will assign clients to you shortly.</div>
+                  <div style={{ color:"#4A5A7A", fontSize:17.5 }}>No clients assigned yet.</div>
+                  <div style={{ color:"#6B7FA8", fontSize:15, marginTop:4 }}>Your administrator will assign clients to you shortly.</div>
                 </div>
               )}
               {myClients.map(c => <ClientCard key={c.id} client={c} specialistName={employee.name}/>)}
@@ -693,7 +693,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
               {upcomingSessions.length === 0 ? (
                 <div className="py-12 text-center rounded-2xl" style={GLASS}>
                   <Calendar size={36} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>
-                  <div style={{ color:"#4A5A7A", fontSize:15.5 }}>No upcoming sessions scheduled.</div>
+                  <div style={{ color:"#4A5A7A", fontSize:17.5 }}>No upcoming sessions scheduled.</div>
                 </div>
               ) : (
                 upcomingSessions.map(s => (
@@ -705,8 +705,8 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                           <Calendar size={20}/>
                         </div>
                         <div>
-                          <div style={{ ...DISPLAY, fontSize:17, color:"#E8EDF5" }}>{s.clientName}</div>
-                          <div style={{ color:"#8A9AB8", fontSize:13.5 }}>{s.date} · {s.time}</div>
+                          <div style={{ ...DISPLAY, fontSize:19, color:"#E8EDF5" }}>{s.clientName}</div>
+                          <div style={{ color:"#8A9AB8", fontSize:15 }}>{s.date} · {s.time}</div>
                           <div className="mt-1"><SessionBadge type={s.type}/></div>
                         </div>
                       </div>
@@ -736,7 +736,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
               <div className="flex items-start gap-3 p-4 rounded-2xl"
                 style={{ background:"rgba(91,167,214,0.04)", border:"1px solid rgba(91,167,214,0.15)" }}>
                 <Shield size={13} color="#FFFFFF" style={{ marginTop:1 }}/>
-                <p style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:1.7 }}>
+                <p style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7 }}>
                   Clients must sign their Authorization Waiver before you begin uploading documents or making changes on their behalf.
                 </p>
               </div>
@@ -748,8 +748,8 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                   <div key={client.id} className="p-5 rounded-2xl" style={GLASS}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div style={{ ...DISPLAY, fontSize:17, color:"#E8EDF5" }}>{client.name}</div>
-                        <div style={{ color:"#4A5A7A", fontSize:12.5 }}>{client.email}</div>
+                        <div style={{ ...DISPLAY, fontSize:19, color:"#E8EDF5" }}>{client.name}</div>
+                        <div style={{ color:"#4A5A7A", fontSize:14 }}>{client.email}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="px-2 py-1 rounded-full text-xs font-bold"
@@ -773,7 +773,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
                       </div>
                     </div>
                     {w?.signedAt && (
-                      <div style={{ color:"#D99A6B", fontSize:12.5, marginTop:6 }}>
+                      <div style={{ color:"#D99A6B", fontSize:14, marginTop:6 }}>
                         Signed by {w.signedName} on {w.signedAt}
                       </div>
                     )}

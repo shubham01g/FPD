@@ -51,13 +51,13 @@ const STORAGE_CSS = `
 
 .fpd-storage .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-storage .card.pad{padding:28px;}
-.fpd-storage .eyebrow{font-size:11px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-storage .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-storage .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.fpd-storage .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-storage .pg-sub{color:${MUTED};font-size:14.5px;max-width:660px;line-height:1.6;}
+.fpd-storage .pg-h1{font-size:30px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-storage .pg-sub{color:${MUTED};font-size:16px;max-width:660px;line-height:1.6;}
 
-.fpd-storage .sec-title{font-size:17px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
+.fpd-storage .sec-title{font-size:19px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;margin-bottom:16px;}
 .fpd-storage .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 
 /* alert banner */
@@ -68,10 +68,10 @@ const STORAGE_CSS = `
 .fpd-storage .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
 .fpd-storage .kcell:first-child{border-left:none;}
 .fpd-storage .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-storage .kcell .klbl{font-size:10.5px;font-weight:600;color:${MUTED};}
+.fpd-storage .kcell .klbl{font-size:12px;font-weight:600;color:${MUTED};}
 .fpd-storage .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-storage .kcell .kval{font-family:var(--font-display);font-size:27px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-storage .kcell .ksub{font-size:13px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
+.fpd-storage .kcell .kval{font-family:var(--font-display);font-size:30px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
+.fpd-storage .kcell .ksub{font-size:14.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
 .fpd-storage .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:880px){.fpd-storage .kstrip{grid-template-columns:1fr 1fr;}.fpd-storage .kcell:nth-child(3){border-left:none;}.fpd-storage .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
 
@@ -79,24 +79,24 @@ const STORAGE_CSS = `
 .fpd-storage .meter-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .fpd-storage .meter-track{position:relative;height:32px;border-radius:99px;background:#0F1624;margin-bottom:6px;}
 .fpd-storage .meter-fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transition:width .4s;}
-.fpd-storage .meter-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#04070E;font-size:13.5px;font-weight:700;}
+.fpd-storage .meter-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#04070E;font-size:15px;font-weight:700;}
 .fpd-storage .meter-mark{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.16);}
-.fpd-storage .meter-mark span{position:absolute;top:100%;margin-top:6px;left:50%;transform:translateX(-50%);font-size:10px;color:${MUTED};font-family:var(--font-mono);white-space:nowrap;}
+.fpd-storage .meter-mark span{position:absolute;top:100%;margin-top:6px;left:50%;transform:translateX(-50%);font-size:11px;color:${MUTED};font-family:var(--font-mono);white-space:nowrap;}
 .fpd-storage .thresh-row{display:flex;align-items:center;justify-content:space-between;margin-top:28px;}
 .fpd-storage .thresh{text-align:center;flex:1;}
-.fpd-storage .thresh-pct{font-family:var(--font-mono);font-size:14.5px;font-weight:700;}
-.fpd-storage .thresh-lbl{color:${TEXT};font-size:13.5px;}
-.fpd-storage .thresh-msg{color:${MUTED};font-size:12.5px;}
+.fpd-storage .thresh-pct{font-family:var(--font-mono);font-size:16px;font-weight:700;}
+.fpd-storage .thresh-lbl{color:${TEXT};font-size:15px;}
+.fpd-storage .thresh-msg{color:${MUTED};font-size:14px;}
 
 /* bar chart */
 .fpd-storage .chart-wrap{display:flex;align-items:flex-end;gap:8px;height:160px;position:relative;}
 .fpd-storage .chart-limit{position:absolute;left:0;right:0;border-top:2px dashed rgba(208,107,107,0.5);pointer-events:none;}
-.fpd-storage .chart-limit span{position:absolute;right:0;top:-14px;color:${NEG};font-size:10px;font-family:var(--font-mono);}
+.fpd-storage .chart-limit span{position:absolute;right:0;top:-14px;color:${NEG};font-size:11px;font-family:var(--font-mono);}
 .fpd-storage .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.fpd-storage .chart-val{color:${MUTED};font-size:10px;font-family:var(--font-mono);}
+.fpd-storage .chart-val{color:${MUTED};font-size:11px;font-family:var(--font-mono);}
 .fpd-storage .chart-bar-wrap{width:100%;height:120px;display:flex;align-items:flex-end;}
 .fpd-storage .chart-bar{width:100%;border-radius:4px 4px 0 0;}
-.fpd-storage .chart-foot{color:${MUTED};font-size:12.5px;margin-top:8px;}
+.fpd-storage .chart-foot{color:${MUTED};font-size:14px;margin-top:8px;}
 
 /* category */
 .fpd-storage .cat-row + .cat-row{margin-top:12px;}
@@ -109,22 +109,22 @@ const STORAGE_CSS = `
 @media (max-width:900px){.fpd-storage .plan-grid{grid-template-columns:1fr;}}
 .fpd-storage .plan-card{padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);background:#0F1624;}
 .fpd-storage .plan-card.current{background:rgba(91,110,225,0.08);border:2px solid ${ACCENT};}
-.fpd-storage .plan-tag{font-size:11px;font-family:var(--font-mono);color:#6FAE8B;margin-bottom:6px;}
-.fpd-storage .plan-name{font-family:var(--font-display);font-size:19px;color:${TEXT};margin-bottom:6px;}
-.fpd-storage .plan-price{font-size:24.5px;color:${TEXT};font-weight:700;}
-.fpd-storage .plan-price-sub{color:${MUTED};font-size:13.5px;}
-.fpd-storage .plan-detail{color:${MUTED};font-size:14px;}
-.fpd-storage .plan-btn{width:100%;padding:11px;border-radius:16px;font-size:14.5px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-storage .plan-tag{font-size:12.5px;font-family:var(--font-mono);color:#6FAE8B;margin-bottom:6px;}
+.fpd-storage .plan-name{font-family:var(--font-display);font-size:21.5px;color:${TEXT};margin-bottom:6px;}
+.fpd-storage .plan-price{font-size:27.5px;color:${TEXT};font-weight:700;}
+.fpd-storage .plan-price-sub{color:${MUTED};font-size:15px;}
+.fpd-storage .plan-detail{color:${MUTED};font-size:15.5px;}
+.fpd-storage .plan-btn{width:100%;padding:11px;border-radius:16px;font-size:16px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
 .fpd-storage .plan-btn.up{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.7);}
 .fpd-storage .plan-btn.down{background:#141B2E;color:${MUTED};}
-.fpd-storage .plan-btn.crypto{padding:9px;font-size:13.5px;background:rgba(247,147,26,0.1);color:#F7931A;border:1px solid rgba(247,147,26,0.3);}
+.fpd-storage .plan-btn.crypto{padding:9px;font-size:15px;background:rgba(247,147,26,0.1);color:#F7931A;border:1px solid rgba(247,147,26,0.3);}
 .fpd-storage .overage-note{margin-top:16px;padding:12px 16px;border-radius:16px;background:#0F1624;display:flex;align-items:center;gap:10px;}
-.fpd-storage .overage-note span{color:${MUTED};font-size:14.5px;}
+.fpd-storage .overage-note span{color:${MUTED};font-size:16px;}
 
 /* alert history */
 .fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#0F1624;}
 .fpd-storage .alert-row + .alert-row{margin-top:10px;}
-.fpd-storage .alert-tag{border-radius:16px;padding:4px 9px;font-family:var(--font-mono);font-size:12.5px;font-weight:700;flex-shrink:0;}
+.fpd-storage .alert-tag{border-radius:16px;padding:4px 9px;font-family:var(--font-mono);font-size:14px;font-weight:700;flex-shrink:0;}
 `;
 
 export function StorageUsage() {
@@ -175,8 +175,8 @@ export function StorageUsage() {
           <div className="alert-banner" style={{ background: `${bannerColor}14`, borderColor: `${bannerColor}4D` }}>
             <AlertTriangle size={16} color={bannerColor}/>
             <div>
-              <span style={{ color: bannerColor, fontWeight: 600, fontSize: 15.5 }}>{percent}% Storage Used</span>
-              <span style={{ color: MUTED, fontSize: 15.5 }}>
+              <span style={{ color: bannerColor, fontWeight: 600, fontSize: 17.5 }}>{percent}% Storage Used</span>
+              <span style={{ color: MUTED, fontSize: 17.5 }}>
                 {percent >= 95 ? " — Overage billing begins when limit is reached." :
                  percent >= 90 ? " — We recommend upgrading your plan." :
                  " — Consider managing your storage."}
@@ -203,7 +203,7 @@ export function StorageUsage() {
         <div className="card pad">
           <div className="meter-hd">
             <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Current Billing Cycle</h3>
-            <div style={{ color: MUTED, fontSize: 13.5, fontFamily: "var(--font-mono)" }}>Resets Jul 1, 2026</div>
+            <div style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>Resets Jul 1, 2026</div>
           </div>
           <div className="meter-track">
             <div className="meter-fill" style={{ width: `${Math.min(percent, 100)}%`, background: `linear-gradient(90deg, ${getBarColor(40)}, ${getBarColor(percent)})` }}/>
@@ -262,8 +262,8 @@ export function StorageUsage() {
               {usageByCategory.map(cat => (
                 <div key={cat.category} className="cat-row">
                   <div className="cat-hd">
-                    <span style={{ color: TEXT, fontSize: 14.5 }}>{cat.category}</span>
-                    <span style={{ color: MUTED, fontSize: 13.5, fontFamily: "var(--font-mono)" }}>{cat.gb} GB</span>
+                    <span style={{ color: TEXT, fontSize: 16 }}>{cat.category}</span>
+                    <span style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>{cat.gb} GB</span>
                   </div>
                   <div className="cat-track">
                     <div className="cat-fill" style={{ width: `${(cat.gb / used) * 100}%`, background: cat.color }} />
@@ -287,7 +287,7 @@ export function StorageUsage() {
                   <span className="plan-price-sub">/mo</span>
                 </div>
                 <div className="plan-detail" style={{ marginBottom: 4 }}>{plan.storage >= 1024 ? `${plan.storage / 1024} TB` : `${plan.storage} GB`} storage</div>
-                <div className="plan-detail" style={{ marginBottom: 12, fontSize: 12.5 }}>Overage: ${plan.overage}/GB</div>
+                <div className="plan-detail" style={{ marginBottom: 12, fontSize: 14 }}>Overage: ${plan.overage}/GB</div>
                 {!plan.current && (
                   <div className="space-y-2">
                     <button
@@ -321,8 +321,8 @@ export function StorageUsage() {
             {alertHistory.map((alert, i) => (
               <div key={i} className="alert-row">
                 <div className="alert-tag" style={{ background: `${alert.color}20`, color: alert.color }}>{alert.type}</div>
-                <div style={{ color: TEXT, fontSize: 14.5, flex: 1 }}>{alert.message}</div>
-                <div style={{ color: MUTED, fontSize: 13.5, flexShrink: 0 }}>{alert.date}</div>
+                <div style={{ color: TEXT, fontSize: 16, flex: 1 }}>{alert.message}</div>
+                <div style={{ color: MUTED, fontSize: 15, flexShrink: 0 }}>{alert.date}</div>
               </div>
             ))}
           </div>

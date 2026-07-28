@@ -60,43 +60,43 @@ const VITAL_CSS = `
 
 .fpd-vital .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-vital .card.pad{padding:28px;}
-.fpd-vital .eyebrow{font-size:11px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
-.fpd-vital .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:15.5px;font-weight:600;color:${TEXT};margin-bottom:16px;}
+.fpd-vital .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-vital .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:17.5px;font-weight:600;color:${TEXT};margin-bottom:16px;}
 .fpd-vital .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 
 /* header */
 .fpd-vital .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.fpd-vital .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-vital .pg-sub{color:${MUTED};font-size:14.5px;max-width:640px;line-height:1.6;}
+.fpd-vital .pg-h1{font-size:30px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-vital .pg-sub{color:${MUTED};font-size:16px;max-width:640px;line-height:1.6;}
 .fpd-vital .head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:15.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 .fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
+.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:15.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
 .fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:#6FAE8B;}
 
 /* empty state */
 .fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
 .fpd-vital .empty-ico{width:52px;height:52px;border-radius:18px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
-.fpd-vital .empty-title{color:${TEXT};font-size:17px;font-weight:600;}
-.fpd-vital .empty-desc{color:${MUTED};font-size:14px;max-width:440px;line-height:1.6;}
+.fpd-vital .empty-title{color:${TEXT};font-size:19px;font-weight:600;}
+.fpd-vital .empty-desc{color:${MUTED};font-size:15.5px;max-width:440px;line-height:1.6;}
 
 /* requirement rows */
 .fpd-vital .reqs{display:flex;flex-direction:column;gap:10px;}
 .fpd-vital .req-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-vital .req-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-vital .req-title{color:${TEXT};font-size:14.5px;font-weight:600;margin-bottom:4px;}
-.fpd-vital .req-body{color:${MUTED};font-size:13.5px;line-height:1.7;}
+.fpd-vital .req-title{color:${TEXT};font-size:16px;font-weight:600;margin-bottom:4px;}
+.fpd-vital .req-body{color:${MUTED};font-size:15px;line-height:1.7;}
 .fpd-vital .req-body code{font-family:var(--font-mono);color:${SOFT};}
 
 /* frame */
 .fpd-vital .frame-wrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#0B111D;}
 .fpd-vital .frame-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0B111D;}
-.fpd-vital .frame-overlay .url{font-family:var(--font-mono);font-size:12.5px;color:${FAINT};opacity:.8;}
+.fpd-vital .frame-overlay .url{font-family:var(--font-mono);font-size:14px;color:${FAINT};opacity:.8;}
 .fpd-vital .spin{animation:fpdvitalspin 1s linear infinite;}
 @keyframes fpdvitalspin{to{transform:rotate(360deg);}}
 
 /* footer note */
-.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:13.5px;line-height:1.7;}
+.fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:15px;line-height:1.7;}
 `;
 
 export function VitalClone() {
@@ -191,16 +191,16 @@ export function VitalClone() {
           {state === "loading" ? (
             <>
               <Loader2 size={26} color="#FFFFFF" className="spin" />
-              <div style={{ color: MUTED, fontSize: 14.5 }}>Loading VitalClone…</div>
+              <div style={{ color: MUTED, fontSize: 16 }}>Loading VitalClone…</div>
               <div className="url">{VITALCLONE_URL}</div>
             </>
           ) : (
             <div style={{ textAlign: "center", maxWidth: 460, padding: 24 }}>
               <TriangleAlert size={26} color={WARN} style={{ margin: "0 auto 12px" }} />
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: TEXT, marginBottom: 8 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: TEXT, marginBottom: 8 }}>
                 VitalClone didn't load
               </div>
-              <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.75, marginBottom: 16 }}>
+              <p style={{ color: MUTED, fontSize: 15.5, lineHeight: 1.75, marginBottom: 16 }}>
                 No response after {LOAD_TIMEOUT_MS / 1000} seconds. The most common cause is VitalClone refusing to be framed
                 (<span style={{ fontFamily: "var(--font-mono)" }}>X-Frame-Options</span> or a restrictive <span style={{ fontFamily: "var(--font-mono)" }}>frame-ancestors</span> policy).
                 Open it in a new tab to check whether the site itself is up.

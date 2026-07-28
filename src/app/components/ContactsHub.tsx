@@ -97,10 +97,10 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
         <span>VIEW ONLY — Guardian contacts cannot download files</span>
       </div>
       <div className="flex items-center justify-between">
-        <span style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
+        <span style={{ color: MUTED, fontSize: 14, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
         <div className="flex gap-2">
-          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 11, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
-          <button onClick={()=>onChange([])} style={{ color: MUTED, fontSize: 11, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
+          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+          <button onClick={()=>onChange([])} style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
         </div>
       </div>
       <div className="folder-grid">
@@ -109,8 +109,8 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
           return (
             <button key={f.id} onClick={()=>toggle(f.id)} className="folder-chip"
               style={{ background:active?`${f.color}1E`:"rgba(255,255,255,0.03)", border:`1px solid ${active?f.color+"55":"rgba(255,255,255,0.08)"}`, color:active?f.color:MUTED }}>
-              <span style={{ fontSize:13.5 }}>{f.emoji}</span>
-              <span style={{ fontSize:10, fontWeight:active?700:400, lineHeight:1.3 }}>{f.label}</span>
+              <span style={{ fontSize:15 }}>{f.emoji}</span>
+              <span style={{ fontSize:11, fontWeight:active?700:400, lineHeight:1.3 }}>{f.label}</span>
               {active && <CheckCircle size={9} color={f.color} style={{ marginLeft:"auto" }}/>}
             </button>
           );
@@ -181,7 +181,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
               <button onClick={()=>setShowFolders(!showFolders)} className="folder-picker-hd">
                 <div className="flex items-center gap-2">
                   <FolderOpen size={14}/>
-                  <span style={{ fontSize:13.5, fontWeight:700, fontFamily:"var(--font-mono)" }}>
+                  <span style={{ fontSize:15, fontWeight:700, fontFamily:"var(--font-mono)" }}>
                     FOLDER ACCESS {guardianFolders.length > 0 ? `· ${guardianFolders.length} assigned` : "— required"}
                   </span>
                 </div>
@@ -193,7 +193,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 
           {isLegacy && (
             <div>
-              <div style={{ color:MUTED, fontSize:12.5, fontFamily:"var(--font-mono)", marginBottom:8 }}>
+              <div style={{ color:MUTED, fontSize:14, fontFamily:"var(--font-mono)", marginBottom:8 }}>
                 VERIFICATION REQUIREMENTS (choose what your legacy contact must provide)
               </div>
               <div className="space-y-2">
@@ -205,10 +205,10 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
                       <div className="verif-ico" style={{ background:selected?"rgba(91,110,225,0.12)":"rgba(255,255,255,0.04)" }}>{vm.icon}</div>
                       <div className="flex-1" style={{ minWidth: 0 }}>
                         <div className="flex items-center gap-2">
-                          <span style={{ color:TEXT, fontSize:13.5, fontWeight:600 }}>{vm.label}</span>
+                          <span style={{ color:TEXT, fontSize:15, fontWeight:600 }}>{vm.label}</span>
                           {vm.required && <span className="req-tag">REQUIRED</span>}
                         </div>
-                        <div style={{ color:MUTED, fontSize:12.5, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
+                        <div style={{ color:MUTED, fontSize:14, marginTop:1, lineHeight:1.4 }}>{vm.desc}</div>
                       </div>
                       <div className="flex-shrink-0" style={{ marginTop: 2 }}>
                         {selected ? <CheckCircle size={15} color="#FFFFFF"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
@@ -305,7 +305,7 @@ function ContactSection({
       <div>
         {contacts.length === 0 && (
           <div style={{ padding: "32px 0", textAlign: "center" }}>
-            <div style={{ color: SOFT, fontSize: 14.5 }}>No {cfg.label.toLowerCase()}s added yet.</div>
+            <div style={{ color: SOFT, fontSize: 16 }}>No {cfg.label.toLowerCase()}s added yet.</div>
             <button onClick={onAdd} className="add-one-link" style={{ color: cfg.color }}>Add one now</button>
           </div>
         )}
@@ -329,7 +329,7 @@ function ContactSection({
 
                 <div className="flex-1" style={{ minWidth: 0 }}>
                   <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
-                    <span style={{ color:TEXT, fontSize:15.5, fontWeight:600 }}>{c.name}</span>
+                    <span style={{ color:TEXT, fontSize:17.5, fontWeight:600 }}>{c.name}</span>
                     {isLegacy && i === 0 && (
                       <span className="rank-badge" style={{ background:"rgba(91,110,225,0.14)", color:"#6FAE8B" }}>
                         <Crown size={9}/> PRIMARY
@@ -340,7 +340,7 @@ function ContactSection({
                         CONTINGENT #{i+1}
                       </span>
                     )}
-                    <span style={{ color:MUTED, fontSize:13.5 }}>{c.relationship}</span>
+                    <span style={{ color:MUTED, fontSize:15 }}>{c.relationship}</span>
                   </div>
 
                   <div className="flex items-center gap-3 flex-wrap">
@@ -354,12 +354,12 @@ function ContactSection({
                   {isGuardian && c.accessLevel && (
                     <div className="flex items-center gap-1.5" style={{ marginTop: 6 }}>
                       <FolderOpen size={10} color="#FFFFFF"/>
-                      <span style={{ color:MUTED, fontSize:11 }}>{c.accessLevel}</span>
+                      <span style={{ color:MUTED, fontSize:12.5 }}>{c.accessLevel}</span>
                     </div>
                   )}
 
                   {isLegacy && (
-                    <div style={{ marginTop: 6, fontSize: 13.5, color: MUTED }}>
+                    <div style={{ marginTop: 6, fontSize: 15, color: MUTED }}>
                       {i === 0
                         ? "Has primary authority — notified first and assumes full control of the vault."
                         : `Backup #${i+1} — assumes control only if all contacts ranked above are unable to act.`}
@@ -375,7 +375,7 @@ function ContactSection({
                           <div className="status-chip lg" style={{ background:`${vc.color}1E`, color:vc.color }}>
                             {vc.icon}<span style={{ fontFamily:"var(--font-mono)", marginLeft:3 }}>{vc.label}</span>
                           </div>
-                          <span style={{ color:MUTED, fontSize:12.5 }}>
+                          <span style={{ color:MUTED, fontSize:14 }}>
                             {vs2==="not_sent" && "ID verification invite not yet sent"}
                             {vs2==="pending" && "Invite sent — awaiting ID submission"}
                             {vs2==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
@@ -408,7 +408,7 @@ function ContactSection({
                             </button>
                           )}
                           {vs2 === "verified" && (
-                            <div className="flex items-center gap-1.5" style={{ fontSize: 13.5, color: "#D99A6B" }}>
+                            <div className="flex items-center gap-1.5" style={{ fontSize: 15, color: "#D99A6B" }}>
                               <UserCheck size={11}/> Vault access activates upon verified passing
                             </div>
                           )}
@@ -448,63 +448,63 @@ const CONTACTS_CSS = `
 
 .fpd-contacts .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-contacts .card.pad{padding:28px;}
-.fpd-contacts .eyebrow{font-size:11px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
+.fpd-contacts .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
 
 .fpd-contacts .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.fpd-contacts .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin-bottom:4px;letter-spacing:-0.02em;font-family:var(--font-display);}
-.fpd-contacts .pg-sub{color:${MUTED};font-size:14.5px;max-width:52ch;line-height:1.6;}
+.fpd-contacts .pg-h1{font-size:30px;color:${TEXT};font-weight:600;margin-bottom:4px;letter-spacing:-0.02em;font-family:var(--font-display);}
+.fpd-contacts .pg-sub{color:${MUTED};font-size:16px;max-width:52ch;line-height:1.6;}
 .fpd-contacts .head-ico{width:52px;height:52px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fpd-contacts .access-pill{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:16px;flex-shrink:0;}
 .fpd-contacts .access-dot{width:6px;height:6px;border-radius:50%;}
 
-.fpd-contacts .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;background:none;}
-.fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid;background:none;}
+.fpd-contacts .btn-sec{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:14.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* chain of authority */
 .fpd-contacts .chain-box{padding:20px;border-radius:22px;background:rgba(91,110,225,0.05);border:2px solid rgba(91,110,225,0.22);}
 .fpd-contacts .chain-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.fpd-contacts .chain-hd span{font-family:var(--font-display);font-size:15.5px;color:${TEXT};}
+.fpd-contacts .chain-hd span{font-family:var(--font-display);font-size:17.5px;color:${TEXT};}
 .fpd-contacts .chain-row{display:flex;align-items:center;gap:12px;}
-.fpd-contacts .chain-num{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;}
-.fpd-contacts .chain-note{margin-top:12px;padding:10px 12px;border-radius:16px;font-size:13.5px;display:flex;align-items:flex-start;gap:8px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);color:${MUTED};line-height:1.5;}
+.fpd-contacts .chain-num{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.fpd-contacts .chain-note{margin-top:12px;padding:10px 12px;border-radius:16px;font-size:15px;display:flex;align-items:flex-start;gap:8px;background:rgba(217,165,94,0.07);border:1px solid rgba(217,165,94,0.22);color:${MUTED};line-height:1.5;}
 
 /* solo-legacy info banner */
 .fpd-contacts .info-banner{display:flex;align-items:flex-start;gap:10px;padding:16px 20px;border-radius:22px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
-.fpd-contacts .info-banner p{color:${MUTED};font-size:13.5px;line-height:1.7;}
+.fpd-contacts .info-banner p{color:${MUTED};font-size:15px;line-height:1.7;}
 
 /* section */
 .fpd-contacts .section-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-contacts .section-ico{width:38px;height:38px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.fpd-contacts .section-title{font-family:var(--font-display);font-size:17px;color:${TEXT};}
-.fpd-contacts .section-count{padding:2px 8px;border-radius:99px;font-size:12.5px;font-weight:700;font-family:var(--font-mono);}
-.fpd-contacts .section-desc{color:${MUTED};font-size:12.5px;margin-top:2px;}
-.fpd-contacts .view-only-strip{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(95,190,145,0.16);background:rgba(95,190,145,0.05);color:#D99A6B;font-size:12.5px;}
-.fpd-contacts .view-only-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:12.5px;font-weight:700;}
-.fpd-contacts .add-one-link{margin-top:6px;font-size:12.5px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .section-title{font-family:var(--font-display);font-size:19px;color:${TEXT};}
+.fpd-contacts .section-count{padding:2px 8px;border-radius:99px;font-size:14px;font-weight:700;font-family:var(--font-mono);}
+.fpd-contacts .section-desc{color:${MUTED};font-size:14px;margin-top:2px;}
+.fpd-contacts .view-only-strip{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(95,190,145,0.16);background:rgba(95,190,145,0.05);color:#D99A6B;font-size:14px;}
+.fpd-contacts .view-only-note{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:14px;font-weight:700;}
+.fpd-contacts .add-one-link{margin-top:6px;font-size:14px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
 
 /* contact row */
 .fpd-contacts .contact-row{padding:18px 20px;border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-contacts .contact-row:first-child{border-top:none;}
-.fpd-contacts .priority-badge{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700;font-family:var(--font-display);}
-.fpd-contacts .rank-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--font-mono);}
-.fpd-contacts .meta-item{display:flex;align-items:center;gap:4px;font-size:12.5px;color:${MUTED};}
-.fpd-contacts .status-chip{display:flex;align-items:center;gap:0;padding:2px 6px;border-radius:6px;font-size:12.5px;}
-.fpd-contacts .status-chip.lg{padding:5px 10px;border-radius:16px;font-size:13.5px;font-weight:700;}
+.fpd-contacts .priority-badge{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17.5px;font-weight:700;font-family:var(--font-display);}
+.fpd-contacts .rank-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:12.5px;font-weight:700;font-family:var(--font-mono);}
+.fpd-contacts .meta-item{display:flex;align-items:center;gap:4px;font-size:14px;color:${MUTED};}
+.fpd-contacts .status-chip{display:flex;align-items:center;gap:0;padding:2px 6px;border-radius:6px;font-size:14px;}
+.fpd-contacts .status-chip.lg{padding:5px 10px;border-radius:16px;font-size:15px;font-weight:700;}
 
 /* modal */
 .fpd-contacts .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.8);backdrop-filter:blur(8px);}
 .fpd-contacts .modal{width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
 .fpd-contacts .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.08);}
-.fpd-contacts .modal-head h3{font-family:var(--font-display);font-size:19px;color:${TEXT};font-weight:600;}
-.fpd-contacts .modal-sub{color:${MUTED};font-size:13.5px;margin-top:3px;}
+.fpd-contacts .modal-head h3{font-family:var(--font-display);font-size:21.5px;color:${TEXT};font-weight:600;}
+.fpd-contacts .modal-sub{color:${MUTED};font-size:15px;margin-top:3px;}
 .fpd-contacts .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-contacts .modal-body{padding:22px 24px;display:flex;flex-direction:column;gap:14px;}
-.fpd-contacts .field label{display:block;margin-bottom:6px;font-size:10.5px;font-weight:600;color:${MUTED};}
-.fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14.5px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-contacts .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
+.fpd-contacts .field input,.fpd-contacts .field select{width:100%;padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-contacts .field input::placeholder{color:${FAINT};}
 .fpd-contacts .field input:focus,.fpd-contacts .field select:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-contacts .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.08);}
-.fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:16px;font-size:14.5px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(91,110,225,0.7);}
+.fpd-contacts .modal-foot .save{flex:1;padding:13px;border-radius:16px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);box-shadow:0 8px 20px -10px rgba(91,110,225,0.7);}
 
 /* folder picker */
 .fpd-contacts .folder-picker{border-radius:18px;overflow:hidden;border:1px solid rgba(95,190,145,0.28);}
@@ -514,12 +514,12 @@ const CONTACTS_CSS = `
 
 /* verification requirement rows */
 .fpd-contacts .verif-row{width:100%;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:16px;text-align:left;border:1px solid;font-family:var(--font-body);}
-.fpd-contacts .verif-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;}
-.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:11px;background:rgba(91,110,225,0.14);color:#6FAE8B;font-family:var(--font-mono);}
+.fpd-contacts .verif-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.fpd-contacts .req-tag{padding:2px 6px;border-radius:5px;font-size:12.5px;background:rgba(91,110,225,0.14);color:#6FAE8B;font-family:var(--font-mono);}
 .fpd-contacts .sub-panel{margin-top:12px;padding:14px;border-radius:16px;background:rgba(91,110,225,0.04);border:1px solid rgba(91,110,225,0.14);}
-.fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:11px;color:${MUTED};}
-.fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14.5px;outline:none;font-family:var(--font-body);}
-.fpd-contacts .sub-hint{color:${MUTED};font-size:11px;margin-top:5px;}
+.fpd-contacts .sub-panel label{display:block;margin-bottom:5px;font-family:var(--font-mono);font-size:12.5px;color:${MUTED};}
+.fpd-contacts .sub-panel input{width:100%;padding:10px 12px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);}
+.fpd-contacts .sub-hint{color:${MUTED};font-size:12.5px;margin-top:5px;}
 `;
 
 /* ── Main Component ──────────────────────────────────────────────── */
@@ -595,7 +595,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           </div>
           <div className="access-pill" style={{ background:`${access[activeType].color}1A`, border:`1px solid ${access[activeType].color}44` }}>
             <div className="access-dot" style={{ background:access[activeType].color, boxShadow:`0 0 6px ${access[activeType].color}` }}/>
-            <span style={{ color:access[activeType].color, fontSize:12.5, fontWeight:600 }}>{access[activeType].label}</span>
+            <span style={{ color:access[activeType].color, fontSize:14, fontWeight:600 }}>{access[activeType].label}</span>
           </div>
         </div>
 
@@ -612,7 +612,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
                   <div className="chain-num" style={{ background:i===0?ACCENT:"rgba(91,110,225,0.14)", color:i===0?"#fff":MUTED }}>
                     {i===0 ? <Crown size={12}/> : `${i+1}`}
                   </div>
-                  <div className="flex-1" style={{ fontSize: 14.5, color: TEXT }}>
+                  <div className="flex-1" style={{ fontSize: 16, color: TEXT }}>
                     <strong>{c.name}</strong>
                     <span style={{ color:MUTED, marginLeft:8 }}>
                       {i===0 ? "Primary — notified first, assumes full vault authority" : `Contingent #${i+1} — activates only if contacts above cannot act`}

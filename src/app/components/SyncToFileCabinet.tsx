@@ -84,8 +84,8 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
             overflow:"hidden",
           }}>
           <div className="px-3 py-2 border-b" style={{ borderColor:"var(--border)", background:"rgba(91,110,225,0.03)" }}>
-            <div style={{ color:"var(--muted-foreground)", fontSize:10, fontFamily:"var(--font-mono)", letterSpacing:"0.08em" }}>SAVE TO FOLDER</div>
-            <div style={{ color:"var(--foreground)", fontSize:12.5, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:200 }}>
+            <div style={{ color:"var(--muted-foreground)", fontSize:11, fontFamily:"var(--font-mono)", letterSpacing:"0.08em" }}>SAVE TO FOLDER</div>
+            <div style={{ color:"var(--foreground)", fontSize:14, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:200 }}>
               {docName.length > 36 ? docName.slice(0,36)+"…" : docName}
             </div>
           </div>
@@ -97,7 +97,7 @@ export function SyncToFileCabinet({ docName, sectionId, sectionLabel, size="—"
                 onMouseEnter={e => (e.currentTarget.style.background="rgba(91,110,225,0.06)")}
                 onMouseLeave={e => (e.currentTarget.style.background="transparent")}>
                 <FolderOpen size={13} color="var(--primary)"/>
-                <span style={{ fontSize:13.5 }}>{f.folderLabel}</span>
+                <span style={{ fontSize:15 }}>{f.folderLabel}</span>
               </button>
             ))}
           </div>

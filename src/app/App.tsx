@@ -103,7 +103,7 @@ function WGClientSubmitDemo() {
             style={{ color:"#6FAE8B" }}>
             ← Switch Client
           </button>
-          <div style={{ color:"#8A9AB8", fontSize:13.5, ...MONO }}>
+          <div style={{ color:"#8A9AB8", fontSize:15, ...MONO }}>
             Simulating: {client.name} · Specialist: {client.specialist}
           </div>
           <button onClick={goToSpecialistInbox}
@@ -122,13 +122,13 @@ function WGClientSubmitDemo() {
       style={{ background:"#070A12", fontFamily:"var(--font-body)" }}>
       <div style={{ maxWidth:520, width:"100%" }}>
         <div className="text-center mb-8">
-          <div style={{ color:"#6FAE8B", fontSize:13.5, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
+          <div style={{ color:"#6FAE8B", fontSize:15, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
             📤 CLIENT DOCUMENT SUBMISSION — DEMO
           </div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:27, color:"#E8EDF5", marginBottom:8 }}>
+          <h2 style={{ fontFamily:"var(--font-display)", fontSize:30, color:"#E8EDF5", marginBottom:8 }}>
             Which client are you simulating?
           </h2>
-          <p style={{ color:"#8A9AB8", fontSize:14.5, lineHeight:1.7 }}>
+          <p style={{ color:"#8A9AB8", fontSize:16, lineHeight:1.7 }}>
             Each client has a unique secure link. Select a client to see their submission page — then switch to the Concierge Portal to see the document appear live in their specialist's inbox.
           </p>
         </div>
@@ -140,20 +140,20 @@ function WGClientSubmitDemo() {
               style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)",
                 boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-display)", fontSize:20 }}>
+                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-display)", fontSize:22.5 }}>
                 {c.name.split(" ").map((w:string) => w[0]).join("").slice(0,2)}
               </div>
               <div className="flex-1">
-                <div style={{ color:"#E8EDF5", fontSize:17, fontWeight:600, marginBottom:3 }}>{c.name}</div>
-                <div style={{ color:"#8A9AB8", fontSize:13.5 }}>
+                <div style={{ color:"#E8EDF5", fontSize:19, fontWeight:600, marginBottom:3 }}>{c.name}</div>
+                <div style={{ color:"#8A9AB8", fontSize:15 }}>
                   Specialist: <strong style={{ color:"#6FAE8B" }}>{c.specialist}</strong>
                 </div>
-                <div style={{ color:"#4A5A7A", fontSize:12.5, marginTop:2, ...MONO }}>
+                <div style={{ color:"#4A5A7A", fontSize:14, marginTop:2, ...MONO }}>
                   Token: {c.token}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl self-center flex-shrink-0"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", fontSize:13.5, fontWeight:700 }}>
+                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", fontSize:15, fontWeight:700 }}>
                 Open →
               </div>
             </button>
@@ -162,8 +162,8 @@ function WGClientSubmitDemo() {
 
         <div className="mt-6 p-4 rounded-2xl text-center"
           style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.2)" }}>
-          <div style={{ color:"#6E90C9", fontSize:13.5, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
-          <ol style={{ color:"#8A9AB8", fontSize:13.5, lineHeight:2, textAlign:"left" }}>
+          <div style={{ color:"#6E90C9", fontSize:15, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
+          <ol style={{ color:"#8A9AB8", fontSize:15, lineHeight:2, textAlign:"left" }}>
             <li>1. Select a client above (e.g. Dorothy Henderson)</li>
             <li>2. Submit a document on their page</li>
             <li>3. Switch Demo Mode → ⭐ Concierge Portal</li>
@@ -196,7 +196,7 @@ function WGScheduleDemo() {
   return (
     <div className="size-full overflow-y-auto">
       <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(91,110,225,0.05)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
-        <span style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)" }}>
+        <span style={{ color:"#8A9AB8", fontSize:14, fontFamily:"var(--font-mono)" }}>
           📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
         </span>
       </div>
@@ -211,7 +211,7 @@ const TOASTER_STYLE = {
   border: "1px solid rgba(91,110,225,0.25)",
   color: "#E8EDF5",
   fontFamily: "var(--font-body)",
-  fontSize: 14.5,
+  fontSize: 16,
   borderRadius: 12,
   backdropFilter: "blur(16px)",
 };
@@ -264,11 +264,11 @@ function DemoBar() {
           borderRadius:14, padding:"8px 6px",
           display:"flex", flexDirection:"column", gap:3, minWidth:190,
         }}>
-          <div style={{ color:"rgba(255,255,255,0.34)", fontSize:9, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
+          <div style={{ color:"rgba(255,255,255,0.34)", fontSize:10, letterSpacing:"0.15em", padding:"2px 8px 4px", fontWeight:700 }}>DEMO MODE — SWITCH VIEW</div>
           {DEMO_TABS.map(t => (
             <button key={t.path} onClick={() => goTo(t)}
               className={`demo-tab${location.pathname===t.path ? " on" : ""}`}
-              style={{ padding:"7px 12px", borderRadius:9, fontSize:12.5, fontWeight:700, cursor:"pointer", textAlign:"left" }}>
+              style={{ padding:"7px 12px", borderRadius:9, fontSize:14, fontWeight:700, cursor:"pointer", textAlign:"left" }}>
               {t.label}
             </button>
           ))}
@@ -278,12 +278,12 @@ function DemoBar() {
         className="demo-toggle"
         style={{
           display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
-          borderRadius:99, fontSize:11, fontWeight:700, cursor:"pointer",
+          borderRadius:99, fontSize:12.5, fontWeight:700, cursor:"pointer",
           color:"#6FAE8B", backdropFilter:"blur(16px)", letterSpacing:"0.06em",
         }}>
-        <span style={{ fontSize:15.5 }}>{current.label.split(" ")[0]}</span>
+        <span style={{ fontSize:17.5 }}>{current.label.split(" ")[0]}</span>
         <span>DEMO</span>
-        <span style={{ fontSize:9, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
+        <span style={{ fontSize:10, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
       </button>
     </div>
   );

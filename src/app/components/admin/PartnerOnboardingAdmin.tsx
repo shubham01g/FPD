@@ -16,7 +16,7 @@ const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = {
   background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)",
-  color:"#FFFFFF", fontSize:14.5, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%",
+  color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%",
 };
 
 type Tab = "packages" | "sales" | "links" | "processors";
@@ -42,7 +42,7 @@ function BillingEditor({
   return (
     <div className="space-y-4">
       <div>
-        <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:8 }}>BILLING MODEL</label>
+        <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>BILLING MODEL</label>
         <div className="grid grid-cols-3 gap-2">
           {modelTypes.map(t => (
             <button key={t.id} onClick={() => switchModel(t.id)}
@@ -51,15 +51,15 @@ function BillingEditor({
                 border:`1px solid ${billing.type===t.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
                 color:billing.type===t.id?"#FFFFFF":"#8A9AB8" }}>
               {t.icon}
-              <span style={{ fontSize:11, fontWeight:700 }}>{t.label}</span>
-              <span style={{ fontSize:10, color:"#8A9AB8", lineHeight:1.3, textAlign:"center" }}>{t.desc}</span>
+              <span style={{ fontSize:12.5, fontWeight:700 }}>{t.label}</span>
+              <span style={{ fontSize:11, color:"#8A9AB8", lineHeight:1.3, textAlign:"center" }}>{t.desc}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>ONE-TIME SETUP FEE ($)</label>
+        <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>ONE-TIME SETUP FEE ($)</label>
         <input type="number" value={billing.setupFee}
           onChange={e => onChange({ ...billing, setupFee:Number(e.target.value) } as BillingModel)}
           style={INPUT}/>
@@ -67,7 +67,7 @@ function BillingEditor({
 
       {billing.type === "flat_monthly" && (
         <div>
-          <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>FLAT MONTHLY ($)</label>
+          <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>FLAT MONTHLY ($)</label>
           <input type="number" value={billing.flatMonthly}
             onChange={e => onChange({ ...billing, flatMonthly:Number(e.target.value) })}
             style={INPUT}/>
@@ -77,13 +77,13 @@ function BillingEditor({
       {billing.type === "per_user_flat" && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>$ PER USER/MO</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>$ PER USER/MO</label>
             <input type="number" step="0.01" value={billing.perUserAmount}
               onChange={e => onChange({ ...billing, perUserAmount:Number(e.target.value) })}
               style={INPUT}/>
           </div>
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>MINIMUM MONTHLY ($)</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>MINIMUM MONTHLY ($)</label>
             <input type="number" value={billing.minMonthly}
               onChange={e => onChange({ ...billing, minMonthly:Number(e.target.value) })}
               style={INPUT}/>
@@ -94,13 +94,13 @@ function BillingEditor({
       {billing.type === "per_user_percentage" && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>% OF USER REVENUE</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>% OF USER REVENUE</label>
             <input type="number" step="0.1" value={billing.percentOfRevenue}
               onChange={e => onChange({ ...billing, percentOfRevenue:Number(e.target.value) })}
               style={INPUT}/>
           </div>
           <div>
-            <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>MINIMUM MONTHLY ($)</label>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>MINIMUM MONTHLY ($)</label>
             <input type="number" value={billing.minMonthly}
               onChange={e => onChange({ ...billing, minMonthly:Number(e.target.value) })}
               style={INPUT}/>
@@ -110,12 +110,12 @@ function BillingEditor({
 
       {/* Live charge preview */}
       <div className="p-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-        <div style={{ color:"#D99A6B", fontSize:10, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
+        <div style={{ color:"#D99A6B", fontSize:11, ...MONO, marginBottom:6 }}>CHARGE PREVIEW</div>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[50, 200, 1000].map(n => (
             <div key={n}>
-              <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{n} USERS</div>
-              <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:700 }}>${calcMonthlyCharge(billing, n).toLocaleString()}/mo</div>
+              <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{n} USERS</div>
+              <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:700 }}>${calcMonthlyCharge(billing, n).toLocaleString()}/mo</div>
             </div>
           ))}
         </div>
@@ -166,7 +166,7 @@ function PackageModal({ pkg, onClose, onSave }: {
       <div className="w-full max-w-2xl rounded-2xl overflow-y-auto" style={{ ...CARD, maxHeight:"92vh" }}>
         <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10"
           style={{ background:"#0A0F1A", borderColor:"rgba(91,110,225,0.2)" }}>
-          <h3 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>
+          <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>
             {isNew ? "Create Package" : `Edit: ${form.name}`}
           </h3>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
@@ -176,20 +176,20 @@ function PackageModal({ pkg, onClose, onSave }: {
           <div className="grid grid-cols-2 gap-4">
             {([ ["name","PACKAGE NAME","Agency Partner"], ["tier","TIER LABEL","AGENCY"], ["userLimitLabel","USER LIMIT","Up to 500 users"] ] as [keyof WLPackage, string, string][]).map(([k, lbl, ph]) => (
               <div key={k as string}>
-                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>{lbl}</label>
+                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>{lbl}</label>
                 <input value={String(form[k] ?? "")} placeholder={ph}
                   onChange={e => setForm(p => ({ ...p, [k]: k==="tier" ? e.target.value.toUpperCase() : e.target.value }))}
                   style={INPUT}/>
               </div>
             ))}
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>COMMISSION % (lifetime)</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>COMMISSION % (lifetime)</label>
               <input type="number" value={form.commission}
                 onChange={e => setForm(p => ({ ...p, commission:Number(e.target.value) }))}
                 style={INPUT}/>
             </div>
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>ACCENT COLOR</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>ACCENT COLOR</label>
               <div className="flex gap-2">
                 <input type="color" value={form.color}
                   onChange={e => setForm(p => ({ ...p, color:e.target.value }))}
@@ -198,7 +198,7 @@ function PackageModal({ pkg, onClose, onSave }: {
               </div>
             </div>
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>BADGE (optional)</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>BADGE (optional)</label>
               <input value={form.badge ?? ""} placeholder="Most Popular"
                 onChange={e => setForm(p => ({ ...p, badge:e.target.value || null }))}
                 style={INPUT}/>
@@ -206,13 +206,13 @@ function PackageModal({ pkg, onClose, onSave }: {
           </div>
 
           <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
-            <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:600, marginBottom:12 }}>Billing Configuration</div>
+            <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:600, marginBottom:12 }}>Billing Configuration</div>
             <BillingEditor billing={form.billing} onChange={b => setForm(p => ({ ...p, billing:b }))}/>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>FEATURES LIST</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>FEATURES LIST</label>
               <button onClick={() => setForm(p => ({ ...p, features:[...p.features,"New feature"] }))}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
@@ -233,13 +233,13 @@ function PackageModal({ pkg, onClose, onSave }: {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>STRIPE PRODUCT ID</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>STRIPE PRODUCT ID</label>
               <input value={form.stripeProductId ?? ""} placeholder="prod_..."
                 onChange={e => setForm(p => ({ ...p, stripeProductId:e.target.value||null }))}
                 style={INPUT}/>
             </div>
             <div>
-              <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:4 }}>STRIPE PRICE ID</label>
+              <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:4 }}>STRIPE PRICE ID</label>
               <input value={form.stripePriceId ?? ""} placeholder="price_..."
                 onChange={e => setForm(p => ({ ...p, stripePriceId:e.target.value||null }))}
                 style={INPUT}/>
@@ -249,8 +249,8 @@ function PackageModal({ pkg, onClose, onSave }: {
           <div className="flex items-center justify-between p-4 rounded-2xl"
             style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.1)" }}>
             <div>
-              <div style={{ color:"#E8EDF5", fontSize:14.5, fontWeight:500 }}>Package Active</div>
-              <div style={{ color:"#8A9AB8", fontSize:12.5 }}>When off, hidden from the website and onboarding</div>
+              <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:500 }}>Package Active</div>
+              <div style={{ color:"#8A9AB8", fontSize:14 }}>When off, hidden from the website and onboarding</div>
             </div>
             <button onClick={() => setForm(p => ({ ...p, active:!p.active }))}
               style={{ color:form.active?"#D99A6B":"#8A9AB8" }}>
@@ -325,10 +325,10 @@ export function PartnerOnboardingAdmin() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Building size={15} color="#FFFFFF"/>
-              <span style={{ color:"#6E90C9", fontSize:12.5, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WL ONBOARDING CONTROL</span>
+              <span style={{ color:"#6E90C9", fontSize:14, ...MONO, letterSpacing:"0.1em" }}>ADMIN · WL ONBOARDING CONTROL</span>
             </div>
-            <h1 style={{ fontFamily:"var(--font-display)", fontSize:29, color:"#E8EDF5" }}>WL Onboarding Control</h1>
-            <p style={{ color:"#8A9AB8", fontSize:14.5, marginTop:4 }}>
+            <h1 style={{ fontFamily:"var(--font-display)", fontSize:32.5, color:"#E8EDF5" }}>WL Onboarding Control</h1>
+            <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
               Edit packages + billing models, track sales, manage payment processors. Changes reflect live on the website.
             </p>
           </div>
@@ -355,8 +355,8 @@ export function PartnerOnboardingAdmin() {
             { label:"Total WL Revenue",     value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
           ].map(s => (
             <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:27, color:s.color }}>{s.value}</div>
-              <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{s.label}</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:30, color:s.color }}>{s.value}</div>
+              <div style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -377,7 +377,7 @@ export function PartnerOnboardingAdmin() {
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={CARD}>
             <Search size={13} color="#8A9AB8"/>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-              style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:14.5, flex:1 }}/>
+              style={{ background:"transparent", border:"none", outline:"none", color:"#E8EDF5", fontSize:16, flex:1 }}/>
           </div>
         )}
 
@@ -400,11 +400,11 @@ export function PartnerOnboardingAdmin() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span style={{ fontFamily:"var(--font-display)", fontSize:18, color:"#E8EDF5" }}>{pkg.name}</span>
+                          <span style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>{pkg.name}</span>
                           {pkg.badge && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:`${pkg.color}15`, color:pkg.color, ...MONO }}>{pkg.badge}</span>}
                           {!pkg.active && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(107,114,128,0.12)", color:"#6B7FA8", ...MONO }}>INACTIVE</span>}
                         </div>
-                        <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:2 }}>{pkg.userLimitLabel} · {pkg.commission}% lifetime commission</div>
+                        <div style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>{pkg.userLimitLabel} · {pkg.commission}% lifetime commission</div>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -426,16 +426,16 @@ export function PartnerOnboardingAdmin() {
 
                   <div className="grid grid-cols-3 gap-3 mt-4">
                     <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                      <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>BILLING MODEL</div>
-                      <div style={{ color:"#E8EDF5", fontSize:12.5, fontWeight:600, marginTop:2 }}>{billingStr}</div>
+                      <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>BILLING MODEL</div>
+                      <div style={{ color:"#E8EDF5", fontSize:14, fontWeight:600, marginTop:2 }}>{billingStr}</div>
                     </div>
                     <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                      <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>SETUP FEE</div>
-                      <div style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:700, marginTop:2 }}>${b.setupFee.toLocaleString()}</div>
+                      <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>SETUP FEE</div>
+                      <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:700, marginTop:2 }}>${b.setupFee.toLocaleString()}</div>
                     </div>
                     <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                      <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>STRIPE PRODUCT</div>
-                      <div style={{ color:pkg.stripeProductId?"#6E90C9":"#FC8181", fontSize:12.5, ...MONO, marginTop:2 }}>
+                      <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>STRIPE PRODUCT</div>
+                      <div style={{ color:pkg.stripeProductId?"#6E90C9":"#FC8181", fontSize:14, ...MONO, marginTop:2 }}>
                         {pkg.stripeProductId ?? "⚠ Not linked"}
                       </div>
                     </div>
@@ -444,8 +444,8 @@ export function PartnerOnboardingAdmin() {
                   <div className="flex gap-3 mt-3">
                     {[50, 200, 1000].map(n => (
                       <div key={n} className="flex-1 text-center px-2 py-1.5 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
-                        <div style={{ color:"#8A9AB8", fontSize:9, ...MONO }}>{n} USERS</div>
-                        <div style={{ color:pkg.color, fontSize:13.5, fontWeight:700 }}>
+                        <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{n} USERS</div>
+                        <div style={{ color:pkg.color, fontSize:15, fontWeight:700 }}>
                           ${calcMonthlyCharge(pkg.billing, n).toLocaleString()}/mo
                         </div>
                       </div>
@@ -461,7 +461,7 @@ export function PartnerOnboardingAdmin() {
         {tab === "sales" && (
           <div className="space-y-4">
             <div className="p-5 rounded-2xl" style={CARD}>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5", marginBottom:14 }}>Revenue by Package</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:14 }}>Revenue by Package</div>
               <div className="space-y-3">
                 {packages.map(pkg => {
                   const pkgMRR = activeSales.filter(s => s.packageId === pkg.id).reduce((s, a) => s + a.mrr, 0);
@@ -470,8 +470,8 @@ export function PartnerOnboardingAdmin() {
                   return (
                     <div key={pkg.id}>
                       <div className="flex items-center justify-between mb-1">
-                        <span style={{ color:"#E8EDF5", fontSize:14.5 }}>{pkg.name}</span>
-                        <span style={{ color:pkg.color, fontSize:13.5, fontWeight:700, ...MONO }}>${pkgMRR.toLocaleString()}/mo · {count} accounts</span>
+                        <span style={{ color:"#E8EDF5", fontSize:16 }}>{pkg.name}</span>
+                        <span style={{ color:pkg.color, fontSize:15, fontWeight:700, ...MONO }}>${pkgMRR.toLocaleString()}/mo · {count} accounts</span>
                       </div>
                       <div className="h-2 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                         <div className="h-2 rounded-full" style={{ width:`${(pkgMRR/maxMRR)*100}%`, background:pkg.color }}/>
@@ -487,7 +487,7 @@ export function PartnerOnboardingAdmin() {
                 <thead>
                   <tr style={{ background:"rgba(255,255,255,0.08)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
                     {["ID","Organization","Package","Users","MRR","Total Paid","Processor","Status"].map(h => (
-                      <th key={h} className="px-4 py-3 text-left" style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>{h}</th>
+                      <th key={h} className="px-4 py-3 text-left" style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -497,16 +497,16 @@ export function PartnerOnboardingAdmin() {
                     const statusColor = ({ active:"#48BB78", pending:"#F6AD55", suspended:"#FC8181", cancelled:"#8A9AB8" } as Record<string,string>)[s.status] ?? "#8A9AB8";
                     return (
                       <tr key={s.id} style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
-                        <td className="px-4 py-3" style={{ color:"#6E90C9", fontSize:11, ...MONO }}>{s.id}</td>
+                        <td className="px-4 py-3" style={{ color:"#6E90C9", fontSize:12.5, ...MONO }}>{s.id}</td>
                         <td className="px-4 py-3">
-                          <div style={{ color:"#E8EDF5", fontSize:13.5, fontWeight:500 }}>{s.org}</div>
-                          <div style={{ color:"#8A9AB8", fontSize:11 }}>{s.subdomain}</div>
+                          <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:500 }}>{s.org}</div>
+                          <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.subdomain}</div>
                         </td>
-                        <td className="px-4 py-3" style={{ color:pkg?.color ?? "#8A9AB8", fontSize:12.5, fontWeight:600 }}>{pkg?.name ?? s.packageId}</td>
-                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:13.5, ...MONO }}>{s.users.toLocaleString()}</td>
-                        <td className="px-4 py-3" style={{ color:"#6FAE8B", fontSize:13.5, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
-                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:13.5, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
-                        <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.processor}</td>
+                        <td className="px-4 py-3" style={{ color:pkg?.color ?? "#8A9AB8", fontSize:14, fontWeight:600 }}>{pkg?.name ?? s.packageId}</td>
+                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>{s.users.toLocaleString()}</td>
+                        <td className="px-4 py-3" style={{ color:"#6FAE8B", fontSize:15, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
+                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
+                        <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:14 }}>{s.processor}</td>
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 rounded text-xs font-bold"
                             style={{ background:`${statusColor}18`, color:statusColor, ...MONO }}>
@@ -528,7 +528,7 @@ export function PartnerOnboardingAdmin() {
             <div className="flex items-start gap-3 p-4 rounded-2xl"
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <AlertCircle size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
-              <p style={{ color:"#8A9AB8", fontSize:13.5 }}>
+              <p style={{ color:"#8A9AB8", fontSize:15 }}>
                 Each link includes a one-time token. When a prospect clicks it, the onboarding wizard opens pre-set to that package. Copy and share directly, or use Email Invite.
               </p>
             </div>
@@ -537,14 +537,14 @@ export function PartnerOnboardingAdmin() {
               <div key={pkg.id} className="p-5 rounded-2xl" style={CARD}>
                 <div className="flex items-center gap-2 mb-3">
                   <div style={{ width:8, height:8, borderRadius:"50%", background:pkg.color }}/>
-                  <span style={{ color:pkg.color, fontSize:12.5, fontWeight:700, ...MONO }}>{pkg.tier}</span>
-                  <span style={{ color:"#E8EDF5", fontSize:15.5, fontWeight:500 }}>{pkg.name}</span>
-                  {!pkg.active && <span style={{ color:"#8A9AB8", fontSize:11 }}>(inactive)</span>}
+                  <span style={{ color:pkg.color, fontSize:14, fontWeight:700, ...MONO }}>{pkg.tier}</span>
+                  <span style={{ color:"#E8EDF5", fontSize:17.5, fontWeight:500 }}>{pkg.name}</span>
+                  {!pkg.active && <span style={{ color:"#8A9AB8", fontSize:12.5 }}>(inactive)</span>}
                 </div>
                 <div className="flex items-center gap-2 p-3 rounded-2xl mb-3"
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <Globe size={11} color="#8A9AB8"/>
-                  <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flex:1 }} className="truncate">
+                  <span style={{ color:"#8A9AB8", fontSize:14, ...MONO, flex:1 }} className="truncate">
                     https://finalpassdown.com/partner/onboard?tier={pkg.id}&token=XXXXXX
                   </span>
                 </div>
@@ -569,7 +569,7 @@ export function PartnerOnboardingAdmin() {
         {tab === "processors" && (
           <div className="space-y-4">
             <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.15)" }}>
-              <p style={{ color:"#8A9AB8", fontSize:13.5 }}>
+              <p style={{ color:"#8A9AB8", fontSize:15 }}>
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
                 WL partners can also bring their own processor — configure a per-package override in the package editor.
               </p>
@@ -579,13 +579,13 @@ export function PartnerOnboardingAdmin() {
               <div key={proc.id} className="p-5 rounded-2xl" style={CARD}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <span style={{ fontSize:31.5 }}>{proc.logo}</span>
+                    <span style={{ fontSize:35.5 }}>{proc.logo}</span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span style={{ fontFamily:"var(--font-display)", fontSize:17, color:"#E8EDF5" }}>{proc.name}</span>
+                        <span style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>{proc.name}</span>
                         {proc.isDefault && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>DEFAULT</span>}
                       </div>
-                      <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:2 }}>
+                      <div style={{ color:"#8A9AB8", fontSize:14, marginTop:2 }}>
                         {proc.enabled ? "Active" : "Disabled"}
                       </div>
                     </div>
@@ -615,7 +615,7 @@ export function PartnerOnboardingAdmin() {
                   <div className="grid grid-cols-2 gap-3">
                     {Object.entries(proc.config).map(([key, val]) => (
                       <div key={key}>
-                        <label style={{ color:"#8A9AB8", fontSize:10, ...MONO, display:"block", marginBottom:4 }}>
+                        <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>
                           {key.replace(/([A-Z])/g, " $1").toUpperCase()}
                         </label>
                         <input defaultValue={val}
@@ -627,7 +627,7 @@ export function PartnerOnboardingAdmin() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-3" style={{ color:"#8A9AB8", fontSize:13.5 }}>
+                  <div className="text-center py-3" style={{ color:"#8A9AB8", fontSize:15 }}>
                     Enable to configure credentials
                   </div>
                 )}
@@ -636,8 +636,8 @@ export function PartnerOnboardingAdmin() {
 
             <div className="p-5 text-center rounded-2xl"
               style={{ border:"2px dashed rgba(91,110,225,0.2)", borderRadius:22 }}>
-              <div style={{ color:"#8A9AB8", fontSize:14.5, fontWeight:500, marginBottom:4 }}>Need a custom processor deal?</div>
-              <div style={{ color:"#8A9AB8", fontSize:13.5, marginBottom:12 }}>
+              <div style={{ color:"#8A9AB8", fontSize:16, fontWeight:500, marginBottom:4 }}>Need a custom processor deal?</div>
+              <div style={{ color:"#8A9AB8", fontSize:15, marginBottom:12 }}>
                 Contact integrations@finalpassdown.com to add a processor or integrate a WL partner's existing payment system.
               </div>
               <button onClick={() => toast.success("Request sent to integrations team")}
@@ -656,12 +656,12 @@ export function PartnerOnboardingAdmin() {
           style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
           <div className="w-full max-w-md rounded-2xl p-7" style={CARD}>
             <div className="flex items-center justify-between mb-5">
-              <h3 style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
+              <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
               <button onClick={() => setShowSend(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>PACKAGE</label>
+                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>PACKAGE</label>
                 <div className="flex flex-wrap gap-2">
                   {packages.filter(p => p.active).map(p => (
                     <button key={p.id} onClick={() => setSendPkgId(p.id)}
@@ -675,7 +675,7 @@ export function PartnerOnboardingAdmin() {
                 </div>
               </div>
               <div>
-                <label style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, display:"block", marginBottom:6 }}>RECIPIENT EMAIL</label>
+                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>RECIPIENT EMAIL</label>
                 <input type="email" value={sendEmail} onChange={e => setSendEmail(e.target.value)}
                   placeholder="contact@organization.com" style={INPUT}/>
               </div>
