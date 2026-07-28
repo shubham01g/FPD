@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
+import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar & AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -19,6 +20,16 @@ const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const NEG     = "#D06B6B";
+
+/* Icon-chip tone → colour, same gradient language as the redesigned
+   dashboard/calendar "At a Glance" stat cards. */
+const KPI_TONES: Record<string, { bg: string; fg: string }> = {
+  sky:      { bg: "linear-gradient(150deg, rgba(91,167,214,0.34), rgba(91,167,214,0.08))",   fg: "#9FD3EE" },
+  mint:     { bg: "linear-gradient(150deg, rgba(111,174,139,0.34), rgba(111,174,139,0.08))",  fg: "#A9DABC" },
+  good:     { bg: "linear-gradient(150deg, rgba(95,190,145,0.30), rgba(95,190,145,0.09))",    fg: "#A9E6C4" },
+  critical: { bg: "linear-gradient(150deg, rgba(208,107,107,0.32), rgba(208,107,107,0.08))",  fg: "#F0A9A9" },
+  violet:   { bg: "linear-gradient(150deg, rgba(126,107,216,0.34), rgba(126,107,216,0.08))",  fg: "#C9BFF0" },
+};
 
 interface FolderFile {
   id: string; name: string;
@@ -327,12 +338,12 @@ const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
 /* Five meaning-grouped "drawers" replacing the old flat 23-folder grid —
    grouped by what they're for, with one accent per drawer (rather than the
    RAMP's per-folder cycling) so folders that belong together read together. */
-const SECTIONS: { id: string; label: string; laser: string; ids: string[] }[] = [
-  { id: "legal",    label: "Legal & Financial",     laser: "#5B6EE1", ids: ["legal", "financial", "taxes", "insurance", "goals"] },
-  { id: "property", label: "Property & Belongings", laser: "#D99A6B", ids: ["property", "vehicles", "utilities", "warranties", "keepsakes", "weapons_locker"] },
-  { id: "health",   label: "Health & Family",       laser: "#6FAE8B", ids: ["medical", "pets", "daycare", "ids"] },
-  { id: "memories", label: "Memories & Messages",   laser: "#D68FA8", ids: ["personal", "photos", "videos", "awards", "places"] },
-  { id: "security", label: "Security & Access",     laser: "#C9AC6E", ids: ["digital", "firearms", "secret"] },
+const SECTIONS: { id: string; label: string; ids: string[] }[] = [
+  { id: "legal",    label: "Legal & Financial",     ids: ["legal", "financial", "taxes", "insurance", "goals"] },
+  { id: "property", label: "Property & Belongings", ids: ["property", "vehicles", "utilities", "warranties", "keepsakes", "weapons_locker"] },
+  { id: "health",   label: "Health & Family",       ids: ["medical", "pets", "daycare", "ids"] },
+  { id: "memories", label: "Memories & Messages",   ids: ["personal", "photos", "videos", "awards", "places"] },
+  { id: "security", label: "Security & Access",     ids: ["digital", "firearms", "secret"] },
 ];
 
 function getIcon(type: string, color = ACCENT2, size = 28) {
@@ -354,6 +365,26 @@ const CAB_CSS = `
 .fpd-cab *{box-sizing:border-box;}
 .fpd-cab-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-cab .wrap{max-width:1320px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-cab .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-cab .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-cab .hbanner:hover .art{transform:scale(1.08);}
+.fpd-cab .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-cab .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-cab .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-cab .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-cab .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-cab .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-cab .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-cab .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-cab .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-cab .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-cab .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-cab .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-cab .hbanner{min-height:auto;} .fpd-cab .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-cab .hbanner h1{font-size:23px;}}
 
 .fpd-cab .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-cab .card.pad{padding:28px;}
@@ -388,17 +419,18 @@ const CAB_CSS = `
 .fpd-cab .search input::placeholder{color:${FAINT};}
 .fpd-cab .search .x{color:${MUTED};cursor:pointer;display:flex;background:none;border:none;}
 
-/* KPI ledger */
-.fpd-cab .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
-.fpd-cab .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
-.fpd-cab .kcell:first-child{border-left:none;}
-.fpd-cab .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-cab .kcell .klbl{font-size:9.5px;font-weight:600;color:${MUTED};}
-.fpd-cab .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-cab .kcell .kval{font-family:var(--font-display);font-size:26px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-cab .kcell .ksub{font-size:11.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
-.fpd-cab .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-cab .kstrip{grid-template-columns:1fr 1fr;}.fpd-cab .kcell:nth-child(3){border-left:none;}.fpd-cab .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
+/* KPI cards — same "At a Glance" language as the redesigned dashboard/calendar:
+   separate flat cards with a gradient icon chip, not a single divided strip. */
+.fpd-cab .kpi-stack{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fpd-cab .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-cab .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
+.fpd-cab .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-cab .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-cab .kpi-mini-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-cab .kpi-mini-lbl{font-size:11.5px;color:${MUTED};margin-top:4px;}
+.fpd-cab .kpi-mini-sub{font-size:11px;color:${SOFT};margin-top:5px;display:flex;align-items:center;gap:6px;}
+.fpd-cab .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:520px){.fpd-cab .kpi-stack{grid-template-columns:1fr;}}
 
 /* drop zone */
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:16px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}
@@ -415,13 +447,13 @@ const CAB_CSS = `
 
 /* ── Drawer cabinet (replaces the old flat folder grid) ── */
 .fpd-cab .cab-drawers{display:flex;flex-direction:column;gap:12px;}
-.fpd-cab details.cab-drawer{border-radius:22px;overflow:hidden;border:1.5px solid color-mix(in srgb, var(--dlaser) 40%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--dlaser) 10%, transparent), 0 0 18px -8px color-mix(in srgb, var(--dlaser) 40%, transparent);transition:border-color .18s ease,box-shadow .18s ease;}
-.fpd-cab details.cab-drawer:hover,.fpd-cab details.cab-drawer[open]{border-color:color-mix(in srgb, var(--dlaser) 60%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--dlaser) 14%, transparent), 0 0 26px -6px color-mix(in srgb, var(--dlaser) 50%, transparent);}
-.fpd-cab details.cab-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:15px 20px;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border-bottom:1px solid color-mix(in srgb, var(--dlaser) 30%, transparent);}
+.fpd-cab details.cab-drawer{border-radius:22px;overflow:hidden;background:#101728;border:1px solid rgba(255,255,255,0.06);transition:border-color .18s ease;}
+.fpd-cab details.cab-drawer:hover,.fpd-cab details.cab-drawer[open]{border-color:rgba(255,255,255,0.14);}
+.fpd-cab details.cab-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 20px;background:none;border-bottom:1px solid rgba(255,255,255,0.06);}
 .fpd-cab details.cab-drawer summary::-webkit-details-marker{display:none;}
-.fpd-cab .cab-pull{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--dlaser) 14%, transparent);border:1px solid color-mix(in srgb, var(--dlaser) 34%, transparent);transition:box-shadow .2s;}
-.fpd-cab .cab-pull i{display:block;width:14px;height:2px;border-radius:2px;background:var(--dlaser);}
-.fpd-cab details.cab-drawer[open] .cab-pull{box-shadow:0 0 0 1px rgba(201,172,110,0.55), inset 0 1px 0 rgba(255,255,255,.08);}
+.fpd-cab .cab-pull{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,167,214,0.10);border:1px solid rgba(91,167,214,0.24);}
+.fpd-cab .cab-pull i{display:block;width:14px;height:2px;border-radius:2px;background:${ACCENT2};}
+.fpd-cab details.cab-drawer[open] .cab-pull{background:rgba(91,167,214,0.16);}
 .fpd-cab .cab-dtitle{font-family:var(--font-display);font-size:15px;font-weight:600;letter-spacing:-0.005em;color:${TEXT};}
 .fpd-cab .cab-dsub{font-family:var(--font-mono);font-size:10px;color:${FAINT};margin-top:2px;letter-spacing:0.02em;}
 .fpd-cab .cab-chev{margin-left:auto;color:${FAINT};transition:transform .2s ease;flex-shrink:0;}
@@ -513,6 +545,8 @@ export function DigitalFileCabinet() {
   const [syncedDocs, setSyncedDocs] = useState<SyncedDoc[]>([]);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["legal", "property"]));
   const fileRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const drawersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => subscribeToSyncedDocs(setSyncedDocs), []);
 
@@ -574,10 +608,10 @@ export function DigitalFileCabinet() {
   const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
 
   const kpis = [
-    { label: "Folders", value: String(themedCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={14}/>, dot: ACCENT2 },
-    { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={14}/>, dot: ACCENT2 },
-    { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={14}/>, dot: NEG },
-    { label: "Encryption", value: "AES-256", icon: <Shield size={14}/>, sub: "Client-side, zero-knowledge", dot: POS },
+    { label: "Folders", value: String(themedCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={16}/>, dot: ACCENT2, tone: "sky" },
+    { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={16}/>, dot: ACCENT, tone: "violet" },
+    { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={16}/>, dot: NEG, tone: "critical" },
+    { label: "Encryption", value: "AES-256", icon: <Shield size={16}/>, sub: "Client-side, zero-knowledge", dot: POS, tone: "good" },
   ];
 
   return (
@@ -586,6 +620,27 @@ export function DigitalFileCabinet() {
       <div className="fpd-cab-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner (root view only) ── */}
+        {!current && (
+          <div className="hbanner">
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroCabinetPhoto})` }} />
+            <div className="scrim" />
+            <div className="hcontent">
+              <span className="heyebrow">Everything, Filed & Protected</span>
+              <h1>Your records, <span className="accent">organized and encrypted.</span></h1>
+              <p>Legal, financial, medical and personal documents — sorted into folders and secured with AES-256 encryption before they ever leave your device.</p>
+              <div className="hactions">
+                <button className="hbtn primary" onClick={() => drawersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                  <FolderOpen size={15}/> Browse Folders
+                </button>
+                <button className="hbtn ghost" onClick={() => searchRef.current?.focus()}>
+                  <Search size={15}/> Search Documents
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div className="pg-h1row">
@@ -637,7 +692,7 @@ export function DigitalFileCabinet() {
         {/* ── Search ── */}
         <div className="card search">
           <Search size={13} color={MUTED}/>
-          <input value={search} onChange={e => setSearch(e.target.value)}
+          <input ref={searchRef} value={search} onChange={e => setSearch(e.target.value)}
             placeholder={current ? `Search in ${current.label}...` : "Search all folders..."}/>
           {search && <button className="x" onClick={() => setSearch("")}><X size={13}/></button>}
         </div>
@@ -676,25 +731,28 @@ export function DigitalFileCabinet() {
           </div>
         )}
 
-        {/* ── KPI ledger (root only) ── */}
+        {/* ── KPI cards (root only) ── */}
         {!current && (
-          <div className="card kstrip">
-            {kpis.map(k => (
-              <div key={k.label} className="kcell">
-                <div className="khead">
-                  <span className="klbl">{k.label}</span>
-                  <span className="kico">{k.icon}</span>
+          <div className="kpi-stack">
+            {kpis.map(k => {
+              const tone = KPI_TONES[k.tone] ?? KPI_TONES.sky;
+              return (
+                <div key={k.label} className="kpi-mini">
+                  <span className="kpi-mini-ico" style={{ background: tone.bg, color: tone.fg }}>{k.icon}</span>
+                  <div className="kpi-mini-txt">
+                    <div className="kpi-mini-val">{k.value}</div>
+                    <div className="kpi-mini-lbl">{k.label}</div>
+                    <div className="kpi-mini-sub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
+                  </div>
                 </div>
-                <div className="kval">{k.value}</div>
-                <div className="ksub"><span className="dt" style={{ background: k.dot }}/>{k.sub}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* ── DRAWER CABINET (root only) ── */}
         {!current && (
-          <div className="cab-drawers">
+          <div className="cab-drawers" ref={drawersRef}>
             {SECTIONS.map(sec => {
                 const folders = themedCabinets.filter(c => sec.ids.includes(c.id));
                 const visible = folders.filter(matchesSearch);
@@ -705,8 +763,7 @@ export function DigitalFileCabinet() {
                     onToggle={e => {
                       const nowOpen = (e.currentTarget as HTMLDetailsElement).open;
                       setOpenSections(s => { const n = new Set(s); nowOpen ? n.add(sec.id) : n.delete(sec.id); return n; });
-                    }}
-                    style={{ ["--dlaser" as any]: sec.laser }}>
+                    }}>
                     <summary>
                       <span className="cab-pull"><i/></span>
                       <span>
@@ -724,17 +781,17 @@ export function DigitalFileCabinet() {
                             const restricted = folder.files.some(f => f.locked);
                             return (
                               <div key={folder.id} className="cab-tab">
-                                <span className="cab-tabflag" style={{ background:`${sec.laser}2E`, border:`1px solid ${sec.laser}66` }}>{folder.emoji}</span>
+                                <span className="cab-tabflag" style={{ background:`${folder.color}2E`, border:`1px solid ${folder.color}66` }}>{folder.emoji}</span>
                                 <button onClick={() => openFolder(folder)} className="cab-tabbody">
                                   {restricted && (
-                                    <span className="cab-lockbadge" style={{ background:`${sec.laser}22`, border:`1px solid ${sec.laser}66`, color: sec.laser }}>
+                                    <span className="cab-lockbadge" style={{ background:`${folder.color}22`, border:`1px solid ${folder.color}66`, color: folder.color }}>
                                       <Lock size={10}/>
                                     </span>
                                   )}
                                   <div className="ftitle">{folder.label}</div>
                                   <div className="fdesc">{folder.description}</div>
                                   <div className="ffoot">
-                                    <span className="fcount" style={{ background:`${sec.laser}29`, color: sec.laser }}>
+                                    <span className="fcount" style={{ background:`${folder.color}29`, color: folder.color }}>
                                       {isLocked ? "🔒 PIN" : `${count} files`}
                                     </span>
                                   </div>
@@ -755,7 +812,7 @@ export function DigitalFileCabinet() {
                                   <div className="rtitle">{folder.label}</div>
                                   <div className="rdesc">{folder.description}</div>
                                 </div>
-                                <span className="rcount" style={{ background:`${sec.laser}29`, color: sec.laser }}>{isLocked ? "🔒" : `${count} files`}</span>
+                                <span className="rcount" style={{ background:`${folder.color}29`, color: folder.color }}>{isLocked ? "🔒" : `${count} files`}</span>
                                 <ChevronRight size={14} color={MUTED}/>
                               </button>
                             );

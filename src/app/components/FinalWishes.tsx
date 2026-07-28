@@ -4,6 +4,9 @@ import {
   CheckCircle, Edit2, Trash2, ChevronDown, ArrowRight, Layers
 } from "lucide-react";
 import { toast } from "sonner";
+import heroWishesPhoto from "../../imports/finalwishes_hero_photo.png";
+import heroFuneralPhoto from "../../imports/funeral_hero_photo.png";
+import heroQuestionnairePhoto from "../../imports/questionnaire_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
 const TEXT    = "#EFF2F9";
@@ -84,6 +87,27 @@ const WISHES_CSS = `
 .fpd-wishes *{box-sizing:border-box;}
 .fpd-wishes-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wishes .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only.
+   One banner per sub-section (wishes / funeral / questionnaire), swapped by active tab. */
+.fpd-wishes .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:200px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-wishes .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-wishes .hbanner:hover .art{transform:scale(1.08);}
+.fpd-wishes .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-wishes .hbanner .hcontent{position:relative;z-index:2;padding:28px 32px;display:flex;flex-direction:column;justify-content:center;max-width:460px;}
+.fpd-wishes .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:13px;font-family:var(--font-mono);}
+.fpd-wishes .hbanner h1{font-family:var(--font-display);font-size:26px;font-weight:700;line-height:1.16;letter-spacing:-0.02em;margin:0 0 9px;color:${TEXT};}
+.fpd-wishes .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-wishes .hbanner p{color:${SOFT};font-size:13px;line-height:1.6;max-width:390px;margin:0 0 18px;}
+.fpd-wishes .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-wishes .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-wishes .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-wishes .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-wishes .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-wishes .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-wishes .hbanner{min-height:auto;} .fpd-wishes .hbanner .hcontent{padding:22px 20px;max-width:none;} .fpd-wishes .hbanner h1{font-size:21px;}}
 
 .fpd-wishes .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-wishes .card.pad{padding:28px;}
@@ -287,6 +311,9 @@ export function FinalWishes() {
 
   const [obituary, setObituary] = useState(funeralPlan.obituaryDraft);
   const [editingObit, setEditingObit] = useState(false);
+  const wlistRef = React.useRef<HTMLDivElement>(null);
+  const funeralGridRef = React.useRef<HTMLDivElement>(null);
+  const qlistRef = React.useRef<HTMLDivElement>(null);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "wishes",        label: "Final Wishes",     icon: <Heart size={14} /> },
@@ -317,6 +344,53 @@ export function FinalWishes() {
           <h1 className="pg-h1">Final Wishes</h1>
           <div className="pg-sub">Document your wishes, legal instruments, and funeral preferences in one secure place.</div>
         </div>
+
+        {/* ── Hero banner (swaps with the active tab) ── */}
+        {tab === "wishes" && (
+          <div className="hbanner">
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroWishesPhoto})` }} />
+            <div className="scrim" />
+            <div className="hcontent">
+              <span className="heyebrow">Your Wishes, Written Down</span>
+              <h1>Say exactly <span className="accent">who gets what.</span></h1>
+              <p>Specific items, property, and bequests — recorded clearly so your loved ones never have to guess.</p>
+              <div className="hactions">
+                <button className="hbtn primary" onClick={() => { setEditingWish(null); setWishModal(true); }}><Plus size={15} /> Add Wish</button>
+                <button className="hbtn ghost" onClick={() => wlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Heart size={15} /> View All Wishes</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {tab === "funeral" && (
+          <div className="hbanner">
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroFuneralPhoto})` }} />
+            <div className="scrim" />
+            <div className="hcontent">
+              <span className="heyebrow">A Service, Planned With Care</span>
+              <h1>Every detail, <span className="accent">already decided.</span></h1>
+              <p>Service type, music, readings, and the obituary draft — so your family can focus on each other, not logistics.</p>
+              <div className="hactions">
+                <button className="hbtn primary" onClick={() => setEditingObit(true)}><Edit2 size={15} /> Edit Obituary</button>
+                <button className="hbtn ghost" onClick={() => funeralGridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Church size={15} /> View Service Details</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {tab === "questionnaire" && (
+          <div className="hbanner">
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroQuestionnairePhoto})` }} />
+            <div className="scrim" />
+            <div className="hcontent">
+              <span className="heyebrow">Help Them Understand You</span>
+              <h1>Answer a few questions, <span className="accent">ease a hundred decisions.</span></h1>
+              <p>Your values, medical wishes, and final arrangements — in your own words, for the people who'll need them most.</p>
+              <div className="hactions">
+                <button className="hbtn primary" onClick={() => { setExpandedCat(0); qlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}><HelpCircle size={15} /> Answer Questions</button>
+                <button className="hbtn ghost" onClick={() => qlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><CheckCircle size={15} /> View Progress</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── KPI ledger ── */}
         <div className="card kstrip">
@@ -359,7 +433,7 @@ export function FinalWishes() {
               </div>
             )}
 
-            <div className="wlist">
+            <div className="wlist" ref={wlistRef}>
               {wishes.map((wish) => (
                 <div key={wish.id} className="card wrow">
                   <div className="wtop">
@@ -383,7 +457,7 @@ export function FinalWishes() {
         {/* ── Funeral Planning ── */}
         {tab === "funeral" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="fgrid">
+            <div className="fgrid" ref={funeralGridRef}>
               <div className="card pad">
                 <h3 className="sec-title"><span className="tick" />Service Details</h3>
                 {[
@@ -460,7 +534,7 @@ export function FinalWishes() {
               <p>Answer these questions to help your loved ones understand your wishes and values.</p>
               <span className="qcount">{completedAnswers}/{totalQuestions} Answered</span>
             </div>
-            <div className="qbar"><i style={{ width: `${(completedAnswers / totalQuestions) * 100}%` }} /></div>
+            <div className="qbar" ref={qlistRef}><i style={{ width: `${(completedAnswers / totalQuestions) * 100}%` }} /></div>
 
             {questionnaireCategories.map((cat, ci) => (
               <div key={ci} className="card qcat">

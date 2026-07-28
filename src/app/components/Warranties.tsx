@@ -3,6 +3,7 @@ import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, Che
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import heroWarrantyPhoto from "../../imports/warranties_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
 const TEXT    = "#EFF2F9";
@@ -70,6 +71,24 @@ const WARR_CSS = `
 .fpd-warr *{box-sizing:border-box;}
 .fpd-warr-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-warr .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* hero banner */
+.fpd-warr .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-warr .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-warr .hbanner:hover .art{transform:scale(1.08);}
+.fpd-warr .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-warr .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-warr .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-warr .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-warr .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-warr .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-warr .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-warr .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-warr .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-warr .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-warr .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-warr .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-warr .hbanner{min-height:auto;} .fpd-warr .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-warr .hbanner h1{font-size:23px;}}
 
 .fpd-warr .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-warr .card.pad{padding:28px;}
@@ -177,6 +196,8 @@ export function Warranties() {
   const [filterCat, setFilterCat] = useState("all");
   const [form, setForm] = useState({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
 
+  const listRef = React.useRef<HTMLDivElement>(null);
+
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
   function addWarranty() {
@@ -205,6 +226,25 @@ export function Warranties() {
       <div className="fpd-warr-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroWarrantyPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Coverage You Won't Forget</span>
+            <h1>Every warranty, tracked — <span className="accent">so nothing expires unnoticed.</span></h1>
+            <p>Purchase dates, coverage terms, and claim instructions — kept together so you never lose a warranty to a lost receipt.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+                <Plus size={15}/> Add Warranty
+              </button>
+              <button className="hbtn ghost" onClick={() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                <Shield size={15}/> View All Warranties
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
@@ -248,7 +288,7 @@ export function Warranties() {
         </div>
 
         {/* ── Warranty list ── */}
-        <div className="dlist">
+        <div className="dlist" ref={listRef}>
           {filtered.map(w => (
             <div key={w.id} className="card" style={{ overflow: "hidden" }}>
               {(w as any).photo && (

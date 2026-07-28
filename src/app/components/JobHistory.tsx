@@ -3,6 +3,7 @@ import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, Ch
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
+import heroJobPhoto from "../../imports/jobhistory_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -51,6 +52,26 @@ const JOB_CSS = `
 .fpd-job *{box-sizing:border-box;}
 .fpd-job-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-job .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-job .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-job .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-job .hbanner:hover .art{transform:scale(1.08);}
+.fpd-job .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-job .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-job .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-job .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-job .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-job .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-job .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-job .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-job .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-job .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-job .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-job .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-job .hbanner{min-height:auto;} .fpd-job .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-job .hbanner h1{font-size:23px;}}
 
 .fpd-job .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-job .card.pad{padding:28px;}
@@ -126,6 +147,7 @@ export function JobHistory() {
   const [expanded, setExpanded] = useState<number | null>(1);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" });
+  const jlistRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
@@ -156,6 +178,25 @@ export function JobHistory() {
       <div className="fpd-job-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroJobPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Your Working Life, Documented</span>
+            <h1>Every role, every employer — <span className="accent">one complete timeline.</span></h1>
+            <p>Titles, employers, dates, and documents — a full record of your career for reference or estate purposes.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+                <Plus size={15}/> Add Position
+              </button>
+              <button className="hbtn ghost" onClick={() => jlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                <Briefcase size={15}/> View Timeline
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
@@ -185,7 +226,7 @@ export function JobHistory() {
         </div>
 
         {/* ── Timeline ── */}
-        <div className="jlist">
+        <div className="jlist" ref={jlistRef}>
           {jobs.map(job => (
             <div key={job.id} className="card jcard">
               <button className="jhead" onClick={() => setExpanded(expanded === job.id ? null : job.id)}>

@@ -3,6 +3,8 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import { FileText, Plus, Edit2, CheckCircle, Shield, X, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
+import heroWillsPhoto from "../../imports/wills_hero_photo.png";
+import trustSidePhoto from "../../imports/trust_side_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -42,6 +44,34 @@ const WILLS_CSS = `
 .fpd-wills *{box-sizing:border-box;}
 .fpd-wills-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-wills .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-wills .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-wills .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-wills .hbanner:hover .art{transform:scale(1.08);}
+.fpd-wills .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-wills .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-wills .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-wills .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-wills .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-wills .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-wills .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-wills .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-wills .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-wills .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-wills .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-wills .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-wills .hbanner{min-height:auto;} .fpd-wills .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-wills .hbanner h1{font-size:23px;}}
+
+/* info row — existing info banner paired with a side photo card */
+.fpd-wills .infogrid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:stretch;}
+.fpd-wills .side-photo{position:relative;border-radius:22px;overflow:hidden;min-height:120px;border:1px solid rgba(255,255,255,0.08);}
+.fpd-wills .side-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.fpd-wills .side-photo .sp-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0) 45%,rgba(7,10,18,0.6) 100%);}
+.fpd-wills .side-photo .sp-label{position:absolute;left:14px;bottom:12px;right:14px;color:#fff;font-family:var(--font-display);font-size:13px;font-weight:600;letter-spacing:-0.01em;}
+@media (max-width:760px){.fpd-wills .infogrid{grid-template-columns:1fr;}}
 
 .fpd-wills .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-wills .card.pad{padding:28px;}
@@ -155,6 +185,21 @@ export function WillsAndTrusts() {
       <div className="fpd-wills-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroWillsPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Made Legal, Made Certain</span>
+            <h1>The documents that make <span className="accent">your wishes binding.</span></h1>
+            <p>Wills, trusts, and powers of attorney — executed with your attorney and kept current, so your intentions carry the full weight of the law.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Document</button>
+              <button className="hbtn ghost" onClick={() => toast.success(`Opening ${wills[0]?.type ?? "your documents"} in Legacy Vault`)}><Shield size={15} /> View in Vault</button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
@@ -184,13 +229,20 @@ export function WillsAndTrusts() {
           ))}
         </div>
 
-        {/* ── Info banner ── */}
-        <div className="foot">
-          <Shield size={16} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
-          <div className="ft">
-            <b>Important:</b> Your legal documents should be prepared and executed by a licensed estate attorney.
-            Store the original in a fireproof safe or safe deposit box, and upload a certified copy to your Legacy
-            Vault so your legacy contacts can access it when needed.
+        {/* ── Info banner, paired with a trust-themed side photo ── */}
+        <div className="infogrid">
+          <div className="foot">
+            <Shield size={16} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
+            <div className="ft">
+              <b>Important:</b> Your legal documents should be prepared and executed by a licensed estate attorney.
+              Store the original in a fireproof safe or safe deposit box, and upload a certified copy to your Legacy
+              Vault so your legacy contacts can access it when needed.
+            </div>
+          </div>
+          <div className="side-photo">
+            <img src={trustSidePhoto} alt="" />
+            <div className="sp-scrim" />
+            <div className="sp-label">Built on trust</div>
           </div>
         </div>
 
