@@ -6,7 +6,6 @@ import {
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
-import purposePhoto from "../../imports/dashboard_purpose_photo.png";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -162,9 +161,7 @@ const DASH_CSS = `
 .fpd-dash .qa-txt b{display:block;font-size:13px;font-weight:600;color:${TEXT};}
 .fpd-dash .qa-txt i{display:block;font-style:normal;font-size:11px;color:${FAINT};margin-top:2px;}
 
-/* ── Row 3 — storage & usage (with trend graph) + purpose illustration ── */
-.fpd-dash .row3{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:stretch;}
-@media (max-width:980px){.fpd-dash .row3{grid-template-columns:1fr;}}
+/* ── Row 3 — storage & usage (with trend graph) ── */
 .fpd-dash .stor-fig{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .fpd-dash .stor-fig .big{font-family:var(--font-display);font-size:28px;font-weight:600;color:${TEXT};letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-dash .stor-fig .of{color:${FAINT};font-size:13.5px;}
@@ -190,16 +187,6 @@ const DASH_CSS = `
 .fpd-dash .trend-head .v{font-size:11px;color:${MINT};font-weight:600;}
 .fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
 .fpd-dash .months span{font-size:10px;color:${FAINT};}
-
-.fpd-dash .purpose{position:relative;overflow:hidden;border-color:rgba(91,110,225,0.18);display:flex;flex-direction:column;justify-content:flex-end;padding:0;isolation:isolate;min-height:280px;}
-.fpd-dash .purpose .art{position:absolute;inset:-6%;z-index:0;background-size:cover;background-position:center;transition:transform .7s cubic-bezier(.16,1,.3,1);pointer-events:none;}
-.fpd-dash .purpose:hover .art{transform:scale(1.06);}
-.fpd-dash .purpose .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(7,10,18,0.08) 0%,rgba(7,10,18,0.55) 55%,rgba(7,10,18,0.94) 100%);pointer-events:none;}
-.fpd-dash .purpose-body{position:relative;z-index:2;padding:24px 24px 26px;display:flex;flex-direction:column;gap:12px;}
-.fpd-dash .purpose-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.4);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;align-self:flex-start;font-family:var(--font-mono);}
-.fpd-dash .purpose h2{font-family:var(--font-display);font-size:18.5px;font-weight:600;color:${TEXT};margin:0;letter-spacing:-0.01em;line-height:1.28;}
-.fpd-dash .purpose h2 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
-.fpd-dash .purpose p{color:${SOFT};font-size:12.5px;line-height:1.65;margin:0;}
 
 /* ── Row 4 — recent documents + notifications (shared evrow pattern, same
    colour-coded-card language LifeCalendar uses for its event rows) ── */
@@ -439,9 +426,8 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
         </div>
 
-        {/* ── Row 3 — Storage & Usage (with trend graph) + purpose illustration ── */}
-        <div className="row3">
-          <div className="card pad">
+        {/* ── Row 3 — Storage & Usage (with trend graph) ── */}
+        <div className="card pad">
             <div className="sec-head">
               <h3 className="sec-title"><span className="tick" />Storage &amp; Usage</h3>
               <button className="sec-link" onClick={() => onNavigate("storage-usage")}>Manage <ArrowRight size={12} /></button>
@@ -496,17 +482,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
               </div>
             </div>
           </div>
-
-          <div className="card purpose">
-            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.28), rgba(91,167,214,0.12)), url(${purposePhoto})` }} />
-            <div className="scrim" />
-            <div className="purpose-body">
-              <span className="purpose-eyebrow">What This Page Is For</span>
-              <h2>One vault, <span className="accent">everything that matters</span>, in a single view.</h2>
-              <p>This dashboard is the control center for your digital legacy — every document, contact, wish and memory verified, encrypted and connected in one place, ready for the people you trust to find exactly what they need, exactly when they need it.</p>
-            </div>
-          </div>
-        </div>
 
         {/* ── Row 4 — Recent Documents + Notifications ── */}
         <div className="row4">
