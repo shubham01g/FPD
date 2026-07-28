@@ -29,6 +29,7 @@ import {
   eventsForMonth, upcomingEvents, monthlyBillingTotal, iso, daysInMonth,
   SOURCE_META, type CalendarEvent, type EventSource,
 } from "../services/calendarEvents";
+import heroCalendarPhoto from "../../imports/calendar_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard) ── */
 const TEXT   = "#EFF2F9";
@@ -117,6 +118,26 @@ const CAL_CSS = `
 .fpd-cal .sec-title{font-size:15px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);letter-spacing:-0.01em;}
 .fpd-cal .sec-title .tick{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 .fpd-cal .sec-cnt{color:${MUTED};font-size:11px;font-family:var(--font-mono);}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-cal .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-cal .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-cal .hbanner:hover .art{transform:scale(1.08);}
+.fpd-cal .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-cal .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-cal .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-cal .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-cal .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-cal .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-cal .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-cal .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-cal .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-cal .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-cal .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-cal .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-cal .hbanner{min-height:auto;} .fpd-cal .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-cal .hbanner h1{font-size:23px;}}
 
 /* header */
 .fpd-cal .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
@@ -466,6 +487,25 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
       <div className="fpd-cal-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroCalendarPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Every Date That Matters</span>
+            <h1>Never miss a moment <span className="accent">worth planning for.</span></h1>
+            <p>Bills, birthdays, warranties, travel and appointments — all in one calendar, so nothing important slips through the cracks.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={goToday}>
+                <CalendarClock size={15} /> Jump to Today
+              </button>
+              <button className="hbtn ghost" onClick={() => setView("agenda")}>
+                <List size={15} /> View Agenda
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>

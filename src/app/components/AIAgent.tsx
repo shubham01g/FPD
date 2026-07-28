@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Send, X, Minimize2, Maximize2, Sparkles, RefreshCw, Plus, Info, ArrowUpRight,
   Compass, Users, DollarSign, Shield, Layers, Star,
-  BookOpen, LayoutGrid, Zap, Clock, MessageCircle, List,
+  BookOpen, LayoutGrid, Zap, Clock, List,
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import heroQAPhoto from "../../imports/ai_hero_qa.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";
@@ -394,6 +395,26 @@ const AI_CSS = `
 .fpd-ai .btn-new{display:inline-flex;align-items:center;gap:7px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:12.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s,transform .18s;}
 .fpd-ai .btn-new:hover{filter:brightness(1.08);transform:translateY(-1px);}
 
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-ai .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-ai .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-ai .hbanner:hover .art{transform:scale(1.08);}
+.fpd-ai .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-ai .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-ai .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-ai .hbanner h1{font-family:var(--font-display);font-size:29px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-ai .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${GREEN});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-ai .hbanner p{color:${SOFT};font-size:13.5px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-ai .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-ai .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-ai .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-ai .hbanner .hbtn.primary{background:linear-gradient(180deg,${PURPLE},#5B6EE1);color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-ai .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-ai .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-ai .hbanner{min-height:auto;} .fpd-ai .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-ai .hbanner h1{font-size:23px;}}
+
 /* page cards */
 .fpd-ai .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-ai .card.pad{padding:20px;}
@@ -418,28 +439,6 @@ const AI_CSS = `
    (gradient glow pair, grid overlay, watermark mark, eyebrow/heading/
    subtitle/action-pair, "next up"-style real-content row), carrying AI
    Assistant content instead of a calendar day. */
-.fpd-ai .hero{position:relative;overflow:hidden;border-radius:18px;padding:24px 22px;background:radial-gradient(420px 220px at 88% -30%,rgba(91,167,214,0.28),transparent 65%),radial-gradient(360px 260px at -10% 120%,rgba(126,107,216,0.24),transparent 60%),linear-gradient(160deg,#141b30 0%,#0d1220 65%,#0c111f 100%);border:1px solid rgba(91,110,225,0.2);flex-shrink:0;}
-.fpd-ai .hero-grid{position:absolute;inset:0;opacity:.22;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.09) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(240px 200px at 100% 0%,#000 0%,transparent 75%);}
-.fpd-ai .hero-mark{position:absolute;right:-14px;top:-14px;opacity:.16;color:${ACCENT2};pointer-events:none;}
-.fpd-ai .hero-body{position:relative;}
-.fpd-ai .hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.36);color:#C9BFF0;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:13px;}
-.fpd-ai .hero-h2{font-family:var(--font-display);font-size:20px;font-weight:700;color:${TEXT};line-height:1.2;letter-spacing:-0.01em;margin-bottom:8px;}
-.fpd-ai .hero-h2 .accent{background:linear-gradient(90deg,${ACCENT2},${GREEN});-webkit-background-clip:text;background-clip:text;color:transparent;}
-.fpd-ai .hero-sub{color:${SOFT};font-size:12.5px;line-height:1.6;max-width:380px;margin-bottom:18px;}
-.fpd-ai .hero-actions{display:flex;gap:9px;flex-wrap:wrap;}
-.fpd-ai .hero-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .16s,filter .16s;}
-.fpd-ai .hero-btn:hover{transform:translateY(-1px);}
-.fpd-ai .hero-btn.primary{background:#fff;color:#12172A;}
-.fpd-ai .hero-btn.ghost{background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.4);color:#fff;}
-.fpd-ai .hero-next-wrap{position:relative;margin-top:14px;}
-.fpd-ai .hero-lbl{font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};margin-bottom:8px;}
-.fpd-ai .hero-evrow{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,0.024);border:1px solid rgba(91,167,214,0.15);}
-.fpd-ai .hero-evico{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,167,214,0.11);color:${ACCENT2};}
-.fpd-ai .hero-evbody{flex:1;min-width:0;}
-.fpd-ai .hero-evt{font-size:14px;font-weight:600;color:${TEXT};}
-.fpd-ai .hero-evdet{color:${MUTED};font-size:12px;line-height:1.55;margin-top:5px;}
-.fpd-ai .hero-evopen{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:99px;font-size:11.5px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);background:rgba(91,167,214,0.14);color:${ACCENT2};align-self:center;transition:filter .18s;}
-.fpd-ai .hero-evopen:hover{filter:brightness(1.15);}
 
 /* bento */
 .fpd-ai .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
@@ -522,14 +521,13 @@ const AI_CSS = `
   .fpd-ai .bento{grid-template-columns:1fr;}
   .fpd-ai .chatcard{height:560px;}
   .fpd-ai .kpi-stack{grid-template-columns:1fr 1fr;}
-  .fpd-ai .hero-next-wrap{margin-top:16px;}
 }
 @media (max-width:520px){
   .fpd-ai .kpi-stack{grid-template-columns:1fr;}
 }
 @media (prefers-reduced-motion:reduce){
   .fpd-ai .typing .dot,.fpd-ai .hd-status .d,.fpd-ai .chat-status .d,.fpd-ai-launch,.fpd-ai .send.on{animation:none!important;transition:none!important;}
-  .fpd-ai .kpi-mini,.fpd-ai .qrow,.fpd-ai .hero-btn{transition:none!important;}
+  .fpd-ai .kpi-mini,.fpd-ai .qrow,.fpd-ai .hbtn{transition:none!important;}
 }
 `;
 
@@ -606,6 +604,25 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
         <div className="grain" />
 
         <div className="wrap">
+          {/* Hero banner */}
+          <div className="hbanner">
+            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(111,174,139,0.2)), url(${heroQAPhoto})` }} />
+            <div className="scrim" />
+            <div className="hcontent">
+              <span className="heyebrow">Ask Anything, Anytime</span>
+              <h1>Every question, <span className="accent">answered instantly.</span></h1>
+              <p>Your always-on guide to Final Pass Down — ask about any section, fee, or feature and get a specific, instant answer.</p>
+              <div className="hactions">
+                <button className="hbtn primary" onClick={() => inputRef.current?.focus()}>
+                  <Send size={15} /> Start a Conversation
+                </button>
+                <button className="hbtn ghost" onClick={() => popularRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })}>
+                  <List size={15} /> See Popular Questions
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Header */}
           <div className="pg-head">
             <div style={{ minWidth:0 }}>
@@ -619,42 +636,6 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             </div>
             <div className="head-r">
               <button className="btn-new" onClick={reset}><Plus size={14}/> New conversation</button>
-            </div>
-          </div>
-
-          {/* AI hero — same themed-hero component as the Calendar's real
-              cal-hero (gradient glow pair, grid overlay, watermark mark,
-              eyebrow/heading/subtitle/action-pair, real-content row below),
-              carrying AI Assistant content instead of a calendar day. */}
-          <div className="card hero">
-            <div className="hero-grid" />
-            <div className="hero-mark"><MessageCircle size={96}/></div>
-            <div className="hero-body">
-              <span className="hero-eyebrow">Online Now</span>
-              <h4 className="hero-h2">Every Answer,<br/><span className="accent">One Conversation</span></h4>
-              <p className="hero-sub">
-                The Legacy Vault, the Activate Legacy Access fee, White Glove, security, plans — ask in plain
-                English and get the exact next step.
-              </p>
-              <div className="hero-actions">
-                <button className="hero-btn primary" onClick={() => inputRef.current?.focus()}>
-                  <Send size={14}/> Start a Conversation
-                </button>
-                <button className="hero-btn ghost" onClick={() => popularRef.current?.scrollIntoView({ behavior:"smooth", block:"nearest" })}>
-                  <List size={14}/> See Popular Questions
-                </button>
-              </div>
-            </div>
-            <div className="hero-next-wrap">
-              <div className="hero-lbl">Try asking</div>
-              <div className="hero-evrow">
-                <div className="hero-evico"><Users size={18}/></div>
-                <div className="hero-evbody">
-                  <span className="hero-evt">"What is a Legacy Contact?"</span>
-                  <div className="hero-evdet">Legacy Contacts are the people who receive access to your complete vault after your verified passing.</div>
-                </div>
-                <button className="hero-evopen" onClick={() => send("What is a Legacy Contact?")}>Ask <ArrowUpRight size={12}/></button>
-              </div>
             </div>
           </div>
 
