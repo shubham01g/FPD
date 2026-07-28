@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
+import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -82,6 +83,26 @@ const DASH_CSS = `
 .fpd-dash .sec-title .tick{width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
 .fpd-dash .sec-link{color:${SOFT};font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:color .15s,background .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:5px 10px;margin:-5px -10px;border-radius:99px;}
 .fpd-dash .sec-link:hover{color:${MINT};background:rgba(111,174,139,0.1);}
+
+/* hero banner — full-bleed photo, tinted toward the brand palette via
+   background-blend-mode rather than a flat color overlay, so it still reads
+   as a photo. Hover zooms the art layer only; text stays put. */
+.fpd-dash .hbanner{position:relative;overflow:hidden;border-radius:24px;min-height:320px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid ${LINE_SOFT};isolation:isolate;flex-shrink:0;}
+.fpd-dash .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center 35%;background-blend-mode:color;}
+.fpd-dash .hbanner:hover .art{transform:scale(1.08);}
+.fpd-dash .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 30%,rgba(7,10,18,0.55) 58%,rgba(7,10,18,0.15) 100%);pointer-events:none;}
+.fpd-dash .hbanner .hcontent{position:relative;z-index:2;padding:40px 42px;display:flex;flex-direction:column;justify-content:center;max-width:540px;}
+.fpd-dash .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 14px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:18px;font-family:var(--font-mono);}
+.fpd-dash .hbanner h1{font-family:var(--font-display);font-size:38px;font-weight:700;line-height:1.1;letter-spacing:-0.02em;margin:0 0 14px;color:${TEXT};}
+.fpd-dash .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-dash .hbanner p{color:${SOFT};font-size:14.5px;line-height:1.65;max-width:420px;margin:0 0 26px;}
+.fpd-dash .hbanner .hactions{display:flex;gap:12px;flex-wrap:wrap;}
+.fpd-dash .hbanner .hbtn{display:inline-flex;align-items:center;gap:9px;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-dash .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-dash .hbanner .hbtn.primary{background:linear-gradient(180deg,${ACCENT_D},${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-dash .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-dash .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-dash .hbanner{min-height:auto;} .fpd-dash .hbanner .hcontent{padding:28px 24px;max-width:none;} .fpd-dash .hbanner h1{font-size:28px;}}
 
 /* header */
 .fpd-dash .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
@@ -276,6 +297,25 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
       <div className="fpd-dash-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.42), rgba(91,167,214,0.22)), url(${heroFamilyPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">My Life · My Wishes · My Way</span>
+            <h1>My Life. My Wishes.<br /><span className="accent">My Way.</span></h1>
+            <p>Store your documents, record your wishes, and make sure everything you love is passed on exactly as you intend — sealed and encrypted end-to-end.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => onNavigate("file-cabinet")}>
+                <Plus size={15} /> Add to Vault
+              </button>
+              <button className="hbtn ghost" onClick={() => onNavigate(sealed ? "storage-usage" : (nextUp?.page ?? "file-cabinet"))}>
+                <ArrowRight size={15} /> {sealed ? "View Your Vault" : "Finish Your Vault"}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div>
