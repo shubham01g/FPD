@@ -12,7 +12,6 @@ interface UserDashboardProps { onNavigate: (page: string) => void; }
 /* ── Royal Vault Blue palette (unchanged brand tokens) ── */
 const TEXT     = "#EFF2F9";
 const SOFT     = "#BCC5DA";
-const MUTED    = "#A3ADC9";
 const FAINT    = "#929CBC";
 const ACCENT   = "#5B6EE1";
 const ACCENT2  = "#5BA7D6"; /* sky */
@@ -29,7 +28,6 @@ const LINE_SOFT_2 = "rgba(255,255,255,0.13)";
    STORAGE_BREAKDOWN (and the Usage & Billing page) keep their own category
    colours untouched. */
 const STORAGE_RAMP = ["#5BA7D6", "#6F9E94", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
-const FREE = "#929CBC";
 
 const storageHistory = [
   { month: "Jan", used: 4.2 }, { month: "Feb", used: 6.8 }, { month: "Mar", used: 9.1 },
@@ -40,7 +38,7 @@ const storageHistory = [
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
-/* Icon-chip tone → colour, used for every icon chip on the dashboard. */
+/* Icon-chip tone → colour, used for the readiness ring and the at-a-glance stats. */
 const TONES: Record<string, { bg: string; fg: string }> = {
   accent:   { bg: "linear-gradient(150deg, rgba(91,110,225,0.32), rgba(91,110,225,0.09))",  fg: "#AEB9F5" },
   sky:      { bg: "linear-gradient(150deg, rgba(91,167,214,0.32), rgba(91,167,214,0.09))",  fg: "#9FD3EE" },
@@ -62,10 +60,11 @@ function Chip({ tone, size = 34, iconSize = 16, children }: { tone: string; size
   );
 }
 
-/* Category → tone, so existing document categories get a consistent colour
-   without inventing any new fields. */
-const DOC_TONE: Record<string, string> = { legal: "accent", financial: "mint", digital: "sky", medical: "warn", personal: "good" };
-const NOTIF_TONE: Record<string, string> = { info: "sky", success: "good", warning: "warn", error: "critical" };
+/* Per-category / per-type hue — the same "one hue per kind of thing" language
+   LifeCalendar uses for its event sources, applied here to document rows and
+   notification rows (icon chip + tinted border + coloured meta text). */
+const DOC_HUE: Record<string, string> = { legal: "#6E90C9", financial: "#6FAE8B", digital: "#97A2C6", medical: "#D99A6B", personal: "#A98CC7" };
+const NOTIF_HUE: Record<string, string> = { info: ACCENT2, success: POS, warning: WARN, error: NEG };
 const NOTIF_ICON: Record<string, React.ReactNode> = {
   info: <Bell size={15} />, success: <Check size={15} />, warning: <AlertTriangle size={15} />, error: <AlertCircle size={15} />,
 };
@@ -76,7 +75,7 @@ const DASH_CSS = `
 .fpd-dash-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.02;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-dash .wrap{max-width:1340px;margin:0 auto;padding:30px 34px 30px;display:flex;flex-direction:column;gap:24px;position:relative;z-index:1;}
 
-.fpd-dash .card{background:${SURFACE2};border:1px solid ${LINE_SOFT};border-radius:24px;}
+.fpd-dash .card{background:${SURFACE2};border:1px solid ${LINE_SOFT};border-radius:22px;}
 .fpd-dash .card.pad{padding:30px;}
 .fpd-dash .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px;}
 .fpd-dash .sec-title{font-size:16px;font-weight:600;color:${TEXT};display:flex;align-items:center;gap:10px;font-family:var(--font-display);}
@@ -121,11 +120,9 @@ const DASH_CSS = `
 .fpd-dash .salert .msg{flex:1;font-size:13.5px;}
 .fpd-dash .salert button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;background:rgba(217,165,94,0.16);color:${WARN};font-size:12.5px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);}
 
-/* hero row */
-.fpd-dash .hero-grid{display:grid;grid-template-columns:1.65fr 1fr;gap:20px;align-items:stretch;}
-@media (max-width:1080px){.fpd-dash .hero-grid{grid-template-columns:1fr;}}
-.fpd-dash .ready{display:flex;align-items:center;gap:34px;padding:32px 34px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.18);}
-@media (max-width:640px){.fpd-dash .ready{flex-direction:column;align-items:flex-start;gap:22px;}}
+/* ── Row 1 — vault readiness card, full width ── */
+.fpd-dash .ready{display:flex;align-items:center;gap:36px;padding:32px 36px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-color:rgba(91,110,225,0.18);}
+@media (max-width:720px){.fpd-dash .ready{flex-direction:column;align-items:flex-start;gap:22px;}}
 .fpd-dash .ring-col{display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0;}
 .fpd-dash .ring-wrap{position:relative;width:132px;height:132px;flex-shrink:0;}
 .fpd-dash .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -134,35 +131,39 @@ const DASH_CSS = `
 .fpd-dash .ring-tag{font-size:11.5px;font-weight:600;}
 .fpd-dash .ready-info{flex:1;min-width:0;}
 .fpd-dash .ready-info h2{font-size:24px;font-weight:600;color:${TEXT};margin-bottom:8px;letter-spacing:-0.01em;font-family:var(--font-display);}
-.fpd-dash .ready-info p{color:${SOFT};font-size:14px;line-height:1.6;max-width:440px;margin-bottom:16px;}
+.fpd-dash .ready-info p{color:${SOFT};font-size:14px;line-height:1.6;max-width:560px;margin-bottom:16px;}
 .fpd-dash .finish{display:inline-flex;align-items:center;gap:7px;margin-bottom:18px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,${ACCENT_D},${ACCENT});color:#fff;font-size:12.5px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-dash .finish:hover{filter:brightness(1.08);}
-.fpd-dash .ess-list{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
-@media (max-width:640px){.fpd-dash .ess-list{width:100%;}}
+.fpd-dash .ess-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 14px;}
+@media (max-width:900px){.fpd-dash .ess-list{grid-template-columns:1fr 1fr;}}
+@media (max-width:640px){.fpd-dash .ess-list{width:100%;grid-template-columns:1fr;}}
 .fpd-dash .ess{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};cursor:pointer;text-align:left;width:100%;transition:border-color .15s,background .15s,transform .15s;font-family:var(--font-body);}
 .fpd-dash .ess:hover{border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.06);transform:translateY(-1px);}
 .fpd-dash .ess .lbl{font-size:13px;color:${SOFT};}
 
-/* at-a-glance stat block */
-.fpd-dash .kpi-stack{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:100%;}
-@media (max-width:520px){.fpd-dash .kpi-stack{grid-template-columns:1fr;}}
-.fpd-dash .kpi-mini{display:flex;align-items:center;gap:13px;padding:18px 16px;border-radius:15px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};transition:background .15s,border-color .15s,transform .15s;height:100%;width:100%;text-align:left;cursor:pointer;font-family:var(--font-body);}
+/* ── Row 2 — bare 2x2 kpi grid (no card, no highlight) + Quick Actions card ── */
+.fpd-dash .row2{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:stretch;}
+@media (max-width:820px){.fpd-dash .row2{grid-template-columns:1fr;}}
+.fpd-dash .kpi-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;}
+.fpd-dash .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};transition:background .15s,border-color .15s,transform .15s;text-align:left;cursor:pointer;font-family:var(--font-body);}
 .fpd-dash .kpi-mini:hover{background:${SURFACE2};border-color:${LINE_SOFT_2};transform:translateY(-1px);}
-.fpd-dash .kpi-mini.hl{background:linear-gradient(135deg,rgba(91,110,225,0.18),transparent 75%);border-color:rgba(91,110,225,0.32);}
 .fpd-dash .kpi-mini-txt{flex:1;min-width:0;}
 .fpd-dash .kpi-mini-val{font-family:var(--font-display);font-size:21px;font-weight:600;color:${TEXT};line-height:1.15;font-variant-numeric:tabular-nums;}
 .fpd-dash .kpi-mini-lbl{font-size:11px;color:${FAINT};margin-top:4px;}
 .fpd-dash .kpi-mini-sub{font-size:11px;color:${SOFT};margin-top:4px;display:flex;align-items:center;gap:5px;}
 .fpd-dash .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.fpd-dash .qa-card{display:flex;flex-direction:column;}
+.fpd-dash .qa-grid{display:flex;flex-direction:column;gap:9px;flex:1;justify-content:space-between;}
+.fpd-dash .qa-btn{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:15px;text-align:left;border:1px solid;cursor:pointer;background:none;font-family:var(--font-body);transition:transform .15s;}
+.fpd-dash .qa-btn:hover{transform:translateY(-1px);}
+.fpd-dash .qa-ico{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fpd-dash .qa-txt{flex:1;min-width:0;}
+.fpd-dash .qa-txt b{display:block;font-size:13px;font-weight:600;color:${TEXT};}
+.fpd-dash .qa-txt i{display:block;font-style:normal;font-size:11px;color:${FAINT};margin-top:2px;}
 
-/* second row: two balanced columns */
-.fpd-dash .tri-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:stretch;}
-.fpd-dash .stack-col{display:flex;flex-direction:column;gap:20px;min-width:0;}
-.fpd-dash .stack-col>.card:last-child{flex:1;display:flex;flex-direction:column;}
-.fpd-dash .qa-list,.fpd-dash .notif-list{flex:1;display:flex;flex-direction:column;justify-content:space-between;}
-@media (max-width:900px){.fpd-dash .tri-grid{grid-template-columns:1fr;}.fpd-dash .stack-col>.card:last-child{flex:initial;}}
-
-/* storage */
+/* ── Row 3 — storage & usage (with trend graph) + purpose illustration ── */
+.fpd-dash .row3{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:stretch;}
+@media (max-width:980px){.fpd-dash .row3{grid-template-columns:1fr;}}
 .fpd-dash .stor-fig{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .fpd-dash .stor-fig .big{font-family:var(--font-display);font-size:28px;font-weight:600;color:${TEXT};letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
 .fpd-dash .stor-fig .of{color:${FAINT};font-size:13.5px;}
@@ -189,34 +190,31 @@ const DASH_CSS = `
 .fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
 .fpd-dash .months span{font-size:10px;color:${FAINT};}
 
-/* documents list */
-.fpd-dash .doc-list{display:flex;flex-direction:column;}
-.fpd-dash .doc-row{display:flex;align-items:center;gap:13px;padding:13px 8px;border-top:1px solid ${LINE_SOFT};border-radius:12px;cursor:pointer;transition:background .15s;background:none;border-left:none;border-right:none;border-bottom:none;text-align:left;width:100%;font-family:var(--font-body);}
-.fpd-dash .doc-row:first-child{border-top:none;}
-.fpd-dash .doc-row:hover{background:${SURFACE2};}
-.fpd-dash .doc-info{flex:1;min-width:0;}
-.fpd-dash .doc-nm{color:${TEXT};font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fpd-dash .doc-meta{font-size:11.5px;color:${FAINT};margin-top:3px;}
-.fpd-dash .doc-status{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;flex-shrink:0;white-space:nowrap;}
+.fpd-dash .purpose{position:relative;overflow:hidden;padding:26px 24px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 55%,#0C1322 100%);border-color:rgba(91,110,225,0.18);display:flex;flex-direction:column;gap:16px;}
+.fpd-dash .purpose-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:10px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;align-self:flex-start;font-family:var(--font-mono);}
+.fpd-dash .purpose h2{font-family:var(--font-display);font-size:18.5px;font-weight:600;color:${TEXT};margin:0;letter-spacing:-0.01em;line-height:1.28;}
+.fpd-dash .purpose h2 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-dash .purpose p{color:${SOFT};font-size:12.5px;line-height:1.65;margin:0;}
+.fpd-dash .purpose-art{width:100%;max-width:210px;margin:4px auto 0;aspect-ratio:1/1;}
 
-/* notifications */
-.fpd-dash .notif{display:flex;gap:12px;padding:14px 10px;border-top:1px solid ${LINE_SOFT};border-radius:12px;position:relative;}
-.fpd-dash .notif:first-child{border-top:none;}
-.fpd-dash .notif.unread{background:${SURFACE2};}
-.fpd-dash .notif.unread::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
-.fpd-dash .notif-title{font-size:13px;font-weight:600;color:${TEXT};}
-.fpd-dash .notif.read .notif-title{color:${SOFT};font-weight:500;}
-.fpd-dash .notif-msg{color:${SOFT};font-size:12px;line-height:1.55;margin-top:3px;}
-.fpd-dash .notif-time{color:${FAINT};font-size:10.5px;margin-top:4px;}
-
-/* quick actions */
-.fpd-dash .qa-btn{display:flex;align-items:center;gap:14px;padding:13px 9px;border-radius:14px;text-align:left;transition:background .15s,padding-left .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);width:100%;}
-.fpd-dash .qa-btn:hover{background:${SURFACE2};padding-left:11px;}
-.fpd-dash .qa-txt{flex:1;}
-.fpd-dash .qa-txt b{display:block;font-size:13px;font-weight:600;color:${TEXT};}
-.fpd-dash .qa-txt i{display:block;font-style:normal;font-size:11px;color:${FAINT};margin-top:2px;}
-.fpd-dash .qa-arrow{color:${FAINT};transition:color .15s,transform .15s;display:flex;}
-.fpd-dash .qa-btn:hover .qa-arrow{color:${MINT};transform:translateX(2px);}
+/* ── Row 4 — recent documents + notifications (shared evrow pattern, same
+   colour-coded-card language LifeCalendar uses for its event rows) ── */
+.fpd-dash .row4{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+@media (max-width:980px){.fpd-dash .row4{grid-template-columns:1fr;}}
+.fpd-dash .evlist{display:flex;flex-direction:column;gap:11px;}
+.fpd-dash .evrow{display:flex;align-items:center;gap:14px;padding:15px 17px;border-radius:16px;background:rgba(255,255,255,0.024);border:1px solid;transition:opacity .15s;width:100%;text-align:left;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .evrow.read{opacity:0.6;cursor:default;}
+.fpd-dash .evico{width:42px;height:42px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-dash .evbody{flex:1;min-width:0;}
+.fpd-dash .evtop{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.fpd-dash .evt{font-size:13.5px;font-weight:600;color:${TEXT};}
+.fpd-dash .evmeta{font-size:11.5px;margin-top:4px;font-weight:600;}
+.fpd-dash .evdet{color:${FAINT};font-size:11.5px;line-height:1.5;margin-top:3px;}
+.fpd-dash .evstatus{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;flex-shrink:0;white-space:nowrap;}
+.fpd-dash .grid-legend{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid ${LINE_SOFT};}
+.fpd-dash .legend-item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:${SOFT};font-weight:500;}
+.fpd-dash .legend-item .dt{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.fpd-dash .legend-note{font-size:11px;color:${FAINT};margin-left:auto;}
 `;
 
 export function UserDashboard({ onNavigate }: UserDashboardProps) {
@@ -229,6 +227,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
   const docsTotal = docs.length;
   const docsPending = docs.filter(d => d.status === "pending").length;
+  const docCategories = Array.from(new Set(docs.map(d => d.category)));
 
   const legacyContacts = contacts.filter(c => c.type === "legacy");
   const guardianContacts = contacts.filter(c => c.type === "guardian");
@@ -258,17 +257,17 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const unread = notifications.filter(n => !n.read).length;
 
   const statCards = [
-    { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN, hl: false },
-    { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS, hl: false },
-    { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2, hl: false },
-    { label: "Referral Earnings", value: "$284.50", sub: "This month", icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: POS, hl: true },
+    { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN },
+    { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS },
+    { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2 },
+    { label: "Referral Earnings", value: "$284.50", sub: "This month", icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: ACCENT },
   ];
 
   const quickActions = [
-    { icon: <Plus size={16} />, label: "Add document", sub: "Upload to your vault", page: "file-cabinet", tone: "accent" },
-    { icon: <Users size={16} />, label: "Add contact", sub: "Assign legacy access", page: "contacts-legacy", tone: "good" },
-    { icon: <HardDrive size={16} />, label: "Check storage", sub: "Review usage & billing", page: "storage-usage", tone: "sky" },
-    { icon: <TrendingUp size={16} />, label: "Refer & earn", sub: "Share your link", page: "affiliate", tone: "mint" },
+    { icon: <Plus size={16} />, label: "Add document", sub: "Upload to your vault", page: "file-cabinet", hue: ACCENT },
+    { icon: <Users size={16} />, label: "Add contact", sub: "Assign legacy access", page: "contacts-legacy", hue: POS },
+    { icon: <HardDrive size={16} />, label: "Check storage", sub: "Review usage & billing", page: "storage-usage", hue: ACCENT2 },
+    { icon: <TrendingUp size={16} />, label: "Refer & earn", sub: "Share your link", page: "affiliate", hue: MINT },
   ];
 
   /* ── Readiness ring geometry ── */
@@ -350,199 +349,245 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
         )}
 
-        {/* ── Hero row: readiness (wide) + at-a-glance stats (narrow) ── */}
-        <div className="hero-grid">
-          <div className="card ready">
-            <div className="ring-col">
-              <div className="ring-wrap">
-                <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
-                  <defs>
-                    <linearGradient id="fpdRing" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor={ACCENT2} />
-                      <stop offset="100%" stopColor={ACCENT} />
-                    </linearGradient>
-                  </defs>
-                  <circle cx={RC} cy={RC} r={RR} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={RST} />
-                  <circle
-                    cx={RC} cy={RC} r={RR} fill="none" stroke="url(#fpdRing)" strokeWidth={RST}
-                    strokeLinecap="round" strokeDasharray={RCIRC} strokeDashoffset={ROFF}
-                    transform={`rotate(-90 ${RC} ${RC})`}
-                    style={{ transition: "stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)" }}
-                  />
-                </svg>
-                <div className="ring-center">
-                  <span className="ring-em"><Chip tone="good" size={36} iconSize={19}><ShieldCheck size={19} /></Chip></span>
-                  <b>{readyPct}%</b>
-                </div>
-              </div>
-              <span className="ring-tag" style={{ color: sealed ? MINT : WARN }}>{sealed ? "Sealed" : "In progress"}</span>
-            </div>
-
-            <div className="ready-info">
-              <h2>{sealed ? "Vault fully prepared" : `Vault ${readyPct}% prepared`}</h2>
-              <p>
-                {sealed
-                  ? <>All {essentials.length} estate essentials are complete, encrypted &amp; sealed for those you love.</>
-                  : <>{doneCount} of {essentials.length} essentials in place.{nextUp ? <> Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
-              </p>
-              {!sealed && nextUp && (
-                <button className="finish" onClick={() => onNavigate(nextUp.page)}>
-                  Finish your vault <ArrowRight size={13} />
-                </button>
-              )}
-              <div className="ess-list">
-                {essentials.map(e => (
-                  <button key={e.label} className="ess" onClick={() => onNavigate(e.page)}>
-                    <Chip tone={e.done ? "good" : "accent"} size={18} iconSize={10}>
-                      {e.done && <Check size={10} strokeWidth={3} />}
-                    </Chip>
-                    <span className="lbl">{e.label}</span>
-                  </button>
-                ))}
+        {/* ── Row 1 — vault readiness, full width ── */}
+        <div className="card ready">
+          <div className="ring-col">
+            <div className="ring-wrap">
+              <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
+                <defs>
+                  <linearGradient id="fpdRing" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor={ACCENT2} />
+                    <stop offset="100%" stopColor={ACCENT} />
+                  </linearGradient>
+                </defs>
+                <circle cx={RC} cy={RC} r={RR} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={RST} />
+                <circle
+                  cx={RC} cy={RC} r={RR} fill="none" stroke="url(#fpdRing)" strokeWidth={RST}
+                  strokeLinecap="round" strokeDasharray={RCIRC} strokeDashoffset={ROFF}
+                  transform={`rotate(-90 ${RC} ${RC})`}
+                  style={{ transition: "stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)" }}
+                />
+              </svg>
+              <div className="ring-center">
+                <span className="ring-em"><Chip tone="good" size={36} iconSize={19}><ShieldCheck size={19} /></Chip></span>
+                <b>{readyPct}%</b>
               </div>
             </div>
+            <span className="ring-tag" style={{ color: sealed ? MINT : WARN }}>{sealed ? "Sealed" : "In progress"}</span>
           </div>
 
-          <div className="card pad">
-            <div className="kpi-stack">
-              {statCards.map(card => (
-                <button key={card.label} className={`kpi-mini ${card.hl ? "hl" : ""}`} onClick={() => onNavigate(card.page)}>
-                  <Chip tone={card.tone} size={36} iconSize={16}>{card.icon}</Chip>
-                  <div className="kpi-mini-txt">
-                    <div className="kpi-mini-val">{card.value}</div>
-                    <div className="kpi-mini-lbl">{card.label}</div>
-                    <div className="kpi-mini-sub"><span className="dt" style={{ background: card.dot }} />{card.sub}</div>
-                  </div>
+          <div className="ready-info">
+            <h2>{sealed ? "Vault fully prepared" : `Vault ${readyPct}% prepared`}</h2>
+            <p>
+              {sealed
+                ? <>All {essentials.length} estate essentials are complete, encrypted &amp; sealed for those you love.</>
+                : <>{doneCount} of {essentials.length} essentials in place.{nextUp ? <> Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
+            </p>
+            {!sealed && nextUp && (
+              <button className="finish" onClick={() => onNavigate(nextUp.page)}>
+                Finish your vault <ArrowRight size={13} />
+              </button>
+            )}
+            <div className="ess-list">
+              {essentials.map(e => (
+                <button key={e.label} className="ess" onClick={() => onNavigate(e.page)}>
+                  <Chip tone={e.done ? "good" : "accent"} size={18} iconSize={10}>
+                    {e.done && <Check size={10} strokeWidth={3} />}
+                  </Chip>
+                  <span className="lbl">{e.label}</span>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── Second row: Storage + Documents (left) · Quick Actions + Notifications (right) ── */}
-        <div className="tri-grid">
-          <div className="stack-col">
-            {/* Storage & Usage */}
-            <div className="card pad">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />Storage &amp; Usage</h3>
-                <button className="sec-link" onClick={() => onNavigate("storage-usage")}>Manage <ArrowRight size={12} /></button>
-              </div>
-              <div className="stor-fig">
-                <span className="big">{used} GB</span>
-                <span className="of">of {total} GB</span>
-                <span className="free">{freeGb.toFixed(1)} GB free</span>
-              </div>
-              <div className="meter">
-                {breakdown.map(seg => (
-                  <i key={seg.key} title={`${seg.label} · ${seg.pct.toFixed(0)}%`} style={{ width: `${(seg.gb / total) * 100}%`, background: seg.color }} />
-                ))}
-                <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(146,156,188,0.22)" }} />
-              </div>
-              <div className="uf">
-                <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b></div>
-                <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b></div>
-              </div>
-              <div className="leg">
-                {breakdown.map(seg => (
-                  <div key={seg.key} className="leg-row">
-                    <span className="sw" style={{ background: seg.color }} />
-                    <span className="nm">{seg.label}</span>
-                    <span className="gb">{seg.gb.toFixed(1)} GB</span>
-                    <span className="pc">{((seg.gb / used) * 100).toFixed(1)}%</span>
-                  </div>
-                ))}
-              </div>
-              <div className="trend">
-                <div className="trend-head">
-                  <span className="t">Usage · last 6 months</span>
-                  <span className="v">+{trendDelta} GB</span>
+        {/* ── Row 2 — bare 2x2 kpi grid (two upper, two lower) + Quick Actions ── */}
+        <div className="row2">
+          <div className="kpi-grid">
+            {statCards.map(card => (
+              <button key={card.label} className="kpi-mini" onClick={() => onNavigate(card.page)}>
+                <Chip tone={card.tone} size={36} iconSize={16}>{card.icon}</Chip>
+                <div className="kpi-mini-txt">
+                  <div className="kpi-mini-val">{card.value}</div>
+                  <div className="kpi-mini-lbl">{card.label}</div>
+                  <div className="kpi-mini-sub"><span className="dt" style={{ background: card.dot }} />{card.sub}</div>
                 </div>
-                <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 96, display: "block" }}>
-                  <defs>
-                    <linearGradient id="fpdArea" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(91,110,225,0.32)" />
-                      <stop offset="100%" stopColor="rgba(91,110,225,0)" />
-                    </linearGradient>
-                  </defs>
-                  {gridYs.map((y, i) => (
-                    <line key={i} x1="0" y1={y.toFixed(1)} x2={CW} y2={y.toFixed(1)} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                  ))}
-                  <path d={areaPath} fill="url(#fpdArea)" />
-                  <path d={linePath.trim()} fill="none" stroke={ACCENT2} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-                  <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="7" fill="rgba(91,110,225,0.25)" />
-                  <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="3.6" fill={ACCENT2} />
-                </svg>
-                <div className="months">
-                  {storageHistory.map(d => <span key={d.month}>{d.month}</span>)}
-                </div>
-              </div>
-            </div>
+              </button>
+            ))}
+          </div>
 
-            {/* Recent Documents */}
-            <div className="card pad">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />Recent Documents</h3>
-                <button className="sec-link" onClick={() => onNavigate("file-cabinet")}>View all <ArrowRight size={12} /></button>
+          <div className="card pad qa-card">
+            <div className="sec-head">
+              <h3 className="sec-title"><span className="tick" />Quick Actions</h3>
+            </div>
+            <div className="qa-grid">
+              {quickActions.map(a => (
+                <button
+                  key={a.label} className="qa-btn"
+                  style={{ borderColor: `${a.hue}44`, background: `${a.hue}14` }}
+                  onClick={() => onNavigate(a.page)}
+                >
+                  <span className="qa-ico" style={{ background: `${a.hue}1C`, color: a.hue }}>{a.icon}</span>
+                  <span className="qa-txt"><b>{a.label}</b><i>{a.sub}</i></span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Row 3 — Storage & Usage (with trend graph) + purpose illustration ── */}
+        <div className="row3">
+          <div className="card pad">
+            <div className="sec-head">
+              <h3 className="sec-title"><span className="tick" />Storage &amp; Usage</h3>
+              <button className="sec-link" onClick={() => onNavigate("storage-usage")}>Manage <ArrowRight size={12} /></button>
+            </div>
+            <div className="stor-fig">
+              <span className="big">{used} GB</span>
+              <span className="of">of {total} GB</span>
+              <span className="free">{freeGb.toFixed(1)} GB free</span>
+            </div>
+            <div className="meter">
+              {breakdown.map(seg => (
+                <i key={seg.key} title={`${seg.label} · ${seg.pct.toFixed(0)}%`} style={{ width: `${(seg.gb / total) * 100}%`, background: seg.color }} />
+              ))}
+              <i title={`Free · ${freeGb.toFixed(1)} GB`} style={{ flex: 1, background: "rgba(146,156,188,0.22)" }} />
+            </div>
+            <div className="uf">
+              <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b></div>
+              <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b></div>
+            </div>
+            <div className="leg">
+              {breakdown.map(seg => (
+                <div key={seg.key} className="leg-row">
+                  <span className="sw" style={{ background: seg.color }} />
+                  <span className="nm">{seg.label}</span>
+                  <span className="gb">{seg.gb.toFixed(1)} GB</span>
+                  <span className="pc">{((seg.gb / used) * 100).toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+            <div className="trend">
+              <div className="trend-head">
+                <span className="t">Usage · last 6 months</span>
+                <span className="v">+{trendDelta} GB</span>
               </div>
-              <div className="doc-list">
-                {docs.slice(0, 5).map(doc => {
-                  const ok = doc.status === "verified";
-                  const tone = DOC_TONE[doc.category] ?? "accent";
-                  return (
-                    <button key={doc.id} className="doc-row" onClick={() => onNavigate("file-cabinet")}>
-                      <Chip tone={tone} size={36} iconSize={15}><FileText size={15} /></Chip>
-                      <div className="doc-info">
-                        <div className="doc-nm">{doc.name}</div>
-                        <div className="doc-meta">{doc.size} {doc.sizeUnit} · {doc.uploaded}</div>
-                      </div>
-                      <span className="doc-status" style={{ background: ok ? "rgba(95,190,145,0.15)" : "rgba(217,165,94,0.15)", color: ok ? POS : WARN }}>
-                        {ok ? "Verified" : "Pending"}
-                      </span>
-                    </button>
-                  );
-                })}
+              <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 96, display: "block" }}>
+                <defs>
+                  <linearGradient id="fpdArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(91,110,225,0.32)" />
+                    <stop offset="100%" stopColor="rgba(91,110,225,0)" />
+                  </linearGradient>
+                </defs>
+                {gridYs.map((y, i) => (
+                  <line key={i} x1="0" y1={y.toFixed(1)} x2={CW} y2={y.toFixed(1)} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                ))}
+                <path d={areaPath} fill="url(#fpdArea)" />
+                <path d={linePath.trim()} fill="none" stroke={ACCENT2} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+                <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="7" fill="rgba(91,110,225,0.25)" />
+                <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="3.6" fill={ACCENT2} />
+              </svg>
+              <div className="months">
+                {storageHistory.map(d => <span key={d.month}>{d.month}</span>)}
               </div>
             </div>
           </div>
 
-          <div className="stack-col">
-            {/* Quick Actions */}
-            <div className="card pad">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />Quick Actions</h3>
-              </div>
-              <div className="qa-list">
-                {quickActions.map(a => (
-                  <button key={a.label} className="qa-btn" onClick={() => onNavigate(a.page)}>
-                    <Chip tone={a.tone} size={36} iconSize={16}>{a.icon}</Chip>
-                    <span className="qa-txt"><b>{a.label}</b><i>{a.sub}</i></span>
-                    <span className="qa-arrow"><ArrowRight size={14} /></span>
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="card purpose">
+            <span className="purpose-eyebrow">What This Page Is For</span>
+            <h2>One vault, <span className="accent">everything that matters</span>, in a single view.</h2>
+            <p>This dashboard is the control center for your digital legacy — every document, contact, wish and memory verified, encrypted and connected in one place, ready for the people you trust to find exactly what they need, exactly when they need it.</p>
+            <svg className="purpose-art" viewBox="0 0 300 300" fill="none">
+              <defs>
+                <radialGradient id="fpdPurposeGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#5B6EE1" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#5B6EE1" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="fpdPurposeCore" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#5BA7D6" />
+                  <stop offset="100%" stopColor="#5B6EE1" />
+                </linearGradient>
+              </defs>
+              <circle cx="150" cy="150" r="130" fill="url(#fpdPurposeGlow)" />
+              <line x1="150" y1="150" x2="150" y2="55" stroke="#6E90C9" strokeWidth="1.4" strokeOpacity="0.55" />
+              <line x1="150" y1="150" x2="238" y2="103" stroke="#6FAE8B" strokeWidth="1.4" strokeOpacity="0.55" />
+              <line x1="150" y1="150" x2="238" y2="197" stroke="#D99A6B" strokeWidth="1.4" strokeOpacity="0.55" />
+              <line x1="150" y1="150" x2="150" y2="245" stroke="#A98CC7" strokeWidth="1.4" strokeOpacity="0.55" />
+              <line x1="150" y1="150" x2="62" y2="197" stroke="#97A2C6" strokeWidth="1.4" strokeOpacity="0.55" />
+              <line x1="150" y1="150" x2="62" y2="103" stroke="#5BA7D6" strokeWidth="1.4" strokeOpacity="0.55" />
+              <circle cx="150" cy="150" r="30" fill="#0C1322" stroke="url(#fpdPurposeCore)" strokeWidth="2.5" />
+              <path d="M150 136 l13 5.5 v11.5 c0 9.5 -5.5 15.5 -13 19.5 c-7.5 -4 -13 -10 -13 -19.5 v-11.5 z" fill="none" stroke="url(#fpdPurposeCore)" strokeWidth="2" />
+              <circle cx="150" cy="55" r="13" fill="#6E90C91C" stroke="#6E90C9" strokeWidth="1.6" />
+              <circle cx="238" cy="103" r="13" fill="#6FAE8B1C" stroke="#6FAE8B" strokeWidth="1.6" />
+              <circle cx="238" cy="197" r="13" fill="#D99A6B1C" stroke="#D99A6B" strokeWidth="1.6" />
+              <circle cx="150" cy="245" r="13" fill="#A98CC71C" stroke="#A98CC7" strokeWidth="1.6" />
+              <circle cx="62" cy="197" r="13" fill="#97A2C61C" stroke="#97A2C6" strokeWidth="1.6" />
+              <circle cx="62" cy="103" r="13" fill="#5BA7D61C" stroke="#5BA7D6" strokeWidth="1.6" />
+            </svg>
+          </div>
+        </div>
 
-            {/* Notifications */}
-            <div className="card pad">
-              <div className="sec-head">
-                <h3 className="sec-title"><span className="tick" />Notifications</h3>
-                <span className="sec-link" style={{ cursor: "default", color: unread ? MINT : SOFT }}>
-                  <Bell size={12} /> {unread} new
-                </span>
+        {/* ── Row 4 — Recent Documents + Notifications ── */}
+        <div className="row4">
+          <div className="card pad">
+            <div className="sec-head">
+              <h3 className="sec-title"><span className="tick" />Recent Documents</h3>
+              <button className="sec-link" onClick={() => onNavigate("file-cabinet")}>View all <ArrowRight size={12} /></button>
+            </div>
+            <div className="evlist">
+              {docs.slice(0, 5).map(doc => {
+                const ok = doc.status === "verified";
+                const hue = DOC_HUE[doc.category] ?? FAINT;
+                return (
+                  <button key={doc.id} className="evrow" style={{ borderColor: `${hue}26` }} onClick={() => onNavigate("file-cabinet")}>
+                    <span className="evico" style={{ background: `${hue}1C`, color: hue }}><FileText size={16} /></span>
+                    <div className="evbody">
+                      <div className="evtop"><span className="evt">{doc.name}</span></div>
+                      <div className="evmeta" style={{ color: hue }}>
+                        {doc.category.charAt(0).toUpperCase() + doc.category.slice(1)} · {doc.size} {doc.sizeUnit} · {doc.uploaded}
+                      </div>
+                    </div>
+                    <span className="evstatus" style={{ background: ok ? "rgba(95,190,145,0.15)" : "rgba(217,165,94,0.15)", color: ok ? POS : WARN }}>
+                      {ok ? "Verified" : "Pending"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {docCategories.length > 0 && (
+              <div className="grid-legend">
+                {docCategories.map(cat => (
+                  <span key={cat} className="legend-item">
+                    <span className="dt" style={{ background: DOC_HUE[cat] ?? FAINT }} />
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </span>
+                ))}
+                <span className="legend-note">{docsTotal} documents total, {Math.min(5, docsTotal)} shown</span>
               </div>
-              <div className="notif-list">
-                {notifications.slice(0, 5).map(n => (
-                  <div key={n.id} className={`notif ${n.read ? "read" : "unread"}`}>
-                    <Chip tone={NOTIF_TONE[n.type] ?? "sky"} size={32} iconSize={15}>{NOTIF_ICON[n.type] ?? <Bell size={15} />}</Chip>
-                    <div style={{ minWidth: 0 }}>
-                      <div className="notif-title">{n.title}</div>
-                      <div className="notif-msg">{n.message}</div>
-                      <div className="notif-time">{n.time}</div>
+            )}
+          </div>
+
+          <div className="card pad">
+            <div className="sec-head">
+              <h3 className="sec-title"><span className="tick" />Notifications</h3>
+              <span className="sec-link" style={{ cursor: "default", color: unread ? MINT : SOFT }}>
+                <Bell size={12} /> {unread} new
+              </span>
+            </div>
+            <div className="evlist">
+              {notifications.slice(0, 5).map(n => {
+                const hue = NOTIF_HUE[n.type] ?? ACCENT2;
+                return (
+                  <div key={n.id} className={`evrow ${n.read ? "read" : ""}`} style={{ borderColor: `${hue}26` }}>
+                    <span className="evico" style={{ background: `${hue}1C`, color: hue }}>{NOTIF_ICON[n.type] ?? <Bell size={15} />}</span>
+                    <div className="evbody">
+                      <div className="evtop"><span className="evt">{n.title}</span></div>
+                      <div className="evmeta" style={{ color: hue }}>{n.time}</div>
+                      <div className="evdet">{n.message}</div>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
