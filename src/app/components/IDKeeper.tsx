@@ -101,7 +101,7 @@ const IDK_CSS = `
 
 /* KPI ledger */
 .fpd-idk .kpi-stack{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.fpd-idk .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-idk .kpi-mini{display:flex;align-items:flex-start;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
 .fpd-idk .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
 .fpd-idk .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
 .fpd-idk .kpi-mini-txt{flex:1;min-width:0;}
@@ -127,8 +127,8 @@ const IDK_CSS = `
 .fpd-idk .idnum-lbl{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:3px;}
 .fpd-idk .idnum-val{font-family:var(--font-mono);font-size:17.5px;font-weight:700;color:${TEXT};}
 .fpd-idk .eye-btn{color:${MUTED};background:none;border:none;cursor:pointer;display:flex;}
-.fpd-idk .igrid2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.fpd-idk .itile{padding:9px 10px;border-radius:99px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
+.fpd-idk .igrid2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;align-items:start;}
+.fpd-idk .itile{padding:9px 10px;border-radius:14px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-idk .itile .tk{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.08em;color:${MUTED};margin-bottom:2px;}
 .fpd-idk .itile .tv{color:${TEXT};font-size:15px;}
 .fpd-idk .inotes{color:${MUTED};font-size:15px;line-height:1.55;}

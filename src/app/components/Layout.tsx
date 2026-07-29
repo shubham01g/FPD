@@ -218,10 +218,10 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(91,110,225,0.12)"; }}
         onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
         <span style={{ flexShrink: 0, color: "#FFFFFF", display: "flex" }}>{item.icon}</span>
-        {!collapsed && <span style={{ fontSize: 16, fontWeight: active ? 650 : 500, flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>{item.label}</span>}
+        {!collapsed && <span style={{ fontSize: 16, fontWeight: active ? 650 : 500, flex: 1, minWidth: 0, textAlign: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</span>}
         {!collapsed && item.badge && (
           <span style={{
-            fontSize: 11, fontWeight: 700, letterSpacing: "0.02em",
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.02em", flexShrink: 0,
             background: active ? "rgba(255,255,255,0.22)" : "rgba(91,110,225,0.25)",
             color: active ? "#FFFFFF" : "#6FAE8B", padding: "2px 6px", borderRadius: 99,
           }}>{item.badge}</span>

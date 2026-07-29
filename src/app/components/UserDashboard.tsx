@@ -145,7 +145,7 @@ const DASH_CSS = `
 .fpd-dash .row2{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:stretch;}
 @media (max-width:820px){.fpd-dash .row2{grid-template-columns:1fr;}}
 .fpd-dash .kpi-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;}
-.fpd-dash .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};transition:background .15s,border-color .15s,transform .15s;text-align:left;cursor:pointer;font-family:var(--font-body);}
+.fpd-dash .kpi-mini{display:flex;align-items:flex-start;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid ${LINE_SOFT};transition:background .15s,border-color .15s,transform .15s;text-align:left;cursor:pointer;font-family:var(--font-body);}
 .fpd-dash .kpi-mini:hover{background:${SURFACE2};border-color:${LINE_SOFT_2};transform:translateY(-1px);}
 .fpd-dash .kpi-mini-txt{flex:1;min-width:0;}
 .fpd-dash .kpi-mini-val{font-family:var(--font-display);font-size:23.5px;font-weight:600;color:${TEXT};line-height:1.15;font-variant-numeric:tabular-nums;}
