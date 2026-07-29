@@ -156,7 +156,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
         </div>
         <div className="flex items-center gap-2.5">
           <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors" style={{ color: "#A98CC7" }}>
-            <Star size={13} /> White Glove
+            White Glove
           </button>
           <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:text-white" style={{ color: SOFT }}>Sign In</button>
           <PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn>
@@ -177,12 +177,6 @@ function TopNav({ onStart }: { onStart: () => void }) {
 
 /* ── HERO ─────────────────────────────────────────────────────── */
 function Hero({ onStart }: { onStart: () => void }) {
-  const stats: [string, string][] = [
-    ["50,000+", "Legacies Protected"],
-    ["$2.4B+", "Assets Secured"],
-    ["4.9 / 5", "User Rating"],
-    ["256-bit", "Encryption"],
-  ];
   return (
     <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
       <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
@@ -202,27 +196,6 @@ function Hero({ onStart }: { onStart: () => void }) {
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
             <GhostBtn onClick={() => scrollToId("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
-        </div>
-
-        {/* stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-12">
-          {stats.map(([val, label]) => (
-            <div key={label} className="p-5 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div style={{ ...DISPLAY, fontSize: 32.5, fontWeight: 800, color: "#6FAE8B" }}>{val}</div>
-              <div style={{ color: MUTED, fontSize: 15, marginTop: 4, ...MONO }}>{label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* social proof */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center">
-            {["AR", "MT", "JW", "LK", "DP", "RH"].map((ini, i) => (
-              <div key={ini} className="flex items-center justify-center" style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: i > 0 ? -10 : 0, background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 14, fontWeight: 700, ...MONO }}>{ini}</div>
-            ))}
-            <div style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid rgba(91,110,225,0.4)", marginLeft: -10, background: "rgba(91,110,225,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#6FAE8B", fontSize: 12.5, fontWeight: 700, ...MONO }}>+50k</div>
-          </div>
-          <div style={{ color: MUTED, fontSize: 16 }}>Joined by 50,000+ families protecting their legacy</div>
         </div>
       </div>
     </header>
@@ -338,30 +311,21 @@ const FEATURES: Feat[] = [
   { cat: "organize", icon: <HardDrive size={20} />, title: "Storage Metering", desc: "Real-time storage dashboard with overage alerts at 80%, 90%, 95%." },
   { cat: "organize", icon: <BarChart3 size={20} />, title: "Activity Log", desc: "Complete audit trail of all vault changes and contact access events." },
 ];
-const CAT_LABELS: Record<string, string> = { all: "All Features", legacy: "Legacy Planning", personal: "Personal Records", financial: "Financial", family: "Family & Memories", organize: "Organization" };
+/* curated flagship features — the rest live inside the app itself */
+const HIGHLIGHT_TITLES = ["Document Vault", "Video Messages", "Will & Testament", "Insurance Policies", "Investment Portfolios", "Digital Assets", "Memories", "Pet Care", "Personal Folders"];
 
 function Features() {
-  const [active, setActive] = useState("all");
-  const cats = ["all", "legacy", "personal", "financial", "family", "organize"];
-  const filtered = active === "all" ? FEATURES : FEATURES.filter(f => f.cat === active);
+  const highlighted = FEATURES.filter(f => HIGHLIGHT_TITLES.includes(f.title));
   return (
     <section id="features" className="relative py-28 px-6">
-      <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="30+ life categories, all in one military-grade encrypted vault." />
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
-          {cats.map(c => (
-            <button key={c} onClick={() => setActive(c)} className="px-5 py-2 rounded-full text-sm transition-all"
-              style={{ background: active === c ? `linear-gradient(135deg,${PRIMARY},${ACCENT})` : "rgba(91,110,225,0.06)", color: active === c ? "#fff" : MUTED, border: `1px solid ${active === c ? "transparent" : "rgba(91,110,225,0.18)"}`, fontWeight: active === c ? 700 : 500, ...MONO }}>
-              {CAT_LABELS[c]}
-            </button>
-          ))}
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {filtered.map(f => (
-            <div key={f.title} className="p-5 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{f.icon}</div>
-              <div style={{ ...DISPLAY, fontSize: 17.5, fontWeight: 600, color: TEXT, marginBottom: 6 }}>{f.title}</div>
-              <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.65 }}>{f.desc}</p>
+      <div className="max-w-6xl mx-auto">
+        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one military-grade encrypted vault." />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {highlighted.map(f => (
+            <div key={f.title} className="p-6 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{f.icon}</div>
+              <div style={{ ...DISPLAY, fontSize: 18.5, fontWeight: 600, color: TEXT, marginBottom: 6 }}>{f.title}</div>
+              <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
           ))}
         </div>
@@ -871,10 +835,7 @@ function Help() {
         <div className="mt-12 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 8 }}>Still have questions?</div>
           <p style={{ color: MUTED, fontSize: 17.5, marginBottom: 20 }}>Our team is available 7 days a week. Average response time: under 2 hours.</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="mailto:support@finalpassdown.com"><GhostBtn><Mail size={15} /> Email Support</GhostBtn></a>
-            <GhostBtn><Phone size={15} /> Call Us</GhostBtn>
-          </div>
+          <a href="mailto:support@finalpassdown.com"><PrimaryBtn><Mail size={15} /> Contact Us</PrimaryBtn></a>
         </div>
       </div>
     </section>
