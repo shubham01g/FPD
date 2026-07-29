@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { CryptoPayment } from "./CryptoPayment";
+import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -62,6 +63,26 @@ const LCF_CSS = `
 .fpd-lcf *{box-sizing:border-box;}
 .fpd-lcf-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-lcf .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-lcf .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-lcf .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-lcf .hbanner:hover .art{transform:scale(1.08);}
+.fpd-lcf .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-lcf .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-lcf .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-lcf .hbanner h1{font-family:var(--font-display);font-size:36.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-lcf .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-lcf .hbanner p{color:${SOFT};font-size:17px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-lcf .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-lcf .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-lcf .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-lcf .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-lcf .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-lcf .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-lcf .hbanner{min-height:auto;} .fpd-lcf .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-lcf .hbanner h1{font-size:29px;}}
 
 .fpd-lcf .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-lcf .card.pad{padding:28px;}
@@ -244,6 +265,21 @@ export function LegacyContinuationFee() {
       <div className="fpd-lcf-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroLegacyAccessPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Legacy Protection</span>
+            <h1>The moment your vault <span className="accent">unlocks for them.</span></h1>
+            <p>A one-time $199 fee that guarantees your legacy contacts can download your complete account — every document, video, and record — once your passing is verified.</p>
+            <div className="hactions">
+              {!status.paid && <button className="hbtn primary" onClick={() => setShowPayment(true)}><CreditCard size={15} /> Pay $199 Fee</button>}
+              <button className="hbtn ghost" onClick={() => setShowCoverage(true)}><Download size={15} /> What Gets Unlocked</button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div>
           <div className="eyebrow"><Shield size={12} /> Legacy Protection</div>

@@ -8,6 +8,9 @@ import {
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
+import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.png";
+import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.png";
+import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -446,6 +449,26 @@ const CONTACTS_CSS = `
 .fpd-contacts-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-contacts .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-contacts .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-contacts .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-contacts .hbanner:hover .art{transform:scale(1.08);}
+.fpd-contacts .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-contacts .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-contacts .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-contacts .hbanner h1{font-family:var(--font-display);font-size:36.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-contacts .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-contacts .hbanner p{color:${SOFT};font-size:17px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-contacts .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-contacts .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-contacts .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-contacts .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-contacts .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-contacts .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-contacts .hbanner{min-height:auto;} .fpd-contacts .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-contacts .hbanner h1{font-size:29px;}}
+
 .fpd-contacts .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-contacts .card.pad{padding:28px;}
 .fpd-contacts .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
@@ -576,12 +599,34 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   };
   const Icon = activeType === "legacy" ? Shield : activeType === "guardian" ? Users : activeType === "emergency" ? AlertCircle : PawPrint;
 
+  const heroConfig: Record<ContactType, { photo: string; eyebrow: string; title: React.ReactNode; sub: string }> = {
+    legacy:        { photo: heroLegacyPhoto,    eyebrow: "Trusted With Everything",  title: <>The people who <span className="accent">carry your vault forward.</span></>, sub: "Verified legacy contacts unlock full access to your account after your passing is confirmed." },
+    guardian:      { photo: heroGuardianPhoto,  eyebrow: "Trusted Right Now",         title: <>Give someone a <span className="accent">window in, today.</span></>, sub: "Guardian contacts get view-only access to the folders you assign — no waiting required." },
+    emergency:     { photo: heroEmergencyPhoto, eyebrow: "In Case Of Emergency",      title: <>The call that gets made <span className="accent">first.</span></>, sub: "Emergency contacts are who first responders reach — keep their information current." },
+    pet_emergency: { photo: heroEmergencyPhoto, eyebrow: "For Your Pets",             title: <>Someone to <span className="accent">care for them, too.</span></>, sub: "Make sure your pets are looked after in an emergency or after your passing." },
+  };
+  const hero = heroConfig[activeType];
+
   return (
     <div className="fpd-contacts">
       <style dangerouslySetInnerHTML={{ __html: CONTACTS_CSS }} />
       <div className="fpd-contacts-grain" />
 
       <div className="wrap fpd-fade-in-up">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${hero.photo})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">{hero.eyebrow}</span>
+            <h1>{hero.title}</h1>
+            <p>{hero.sub}</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setAddingType(activeType)}><Plus size={15} /> Add {cfg.label}</button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Page header ── */}
         <div className="pg-head">
           <div className="flex items-start gap-4">

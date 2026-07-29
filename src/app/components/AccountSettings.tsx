@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
+import heroAccountPhoto from "../../imports/accountsettings_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -38,6 +39,26 @@ const ACCT_CSS = `
 .fpd-acct *{box-sizing:border-box;}
 .fpd-acct-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-acct .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
+
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-acct .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-acct .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-acct .hbanner:hover .art{transform:scale(1.08);}
+.fpd-acct .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-acct .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-acct .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-acct .hbanner h1{font-family:var(--font-display);font-size:36.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-acct .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-acct .hbanner p{color:${SOFT};font-size:17px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-acct .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-acct .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-acct .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-acct .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-acct .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-acct .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-acct .hbanner{min-height:auto;} .fpd-acct .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-acct .hbanner h1{font-size:29px;}}
 
 .fpd-acct .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-acct .card.pad{padding:28px;}
@@ -323,6 +344,21 @@ export function AccountSettings() {
       <div className="fpd-acct-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroAccountPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Account &amp; Security</span>
+            <h1>Your identity, <span className="accent">fully in your control.</span></h1>
+            <p>Profile details, two-factor authentication, encryption, and notification preferences — all in one place.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setTab("profile")}><User size={15} /> Edit Profile</button>
+              <button className="hbtn ghost" onClick={() => setTab("security")}><Shield size={15} /> Security &amp; 2FA</button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>

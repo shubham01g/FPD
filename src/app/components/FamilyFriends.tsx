@@ -6,6 +6,7 @@ import {
   Send, CheckCircle, Layers
 } from "lucide-react";
 import { toast } from "sonner";
+import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -203,6 +204,26 @@ const FF_CSS = `
 .fpd-ff-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-ff .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
+/* photo hero banner — same full-bleed treatment as the Dashboard's hero,
+   tinted toward the brand palette via background-blend-mode so it reads as
+   one system rather than a flat stock photo. Hover zooms the art only. */
+.fpd-ff .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-ff .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-ff .hbanner:hover .art{transform:scale(1.08);}
+.fpd-ff .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-ff .hbanner .hcontent{position:relative;z-index:2;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;max-width:480px;}
+.fpd-ff .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-ff .hbanner h1{font-family:var(--font-display);font-size:36.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-ff .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-ff .hbanner p{color:${SOFT};font-size:17px;line-height:1.6;max-width:400px;margin:0 0 20px;}
+.fpd-ff .hbanner .hactions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-ff .hbanner .hbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-size:15.5px;font-weight:700;cursor:pointer;font-family:var(--font-body);border:none;transition:transform .18s,filter .18s;}
+.fpd-ff .hbanner .hbtn:hover{transform:translateY(-1px);}
+.fpd-ff .hbanner .hbtn.primary{background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;box-shadow:0 14px 30px -12px rgba(91,110,225,0.75),inset 0 1px 0 rgba(255,255,255,0.18);}
+.fpd-ff .hbanner .hbtn.ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#fff;}
+.fpd-ff .hbanner .hbtn.ghost:hover{background:rgba(255,255,255,0.1);}
+@media (max-width:640px){.fpd-ff .hbanner{min-height:auto;} .fpd-ff .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-ff .hbanner h1{font-size:29px;}}
+
 .fpd-ff .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-ff .card.pad{padding:28px;}
 .fpd-ff .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
@@ -351,6 +372,21 @@ export function FamilyFriends() {
       <div className="fpd-ff-grain" />
 
       <div className="wrap">
+        {/* ── Hero banner ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroFamilyFriendsPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">The People Who Matter</span>
+            <h1>Every relationship worth <span className="accent">keeping close.</span></h1>
+            <p>Family, friends, and neighbors — with the details your legacy contacts will need to reach them when it counts.</p>
+            <div className="hactions">
+              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Contact</button>
+              <button className="hbtn ghost" onClick={() => setShowGroupsPanel(true)}><Layers size={15} /> Groups & Email Blast</button>
+            </div>
+          </div>
+        </div>
+
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
