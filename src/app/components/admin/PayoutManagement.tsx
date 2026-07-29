@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { DollarSign, CheckCircle, Clock, Filter, Download, Search, TrendingUp, Users, Handshake } from "lucide-react";
+import { DollarSign, CheckCircle, Clock, Filter, Download, Search, TrendingUp, Users, Handshake, Layers } from "lucide-react";
 
-type PayoutType = "all" | "affiliate" | "partnership";
+type PayoutType = "all" | "affiliate" | "partnership" | "white-label";
 type PayoutStatus = "all" | "pending" | "processing" | "paid";
 
 const payouts = [
@@ -12,7 +12,15 @@ const payouts = [
   { id: "PAY-2026-0907", recipient: "Marcus Johnson", type: "affiliate", amount: 312.80, period: "May 2026", accounts: 14, rate: 20, status: "paid", paidDate: "Jun 1, 2026", method: "PayPal", email: "m.johnson@email.com" },
   { id: "PAY-2026-0906", recipient: "First National Bank", type: "partnership", amount: 2840.22, period: "May 2026", accounts: 112, rate: 30, status: "paid", paidDate: "Jun 1, 2026", method: "Wire", email: "banking@fnb.com" },
   { id: "PAY-2026-0905", recipient: "Amanda Torres", type: "affiliate", amount: 124.30, period: "May 2026", accounts: 7, rate: 20, status: "paid", paidDate: "Jun 1, 2026", method: "ACH", email: "a.torres@email.com" },
+  { id: "PAY-2026-0904", recipient: "Heritage Trust Co. (White Label)", type: "white-label", amount: 4210.60, period: "Jun 2026", accounts: 148, rate: 35, status: "pending", method: "Wire", email: "finance@heritagetrust.com" },
+  { id: "PAY-2026-0903", recipient: "Meridian Estate Partners (White Label)", type: "white-label", amount: 1985.40, period: "May 2026", accounts: 61, rate: 35, status: "paid", paidDate: "Jun 1, 2026", method: "Wire", email: "ap@meridianestate.com" },
 ];
+
+const typeConfig: Record<Exclude<PayoutType, "all">, { label: string; color: string; icon: React.ReactNode }> = {
+  affiliate: { label: "Affiliate", color: "var(--gold)", icon: <Users size={12} color="var(--gold)" /> },
+  partnership: { label: "Partnership", color: "#6FAE8B", icon: <Handshake size={12} color="#FFFFFF" /> },
+  "white-label": { label: "White Label", color: "#8CA6E0", icon: <Layers size={12} color="#8CA6E0" /> },
+};
 
 const statusConfig = {
   pending: { label: "PENDING", color: "#F6AD55", bg: "rgba(246,173,85,0.12)", icon: <Clock size={12} /> },
@@ -112,6 +120,7 @@ export function PayoutManagement() {
             { id: "all", label: "All Types" },
             { id: "affiliate", label: "Affiliate", icon: <Users size={12} /> },
             { id: "partnership", label: "Partnership", icon: <Handshake size={12} /> },
+            { id: "white-label", label: "White Label", icon: <Layers size={12} /> },
           ].map((f) => (
             <button
               key={f.id}
@@ -176,8 +185,8 @@ export function PayoutManagement() {
                 <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{payout.email} · {payout.id}</div>
               </div>
               <div className="flex items-center gap-1.5">
-                {payout.type === "affiliate" ? <Users size={12} color="var(--gold)" /> : <Handshake size={12} color="#FFFFFF" />}
-                <span style={{ color: payout.type === "affiliate" ? "var(--gold)" : "#6FAE8B", fontSize: 15, textTransform: "capitalize" }}>{payout.type}</span>
+                {typeConfig[payout.type as Exclude<PayoutType, "all">].icon}
+                <span style={{ color: typeConfig[payout.type as Exclude<PayoutType, "all">].color, fontSize: 15 }}>{typeConfig[payout.type as Exclude<PayoutType, "all">].label}</span>
               </div>
               <div style={{ color: "var(--muted-foreground)", fontSize: 16 }}>{payout.period}</div>
               <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{payout.rate}%</div>

@@ -10,7 +10,7 @@ import {
   CheckCircle, XCircle, Clock, Edit, Trash2, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Lock, Settings,
   RefreshCw, Shield, UserPlus, X, ToggleLeft, ToggleRight,
-  Star, Send, Gift, Bot
+  Star, Send, Gift, Bot, Handshake, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -901,6 +901,7 @@ export function MasterAdmin() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
   const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
+  const [payoutTypeFilter, setPayoutTypeFilter] = useState<"all"|"Affiliate"|"Partnership"|"White Label">("all");
 
   const filteredUsers = ADMIN_USERS.filter(u =>
     u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
@@ -1623,22 +1624,54 @@ export function MasterAdmin() {
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
               <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5"}}>Pending Payouts</h3>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm" style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(91,110,225,0.3)"}}>Process All Pending</button>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1 p-1 rounded-2xl" style={{background:"rgba(255,255,255,0.04)"}}>
+                  {([
+                    {id:"all",label:"All",icon:null},
+                    {id:"Affiliate",label:"Affiliate",icon:<Users size={12}/>},
+                    {id:"Partnership",label:"Partnership",icon:<Handshake size={12}/>},
+                    {id:"White Label",label:"White Label",icon:<Layers size={12}/>},
+                  ] as const).map(f=>(
+                    <button
+                      key={f.id}
+                      onClick={()=>setPayoutTypeFilter(f.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all"
+                      style={{background:payoutTypeFilter===f.id?"rgba(91,110,225,0.25)":"transparent",color:payoutTypeFilter===f.id?"#AEB9F5":"#8A9AB8",fontWeight:payoutTypeFilter===f.id?700:400}}
+                    >
+                      {f.icon}{f.label}
+                    </button>
+                  ))}
+                </div>
+                <button className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm" style={{background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)",color:"#F0F4FA",fontWeight:700,boxShadow:"0 0 16px rgba(91,110,225,0.3)"}}>Process All Pending</button>
+              </div>
             </div>
-            {[{id:"PAY-0912",name:"James Doe",type:"Affiliate",amount:189.50,method:"ACH"},{id:"PAY-0911",name:"Sarah Chen",type:"Affiliate",amount:847.20,method:"ACH"},{id:"PAY-0910",name:"Greenfield Law Offices",type:"Partnership",amount:3359.88,method:"Wire"}].map((p,i)=>(
+            {[
+              {id:"PAY-0912",name:"James Doe",type:"Affiliate",amount:189.50,method:"ACH"},
+              {id:"PAY-0911",name:"Sarah Chen",type:"Affiliate",amount:847.20,method:"ACH"},
+              {id:"PAY-0910",name:"Greenfield Law Offices",type:"Partnership",amount:3359.88,method:"Wire"},
+              {id:"PAY-0909",name:"Heritage Trust Co.",type:"White Label",amount:4210.60,method:"Wire"},
+            ].filter(p=>payoutTypeFilter==="all"||p.type===payoutTypeFilter).map((p,i)=>{
+              const typeColor = p.type==="Affiliate"?"#D99A6B":p.type==="Partnership"?"#6FAE8B":"#8CA6E0";
+              const typeIcon = p.type==="Affiliate"?<Users size={11} color={typeColor}/>:p.type==="Partnership"?<Handshake size={11} color={typeColor}/>:<Layers size={11} color={typeColor}/>;
+              return (
               <div key={p.id} className="flex items-center justify-between p-4 rounded-2xl mb-2" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.08)"}}>
                 <div>
                   <div style={{color:"#E8EDF5",fontSize:16}}>{p.name}</div>
-                  <div style={{color:"#8A9AB8",fontSize:14,...MONO}}>{p.id} · {p.type} · {p.method}</div>
+                  <div className="flex items-center gap-1.5 mt-0.5" style={{color:"#8A9AB8",fontSize:14,...MONO}}>
+                    <span>{p.id} ·</span>
+                    <span className="flex items-center gap-1" style={{color:typeColor}}>{typeIcon}{p.type}</span>
+                    <span>· {p.method}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span style={{fontFamily:"var(--font-display)",fontSize:22.5,color:"#6E90C9"}}>${p.amount.toFixed(2)}</span>
                   <button className="px-3 py-1.5 rounded-xl text-xs font-bold" style={{background:"rgba(72,187,120,0.15)",color:"#D99A6B"}}>Process</button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
