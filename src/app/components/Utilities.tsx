@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Zap, Plus, X, Phone, Globe, Hash, CircleDollarSign, Boxes } from "lucide-react";
 import { toast } from "sonner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroUtilitiesPhoto from "../../imports/personalassets_hero_photo.png";
+import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";

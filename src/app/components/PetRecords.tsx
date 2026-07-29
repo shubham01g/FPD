@@ -3,7 +3,7 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
-import heroPetPhoto from "../../imports/familymemories_hero_photo.png";
+import heroPetPhoto from "../../imports/petrecords_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";
