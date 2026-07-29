@@ -1008,11 +1008,11 @@ export function MasterAdmin() {
         })}
       </div>
 
-      {/* Tab bar — horizontally scrollable, single row */}
-      <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto fpd-scroll" style={{ background:"#0F1624", border:"1px solid rgba(91,110,225,0.18)" }}>
+      {/* Tab bar — wraps to as many rows as needed so every tab stays visible, no horizontal scrolling */}
+      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"#0F1624", border:"1px solid rgba(91,110,225,0.18)" }}>
         {tabs.map(t => (
           <button key={t.id} onClick={()=>setTab(t.id)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all flex-shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all"
             style={{ background:tab===t.id?"linear-gradient(180deg,#7E6BD8,#5B6EE1)":"transparent", color:tab===t.id?"#fff":"#8A9AB8", fontWeight:tab===t.id?700:500, whiteSpace:"nowrap" }}>
             {t.icon} {t.label}
             {t.badge && (
