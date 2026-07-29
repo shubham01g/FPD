@@ -3,7 +3,7 @@
 :root {
   --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
   --font-body:    'Inter', system-ui, sans-serif;
-  --font-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-mono:    'Inter', system-ui, sans-serif;
 }
 
 body { font-family: var(--font-body); }
