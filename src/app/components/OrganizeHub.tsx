@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper } from "lucide-react";
+import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, House, ShieldCheck, Mail, Image as ImageIcon, Lock, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
 import heroFoldersPhoto from "../../imports/folders_hero_photo.png";
@@ -23,15 +23,22 @@ type Tab = "folders"|"reminders"|"occasions";
 const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 
 const folders = [
-  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:RAMP[0], desc:"Wills, trusts, power of attorney" },
-  { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:RAMP[1], desc:"Bank statements, tax returns" },
-  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:RAMP[2], desc:"Test results, prescriptions" },
-  { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:RAMP[3], desc:"Deeds, mortgage statements" },
-  { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:RAMP[4], desc:"Life, home, auto policies" },
-  { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:RAMP[5], desc:"Letters to family" },
-  { id:7, name:"Photo Archive",    files:847, size:"4.2 GB",  color:RAMP[6], desc:"Scanned family photos" },
-  { id:8, name:"Secret Vault", files:3,   size:"0.8 MB",  color:NEG, desc:"Encrypted — seed phrases, combinations", locked:true },
+  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:ACCENT2,   desc:"Wills, trusts, power of attorney",   icon:Scale,       updated:"2 days ago" },
+  { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:ACCENT,    desc:"Bank statements, tax returns",       icon:Landmark,    updated:"5 days ago" },
+  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:"#7E6BD8", desc:"Test results, prescriptions",        icon:HeartPulse,  updated:"1 week ago" },
+  { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:"#6F9E94", desc:"Deeds, mortgage statements",         icon:House,       updated:"3 weeks ago" },
+  { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:"#6FAE8B", desc:"Life, home, auto policies",          icon:ShieldCheck, updated:"2 weeks ago" },
+  { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:"#97A2C6", desc:"Letters to family",                  icon:Mail,        updated:"4 days ago" },
+  { id:7, name:"Photo Archive",    files:847, size:"4.2 GB",  color:"#A98CC7", desc:"Scanned family photos",              icon:ImageIcon,   updated:"Yesterday" },
+  { id:8, name:"Secret Vault", files:3,   size:"0.8 MB",  color:NEG, desc:"Encrypted — seed phrases, combinations", icon:Lock, locked:true, updated:"1 month ago" },
 ];
+
+const remCatIcon: Record<string, any> = { Legal:Scale, Financial:Landmark, Medical:HeartPulse, Legacy:Heart, Vehicles:Car, Pets:PawPrint };
+
+function dateChip(due: string) {
+  const m = due.match(/^([A-Za-z]{3})[a-z]*\s+(\d{1,2})/);
+  return m ? { mon: m[1].toUpperCase(), day: m[2] } : null;
+}
 
 const remStatus = {
   overdue:  { color:NEG,  label:"OVERDUE" },
@@ -96,24 +103,38 @@ const ORG_CSS = `
 .fpd-org .toolbar{display:flex;justify-content:flex-end;}
 
 /* folder grid */
-.fpd-org .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
-.fpd-org .fcard{position:relative;text-align:left;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .18s,border-color .18s;}
-.fpd-org .fcard:hover{transform:translateY(-2px);border-color:rgba(91,110,225,0.3);}
+.fpd-org .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px;}
+.fpd-org .fcard{position:relative;text-align:left;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 10px 34px -18px rgba(0,0,0,0.7);cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),border-color .2s,box-shadow .2s;display:flex;flex-direction:column;}
+.fpd-org .fcard:hover{transform:translateY(-3px);border-color:rgba(91,110,225,0.34);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 18px 40px -16px rgba(0,0,0,0.75);}
+.fpd-org .fcard.locked{background:linear-gradient(180deg,#171016 0%,#0F0A0C 100%);}
+.fpd-org .fcard.locked:hover{border-color:rgba(208,107,107,0.4);}
 .fpd-org .fcard .bar{height:3px;}
-.fpd-org .fcard .fbody{padding:18px;}
-.fpd-org .fcard .ftop{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.fpd-org .fcard .fico{width:40px;height:40px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-org .fcard .fbody{padding:18px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.fpd-org .fcard .ftop{display:flex;align-items:center;gap:12px;}
+.fpd-org .fcard .fico{width:44px;height:44px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+.fpd-org .fcard:hover .fico{transform:scale(1.06);}
 .fpd-org .fcard .ftitle{color:${TEXT};font-size:17px;font-weight:600;font-family:var(--font-display);}
 .fpd-org .fcard .fmeta{color:${MUTED};font-family:var(--font-mono);font-size:12.5px;margin-top:2px;}
-.fpd-org .fcard .flocked{margin-left:auto;color:${NEG};font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
-.fpd-org .fcard .fdesc{color:${MUTED};font-size:14.5px;line-height:1.55;}
+.fpd-org .fcard .flocked{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:7px;background:rgba(208,107,107,0.13);color:${NEG};font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
+.fpd-org .fcard .fdesc{color:${MUTED};font-size:14.5px;line-height:1.55;flex:1;}
+.fpd-org .fcard .ffoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+.fpd-org .fcard .fupdated{display:flex;align-items:center;gap:5px;color:${FAINT};font-size:12px;font-family:var(--font-mono);}
+.fpd-org .fcard .fopen{display:flex;align-items:center;gap:4px;color:${MUTED};font-size:13px;font-weight:600;opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s,color .2s;flex-shrink:0;}
+.fpd-org .fcard:hover .fopen{opacity:1;transform:translateX(0);color:#fff;}
 
 /* reminders */
-.fpd-org .rlist{display:flex;flex-direction:column;gap:10px;}
-.fpd-org .rrow{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);transition:border-color .18s ease,background .18s ease;}
-.fpd-org .rrow:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.03);}
-.fpd-org .rrow .rico{width:40px;height:40px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-org .rrow .rtop{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.fpd-org .rlist{display:flex;flex-direction:column;gap:22px;}
+.fpd-org .rsection{display:flex;flex-direction:column;gap:10px;}
+.fpd-org .rsec-head{display:flex;align-items:center;gap:8px;padding:0 2px;}
+.fpd-org .rsec-dot{width:8px;height:8px;border-radius:99px;flex-shrink:0;}
+.fpd-org .rsec-title{font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;font-family:var(--font-mono);}
+.fpd-org .rsec-count{font-size:12px;color:${FAINT};background:rgba(255,255,255,0.05);border-radius:99px;padding:1px 8px;}
+.fpd-org .rrow{display:flex;align-items:center;gap:14px;padding:15px 18px;border-radius:18px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);transition:border-color .18s ease,background .18s ease,transform .18s ease;}
+.fpd-org .rrow:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.03);transform:translateY(-1px);}
+.fpd-org .rdate{width:52px;height:52px;flex-shrink:0;border-radius:14px;background:#0F1624;border:1px solid rgba(255,255,255,0.09);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.fpd-org .rdate-mon{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.06em;}
+.fpd-org .rdate-day{font-family:var(--font-display);font-size:20px;font-weight:700;color:${TEXT};line-height:1;margin-top:2px;}
+.fpd-org .rrow .rtop{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
 .fpd-org .rrow .rtitle{color:${TEXT};font-size:17px;font-weight:600;font-family:var(--font-display);}
 .fpd-org .rrow .rmeta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:4px;}
 .fpd-org .rrow .rmeta span{color:${MUTED};font-size:15px;}
@@ -122,22 +143,28 @@ const ORG_CSS = `
 .fpd-org .rrow .rnotes{color:${MUTED};font-size:14.5px;margin-top:3px;}
 .fpd-org .rrow .racts{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .fpd-org .rrow .rbadge{padding:4px 9px;border-radius:7px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:0.05em;flex-shrink:0;}
-.fpd-org .rrow .racts button{background:none;border:none;cursor:pointer;padding:5px;display:flex;transition:filter .16s;}
+.fpd-org .rrow .racts button{background:rgba(255,255,255,0.03);border:none;border-radius:10px;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transition:background .16s,filter .16s;flex-shrink:0;}
+.fpd-org .rrow .racts button.done:hover{background:rgba(111,174,139,0.15);}
+.fpd-org .rrow .racts button.del:hover{background:rgba(208,107,107,0.15);}
 
 /* occasions */
-.fpd-org .ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
-.fpd-org .ocard{padding:18px;border-radius:22px;}
-.fpd-org .ocard .otop{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.fpd-org .ocard .oico{width:40px;height:40px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fpd-org .osections{display:flex;flex-direction:column;gap:22px;}
+.fpd-org .ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;}
+.fpd-org .ocard{padding:18px;border-radius:22px;transition:transform .18s,border-color .18s;}
+.fpd-org .ocard:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14);}
+.fpd-org .ocard .otop{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
 .fpd-org .ocard .oname{color:${TEXT};font-size:17px;font-weight:600;font-family:var(--font-display);}
-.fpd-org .ocard .odate{font-family:var(--font-mono);font-size:14.5px;margin-top:2px;}
-.fpd-org .ocard .orec{color:${MUTED};font-size:15px;margin-bottom:4px;}
-.fpd-org .ocard .onotes{color:${MUTED};font-size:14.5px;font-style:italic;}
-.fpd-org .ocard .oannual{margin-left:auto;color:#D99A6B;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;}
+.fpd-org .ocard .orec{color:${MUTED};font-size:14.5px;margin-top:1px;}
+.fpd-org .ocard .onotes{color:${MUTED};font-size:14.5px;font-style:italic;padding-top:10px;margin-top:2px;border-top:1px solid rgba(255,255,255,0.06);}
+.fpd-org .ocard .oannual{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:7px;background:rgba(217,154,107,0.13);color:#D99A6B;font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.06em;flex-shrink:0;align-self:flex-start;}
 
 /* new-tile / empty */
-.fpd-org .newtile{border-radius:22px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;color:${MUTED};cursor:pointer;transition:border-color .18s,color .18s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
-.fpd-org .newtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
+.fpd-org .newtile{border-radius:22px;border:1.5px dashed rgba(255,255,255,0.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;color:${MUTED};cursor:pointer;transition:border-color .2s,background .2s;background:rgba(255,255,255,0.008);font-family:var(--font-body);}
+.fpd-org .newtile:hover{border-color:rgba(91,110,225,0.4);background:rgba(91,110,225,0.03);}
+.fpd-org .newtile-ico{width:44px;height:44px;border-radius:16px;background:rgba(91,110,225,0.1);border:1px solid rgba(91,110,225,0.25);display:flex;align-items:center;justify-content:center;color:${ACCENT2};margin-bottom:4px;transition:background .2s,transform .2s;}
+.fpd-org .newtile:hover .newtile-ico{background:rgba(91,110,225,0.2);transform:scale(1.08);}
+.fpd-org .newtile-title{font-size:16px;font-weight:600;color:${SOFT};}
+.fpd-org .newtile-sub{font-size:13px;color:${FAINT};}
 .fpd-org .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:44px 12px;}
 .fpd-org .empty .ei{width:46px;height:46px;border-radius:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.2);display:flex;align-items:center;justify-content:center;color:#6FAE8B;margin-bottom:12px;}
 .fpd-org .empty .et{color:${SOFT};font-size:16px;font-weight:600;font-family:var(--font-display);}
@@ -325,25 +352,34 @@ export function OrganizeHub() {
               <button className="btn-primary" onClick={()=>setShowAddFolder(true)}><Plus size={14}/> Create New Folder</button>
             </div>
             <div className="fgrid" ref={fgridRef}>
-              {folderList.map(f=>(
-                <button key={f.id} className="fcard" onClick={()=>toast.success(`Opened: ${f.name}`)}>
-                  <div className="bar" style={{ background:`linear-gradient(90deg,${f.color},${f.color}66)` }}/>
-                  <div className="fbody">
-                    <div className="ftop">
-                      <div className="fico" style={{ background:`linear-gradient(150deg, ${f.color}52, ${f.color}17)`, color:f.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><Folder size={18} fill={`${f.color}33`}/></div>
-                      <div>
-                        <div className="ftitle">{f.name}</div>
-                        <div className="fmeta">{f.files} files · {f.size}</div>
+              {folderList.map(f=>{
+                const Icon = (f as any).icon || Folder;
+                const locked = (f as any).locked;
+                return (
+                  <button key={f.id} className={`fcard${locked ? " locked" : ""}`} onClick={()=>toast.success(`Opened: ${f.name}`)}>
+                    <div className="bar" style={{ background:`linear-gradient(90deg,${f.color},${f.color}66)` }}/>
+                    <div className="fbody">
+                      <div className="ftop">
+                        <div className="fico" style={{ background:`linear-gradient(150deg, ${f.color}52, ${f.color}17)`, color:f.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><Icon size={20}/></div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div className="ftitle">{f.name}</div>
+                          <div className="fmeta">{f.files} files · {f.size}</div>
+                        </div>
+                        {locked && <span className="flocked"><Lock size={10}/> LOCKED</span>}
                       </div>
-                      {(f as any).locked && <span className="flocked">LOCKED</span>}
+                      <div className="fdesc">{f.desc}</div>
+                      <div className="ffoot">
+                        <span className="fupdated"><Clock size={11}/> Updated {(f as any).updated}</span>
+                        <span className="fopen">Open <ArrowRight size={13}/></span>
+                      </div>
                     </div>
-                    <div className="fdesc">{f.desc}</div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
               <div className="newtile" onClick={()=>setShowAddFolder(true)}>
-                <Plus size={20} style={{ opacity:0.6 }}/>
-                <span style={{ fontSize:16 }}>New Custom Folder</span>
+                <div className="newtile-ico"><Plus size={20}/></div>
+                <span className="newtile-title">New Custom Folder</span>
+                <span className="newtile-sub">Organize it your way</span>
               </div>
             </div>
           </div>
@@ -374,29 +410,48 @@ export function OrganizeHub() {
               </div>
             )}
             <div className="rlist" ref={rlistRef}>
-              {reminders.map(r=>{
-                const s = remStatus[r.status];
+              {(["overdue","due_soon","upcoming","completed"] as const).map(key=>{
+                const list = reminders.filter(r=>r.status===key);
+                if (!list.length) return null;
+                const s = remStatus[key];
+                const sectionTitle = { overdue:"Overdue", due_soon:"Due Soon", upcoming:"Upcoming", completed:"Completed" }[key];
                 return (
-                  <div key={r.id} className="card rrow">
-                    <span className="rico" style={{ background:`linear-gradient(150deg, ${s.color}52, ${s.color}17)`, color:s.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><Bell size={16}/></span>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div className="rtop">
-                        <span className="rtitle">{r.title}</span>
-                      </div>
-                      <div className="rmeta">
-                        <span>Due: <strong>{r.dueDate}</strong></span>
-                        <span>Repeats: {r.frequency}</span>
-                        <span className="rcat">{r.category}</span>
-                      </div>
-                      {r.notes && <div className="rnotes">{r.notes}</div>}
+                  <div className="rsection" key={key}>
+                    <div className="rsec-head">
+                      <span className="rsec-dot" style={{ background:s.color }}/>
+                      <span className="rsec-title" style={{ color:s.color }}>{sectionTitle}</span>
+                      <span className="rsec-count">{list.length}</span>
                     </div>
-                    <div className="racts">
-                      <span className="rbadge" style={{ background:`${s.color}22`, color:s.color }}>{s.label}</span>
-                      {r.status!=="completed" && (
-                        <button onClick={()=>completeReminder(r.id)} style={{ color:"#D99A6B" }}><CheckCircle size={15}/></button>
-                      )}
-                      <button onClick={()=>removeReminder(r.id)} style={{ color:NEG }}><Trash2 size={14}/></button>
-                    </div>
+                    {list.map(r=>{
+                      const CatIcon = remCatIcon[r.category] || Bell;
+                      const chip = dateChip(r.dueDate);
+                      return (
+                        <div key={r.id} className="card rrow">
+                          <div className="rdate" style={{ borderColor:`${s.color}44` }}>
+                            {chip ? <><span className="rdate-mon" style={{ color:s.color }}>{chip.mon}</span><span className="rdate-day">{chip.day}</span></> : <Bell size={16} style={{ color:s.color }}/>}
+                          </div>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div className="rtop">
+                              <CatIcon size={15} style={{ color:s.color, flexShrink:0 }}/>
+                              <span className="rtitle">{r.title}</span>
+                              <span className="rcat">{r.category}</span>
+                            </div>
+                            <div className="rmeta">
+                              <span>Due <strong>{r.dueDate}</strong></span>
+                              <span>Repeats {r.frequency}</span>
+                            </div>
+                            {r.notes && <div className="rnotes">{r.notes}</div>}
+                          </div>
+                          <div className="racts">
+                            <span className="rbadge" style={{ background:`${s.color}22`, color:s.color }}>{s.label}</span>
+                            {r.status!=="completed" && (
+                              <button className="done" onClick={()=>completeReminder(r.id)} style={{ color:"#6FAE8B" }}><CheckCircle size={15}/></button>
+                            )}
+                            <button className="del" onClick={()=>removeReminder(r.id)} style={{ color:NEG }}><Trash2 size={14}/></button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -407,7 +462,11 @@ export function OrganizeHub() {
 
         {tab==="occasions" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div className="toolbar">
+            <div className="pg-head">
+              <div style={{ minWidth:0 }}>
+                <div className="eyebrow"><Calendar size={12}/> Never Forget a Special Day</div>
+                <div className="pg-sub" style={{ marginTop:6 }}>Birthdays, anniversaries, and holidays that matter to your family — with a friendly heads-up every year.</div>
+              </div>
               <button className="btn-primary" onClick={()=>setShowAddOcc(true)}><Plus size={14}/> Add Occasion</button>
             </div>
             {occasions.length===0 && (
@@ -416,21 +475,39 @@ export function OrganizeHub() {
                 <div className="et">No occasions yet</div>
               </div>
             )}
-            <div className="ogrid">
-              {occasions.map(o=>{
-                const ot = occType[o.type];
+            <div className="osections">
+              {(["birthday","anniversary","holiday"] as const).map(type=>{
+                const list = occasions.filter(o=>o.type===type);
+                if (!list.length) return null;
+                const ot = occType[type];
+                const title = { birthday:"Birthdays", anniversary:"Anniversaries", holiday:"Holidays" }[type];
                 return (
-                  <div key={o.id} className="card ocard">
-                    <div className="otop">
-                      <div className="oico" style={{ background:`linear-gradient(150deg, ${ot.color}52, ${ot.color}17)`, color:ot.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><ot.Icon size={18}/></div>
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div className="oname">{o.name}</div>
-                        <div className="odate" style={{ color:ot.color }}>{o.date}</div>
-                      </div>
-                      {o.recurring && <span className="oannual">ANNUAL</span>}
+                  <div className="rsection" key={type}>
+                    <div className="rsec-head">
+                      <span className="rsec-dot" style={{ background:ot.color }}/>
+                      <span className="rsec-title" style={{ color:ot.color }}>{title}</span>
+                      <span className="rsec-count">{list.length}</span>
                     </div>
-                    <div className="orec">{o.recipient}</div>
-                    {o.notes && <div className="onotes">{o.notes}</div>}
+                    <div className="ogrid">
+                      {list.map(o=>{
+                        const chip = dateChip(o.date);
+                        return (
+                          <div key={o.id} className="card ocard">
+                            <div className="otop">
+                              <div className="rdate" style={{ borderColor:`${ot.color}44` }}>
+                                {chip ? <><span className="rdate-mon" style={{ color:ot.color }}>{chip.mon}</span><span className="rdate-day">{chip.day}</span></> : <ot.Icon size={16} style={{ color:ot.color }}/>}
+                              </div>
+                              <div style={{ flex:1, minWidth:0 }}>
+                                <div className="oname">{o.name}</div>
+                                <div className="orec">{o.recipient}</div>
+                              </div>
+                              {o.recurring && <span className="oannual"><ot.Icon size={11}/> ANNUAL</span>}
+                            </div>
+                            {o.notes && <div className="onotes">{o.notes}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}
