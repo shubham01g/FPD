@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { Camera, Video, Star, Trophy, Target, Heart, PawPrint, Plus, Edit2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
+import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
+import { PhotoPicker } from "./PhotoPicker";
+import { AttachDocumentField } from "./AttachDocumentField";
 import heroFamilyPhoto from "../../imports/familymemories_hero_photo.png";
 
-type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards" | "pets";
+type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
 
 /* Photo Memories — photos you upload from a device or scan in from prints.
    Each entry is one moment, holding one or many photos.                     */
@@ -67,75 +69,6 @@ const awards = [
   { id: 1, award: "U.S. Army Good Conduct Medal", year: "1988", organization: "United States Army", category: "Military", description: "Awarded for exemplary behavior during service." },
   { id: 2, award: "Wildlife Photographer of the Year — Regional Finalist", year: "2019", organization: "California Photography Guild", category: "Professional", description: "Shortlisted for Big Sur Wildlife Series." },
   { id: 3, award: "Sacramento Business of the Year — Small Business", year: "2021", organization: "Sacramento Chamber of Commerce", category: "Business", description: "Awarded to Doe Photography LLC." },
-];
-
-interface PetVaccination { type: string; date: string; }
-interface PetCaretaker { name: string; phone: string; }
-interface PetProvider { name: string; phone: string; }
-interface PetInstruction { name: string; phone: string; description: string; }
-interface PetFeeding { foodType: string; timeType: string; quantity: string; locationOfFood: string; }
-interface PetRecord {
-  id: number;
-  photos: string[];
-  // Emergency Pet Caretakers
-  caretakers: PetCaretaker[];
-  // Long Term Pet Provider
-  providers: PetProvider[];
-  // Special Care Instructions
-  instructions: PetInstruction[];
-  // About Your Beloved Pet
-  name: string;
-  dateOfBirth: string;
-  gender: string;
-  breed: string;
-  colour: string;
-  documents: string[];
-  // Health Info
-  medicalHistory: string;
-  vaccinations: PetVaccination[];
-  // Vet Info
-  vetName: string;
-  vetPhone: string;
-  vetEmail: string;
-  // Feeding
-  feedings: PetFeeding[];
-}
-
-const pets: PetRecord[] = [
-  {
-    id: 1,
-    photos: [],
-    caretakers: [
-      { name: "Emily Doe (Daughter)", phone: "(916) 555-0392" },
-    ],
-    providers: [
-      { name: "Sacramento Animal Boarding — Oak Park", phone: "(916) 555-0841" },
-    ],
-    instructions: [
-      { name: "Dr. Patricia Moore", phone: "(916) 555-0721", description: "Biscuit requires 0.8mg Methimazole thyroid medication daily — mixed into wet food. Give in the morning with breakfast. Keep away from chocolate, grapes, onions." },
-      { name: "Emily Doe", phone: "(916) 555-0392", description: "Biscuit is scared of thunderstorms. Keep him in the laundry room during storms. He loves tennis balls — bring 2 when boarding." },
-    ],
-    name: "Biscuit",
-    dateOfBirth: "Mar 15, 2017",
-    gender: "Male",
-    breed: "Golden Retriever",
-    colour: "Golden / Cream",
-    documents: ["Adoption Certificate 2017", "Microchip Registration"],
-    medicalHistory: "Healthy adult male Golden Retriever. Diagnosed with hypothyroidism in 2022 — managed with daily Methimazole. Annual wellness exams at Sacramento Animal Hospital. No known allergies. Microchip ID: 985121084982110.",
-    vaccinations: [
-      { type: "Rabies", date: "Mar 10, 2026" },
-      { type: "DHPP (Distemper/Parvo)", date: "Mar 10, 2026" },
-      { type: "Bordetella", date: "Mar 10, 2026" },
-      { type: "Leptospirosis", date: "Mar 10, 2026" },
-    ],
-    vetName: "Dr. Patricia Moore",
-    vetPhone: "(916) 555-0721",
-    vetEmail: "pmoore@sacanimalhospital.com",
-    feedings: [
-      { foodType: "Royal Canin Medium Adult (dry)", timeType: "Morning", quantity: "2 cups", locationOfFood: "Kitchen — cabinet under sink" },
-      { foodType: "Royal Canin Medium Adult (dry)", timeType: "Evening", quantity: "2 cups", locationOfFood: "Kitchen — cabinet under sink" },
-    ],
-  },
 ];
 
 const statusStyles = {
@@ -274,6 +207,10 @@ const FAM_CSS = `
 .fpd-fam .thumb{width:56px;height:56px;object-fit:cover;border-radius:16px;border:1px solid rgba(255,255,255,0.08);}
 .fpd-fam .thumb-more{width:56px;height:56px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:${MUTED};font-size:15px;}
 
+/* photo frame (keepsakes / awards) */
+.fpd-fam .photo-frame{position:relative;background:#0F1624;border-bottom:1px solid rgba(255,255,255,0.08);overflow:hidden;}
+.fpd-fam .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
+
 /* video card */
 .fpd-fam .vplay{width:52px;height:52px;border-radius:16px;background:rgba(91,110,225,0.1);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
 
@@ -312,23 +249,6 @@ const FAM_CSS = `
 .fpd-fam .rec-save{flex:1;padding:13px;border-radius:16px;font-weight:700;font-size:17.5px;border:none;cursor:pointer;color:#fff;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);}
 .fpd-fam .rec-discard{padding:13px 18px;border-radius:16px;font-size:16px;font-weight:600;border:none;cursor:pointer;background:rgba(255,255,255,0.04);color:${MUTED};font-family:var(--font-body);}
 
-/* pets */
-.fpd-fam .petphotos{display:flex;gap:8px;padding:12px;overflow-x:auto;background:rgba(91,110,225,0.03);}
-.fpd-fam .petphoto{width:100px;height:80px;object-fit:cover;border-radius:18px;flex-shrink:0;}
-.fpd-fam .pethead{display:flex;align-items:center;gap:16px;}
-.fpd-fam .petname{font-family:var(--font-display);font-size:25px;color:${TEXT};font-weight:600;}
-.fpd-fam .petmeta{color:${MUTED};font-size:16px;margin-top:2px;}
-.fpd-fam .petrow{display:flex;gap:16px;align-items:center;padding:12px 16px;border-radius:16px;margin-bottom:8px;}
-.fpd-fam .petrow .nm{color:${TEXT};font-size:16px;}
-.fpd-fam .petrow .ph{color:${MUTED};font-size:16px;}
-.fpd-fam .instruction{padding:14px 16px;border-radius:16px;margin-bottom:8px;}
-.fpd-fam .instruction .top{display:flex;gap:16px;margin-bottom:6px;}
-.fpd-fam .instruction .nm{color:${TEXT};font-size:16px;font-weight:600;}
-.fpd-fam .instruction .ph{color:${MUTED};font-size:16px;}
-.fpd-fam .instruction .desc{color:${SOFT};font-size:16px;line-height:1.6;}
-.fpd-fam .petdocs{display:flex;flex-wrap:wrap;gap:8px;}
-.fpd-fam .petdoc{padding:8px 13px;border-radius:16px;font-size:15.5px;cursor:pointer;background:rgba(91,110,225,0.08);color:#6FAE8B;border:1px solid rgba(91,110,225,0.18);font-family:var(--font-body);}
-
 /* modal (shared pattern) */
 .fpd-fam .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
 .fpd-fam .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
@@ -344,21 +264,6 @@ const FAM_CSS = `
 .fpd-fam .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);position:sticky;bottom:0;background:#0D1421;}
 .fpd-fam .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-fam .modal-foot .save:hover{filter:brightness(1.08);}
-
-/* pet form sections */
-.fpd-fam .pfsection .st{font-weight:700;font-size:19px;color:${TEXT};margin-bottom:12px;font-family:var(--font-display);}
-.fpd-fam .pfrow{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.fpd-fam .pfaddwrap{display:flex;justify-content:flex-end;}
-.fpd-fam .dropzone{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:26px;border-radius:18px;border:2px dashed rgba(91,110,225,0.3);background:rgba(91,110,225,0.03);cursor:pointer;color:inherit;}
-.fpd-fam .dropzone .dt{color:${TEXT};font-weight:600;font-size:17.5px;}
-.fpd-fam .dropzone .ds{color:${MUTED};font-size:15px;}
-.fpd-fam .dropzone.sm{padding:18px;}
-.fpd-fam .pfthumbs{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:2px;}
-.fpd-fam .pfthumb{position:relative;flex-shrink:0;}
-.fpd-fam .pfthumb img{width:72px;height:60px;object-fit:cover;border-radius:16px;}
-.fpd-fam .pfremove{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:${NEG};color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;line-height:1;}
-.fpd-fam .pfdocs{display:flex;flex-wrap:wrap;gap:7px;}
-.fpd-fam .pfdoc{padding:5px 10px;border-radius:7px;font-size:14.5px;background:rgba(91,110,225,0.08);color:#6FAE8B;}
 
 /* universal add modal — staged photo/video preview */
 .fpd-fam .stagethumbs{display:flex;flex-wrap:wrap;gap:8px;}
@@ -523,59 +428,25 @@ export function FamilyMemories() {
   const [keepsakesList, setKeepsakesList] = useState(keepsakes);
   const [goalsList, setGoalsList] = useState(goals);
   const [awardsList, setAwardsList] = useState(awards);
-  const [petsList, setPetsList] = useState<PetRecord[]>(pets);
   const [showAdd, setShowAdd] = useState<Tab|null>(null);
-  const [showPetForm, setShowPetForm] = useState(false);
-  const [expandedPet, setExpandedPet] = useState<number|null>(1);
 
   /* Closing without saving drops any staged media so blob URLs don't leak. */
   function closeAddModal() {
     clearPendingPhotos();
     if (pendingVideo) { URL.revokeObjectURL(pendingVideo.url); setPendingVideo(null); }
+    resetItemMedia();
     setShowAdd(null); setForm({});
   }
 
-  useEscapeKey(showAdd !== null || showPetForm, () => { closeAddModal(); setShowPetForm(false); });
+  useEscapeKey(showAdd !== null, closeAddModal);
 
-  // Pet form state matching screenshot fields exactly
-  const [petPhotos, setPetPhotos] = useState<string[]>([]);
-  const [petCaretakers, setPetCaretakers] = useState<PetCaretaker[]>([{name:"",phone:""}]);
-  const [petProviders, setPetProviders] = useState<PetProvider[]>([{name:"",phone:""}]);
-  const [petInstructions, setPetInstructions] = useState<PetInstruction[]>([{name:"",phone:"",description:""}]);
-  const [petAbout, setPetAbout] = useState({name:"",dateOfBirth:"",gender:"",breed:"",colour:""});
-  const [petDocs, setPetDocs] = useState<string[]>([]);
-  const [petMedHistory, setPetMedHistory] = useState("");
-  const [petVaccinations, setPetVaccinations] = useState<PetVaccination[]>([{type:"",date:""}]);
-  const [petVet, setPetVet] = useState({vetName:"",vetPhone:"",vetEmail:""});
-  const [petFeedings, setPetFeedings] = useState<PetFeeding[]>([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
-  const petPhotoRef = useRef<HTMLInputElement>(null);
-
-  function resetPetForm() {
-    setPetPhotos([]); setPetCaretakers([{name:"",phone:""}]); setPetProviders([{name:"",phone:""}]);
-    setPetInstructions([{name:"",phone:"",description:""}]); setPetAbout({name:"",dateOfBirth:"",gender:"",breed:"",colour:""});
-    setPetDocs([]); setPetMedHistory(""); setPetVaccinations([{type:"",date:""}]);
-    setPetVet({vetName:"",vetPhone:"",vetEmail:""}); setPetFeedings([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
-  }
-
-  function savePetRecord() {
-    if (!petAbout.name) { toast.error("Pet name required"); return; }
-    const rec: PetRecord = {
-      id: Date.now(), photos: petPhotos,
-      caretakers: petCaretakers.filter(c=>c.name.trim()),
-      providers: petProviders.filter(p=>p.name.trim()),
-      instructions: petInstructions.filter(i=>i.description.trim()||i.name.trim()),
-      ...petAbout, documents: petDocs,
-      medicalHistory: petMedHistory,
-      vaccinations: petVaccinations.filter(v=>v.type.trim()),
-      ...petVet,
-      feedings: petFeedings.filter(f=>f.foodType.trim()),
-    };
-    setPetsList(p=>[...p, rec]);
-    toast.success(`${petAbout.name} added to Pet Records`);
-    resetPetForm(); setShowPetForm(false);
-  }
   const [form, setForm] = useState<Record<string,string>>({});
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
+
+  // ── Keepsake / Award photo + document attach (shared by both, one modal open at a time) ──
+  const [itemPhoto, setItemPhoto] = useState("");
+  const [itemDoc, setItemDoc] = useState<string|null>(null);
+  function resetItemMedia() { setItemPhoto(""); setItemDoc(null); }
 
   function quickAdd() {
     switch(showAdd) {
@@ -607,19 +478,16 @@ export function FamilyMemories() {
         toast.success(`${form.name} added`); break;
       case "keepsakes":
         if (!form.item) { toast.error("Item name required"); return; }
-        setKeepsakesList(p=>[...p,{id:Date.now(),item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||""}]);
-        toast.success(`"${form.item}" added to Keepsakes`); break;
+        setKeepsakesList(p=>[...p,{id:Date.now(),item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}]);
+        toast.success(`"${form.item}" added to Keepsakes`); resetItemMedia(); break;
       case "goals":
         if (!form.goal) { toast.error("Goal description required"); return; }
         setGoalsList(p=>[...p,{id:Date.now(),goal:form.goal,status:"in_progress",progress:Number(form.progress)||0,notes:form.notes||""}]);
         toast.success("Goal added"); break;
       case "awards":
         if (!form.award) { toast.error("Award name required"); return; }
-        setAwardsList(p=>[...p,{id:Date.now(),award:form.award,year:form.year||String(new Date().getFullYear()),organization:form.org||"",category:form.category||"Other",description:form.desc||""}]);
-        toast.success(`"${form.award}" added`); break;
-      case "pets":
-        // Handled by dedicated PetForm modal below
-        break;
+        setAwardsList(p=>[...p,{id:Date.now(),award:form.award,year:form.year||String(new Date().getFullYear()),organization:form.org||"",category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}]);
+        toast.success(`"${form.award}" added`); resetItemMedia(); break;
     }
     setForm({});
     setShowAdd(null);
@@ -633,7 +501,6 @@ export function FamilyMemories() {
     keepsakes: [{key:"item",label:"Item Name *",ph:"e.g. Grandfather's Watch"},{key:"location",label:"Where It Is",ph:""},{key:"value",label:"Value",ph:"e.g. Sentimental / ~$500"},{key:"intendedFor",label:"Intended For",ph:""},{key:"story",label:"Story / Significance",ph:"Why this item matters"}],
     goals:     [{key:"goal",label:"Goal *",ph:"e.g. Pay off mortgage"},{key:"progress",label:"Current Progress (%)",ph:"0"},{key:"notes",label:"Notes",ph:""}],
     awards:    [{key:"award",label:"Award Name *",ph:""},{key:"year",label:"Year",ph:String(new Date().getFullYear())},{key:"org",label:"Organization",ph:""},{key:"category",label:"Category",ph:"e.g. Military, Professional"},{key:"desc",label:"Description",ph:""}],
-    pets: [], // pets use dedicated PetForm modal
   };
 
   const tabs = [
@@ -644,15 +511,14 @@ export function FamilyMemories() {
     { id: "keepsakes" as Tab, label: "Keepsakes", icon: <Star size={14} /> },
     { id: "goals" as Tab, label: "Goals", icon: <Target size={14} /> },
     { id: "awards" as Tab, label: "Awards", icon: <Trophy size={14} /> },
-    { id: "pets" as Tab, label: "Pets", icon: <PawPrint size={14} /> },
   ];
 
-  const familyRecordsCount = kidsList.length + keepsakesList.length + goalsList.length + awardsList.length + petsList.length;
+  const familyRecordsCount = kidsList.length + keepsakesList.length + goalsList.length + awardsList.length;
   const kpis = [
     { label: "Photo Memories", value: String(memoriesList.length), sub: "Moments preserved", icon: <Camera size={14} />, dot: ACCENT2 },
     { label: "Video Memories", value: String(videoList.length), sub: "Home movies & clips", icon: <Video size={14} />, dot: ACCENT2 },
     { label: "Audio Recordings", value: String(audioList.length), sub: "In your own voice", icon: <Mic size={14} />, dot: ACCENT2 },
-    { label: "Family Records", value: String(familyRecordsCount), sub: "Kids, keepsakes, goals, awards & pets", icon: <Heart size={14} />, dot: POS },
+    { label: "Family Records", value: String(familyRecordsCount), sub: "Kids, keepsakes, goals & awards", icon: <Heart size={14} />, dot: POS },
   ];
 
   return (
@@ -981,22 +847,33 @@ export function FamilyMemories() {
               <button className="btn-primary" onClick={()=>setShowAdd("keepsakes")}><Plus size={14} /> Add Keepsake</button>
             </div>
             {keepsakesList.map(k => (
-              <div key={k.id} className="card pad">
-                <div className="r-top">
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="r-title">{k.item}</div>
-                    <div className="r-sub accent" style={{ marginBottom: 8 }}>→ {k.intendedFor}</div>
-                    <div className="r-grid">
-                      {[{ label: "Location", value: k.location }, { label: "Estimated Value", value: k.value }].map(f => (
-                        <div key={f.label} className="tile">
-                          <div className="tk">{f.label}</div>
-                          <div className="tv">{f.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ color: SOFT, fontSize: 16, fontStyle: "italic", lineHeight: 1.6 }}>"{k.story}"</div>
+              <div key={k.id} className="card" style={{ overflow: "hidden" }}>
+                {(k as any).photo && (
+                  <div className="photo-frame" style={{ height: 180 }}>
+                    <img src={(k as any).photo} alt={k.item}/>
                   </div>
-                  <button style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                )}
+                <div className="pad" style={{ padding: 22 }}>
+                  <div className="r-top">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="r-title">{k.item}</div>
+                      <div className="r-sub accent" style={{ marginBottom: 8 }}>→ {k.intendedFor}</div>
+                      <div className="r-grid">
+                        {[{ label: "Location", value: k.location }, { label: "Estimated Value", value: k.value }].map(f => (
+                          <div key={f.label} className="tile">
+                            <div className="tk">{f.label}</div>
+                            <div className="tv">{f.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ color: SOFT, fontSize: 16, fontStyle: "italic", lineHeight: 1.6 }}>"{k.story}"</div>
+                      {(k as any).attachedDoc && <div className="r-sub" style={{ marginTop: 10 }}>📄 {(k as any).attachedDoc}</div>}
+                      <div style={{ marginTop: 12 }}>
+                        <ScanButton folder="personal" onUpload={doc => { setKeepsakesList(p => p.map(x => x.id === k.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${k.item}`); }} size="sm" label="Scan Document"/>
+                      </div>
+                    </div>
+                    <button style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1038,151 +915,28 @@ export function FamilyMemories() {
               <button className="btn-primary" onClick={()=>setShowAdd("awards")}><Plus size={14} /> Add Award</button>
             </div>
             {awardsList.map(a => (
-              <div key={a.id} className="card pad">
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                  <div className="r-icon"><Trophy size={20} /></div>
-                  <div>
-                    <div className="r-title">{a.award}</div>
-                    <div className="r-sub">{a.organization} · {a.year}</div>
-                    <div style={{ marginTop: 8 }}>
-                      <span className="tag" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{a.category}</span>
-                    </div>
-                    {a.description && <div className="r-desc" style={{ marginTop: 6 }}>{a.description}</div>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── Pets ── */}
-        {tab === "pets" && (
-          <div className="stack">
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btn-primary" onClick={()=>setShowPetForm(true)}>
-                <Plus size={14}/> Add Pet Record
-              </button>
-            </div>
-
-            {petsList.map(pet => (
-              <div key={pet.id} className="card" style={{ overflow: "hidden" }}>
-                {/* Photos */}
-                {pet.photos.length > 0 && (
-                  <div className="petphotos">
-                    {pet.photos.map((url,i) => (
-                      <img key={i} className="petphoto" src={url} alt=""/>
-                    ))}
+              <div key={a.id} className="card" style={{ overflow: "hidden" }}>
+                {(a as any).photo && (
+                  <div className="photo-frame" style={{ height: 180 }}>
+                    <img src={(a as any).photo} alt={a.award}/>
                   </div>
                 )}
-
-                <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 20 }}>
-                  {/* Header */}
-                  <div className="pethead">
-                    <div className="r-icon" style={{ width: 52, height: 52, borderRadius: 16 }}><PawPrint size={24}/></div>
-                    <div>
-                      <div className="petname">{pet.name}</div>
-                      <div className="petmeta">{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
-                    </div>
-                  </div>
-
-                  {/* Emergency Pet Caretakers */}
-                  {pet.caretakers.length > 0 && (
-                    <div>
-                      <h3 className="sec-title"><span className="tick"/>Emergency Pet Caretaker</h3>
-                      {pet.caretakers.map((c,i) => (
-                        <div key={i} className="petrow tile neg">
-                          <span className="nm">{c.name}</span>
-                          <span className="ph">{c.phone}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Long Term Pet Provider */}
-                  {pet.providers.length > 0 && (
-                    <div>
-                      <h3 className="sec-title"><span className="tick"/>Long Term Pet Provider</h3>
-                      {pet.providers.map((p,i) => (
-                        <div key={i} className="petrow tile info">
-                          <span className="nm">{p.name}</span>
-                          <span className="ph">{p.phone}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Special Care Instructions */}
-                  {pet.instructions.length > 0 && (
-                    <div>
-                      <h3 className="sec-title"><span className="tick"/>Special Care Instructions</h3>
-                      {pet.instructions.map((ins,i) => (
-                        <div key={i} className="instruction tile warn">
-                          <div className="top"><span className="nm">{ins.name}</span><span className="ph">{ins.phone}</span></div>
-                          {ins.description && <div className="desc">{ins.description}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Health Info */}
-                  <div>
-                    <h3 className="sec-title"><span className="tick"/>Health Info</h3>
-                    {pet.medicalHistory && (
-                      <div className="tile" style={{ marginBottom: 12 }}>
-                        <div className="tk">Medical History / Back Story</div>
-                        <div className="tv">{pet.medicalHistory}</div>
+                <div className="pad" style={{ padding: 22 }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+                    <div className="r-icon"><Trophy size={20} /></div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="r-title">{a.award}</div>
+                      <div className="r-sub">{a.organization} · {a.year}</div>
+                      <div style={{ marginTop: 8 }}>
+                        <span className="tag" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{a.category}</span>
                       </div>
-                    )}
-                    {pet.vaccinations.length > 0 && (
-                      <div className="r-grid" style={{ margin: 0 }}>
-                        {pet.vaccinations.map((v,i) => (
-                          <div key={i} className="tile pos">
-                            <div className="tk" style={{ color: "#D99A6B" }}>Vaccination</div>
-                            <div className="tv">{v.type} · {v.date}</div>
-                          </div>
-                        ))}
+                      {a.description && <div className="r-desc" style={{ marginTop: 6 }}>{a.description}</div>}
+                      {(a as any).attachedDoc && <div className="r-sub" style={{ marginTop: 10 }}>📄 {(a as any).attachedDoc}</div>}
+                      <div style={{ marginTop: 12 }}>
+                        <ScanButton folder="personal" onUpload={doc => { setAwardsList(p => p.map(x => x.id === a.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${a.award}`); }} size="sm" label="Scan Document"/>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Vet Info */}
-                  <div>
-                    <h3 className="sec-title"><span className="tick"/>Vet Info</h3>
-                    <div className="r-grid c3" style={{ margin: 0 }}>
-                      {[["Name",pet.vetName],["Phone",pet.vetPhone],["Email",pet.vetEmail]].map(([label,value])=>(
-                        <div key={label} className="tile">
-                          <div className="tk">{label}</div>
-                          <div className="tv">{value||"—"}</div>
-                        </div>
-                      ))}
                     </div>
                   </div>
-
-                  {/* Feeding */}
-                  {pet.feedings.length > 0 && (
-                    <div>
-                      <h3 className="sec-title"><span className="tick"/>Feeding</h3>
-                      {pet.feedings.map((f,i) => (
-                        <div key={i} className="r-grid c4" style={{ marginTop: 0, marginBottom: 8 }}>
-                          {[["Food Type",f.foodType],["Time",f.timeType],["Quantity",f.quantity],["Location of Food",f.locationOfFood]].map(([label,value])=>(
-                            <div key={label} className="tile">
-                              <div className="tk">{label}</div>
-                              <div className="tv">{value||"—"}</div>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Documents */}
-                  {pet.documents.length > 0 && (
-                    <div className="petdocs">
-                      {pet.documents.map(d=>(
-                        <button key={d} className="petdoc" onClick={()=>toast.success(`Opening: ${d}`)}>📄 {d}</button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -1190,156 +944,13 @@ export function FamilyMemories() {
         )}
 
         </div>
-        {/* ── PET RECORDS FORM ──────────────────────────────────────── */}
-        {showPetForm && (
-          <div className="backdrop">
-            <div className="card modal wide">
-              <div className="modal-head">
-                <h3>Upload Pet Records</h3>
-                <button onClick={()=>{ setShowPetForm(false); resetPetForm(); }}><X size={18}/></button>
-              </div>
-              <div className="modal-body">
-
-                {/* Upload Images or Videos */}
-                <div>
-                  <button className="dropzone" onClick={()=>petPhotoRef.current?.click()}>
-                    <ImageIcon size={32} color="#FFFFFF"/>
-                    <div className="dt">Upload Images or Videos</div>
-                    <div className="ds">Minimum 1 Maximum 10 images or videos</div>
-                  </button>
-                  <input ref={petPhotoRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => {
-                    const files = Array.from(e.target.files||[]).slice(0, 10 - petPhotos.length);
-                    const urls = files.map(f => URL.createObjectURL(f));
-                    setPetPhotos(p => [...p, ...urls].slice(0,10));
-                    e.target.value = "";
-                  }}/>
-                  {petPhotos.length > 0 && (
-                    <div className="pfthumbs">
-                      {petPhotos.map((url,i)=>(
-                        <div key={i} className="pfthumb">
-                          <img src={url} alt=""/>
-                          <button className="pfremove" onClick={()=>setPetPhotos(p=>p.filter((_,idx)=>idx!==i))}>×</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Emergency Pet Caretaker */}
-                <div className="pfsection">
-                  <div className="st">Emergency Pet Caretaker</div>
-                  {petCaretakers.map((c,i)=>(
-                    <div key={i} className="pfrow">
-                      <input className="fin" value={c.name} onChange={e=>setPetCaretakers(p=>p.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Name"/>
-                      <input className="fin" value={c.phone} onChange={e=>setPetCaretakers(p=>p.map((x,idx)=>idx===i?{...x,phone:e.target.value}:x))} placeholder="🇺🇸 +1  Phone"/>
-                    </div>
-                  ))}
-                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetCaretakers(p=>[...p,{name:"",phone:""}])}><Plus size={12}/> Caretaker</button></div>
-                </div>
-
-                {/* Long Term Pet Provider */}
-                <div className="pfsection">
-                  <div className="st">Long Term Pet Provider</div>
-                  {petProviders.map((p,i)=>(
-                    <div key={i} className="pfrow">
-                      <input className="fin" value={p.name} onChange={e=>setPetProviders(pr=>pr.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Name"/>
-                      <input className="fin" value={p.phone} onChange={e=>setPetProviders(pr=>pr.map((x,idx)=>idx===i?{...x,phone:e.target.value}:x))} placeholder="🇺🇸 +1  Phone"/>
-                    </div>
-                  ))}
-                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetProviders(p=>[...p,{name:"",phone:""}])}><Plus size={12}/> Provider</button></div>
-                </div>
-
-                {/* Special Care Instruction */}
-                <div className="pfsection">
-                  <div className="st">Special Care Instruction</div>
-                  {petInstructions.map((ins,i)=>(
-                    <div key={i} className="pfrow">
-                      <input className="fin" value={ins.name} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Name"/>
-                      <input className="fin" value={ins.phone} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,phone:e.target.value}:x))} placeholder="🇺🇸 +1  Phone"/>
-                      <textarea className="fin" value={ins.description} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,description:e.target.value}:x))} placeholder="Description" rows={3} style={{ resize: "none" }}/>
-                    </div>
-                  ))}
-                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetInstructions(p=>[...p,{name:"",phone:"",description:""}])}><Plus size={12}/> Instruction</button></div>
-                </div>
-
-                {/* About Your Beloved Pet */}
-                <div className="pfsection">
-                  <div className="st">About Your Beloved Pet</div>
-                  <div className="pfrow">
-                    <input className="fin" value={petAbout.name} onChange={e=>setPetAbout(p=>({...p,name:e.target.value}))} placeholder="Name"/>
-                    <input className="fin" value={petAbout.dateOfBirth} onChange={e=>setPetAbout(p=>({...p,dateOfBirth:e.target.value}))} placeholder="Date of Birth"/>
-                    <select className="fin" value={petAbout.gender} onChange={e=>setPetAbout(p=>({...p,gender:e.target.value}))}>
-                      <option value="">Gender</option>
-                      <option>Male</option><option>Female</option><option>Unknown</option>
-                    </select>
-                    <input className="fin" value={petAbout.breed} onChange={e=>setPetAbout(p=>({...p,breed:e.target.value}))} placeholder="Breed"/>
-                    <input className="fin" value={petAbout.colour} onChange={e=>setPetAbout(p=>({...p,colour:e.target.value}))} placeholder="Colour"/>
-                    {/* Upload Documents */}
-                    <div className="dropzone sm">
-                      <span style={{ fontSize: 35.5 }}>📄</span>
-                      <div className="dt" style={{ fontSize: 16 }}>Upload Documents</div>
-                      <div className="ds">Minimum 1 Maximum 10 documents</div>
-                      <ScanButton folder="pets" onUpload={doc=>{ setPetDocs(p=>[...p,doc.name]); toast.success(`"${doc.name}" attached`); }} size="sm" label="Scan or Upload"/>
-                    </div>
-                    {petDocs.length > 0 && <div className="pfdocs">{petDocs.map(d=><span key={d} className="pfdoc">📄 {d}</span>)}</div>}
-                  </div>
-                </div>
-
-                {/* Health Info */}
-                <div className="pfsection">
-                  <div className="st">Health Info</div>
-                  <textarea className="fin" value={petMedHistory} onChange={e=>setPetMedHistory(e.target.value)} placeholder="Medical History Or Back Story On Your Pet" rows={4} style={{ resize: "none", marginBottom: 12 }}/>
-                  {petVaccinations.map((v,i)=>(
-                    <div key={i} className="r-grid" style={{ marginTop: 0, marginBottom: 8 }}>
-                      <input className="fin" value={v.type} onChange={e=>setPetVaccinations(p=>p.map((x,idx)=>idx===i?{...x,type:e.target.value}:x))} placeholder="Vaccination Type"/>
-                      <input className="fin" value={v.date} onChange={e=>setPetVaccinations(p=>p.map((x,idx)=>idx===i?{...x,date:e.target.value}:x))} placeholder="Vaccination Date"/>
-                    </div>
-                  ))}
-                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetVaccinations(p=>[...p,{type:"",date:""}])}><Plus size={12}/> Vaccination</button></div>
-                </div>
-
-                {/* Vet Info */}
-                <div className="pfsection">
-                  <div className="st">Vet Info</div>
-                  <div className="pfrow">
-                    <input className="fin" value={petVet.vetName} onChange={e=>setPetVet(p=>({...p,vetName:e.target.value}))} placeholder="Name"/>
-                    <input className="fin" value={petVet.vetPhone} onChange={e=>setPetVet(p=>({...p,vetPhone:e.target.value}))} placeholder="🇺🇸 +1  Phone"/>
-                    <input className="fin" value={petVet.vetEmail} onChange={e=>setPetVet(p=>({...p,vetEmail:e.target.value}))} placeholder="Email Address" type="email"/>
-                  </div>
-                </div>
-
-                {/* Feeding */}
-                <div className="pfsection">
-                  <div className="st">Feeding</div>
-                  {petFeedings.map((f,i)=>(
-                    <div key={i} className="pfrow">
-                      <input className="fin" value={f.foodType} onChange={e=>setPetFeedings(p=>p.map((x,idx)=>idx===i?{...x,foodType:e.target.value}:x))} placeholder="Food Type"/>
-                      <select className="fin" value={f.timeType} onChange={e=>setPetFeedings(p=>p.map((x,idx)=>idx===i?{...x,timeType:e.target.value}:x))}>
-                        {["Morning","Afternoon","Evening","Night","As Needed"].map(t=><option key={t}>{t}</option>)}
-                      </select>
-                      <input className="fin" value={f.quantity} onChange={e=>setPetFeedings(p=>p.map((x,idx)=>idx===i?{...x,quantity:e.target.value}:x))} placeholder="Quantity"/>
-                      <input className="fin" value={f.locationOfFood} onChange={e=>setPetFeedings(p=>p.map((x,idx)=>idx===i?{...x,locationOfFood:e.target.value}:x))} placeholder="Location of Food"/>
-                    </div>
-                  ))}
-                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetFeedings(p=>[...p,{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}])}><Plus size={12}/> Food</button></div>
-                </div>
-              </div>
-
-              {/* Upload / Save button */}
-              <div className="modal-foot">
-                <button className="save" onClick={savePetRecord}>Upload</button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* ── Universal Add Modal ── */}
-        {showAdd && showAdd !== "pets" && (
+        {showAdd && (
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
                 <h3>
-                  Add {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : showAdd === "awards" ? "Award" : "Pet"}
+                  Add {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : "Award"}
                 </h3>
                 <button onClick={closeAddModal}><X size={16}/></button>
               </div>
@@ -1389,6 +1000,21 @@ export function FamilyMemories() {
                     <input value={form[f.key]||""} onChange={F(f.key)} placeholder={f.ph}/>
                   </div>
                 ))}
+
+                {/* Keepsakes & Awards — picture + document upload/scan */}
+                {(showAdd === "keepsakes" || showAdd === "awards") && (
+                  <>
+                    <PhotoPicker value={itemPhoto} onChange={setItemPhoto} label="Photo" aspectRatio="4/3"/>
+                    <AttachDocumentField
+                      value={itemDoc}
+                      onChange={setItemDoc}
+                      folder="personal"
+                      sectionId="family-memories"
+                      sectionLabel="Family & Memories"
+                      label={showAdd === "keepsakes" ? "Attach Document (appraisal, certificate, provenance)" : "Attach Document (certificate, citation)"}
+                    />
+                  </>
+                )}
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={quickAdd}>Add</button>

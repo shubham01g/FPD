@@ -315,12 +315,12 @@ export function LegacyVault() {
     toast.success(`Downloaded: ${section.label}`);
   };
 
-  /* Everything → the full Legacy Vault Clone archive. */
+  /* Everything → the full Legacy Vault Export archive. */
   const downloadFullPackage = () => {
     const blob = createZip(buildEntries(owner, THEMED_SECTIONS));
     const kb = Math.max(1, Math.round(blob.size / 1024));
-    downloadBlob(blob, `fpd-legacy-vault-clone-${stamp()}.zip`);
-    toast.success(`Legacy Vault Clone downloaded — ${THEMED_SECTIONS.length} sections, ${kb} KB`);
+    downloadBlob(blob, `fpd-legacy-vault-export-${stamp()}.zip`);
+    toast.success(`Legacy Vault Export downloaded — ${THEMED_SECTIONS.length} sections, ${kb} KB`);
   };
 
   if (showVaultClone) return <VaultClone onBack={() => setShowVaultClone(false)} />;
@@ -343,8 +343,8 @@ export function LegacyVault() {
               <button className="hbtn primary" onClick={() => sectionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                 <Eye size={15}/> See What's Included
               </button>
-              <button className="hbtn ghost" onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}>
-                <Download size={15}/> Download Vault Clone
+              <button className="hbtn ghost" onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Export.")}>
+                <Download size={15}/> Download Vault Export
               </button>
             </div>
           </div>
@@ -394,7 +394,7 @@ export function LegacyVault() {
             )}
             <div className={`status-row ${fullyUnlocked ? "ok" : "no"}`}>
               {fullyUnlocked
-                ? <><CheckCircle size={15} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:16, fontWeight:600 }}>Both conditions met — Legacy Vault Clone is fully unlocked.</span></>
+                ? <><CheckCircle size={15} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:16, fontWeight:600 }}>Both conditions met — Legacy Vault Export is fully unlocked.</span></>
                 : <><AlertTriangle size={15} color={NEG}/><span style={{ color:NEG, fontSize:16 }}>Downloads are locked until <strong>both</strong> conditions are met.</span></>
               }
             </div>
@@ -412,7 +412,7 @@ export function LegacyVault() {
             <div>
               <h3 className="sec-title"><span className="tick"/>What Your Legacy Contacts Receive</h3>
               <div className="sec-sub">
-                Everything below is included in the Legacy Vault Clone — a complete encrypted download of your entire account.
+                Everything below is included in the Legacy Vault Export — a complete encrypted download of your entire account.
               </div>
             </div>
             <button className="btn-link" onClick={() => setExpanded(e => !e)}>
@@ -460,13 +460,13 @@ export function LegacyVault() {
           )}
         </div>
 
-        {/* ── Legacy Vault Clone CTA ── */}
+        {/* ── Legacy Vault Export CTA ── */}
         <div className="card cta">
           <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,110,225,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,110,225,0.26)"}` }}>
             {fullyUnlocked ? <Unlock size={26} color="#FFFFFF"/> : <Lock size={26} color="#FFFFFF"/>}
           </div>
           <div className="cta-title">
-            {fullyUnlocked ? "Legacy Vault Clone — Ready to Download" : "Legacy Vault Clone — Locked"}
+            {fullyUnlocked ? "Legacy Vault Export — Ready to Download" : "Legacy Vault Export — Locked"}
           </div>
           <div className="cta-desc">
             {fullyUnlocked
@@ -476,14 +476,14 @@ export function LegacyVault() {
           <div className="cta-btns">
             <button
               className="cta-primary"
-              onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Clone.")}
+              onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Export.")}
               style={{
                 background: fullyUnlocked ? "linear-gradient(180deg,#6BCB9C,#4CAE7C)" : "rgba(255,255,255,0.05)",
                 color: fullyUnlocked ? "#0A1712" : MUTED,
                 boxShadow: fullyUnlocked ? "0 8px 22px -8px rgba(95,190,145,0.55)" : "none",
                 cursor: fullyUnlocked ? "pointer" : "not-allowed",
               }}>
-              {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Clone (.zip)</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
+              {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Export (.zip)</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
             </button>
             {fullyUnlocked && (
               <button className="cta-secondary" onClick={() => setShowVaultClone(true)}>

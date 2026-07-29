@@ -145,7 +145,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
         <div className="modal-head">
           <div className="head-ico"><Copy size={18}/></div>
           <div>
-            <div className="head-title">Legacy Vault Clone</div>
+            <div className="head-title">Legacy Vault Export</div>
             <div className="head-sub">Complete download of all account data for verified legacy contacts</div>
           </div>
         </div>
@@ -157,7 +157,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
             <>
               <div className="panel panel-locked">
                 <AlertTriangle size={32} color={NEG} style={{ margin:"0 auto" }}/>
-                <div className="lock-title">Legacy Vault Clone Locked</div>
+                <div className="lock-title">Legacy Vault Export Locked</div>
                 <p>Downloads are locked until <strong style={{ color: TEXT }}>both</strong> conditions are met:</p>
                 <div className="flex flex-col gap-2" style={{ marginTop: 14, textAlign: "left" }}>
                   {[
@@ -195,7 +195,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div className="panel panel-unlocked">
                 <Shield size={16} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
                 <div>
-                  <div className="panel-unlocked-title">Legacy Vault Clone Unlocked</div>
+                  <div className="panel-unlocked-title">Legacy Vault Export Unlocked</div>
                   <p>Legacy Continuation Fee paid and confirmation of passing verified by FPD administrators. This download contains <strong style={{ color: TEXT }}>everything</strong> in the account — {totalItems}+ items across all categories.</p>
                 </div>
               </div>

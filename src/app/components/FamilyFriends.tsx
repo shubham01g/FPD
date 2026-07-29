@@ -6,6 +6,7 @@ import {
   Send, CheckCircle, Layers
 } from "lucide-react";
 import { toast } from "sonner";
+import { PhotoPicker } from "./PhotoPicker";
 import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -132,6 +133,7 @@ const groupConfig = {
 function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: Contact) => void }) {
   useEscapeKey(true, onClose);
   const [form, setForm] = useState({ name:"", relationship:"", phone:"", email:"", birthday:"", address:"", group:"immediate" as Contact["group"], notes:"" });
+  const [photo, setPhoto] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -139,7 +141,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
     setLoading(true);
     await new Promise(r => setTimeout(r, 600));
     const initials = form.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
-    onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)] });
+    onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
     toast.success(`${form.name} added to Family & Friends`);
     onClose();
   };
@@ -152,6 +154,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
+          <PhotoPicker value={photo} onChange={setPhoto} label="Contact Photo (optional)" aspectRatio="1/1"/>
           {[
             { key:"name", label:"FULL NAME", ph:"e.g. John Smith", required:true },
             { key:"relationship", label:"RELATIONSHIP", ph:"e.g. Son, Friend, Neighbor" },

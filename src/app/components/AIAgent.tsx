@@ -35,13 +35,13 @@ interface Message { id: string; role: "user"|"agent"; text: string; time: string
 const KB: Record<string, string> = {
 
   // ── Navigation & Getting Started ─────────────────────────────────
-  "navigate": `Here's a map of every section in Final Pass Down:\n\n**Vault & Files**\n• **Legacy Vault** — your encrypted master vault\n• **File Cabinet** — 18+ categorized folders for all documents\n• **Folders & Reminders** — custom folders and calendar reminders\n\n**Wishes & Legal**\n• **Final Wishes** — bequests, burial preferences, estate instructions\n• **Wills and Living Trusts** — legal documents with attorney details\n\n**Life Records**\n• Medical Info · Financial Records · Assets & Property\n• Memories & Media · Digital Diary · Job History\n• ID Keeper · Warranties · Travel Planner · Favorite Places\n\n**Family Life**\n• Daycare Information · Kids' Activities\n\n**People / Contacts**\n• Legacy Contacts · Guardian Contacts · Emergency Contacts\n\n**Security**\n• Account & Profile · Password Manager · Auto Pay & Subs\n• Activate Legacy Access\n\n**Earn & Concierge**\n• Affiliate Program · White Glove Service\n\n**AI**\n• Ask FPD AI Assistant (that's me!)\n\nJust click any section in the left sidebar to get started.`,
+  "navigate": `Here's a map of every section in Final Pass Down:\n\n**Vault & Files**\n• **Legacy Vault** — your encrypted master vault\n• **File Cabinet** — 18+ categorized folders for all documents\n• **Folders & Reminders** — custom folders and calendar reminders\n\n**Wishes & Legal**\n• **Final Wishes** — bequests, burial preferences, estate instructions\n• **Wills and Living Trusts** — legal documents with attorney details\n\n**Life Records**\n• Medical Info · Financial Records · Assets & Property · Utilities\n• Memories & Media · Pet Records · Digital Diary · Job History\n• ID Keeper · Warranties · Travel Planner · Favorite Places\n\n**Family Life**\n• Daycare Information · Kids' Activities\n\n**People / Contacts**\n• Legacy Contacts · Guardian Contacts · Emergency Contacts\n\n**Security**\n• Password Manager · Auto Pay & Subs · Activate Legacy Access\n\n**Billing & Earn**\n• Account & Profile · Usage & Billing · Affiliate Program · White Glove Service\n\n**Assistant**\n• Ask Carlos (that's me!)\n\nJust click any section in the left sidebar to get started.`,
 
   // ── File Cabinet ─────────────────────────────────────────────────
   "file cabinet": `The **Digital File Cabinet** is your organized document library with 18+ folders:\n\n⚖️ Legal Documents · 💰 Financial Records · 🏥 Medical Records\n📋 Tax Records · 🏠 Property & Real Estate · 🚗 Vehicles\n⚡ Utilities & Services · 🛡️ Insurance Policies · 🐾 Pet Records\n💌 Personal Letters · 📷 Photo Albums · 🎥 Video Messages\n💻 Digital Assets · ₿ Crypto & NFTs · 🔒 Firearms Registry\n⚔️ Weapons Locker · 🛡️ Warranties · 🔐 Secret Vault\n\n**To upload:** Open any folder → click Upload Files or drag & drop.\n**To scan:** Click the Scan button — uses your device camera.\n**Syncing from sidebar sections:** Many sidebar pages (Financial Records, Warranties, etc.) have a "Sync to File Cabinet" button to push records directly into the correct folder.\n\nAll files are AES-256 encrypted client-side before leaving your device.`,
 
   // ── Legacy Vault ─────────────────────────────────────────────────
-  "legacy vault": `The **Legacy Vault** is your encrypted master vault — the centerpiece of your account.\n\n**What it contains:** All uploaded documents across every life category.\n\n**Access is locked until TWO conditions are met:**\n1. The **Activate Legacy Access Fee** is paid\n2. **Confirmation of passing** is verified by FPD administrators\n\n**Accepted confirmation documents:** death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record.\n\n**Legacy Vault Clone:** Once both conditions are met, legacy contacts can download EVERYTHING — all 18+ folder categories, final wishes, medical records, financial records, digital diary, password manager contents, and more.\n\nTo set this up: Go to **Security → Activate Legacy Access** in the sidebar.`,
+  "legacy vault": `The **Legacy Vault** is your encrypted master vault — the centerpiece of your account.\n\n**What it contains:** All uploaded documents across every life category.\n\n**Access is locked until TWO conditions are met:**\n1. The **Activate Legacy Access Fee** is paid\n2. **Confirmation of passing** is verified by FPD administrators\n\n**Accepted confirmation documents:** death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record.\n\n**Legacy Vault Export:** Once both conditions are met, legacy contacts can download EVERYTHING — all 18+ folder categories, final wishes, medical records, financial records, digital diary, password manager contents, and more.\n\nTo set this up: Go to **Security → Activate Legacy Access** in the sidebar.`,
 
   // ── Legacy Continuation Fee ───────────────────────────────────────
   "199": `The **Activate Legacy Access Fee** is a one-time payment that unlocks your legacy contacts' ability to access and download your vault.\n\n**Why it exists:** Without it, your vault goes into archive mode after your subscription expires.\n\n**Two conditions required to unlock downloads:**\n1. ✅ $199 fee paid (by you or a legacy contact)\n2. ✅ Confirmation of passing verified by FPD admin\n\n**Payment options:** Card (Stripe) or cryptocurrency (BTC, ETH, USDC, USDT, SOL, BNB, XRP, LTC)\n\n**Who can pay:** You can pay now (anytime, even years before passing), or your legacy contact can pay after your passing.\n\n**Demo flow:** Go to **Security → Activate Legacy Access** → pay via the form → click "Simulate Admin Verification" to see the full unlocked state.\n\nThe fee is non-refundable once processed. Vault stays active for 24 months from the verified date of passing (admin-configurable).`,
@@ -68,7 +68,10 @@ const KB: Record<string, string> = {
   "financial": `The **Financial Records** section has 6 tabs:\n\n💼 **Insurance** — Life, homeowner's, auto, umbrella policies with carrier, policy #, coverage, beneficiary\n🏠 **Real Estate** — Properties with value, mortgage, title holder, deed info\n📈 **Investments** — Brokerage, Roth IRA, mutual funds with institution, holdings, beneficiary\n💰 **Retirement** — 401(k), IRA, pension, Social Security with balance and beneficiary\n📋 **Tax Records** — Annual filings with preparer, result, document location\n📊 **Business** — Business entities with EIN, bank, revenue, accountant\n\nAll records have a **Sync to File Cabinet** button to push documents to the appropriate folder.\n\nTo access: **Life Records → Financial Records** in the sidebar.`,
 
   // ── Personal Assets ───────────────────────────────────────────────
-  "assets": `The **Personal Assets** section has 7 tabs:\n\n🚗 **Vehicles** — Make, model, VIN, title, insurance, registration, estimated value, photo\n🏠 **Real Estate** — Properties with photo, mortgage, deed, sq ft, bed/bath, lot size\n⚡ **Utilities** — Service accounts with account #, autopay status, monthly average\n💻 **Digital Assets** — Crypto, social media, domains, online accounts with access method\n🔒 **Firearms** — Make, model, serial, DOJ registration, storage, transfer instructions, photo\n⚔️ **Weapons Locker** — Non-firearm bladed weapons (knives, swords, etc.) with photo\n💎 **Collectibles** — Sports cards, watches, art, jewelry with photo, condition, estimated value, intended recipient\n\nTo access: **Life Records → Assets & Property** in the sidebar.`,
+  "assets": `The **Personal Assets** section has 6 tabs:\n\n🚗 **Vehicles** — Make, model, VIN, title, insurance, registration, estimated value, photo\n🏠 **Real Estate** — Properties with photo, mortgage, deed, sq ft, bed/bath, lot size\n💻 **Digital Assets** — Crypto, social media, domains, online accounts with access method\n🔒 **Firearms** — Make, model, serial, DOJ registration, storage, transfer instructions, photo\n⚔️ **Weapons Locker** — Non-firearm bladed weapons (knives, swords, etc.) with photo\n💎 **Collectibles** — Sports cards, watches, art, jewelry with photo, condition, estimated value, intended recipient\n\nUtility accounts (electricity, water, internet, etc.) live in their own **Life Records → Utilities** section.\n\nTo access: **Life Records → Assets & Property** in the sidebar.`,
+
+  // ── Utilities ─────────────────────────────────────────────────────
+  "utilities": `The **Utilities** section tracks household service accounts:\n\n**Each account:** Service type (Electricity, Gas, Internet, Water/Sewer, Trash, HOA, etc.), provider, account number, phone, website, autopay status, and monthly average cost.\n\nThis is its own section — separate from Assets & Property.\n\nTo access: **Life Records → Utilities** in the sidebar.`,
 
   // ── Warranties ────────────────────────────────────────────────────
   "warranties": `The **Warranties** section tracks product warranties so nothing expires unnoticed:\n\n**Status badges:** ACTIVE (green) · EXPIRING IN Xd (amber, < 90 days) · EXPIRED (red) · LIFETIME (green)\n\n**Each warranty includes:** Product photo, brand, model, serial #, purchase details, warranty type, provider contact, expiry date, what's covered, how to file a claim, notes, documents.\n\n**Sync to File Cabinet:** Pushes warranty records to the Warranties folder in the File Cabinet.\n\n**Add a warranty:** Click "Add Warranty" → fill in all details including an optional product photo → the card appears immediately.\n\nTo access: **Life Records → Warranties** in the sidebar.`,
@@ -92,10 +95,10 @@ const KB: Record<string, string> = {
   "kids": `The **Kids' Activities** section tracks every activity for every child:\n\n**Each activity:** Type (Soccer, Dance, Swimming, Piano, etc.), child's name, organization/team, coach/instructor with phone, schedule, season dates, cost, payment due date, uniform/equipment needed, **Transportation & Pickup Notes** (who drives, carpool), emergency contact, and documents.\n\n**Filter by child** using the buttons at the top.\n\nTo access: **Family Life → Kids' Activities** in the sidebar.`,
 
   // ── Memories ─────────────────────────────────────────────────────
-  "memories": `The **Memories & Media** section has 7 tabs:\n\n📷 **Memories** — Photo and video memories with date, description, tags\n🎥 **Video Messages** — Private messages to specific recipients, delivered after passing\n❤️ **Kids & Family** — Children's info, school, activities, notes\n⭐ **Keepsakes** — Sentimental items with story, location, intended recipient\n🎯 **Goals** — Life goals with progress bars\n🏆 **Awards** — Achievements, military service, professional recognition\n🐾 **Pets** — Full pet records (see "pet records" for details)\n\nTo access: **Life Records → Memories & Media** in the sidebar.`,
+  "memories": `The **Family & Memories** section has 6 tabs:\n\n📷 **Memories** — Photo and video memories with date, description, tags\n🎥 **Video Messages** — Private messages to specific recipients, delivered after passing\n❤️ **Kids & Family** — Children's info, school, activities, notes\n⭐ **Keepsakes** — Sentimental items with story, location, intended recipient\n🎯 **Goals** — Life goals with progress bars\n🏆 **Awards** — Achievements, military service, professional recognition\n\nPet records live in their own **Life Records → Pet Records** section — see "pet records" for details.\n\nTo access: **Life Records → Family & Memories** in the sidebar.`,
 
   // ── Pet Records ───────────────────────────────────────────────────
-  "pet": `The **Pet Records** form matches the official app design exactly:\n\n**8 sections:**\n1. Upload Images/Videos (up to 10)\n2. Emergency Pet Caretaker (Name + Phone, add multiple)\n3. Long Term Pet Provider (Name + Phone, add multiple)\n4. Special Care Instruction (Name + Phone + Description, add multiple)\n5. About Your Beloved Pet (Name, Date of Birth, Gender, Breed, Colour, Upload Documents)\n6. Health Info (Medical History, Vaccination Type + Date pairs, add multiple)\n7. Vet Info (Name, Phone, Email)\n8. Feeding (Food Type, Time of Day, Quantity, Location of Food, add multiple)\n\nTo add a pet: **Memories & Media → Pets tab → Add Pet Record**`,
+  "pet": `**Pet Records** is its own section under Life Records, with a form that matches the official app design exactly:\n\n**8 sections:**\n1. Upload Images/Videos (up to 10)\n2. Emergency Pet Caretaker (Name + Phone, add multiple)\n3. Long Term Pet Provider (Name + Phone, add multiple)\n4. Special Care Instruction (Name + Phone + Description, add multiple)\n5. About Your Beloved Pet (Name, Date of Birth, Gender, Breed, Colour, Upload Documents)\n6. Health Info (Medical History, Vaccination Type + Date pairs, add multiple)\n7. Vet Info (Name, Phone, Email)\n8. Feeding (Food Type, Time of Day, Quantity, Location of Food, add multiple)\n\nTo add a pet: **Life Records → Pet Records → Add Pet Record**`,
 
   // ── Digital Diary ─────────────────────────────────────────────────
   "diary": `The **Digital Diary** lets you record text, audio, and video journal entries:\n\n**Entry types:** Written · Audio Recording · Video Recording\n\n**Privacy levels:** Private (only you), Legacy Contacts Only, or visible to all contacts\n\n**Mood tags, dates, and search** are all supported.\n\n**Recording:** Click Open Camera/Microphone — browser asks for permission. Videos are encrypted.\n\nTo access: **Life Records → Digital Diary** in the sidebar.`,
@@ -128,13 +131,13 @@ const KB: Record<string, string> = {
   "family friends": `The **Family & Friends** section is your personal contact book:\n\n**Contact groups:** Create named groups (e.g. "Immediate Family", "Work Colleagues") with colors and descriptions.\n\n**Add All button:** Instantly selects every contact for a new group.\n\n**Email Blast (BCC):** Click "Blast Email" on any group → compose subject + message → all members with email are BCC'd. Each person sees only themselves.\n\n**Contacts:** Name, email, phone, relationship, birthday — you can add as many as you want.\n\nTo access: **People → Family & Friends** in the sidebar.`,
 
   // ── Account Settings ──────────────────────────────────────────────
-  "account": `**Account Settings** has 4 tabs:\n\n👤 **Profile** — Upload profile photo, edit name, email, phone\n🔐 **Security & 2FA** — Enable SMS/Email OTP/Authenticator 2FA, change password\n🔒 **Encryption** — View AES-256 encryption status (always on, zero-knowledge)\n🔔 **Notifications** — Toggle Email, SMS, Push, Storage Alerts, Contact Updates, Marketing\n\nTo access: **Security → Account & Profile** in the sidebar.`,
+  "account": `**Account Settings** has 4 tabs:\n\n👤 **Profile** — Upload profile photo, edit name, email, phone\n🔐 **Security & 2FA** — Enable SMS/Email OTP/Authenticator 2FA, change password\n🔒 **Encryption** — View AES-256 encryption status (always on, zero-knowledge)\n🔔 **Notifications** — Toggle Email, SMS, Push, Storage Alerts, Contact Updates, Marketing\n\nTo access: **Billing & Earn → Account & Profile** in the sidebar.`,
 
   // ── Confirmation of Passing ───────────────────────────────────────
   "confirmation of passing": `**Confirmation of Passing** — what FPD needs to activate legacy access:\n\nAccepted documents include:\n• Death certificates\n• Obituaries from recognized publications\n• Hospital or hospice records\n• Coroner reports\n• Funeral home letters\n• Probate filings\n• Any credible official record\n\n**Process:** Legacy contact submits documentation → FPD admin reviews → admin verifies → admin clicks "Activate" → vault opens for all verified legacy contacts.\n\n**Important:** Verification and admin approval are required, with a follow-up confirmation of death once received. The $199 fee must ALSO be paid — paying the fee alone does not unlock access.`,
 
   // ── Default / Help ────────────────────────────────────────────────
-  "default": `I'm your **FPD AI Assistant** — fully trained on every feature of Final Pass Down.\n\nI can help you with:\n\n📁 **Navigating the platform** — where to find any section\n👥 **Contacts & permissions** — Legacy, Guardian, Emergency contacts\n💰 **The Activate Legacy Access Fee** — how it works, how to pay\n📋 **Documents & files** — uploading, organizing, syncing\n🛡️ **Security** — 2FA, encryption, password manager\n⭐ **White Glove Service** — hands-on concierge help\n📊 **Plans & storage** — pricing, overage, upgrades\n🎯 **Any specific feature** — just ask!\n\nType your question or tap a suggestion below.`,
+  "default": `I'm **Carlos** — fully trained on every feature of Final Pass Down.\n\nI can help you with:\n\n📁 **Navigating the platform** — where to find any section\n👥 **Contacts & permissions** — Legacy, Guardian, Emergency contacts\n💰 **The Activate Legacy Access Fee** — how it works, how to pay\n📋 **Documents & files** — uploading, organizing, syncing\n🛡️ **Security** — 2FA, encryption, password manager\n⭐ **White Glove Service** — hands-on concierge help\n📊 **Plans & storage** — pricing, overage, upgrades\n🎯 **Any specific feature** — just ask!\n\nType your question or tap a suggestion below.`,
 };
 
 /* ── Match query to knowledge base ─────────────────────────────── */
@@ -174,8 +177,11 @@ function getResponse(query: string): string {
   // Financial
   if (q.match(/financial|insurance|real estate|investment|retirement|401k|ira|tax|business record/)) return KB["financial"];
 
+  // Utilities
+  if (q.match(/utilit|electric bill|gas bill|water bill|internet bill|hoa/)) return KB["utilities"];
+
   // Personal Assets
-  if (q.match(/asset|vehicle|car|truck|suv|utility|digital asset|firearm|gun|weapon|collectible|real estate|property/)) return KB["assets"];
+  if (q.match(/asset|vehicle|car|truck|suv|digital asset|firearm|gun|weapon|collectible|real estate|property/)) return KB["assets"];
 
   // Warranties
   if (q.match(/warrant|product.*cover|cover.*product|expir.*warrant|warrant.*expir/)) return KB["warranties"];
@@ -626,8 +632,8 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
           {/* Header */}
           <div className="pg-head">
             <div style={{ minWidth:0 }}>
-              <div className="eyebrow"><Sparkles size={12}/> AI Concierge · Trained on Every Feature</div>
-              <h1 className="pg-h1">FPD AI Assistant</h1>
+              <div className="eyebrow"><Sparkles size={12}/> Your Concierge · Trained on Every Feature</div>
+              <h1 className="pg-h1">Ask Carlos</h1>
               <div className="pg-sub">
                 Your always-on guide to Final Pass Down. Ask about any section, contact type, the Activate
                 Legacy Access fee, security, plans, or how to get something done — answers are instant and
@@ -704,7 +710,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
     <>
       <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
       <button className="fpd-ai-launch" onClick={() => setOpen(true)}>
-        <Sparkles size={16}/> FPD Assistant
+        <Sparkles size={16}/> Ask Carlos
       </button>
     </>
   );
@@ -720,7 +726,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             <div className="hd-logo"><img src={fpdSquareLogo} alt="FPD"/></div>
             <div style={{ minWidth:0 }}>
               <div className="hd-eyebrow">Final Pass Down</div>
-              <div className="hd-title">AI Assistant</div>
+              <div className="hd-title">Carlos</div>
               <div className="hd-status">
                 <span className="d"/>
                 <span>Trained on every FPD feature</span>

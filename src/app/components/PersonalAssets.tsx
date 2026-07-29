@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Car, Zap, Lock, Bitcoin, Plus, Edit2, Trash2, Key, X, Home, Camera, Image, Gem, Sword, Boxes } from "lucide-react";
+import { Car, Lock, Bitcoin, Plus, Edit2, Trash2, Key, X, Home, Camera, Image, Gem, Sword, Boxes } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -17,20 +17,11 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-type Tab = "vehicles" | "realestate" | "utilities" | "digital" | "weapons" | "weapons_locker" | "collectibles";
+type Tab = "vehicles" | "realestate" | "digital" | "weapons" | "weapons_locker" | "collectibles";
 
 const vehicles = [
   { id: 1, year: 2021, make: "Toyota", model: "Camry XSE", color: "Midnight Black", vin: "4T1BZ1HK8MU024891", plate: "7KBH421 CA", title: "James Doe", lien: "None — Owned free & clear", insurance: "GEICO — Policy GI-293847-CA", registration: "Exp. Dec 2026", value: "$28,400", notes: "Primary vehicle. Keys in kitchen drawer." },
   { id: 2, year: 1967, make: "Ford", model: "Mustang Fastback", color: "Candy Apple Red", vin: "7F02S100433", plate: "CLASIC67 CA", title: "James Doe", lien: "None", insurance: "Hagerty Collector — Policy HG-88421", registration: "Exp. Mar 2027", value: "$68,000", notes: "Do NOT sell. Bequeathed to Michael Doe per will." },
-];
-
-const utilities = [
-  { id: 1, service: "Electricity", provider: "SMUD", accountNum: "SMUD-9284-01", phone: "(916) 452-3211", website: "smud.org", autopay: true, monthlyAvg: "$142", notes: "" },
-  { id: 2, service: "Natural Gas", provider: "PG&E", accountNum: "PGE-481-2291-X", phone: "1-800-743-5000", website: "pge.com", autopay: true, monthlyAvg: "$68", notes: "" },
-  { id: 3, service: "Internet", provider: "AT&T Fiber", accountNum: "ATT-882-4291", phone: "1-800-288-2020", website: "att.com", autopay: true, monthlyAvg: "$65", notes: "1 Gig plan. Router in home office closet." },
-  { id: 4, service: "Water / Sewer", provider: "Sacramento Water District", accountNum: "SWD-2941-B", phone: "(916) 808-5454", website: "cityofsacramento.org", autopay: false, monthlyAvg: "$88", notes: "Bill arrives first of month." },
-  { id: 5, service: "Trash Collection", provider: "Republic Services", accountNum: "RS-4821-SAC", phone: "1-800-237-9840", website: "republicservices.com", autopay: true, monthlyAvg: "$44", notes: "Pickup Tuesdays." },
-  { id: 6, service: "HOA", provider: "Oak Ridge HOA", accountNum: "ORHA-29", phone: "(916) 555-0192", website: "oakridgehoa.com", autopay: false, monthlyAvg: "$220", notes: "Quarterly billing — $660/quarter." },
 ];
 
 const digitalAssets = [
@@ -186,7 +177,6 @@ export function PersonalAssets() {
   const [tab, setTab] = useState<Tab>("vehicles");
   const [vehicleList, setVehicleList] = useState(vehicles);
   const [realEstateList, setRealEstateList] = useState(realEstateInit);
-  const [utilityList, setUtilityList] = useState(utilities);
   const [digitalList, setDigitalList] = useState(digitalAssets);
   const [weaponList, setWeaponList] = useState(weapons);
   const [collectiblesList, setCollectiblesList] = useState(collectiblesInit);
@@ -200,8 +190,8 @@ export function PersonalAssets() {
   const [vDoc, setVDoc] = useState<string|null>(null);
   const [rForm, setRForm] = useState({ type:"", address:"", city:"", value:"", mortgage:"", mortgagePayment:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"", notes:"", photo:"" });
   const [rDoc, setRDoc] = useState<string|null>(null);
-  const [uForm, setUForm] = useState({ service:"", provider:"", accountNum:"", phone:"", website:"", monthlyAvg:"", notes:"" });
   const [dForm, setDForm] = useState({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
+  const [dDoc, setDDoc] = useState<string|null>(null);
   const [wForm, setWForm] = useState({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", storage:"", transfer:"", photo:"" });
   const [wDoc, setWDoc] = useState<string|null>(null);
   const [cForm, setCForm] = useState({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
@@ -237,18 +227,12 @@ export function PersonalAssets() {
     setVForm({ year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", notes:"", photo:"" });
     setShowAdd(null);
   }
-  function addUtility() {
-    if (!uForm.service || !uForm.provider) { toast.error("Service and provider required"); return; }
-    setUtilityList(p => [...p, { id:Date.now(), service:uForm.service, provider:uForm.provider, accountNum:uForm.accountNum, phone:uForm.phone, website:uForm.website, autopay:false, monthlyAvg:uForm.monthlyAvg||"$0", notes:uForm.notes }]);
-    toast.success(`${uForm.service} — ${uForm.provider} added`);
-    setUForm({ service:"", provider:"", accountNum:"", phone:"", website:"", monthlyAvg:"", notes:"" });
-    setShowAdd(null);
-  }
   function addDigital() {
     if (!dForm.asset) { toast.error("Asset name required"); return; }
-    setDigitalList(p => [...p, { id:Date.now(), category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, walletAddress:"—", notes:dForm.notes }]);
+    setDigitalList(p => [...p, { id:Date.now(), category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, walletAddress:"—", notes:dForm.notes, attachedDoc:dDoc }]);
     toast.success(`${dForm.asset} added`);
     setDForm({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
+    setDDoc(null);
     setShowAdd(null);
   }
   function addWeapon() {
@@ -281,7 +265,6 @@ export function PersonalAssets() {
   const tabs = [
     { id: "vehicles" as Tab,        label: "Vehicles",       icon: <Car size={14} /> },
     { id: "realestate" as Tab,      label: "Real Estate",    icon: <Home size={14} /> },
-    { id: "utilities" as Tab,       label: "Utilities",      icon: <Zap size={14} /> },
     { id: "digital" as Tab,         label: "Digital Assets", icon: <Bitcoin size={14} /> },
     { id: "weapons" as Tab,         label: "Firearms",       icon: <Lock size={14} /> },
     { id: "weapons_locker" as Tab,  label: "Weapons Locker", icon: <Sword size={14} /> },
@@ -324,7 +307,7 @@ export function PersonalAssets() {
         <div>
           <div className="eyebrow"><Boxes size={12} /> Estate Inventory</div>
           <h1 className="pg-h1">Personal Assets</h1>
-          <div className="pg-sub">Vehicles, utility accounts, digital assets, and firearms — all in one secure record.</div>
+          <div className="pg-sub">Vehicles, real estate, digital assets, and firearms — all in one secure record.</div>
         </div>
 
         {/* ── Tabs ── */}
@@ -436,38 +419,6 @@ export function PersonalAssets() {
           </div>
         )}
 
-        {/* ── UTILITIES ── */}
-        {tab === "utilities" && (
-          <div className="dlist">
-            <div className="toolbar-end">
-              <button className="btn-primary" onClick={() => setShowAdd("utilities")}><Plus size={14} /> Add Utility</button>
-            </div>
-            {utilityList.map(u => (
-              <div key={u.id} className="card pad">
-                <div className="dtop" style={{ marginBottom: 14 }}>
-                  <div className="dleft">
-                    <div className="dico"><Zap size={18} /></div>
-                    <div>
-                      <div className="dtype" style={{ fontSize: 19 }}>{u.service}</div>
-                      <div className="dsub">{u.provider}</div>
-                    </div>
-                  </div>
-                  <div className="dright">
-                    {u.autopay && <span className="dbadge autopay">AUTOPAY</span>}
-                    <span className="damt">{u.monthlyAvg}<span>/mo</span></span>
-                  </div>
-                </div>
-                <div className="dgrid">
-                  <Field label="Account #" value={u.accountNum} />
-                  <Field label="Phone" value={u.phone} />
-                  <Field label="Website" value={u.website} />
-                </div>
-                {u.notes && <div className="notemuted">{u.notes}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* ── DIGITAL ASSETS ── */}
         {tab === "digital" && (
           <div className="dlist">
@@ -493,6 +444,10 @@ export function PersonalAssets() {
                   <Field label="Access Method" value={d.accessMethod} />
                 </div>
                 {d.notes && <div className="noteitalic">{d.notes}</div>}
+                {(d as any).attachedDoc && <div className="notemuted">📄 {(d as any).attachedDoc}</div>}
+                <div className="dacts">
+                  <ScanButton folder="digital" onUpload={doc => { setDigitalList(p => p.map(x => x.id === d.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${d.asset}`); }} size="sm" label="Scan Document" />
+                </div>
               </div>
             ))}
           </div>
@@ -649,30 +604,6 @@ export function PersonalAssets() {
           </div>
         )}
 
-        {/* Add Utility Modal */}
-        {showAdd === "utilities" && (
-          <div className="backdrop">
-            <div className="card modal">
-              <div className="modal-head">
-                <h3>Add Utility Account</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
-              </div>
-              <div className="modal-body">
-                {([["Service Type", "service", "e.g. Electricity, Internet, Water"], ["Provider", "provider", "e.g. AT&T, PG&E"], ["Account Number", "accountNum", ""], ["Phone", "phone", ""], ["Website", "website", ""], ["Monthly Average", "monthlyAvg", "e.g. $85"], ["Notes", "notes", "Optional"]] as [string, string, string][]).map(([label, key, ph]) => (
-                  <div className="field" key={key}>
-                    <label>{label}</label>
-                    <input value={(uForm as any)[key]} onChange={e => setUForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
-                  </div>
-                ))}
-              </div>
-              <div className="modal-foot">
-                <button className="save" onClick={addUtility}>Add Utility</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Add Digital Asset Modal */}
         {showAdd === "digital" && (
           <div className="backdrop">
@@ -694,6 +625,7 @@ export function PersonalAssets() {
                     <input value={(dForm as any)[key]} onChange={e => setDForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
                   </div>
                 ))}
+                <AttachDocumentField value={dDoc} onChange={setDDoc} folder="digital" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (account statement, ownership record)" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={addDigital}>Add Asset</button>

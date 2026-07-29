@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, Home, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, Building, X, Upload, FileText, CheckCircle } from "lucide-react";
+import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.png";
@@ -15,7 +15,7 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-type Tab = "insurance" | "realestate" | "portfolios" | "retirement" | "taxes" | "business";
+type Tab = "insurance" | "personal" | "portfolios" | "retirement" | "taxes" | "business";
 
 const insurancePolicies = [
   { id: 1, type: "Life Insurance", carrier: "MetLife", policyNum: "ML-88291-CA", coverage: "$500,000", premium: "$182/month", beneficiary: "Sarah Johnson (100%)", agent: "Tom Richards — (916) 555-0291", status: "active" },
@@ -24,9 +24,9 @@ const insurancePolicies = [
   { id: 4, type: "Umbrella Policy", carrier: "State Farm", policyNum: "SF-UMB-1029-CA", coverage: "$1,000,000", premium: "$28/month", beneficiary: "N/A", agent: "Linda Park — (916) 555-0482", status: "active" },
 ];
 
-const realEstate = [
-  { id: 1, type: "Primary Residence", address: "1842 Oak Ridge Drive, Sacramento, CA 95825", value: "$485,000", mortgage: "Wells Fargo — Balance: $201,400", mortgagePayment: "$1,842/month", titleHolder: "James & Sarah Doe", deed: "Recorded with Sacramento County", notes: "Paid off 2034" },
-  { id: 2, type: "Rental Property", address: "524 Elm Street, Roseville, CA 95678", value: "$320,000", mortgage: "None — Owned free & clear", mortgagePayment: "N/A", titleHolder: "James Doe", deed: "Recorded with Placer County", notes: "Rented to Tenant — $1,800/month income" },
+const personalAccounts = [
+  { id: 1, accountName: "Primary Checking", bank: "Wells Fargo", accountType: "Checking", accountNum: "XXXX-2891", balance: "$8,420", beneficiary: "Sarah Johnson (POD)", notes: "Direct deposit and all household bills run through this account." },
+  { id: 2, accountName: "Emergency Savings", bank: "Ally Bank", accountType: "High-Yield Savings", accountNum: "XXXX-7734", balance: "$32,100", beneficiary: "Sarah Johnson (POD)", notes: "6 months of expenses. Do not touch except in emergency." },
 ];
 
 const portfolios = [
@@ -52,7 +52,7 @@ const businessAccounts = [
 
 const tabConfig = [
   { id: "insurance" as Tab, label: "Insurance", icon: <Shield size={14} /> },
-  { id: "realestate" as Tab, label: "Real Estate", icon: <Home size={14} /> },
+  { id: "personal" as Tab, label: "Personal", icon: <User size={14} /> },
   { id: "portfolios" as Tab, label: "Investments", icon: <TrendingUp size={14} /> },
   { id: "retirement" as Tab, label: "Retirement", icon: <DollarSign size={14} /> },
   { id: "taxes" as Tab, label: "Tax Records", icon: <Receipt size={14} /> },
@@ -252,7 +252,7 @@ export function FinancialRecords() {
   const [tab, setTab] = useState<Tab>("insurance");
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
   const [policies, setPolicies]       = useState(insurancePolicies);
-  const [properties, setProperties]   = useState(realEstate);
+  const [personalList, setPersonalList] = useState(personalAccounts);
   const [investments, setInvestments] = useState(portfolios);
   const [retirement, setRetirement]   = useState(retirementAccounts);
   const [taxList, setTaxList]         = useState(taxes);
@@ -261,7 +261,7 @@ export function FinancialRecords() {
 
   const kpis = [
     { label: "Insurance Policies", value: String(policies.length), sub: "On file", icon: <Shield size={14} />, dot: ACCENT2 },
-    { label: "Real Estate", value: String(properties.length), sub: properties.length === 1 ? "Property" : "Properties", icon: <Home size={14} />, dot: ACCENT2 },
+    { label: "Personal Accounts", value: String(personalList.length), sub: personalList.length === 1 ? "Bank account" : "Bank accounts", icon: <User size={14} />, dot: ACCENT2 },
     { label: "Investment Accounts", value: String(investments.length), sub: "Brokerage & retirement", icon: <TrendingUp size={14} />, dot: POS },
     { label: "Tax Years Filed", value: String(taxList.length), sub: "Years on record", icon: <Receipt size={14} />, dot: ACCENT2 },
   ];
@@ -278,8 +278,8 @@ export function FinancialRecords() {
           <div className="scrim" />
           <div className="hcontent">
             <span className="heyebrow">One Ledger, Every Account</span>
-            <h1>Insurance, property, and investments — <span className="accent">organized in one place.</span></h1>
-            <p>Policies, real estate, portfolios, retirement accounts, taxes, and business records — all where your legacy contacts can find them.</p>
+            <h1>Insurance, banking, and investments — <span className="accent">organized in one place.</span></h1>
+            <p>Policies, personal bank accounts, portfolios, retirement accounts, taxes, and business records — all where your legacy contacts can find them.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => setTab("insurance")}>
                 <Shield size={15}/> View Insurance
@@ -296,7 +296,7 @@ export function FinancialRecords() {
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow"><DollarSign size={12} /> Financial Records</div>
             <h1 className="pg-h1">Financial Records</h1>
-            <div className="pg-sub">Insurance policies, real estate, investments, retirement accounts, taxes, and business information.</div>
+            <div className="pg-sub">Insurance policies, personal bank accounts, investments, retirement accounts, taxes, and business information.</div>
           </div>
         </div>
 
@@ -358,31 +358,29 @@ export function FinancialRecords() {
           </div>
         )}
 
-        {/* ── Real Estate ── */}
-        {tab === "realestate" && (
+        {/* ── Personal ── */}
+        {tab === "personal" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="toolbar"><button className="btn-primary" onClick={() => setShowAdd("realestate")}><Plus size={14} /> Add Property</button></div>
+            <div className="toolbar"><button className="btn-primary" onClick={() => setShowAdd("personal")}><Plus size={14} /> Add Account</button></div>
             <div className="rlist">
-              {properties.map(prop => (
-                <div key={prop.id} className="card pad">
+              {personalList.map(acct => (
+                <div key={acct.id} className="card pad">
                   <div className="rtop">
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-                      <div className="rico"><Home size={20} /></div>
+                      <div className="rico"><User size={20} /></div>
                       <div>
-                        <div className="rtitle">{prop.type}</div>
-                        <div className="rsub">{prop.address}</div>
+                        <div className="rtitle">{acct.accountName}</div>
+                        <div className="rsub">{acct.bank} · {acct.accountType}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: "#6FAE8B" }}>{prop.value}</div>
+                    <div className="bigval" style={{ color: "#6FAE8B" }}>{acct.balance}</div>
                   </div>
                   <div className="rgrid">
-                    <div className="tile"><div className="tk">Mortgage / Lender</div><div className="tv">{prop.mortgage}</div></div>
-                    <div className="tile"><div className="tk">Monthly Payment</div><div className="tv">{prop.mortgagePayment}</div></div>
-                    <div className="tile"><div className="tk">Title Holder</div><div className="tv">{prop.titleHolder}</div></div>
-                    <div className="tile"><div className="tk">Deed Recording</div><div className="tv">{prop.deed}</div></div>
-                    <div className="tile"><div className="tk">Notes</div><div className="tv">{prop.notes}</div></div>
+                    <div className="tile"><div className="tk">Account Number</div><div className="tv">{acct.accountNum}</div></div>
+                    <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{acct.beneficiary}</div></div>
+                    <div className="tile"><div className="tk">Notes</div><div className="tv">{acct.notes}</div></div>
                   </div>
-                  {(prop as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(prop as any).attachedDoc}</div>}
+                  {(acct as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(acct as any).attachedDoc}</div>}
                 </div>
               ))}
             </div>
@@ -507,9 +505,9 @@ export function FinancialRecords() {
           fields={[{ label: "Type", key: "type", placeholder: "e.g. Life Insurance" }, { label: "Carrier", key: "carrier", placeholder: "e.g. MetLife" }, { label: "Policy Number", key: "policyNum" }, { label: "Coverage Amount", key: "coverage", placeholder: "e.g. $500,000" }, { label: "Premium", key: "premium", placeholder: "e.g. $182/month" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Agent", key: "agent" }, { label: "Status", key: "status", placeholder: "active" }]}
           onAdd={(f, doc) => { setPolicies(p => [...p, { id: Date.now(), type: f.type || "Policy", carrier: f.carrier || "", policyNum: f.policyNum || "", coverage: f.coverage || "", premium: f.premium || "", beneficiary: f.beneficiary || "", agent: f.agent || "", status: f.status || "active", attachedDoc: doc || null }]); toast.success(`${f.type || "Policy"} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
 
-        {showAdd === "realestate" && <AddModal title="Add Property" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Type", key: "type", placeholder: "e.g. Primary Residence, Rental" }, { label: "Address", key: "address" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $485,000" }, { label: "Mortgage", key: "mortgage", placeholder: "Lender or None" }, { label: "Monthly Payment", key: "mortgagePayment" }, { label: "Title Holder", key: "titleHolder" }, { label: "Deed Info", key: "deed" }, { label: "Notes", key: "notes" }]}
-          onAdd={(f, doc) => { setProperties(p => [...p, { id: Date.now(), type: f.type || "Property", address: f.address || "", value: f.value || "", mortgage: f.mortgage || "", mortgagePayment: f.mortgagePayment || "", titleHolder: f.titleHolder || "", deed: f.deed || "", notes: f.notes || "", attachedDoc: doc || null }]); toast.success(`Property added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "personal" && <AddModal title="Add Personal Account" onClose={() => setShowAdd(null)}
+          fields={[{ label: "Account Name", key: "accountName", placeholder: "e.g. Primary Checking" }, { label: "Bank", key: "bank", placeholder: "e.g. Wells Fargo" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Checking, Savings" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $8,000" }, { label: "Beneficiary", key: "beneficiary", placeholder: "e.g. Payable on Death (POD) name" }, { label: "Notes", key: "notes" }]}
+          onAdd={(f, doc) => { setPersonalList(p => [...p, { id: Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", attachedDoc: doc || null }]); toast.success(`${f.accountName || "Account"} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
 
         {showAdd === "portfolios" && <AddModal title="Add Investment Account" onClose={() => setShowAdd(null)}
           fields={[{ label: "Institution", key: "institution", placeholder: "e.g. Fidelity Investments" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Brokerage, Roth IRA" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $50,000" }, { label: "Holdings", key: "holdings", placeholder: "e.g. S&P 500 Index" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Contact", key: "contact" }]}

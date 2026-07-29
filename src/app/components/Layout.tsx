@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Layers, CalendarDays, Activity
+  ShieldCheck, ChevronRight, X, Menu, Layers, CalendarDays, Activity, Zap, PawPrint
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { useWLEntitlement } from "../context/WLEntitlementContext";
@@ -25,7 +25,7 @@ export type PageId =
   | "legacy-continuation" | "white-glove" | "white-label" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
-  | "warranties";
+  | "warranties" | "utilities" | "pet-records";
 
 type NavItem = { id: PageId; label: string; icon: React.ReactNode; badge?: string; highlight?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
@@ -36,7 +36,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "dashboard", label: "Dashboard", icon: <Home size={16}/> },
       { id: "calendar", label: "Calendar", icon: <CalendarDays size={16}/> },
-      { id: "fpd-ai", label: "Ask FPD AI Assistant", icon: <MessageCircle size={16}/>, badge: "AI" },
+      { id: "fpd-ai", label: "Ask Carlos", icon: <MessageCircle size={16}/> },
     ],
   },
   {
@@ -60,7 +60,9 @@ const navGroups: NavGroup[] = [
       { id: "medical-info",      label: "Medical Info",       icon: <Stethoscope size={16}/> },
       { id: "financial-records", label: "Financial Records",  icon: <Wallet size={16}/> },
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
+      { id: "utilities",         label: "Utilities",          icon: <Zap size={16}/> },
       { id: "family-memories",   label: "Family & Memories",  icon: <Camera size={16}/> },
+      { id: "pet-records",       label: "Pet Records",        icon: <PawPrint size={16}/> },
       { id: "messages-loved-ones", label: "Messages to Loved Ones", icon: <Heart size={16}/>, badge: "New" },
       { id: "digital-diary",     label: "Digital Diary",      icon: <BookOpen size={16}/> },
       { id: "job-history",       label: "Job History",        icon: <Briefcase size={16}/> },
@@ -89,7 +91,6 @@ const navGroups: NavGroup[] = [
   {
     label: "Security & Account",
     items: [
-      { id: "account-settings",     label: "Account & Profile",      icon: <Settings size={16}/> },
       { id: "password-manager",     label: "Password Manager",       icon: <Key size={16}/> },
       { id: "subscription-manager", label: "Auto Pay & Subs",        icon: <CreditCard size={16}/> },
       { id: "legacy-continuation",  label: "Activate Legacy Access", icon: <Shield size={16}/> },
@@ -98,11 +99,12 @@ const navGroups: NavGroup[] = [
   {
     label: "Billing & Earn",
     items: [
+      { id: "account-settings", label: "Account & Profile",  icon: <Settings size={16}/> },
       { id: "storage-usage", label: "Usage & Billing",   icon: <HardDrive size={16}/> },
       { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/>, badge: "30%" },
-      { id: "white-glove",   label: "White Glove Service", icon: <Star size={16}/>, badge: "⭐" },
+      { id: "white-glove",   label: "White Glove Service", icon: <Star size={16}/> },
       { id: "white-label",   label: "White Label", icon: <Layers size={16}/>, badge: "Partner" },
-      { id: "vital-clone",   label: "VitalClone", icon: <Activity size={16}/> },
+      { id: "vital-clone",   label: "Vital Clone", icon: <Activity size={16}/> },
     ],
   },
 ];
@@ -316,7 +318,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
 
         {/* Footer — Vault Clone + user card */}
         <div className="flex-shrink-0" style={{ borderTop: `1px solid ${BORDER}`, padding: collapsed ? "10px 12px" : "12px" }}>
-          <button onClick={() => setShowClone(true)} title={collapsed ? "Legacy Vault Clone" : undefined}
+          <button onClick={() => setShowClone(true)} title={collapsed ? "Legacy Vault Export" : undefined}
             className="w-full flex items-center rounded-xl transition-all"
             style={{
               gap: collapsed ? 0 : 10, justifyContent: collapsed ? "center" : "flex-start",
@@ -326,7 +328,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"}
             onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
             <Copy size={16} style={{ color: "#6FAE8B", flexShrink: 0 }}/>
-            {!collapsed && <span style={{ fontSize: 15.5, fontWeight: 600 }}>Legacy Vault Clone</span>}
+            {!collapsed && <span style={{ fontSize: 15.5, fontWeight: 600 }}>Legacy Vault Export</span>}
           </button>
 
           {collapsed ? (

@@ -3,6 +3,7 @@ import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, Che
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { AttachDocumentField } from "./AttachDocumentField";
 import heroWarrantyPhoto from "../../imports/warranties_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
@@ -196,6 +197,7 @@ export function Warranties() {
   const [showAdd, setShowAdd] = useState(false);
   const [filterCat, setFilterCat] = useState("all");
   const [form, setForm] = useState({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
+  const [wDoc, setWDoc] = useState<string|null>(null);
 
   const listRef = React.useRef<HTMLDivElement>(null);
 
@@ -203,8 +205,9 @@ export function Warranties() {
 
   function addWarranty() {
     if (!form.product) { toast.error("Product name required"); return; }
-    setWarranties(p => [...p, { ...form, id:Date.now(), documents:[], photo:form.photo||"" }]);
+    setWarranties(p => [...p, { ...form, id:Date.now(), documents: wDoc ? [wDoc] : [], photo:form.photo||"" }]);
     toast.success(`Warranty for "${form.product}" added`);
+    setWDoc(null);
     setForm({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"" });
     setShowAdd(false);
   }
@@ -412,6 +415,7 @@ export function Warranties() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
+                <AttachDocumentField value={wDoc} onChange={setWDoc} folder="personal" sectionId="warranties" sectionLabel="Warranties" label="Attach Document (receipt, warranty card, protection plan)" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={addWarranty}>Add Warranty</button>

@@ -75,18 +75,24 @@ export const SECTION_FOLDER_MAP: Record<string, { folderId: string; folderLabel:
   "personal-assets": [
     { folderId:"vehicles",       folderLabel:"Vehicles" },
     { folderId:"property",       folderLabel:"Property & Real Estate" },
-    { folderId:"utilities",      folderLabel:"Utilities & Services" },
     { folderId:"digital",        folderLabel:"Digital Assets" },
     { folderId:"legal",          folderLabel:"Legal Documents" },
+  ],
+  "utilities": [
+    { folderId:"utilities",      folderLabel:"Utilities & Services" },
+    { folderId:"financial",      folderLabel:"Financial Records" },
+  ],
+  "pet-records": [
+    { folderId:"pets",           folderLabel:"Pet Records" },
+    { folderId:"medical",        folderLabel:"Medical Records" },
+  ],
+  "family-memories": [
+    { folderId:"personal",       folderLabel:"Personal Letters & Messages" },
+    { folderId:"photos",         folderLabel:"Photo Albums" },
   ],
   "weapons_locker": [
     { folderId:"weapons_locker", folderLabel:"Weapons Locker" },
     { folderId:"legal",          folderLabel:"Legal Documents" },
-  ],
-  "collectibles": [
-    { folderId:"personal",       folderLabel:"Personal Letters & Messages" },
-    { folderId:"photos",         folderLabel:"Photo Albums" },
-    { folderId:"financial",      folderLabel:"Financial Records" },
   ],
   "wills-trusts": [
     { folderId:"legal",     folderLabel:"Legal Documents" },
