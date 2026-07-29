@@ -290,11 +290,6 @@ function ContactsStory() {
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-contacts.mp4" tone="blue" overlay={0.35} showPlay />
-          <div className="absolute top-4 left-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
-            <div style={{ ...MONO, color: "#6FAE8B", fontSize: 14, marginBottom: 4, letterSpacing: "0.08em" }}>VERIFIED ACCESS</div>
-            <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>ID-Checked</div>
-            <div style={{ color: MUTED, fontSize: 16 }}>Every contact, verified</div>
-          </div>
         </div>
         <div className="order-1 lg:order-2">
           <Kicker>Trusted Contacts</Kicker>
@@ -415,11 +410,6 @@ function MemoriesStory({ onStart }: { onStart: () => void }) {
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-memories.mp4" tone="warm" overlay={0.35} showPlay />
-          <div className="absolute top-4 right-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
-            <div style={{ ...MONO, color: "#6FAE8B", fontSize: 14, marginBottom: 4, letterSpacing: "0.08em" }}>PRESERVED FOREVER</div>
-            <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>HD Video</div>
-            <div style={{ color: MUTED, fontSize: 16 }}>Messages that outlive the moment</div>
-          </div>
         </div>
       </div>
     </section>
