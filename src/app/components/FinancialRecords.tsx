@@ -138,8 +138,6 @@ const FIN_CSS = `
 .fpd-fin .rgrid.c2 .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-fin .tile{padding:12px 14px;position:relative;transition:background .18s ease;}
 .fpd-fin .tile:hover{background:rgba(126,107,216,0.08);}
-.fpd-fin .tile::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;pointer-events:none;background:linear-gradient(90deg,#7E6BD8,#5B6EE1);transform:scaleX(0);transform-origin:left;transition:transform .2s ease;box-shadow:0 0 8px 0 rgba(126,107,216,0.65);}
-.fpd-fin .tile:hover::after{transform:scaleX(1);}
 .fpd-fin .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-fin .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;transition:color .18s ease;}
 .fpd-fin .tile:hover .tv{color:#C9BFF0;}

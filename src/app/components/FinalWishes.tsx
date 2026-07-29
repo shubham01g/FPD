@@ -198,8 +198,6 @@ const WISHES_CSS = `
 .fpd-wishes .qq{color:${TEXT};font-size:17px;font-weight:600;margin-bottom:8px;}
 .fpd-wishes .qans{position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:border-color .16s;}
 .fpd-wishes .qans:hover{border-color:rgba(91,110,225,0.3);}
-.fpd-wishes .qans::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;pointer-events:none;background:linear-gradient(90deg,#7E6BD8,#5B6EE1);transform:scaleX(0);transform-origin:left;transition:transform .2s ease;box-shadow:0 0 8px 0 rgba(126,107,216,0.65);}
-.fpd-wishes .qans:hover::after{transform:scaleX(1);}
 .fpd-wishes .qans .qa-text{flex:1;font-size:16px;line-height:1.6;}
 .fpd-wishes .qans .qa-text.filled{color:${SOFT};}
 .fpd-wishes .qans .qa-text.empty{color:${FAINT};font-style:italic;}
