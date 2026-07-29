@@ -5,7 +5,7 @@ import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal"
 import { SystemHealth } from "./SystemHealth";
 import { AdminAIAgent } from "../AdminAIAgent";
 import {
-  Users, DollarSign, HardDrive, TrendingUp, Globe, Crown,
+  Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, ArrowUp, ArrowDown, Search, Filter, Eye,
   CheckCircle, XCircle, Clock, Edit, Trash2, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Lock, Settings,
@@ -16,6 +16,16 @@ import { toast } from "sonner";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+
+/* Icon-chip tones — same values as the Dashboard/Calendar "at a glance" tiles, for a consistent look */
+const CHIP_TONES: Record<string, { bg: string; fg: string }> = {
+  accent:   { bg: "linear-gradient(150deg, rgba(91,110,225,0.32), rgba(91,110,225,0.09))",  fg: "#AEB9F5" },
+  sky:      { bg: "linear-gradient(150deg, rgba(91,167,214,0.32), rgba(91,167,214,0.09))",  fg: "#9FD3EE" },
+  mint:     { bg: "linear-gradient(150deg, rgba(111,174,139,0.32), rgba(111,174,139,0.09))", fg: "#A9DABC" },
+  good:     { bg: "linear-gradient(150deg, rgba(95,190,145,0.30), rgba(95,190,145,0.09))",   fg: "#A9E6C4" },
+  warn:     { bg: "linear-gradient(150deg, rgba(217,165,94,0.30), rgba(217,165,94,0.09))",   fg: "#F0C088" },
+  critical: { bg: "linear-gradient(150deg, rgba(208,107,107,0.30), rgba(208,107,107,0.09))", fg: "#F0A9A9" },
+};
 
 /* ── mock data ──────────────────────────────────────────────────── */
 const revenueData = [
@@ -535,12 +545,12 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 }
 
 const topMetrics = [
-  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#6E90C9" },
-  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#D99A6B" },
-  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#6FAE8B" },
-  { label:"Affiliate Payouts (Jun)", value:"$23,040", change:+14.2, color:"#F6AD55" },
-  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#6E90C9" },
-  { label:"Churn Rate (Jun)", value:"2.3%", change:-0.4, color:"#FC8181", lowerBetter:true },
+  { label:"Total Active Users", value:"51,490", change:+18.4, color:"#6E90C9", tone:"accent", icon:<Users size={16}/> },
+  { label:"Monthly Recurring Revenue", value:"$112,340", change:+22.1, color:"#D99A6B", tone:"warn", icon:<DollarSign size={16}/> },
+  { label:"Overage Revenue (Jun)", value:"$5,212", change:+27.5, color:"#6FAE8B", tone:"good", icon:<TrendingUp size={16}/> },
+  { label:"Affiliate Payouts (Jun)", value:"$23,040", change:+14.2, color:"#F6AD55", tone:"mint", icon:<Handshake size={16}/> },
+  { label:"Avg Storage/User", value:"12.4 GB", change:+8.1, color:"#6E90C9", tone:"sky", icon:<HardDrive size={16}/> },
+  { label:"Churn Rate (Jun)", value:"2.3%", change:-0.4, color:"#FC8181", lowerBetter:true, tone:"critical", icon:<TrendingDown size={16}/> },
 ];
 
 /* ─────────────────────────────────────────────────────────────────
@@ -973,22 +983,29 @@ export function MasterAdmin() {
         </div>
       )}
 
-      {/* Top metrics */}
+      {/* Top metrics — same "at a glance" tile treatment as the Dashboard and Calendar KPI rows */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        {topMetrics.map(m => (
-          <div key={m.label} className="p-4" style={GLASS}>
-            <div style={{ color:"#8A9AB8", fontSize:13, fontWeight:500, marginBottom:8, lineHeight:1.3 }}>{m.label}</div>
-            <div className="flex items-end justify-between gap-2">
-              <div style={{ fontFamily:"var(--font-display)", fontSize:23, fontWeight:700, color:m.color }}>{m.value}</div>
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(95,190,145,0.14)" : "rgba(252,129,129,0.14)",
-                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#5FBE91" : "#FC8181", fontSize:11.5, fontWeight:700, ...MONO }}>
-                {m.change>0 ? <ArrowUp size={9}/> : <ArrowDown size={9}/>}
-                {Math.abs(m.change)}%
+        {topMetrics.map(m => {
+          const chip = CHIP_TONES[m.tone] ?? CHIP_TONES.accent;
+          const good = m.lowerBetter ? m.change < 0 : m.change > 0;
+          const dot = good ? "#5FBE91" : "#D06B6B";
+          return (
+            <div key={m.label} className="flex items-start gap-3.5 p-4"
+              style={{ background:"rgba(255,255,255,0.02)", border:"1px solid rgba(255,255,255,0.045)", borderRadius:18 }}>
+              <div className="flex items-center justify-center flex-shrink-0" style={{ width:36, height:36, borderRadius:13, background:chip.bg, color:chip.fg, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+                {m.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div style={{ fontFamily:"var(--font-display)", fontSize:20, fontWeight:600, color:m.color, lineHeight:1.15 }}>{m.value}</div>
+                <div style={{ fontSize:12.5, color:"#929CBC", marginTop:4, lineHeight:1.3 }}>{m.label}</div>
+                <div className="flex items-center gap-1.5" style={{ fontSize:12.5, color:"#BCC5DA", marginTop:4 }}>
+                  <span style={{ width:5, height:5, borderRadius:"50%", background:dot, flexShrink:0 }} />
+                  {m.change > 0 ? "+" : ""}{m.change}% {m.lowerBetter ? "vs last month" : "this month"}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Tab bar — horizontally scrollable, single row */}
