@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", borderRadius:22, boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" };
+const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none" };
 

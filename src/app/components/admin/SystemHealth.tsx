@@ -37,8 +37,8 @@ const T = {
 const MONO:    React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily:"var(--font-display)" };
 const CARD:    React.CSSProperties = {
-  background: T.card, border:"1px solid rgba(255,255,255,0.06)",
-  boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22, padding:22,
+  background: T.card, border:"1px solid rgba(91,110,225,0.16)",
+  borderRadius:20, padding:22,
 };
 const INPUT:   React.CSSProperties = {
   background:"#141B2E", border:`1px solid rgba(91,110,225,0.3)`,

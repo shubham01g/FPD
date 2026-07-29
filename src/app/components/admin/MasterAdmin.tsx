@@ -14,8 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
-const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
+const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 /* ── mock data ──────────────────────────────────────────────────── */
@@ -221,10 +220,10 @@ function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:num
 
 function StatChip({ label, value, sub, color }: { label:string; value:string|number; sub?:string; color:string }) {
   return (
-    <div className="p-4 rounded-2xl" style={{ background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" }}>
-      <div style={{ fontFamily:"var(--font-display)", fontSize:32.5, color, lineHeight:1 }}>{value}</div>
-      <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:500, marginTop:4 }}>{label}</div>
-      {sub && <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:2 }}>{sub}</div>}
+    <div className="p-4 rounded-2xl transition-all" style={GLASS}>
+      <div style={{ fontFamily:"var(--font-display)", fontSize:27.5, fontWeight:700, color, lineHeight:1.15 }}>{value}</div>
+      <div style={{ color:"#EFF2F9", fontSize:14.5, fontWeight:500, marginTop:5 }}>{label}</div>
+      {sub && <div style={{ color:"#8A9AB8", fontSize:13, marginTop:2 }}>{sub}</div>}
     </div>
   );
 }
@@ -232,16 +231,15 @@ function StatChip({ label, value, sub, color }: { label:string; value:string|num
 function SectionHead({ title, sub }: { title:string; sub?:string }) {
   return (
     <div className="flex items-baseline gap-3 mb-4">
-      <div style={{ fontFamily:"var(--font-display)", fontSize:21.5, color:"#E8EDF5" }}>{title}</div>
-      {sub && <div style={{ color:"#8A9AB8", fontSize:15 }}>{sub}</div>}
+      <div style={{ fontFamily:"var(--font-display)", fontSize:20, fontWeight:600, color:"#EFF2F9" }}>{title}</div>
+      {sub && <div style={{ color:"#8A9AB8", fontSize:14.5 }}>{sub}</div>}
     </div>
   );
 }
 
 function Card({ children, className = "" }: { children:React.ReactNode; className?:string }) {
   return (
-    <div className={`p-5 rounded-2xl ${className}`}
-      style={{ background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)" }}>
+    <div className={`p-5 ${className}`} style={GLASS}>
       {children}
     </div>
   );
@@ -322,7 +320,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
     }, 900);
   }
 
-  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
+  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
   const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
@@ -590,7 +588,7 @@ function PushNotificationCenter() {
   const [preview, setPreview] = useState(false);
   const [channel, setChannel] = useState<"push"|"email"|"both">("push");
 
-  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
+  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
   const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
   const MONO_S: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 
@@ -639,11 +637,11 @@ function PushNotificationCenter() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.25)" }}>
+      <div className="flex gap-1 p-1 rounded-2xl w-fit" style={{ background:"#0F1624", border:"1px solid rgba(91,110,225,0.18)" }}>
         {[["compose","✏️ Compose"],["history","📋 Sent History"]].map(([id,label]) => (
           <button key={id} onClick={() => setView(id as any)}
             className="px-5 py-2 rounded-xl text-sm font-semibold transition-all"
-            style={{ background:view===id?"#5B6EE1":"transparent", color:view===id?"#fff":"#8A9AB8" }}>
+            style={{ background:view===id?"linear-gradient(180deg,#7E6BD8,#5B6EE1)":"transparent", color:view===id?"#fff":"#8A9AB8" }}>
             {label}
           </button>
         ))}
@@ -928,75 +926,80 @@ export function MasterAdmin() {
   ];
 
   return (
-    <div className="p-6 space-y-5 relative" style={{ maxWidth:1400, ...GRID }}>
+    <div className="p-7 space-y-6 relative" style={{ maxWidth:1360, margin:"0 auto" }}>
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Crown size={15} color="#FFFFFF" />
-            <span style={{ color:"#6E90C9", fontSize:14, ...MONO, letterSpacing:"0.12em" }}>MASTER ADMIN · FINAL PASS DOWN</span>
+          <div className="inline-flex items-center gap-2 mb-3 px-3 py-1.5 rounded-full" style={{ background:"rgba(91,110,225,0.12)", border:"1px solid rgba(91,110,225,0.3)" }}>
+            <Crown size={13} color="#FFFFFF" />
+            <span style={{ color:"#AEB9F5", fontSize:13, fontWeight:700, letterSpacing:"0.1em", ...MONO }}>MASTER ADMIN · FINAL PASS DOWN</span>
           </div>
-          <h1 style={{ fontFamily:"var(--font-display)", fontSize:32.5, color:"#E8EDF5" }}>Platform Command Center</h1>
-          <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:30, fontWeight:600, color:"#EFF2F9", letterSpacing:"-0.02em" }}>Platform Command Center</h1>
+          <p style={{ color:"#8A9AB8", fontSize:15.5, marginTop:5 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowOnboard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm"
-            style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#fff", boxShadow:"0 4px 16px rgba(91,110,225,0.35)" }}>
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-transform"
+            style={{ background:"linear-gradient(180deg,#7E6BD8,#5B6EE1)", color:"#fff", boxShadow:"0 8px 20px -8px rgba(91,110,225,0.7)" }}>
             <UserPlus size={14}/> Onboard User
           </button>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
-            <Activity size={13} color="#FFFFFF" />
-            <span style={{ color:"#D99A6B", fontSize:14, ...MONO }}>LIVE · Jun 24, 2026</span>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ background:"rgba(95,190,145,0.08)", border:"1px solid rgba(95,190,145,0.22)" }}>
+            <div style={{ width:6, height:6, borderRadius:"50%", background:"#5FBE91", boxShadow:"0 0 6px #5FBE91" }}/>
+            <span style={{ color:"#D99A6B", fontSize:13.5, fontWeight:600, ...MONO }}>LIVE · Jun 24, 2026</span>
           </div>
         </div>
       </div>
 
       {/* Manually onboarded users strip */}
       {manualUsers.length > 0 && (
-        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.15)" }}>
-          <UserPlus size={14} color="#FFFFFF"/>
-          <span style={{ color:"#6E90C9", fontSize:15, fontWeight:600 }}>Manually Onboarded:</span>
+        <div className="flex items-center gap-3 px-5 py-3.5 flex-wrap" style={GLASS}>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <UserPlus size={14} color="#FFFFFF"/>
+            <span style={{ color:"#B8C8E0", fontSize:15, fontWeight:600, whiteSpace:"nowrap" }}>Manually Onboarded</span>
+          </div>
           <div className="flex flex-wrap gap-2 flex-1">
             {manualUsers.slice(0,4).map(u => (
               <span key={u.id} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
-                style={{ background:`rgba(91,110,225,0.1)`, color:"#6E90C9", fontWeight:500 }}>
+                style={{ background:`rgba(91,110,225,0.1)`, color:"#AEB9F5", fontWeight:500 }}>
                 {u.whiteGlove && <Star size={9} color="#FFFFFF"/>}
                 {u.name}
                 {u.subscriptionWaived && <Gift size={9} color="#FFFFFF"/>}
               </span>
             ))}
-            {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:15 }}>+{manualUsers.length-4} more</span>}
+            {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:14.5 }}>+{manualUsers.length-4} more</span>}
           </div>
-          <button onClick={() => setTab("users")} style={{ color:"#6E90C9", fontSize:14, fontWeight:600 }}>View all →</button>
+          <button onClick={() => setTab("users")} style={{ color:"#6FAE8B", fontSize:14, fontWeight:600, flexShrink:0 }}>View all →</button>
         </div>
       )}
 
       {/* Top metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {topMetrics.map(m => (
-          <div key={m.label} className="p-4 rounded-2xl" style={GLASS}>
-            <div className="flex items-center justify-between mb-2">
-              <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{m.label.toUpperCase().split(" ").slice(-2).join(" ")}</div>
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
-                style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)",
-                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#D99A6B" : "#FC8181", fontSize:11, ...MONO }}>
-                {m.change>0 ? <ArrowUp size={8}/> : <ArrowDown size={8}/>}
+          <div key={m.label} className="p-4" style={GLASS}>
+            <div style={{ color:"#8A9AB8", fontSize:13, fontWeight:500, marginBottom:8, lineHeight:1.3 }}>{m.label}</div>
+            <div className="flex items-end justify-between gap-2">
+              <div style={{ fontFamily:"var(--font-display)", fontSize:23, fontWeight:700, color:m.color }}>{m.value}</div>
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: (m.lowerBetter ? m.change<0 : m.change>0) ? "rgba(95,190,145,0.14)" : "rgba(252,129,129,0.14)",
+                  color: (m.lowerBetter ? m.change<0 : m.change>0) ? "#5FBE91" : "#FC8181", fontSize:11.5, fontWeight:700, ...MONO }}>
+                {m.change>0 ? <ArrowUp size={9}/> : <ArrowDown size={9}/>}
                 {Math.abs(m.change)}%
               </div>
             </div>
-            <div style={{ fontFamily:"var(--font-display)", fontSize:25, color:m.color }}>{m.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Tab bar */}
-      <div className="flex flex-wrap gap-1 p-1 rounded-2xl" style={{ background:"#0A0F1A", border:"1px solid rgba(91,110,225,0.2)", width:"fit-content" }}>
+      {/* Tab bar — horizontally scrollable, single row */}
+      <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto fpd-scroll" style={{ background:"#0F1624", border:"1px solid rgba(91,110,225,0.18)" }}>
         {tabs.map(t => (
           <button key={t.id} onClick={()=>setTab(t.id)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm transition-all"
-            style={{ background:tab===t.id?"#5B6EE1":"transparent", color:tab===t.id?"#F0F4FA":"#8A9AB8", fontWeight:tab===t.id?700:400 }}>
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all flex-shrink-0"
+            style={{ background:tab===t.id?"linear-gradient(180deg,#7E6BD8,#5B6EE1)":"transparent", color:tab===t.id?"#fff":"#8A9AB8", fontWeight:tab===t.id?700:500, whiteSpace:"nowrap" }}>
             {t.icon} {t.label}
+            {t.badge && (
+              <span style={{ fontSize:10.5, fontWeight:700, padding:"1px 6px", borderRadius:99, background:tab===t.id?"rgba(255,255,255,0.22)":"rgba(91,110,225,0.2)", color:tab===t.id?"#fff":"#AEB9F5" }}>{t.badge}</span>
+            )}
           </button>
         ))}
       </div>
