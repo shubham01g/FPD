@@ -277,6 +277,52 @@ function HowItWorks() {
   );
 }
 
+/* ── TRUSTED CONTACTS STORY ───────────────────────────────────── */
+function ContactsStory() {
+  const points = [
+    "Legacy Contacts receive your vault exactly when the time comes",
+    "Guardian Contacts step in for approvals and emergencies",
+    "Emergency Contacts get instant access to critical information",
+    "Every contact verifies their identity with government-issued ID",
+  ];
+  return (
+    <section id="trusted-contacts" className="relative py-28 px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <MediaBackdrop src="/media/story-contacts.mp4" tone="blue" overlay={0.35} showPlay />
+          <div className="absolute top-4 left-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
+            <div style={{ ...MONO, color: "#6FAE8B", fontSize: 14, marginBottom: 4, letterSpacing: "0.08em" }}>VERIFIED ACCESS</div>
+            <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>ID-Checked</div>
+            <div style={{ color: MUTED, fontSize: 16 }}>Every contact, verified</div>
+          </div>
+        </div>
+        <div className="order-1 lg:order-2">
+          <Kicker>Trusted Contacts</Kicker>
+          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+            The Right People,<br />
+            <span style={{ color: "#6FAE8B" }}>At the Right Time</span>
+          </h2>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+            A vault is only as good as the people who can reach it. Final Pass Down lets you designate exactly who gets access, to what, and when — so nothing ever falls into the wrong hands or the wrong timing.
+          </p>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+            From the people who inherit your legacy to the ones who step in during an emergency, every relationship is defined, verified, and ready before you ever need it.
+          </p>
+          <div className="flex flex-col gap-3 mb-8">
+            {points.map(p => (
+              <div key={p} className="flex items-start gap-3">
+                <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
+                <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
+              </div>
+            ))}
+          </div>
+          <GhostBtn onClick={() => scrollToId("features")}>See how contacts work <ChevronRight size={16} /></GhostBtn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── FEATURES (30+ categories with filter tabs) ───────────────── */
 type Feat = { cat: string; icon: React.ReactNode; title: string; desc: string };
 const FEATURES: Feat[] = [
@@ -328,6 +374,52 @@ function Features() {
               <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── MEMORIES & MESSAGES STORY ────────────────────────────────── */
+function MemoriesStory({ onStart }: { onStart: () => void }) {
+  const points = [
+    "Record video messages delivered exactly when you choose",
+    "Preserve photos and stories with context for future generations",
+    "Attach memories to the people, dates, or occasions they belong to",
+    "Every memory stays private until you decide it's time to share",
+  ];
+  return (
+    <section id="memories" className="relative py-28 px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div>
+          <Kicker>Memories & Messages</Kicker>
+          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+            Memories That<br />
+            <span style={{ color: "#6FAE8B" }}>Speak For You</span>
+          </h2>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+            Photos fade and stories get lost. Final Pass Down keeps both — every picture, every keepsake, every video message — safe, organized, and ready to reach the people you love, in your own voice.
+          </p>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+            Whether it's a birthday message for a grandchild not yet born or the story behind a family heirloom, your words outlive the moment they were recorded.
+          </p>
+          <div className="flex flex-col gap-3 mb-8">
+            {points.map(p => (
+              <div key={p} className="flex items-start gap-3">
+                <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
+                <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
+              </div>
+            ))}
+          </div>
+          <GhostBtn onClick={onStart}>Start preserving memories <ChevronRight size={16} /></GhostBtn>
+        </div>
+        <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <MediaBackdrop src="/media/story-memories.mp4" tone="warm" overlay={0.35} showPlay />
+          <div className="absolute top-4 right-4 p-5 rounded-2xl" style={{ background: "rgba(8,12,24,0.82)", border: "1px solid rgba(91,110,225,0.25)", backdropFilter: "blur(10px)" }}>
+            <div style={{ ...MONO, color: "#6FAE8B", fontSize: 14, marginBottom: 4, letterSpacing: "0.08em" }}>PRESERVED FOREVER</div>
+            <div style={{ ...DISPLAY, fontSize: 32, fontWeight: 800, color: TEXT }}>HD Video</div>
+            <div style={{ color: MUTED, fontSize: 16 }}>Messages that outlive the moment</div>
+          </div>
         </div>
       </div>
     </section>
@@ -950,7 +1042,9 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
         <Hero onStart={onGetStarted} />
         <About onStart={onGetStarted} />
         <HowItWorks />
+        <ContactsStory />
         <Features />
+        <MemoriesStory onStart={onGetStarted} />
         <Security />
         <Pricing onStart={onGetStarted} />
         <Affiliates onStart={onGetStarted} />
