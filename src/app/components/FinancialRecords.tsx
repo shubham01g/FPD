@@ -110,16 +110,17 @@ const FIN_CSS = `
 .fpd-fin .toolbar{display:flex;align-items:center;justify-content:flex-end;}
 
 /* KPI ledger */
-.fpd-fin .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
-.fpd-fin .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
-.fpd-fin .kcell:first-child{border-left:none;}
-.fpd-fin .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-fin .kcell .klbl{font-size:12px;font-weight:600;color:${MUTED};}
-.fpd-fin .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-fin .kcell .kval{font-family:var(--font-display);font-size:32.5px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-fin .kcell .ksub{font-size:14.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
-.fpd-fin .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-fin .kstrip{grid-template-columns:1fr 1fr;}.fpd-fin .kcell:nth-child(3){border-left:none;}.fpd-fin .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
+.fpd-fin .kpi-stack{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.fpd-fin .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-fin .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
+.fpd-fin .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-fin .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-fin .kpi-mini-val{font-family:var(--font-display);font-size:27.5px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-fin .kpi-mini-lbl{font-size:14.5px;color:${MUTED};margin-top:4px;}
+.fpd-fin .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
+.fpd-fin .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:640px){.fpd-fin .kpi-stack{grid-template-columns:1fr 1fr;}}
+@media (max-width:420px){.fpd-fin .kpi-stack{grid-template-columns:1fr;}}
 
 /* record cards */
 .fpd-fin .rlist{display:flex;flex-direction:column;gap:14px;}
@@ -300,15 +301,15 @@ export function FinancialRecords() {
         </div>
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip">
+        <div className="kpi-stack">
           {kpis.map(k => (
-            <div key={k.label} className="kcell">
-              <div className="khead">
-                <span className="klbl">{k.label}</span>
-                <span className="kico">{k.icon}</span>
+            <div key={k.label} className="kpi-mini">
+              <span className="kpi-mini-ico" style={{ background:`linear-gradient(150deg,${k.dot}52,${k.dot}12)`, color: k.dot }}>{k.icon}</span>
+              <div className="kpi-mini-txt">
+                <div className="kpi-mini-val">{k.value}</div>
+                <div className="kpi-mini-lbl">{k.label}</div>
+                <div className="kpi-mini-sub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
               </div>
-              <div className="kval">{k.value}</div>
-              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
             </div>
           ))}
         </div>

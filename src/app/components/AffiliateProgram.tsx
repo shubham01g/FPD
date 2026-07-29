@@ -65,16 +65,17 @@ const AFF_CSS = `
 .fpd-aff .progress-fill{height:12px;border-radius:99px;}
 
 /* KPI ledger */
-.fpd-aff .kstrip{display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;}
-.fpd-aff .kcell{padding:20px 22px;border-left:1px solid rgba(255,255,255,0.08);position:relative;text-align:left;overflow:hidden;}
-.fpd-aff .kcell:first-child{border-left:none;}
-.fpd-aff .kcell .khead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.fpd-aff .kcell .klbl{font-size:12px;font-weight:600;color:${MUTED};}
-.fpd-aff .kcell .kico{width:27px;height:27px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;background:#0F1624;color:${SOFT};}
-.fpd-aff .kcell .kval{font-family:var(--font-display);font-size:30px;font-weight:600;color:${TEXT};line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;}
-.fpd-aff .kcell .ksub{font-size:14.5px;color:${MUTED};margin-top:9px;display:flex;align-items:center;gap:6px;}
-.fpd-aff .kcell .ksub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:880px){.fpd-aff .kstrip{grid-template-columns:1fr 1fr;}.fpd-aff .kcell:nth-child(3){border-left:none;}.fpd-aff .kcell:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}}
+.fpd-aff .kpi-stack{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.fpd-aff .kpi-mini{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);transition:background .15s,border-color .15s,transform .15s;}
+.fpd-aff .kpi-mini:hover{background:#101728;border-color:rgba(255,255,255,0.13);transform:translateY(-1px);}
+.fpd-aff .kpi-mini-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-aff .kpi-mini-txt{flex:1;min-width:0;}
+.fpd-aff .kpi-mini-val{font-family:var(--font-display);font-size:27.5px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-aff .kpi-mini-lbl{font-size:14.5px;color:${MUTED};margin-top:4px;}
+.fpd-aff .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
+.fpd-aff .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+@media (max-width:640px){.fpd-aff .kpi-stack{grid-template-columns:1fr 1fr;}}
+@media (max-width:420px){.fpd-aff .kpi-stack{grid-template-columns:1fr;}}
 
 /* referral link */
 .fpd-aff .link-row{display:flex;gap:10px;flex-wrap:wrap;}
@@ -177,15 +178,15 @@ export function AffiliateProgram() {
         )}
 
         {/* ── KPI ledger ── */}
-        <div className="card kstrip">
+        <div className="kpi-stack">
           {kpis.map(k => (
-            <div key={k.label} className="kcell">
-              <div className="khead">
-                <span className="klbl">{k.label}</span>
-                <span className="kico">{k.icon}</span>
+            <div key={k.label} className="kpi-mini">
+              <span className="kpi-mini-ico" style={{ background:`linear-gradient(150deg,${k.dot}52,${k.dot}12)`, color: k.dot }}>{k.icon}</span>
+              <div className="kpi-mini-txt">
+                <div className="kpi-mini-val">{k.value}</div>
+                <div className="kpi-mini-lbl">{k.label}</div>
+                <div className="kpi-mini-sub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
               </div>
-              <div className="kval">{k.value}</div>
-              <div className="ksub"><span className="dt" style={{ background: k.dot }} />{k.sub}</div>
             </div>
           ))}
         </div>

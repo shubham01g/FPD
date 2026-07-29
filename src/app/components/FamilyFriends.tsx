@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import {
-  Users, Phone, Mail, MapPin, Gift, Heart, Plus, Search,
+  Users, Users2, Contact, Phone, Mail, MapPin, Gift, Heart, Plus, Search,
   Edit2, Trash2, X, Star, Camera,
   Send, CheckCircle, Layers
 } from "lucide-react";
@@ -122,10 +122,10 @@ const initContacts: Contact[] = [
 ];
 
 const groupConfig = {
-  immediate: { label: "Immediate Family", color: "#6FAE8B" },
-  extended:  { label: "Extended Family",  color: "#D99A6B" },
-  friends:   { label: "Friends",          color: "#6E90C9" },
-  other:     { label: "Other Contacts",   color: WARN },
+  immediate: { label: "Immediate Family", color: "#6FAE8B", icon: <Heart size={18}/> },
+  extended:  { label: "Extended Family",  color: "#D99A6B", icon: <Users size={18}/> },
+  friends:   { label: "Friends",          color: "#6E90C9", icon: <Users2 size={18}/> },
+  other:     { label: "Other Contacts",   color: WARN,      icon: <Contact size={18}/> },
 };
 
 function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: Contact) => void }) {
@@ -217,11 +217,14 @@ const FF_CSS = `
 .fpd-ff .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:15.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
 
 /* group summary — clickable filter tiles */
-.fpd-ff .gstat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.fpd-ff .gstat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 @media (max-width:760px){.fpd-ff .gstat-grid{grid-template-columns:1fr 1fr;}}
-.fpd-ff .gstat{padding:16px;text-align:left;cursor:pointer;transition:border-color .18s;}
-.fpd-ff .gstat-val{font-family:var(--font-display);font-size:27.5px;font-weight:600;}
-.fpd-ff .gstat-lbl{color:${TEXT};font-size:16px;font-weight:500;margin-top:2px;}
+.fpd-ff .gstat{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.065);text-align:left;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;}
+.fpd-ff .gstat:hover{background:#101728;transform:translateY(-1px);}
+.fpd-ff .gstat-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
+.fpd-ff .gstat-txt{flex:1;min-width:0;}
+.fpd-ff .gstat-val{font-family:var(--font-display);font-size:27.5px;font-weight:700;color:${TEXT};line-height:1.15;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+.fpd-ff .gstat-lbl{font-size:14.5px;color:${MUTED};margin-top:4px;}
 
 /* segmented all/starred filter */
 .fpd-ff .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
@@ -482,9 +485,12 @@ export function FamilyFriends() {
         <div className="gstat-grid">
           {(Object.entries(groupConfig) as [Contact["group"], typeof groupConfig[Contact["group"]]][]).map(([g, cfg]) => (
             <button key={g} onClick={() => setActiveGroup(activeGroup === g ? "all" : g)}
-              className="card gstat" style={{ borderColor: activeGroup === g ? cfg.color : "rgba(255,255,255,0.065)" }}>
-              <div className="gstat-val" style={{ color: cfg.color }}>{byGroup(g).length}</div>
-              <div className="gstat-lbl">{cfg.label}</div>
+              className="gstat" style={{ borderColor: activeGroup === g ? cfg.color : "rgba(255,255,255,0.065)" }}>
+              <span className="gstat-ico" style={{ background:`linear-gradient(150deg,${cfg.color}52,${cfg.color}12)`, color: cfg.color }}>{cfg.icon}</span>
+              <div className="gstat-txt">
+                <div className="gstat-val">{byGroup(g).length}</div>
+                <div className="gstat-lbl">{cfg.label}</div>
+              </div>
             </button>
           ))}
         </div>

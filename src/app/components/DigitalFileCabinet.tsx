@@ -338,12 +338,12 @@ const themedCabinets: Cabinet[] = cabinets.map((c, i) => ({
 /* Five meaning-grouped "drawers" replacing the old flat 23-folder grid —
    grouped by what they're for, with one accent per drawer (rather than the
    RAMP's per-folder cycling) so folders that belong together read together. */
-const SECTIONS: { id: string; label: string; ids: string[] }[] = [
-  { id: "legal",    label: "Legal & Financial",     ids: ["legal", "financial", "taxes", "insurance", "goals"] },
-  { id: "property", label: "Property & Belongings", ids: ["property", "vehicles", "utilities", "warranties", "keepsakes", "weapons_locker"] },
-  { id: "health",   label: "Health & Family",       ids: ["medical", "pets", "daycare", "ids"] },
-  { id: "memories", label: "Memories & Messages",   ids: ["personal", "photos", "videos", "awards", "places"] },
-  { id: "security", label: "Security & Access",     ids: ["digital", "firearms", "secret"] },
+const SECTIONS: { id: string; label: string; ids: string[]; accent: string }[] = [
+  { id: "legal",    label: "Legal & Financial",     ids: ["legal", "financial", "taxes", "insurance", "goals"], accent: ACCENT2 },
+  { id: "property", label: "Property & Belongings", ids: ["property", "vehicles", "utilities", "warranties", "keepsakes", "weapons_locker"], accent: "#6FAE8B" },
+  { id: "health",   label: "Health & Family",       ids: ["medical", "pets", "daycare", "ids"], accent: "#7E6BD8" },
+  { id: "memories", label: "Memories & Messages",   ids: ["personal", "photos", "videos", "awards", "places"], accent: "#97A2C6" },
+  { id: "security", label: "Security & Access",     ids: ["digital", "firearms", "secret"], accent: NEG },
 ];
 
 function getIcon(type: string, color = ACCENT2, size = 28) {
@@ -445,15 +445,21 @@ const CAB_CSS = `
 .fpd-cab .chip:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
 .fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
 
+/* jump nav — hop straight to a drawer instead of scrolling past 23 folders */
+.fpd-cab .jumpnav{display:flex;flex-wrap:wrap;gap:8px;}
+.fpd-cab .jumpchip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;font-size:14px;font-weight:600;color:${SOFT};background:#101728;border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
+.fpd-cab .jumpchip:hover{border-color:rgba(255,255,255,0.22);}
+.fpd-cab .jumpchip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.fpd-cab .jumpchip .n{font-family:var(--font-mono);font-size:12px;color:${FAINT};}
+
 /* ── Drawer cabinet (replaces the old flat folder grid) ── */
 .fpd-cab .cab-drawers{display:flex;flex-direction:column;gap:12px;}
 .fpd-cab details.cab-drawer{border-radius:22px;overflow:hidden;background:#101728;border:1px solid rgba(255,255,255,0.06);transition:border-color .18s ease;}
 .fpd-cab details.cab-drawer:hover,.fpd-cab details.cab-drawer[open]{border-color:rgba(255,255,255,0.14);}
 .fpd-cab details.cab-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px 20px;background:none;border-bottom:1px solid rgba(255,255,255,0.06);}
 .fpd-cab details.cab-drawer summary::-webkit-details-marker{display:none;}
-.fpd-cab .cab-pull{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,167,214,0.10);border:1px solid rgba(91,167,214,0.24);}
-.fpd-cab .cab-pull i{display:block;width:14px;height:2px;border-radius:2px;background:${ACCENT2};}
-.fpd-cab details.cab-drawer[open] .cab-pull{background:rgba(91,167,214,0.16);}
+.fpd-cab .cab-pull{width:34px;height:34px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(91,167,214,0.24);}
+.fpd-cab .cab-pull i{display:block;width:14px;height:2px;border-radius:2px;}
 .fpd-cab .cab-dtitle{font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:-0.005em;color:${TEXT};}
 .fpd-cab .cab-dsub{font-family:var(--font-mono);font-size:12.5px;color:${FAINT};margin-top:2px;letter-spacing:0.02em;}
 .fpd-cab .cab-chev{margin-left:auto;color:${FAINT};transition:transform .2s ease;flex-shrink:0;}
@@ -461,17 +467,18 @@ const CAB_CSS = `
 
 .fpd-cab .cab-drawer-body{background:#070A12;box-shadow:inset 0 8px 14px -12px rgba(0,0,0,0.8);}
 .fpd-cab .cab-drawer-body-in{padding:20px 18px;}
-.fpd-cab .cab-tabrow{display:flex;flex-wrap:wrap;gap:16px;}
 
-.fpd-cab .cab-tab{position:relative;margin-top:15px;width:196px;flex:0 0 auto;}
-.fpd-cab .cab-tabflag{position:absolute;top:-15px;left:15px;height:22px;padding:0 9px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:5px;font-size:15px;border-bottom:none;z-index:1;}
-.fpd-cab .cab-tabbody{position:relative;text-align:left;width:100%;padding:16px 14px 13px;border-radius:16px;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;font-family:var(--font-body);}
-.fpd-cab .cab-tabbody:hover{transform:translateY(-2px);box-shadow:0 14px 24px -18px rgba(0,0,0,.7);}
-.fpd-cab .cab-lockbadge{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
-.fpd-cab .cab-tabbody .ftitle{font-family:var(--font-display);font-size:15.5px;font-weight:600;line-height:1.3;color:${TEXT};}
-.fpd-cab .cab-tabbody .fdesc{font-size:13.5px;color:${MUTED};line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.fpd-cab .cab-tabbody .ffoot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:9px;border-top:1px solid rgba(255,255,255,0.1);font-family:var(--font-mono);font-size:11px;color:${FAINT};}
-.fpd-cab .cab-tabbody .fcount{padding:3px 7px;border-radius:6px;font-weight:600;}
+/* folder tiles — even grid (no ragged flex-wrap), icon chip instead of a
+   floating flag tab, one-line description, accent count pill in the footer */
+.fpd-cab .cab-tilegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:12px;}
+.fpd-cab .cab-tile{position:relative;text-align:left;width:100%;padding:16px;border-radius:16px;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:11px;min-height:150px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;font-family:var(--font-body);}
+.fpd-cab .cab-tile:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.18);box-shadow:0 14px 24px -18px rgba(0,0,0,.7);}
+.fpd-cab .cab-tile-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.fpd-cab .cab-tile .ftitle{font-family:var(--font-display);font-size:15px;font-weight:600;line-height:1.3;color:${TEXT};}
+.fpd-cab .cab-tile .fdesc{font-size:13px;color:${MUTED};line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.fpd-cab .cab-tile .ffoot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-family:var(--font-mono);font-size:11px;color:${FAINT};}
+.fpd-cab .cab-tile .fcount{padding:3px 8px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+.fpd-cab .cab-tile .fpin{font-weight:700;letter-spacing:0.04em;padding:3px 8px;border-radius:6px;background:rgba(208,107,107,0.14);color:#F0A9A9;border:1px solid rgba(208,107,107,0.32);}
 .fpd-cab .frow{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:16px;background:rgba(255,255,255,0.018);border:1px solid rgba(255,255,255,0.08);cursor:pointer;text-align:left;width:100%;transition:border-color .16s,background .16s;font-family:var(--font-body);}
 .fpd-cab .frow:hover{border-color:rgba(91,110,225,0.28);background:rgba(91,110,225,0.05);}
 .fpd-cab .frow .femoji2{font-size:25px;flex-shrink:0;}
@@ -543,7 +550,7 @@ export function DigitalFileCabinet() {
   const [extras, setExtras]   = useState<Record<string, FolderFile[]>>({});
   const [selected, setSelected] = useState<FolderFile | null>(null);
   const [syncedDocs, setSyncedDocs] = useState<SyncedDoc[]>([]);
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(["legal", "property"]));
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(SECTIONS.map(s => s.id)));
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const drawersRef = useRef<HTMLDivElement>(null);
@@ -731,6 +738,25 @@ export function DigitalFileCabinet() {
           </div>
         )}
 
+        {/* ── Jump nav (root only) — hop straight to a drawer ── */}
+        {!current && !search && (
+          <div className="jumpnav">
+            {SECTIONS.map(sec => {
+              const folders = themedCabinets.filter(c => sec.ids.includes(c.id));
+              const fileTotal = folders.reduce((s, f) => s + folderCount(f), 0);
+              return (
+                <button key={sec.id} className="jumpchip" onClick={() => {
+                  setOpenSections(s => new Set(s).add(sec.id));
+                  document.getElementById(`cab-sec-${sec.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}>
+                  <span className="dot" style={{ background: sec.accent }}/>
+                  {sec.label} <span className="n">{folders.length} · {fileTotal}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* ── KPI cards (root only) ── */}
         {!current && (
           <div className="kpi-stack">
@@ -759,13 +785,13 @@ export function DigitalFileCabinet() {
                 if (search && visible.length === 0) return null;
                 const fileTotal = folders.reduce((s, f) => s + folderCount(f), 0);
                 return (
-                  <details key={sec.id} className="cab-drawer" open={openSections.has(sec.id)}
+                  <details key={sec.id} id={`cab-sec-${sec.id}`} className="cab-drawer" open={openSections.has(sec.id)}
                     onToggle={e => {
                       const nowOpen = (e.currentTarget as HTMLDetailsElement).open;
                       setOpenSections(s => { const n = new Set(s); nowOpen ? n.add(sec.id) : n.delete(sec.id); return n; });
                     }}>
                     <summary>
-                      <span className="cab-pull"><i/></span>
+                      <span className="cab-pull" style={{ background:`${sec.accent}1A`, borderColor:`${sec.accent}3D` }}><i style={{ background: sec.accent }}/></span>
                       <span>
                         <span className="cab-dtitle">{sec.label}</span>
                         <div className="cab-dsub">{folders.length} folders · {fileTotal} files</div>
@@ -774,29 +800,26 @@ export function DigitalFileCabinet() {
                     </summary>
                     <div className="cab-drawer-body"><div className="cab-drawer-body-in">
                       {view === "grid" ? (
-                        <div className="cab-tabrow">
+                        <div className="cab-tilegrid">
                           {visible.map(folder => {
                             const count = folderCount(folder);
                             const isLocked = folder.id === "secret";
-                            const restricted = folder.files.some(f => f.locked);
+                            const restricted = !isLocked && folder.files.some(f => f.locked);
                             return (
-                              <div key={folder.id} className="cab-tab">
-                                <span className="cab-tabflag" style={{ background:`${folder.color}2E`, border:`1px solid ${folder.color}66` }}>{folder.emoji}</span>
-                                <button onClick={() => openFolder(folder)} className="cab-tabbody">
-                                  {restricted && (
-                                    <span className="cab-lockbadge" style={{ background:`${folder.color}22`, border:`1px solid ${folder.color}66`, color: folder.color }}>
-                                      <Lock size={10}/>
+                              <button key={folder.id} onClick={() => openFolder(folder)} className="cab-tile">
+                                <span className="cab-tile-ico" style={{ background:`${folder.color}22` }}>{folder.emoji}</span>
+                                <div className="ftitle">{folder.label}</div>
+                                <div className="fdesc">{folder.description}</div>
+                                <div className="ffoot">
+                                  {isLocked ? (
+                                    <span className="fpin">PIN REQUIRED</span>
+                                  ) : (
+                                    <span className="fcount" style={{ background:`${folder.color}29`, color: folder.color }}>
+                                      {restricted && <Lock size={10}/>} {count} files
                                     </span>
                                   )}
-                                  <div className="ftitle">{folder.label}</div>
-                                  <div className="fdesc">{folder.description}</div>
-                                  <div className="ffoot">
-                                    <span className="fcount" style={{ background:`${folder.color}29`, color: folder.color }}>
-                                      {isLocked ? "🔒 PIN" : `${count} files`}
-                                    </span>
-                                  </div>
-                                </button>
-                              </div>
+                                </div>
+                              </button>
                             );
                           })}
                         </div>
