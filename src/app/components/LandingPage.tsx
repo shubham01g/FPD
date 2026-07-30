@@ -127,7 +127,7 @@ function scrollToId(id: string) {
 
 /* ── NAV ──────────────────────────────────────────────────────── */
 const NAV_LINKS: [string, string][] = [
-  ["About", "about"], ["Features", "features"],
+  ["About", "about"], ["How It Works", "how-it-works"], ["Features", "features"],
   ["Security", "security"], ["Pricing", "pricing"], ["Affiliates", "affiliates"],
   ["Partners", "partners"], ["White Label", "white-label"], ["Contact Us", "help"],
 ];
@@ -194,7 +194,7 @@ function Hero({ onStart }: { onStart: () => void }) {
           <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
-            <GhostBtn onClick={() => scrollToId("about")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <GhostBtn onClick={() => scrollToId("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
         </div>
       </div>
@@ -250,6 +250,33 @@ function About({ onStart }: { onStart: () => void }) {
 }
 
 /* ── HOW IT WORKS ─────────────────────────────────────────────── */
+const STEPS = [
+  { icon: <Shield size={22} />, n: "01", title: "Create Your Account", desc: "Sign up and choose your plan. Set up multi-factor authentication and biometric security for your vault." },
+  { icon: <Archive size={22} />, n: "02", title: "Build Your Vault", desc: "Upload documents, add life records across 30+ categories — everything from wills to pet care instructions." },
+  { icon: <Users size={22} />, n: "03", title: "Designate Contacts", desc: "Add Legacy, Guardian, Emergency, and Pet Emergency contacts. Each verifies their identity with government-issued ID." },
+  { icon: <Heart size={22} />, n: "04", title: "Your Legacy Lives On", desc: "When the time comes, your designated contacts receive exactly what you intended — securely and on your terms." },
+];
+
+function HowItWorks() {
+  return (
+    <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+      <div className="max-w-7xl mx-auto">
+        <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
+        <div className="grid md:grid-cols-4 gap-5">
+          {STEPS.map(s => (
+            <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <div style={{ ...DISPLAY, fontSize: 55.5, fontWeight: 800, color: "rgba(147,168,124,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
+              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.14)", color: "#FFFFFF" }}>{s.icon}</div>
+              <h3 style={{ ...DISPLAY, fontSize: 21.5, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</h3>
+              <p style={{ color: MUTED, fontSize: 17.5, lineHeight: 1.65 }}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── TRUSTED CONTACTS STORY ───────────────────────────────────── */
 function ContactsStory() {
   const points = [
@@ -973,6 +1000,7 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
       <main>
         <Hero onStart={onGetStarted} />
         <About onStart={onGetStarted} />
+        <HowItWorks />
         <ContactsStory />
         <Features />
         <MemoriesStory onStart={onGetStarted} />
