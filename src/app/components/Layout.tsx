@@ -5,10 +5,9 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Layers, CalendarDays, Activity, PawPrint, Gem
+  ShieldCheck, ChevronRight, X, Menu, CalendarDays, Activity, PawPrint, Gem
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
-import { useWLEntitlement } from "../context/WLEntitlementContext";
 import { VaultClone } from "./VaultClone";
 import { useDemo } from "../context/DemoContext";
 
@@ -22,7 +21,7 @@ export type PageId =
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
   | "calendar" | "messages-loved-ones" | "vital-clone"
-  | "legacy-continuation" | "white-glove" | "white-label" | "waiver-sign" | "account-settings"
+  | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
   | "warranties" | "pet-records";
@@ -102,7 +101,6 @@ const navGroups: NavGroup[] = [
       { id: "storage-usage", label: "Usage & Billing",   icon: <HardDrive size={16}/> },
       { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/>, badge: "30%" },
       { id: "white-glove",   label: "White Glove Service", icon: <Gem size={16}/> },
-      { id: "white-label",   label: "White Label", icon: <Layers size={16}/>, badge: "Partner" },
       { id: "vital-clone",   label: "Vital Clone", icon: <Activity size={16}/> },
     ],
   },
@@ -142,7 +140,6 @@ interface LayoutProps {
 }
 
 export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children }: LayoutProps) {
-  const { isEntitled: wlEntitled } = useWLEntitlement();
   const [showClone, setShowClone] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState("");
@@ -158,24 +155,14 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   const meta = pageMeta[currentPage] ?? { group: "Overview", label: "Dashboard" };
   const storagePct = Math.min(100, Math.round((user.storageUsed / user.storageLimit) * 100));
 
-  /* White Label is always visible so clients can see what they'd get, but it
-     carries a lock badge until the partner package is paid for. */
-  const visibleGroups = useMemo(() => {
-    if (wlEntitled) return navGroups;
-    return navGroups.map(g => ({
-      ...g,
-      items: g.items.map(i => i.id === "white-label" ? { ...i, badge: "Locked" } : i),
-    }));
-  }, [wlEntitled]);
-
   /* Filter nav by search query */
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return visibleGroups;
-    return visibleGroups
+    if (!q) return navGroups;
+    return navGroups
       .map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q)) }))
       .filter(g => g.items.length > 0);
-  }, [query, visibleGroups]);
+  }, [query]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
