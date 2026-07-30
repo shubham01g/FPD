@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
+import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -82,11 +83,15 @@ const DASH_CSS = `
 .fpd-dash .sec-link{color:${SOFT};font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:color .15s,background .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:5px 10px;margin:-5px -10px;border-radius:99px;}
 .fpd-dash .sec-link:hover{color:${MINT};background:rgba(111,174,139,0.1);}
 
-/* header — single merged greeting + status + CTA (the old full-bleed hero
-   photo and the separate plain header below it duplicated one another, so
-   they're combined into one card here). */
-.fpd-dash .head{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:30px 34px;background:linear-gradient(120deg,#111A2C 0%,#0B1220 65%,#0C1322 100%);border:1px solid rgba(91,110,225,0.18);border-radius:22px;}
-.fpd-dash .head-l{min-width:0;}
+/* header — single merged greeting + status + CTA, with the family photo as
+   its backdrop (the old full-bleed hero photo and the separate plain header
+   below it duplicated one another, so they're combined into one card here). */
+.fpd-dash .head{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:30px 34px;min-height:210px;background:#0A0F1A;border:1px solid rgba(91,110,225,0.18);border-radius:22px;}
+.fpd-dash .head .art{position:absolute;inset:-6%;z-index:0;background-size:cover;background-position:center 35%;background-blend-mode:color;pointer-events:none;transition:transform .7s cubic-bezier(.16,1,.3,1);}
+.fpd-dash .head:hover .art{transform:scale(1.06);}
+.fpd-dash .head .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.92) 34%,rgba(7,10,18,0.62) 62%,rgba(7,10,18,0.22) 100%);}
+.fpd-dash .head-l{position:relative;z-index:2;min-width:0;}
+.fpd-dash .head-r{position:relative;z-index:2;}
 .fpd-dash .eyebrow{font-size:13.5px;color:${FAINT};margin-bottom:6px;}
 .fpd-dash .pg-h1{font-size:31px;color:${TEXT};font-weight:600;margin:0 0 7px;letter-spacing:-0.01em;font-family:var(--font-display);}
 .fpd-dash .pg-h1 .accent-name{color:${ACCENT2};}
@@ -250,8 +255,10 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
       <div className="fpd-dash-grain" />
 
       <div className="wrap">
-        {/* ── Header — merged greeting, readiness ring & primary CTA ── */}
+        {/* ── Header — merged greeting, readiness ring & primary CTA, with the family photo as backdrop ── */}
         <div className="head">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.42), rgba(91,167,214,0.22)), url(${heroFamilyPhoto})` }} />
+          <div className="scrim" />
           <div className="head-l">
             <div className="eyebrow">{todayLong}</div>
             <h1 className="pg-h1">Welcome back, <span className="accent-name">{firstName}</span></h1>
