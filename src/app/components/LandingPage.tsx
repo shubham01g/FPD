@@ -144,6 +144,10 @@ function TopNav({ onStart }: { onStart: () => void }) {
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
+        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2.5 mr-6">
+          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 46, height: 46, borderRadius: 10, objectFit: "contain" }} />
+          <span className="hidden sm:block" style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 20, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
+        </button>
         <div className="hidden xl:flex items-center gap-1">
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className="px-3.5 py-2.5 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
@@ -156,10 +160,6 @@ function TopNav({ onStart }: { onStart: () => void }) {
           </button>
           <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap" }}>Sign In</button>
           <PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn>
-          <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2.5">
-            <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 46, height: 46, borderRadius: 10, objectFit: "contain" }} />
-            <span className="hidden 2xl:block" style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 20, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
-          </button>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </div>
