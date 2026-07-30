@@ -145,7 +145,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
         <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-4">
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 60, height: 60, borderRadius: 13, objectFit: "contain" }} />
+          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 72, height: 72, borderRadius: 15, objectFit: "contain" }} />
         </button>
         <div className="hidden xl:flex items-center gap-1">
           {NAV_LINKS.map(([l, id]) => (
