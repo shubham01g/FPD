@@ -127,9 +127,9 @@ function scrollToId(id: string) {
 
 /* ── NAV ──────────────────────────────────────────────────────── */
 const NAV_LINKS: [string, string][] = [
-  ["About", "about"], ["How It Works", "how-it-works"], ["Features", "features"],
+  ["About", "about"], ["Features", "features"],
   ["Security", "security"], ["Pricing", "pricing"], ["Affiliates", "affiliates"],
-  ["Partners", "partners"], ["White Label", "white-label"], ["Help", "help"],
+  ["Partners", "partners"], ["White Label", "white-label"], ["Contact Us", "help"],
 ];
 
 function TopNav({ onStart }: { onStart: () => void }) {
@@ -143,32 +143,32 @@ function TopNav({ onStart }: { onStart: () => void }) {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
-        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2.5">
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain" }} />
-          <span className="hidden 2xl:block" style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 19, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
-        </button>
-        <div className="hidden xl:flex items-center gap-0.5">
+      <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
+        <div className="hidden xl:flex items-center gap-1">
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="px-2.5 py-2 rounded-lg transition-colors hover:text-white"
-              style={{ color: MUTED, fontSize: 16, fontWeight: 500, whiteSpace: "nowrap" }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="px-3.5 py-2.5 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
+              style={{ color: MUTED, fontSize: 17, fontWeight: 500, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
-        <div className="flex items-center gap-2.5">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors" style={{ color: "#A98CC7" }}>
+        <div className="flex items-center gap-2.5 ml-auto">
+          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7" }}>
             White Glove
           </button>
-          <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:text-white" style={{ color: SOFT }}>Sign In</button>
+          <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT }}>Sign In</button>
           <PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn>
+          <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2.5">
+            <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 46, height: 46, borderRadius: 10, objectFit: "contain" }} />
+            <span className="hidden 2xl:block" style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 20, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
+          </button>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </div>
       {open && (
         <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(91,110,225,0.14)" }}>
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg" style={{ color: SOFT, fontSize: 17.5 }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}>{l}</button>
           ))}
-          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg" style={{ color: "#A98CC7", fontSize: 17.5 }}>White Glove Concierge</button>
+          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", fontSize: 17.5 }}>White Glove Concierge</button>
         </div>
       )}
     </nav>
@@ -194,7 +194,7 @@ function Hero({ onStart }: { onStart: () => void }) {
           <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
-            <GhostBtn onClick={() => scrollToId("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <GhostBtn onClick={() => scrollToId("about")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
         </div>
       </div>
@@ -250,33 +250,6 @@ function About({ onStart }: { onStart: () => void }) {
 }
 
 /* ── HOW IT WORKS ─────────────────────────────────────────────── */
-const STEPS = [
-  { icon: <Shield size={22} />, n: "01", title: "Create Your Account", desc: "Sign up and choose your plan. Set up multi-factor authentication and biometric security for your vault." },
-  { icon: <Archive size={22} />, n: "02", title: "Build Your Vault", desc: "Upload documents, add life records across 30+ categories — everything from wills to pet care instructions." },
-  { icon: <Users size={22} />, n: "03", title: "Designate Contacts", desc: "Add Legacy, Guardian, Emergency, and Pet Emergency contacts. Each verifies their identity with government-issued ID." },
-  { icon: <Heart size={22} />, n: "04", title: "Your Legacy Lives On", desc: "When the time comes, your designated contacts receive exactly what you intended — securely and on your terms." },
-];
-
-function HowItWorks() {
-  return (
-    <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
-      <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
-        <div className="grid md:grid-cols-4 gap-5">
-          {STEPS.map(s => (
-            <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div style={{ ...DISPLAY, fontSize: 55.5, fontWeight: 800, color: "rgba(147,168,124,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
-              <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.14)", color: "#FFFFFF" }}>{s.icon}</div>
-              <h3 style={{ ...DISPLAY, fontSize: 21.5, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{s.title}</h3>
-              <p style={{ color: MUTED, fontSize: 17.5, lineHeight: 1.65 }}>{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ── TRUSTED CONTACTS STORY ───────────────────────────────────── */
 function ContactsStory() {
   const points = [
@@ -850,39 +823,6 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
   );
 }
 
-/* ── TESTIMONIALS ─────────────────────────────────────────────── */
-function Testimonials() {
-  const quotes = [
-    { name: "Dr. Rebecca Hayes", role: "Estate Planning Attorney, Chicago", initials: "RH", quote: "I now recommend Final Pass Down to every single client. It fills a gap that no legal document can — the human story behind the estate.", rating: 5 },
-    { name: "Marcus & Diana Torres", role: "Retired Couple, Sacramento CA", initials: "MT", quote: "After our health scare last year, we realized our kids would have had no idea where anything was. FPD changed that in a weekend.", rating: 5 },
-    { name: "James Washington", role: "Financial Advisor, Atlanta", initials: "JW", quote: "The partnership program is incredible. My clients get a world-class service, and I earn recurring income for simply doing the right thing for them.", rating: 5 },
-  ];
-  return (
-    <section className="relative py-28 px-6">
-      <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Testimonials" title={<>Trusted by Thousands<br />Across America</>} />
-        <div className="grid md:grid-cols-3 gap-6">
-          {quotes.map(q => (
-            <div key={q.name} className="p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: q.rating }).map((_, i) => <Star key={i} size={13} fill={HILITE} color="#FFFFFF" />)}
-              </div>
-              <p style={{ color: SOFT, fontSize: 18, lineHeight: 1.85, flex: 1, marginBottom: 20 }}>"{q.quote}"</p>
-              <div className="flex items-center gap-3 pt-4" style={{ borderTop: "1px solid rgba(91,110,225,0.12)" }}>
-                <div className="flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, borderRadius: "50%", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", fontSize: 17.5, fontWeight: 700, ...MONO }}>{q.initials}</div>
-                <div>
-                  <div style={{ color: TEXT, fontSize: 17.5, fontWeight: 600 }}>{q.name}</div>
-                  <div style={{ color: MUTED, fontSize: 15 }}>{q.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ── HELP & FAQ ───────────────────────────────────────────────── */
 function Help() {
   const [open, setOpen] = useState<number | null>(null);
@@ -899,7 +839,14 @@ function Help() {
   return (
     <section id="help" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-3xl mx-auto">
-        <SectionHead kicker="Help & advice" title={<>Frequently Asked<br />Questions</>} sub="Everything you need to know about Final Pass Down." />
+        <SectionHead kicker="Get in touch" title={<>Contact Us</>} sub="Our team is available 7 days a week. Average response time: under 2 hours." />
+        <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+          <div className="flex flex-wrap items-center justify-center gap-3.5">
+            <a href="mailto:support@finalpassdown.com"><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
+          </div>
+        </div>
+
+        <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 20, textAlign: "center" }}>Frequently Asked Questions</div>
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
             <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(91,110,225,0.16)" }}>
@@ -913,11 +860,6 @@ function Help() {
               )}
             </div>
           ))}
-        </div>
-        <div className="mt-12 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-          <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 8 }}>Still have questions?</div>
-          <p style={{ color: MUTED, fontSize: 17.5, marginBottom: 20 }}>Our team is available 7 days a week. Average response time: under 2 hours.</p>
-          <a href="mailto:support@finalpassdown.com"><PrimaryBtn><Mail size={15} /> Contact Us</PrimaryBtn></a>
         </div>
       </div>
     </section>
@@ -1031,7 +973,6 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
       <main>
         <Hero onStart={onGetStarted} />
         <About onStart={onGetStarted} />
-        <HowItWorks />
         <ContactsStory />
         <Features />
         <MemoriesStory onStart={onGetStarted} />
@@ -1041,7 +982,6 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
         <Partnerships onStart={onGetStarted} />
         <WhiteGlove onStart={onGetStarted} />
         <WhiteLabel onStart={onGetStarted} />
-        <Testimonials />
         <Help />
         <CTA onStart={onGetStarted} />
       </main>

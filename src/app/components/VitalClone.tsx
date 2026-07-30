@@ -153,15 +153,15 @@ export function VitalClone() {
           <div className="pg-head">
             <div style={{ minWidth: 0 }}>
               <div className="eyebrow"><Activity size={12} /> External Integration</div>
-              <h1 className="pg-h1">VitalClone</h1>
-              <div className="pg-sub">VitalClone runs as a separate application embedded inside Final Pass Down. The embed is built and ready — it just needs the address VitalClone is served from.</div>
+              <h1 className="pg-h1">Vital Clone</h1>
+              <div className="pg-sub">Vital Clone runs as a separate application embedded inside Final Pass Down. The embed is built and ready — it just needs the address Vital Clone is served from.</div>
             </div>
           </div>
 
           <div className="card pad empty">
             <div className="empty-ico"><Settings2 size={22} /></div>
-            <div className="empty-title">VitalClone URL not configured</div>
-            <div className="empty-desc">Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render VitalClone inline, with loading, reload and fullscreen controls already wired.</div>
+            <div className="empty-title">Vital Clone URL not configured</div>
+            <div className="empty-desc">Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render Vital Clone inline, with loading, reload and fullscreen controls already wired.</div>
           </div>
 
           <div className="card pad">
@@ -191,17 +191,17 @@ export function VitalClone() {
           {state === "loading" ? (
             <>
               <Loader2 size={26} color="#FFFFFF" className="spin" />
-              <div style={{ color: MUTED, fontSize: 16 }}>Loading VitalClone…</div>
+              <div style={{ color: MUTED, fontSize: 16 }}>Loading Vital Clone…</div>
               <div className="url">{VITALCLONE_URL}</div>
             </>
           ) : (
             <div style={{ textAlign: "center", maxWidth: 460, padding: 24 }}>
               <TriangleAlert size={26} color={WARN} style={{ margin: "0 auto 12px" }} />
               <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: TEXT, marginBottom: 8 }}>
-                VitalClone didn't load
+                Vital Clone didn't load
               </div>
               <p style={{ color: MUTED, fontSize: 15.5, lineHeight: 1.75, marginBottom: 16 }}>
-                No response after {LOAD_TIMEOUT_MS / 1000} seconds. The most common cause is VitalClone refusing to be framed
+                No response after {LOAD_TIMEOUT_MS / 1000} seconds. The most common cause is Vital Clone refusing to be framed
                 (<span style={{ fontFamily: "var(--font-mono)" }}>X-Frame-Options</span> or a restrictive <span style={{ fontFamily: "var(--font-mono)" }}>frame-ancestors</span> policy).
                 Open it in a new tab to check whether the site itself is up.
               </p>
@@ -219,7 +219,7 @@ export function VitalClone() {
       <iframe
         key={nonce}
         src={VITALCLONE_URL}
-        title="VitalClone"
+        title="Vital Clone"
         onLoad={onFrameLoad}
         referrerPolicy="strict-origin-when-cross-origin"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
@@ -237,8 +237,8 @@ export function VitalClone() {
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow"><Activity size={12} /> External Integration · Embedded</div>
-            <h1 className="pg-h1">VitalClone</h1>
-            <div className="pg-sub">VitalClone runs inside Final Pass Down as an embedded application. Your session here stays separate from theirs.</div>
+            <h1 className="pg-h1">Vital Clone</h1>
+            <div className="pg-sub">Vital Clone runs inside Final Pass Down as an embedded application. Your session here stays separate from theirs.</div>
           </div>
           <div className="head-actions">
             <button className="btn-sec" onClick={reload}><RefreshCw size={13} /> Reload</button>
@@ -256,8 +256,8 @@ export function VitalClone() {
         <div className="note">
           <ShieldCheck size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
-            VitalClone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
-            and anything you enter there is governed by VitalClone's own privacy policy.
+            Vital Clone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
+            and anything you enter there is governed by Vital Clone's own privacy policy.
           </div>
         </div>
       </div>

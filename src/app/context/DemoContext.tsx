@@ -9,7 +9,7 @@ export interface Doc {
 export interface Contact {
   id: string; type: "legacy"|"guardian"|"emergency"|"pet_emergency";
   name: string; relationship: string; email: string; phone: string;
-  verificationStatus: "verified"|"pending"|"not_sent"; accessLevel?: string; notes?: string; avatar: string;
+  verificationStatus: "verified"|"pending"|"not_sent"; accessLevel?: string; notes?: string; avatar: string; photo?: string;
 }
 export interface FinalWish {
   id: string; category: string; item: string; recipient: string; notes: string;

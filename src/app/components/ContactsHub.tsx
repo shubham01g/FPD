@@ -8,6 +8,7 @@ import {
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
+import { PhotoPicker } from "./PhotoPicker";
 import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.png";
 import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.png";
 import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.png";
@@ -127,7 +128,7 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
 function AddContactModal({ defaultType, onClose, onAdd }: {
   defaultType: ContactType; onClose:()=>void; onAdd:(c:Omit<Contact,"id">)=>Promise<void>;
 }) {
-  const [form, setForm] = useState({ name:"", email:"", phone:"", relationship:"", type:defaultType, accessLevel:"", notes:"" });
+  const [form, setForm] = useState({ name:"", email:"", phone:"", relationship:"", type:defaultType, accessLevel:"", notes:"", photo:"" });
   const [guardianFolders, setGuardianFolders] = useState<string[]>([]);
   const [showFolders, setShowFolders] = useState(false);
   const [selectedVerifications, setSelectedVerifications] = useState<string[]>(["death_cert"]);
@@ -151,7 +152,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
     const accessDesc = isGuardian
       ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned`
       : form.accessLevel;
-    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:"pending", avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase() });
+    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:"pending", avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
     onClose();
   };
 
@@ -167,6 +168,8 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
         </div>
 
         <div className="modal-body">
+          <PhotoPicker value={form.photo} onChange={url => setForm(p => ({ ...p, photo: url }))} label="Contact Photo" aspectRatio="1/1" />
+
           {[
             { key:"name",         label:"FULL LEGAL NAME",  ph:"As on government ID" },
             { key:"email",        label:"EMAIL ADDRESS",    ph:"contact@email.com" },
@@ -325,9 +328,15 @@ function ContactSection({
                 )}
 
                 {!isLegacy && (
-                  <div className="priority-badge" style={{ background:`${cfg.color}1E`, color:cfg.color }}>
-                    {c.avatar}
-                  </div>
+                  c.photo ? (
+                    <div className="priority-badge" style={{ padding: 0, overflow: "hidden" }}>
+                      <img src={c.photo} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ) : (
+                    <div className="priority-badge" style={{ background:`${cfg.color}1E`, color:cfg.color }}>
+                      {c.avatar}
+                    </div>
+                  )
                 )}
 
                 <div className="flex-1" style={{ minWidth: 0 }}>
