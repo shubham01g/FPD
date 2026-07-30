@@ -83,28 +83,28 @@ const DASH_CSS = `
 .fpd-dash .sec-link{color:${SOFT};font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:color .15s,background .15s;background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:5px 10px;margin:-5px -10px;border-radius:99px;}
 .fpd-dash .sec-link:hover{color:${MINT};background:rgba(111,174,139,0.1);}
 
-/* header — single merged greeting + status + CTA, with the family photo as
-   its backdrop (the old full-bleed hero photo and the separate plain header
-   below it duplicated one another, so they're combined into one card here). */
-.fpd-dash .head{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:30px 34px;min-height:210px;background:#0A0F1A;border:1px solid rgba(91,110,225,0.18);border-radius:22px;}
-.fpd-dash .head .art{position:absolute;inset:-6%;z-index:0;background-size:cover;background-position:center 35%;background-blend-mode:color;pointer-events:none;transition:transform .7s cubic-bezier(.16,1,.3,1);}
-.fpd-dash .head:hover .art{transform:scale(1.06);}
-.fpd-dash .head .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.92) 34%,rgba(7,10,18,0.62) 62%,rgba(7,10,18,0.22) 100%);}
-.fpd-dash .head-l{position:relative;z-index:2;min-width:0;}
-.fpd-dash .head-r{position:relative;z-index:2;}
+/* ── Hero banner — full-bleed photo, same eyebrow/headline/description
+   pattern every other section (Calendar, Ask Carlos, …) uses. No buttons on
+   the image itself. ── */
+.fpd-dash .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:400px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-dash .hbanner .art{position:absolute;inset:0;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center 50%;}
+.fpd-dash .hbanner:hover .art{transform:scale(1.04);}
+.fpd-dash .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.94) 32%,rgba(7,10,18,0.58) 60%,rgba(7,10,18,0.18) 100%);pointer-events:none;}
+.fpd-dash .hbanner .hcontent{position:relative;z-index:2;padding:36px 40px;display:flex;flex-direction:column;justify-content:center;max-width:500px;}
+.fpd-dash .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(91,110,225,0.14);border:1px solid rgba(91,110,225,0.36);color:#AEB9F5;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
+.fpd-dash .hbanner h1{font-family:var(--font-display);font-size:36.5px;font-weight:700;line-height:1.14;letter-spacing:-0.02em;margin:0 0 10px;color:${TEXT};}
+.fpd-dash .hbanner h1 .accent{background:linear-gradient(90deg,${ACCENT2},${ACCENT});-webkit-background-clip:text;background-clip:text;color:transparent;}
+.fpd-dash .hbanner p{color:${SOFT};font-size:17px;line-height:1.6;max-width:420px;margin:0;}
+@media (max-width:640px){.fpd-dash .hbanner{min-height:auto;} .fpd-dash .hbanner .hcontent{padding:24px 22px;max-width:none;} .fpd-dash .hbanner h1{font-size:29px;}}
+
+/* ── Status row — the personalised greeting + readiness + CTA, kept off the
+   photo so nothing but the description sits on the image. ── */
+.fpd-dash .status-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.fpd-dash .status-l{min-width:0;}
 .fpd-dash .eyebrow{font-size:13.5px;color:${FAINT};margin-bottom:6px;}
-.fpd-dash .pg-h1{font-size:31px;color:${TEXT};font-weight:600;margin:0 0 7px;letter-spacing:-0.01em;font-family:var(--font-display);}
+.fpd-dash .pg-h1{font-size:27px;color:${TEXT};font-weight:600;margin:0 0 6px;letter-spacing:-0.01em;font-family:var(--font-display);}
 .fpd-dash .pg-h1 .accent-name{color:${ACCENT2};}
-.fpd-dash .pg-sub{color:${SOFT};font-size:15.5px;line-height:1.5;}
-.fpd-dash .head-r{display:flex;align-items:center;gap:20px;flex-shrink:0;}
-.fpd-dash .head-meta{text-align:right;line-height:1.35;}
-.fpd-dash .head-meta .a{font-size:12px;color:${FAINT};}
-.fpd-dash .head-meta .b{font-size:14px;color:${SOFT};}
-.fpd-dash .mini-ring{position:relative;width:54px;height:54px;flex-shrink:0;}
-.fpd-dash .mini-ring-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13.5px;font-weight:700;color:${TEXT};}
-.fpd-dash .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:99px;background:linear-gradient(180deg,${ACCENT_D},${ACCENT});color:#fff;font-size:14.5px;font-weight:600;box-shadow:0 14px 30px -12px rgba(91,110,225,0.85),inset 0 1px 0 rgba(255,255,255,0.18);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
-.fpd-dash .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-@media (max-width:640px){.fpd-dash .head{padding:24px;} .fpd-dash .pg-h1{font-size:26px;}}
+.fpd-dash .pg-sub{color:${SOFT};font-size:15px;line-height:1.5;}
 
 /* storage alert */
 .fpd-dash .salert{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:16px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.24);}
@@ -211,7 +211,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const doneCount = essentials.filter(e => e.done).length;
   const readyPct = Math.round((doneCount / essentials.length) * 100);
   const sealed = doneCount === essentials.length;
-  const nextUp = essentials.find(e => !e.done);
 
   const unread = notifications.filter(n => !n.read).length;
 
@@ -228,11 +227,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
     { icon: <HardDrive size={16} />, label: "Check storage", page: "storage-usage", hue: ACCENT2 },
     { icon: <TrendingUp size={16} />, label: "Refer & earn", page: "affiliate", hue: MINT },
   ];
-
-  /* ── Header mini readiness ring geometry ── */
-  const RING = 54, RC = RING / 2, RR = 22, RST = 5;
-  const RCIRC = 2 * Math.PI * RR;
-  const ROFF = RCIRC * (1 - readyPct / 100);
 
   /* ── 6-month trend area chart ── */
   const vals = storageHistory.map(d => d.used);
@@ -255,45 +249,28 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
       <div className="fpd-dash-grain" />
 
       <div className="wrap">
-        {/* ── Header — merged greeting, readiness ring & primary CTA, with the family photo as backdrop ── */}
-        <div className="head">
-          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.42), rgba(91,167,214,0.22)), url(${heroFamilyPhoto})` }} />
+        {/* ── Hero banner — same eyebrow/headline/description pattern as every
+             other section, full-bleed photo, no buttons on the image. ── */}
+        <div className="hbanner">
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(11,15,26,0.28), rgba(91,167,214,0.14)), url(${heroFamilyPhoto})` }} />
           <div className="scrim" />
-          <div className="head-l">
+          <div className="hcontent">
+            <span className="heyebrow">Your Vault At A Glance</span>
+            <h1>Everything you're building, <span className="accent">all in one view.</span></h1>
+            <p>Documents, contacts, storage and how close you are to a fully sealed vault — this dashboard is where it all comes together.</p>
+          </div>
+        </div>
+
+        {/* ── Status row — personalised greeting, kept off the photo ── */}
+        <div className="status-row">
+          <div className="status-l">
             <div className="eyebrow">{todayLong}</div>
-            <h1 className="pg-h1">Welcome back, <span className="accent-name">{firstName}</span></h1>
+            <h2 className="pg-h1">Welcome back, <span className="accent-name">{firstName}</span></h2>
             <div className="pg-sub">
               {sealed
                 ? "Your legacy is fully prepared, sealed, and encrypted end-to-end."
                 : `You're ${readyPct}% of the way to a fully prepared vault.`}
             </div>
-          </div>
-          <div className="head-r">
-            <div className="head-meta">
-              <div className="a">Last backup</div>
-              <div className="b">2 hours ago</div>
-            </div>
-            <div className="mini-ring">
-              <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
-                <defs>
-                  <linearGradient id="fpdRingMini" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor={ACCENT2} />
-                    <stop offset="100%" stopColor={ACCENT} />
-                  </linearGradient>
-                </defs>
-                <circle cx={RC} cy={RC} r={RR} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={RST} />
-                <circle
-                  cx={RC} cy={RC} r={RR} fill="none" stroke="url(#fpdRingMini)" strokeWidth={RST}
-                  strokeLinecap="round" strokeDasharray={RCIRC} strokeDashoffset={ROFF}
-                  transform={`rotate(-90 ${RC} ${RC})`}
-                  style={{ transition: "stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)" }}
-                />
-              </svg>
-              <div className="mini-ring-lbl">{readyPct}%</div>
-            </div>
-            <button className="btn-primary" onClick={() => onNavigate(sealed ? "storage-usage" : (nextUp?.page ?? "file-cabinet"))}>
-              <ArrowRight size={15} /> {sealed ? "View Your Vault" : "Finish your vault"}
-            </button>
           </div>
         </div>
 
