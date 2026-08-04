@@ -61,7 +61,7 @@ const navGroups: NavGroup[] = [
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
       { id: "family-memories",   label: "Family & Memories",  icon: <Camera size={16}/> },
       { id: "pet-records",       label: "Pet Records",        icon: <PawPrint size={16}/> },
-      { id: "messages-loved-ones", label: "Messages to Loved Ones", icon: <Heart size={16}/>, badge: "New" },
+      { id: "messages-loved-ones", label: "Messages to Loved Ones", icon: <Heart size={16}/> },
       { id: "digital-diary",     label: "Digital Diary",      icon: <BookOpen size={16}/> },
       { id: "job-history",       label: "Job History",        icon: <Briefcase size={16}/> },
       { id: "id-keeper",         label: "ID Keeper",          icon: <CreditCard size={16}/> },
@@ -99,7 +99,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "account-settings", label: "Account & Profile",  icon: <Settings size={16}/> },
       { id: "storage-usage", label: "Usage & Billing",   icon: <HardDrive size={16}/> },
-      { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/>, badge: "30%" },
+      { id: "affiliate",     label: "Affiliate Program", icon: <TrendingUp size={16}/> },
       { id: "white-glove",   label: "White Glove Service", icon: <Gem size={16}/> },
       { id: "vital-clone",   label: "Vital Clone", icon: <Activity size={16}/> },
     ],
