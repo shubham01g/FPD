@@ -585,7 +585,6 @@ export function MedicalInfo() {
                 );
               })}
             </div>
-            {showAddAllergy && <AddAllergyModal onClose={() => setShowAddAllergy(false)} onAdd={addAllergy} />}
           </div>
         )}
 
@@ -626,10 +625,11 @@ export function MedicalInfo() {
                 </div>
               ))}
             </div>
-            {showAddMed && <AddMedModal onClose={() => setShowAddMed(false)} onAdd={addMedication} />}
           </div>
         )}
       </div>
+      {showAddAllergy && <AddAllergyModal onClose={() => setShowAddAllergy(false)} onAdd={addAllergy} />}
+      {showAddMed && <AddMedModal onClose={() => setShowAddMed(false)} onAdd={addMedication} />}
     </div>
   );
 }

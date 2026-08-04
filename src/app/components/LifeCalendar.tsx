@@ -694,8 +694,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                     <div className="ed">Nothing ahead matches your active filters. Turn a few back on above.</div>
                   </div>
                 ) : (
-                  <div className="evlist">
-                    {upcoming.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} showDate />)}
+                  <div className="evlist compact">
+                    {upcoming.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} showDate compact />)}
                   </div>
                 )}
               </div>
@@ -771,8 +771,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                     <div className="et">No upcoming events</div>
                   </div>
                 ) : (
-                  <div className="evlist">
-                    {upcoming.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} showDate />)}
+                  <div className="evlist compact">
+                    {upcoming.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} showDate compact />)}
                   </div>
                 )}
               </div>

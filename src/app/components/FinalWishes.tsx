@@ -312,6 +312,7 @@ export function FinalWishes() {
   const [editingObit, setEditingObit] = useState(false);
   const wlistRef = React.useRef<HTMLDivElement>(null);
   const funeralGridRef = React.useRef<HTMLDivElement>(null);
+  const obitRef = React.useRef<HTMLDivElement>(null);
   const qlistRef = React.useRef<HTMLDivElement>(null);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -369,7 +370,7 @@ export function FinalWishes() {
               <h1>Every detail, <span className="accent">already decided.</span></h1>
               <p>Service type, music, readings, and the obituary draft — so your family can focus on each other, not logistics.</p>
               <div className="hactions">
-                <button className="hbtn primary" onClick={() => setEditingObit(true)}><Edit2 size={15} /> Edit Obituary</button>
+                <button className="hbtn primary" onClick={() => { setEditingObit(true); obitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}><Edit2 size={15} /> Edit Obituary</button>
                 <button className="hbtn ghost" onClick={() => funeralGridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Church size={15} /> View Service Details</button>
               </div>
             </div>
@@ -498,7 +499,7 @@ export function FinalWishes() {
               </div>
             </div>
 
-            <div className="card pad">
+            <div className="card pad" ref={obitRef}>
               <h3 className="sec-title"><span className="tick" />Obituary Draft</h3>
               {editingObit ? (
                 <>

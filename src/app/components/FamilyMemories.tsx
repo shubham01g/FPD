@@ -331,6 +331,33 @@ export function FamilyMemories() {
     el.src = url;
   }
 
+  // ── Audio upload staging ────────────────────────────────────────────
+  const [pendingAudio, setPendingAudio] = useState<{ url:string; name:string } | null>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  function stageAudio(files: FileList | null) {
+    const file = Array.from(files || []).find(f => f.type.startsWith("audio/"));
+    if (!file) { toast.error("Please choose an audio file"); return; }
+    if (pendingAudio) URL.revokeObjectURL(pendingAudio.url);
+    const url = URL.createObjectURL(file);
+    setPendingAudio({ url, name: file.name });
+    setForm(p => ({ ...p, title: p.title || file.name.replace(/\.[^.]+$/, "") }));
+    setShowAdd("audio");
+    toast.success(`"${file.name}" ready — add the details to save it`);
+  }
+
+  function probeAudioDuration(url: string, id: number) {
+    const el = document.createElement("audio");
+    el.preload = "metadata";
+    el.onloadedmetadata = () => {
+      const s = Math.round(el.duration || 0);
+      if (!s || !isFinite(s)) return;
+      const m = Math.floor(s / 60), sec = s % 60;
+      setAudioList(p => p.map(a => a.id === id ? { ...a, duration: `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}` } : a));
+    };
+    el.src = url;
+  }
+
   // ── Audio Recorder state ────────────────────────────────────────────
   const [recState, setRecState] = useState<"idle"|"recording"|"paused"|"done">("idle");
   const [recSeconds, setRecSeconds] = useState(0);
@@ -434,6 +461,7 @@ export function FamilyMemories() {
   function closeAddModal() {
     clearPendingPhotos();
     if (pendingVideo) { URL.revokeObjectURL(pendingVideo.url); setPendingVideo(null); }
+    if (pendingAudio) { URL.revokeObjectURL(pendingAudio.url); setPendingAudio(null); }
     resetItemMedia();
     setShowAdd(null); setForm({});
   }
@@ -468,10 +496,15 @@ export function FamilyMemories() {
         setPendingVideo(null);  // ownership passes to the saved memory
         break;
       }
-      case "audio":
+      case "audio": {
         if (!form.title) { toast.error("Title required"); return; }
-        setAudioList(p=>[...p,{id:Date.now(),title:form.title,recipient:form.recipient||"Family",duration:"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||""}]);
-        toast.success(`"${form.title}" added to Audio Memories`); break;
+        const id = Date.now();
+        setAudioList(p=>[...p,{id,title:form.title,recipient:form.recipient||"Family",duration:pendingAudio?"…":"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",url:pendingAudio?.url}]);
+        if (pendingAudio) probeAudioDuration(pendingAudio.url, id);
+        toast.success(`"${form.title}" added to Audio Memories`);
+        setPendingAudio(null);  // ownership passes to the saved memory
+        break;
+      }
       case "kids":
         if (!form.name) { toast.error("Name required"); return; }
         setKidsList(p=>[...p,{id:Date.now(),child:form.name,activities:(form.activities||"").split(",").map(t=>t.trim()).filter(Boolean),school:form.school||"",notes:form.notes||""}]);
@@ -681,7 +714,15 @@ export function FamilyMemories() {
         {/* ── Audio Memories ── */}
         {tab === "audio" && (
           <div className="stack">
-            <p className="pg-sub">Record memories in your own voice — stories, life advice, family history, songs. Kept private in your vault and passed down to the people you choose.</p>
+            <div className="toolbar">
+              <p className="pg-sub" style={{ margin: 0 }}>Record memories in your own voice — stories, life advice, family history, songs. Kept private in your vault and passed down to the people you choose.</p>
+              <div className="actions">
+                <input ref={audioInputRef} type="file" accept="audio/*" className="hidden"
+                  onChange={e => { stageAudio(e.target.files); e.target.value = ""; }}/>
+                <button className="btn-primary" onClick={()=>audioInputRef.current?.click()}><Upload size={14} /> Upload Audio</button>
+                <button className="btn-sec" onClick={()=>setShowAdd("audio")}><Plus size={14} /> Add Details Only</button>
+              </div>
+            </div>
 
             {/* ── Recorder ─────────────────────────────────────────────── */}
             <div className="recorder">
@@ -990,6 +1031,23 @@ export function FamilyMemories() {
                   ) : (
                     <button className="stagedrop" onClick={()=>videoInputRef.current?.click()}>
                       <Upload size={14}/> Attach a video file
+                    </button>
+                  )
+                )}
+
+                {/* Staged audio */}
+                {showAdd === "audio" && (
+                  pendingAudio ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <audio src={pendingAudio.url} controls preload="metadata" style={{ width: "100%" }}/>
+                      <div className="stagevideorow">
+                        <span className="nm">{pendingAudio.name}</span>
+                        <button className="btn-sec" onClick={()=>{ URL.revokeObjectURL(pendingAudio.url); setPendingAudio(null); }}>Remove</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="stagedrop" onClick={()=>audioInputRef.current?.click()}>
+                      <Upload size={14}/> Attach an audio file
                     </button>
                   )
                 )}
