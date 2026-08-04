@@ -34,7 +34,6 @@ import { AffiliateProgram } from "./components/AffiliateProgram";
 import { DigitalFileCabinet } from "./components/DigitalFileCabinet";
 import { FamilyFriends } from "./components/FamilyFriends";
 import { DigitalDiary } from "./components/DigitalDiary";
-import { LifeCalendar } from "./components/LifeCalendar";
 import { MessagesToLovedOnes } from "./components/MessagesToLovedOnes";
 import { VitalClone } from "./components/VitalClone";
 import { PasswordManager } from "./components/PasswordManager";
@@ -334,7 +333,6 @@ function UserRoute() {
       case "family-memories":     return <FamilyMemories/>;
       case "pet-records":         return <PetRecords/>;
       case "digital-diary":         return <DigitalDiary/>;
-      case "calendar":              return <LifeCalendar onNavigate={nav}/>;
       case "messages-loved-ones":   return <MessagesToLovedOnes/>;
       case "vital-clone":           return <VitalClone/>;
       case "password-manager":      return <PasswordManager/>;
@@ -344,7 +342,7 @@ function UserRoute() {
       case "contacts-guardian":  return <ContactsHub initialSection="guardian"/>;
       case "contacts-emergency": return <ContactsHub initialSection="emergency"/>;
       // legacy-verification merged into contacts-legacy
-      case "organize":            return <OrganizeHub/>;
+      case "organize":            return <OrganizeHub onNavigate={nav}/>;
       case "storage-usage":       return <StorageUsage/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;

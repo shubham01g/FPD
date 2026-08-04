@@ -207,8 +207,8 @@ const CAL_CSS = `
 .fpd-cal .cell.sel .dnum{color:#fff;font-weight:800;}
 .fpd-cal .todaydot{font-size:10.5px;font-weight:800;letter-spacing:0.06em;color:#D99A6B;text-transform:uppercase;}
 .fpd-cal .cmore{font-family:var(--font-mono);font-size:11px;color:${MUTED};padding:2px 7px;border-radius:99px;background:rgba(255,255,255,0.05);}
-.fpd-cal .chips{display:flex;flex-direction:column;gap:4px;margin-top:7px;}
-.fpd-cal .cevt{display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:8px;font-size:13.5px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;}
+.fpd-cal .chips{display:flex;flex-direction:column;gap:3px;margin-top:6px;}
+.fpd-cal .cevt{display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:7px;font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;}
 .fpd-cal .cevt svg{flex-shrink:0;opacity:.85;}
 .fpd-cal .cevt .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
@@ -230,6 +230,16 @@ const CAL_CSS = `
 .fpd-cal .evdet{color:${MUTED};font-size:15px;line-height:1.55;margin-top:5px;}
 .fpd-cal .evopen{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:99px;font-size:14.5px;font-weight:600;flex-shrink:0;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-cal .evopen:hover{filter:brightness(1.15);}
+
+/* compact event rows — Today + Coming Up rails, sized to show 3-4 at once
+   instead of 1-2 full-detail rows. */
+.fpd-cal .evrow.compact{gap:10px;padding:9px 11px;border-radius:13px;align-items:center;}
+.fpd-cal .evrow.compact .evico{width:28px;height:28px;border-radius:9px;}
+.fpd-cal .evrow.compact .evt{font-size:13.5px;}
+.fpd-cal .evrow.compact .evamt{font-size:12.5px;}
+.fpd-cal .evrow.compact .evmeta{font-size:11.5px;margin-top:1px;font-weight:500;}
+.fpd-cal .evrow.compact .evopen{padding:6px;border-radius:99px;}
+.fpd-cal .evlist.compact{gap:7px;}
 
 /* calendar-themed hero — fills an empty day with a real-data teaser instead
    of dead air, built from CSS/SVG (no external image assets in the app). */
@@ -286,12 +296,12 @@ const CAL_CSS = `
 `;
 
 /* ── One event row — used in the day panel, upcoming rail and agenda ── */
-function EventRow({ ev, onNavigate, showDate }: { ev: CalendarEvent; onNavigate?: (p: string) => void; showDate?: boolean }) {
+function EventRow({ ev, onNavigate, showDate, compact }: { ev: CalendarEvent; onNavigate?: (p: string) => void; showDate?: boolean; compact?: boolean }) {
   const { color, Icon } = SRC[ev.source];
   return (
-    <div className="evrow" style={{ borderColor: `${color}26` }}>
+    <div className={`evrow${compact ? " compact" : ""}`} style={{ borderColor: `${color}26` }}>
       <div className="evico" style={{ background: `${color}1C`, color }}>
-        <Icon size={18} />
+        <Icon size={compact ? 14 : 18} />
       </div>
       <div className="evbody">
         <div className="evtop">
@@ -307,7 +317,7 @@ function EventRow({ ev, onNavigate, showDate }: { ev: CalendarEvent; onNavigate?
         ) : ev.time ? (
           <div className="evmeta" style={{ color }}>{ev.time}</div>
         ) : null}
-        {ev.detail && <div className="evdet">{ev.detail}</div>}
+        {!compact && ev.detail && <div className="evdet">{ev.detail}</div>}
       </div>
       {ev.linkPage && onNavigate && (
         <button
@@ -316,7 +326,7 @@ function EventRow({ ev, onNavigate, showDate }: { ev: CalendarEvent; onNavigate?
           title={`Open ${ev.linkLabel}`}
           style={{ background: `${color}18`, color }}
         >
-          Open <ArrowRight size={12} />
+          {compact ? <ArrowRight size={12} /> : <>Open <ArrowRight size={12} /></>}
         </button>
       )}
     </div>
@@ -621,7 +631,7 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                             const Icon = SRC[e.source].Icon;
                             return (
                               <div key={e.id} className="cevt" title={e.title} style={{ background: `${c}20`, color: c }}>
-                                <Icon size={11} />
+                                <Icon size={9} />
                                 <span className="ct">{e.title}</span>
                               </div>
                             );
@@ -653,8 +663,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                   <span className="sec-cnt">{selectedEvents.length} item{selectedEvents.length === 1 ? "" : "s"}</span>
                 </div>
                 {selectedEvents.length > 0 ? (
-                  <div className="evlist">
-                    {selectedEvents.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} />)}
+                  <div className="evlist compact">
+                    {selectedEvents.map(e => <EventRow key={e.id} ev={e} onNavigate={onNavigate} compact />)}
                   </div>
                 ) : nextEvent ? (
                   <CalHero

@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, CalendarDays, Activity, PawPrint, Gem, Zap
+  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { VaultClone } from "./VaultClone";
@@ -20,7 +20,7 @@ export type PageId =
   | "family-friends"
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
-  | "calendar" | "messages-loved-ones" | "vital-clone"
+  | "messages-loved-ones" | "vital-clone"
   | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
@@ -34,7 +34,6 @@ const navGroups: NavGroup[] = [
     label: "Overview",
     items: [
       { id: "dashboard", label: "Dashboard", icon: <Home size={16}/> },
-      { id: "calendar", label: "Calendar", icon: <CalendarDays size={16}/> },
       { id: "fpd-ai", label: "Ask Carlos", icon: <MessageCircle size={16}/> },
     ],
   },
