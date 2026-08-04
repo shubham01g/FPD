@@ -13,6 +13,7 @@ layout looks intentional with or without assets.
 | `story-contacts.mp4`   | "The right people, at the right time"     | Handing keys / trusted person / signing             |
 | `story-memories.mp4`   | "Memories that speak for you" split       | Recording a video message / looking at photos       |
 | `story-family.mp4`     | "The words they'll need to hear" split    | A loved one comforted at a difficult moment           |
+| `story-pets.mp4`       | "For the ones who rely on you most" split | Kids and pets — family playing together at home      |
 | `cta.mp4`              | Closing CTA band background               | Abstract royal-blue light particles / calm aura      |
 
 Poster convention: for any `foo.mp4`, add `foo.jpg` as its poster frame. The landing

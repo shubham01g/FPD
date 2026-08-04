@@ -129,7 +129,7 @@ function scrollToId(id: string) {
 const NAV_LINKS: [string, string][] = [
   ["About", "about"], ["How It Works", "how-it-works"], ["Features", "features"],
   ["Security", "security"], ["Pricing", "pricing"], ["Affiliates", "affiliates"],
-  ["Partners", "partners"], ["White Label", "white-label"], ["Contact Us", "help"],
+  ["Partners", "partners"], ["White Label", "white-label"],
 ];
 
 function TopNav({ onStart }: { onStart: () => void }) {
@@ -157,6 +157,9 @@ function TopNav({ onStart }: { onStart: () => void }) {
           <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap" }}>
             White Glove
           </button>
+          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap" }}>
+            <Mail size={14} /> Contact Us
+          </button>
           <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap" }}>Sign In</button>
           <PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
@@ -168,6 +171,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
             <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}>{l}</button>
           ))}
           <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", fontSize: 17.5 }}>White Glove Concierge</button>
+          <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
         </div>
       )}
     </nav>
@@ -344,6 +348,7 @@ const FEATURES: Feat[] = [
   { cat: "family", icon: <Star size={20} />, title: "Keepsakes", desc: "Sentimental items with their stories and intended recipients." },
   { cat: "family", icon: <Award size={20} />, title: "Awards & Achievements", desc: "Military service, professional recognition, and life accomplishments." },
   { cat: "family", icon: <PawPrint size={20} />, title: "Pet Care", desc: "Vet info, medications, diet, microchip, and emergency pet guardian." },
+  { cat: "organize", icon: <Folder size={20} />, title: "Digital File Cabinet", desc: "Every document organized into folders you control, searchable and ready in seconds." },
   { cat: "organize", icon: <Folder size={20} />, title: "Personal Folders", desc: "Custom folders including a locked Secret Vault for ultra-sensitive items." },
   { cat: "organize", icon: <Bell size={20} />, title: "Reminders", desc: "Recurring reminders for document renewals, reviews, and key dates." },
   { cat: "organize", icon: <Calendar size={20} />, title: "Occasions", desc: "Birthdays, anniversaries, and holidays with personal notes." },
@@ -352,7 +357,7 @@ const FEATURES: Feat[] = [
   { cat: "organize", icon: <BarChart3 size={20} />, title: "Activity Log", desc: "Complete audit trail of all vault changes and contact access events." },
 ];
 /* curated flagship features — the rest live inside the app itself */
-const HIGHLIGHT_TITLES = ["Document Vault", "Video Messages", "Will & Testament", "Insurance Policies", "Investment Portfolios", "Digital Assets", "Memories", "Pet Care", "Personal Folders"];
+const HIGHLIGHT_TITLES = ["Document Vault", "Digital File Cabinet", "Video Messages", "Will & Testament", "Insurance Policies", "Investment Portfolios", "Digital Assets", "Memories", "Pet Care"];
 
 function Features() {
   const highlighted = FEATURES.filter(f => HIGHLIGHT_TITLES.includes(f.title));
@@ -368,6 +373,44 @@ function Features() {
               <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── KIDS & PETS STORY ────────────────────────────────────────── */
+function FamilyPetsStory({ onStart }: { onStart: () => void }) {
+  const points = [
+    "School info, activities, allergies, and guardianship instructions for your kids",
+    "Vet records, medications, diet, and microchip details for every pet",
+    "Emergency and Pet Emergency contacts who know exactly what to do",
+    "Nothing about the ones who depend on you gets left to memory",
+  ];
+  return (
+    <section id="family-pets" className="relative py-28 px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div>
+          <Kicker>Kids & Pet Care</Kicker>
+          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+            For the Ones Who<br />
+            <span style={{ color: "#6FAE8B" }}>Rely on You Most</span>
+          </h2>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+            Kids and pets can't ask the right questions in an emergency — so the answers need to already be written down. Final Pass Down keeps every detail about your family, two-legged and four, organized and ready for whoever steps in.
+          </p>
+          <div className="flex flex-col gap-3 mb-8">
+            {points.map(p => (
+              <div key={p} className="flex items-start gap-3">
+                <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
+                <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
+              </div>
+            ))}
+          </div>
+          <GhostBtn onClick={onStart}>Start your family vault <ChevronRight size={16} /></GhostBtn>
+        </div>
+        <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <MediaBackdrop src="/media/story-pets.mp4" tone="warm" overlay={0.35} showPlay />
         </div>
       </div>
     </section>
@@ -1047,6 +1090,7 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
         <Security />
         <FamilyStory onStart={onGetStarted} />
         <Pricing onStart={onGetStarted} />
+        <FamilyPetsStory onStart={onGetStarted} />
         <Affiliates onStart={onGetStarted} />
         <Partnerships onStart={onGetStarted} />
         <WhiteGlove onStart={onGetStarted} />
