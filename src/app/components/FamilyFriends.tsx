@@ -3,7 +3,7 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import {
   Users, Users2, Contact, Phone, Mail, MapPin, Gift, Heart, Plus, Search,
   Edit2, Trash2, X, Star, Camera,
-  Send, CheckCircle, Layers
+  Send, CheckCircle, Layers, Smartphone, FileUp
 } from "lucide-react";
 import { toast } from "sonner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -190,6 +190,207 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
   );
 }
 
+/* ── Bulk import: device Contact Picker + .vcf / .csv file parsing ── */
+type ParsedContact = { name:string; email:string; phone:string; selected:boolean };
+
+function parseVCardText(text: string): Omit<ParsedContact,"selected">[] {
+  const blocks = text.split(/BEGIN:VCARD/i).slice(1);
+  return blocks.map(block => {
+    const fn = block.match(/\r?\nFN[^:]*:(.*)/i)?.[1]?.trim();
+    const n  = block.match(/\r?\nN[^:]*:(.*)/i)?.[1]?.trim();
+    const email = block.match(/\r?\nEMAIL[^:]*:(.*)/i)?.[1]?.trim() ?? "";
+    const tel = block.match(/\r?\nTEL[^:]*:(.*)/i)?.[1]?.trim() ?? "";
+    let name = fn ?? "";
+    if (!name && n) {
+      const parts = n.split(";").map(p => p.trim()).filter(Boolean);
+      name = parts.reverse().join(" ").trim();
+    }
+    return { name, email, phone: tel };
+  }).filter(c => c.name);
+}
+
+function parseCSVText(text: string): Omit<ParsedContact,"selected">[] {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+  const splitLine = (l:string) => l.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+  const headers = splitLine(lines[0]).map(h => h.toLowerCase());
+  const firstIdx = headers.findIndex(h => h.includes("first"));
+  const lastIdx  = headers.findIndex(h => h.includes("last"));
+  const nameIdx  = headers.findIndex(h => h === "name" || (h.includes("name") && !h.includes("first") && !h.includes("last")));
+  const emailIdx = headers.findIndex(h => h.includes("email"));
+  const phoneIdx = headers.findIndex(h => h.includes("phone") || h.includes("tel"));
+  const hasHeader = firstIdx>=0 || lastIdx>=0 || nameIdx>=0 || emailIdx>=0 || phoneIdx>=0;
+  const rows = hasHeader ? lines.slice(1) : lines;
+  return rows.map(line => {
+    const cols = splitLine(line);
+    let name = "";
+    if (nameIdx>=0) name = cols[nameIdx] ?? "";
+    else if (firstIdx>=0 || lastIdx>=0) name = [cols[firstIdx], cols[lastIdx]].filter(Boolean).join(" ");
+    else name = cols[0] ?? "";
+    return {
+      name: name.trim(),
+      email: emailIdx>=0 ? (cols[emailIdx] ?? "").trim() : "",
+      phone: phoneIdx>=0 ? (cols[phoneIdx] ?? "").trim() : "",
+    };
+  }).filter(c => c.name);
+}
+
+async function pickDeviceContacts(): Promise<Omit<ParsedContact,"selected">[]> {
+  const nav = navigator as any;
+  const results = await nav.contacts.select(["name", "email", "tel"], { multiple: true });
+  return results
+    .map((c:any) => ({ name: c.name?.[0] ?? "", email: c.email?.[0] ?? "", phone: c.tel?.[0] ?? "" }))
+    .filter((c:any) => c.name);
+}
+
+function BulkImportModal({ onClose, onImport }: {
+  onClose:()=>void; onImport:(contacts:Contact[])=>void;
+}) {
+  useEscapeKey(true, onClose);
+  const [stage, setStage] = useState<"choose"|"preview">("choose");
+  const [rows, setRows] = useState<ParsedContact[]>([]);
+  const [group, setGroup] = useState<Contact["group"]>("friends");
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const deviceSupported = typeof navigator !== "undefined" && "contacts" in navigator && "ContactsManager" in window;
+
+  function loadRows(parsed: Omit<ParsedContact,"selected">[]) {
+    if (parsed.length === 0) { toast.error("No contacts found in that file"); return; }
+    setRows(parsed.map(p => ({ ...p, selected:true })));
+    setStage("preview");
+  }
+
+  async function handleDevicePick() {
+    try {
+      loadRows(await pickDeviceContacts());
+    } catch {
+      toast.error("Contact picker was cancelled or isn't available");
+    }
+  }
+
+  function handleFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "");
+      loadRows(/BEGIN:VCARD/i.test(text) ? parseVCardText(text) : parseCSVText(text));
+    };
+    reader.readAsText(file);
+  }
+
+  const selectedCount = rows.filter(r => r.selected).length;
+  const toggleRow = (i:number) => setRows(prev => prev.map((r,idx) => idx===i ? { ...r, selected:!r.selected } : r));
+
+  async function doImport() {
+    const chosen = rows.filter(r => r.selected);
+    if (chosen.length === 0) return;
+    setImporting(true);
+    await new Promise(r => setTimeout(r, 500));
+    const imported: Contact[] = chosen.map((r, i) => ({
+      id: `cf-import-${Date.now()}-${i}`,
+      name: r.name, relationship: "", phone: r.phone || undefined, email: r.email || undefined,
+      group,
+      initials: r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?",
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    }));
+    onImport(imported);
+    setImporting(false);
+    toast.success(`${imported.length} contact${imported.length===1?"":"s"} imported`);
+    onClose();
+  }
+
+  return (
+    <div className="backdrop">
+      <div className="card modal">
+        <div className="modal-head">
+          <div>
+            <h3>Import Contacts</h3>
+            <p className="modal-sub">
+              {stage==="choose" ? "Bring in contacts in bulk from your phone or a file." : `Found ${rows.length} contact${rows.length===1?"":"s"} — choose which to import.`}
+            </p>
+          </div>
+          <button onClick={onClose}><X size={16}/></button>
+        </div>
+
+        <div className="modal-body">
+          {stage==="choose" && (
+            <>
+              <button className="import-method" onClick={handleDevicePick} disabled={!deviceSupported}>
+                <div className="imico"><Smartphone size={20}/></div>
+                <div className="flex-1">
+                  <div style={{ color:TEXT, fontSize:16, fontWeight:600 }}>Import From Device Contacts</div>
+                  <div style={{ color:MUTED, fontSize:13.5, marginTop:2 }}>
+                    {deviceSupported ? "Pick contacts straight from your phone in a couple taps." : "Not supported in this browser — use file upload below instead."}
+                  </div>
+                </div>
+              </button>
+
+              <button className="import-method" onClick={()=>fileRef.current?.click()}>
+                <div className="imico"><FileUp size={20}/></div>
+                <div className="flex-1">
+                  <div style={{ color:TEXT, fontSize:16, fontWeight:600 }}>Upload a Contacts File</div>
+                  <div style={{ color:MUTED, fontSize:13.5, marginTop:2 }}>Import a .vcf (vCard) or .csv export from your phone or email provider.</div>
+                </div>
+              </button>
+              <input ref={fileRef} type="file" accept=".vcf,.csv,text/vcard,text/csv" style={{ display:"none" }}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value=""; }}/>
+
+              <p className="import-hint">
+                Tip: Most phones can export contacts as a .vcf file (iPhone: Contacts → Select All → Share → Save as vCard. Android: Contacts → Settings → Export).
+              </p>
+            </>
+          )}
+
+          {stage==="preview" && (
+            <>
+              <div className="field">
+                <label>ADD TO GROUP</label>
+                <select value={group} onChange={e => setGroup(e.target.value as Contact["group"])}>
+                  {Object.entries(groupConfig).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span style={{ color: MUTED, fontSize: 14, fontFamily: "var(--font-mono)" }}>{selectedCount} OF {rows.length} SELECTED</span>
+                <div className="flex gap-2">
+                  <button onClick={()=>setRows(prev=>prev.map(r=>({...r,selected:true})))} style={{ color: "#6FAE8B", fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+                  <button onClick={()=>setRows(prev=>prev.map(r=>({...r,selected:false})))} style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
+                </div>
+              </div>
+              <div className="import-list">
+                {rows.map((r,i)=>(
+                  <button key={i} onClick={()=>toggleRow(i)} className="import-row"
+                    style={{ background:r.selected?"rgba(91,110,225,0.07)":"rgba(255,255,255,0.02)", borderColor:r.selected?"rgba(91,110,225,0.3)":"rgba(255,255,255,0.07)" }}>
+                    <div className="import-row-ico" style={{ background:r.selected?"rgba(91,110,225,0.12)":"rgba(255,255,255,0.04)" }}>
+                      {r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?"}
+                    </div>
+                    <div className="flex-1" style={{ minWidth:0 }}>
+                      <div style={{ color:TEXT, fontSize:15, fontWeight:600 }}>{r.name}</div>
+                      <div style={{ color:MUTED, fontSize:13, marginTop:1 }}>{[r.phone, r.email].filter(Boolean).join(" · ") || "No phone or email"}</div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {r.selected ? <CheckCircle size={15} color="#FFFFFF"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="modal-foot">
+          {stage==="preview" && (
+            <button onClick={doImport} disabled={importing || selectedCount===0} className="save" style={{ opacity:(importing||selectedCount===0)?0.7:1 }}>
+              {importing ? "Importing…" : `Import ${selectedCount} Contact${selectedCount===1?"":"s"}`}
+            </button>
+          )}
+          {stage==="preview" && <button onClick={()=>setStage("choose")} className="btn-sec">Back</button>}
+          <button onClick={onClose} className="btn-sec">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const initGroups: ContactGroup[] = [
   { id:"g1", name:"Estate Team", color:"#6E90C9", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
   { id:"g2", name:"Close Family", color:"#6E90C9", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
@@ -315,7 +516,17 @@ const FF_CSS = `
 .fpd-ff .modal{width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
 .fpd-ff .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);}
 .fpd-ff .modal-head h3{font-family:var(--font-display);font-size:20px;color:${TEXT};font-weight:600;}
-.fpd-ff .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-ff .modal-sub{color:${MUTED};font-size:14px;margin-top:3px;}
+.fpd-ff .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;flex-shrink:0;}
+
+/* bulk import */
+.fpd-ff .import-method{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;text-align:left;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);cursor:pointer;font-family:var(--font-body);}
+.fpd-ff .import-method:disabled{opacity:.45;cursor:not-allowed;}
+.fpd-ff .import-method .imico{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.14);color:${ACCENT2};}
+.fpd-ff .import-hint{color:${MUTED};font-size:13.5px;line-height:1.6;padding:2px 2px 0;}
+.fpd-ff .import-list{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.fpd-ff .import-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;text-align:left;border:1px solid;font-family:var(--font-body);}
+.fpd-ff .import-row-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${TEXT};}
 .fpd-ff .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
 .fpd-ff .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
 .fpd-ff .field input,.fpd-ff .field select,.fpd-ff .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
@@ -339,6 +550,7 @@ export function FamilyFriends() {
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<Contact["group"] | "all" | "starred">("all");
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState<Contact | null>(null);
   const [showGroupsPanel, setShowGroupsPanel] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -385,7 +597,7 @@ export function FamilyFriends() {
             <p>Family, friends, and neighbors — with the details your legacy contacts will need to reach them when it counts.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Contact</button>
-              <button className="hbtn ghost" onClick={() => setShowGroupsPanel(true)}><Layers size={15} /> Groups & Email Blast</button>
+              <button className="hbtn ghost" onClick={() => setShowImport(true)}><FileUp size={15} /> Import Contacts</button>
             </div>
           </div>
         </div>
@@ -400,9 +612,6 @@ export function FamilyFriends() {
           <div className="flex gap-2">
             <button onClick={() => setShowGroupsPanel(!showGroupsPanel)} className={`btn-ghost ${showGroupsPanel ? "on" : ""}`}>
               <Layers size={14}/> Groups & Email Blast ({groups.length})
-            </button>
-            <button className="btn-primary" onClick={() => setShowAdd(true)}>
-              <Plus size={15}/> Add Contact
             </button>
           </div>
         </div>
@@ -647,6 +856,7 @@ export function FamilyFriends() {
       </div>
 
       {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => setContacts(prev => [c, ...prev])}/>}
+      {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={imported => setContacts(prev => [...imported, ...prev])}/>}
       {blastGroup && <BlastEmailModal group={blastGroup} contacts={contacts} onClose={() => setBlastGroup(null)}/>}
     </div>
   );

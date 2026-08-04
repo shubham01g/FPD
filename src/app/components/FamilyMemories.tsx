@@ -536,8 +536,8 @@ export function FamilyMemories() {
             <h1>Stories, photos, and memories — <span className="accent">saved for the people who'll want them.</span></h1>
             <p>Photos, videos, voice recordings, and keepsakes — preserved in one place so the people you love can hold onto what mattered most.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setTab("memories")}>
-                <Camera size={15}/> View Photo Memories
+              <button className="hbtn primary" onClick={() => { setTab("memories"); setShowAdd("memories"); }}>
+                <Plus size={15}/> Add Memory
               </button>
               <button className="hbtn ghost" onClick={() => tabContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                 <ImageIcon size={15}/> View All Memories

@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, CalendarDays, Activity, PawPrint, Gem
+  ShieldCheck, ChevronRight, X, Menu, CalendarDays, Activity, PawPrint, Gem, Zap
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { VaultClone } from "./VaultClone";
@@ -24,7 +24,7 @@ export type PageId =
   | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
-  | "warranties" | "pet-records";
+  | "warranties" | "pet-records" | "utilities";
 
 type NavItem = { id: PageId; label: string; icon: React.ReactNode; badge?: string; highlight?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
@@ -59,6 +59,7 @@ const navGroups: NavGroup[] = [
       { id: "medical-info",      label: "Medical Info",       icon: <Stethoscope size={16}/> },
       { id: "financial-records", label: "Financial Records",  icon: <Wallet size={16}/> },
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
+      { id: "utilities",         label: "Utilities",          icon: <Zap size={16}/> },
       { id: "family-memories",   label: "Family & Memories",  icon: <Camera size={16}/> },
       { id: "pet-records",       label: "Pet Records",        icon: <PawPrint size={16}/> },
       { id: "messages-loved-ones", label: "Messages to Loved Ones", icon: <Heart size={16}/> },
