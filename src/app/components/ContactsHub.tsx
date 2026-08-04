@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Users, Shield, AlertCircle, PawPrint, Plus, Phone, Mail,
   CheckCircle, Clock, X, Trash2, FolderOpen, Eye,
   ChevronDown, ChevronUp, Info, Crown, ArrowDown,
-  AlertTriangle, Upload, RefreshCw, UserCheck
+  AlertTriangle, Upload, RefreshCw, UserCheck, Smartphone, FileUp
 } from "lucide-react";
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
@@ -262,14 +262,203 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
   );
 }
 
+/* ── Bulk import: device Contact Picker + .vcf / .csv file parsing ── */
+type ParsedContact = { name:string; email:string; phone:string; selected:boolean };
+
+function parseVCardText(text: string): Omit<ParsedContact,"selected">[] {
+  const blocks = text.split(/BEGIN:VCARD/i).slice(1);
+  return blocks.map(block => {
+    const fn = block.match(/\r?\nFN[^:]*:(.*)/i)?.[1]?.trim();
+    const n  = block.match(/\r?\nN[^:]*:(.*)/i)?.[1]?.trim();
+    const email = block.match(/\r?\nEMAIL[^:]*:(.*)/i)?.[1]?.trim() ?? "";
+    const tel = block.match(/\r?\nTEL[^:]*:(.*)/i)?.[1]?.trim() ?? "";
+    let name = fn ?? "";
+    if (!name && n) {
+      const parts = n.split(";").map(p => p.trim()).filter(Boolean);
+      name = parts.reverse().join(" ").trim();
+    }
+    return { name, email, phone: tel };
+  }).filter(c => c.name);
+}
+
+function parseCSVText(text: string): Omit<ParsedContact,"selected">[] {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+  const splitLine = (l:string) => l.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+  const headers = splitLine(lines[0]).map(h => h.toLowerCase());
+  const firstIdx = headers.findIndex(h => h.includes("first"));
+  const lastIdx  = headers.findIndex(h => h.includes("last"));
+  const nameIdx  = headers.findIndex(h => h === "name" || (h.includes("name") && !h.includes("first") && !h.includes("last")));
+  const emailIdx = headers.findIndex(h => h.includes("email"));
+  const phoneIdx = headers.findIndex(h => h.includes("phone") || h.includes("tel"));
+  const hasHeader = firstIdx>=0 || lastIdx>=0 || nameIdx>=0 || emailIdx>=0 || phoneIdx>=0;
+  const rows = hasHeader ? lines.slice(1) : lines;
+  return rows.map(line => {
+    const cols = splitLine(line);
+    let name = "";
+    if (nameIdx>=0) name = cols[nameIdx] ?? "";
+    else if (firstIdx>=0 || lastIdx>=0) name = [cols[firstIdx], cols[lastIdx]].filter(Boolean).join(" ");
+    else name = cols[0] ?? "";
+    return {
+      name: name.trim(),
+      email: emailIdx>=0 ? (cols[emailIdx] ?? "").trim() : "",
+      phone: phoneIdx>=0 ? (cols[phoneIdx] ?? "").trim() : "",
+    };
+  }).filter(c => c.name);
+}
+
+async function pickDeviceContacts(): Promise<Omit<ParsedContact,"selected">[]> {
+  const nav = navigator as any;
+  const results = await nav.contacts.select(["name", "email", "tel"], { multiple: true });
+  return results
+    .map((c:any) => ({ name: c.name?.[0] ?? "", email: c.email?.[0] ?? "", phone: c.tel?.[0] ?? "" }))
+    .filter((c:any) => c.name);
+}
+
+function BulkImportModal({ defaultType, onClose, onImport }: {
+  defaultType: ContactType; onClose:()=>void; onImport:(contacts:Omit<Contact,"id">[])=>Promise<void>;
+}) {
+  const [stage, setStage] = useState<"choose"|"preview">("choose");
+  const [rows, setRows] = useState<ParsedContact[]>([]);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const deviceSupported = typeof navigator !== "undefined" && "contacts" in navigator && "ContactsManager" in window;
+
+  function loadRows(parsed: Omit<ParsedContact,"selected">[]) {
+    if (parsed.length === 0) { toast.error("No contacts found in that file"); return; }
+    setRows(parsed.map(p => ({ ...p, selected:true })));
+    setStage("preview");
+  }
+
+  async function handleDevicePick() {
+    try {
+      loadRows(await pickDeviceContacts());
+    } catch {
+      toast.error("Contact picker was cancelled or isn't available");
+    }
+  }
+
+  function handleFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "");
+      loadRows(/BEGIN:VCARD/i.test(text) ? parseVCardText(text) : parseCSVText(text));
+    };
+    reader.readAsText(file);
+  }
+
+  const selectedCount = rows.filter(r => r.selected).length;
+  const toggleRow = (i:number) => setRows(prev => prev.map((r,idx) => idx===i ? { ...r, selected:!r.selected } : r));
+
+  async function doImport() {
+    const chosen = rows.filter(r => r.selected);
+    if (chosen.length === 0) return;
+    setImporting(true);
+    const contacts: Omit<Contact,"id">[] = chosen.map(r => ({
+      name: r.name, email: r.email, phone: r.phone, relationship: "",
+      type: defaultType,
+      accessLevel: defaultType === "guardian" ? "View Only — folders not yet assigned" : "",
+      notes: "", verificationStatus: "pending",
+      avatar: r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?",
+    }));
+    await onImport(contacts);
+  }
+
+  return (
+    <div className="backdrop">
+      <div className="card modal">
+        <div className="modal-head">
+          <div>
+            <h3>Import {typeConfig[defaultType].label}s</h3>
+            <p className="modal-sub">
+              {stage==="choose" ? "Bring in contacts in bulk from your phone or a file." : `Found ${rows.length} contact${rows.length===1?"":"s"} — choose which to import.`}
+            </p>
+          </div>
+          <button onClick={onClose}><X size={16}/></button>
+        </div>
+
+        <div className="modal-body">
+          {stage==="choose" && (
+            <>
+              <button className="import-method" onClick={handleDevicePick} disabled={!deviceSupported}>
+                <div className="imico"><Smartphone size={20}/></div>
+                <div className="flex-1">
+                  <div style={{ color:TEXT, fontSize:16, fontWeight:600 }}>Import From Device Contacts</div>
+                  <div style={{ color:MUTED, fontSize:13.5, marginTop:2 }}>
+                    {deviceSupported ? "Pick contacts straight from your phone in a couple taps." : "Not supported in this browser — use file upload below instead."}
+                  </div>
+                </div>
+              </button>
+
+              <button className="import-method" onClick={()=>fileRef.current?.click()}>
+                <div className="imico"><FileUp size={20}/></div>
+                <div className="flex-1">
+                  <div style={{ color:TEXT, fontSize:16, fontWeight:600 }}>Upload a Contacts File</div>
+                  <div style={{ color:MUTED, fontSize:13.5, marginTop:2 }}>Import a .vcf (vCard) or .csv export from your phone or email provider.</div>
+                </div>
+              </button>
+              <input ref={fileRef} type="file" accept=".vcf,.csv,text/vcard,text/csv" style={{ display:"none" }}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value=""; }}/>
+
+              <p className="import-hint">
+                Tip: Most phones can export contacts as a .vcf file (iPhone: Contacts → Select All → Share → Save as vCard. Android: Contacts → Settings → Export).
+              </p>
+            </>
+          )}
+
+          {stage==="preview" && (
+            <>
+              <div className="flex items-center justify-between">
+                <span style={{ color: MUTED, fontSize: 14, fontFamily: "var(--font-mono)" }}>{selectedCount} OF {rows.length} SELECTED</span>
+                <div className="flex gap-2">
+                  <button onClick={()=>setRows(prev=>prev.map(r=>({...r,selected:true})))} style={{ color: "#6FAE8B", fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+                  <button onClick={()=>setRows(prev=>prev.map(r=>({...r,selected:false})))} style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
+                </div>
+              </div>
+              <div className="import-list">
+                {rows.map((r,i)=>(
+                  <button key={i} onClick={()=>toggleRow(i)} className="verif-row"
+                    style={{ background:r.selected?"rgba(91,110,225,0.07)":"rgba(255,255,255,0.02)", borderColor:r.selected?"rgba(91,110,225,0.3)":"rgba(255,255,255,0.07)" }}>
+                    <div className="verif-ico" style={{ background:r.selected?"rgba(91,110,225,0.12)":"rgba(255,255,255,0.04)", fontSize:12, fontWeight:700, color:TEXT }}>
+                      {r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?"}
+                    </div>
+                    <div className="flex-1" style={{ minWidth:0 }}>
+                      <div style={{ color:TEXT, fontSize:15, fontWeight:600 }}>{r.name}</div>
+                      <div style={{ color:MUTED, fontSize:13, marginTop:1 }}>{[r.phone, r.email].filter(Boolean).join(" · ") || "No phone or email"}</div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {r.selected ? <CheckCircle size={15} color="#FFFFFF"/> : <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px solid rgba(255,255,255,0.25)" }}/>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="modal-foot">
+          {stage==="preview" && (
+            <button onClick={doImport} disabled={importing || selectedCount===0} className="save" style={{ opacity:(importing||selectedCount===0)?0.7:1 }}>
+              {importing ? "Importing…" : `Import ${selectedCount} Contact${selectedCount===1?"":"s"}`}
+            </button>
+          )}
+          {stage==="preview" && <button onClick={()=>setStage("choose")} className="btn-sec">Back</button>}
+          <button onClick={onClose} className="btn-sec">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Section wrapper with its own header + Add button ────────────── */
 function ContactSection({
-  type, contacts, onAdd, onRemove,
+  type, contacts, onAdd, onImport, onRemove,
   getVerifStatus, advanceStatus, simulateVerify, verifying, onScanId,
 }: {
   type: ContactType;
   contacts: Contact[];
   onAdd: () => void;
+  onImport: () => void;
   onRemove: (id:string) => void;
   getVerifStatus?: (id:string) => VerifStatus;
   advanceStatus?: (id:string) => void;
@@ -296,9 +485,14 @@ function ContactSection({
             <div className="section-desc">{cfg.desc}</div>
           </div>
         </div>
-        <button onClick={onAdd} className="btn-ghost" style={{ color: cfg.color, background:`${cfg.color}1E`, borderColor:`${cfg.color}55` }}>
-          <Plus size={12}/> Add {cfg.label}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onImport} className="btn-ghost" style={{ color: MUTED, background:"rgba(255,255,255,0.04)", borderColor:"rgba(255,255,255,0.14)" }}>
+            <FileUp size={12}/> Import
+          </button>
+          <button onClick={onAdd} className="btn-ghost" style={{ color: cfg.color, background:`${cfg.color}1E`, borderColor:`${cfg.color}55` }}>
+            <Plus size={12}/> Add {cfg.label}
+          </button>
+        </div>
       </div>
 
       {isGuardian && contacts.length > 0 && (
@@ -544,6 +738,13 @@ const CONTACTS_CSS = `
 .fpd-contacts .folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:200px;overflow-y:auto;}
 .fpd-contacts .folder-chip{display:flex;align-items:center;gap:6px;padding:8px;border-radius:99px;text-align:left;cursor:pointer;font-family:var(--font-body);}
 
+/* bulk import */
+.fpd-contacts .import-method{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;text-align:left;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);cursor:pointer;font-family:var(--font-body);}
+.fpd-contacts .import-method:disabled{opacity:.45;cursor:not-allowed;}
+.fpd-contacts .import-method .imico{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.14);color:${ACCENT2};}
+.fpd-contacts .import-hint{color:${MUTED};font-size:13.5px;line-height:1.6;padding:2px 2px 0;}
+.fpd-contacts .import-list{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+
 /* verification requirement rows */
 .fpd-contacts .verif-row{width:100%;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:16px;text-align:left;border:1px solid;font-family:var(--font-body);}
 .fpd-contacts .verif-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
@@ -558,6 +759,7 @@ const CONTACTS_CSS = `
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
   const { contacts, addContact, removeContact, updateContactStatus } = useDemo();
   const [addingType, setAddingType] = useState<ContactType | null>(null);
+  const [importingType, setImportingType] = useState<ContactType | null>(null);
 
   // Extended verification status map — keyed by contact id
   const [verifStatus, setVerifStatus] = useState<Record<string, VerifStatus>>(() => {
@@ -632,6 +834,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             <p>{hero.sub}</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => setAddingType(activeType)}><Plus size={15} /> Add {cfg.label}</button>
+              <button className="hbtn ghost" onClick={() => setImportingType(activeType)}><FileUp size={15} /> Import Contacts</button>
             </div>
           </div>
         </div>
@@ -695,6 +898,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           type={activeType}
           contacts={visibleContacts}
           onAdd={() => setAddingType(activeType)}
+          onImport={() => setImportingType(activeType)}
           onRemove={id => removeContact(id)}
           getVerifStatus={getVerifStatus}
           advanceStatus={advanceStatus}
@@ -708,6 +912,18 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             defaultType={addingType}
             onClose={() => setAddingType(null)}
             onAdd={async c => { await addContact(c); setAddingType(null); toast.success(`${typeConfig[c.type].label} added`); }}
+          />
+        )}
+
+        {importingType && (
+          <BulkImportModal
+            defaultType={importingType}
+            onClose={() => setImportingType(null)}
+            onImport={async contacts => {
+              for (const c of contacts) await addContact(c);
+              setImportingType(null);
+              toast.success(`${contacts.length} contact${contacts.length===1?"":"s"} imported`);
+            }}
           />
         )}
       </div>

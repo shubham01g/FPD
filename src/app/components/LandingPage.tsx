@@ -456,6 +456,47 @@ function Security() {
   );
 }
 
+/* ── FAMILY STORY ─────────────────────────────────────────────── */
+function FamilyStory({ onStart }: { onStart: () => void }) {
+  const points = [
+    "Funeral and final wishes recorded in your own words, ahead of time",
+    "A personal video message delivered to your family exactly when they need it",
+    "One less decision left to guesswork during the hardest days",
+    "Your family grieves with guidance, not uncertainty",
+  ];
+  return (
+    <section id="family-story" className="relative py-28 px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
+        </div>
+        <div className="order-1 lg:order-2">
+          <Kicker>When You're Gone</Kicker>
+          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+            What Happens to Your<br />
+            <span style={{ color: "#6FAE8B" }}>Family When You're Gone?</span>
+          </h2>
+          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+            Without a plan, the people you love are left to grieve while also guessing — what you would have wanted, what to say, what happens next. That uncertainty is a burden you can lift from them today.
+          </p>
+          <p style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 600, lineHeight: 1.6, marginBottom: 28 }}>
+            What matters most: write or leave a message for your loved ones — so your voice is still there when you no longer can be.
+          </p>
+          <div className="flex flex-col gap-3 mb-8">
+            {points.map(p => (
+              <div key={p} className="flex items-start gap-3">
+                <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
+                <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
+              </div>
+            ))}
+          </div>
+          <GhostBtn onClick={onStart}>Write your message today <ChevronRight size={16} /></GhostBtn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── PRICING (5 tiers + annual toggle) ────────────────────────── */
 type Plan = { name: string; price: number; storage: string; contacts: number; color: string; popular: boolean; features: string[] };
 const PLANS: Plan[] = [
@@ -1004,6 +1045,7 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
         <Features />
         <MemoriesStory onStart={onGetStarted} />
         <Security />
+        <FamilyStory onStart={onGetStarted} />
         <Pricing onStart={onGetStarted} />
         <Affiliates onStart={onGetStarted} />
         <Partnerships onStart={onGetStarted} />
