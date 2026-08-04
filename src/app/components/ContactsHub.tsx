@@ -833,7 +833,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             <h1>{hero.title}</h1>
             <p>{hero.sub}</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setAddingType(activeType)}><Plus size={15} /> Add {cfg.label}</button>
+              <button className="hbtn primary" onClick={() => setAddingType(activeType)}><Plus size={15} /> Add Contact</button>
               <button className="hbtn ghost" onClick={() => setImportingType(activeType)}><FileUp size={15} /> Import Contacts</button>
             </div>
           </div>
