@@ -8,6 +8,7 @@ import {
   ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { VaultClone } from "./VaultClone";
 import { useDemo } from "../context/DemoContext";
 
@@ -257,13 +258,10 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                 style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 10 }}/>
             </div>
           ) : (
-            /* Expanded — the full logo lockup (already contains the wordmark) + tagline */
+            /* Expanded — the full logo lockup (wordmark + tagline baked in) */
             <div style={{ overflow: "hidden" }}>
-              <img src={fpdSquareLogo} alt="Final Pass Down"
-                style={{ height: 38, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
-              <div style={{ fontSize: 12, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
-                MY LIFE · MY WISHES · MY WAY
-              </div>
+              <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way"
+                style={{ height: 46, width: 70, flexShrink: 0, objectFit: "contain", display: "block", borderRadius: 8, filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
             </div>
           )}
         </div>

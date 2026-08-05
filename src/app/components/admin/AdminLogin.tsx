@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
-import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../../imports/FPD_full_logo.png";
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -59,12 +59,9 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
         <div style={{ position:"absolute", bottom:"10%", right:"5%", width:300, height:300, borderRadius:"50%", background:"radial-gradient(circle,rgba(91,110,225,0.07) 0%,transparent 70%)", pointerEvents:"none" }} />
 
         <div className="relative">
-          <div className="flex items-center gap-3 mb-16">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.3)" }}/>
-            <div>
-              <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:16, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#34456A", fontSize:11, letterSpacing:"0.15em", ...MONO }}>PLATFORM ADMINISTRATION</div>
-            </div>
+          <div className="mb-16">
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:64, width:97, flexShrink:0, borderRadius:12, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.3)", display:"block", marginBottom:10 }}/>
+            <div style={{ color:"#34456A", fontSize:11, letterSpacing:"0.15em", ...MONO }}>PLATFORM ADMINISTRATION</div>
           </div>
           <Crown size={56} color="#FFFFFF" style={{ marginBottom:24, opacity:0.8 }}/>
           <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(2.5rem,5vw,3.8rem)", color:"#E8EDF5", lineHeight:1.15, marginBottom:20 }}>
@@ -95,8 +92,8 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
+          <div className="mb-10 lg:hidden">
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:48, width:73, flexShrink:0, borderRadius:9, objectFit:"contain", display:"block", marginBottom:6 }}/>
             <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:15, fontWeight:700, letterSpacing:"0.06em" }}>ADMIN PORTAL</div>
           </div>
 

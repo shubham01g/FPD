@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import { Eye, EyeOff, Star, AlertCircle, Shield, Lock } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { authenticateConcierge, type ConciergeEmployee } from "../services/conciergeStaff";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -47,12 +47,9 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
         <div style={{ position:"absolute", bottom:"10%", right:"0%", width:260, height:260, borderRadius:"50%", background:"radial-gradient(circle,rgba(91,167,214,0.08) 0%,transparent 70%)", pointerEvents:"none" }}/>
 
         <div className="relative">
-          <div className="flex items-center gap-3 mb-16">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:40, height:40, borderRadius:10, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.25)" }}/>
-            <div>
-              <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:15, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#34456A", fontSize:11, letterSpacing:"0.15em", ...MONO }}>CONCIERGE STAFF PORTAL</div>
-            </div>
+          <div className="mb-16">
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:64, width:97, flexShrink:0, borderRadius:12, objectFit:"contain", boxShadow:"0 0 20px rgba(91,167,214,0.25)", display:"block", marginBottom:10 }}/>
+            <div style={{ color:"#34456A", fontSize:11, letterSpacing:"0.15em", ...MONO }}>CONCIERGE STAFF PORTAL</div>
           </div>
 
           <Star size={52} color="#F7931A" fill="rgba(247,147,26,0.2)" style={{ marginBottom:24, opacity:0.9 }}/>
@@ -84,8 +81,8 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
+          <div className="mb-10 lg:hidden">
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:48, width:73, flexShrink:0, borderRadius:9, objectFit:"contain", display:"block", marginBottom:6 }}/>
             <div style={{ ...DISPLAY, color:"#D68FA8", fontSize:15, fontWeight:700, letterSpacing:"0.06em" }}>CONCIERGE PORTAL</div>
           </div>
 

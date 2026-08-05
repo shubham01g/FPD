@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
-import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" };
 
@@ -198,12 +198,9 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
       {/* Header */}
       <div className="px-5 py-4 border-b"
         style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
-        <div className="max-w-lg mx-auto flex items-center gap-3">
-          <img src={fpdSquareLogo} alt="FPD" style={{ width:36, height:36, borderRadius:8, objectFit:"contain" }}/>
+        <div className="max-w-lg mx-auto">
+          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:44, width:67, flexShrink:0, borderRadius:8, objectFit:"contain", display:"block", marginBottom:6 }}/>
           <div>
-            <div style={{ fontFamily:"var(--font-display)", color:"#6FAE8B", fontSize:14, fontWeight:700, letterSpacing:"0.06em" }}>
-              FINAL PASS DOWN
-            </div>
             <div style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)" }}>
               WHITE GLOVE DOCUMENT SUBMISSION
             </div>

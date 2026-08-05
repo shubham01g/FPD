@@ -10,7 +10,7 @@ import {
   Bell, Calendar, Award, PawPrint, Video, DollarSign, HardDrive,
   BarChart3, Layers,
 } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -102,10 +102,10 @@ function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: Reac
   );
 }
 
-function PrimaryBtn({ children, onClick, large }: { children: React.ReactNode; onClick?: () => void; large?: boolean }) {
+function PrimaryBtn({ children, onClick, large, compact }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean }) {
   return (
     <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl fpd-btn-lift"
-      style={{ padding: large ? "15px 30px" : "12px 24px", fontSize: large ? 20 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap" }}>
+      style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap" }}>
       {children}
     </button>
   );
@@ -144,24 +144,25 @@ function TopNav({ onStart }: { onStart: () => void }) {
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
-        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-4">
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 92, height: 92, borderRadius: 18, objectFit: "contain" }} />
+        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-2">
+          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 32, width: 49, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
         </button>
-        <div className="hidden xl:flex items-center gap-1">
+        <div className="hidden xl:flex flex-1 items-center justify-between mr-4">
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="px-3.5 py-2.5 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
-              style={{ color: MUTED, fontSize: 17, fontWeight: 500, whiteSpace: "nowrap" }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="px-1.5 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
+              style={{ color: MUTED, fontSize: 16, fontWeight: 500, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
-        <div className="flex items-center gap-2.5 ml-auto">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap" }}>
+        <div className="xl:hidden flex-1" />
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
-          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap" }}>
+          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
-          <button onClick={onStart} className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap" }}>Sign In</button>
-          <PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn>
+          <button onClick={onStart} className="hidden sm:block px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
+          <PrimaryBtn onClick={onStart} compact>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </div>
@@ -983,7 +984,7 @@ function CTA({ onStart }: { onStart: () => void }) {
       <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-20" style={{ border: "1px solid rgba(91,110,225,0.24)" }}>
         <MediaBackdrop src="/media/cta.mp4" tone="blue" overlay={0.6} />
         <div className="relative flex flex-col items-center">
-          <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 72, height: 72, borderRadius: 16, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(91,110,225,0.3)" }} />
+          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 76, width: 115, flexShrink: 0, borderRadius: 14, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(91,110,225,0.3)" }} />
           <Kicker>Start today</Kicker>
           <h2 style={{ ...DISPLAY, fontSize: "clamp(2.8rem,6.3vw,4.8rem)", fontWeight: 800, color: TEXT, margin: "18px 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 680 }}>
             Start Your Legacy Today
@@ -1023,14 +1024,12 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
-              <img src={fpdSquareLogo} alt="Final Pass Down" style={{ width: 34, height: 34, borderRadius: 8, objectFit: "contain" }} />
-              <span style={{ fontFamily: "var(--font-display)", color: TEXT, fontSize: 17.5, fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>FINAL PASS DOWN</span>
+            <div className="flex items-center mb-4">
+              <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 52, width: 79, flexShrink: 0, borderRadius: 10, objectFit: "contain" }} />
             </div>
             <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7, maxWidth: 300, marginBottom: 12 }}>
               The secure digital vault for everything that matters — prepared by you, passed down to those you love.
             </p>
-            <p style={{ color: FAINT, fontSize: 15, ...MONO, marginBottom: 8 }}>My Life · My Wishes · My Way</p>
             <p style={{ color: FAINT, fontSize: 14 }}>AES-256 Encrypted · SOC 2 Type II · HIPAA Compliant</p>
             <div className="mt-5"><PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn></div>
           </div>

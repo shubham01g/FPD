@@ -5,6 +5,7 @@ import {
   Shield, ChevronRight, UserCheck, PanelLeft, PanelLeftClose
 } from "lucide-react";
 import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../../imports/FPD_full_logo.png";
 
 export type AdminPageId =
   | "master-admin" | "admin-affiliate" | "admin-partnership"
@@ -140,9 +141,9 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
             </div>
           ) : (
             <div style={{ overflow: "hidden" }}>
-              <img src={fpdSquareLogo} alt="Final Pass Down"
-                style={{ height: 34, width: "auto", maxWidth: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
-              <div style={{ fontSize: 11.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 3, paddingLeft: 2 }}>
+              <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way"
+                style={{ height: 42, width: 64, flexShrink: 0, objectFit: "contain", display: "block", borderRadius: 7, filter: "drop-shadow(0 0 14px rgba(91,110,225,0.35))" }}/>
+              <div style={{ fontSize: 11.5, color: FAINT, fontFamily: "var(--font-mono)", letterSpacing: "0.08em", whiteSpace: "nowrap", marginTop: 4, paddingLeft: 2 }}>
                 ADMIN PORTAL · RESTRICTED
               </div>
             </div>

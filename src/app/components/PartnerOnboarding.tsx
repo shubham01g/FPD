@@ -8,7 +8,7 @@ import {
   Settings, LogOut, ChevronRight, Activity, Calendar, Award,
   Send, Building, Mail, Phone, Handshake, Shield, Zap, Star
 } from "lucide-react";
-import fpdSquareLogo from "../../imports/FPD_mark_square.png";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { toast } from "sonner";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -148,12 +148,9 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
       <div className="sticky top-0 z-20 px-6 py-4 border-b"
         style={{ background:"rgba(10,10,15,0.98)", borderColor:"rgba(91,110,225,0.16)", backdropFilter:"blur(16px)" }}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:32, height:32, borderRadius:8, objectFit:"contain" }}/>
-            <div>
-              <div style={{ ...DISPLAY, color:"#6E90C9", fontSize:14, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#4A5A7A", fontSize:11, ...MONO }}>PARTNER PORTAL — ONBOARDING</div>
-            </div>
+          <div>
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:36, width:55, flexShrink:0, borderRadius:7, objectFit:"contain", display:"block", marginBottom:3 }}/>
+            <div style={{ color:"#4A5A7A", fontSize:11, ...MONO }}>PARTNER PORTAL — ONBOARDING</div>
           </div>
           <StepTracker step={step}/>
         </div>
@@ -414,12 +411,9 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
       {/* Sidebar */}
       <aside className="w-52 flex flex-col flex-shrink-0" style={{ background:"#070A12", borderRight:"1px solid rgba(91,110,225,0.12)" }}>
         <div className="px-4 py-4 border-b" style={{ borderColor:"rgba(91,110,225,0.12)" }}>
-          <div className="flex items-center gap-2.5">
-            <img src={fpdSquareLogo} alt="FPD" style={{ width:28, height:28, borderRadius:7, objectFit:"contain" }}/>
-            <div>
-              <div style={{ ...DISPLAY, color:"#6FAE8B", fontSize:11, fontWeight:700, letterSpacing:"0.06em" }}>FINAL PASS DOWN</div>
-              <div style={{ color:"#4A5A7A", fontSize:9, letterSpacing:"0.12em", ...MONO }}>PARTNER PORTAL</div>
-            </div>
+          <div>
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:30, width:46, flexShrink:0, borderRadius:6, objectFit:"contain", display:"block", marginBottom:3 }}/>
+            <div style={{ color:"#4A5A7A", fontSize:9, letterSpacing:"0.12em", ...MONO }}>PARTNER PORTAL</div>
           </div>
         </div>
 

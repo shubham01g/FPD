@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle, Calendar, Clock, Phone, Star, ArrowRight } from "lucide-react";
 import { getScheduleToken, selectSlot, subscribeToScheduleToken, type ScheduleToken } from "../services/wgClientStore";
+import fpdFullLogo from "../../imports/FPD_full_logo.png";
 
 interface WGSchedulePageProps {
   token: string;
@@ -53,9 +54,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
           {/* FPD logo area */}
           <div>
-            <div style={{ color:"#6E90C9", fontSize:14, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:4 }}>
-              FINAL PASS DOWN
-            </div>
+            <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:56, width:85, borderRadius:10, objectFit:"contain", display:"block", margin:"0 auto 8px" }}/>
             <div className="flex items-center justify-center gap-1">
               <Star size={14} color="#FFFFFF"/>
               <span style={{ color:"#6FAE8B", fontSize:14, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
@@ -117,9 +116,7 @@ export function WGSchedulePage({ token }: WGSchedulePageProps) {
 
       {/* Header */}
       <div className="px-6 py-8 text-center" style={{ background:"#0A0F1A", borderBottom:"1px solid rgba(91,110,225,0.2)" }}>
-        <div style={{ color:"#6E90C9", fontSize:14, fontFamily:"var(--font-mono)", letterSpacing:"0.15em", marginBottom:6 }}>
-          FINAL PASS DOWN
-        </div>
+        <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:56, width:85, borderRadius:10, objectFit:"contain", display:"block", margin:"0 auto 10px" }}/>
         <div className="flex items-center justify-center gap-1 mb-4">
           <Star size={13} color="#FFFFFF"/>
           <span style={{ color:"#6FAE8B", fontSize:14, fontFamily:"var(--font-mono)" }}>WHITE GLOVE SERVICE</span>
