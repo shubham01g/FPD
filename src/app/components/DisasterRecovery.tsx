@@ -6,6 +6,7 @@ import {
   Copy, X, Info, ArrowRight, Package, CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
+import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -31,9 +32,10 @@ const DR_CSS = `
 .fpd-dr-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-dr .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
-/* hero banner — gradient-only (no photo yet; drop a url() into .art background-image alongside the gradient once one is supplied) */
-.fpd-dr .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:190px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
-.fpd-dr .hbanner .art{position:absolute;inset:0;z-index:0;background:linear-gradient(135deg, rgba(217,165,94,0.22), rgba(91,110,225,0.16) 55%, #0A0F1A 100%);}
+/* hero banner — full-bleed photo, tinted toward the brand palette via a gradient layered in the JSX backgroundImage */
+.fpd-dr .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:220px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
+.fpd-dr .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
+.fpd-dr .hbanner:hover .art{transform:scale(1.08);}
 .fpd-dr .hbanner .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(100deg,#070A12 0%,rgba(7,10,18,0.9) 34%,rgba(7,10,18,0.5) 62%,rgba(7,10,18,0.15) 100%);pointer-events:none;}
 .fpd-dr .hbanner .hcontent{position:relative;z-index:2;padding:28px 34px;display:flex;flex-direction:column;justify-content:center;max-width:520px;}
 .fpd-dr .hbanner .heyebrow{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:6px 13px;border-radius:99px;background:rgba(217,165,94,0.14);border:1px solid rgba(217,165,94,0.36);color:#EAC793;font-size:12.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;margin-bottom:14px;font-family:var(--font-mono);}
@@ -422,7 +424,7 @@ export function DisasterRecovery() {
       <div className="fpd-dr-grain" />
       <div className="wrap">
         <div className="hbanner">
-          <div className="art" />
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(217,165,94,0.4), rgba(91,110,225,0.18)), url(${heroDisasterRecoveryPhoto})` }} />
           <div className="scrim" />
           <div className="hcontent">
             <span className="heyebrow">Emergency Protection</span>
