@@ -3,6 +3,7 @@ import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
 import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal";
 import { SystemHealth } from "./SystemHealth";
+import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
 import { AdminAIAgent } from "../AdminAIAgent";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
@@ -10,7 +11,7 @@ import {
   CheckCircle, XCircle, Clock, Edit, Trash2, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Lock, Settings,
   RefreshCw, Shield, UserPlus, X, ToggleLeft, ToggleRight,
-  Star, Send, Gift, Bot, Handshake, Layers
+  Star, Send, Gift, Bot, Handshake, Layers, ShieldAlert
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,7 +73,7 @@ const pendingVerifications = [
   { id:"VER-2026-0835", contact:"Grace Nakamura", forUser:"Kevin Park", type:"Driver's License", submitted:"Jun 9, 2026" },
 ];
 
-type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"admin_ai"|"system_health";
+type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"admin_ai"|"system_health"|"disaster_recovery";
 
 /* ─────────────────────────────────────────────────────────────────
    ANALYTICS DATA — all demo-mode seed data
@@ -930,6 +931,7 @@ export function MasterAdmin() {
     { id:"continuation", label:"$199 Fee",        icon:<DollarSign size={13}/> },
     { id:"audit",        label:"Audit Log",       icon:<Shield size={13}/> },
     { id:"system_health",label:"System Health",   icon:<Activity size={13}/>, badge:"Live" },
+    { id:"disaster_recovery", label:"Disaster Recovery", icon:<ShieldAlert size={13}/>, badge:"DR" },
     { id:"notifications",label:"Push Notifications",icon:<Bell size={13}/>, badge:"NEW" },
     { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/>,   badge:"New" },
     { id:"reports",      label:"Reports & Downloads", icon:<Download size={13}/> },
@@ -1826,6 +1828,7 @@ export function MasterAdmin() {
       {tab === "admin_roles" && <AdminRoles/>}
       {tab === "reports"     && <ReportsDownloads/>}
       {tab === "system_health" && <SystemHealth/>}
+      {tab === "disaster_recovery" && <DisasterRecoveryAdmin/>}
       {tab === "admin_ai"    && (
         <div className="p-6" style={{ maxWidth:900 }}>
           <div className="mb-5">

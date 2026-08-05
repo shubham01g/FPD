@@ -39,6 +39,7 @@ import { VitalClone } from "./components/VitalClone";
 import { PasswordManager } from "./components/PasswordManager";
 import { SubscriptionManager } from "./components/SubscriptionManager";
 import { LegacyContinuationFee } from "./components/LegacyContinuationFee";
+import { DisasterRecovery } from "./components/DisasterRecovery";
 import { PartnerOnboarding } from "./components/PartnerOnboarding";
 import { PartnerOnboardingAdmin } from "./components/admin/PartnerOnboardingAdmin";
 import { AIAgent } from "./components/AIAgent";
@@ -338,6 +339,7 @@ function UserRoute() {
       case "password-manager":      return <PasswordManager/>;
       case "subscription-manager":   return <SubscriptionManager/>;
       case "legacy-continuation":    return <LegacyContinuationFee/>;
+      case "disaster-recovery":      return <DisasterRecovery/>;
       case "contacts-legacy":    return <ContactsHub initialSection="legacy"/>;
       case "contacts-guardian":  return <ContactsHub initialSection="guardian"/>;
       case "contacts-emergency": return <ContactsHub initialSection="emergency"/>;

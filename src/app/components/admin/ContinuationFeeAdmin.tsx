@@ -36,7 +36,7 @@ export function ContinuationFeeAdmin() {
   const pending = fees.filter(f => !f.activated).length;
 
   return (
-    <div style={{ background:"rgba(255,255,255,0.05)", minHeight:"100%", padding:24 }}>
+    <div style={{ background:"transparent", minHeight:"100%", padding:24 }}>
       <div style={{ maxWidth:1100, margin:"0 auto" }} className="space-y-6">
 
         <div>

@@ -84,6 +84,7 @@ export interface AdminUser {
   planId: string;
   status: "active" | "suspended" | "cancelled";
   mfa: boolean;
+  mfaMethod: "sms" | "email_otp" | "authenticator" | null;
   joined: string;
   lastLogin: string;
   nextBilling: string;
@@ -125,11 +126,18 @@ function planPrice(id: string) {
   return PLANS.find(p => p.id === id)?.price ?? 0;
 }
 
+function mfaMethodLabel(method: AdminUser["mfaMethod"]): string {
+  return method === "sms" ? "SMS Text Message"
+    : method === "email_otp" ? "Email OTP"
+    : method === "authenticator" ? "Authenticator App"
+    : "No 2FA configured";
+}
+
 export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8821", name:"James Doe", email:"james.doe@email.com", phone:"(404) 555-0182",
     plan:"Legacy Archive", planId:"family_archive",
-    status:"active", mfa:true, joined:"Apr 8, 2026", lastLogin:"2 hours ago",
+    status:"active", mfa:true, mfaMethod:"sms", joined:"Apr 8, 2026", lastLogin:"2 hours ago",
     nextBilling:"Aug 8, 2026", autoRenew:true,
     storage:16.9, storageTotal:250, storageVideos:7.2, storagePhotos:5.8, storageDocs:2.4, storageOther:1.5,
     contacts:3, guardians:1, referrals:6,
@@ -152,7 +160,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8812", name:"Sarah Chen", email:"s.chen@email.com", phone:"(213) 555-0841",
     plan:"Legacy Archive", planId:"family_archive",
-    status:"active", mfa:true, joined:"Nov 15, 2024", lastLogin:"5 min ago",
+    status:"active", mfa:true, mfaMethod:"sms", joined:"Nov 15, 2024", lastLogin:"5 min ago",
     nextBilling:"Aug 15, 2026", autoRenew:true,
     storage:22.1, storageTotal:250, storageVideos:9.8, storagePhotos:8.4, storageDocs:2.8, storageOther:1.1,
     contacts:8, guardians:2, referrals:32,
@@ -175,7 +183,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8805", name:"Marcus Johnson", email:"m.johnson@email.com", phone:"(312) 555-0294",
     plan:"Foundation", planId:"foundation",
-    status:"active", mfa:false, joined:"Jan 20, 2025", lastLogin:"1 day ago",
+    status:"active", mfa:false, mfaMethod:null, joined:"Jan 20, 2025", lastLogin:"1 day ago",
     nextBilling:"Jul 20, 2026", autoRenew:true,
     storage:4.8, storageTotal:50, storageVideos:1.2, storagePhotos:2.1, storageDocs:1.0, storageOther:0.5,
     contacts:2, guardians:0, referrals:14,
@@ -194,7 +202,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8798", name:"Patricia Wells", email:"p.wells@email.com", phone:"(512) 555-0184",
     plan:"Legacy Pro", planId:"legacy_pro",
-    status:"active", mfa:true, joined:"Sep 3, 2024", lastLogin:"3 hours ago",
+    status:"active", mfa:true, mfaMethod:"authenticator", joined:"Sep 3, 2024", lastLogin:"3 hours ago",
     nextBilling:"Aug 3, 2026", autoRenew:true,
     storage:84.2, storageTotal:500, storageVideos:38.1, storagePhotos:31.4, storageDocs:9.8, storageOther:4.9,
     contacts:12, guardians:3, referrals:81,
@@ -216,7 +224,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8791", name:"Robert Kim", email:"r.kim@email.com", phone:"(503) 555-0029",
     plan:"Foundation", planId:"foundation",
-    status:"active", mfa:false, joined:"May 22, 2026", lastLogin:"4 days ago",
+    status:"active", mfa:false, mfaMethod:null, joined:"May 22, 2026", lastLogin:"4 days ago",
     nextBilling:"Jun 22, 2026", autoRenew:false,
     storage:2.1, storageTotal:50, storageVideos:0.4, storagePhotos:0.9, storageDocs:0.6, storageOther:0.2,
     contacts:1, guardians:0, referrals:0,
@@ -234,7 +242,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8784", name:"Amanda Torres", email:"a.torres@email.com", phone:"(786) 555-0338",
     plan:"Legacy Archive", planId:"family_archive",
-    status:"active", mfa:true, joined:"Mar 1, 2026", lastLogin:"30 min ago",
+    status:"active", mfa:true, mfaMethod:"email_otp", joined:"Mar 1, 2026", lastLogin:"30 min ago",
     nextBilling:"Aug 1, 2026", autoRenew:true,
     storage:18.4, storageTotal:250, storageVideos:6.1, storagePhotos:8.2, storageDocs:2.8, storageOther:1.3,
     contacts:5, guardians:1, referrals:7,
@@ -254,7 +262,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8777", name:"Derek Mills", email:"d.mills@email.com", phone:"(614) 555-0091",
     plan:"Legacy Archive", planId:"family_archive",
-    status:"suspended", mfa:false, joined:"Jul 12, 2024", lastLogin:"14 days ago",
+    status:"suspended", mfa:false, mfaMethod:null, joined:"Jul 12, 2024", lastLogin:"14 days ago",
     nextBilling:"—", autoRenew:false,
     storage:12.0, storageTotal:250, storageVideos:4.2, storagePhotos:5.1, storageDocs:1.8, storageOther:0.9,
     contacts:4, guardians:0, referrals:12,
@@ -277,7 +285,7 @@ export const ADMIN_USERS: AdminUser[] = [
   {
     id:"USR-8770", name:"Grace Nakamura", email:"g.nakamura@email.com", phone:"(808) 555-0214",
     plan:"Legacy Pro", planId:"legacy_pro",
-    status:"active", mfa:true, joined:"Feb 28, 2025", lastLogin:"1 hour ago",
+    status:"active", mfa:true, mfaMethod:"authenticator", joined:"Feb 28, 2025", lastLogin:"1 hour ago",
     nextBilling:"Jul 28, 2026", autoRenew:true,
     storage:51.3, storageTotal:500, storageVideos:22.8, storagePhotos:18.4, storageDocs:6.8, storageOther:3.3,
     contacts:9, guardians:2, referrals:0,
@@ -508,7 +516,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   <DRow label="Status"           value={
                     <span style={{ color:statusColor, fontWeight:700 }}>{user.status.toUpperCase()}</span>}/>
                   <DRow label="Two-Factor Auth"  value={user.mfa
-                    ? <span style={{ color:T.green }}>✔ Enabled</span>
+                    ? <span style={{ color:T.green }}>✔ Enabled · {mfaMethodLabel(user.mfaMethod)}</span>
                     : <span style={{ color:T.red }}>✘ Disabled</span>}/>
                   <DRow label="Joined"           value={user.joined}/>
                   <DRow label="Last Login"       value={user.lastLogin}/>
@@ -967,7 +975,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <div>
                       <div style={{ color:T.text, fontSize:20, fontWeight:700 }}>{user.mfa ? "Enabled" : "Disabled"}</div>
                       <div style={{ color:T.sub, fontSize:15, marginTop:2 }}>
-                        {user.mfa ? "TOTP authenticator active" : "No 2FA configured"}
+                        {mfaMethodLabel(user.mfaMethod)}
                       </div>
                     </div>
                     <div style={{ width:44, height:44, borderRadius:"50%", display:"flex",
@@ -977,10 +985,11 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       <Shield size={20} color={user.mfa ? T.green : T.red}/>
                     </div>
                   </div>
-                  <button onClick={() => { setUser(u=>({...u,mfa:false})); toast.success("2FA reset — user must re-enroll on next login"); }}
-                    className="w-full py-2.5 rounded-2xl text-sm font-semibold"
+                  <button onClick={() => { const label = mfaMethodLabel(user.mfaMethod); setUser(u=>({...u,mfa:false,mfaMethod:null})); toast.success(`${label} reset — user must re-enroll on next login`); }}
+                    disabled={!user.mfa}
+                    className="w-full py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background:T.redBg, color:T.red, border:`1px solid ${T.redBd}` }}>
-                    Reset 2FA
+                    {user.mfa ? `Reset ${mfaMethodLabel(user.mfaMethod)}` : "Reset 2FA"}
                   </button>
                 </div>
 

@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap
+  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import { VaultClone } from "./VaultClone";
@@ -24,7 +24,8 @@ export type PageId =
   | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
   | "fpd-ai"
   | "job-history" | "daycare-info" | "id-keeper" | "favorite-places" | "travel-planner" | "kids-activities"
-  | "warranties" | "pet-records" | "utilities";
+  | "warranties" | "pet-records" | "utilities"
+  | "disaster-recovery";
 
 type NavItem = { id: PageId; label: string; icon: React.ReactNode; badge?: string; highlight?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
@@ -92,6 +93,7 @@ const navGroups: NavGroup[] = [
       { id: "password-manager",     label: "Password Manager",       icon: <Key size={16}/> },
       { id: "subscription-manager", label: "Auto Pay & Subs",        icon: <CreditCard size={16}/> },
       { id: "legacy-continuation",  label: "Activate Legacy Access", icon: <Shield size={16}/> },
+      { id: "disaster-recovery",    label: "Disaster Protection",    icon: <ShieldAlert size={16}/> },
     ],
   },
   {
