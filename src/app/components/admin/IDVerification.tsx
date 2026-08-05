@@ -43,7 +43,7 @@ export function IDVerification() {
   };
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1100 }}>
+    <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">

@@ -499,7 +499,7 @@ export function AdminRoles() {
   const stepIdx = inviteStep === "form" ? 0 : inviteStep === "sending" ? 1 : 2;
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div className="flex items-start justify-between">

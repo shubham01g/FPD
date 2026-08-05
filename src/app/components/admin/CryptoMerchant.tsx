@@ -275,7 +275,7 @@ export function CryptoMerchant() {
   ];
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div>

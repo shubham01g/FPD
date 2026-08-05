@@ -547,7 +547,7 @@ export function EmailTemplates() {
     .replace(/\{\{secure_url\}\}/g, "#");
 
   return (
-    <div className="p-6 space-y-5 relative" style={{ maxWidth: 1400, ...GRID }}>
+    <div className="p-6 space-y-5 relative" style={{ ...GRID }}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

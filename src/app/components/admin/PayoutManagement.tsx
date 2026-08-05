@@ -54,7 +54,7 @@ export function PayoutManagement() {
   const selectedPending = filtered.filter(p => selected.has(p.id) && p.status === "pending");
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1200 }}>
+    <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">

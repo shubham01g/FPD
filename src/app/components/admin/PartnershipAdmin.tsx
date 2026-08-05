@@ -130,7 +130,7 @@ export function PartnershipAdmin() {
   const activePartners = partners.filter(p => p.status === "active").length;
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth: 1200 }}>
+    <div className="p-6 space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Handshake size={16} color="#FFFFFF" />

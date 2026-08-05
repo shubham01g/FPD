@@ -307,7 +307,7 @@ export function WhiteGloveAdmin() {
   const avgCompletion = Math.round(clients.reduce((s,c)=>s+c.completionPct,0)/Math.max(clients.length,1));
 
   return (
-    <div className="p-6 space-y-6" style={{ maxWidth:1100 }}>
+    <div className="p-6 space-y-6">
 
       {/* Header */}
       <div className="flex items-start justify-between">
