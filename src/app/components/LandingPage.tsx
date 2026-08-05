@@ -150,7 +150,7 @@ function TopNav({ onStart }: { onStart: () => void }) {
         <div className="hidden xl:flex flex-1 items-center justify-between mr-4">
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className="px-1.5 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
-              style={{ color: MUTED, fontSize: 16, fontWeight: 500, whiteSpace: "nowrap" }}>{l}</button>
+              style={{ color: "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
