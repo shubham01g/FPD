@@ -388,7 +388,7 @@ export function WGClientSubmit({ token = "TOKEN_JAMES_003" }: { token?: string }
           <div className="space-y-4">
 
             {/* Summary */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { label:"Sent",     value:submissions.length,  color:"#6FAE8B" },
                 { label:"Received", value:submissions.filter(s=>s.status==="received").length, color:"#6E90C9" },

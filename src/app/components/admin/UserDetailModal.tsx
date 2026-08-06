@@ -505,7 +505,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
           {/* ── OVERVIEW ────────────────────────────────────────── */}
           {tab === "overview" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                 {/* Account Details */}
                 <div style={CARD}>
@@ -933,7 +933,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     <Download size={10}/> Export CSV
                   </button>
                 </div>
-                <div className="rounded-2xl overflow-hidden" style={{ border:`1px solid ${T.border}` }}>
+                <div className="rounded-2xl overflow-x-auto" style={{ border:`1px solid ${T.border}` }}>
                   <div className="grid px-4 py-2.5"
                     style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
                       background:"rgba(10,20,40,0.9)" }}>
@@ -966,7 +966,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
           {/* ── SECURITY ─────────────────────────────────────────── */}
           {tab === "security" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                 {/* MFA */}
                 <div style={CARD}>

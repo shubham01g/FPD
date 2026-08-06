@@ -375,7 +375,11 @@ const AI_CSS = `
 
 /* panel shell */
 .fpd-ai .panel{position:relative;z-index:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 24px 60px -24px rgba(0,0,0,0.85);}
-.fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;border-radius:16px;}
+.fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;max-width:calc(100vw - 32px);border-radius:16px;}
+@media (max-width:480px){
+  .fpd-ai .panel.floating{right:16px;left:16px;bottom:88px;width:auto;max-width:none;}
+  .fpd-ai-launch{right:16px;bottom:88px;}
+}
 
 /* header */
 .fpd-ai .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;flex-shrink:0;background:linear-gradient(120deg,#111A2C 0%,#0B1220 60%,#0C1322 100%);border-bottom:1px solid rgba(91,110,225,0.16);}

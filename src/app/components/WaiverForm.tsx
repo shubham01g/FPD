@@ -573,7 +573,7 @@ export function WaiverManager() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label:"Total Sent",    value:waivers.length,                           color:"#6E90C9" },
           { label:"Signed",        value:waivers.filter(w=>w.status==="signed").length, color:"#D99A6B" },
@@ -588,7 +588,7 @@ export function WaiverManager() {
       </div>
 
       {/* Waiver table */}
-      <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
         <div className="px-5 py-3 border-b" style={{ background:"#141B2E", borderColor:"rgba(91,110,225,0.1)" }}>
           <div style={{ display:"grid", gridTemplateColumns:"auto 1fr auto auto auto auto", gap:16, alignItems:"center" }}>
             {["ID","Client","Specialist","Sent","Status","Actions"].map(h => (

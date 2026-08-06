@@ -94,7 +94,7 @@ export function LegacyVerification() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label:"Total Contacts", value:contacts.length, color:"var(--primary)" },
           { label:"Verified",        value:verified,        color:"#D99A6B" },

@@ -49,7 +49,7 @@ export function ContinuationFeeAdmin() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label:"Total Revenue", value:`$${totalRevenue.toLocaleString()}`, color:"#6E90C9" },
             { label:"Fees Collected", value:fees.length, color:"#D99A6B" },
@@ -107,7 +107,7 @@ export function ContinuationFeeAdmin() {
         </div>
 
         {/* Paid fees table */}
-        <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
+        <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
           <div className="flex items-center justify-between px-5 py-3 border-b" style={{ background:"rgba(255,255,255,0.08)", borderColor:"rgba(91,110,225,0.08)" }}>
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>Paid Legacy Continuation Fees</h3>
             <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)" }}>

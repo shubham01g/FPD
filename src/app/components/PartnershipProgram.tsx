@@ -147,7 +147,7 @@ export function PartnershipProgram() {
       </div>
 
       {/* Partner organizations table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         <div className="px-5 py-3 border-b" style={{ background: "var(--muted)", borderColor: "var(--border)" }}>
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--foreground)" }}>Partner Organizations</h3>
         </div>

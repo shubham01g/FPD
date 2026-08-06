@@ -376,7 +376,7 @@ export function WhiteLabelConfig() {
                 </div>
                 <div>
                   <div className="preset-lbl">COLOR PRESETS</div>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {PRESET_COLORS.map(p => (
                       <button key={p.name} onClick={() => { update({ primaryColor: p.primary, accentColor: p.accent }); toast.success(`Applied ${p.name} colors`); }}
                         title={p.name} className="color-preset"

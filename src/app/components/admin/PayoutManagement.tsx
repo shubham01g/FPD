@@ -73,7 +73,7 @@ export function PayoutManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} color="#F6AD55" />
@@ -156,7 +156,7 @@ export function PayoutManagement() {
       </div>
 
       {/* Payout table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}

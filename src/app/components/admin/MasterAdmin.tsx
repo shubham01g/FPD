@@ -633,7 +633,7 @@ function PushNotificationCenter() {
   return (
     <div className="space-y-5">
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label:"Notifications Sent",   value:history.length,                  color:"#6E90C9" },
           { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#D99A6B" },
@@ -703,7 +703,7 @@ function PushNotificationCenter() {
             {/* Delivery channel */}
             <div>
               <label style={{ color:"#8A9AB8", fontSize:14, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {([
                   { id:"push",  label:"Push Only",  icon:"🔔", desc:"In-app + device notification" },
                   { id:"email", label:"Email Only",  icon:"✉️", desc:"Email to all users in segment" },
@@ -882,7 +882,7 @@ function PushNotificationCenter() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                   <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>DELIVERED</div>
                   <div style={{ color:"#6E90C9", fontSize:20, fontWeight:700, fontFamily:"var(--font-display)" }}>{n.delivered.toLocaleString()}</div>
@@ -1187,7 +1187,7 @@ export function MasterAdmin() {
                   <div key={d.label} style={{ flex:d.pct, background:d.color }} title={`${d.label} ${d.pct}%`}/>
                 ))}
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-4">
                 {[
                   { label:"Mobile Total", value:"69.6%", color:"#6E90C9" },
                   { label:"Desktop Total", value:"28.9%", color:"#6FAE8B" },
@@ -1276,7 +1276,7 @@ export function MasterAdmin() {
                   );
                 })}
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                 {[
                   { label:"Avg DAU",         value:"9,284",    color:"#6E90C9" },
                   { label:"DAU/MAU Ratio",   value:"18.0%",    color:"#6FAE8B" },
@@ -1488,7 +1488,7 @@ export function MasterAdmin() {
               <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
             </button>
           </div>
-          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
+          <div className="rounded-2xl overflow-x-auto" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
             <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
               {["ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map(h=>(
                 <div key={h} style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{h.toUpperCase()}</div>
@@ -1579,7 +1579,7 @@ export function MasterAdmin() {
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals</h3>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[{label:"Total Data Stored",value:"428.4 TB",color:"#6E90C9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6FAE8B"},{label:"Avg per User",value:"12.4 GB",color:"#D99A6B"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
                 <div key={s.label} className="p-4 rounded-2xl" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:27.5,color:s.color}}>{s.value}</div>
@@ -1594,7 +1594,7 @@ export function MasterAdmin() {
       {/* VERIFICATION */}
       {tab === "verification" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[{label:"Pending Review",value:3,color:"#F6AD55"},{label:"Approved Today",value:7,color:"#D99A6B"},{label:"Rejected Today",value:1,color:"#FC8181"},{label:"Avg Review Time",value:"4.2h",color:"#6E90C9"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:35.5,color:s.color}}>{s.value}</div>
@@ -1633,7 +1633,7 @@ export function MasterAdmin() {
       {/* PAYOUTS */}
       {tab === "payouts" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[{label:"Pending",value:"$4,396.58",n:3,color:"#F6AD55"},{label:"Processing",value:"$1,049.74",n:1,color:"#6E90C9"},{label:"Paid This Month",value:"$53,277.22",n:22,color:"#D99A6B"}].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:32.5,color:s.color}}>{s.value}</div>
@@ -1760,7 +1760,7 @@ export function MasterAdmin() {
           </div>
 
           {/* Paid fees table */}
-          <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.1)"}}>
+          <div className="rounded-2xl overflow-x-auto" style={{border:"1px solid rgba(91,110,225,0.1)"}}>
             <div className="px-5 py-3 border-b" style={{background:"rgba(255,255,255,0.08)",borderColor:"rgba(91,110,225,0.08)"}}>
               <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5"}}>All Legacy Continuation Fee Payments</h3>
             </div>

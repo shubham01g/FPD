@@ -182,7 +182,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
 
   const wrapStyle: React.CSSProperties = inline
     ? { display:"flex", flexDirection:"column", height:"calc(100vh - 120px)", borderRadius:22, overflow:"hidden", border:"1.5px solid rgba(91,167,214,0.35)", background:"#101728", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)" }
-    : { position:"fixed", bottom:24, left:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:22, overflow:"hidden", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 20px 60px rgba(0,0,0,0.5)", width:390, height:minimized?"auto":580, background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" };
+    : { position:"fixed", bottom:24, left:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:22, overflow:"hidden", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 20px 60px rgba(0,0,0,0.5)", width:"min(390px, calc(100vw - 48px))", maxHeight:"calc(100vh - 48px)", height:minimized?"auto":580, background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" };
 
   if (!open && !inline) return (
     <button onClick={() => setOpen(true)}

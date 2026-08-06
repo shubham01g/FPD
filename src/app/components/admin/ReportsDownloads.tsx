@@ -435,7 +435,7 @@ export function ReportsDownloads() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:s.color, fontWeight:700 }}>{s.value}</div>
@@ -502,7 +502,7 @@ export function ReportsDownloads() {
             </button>
           </div>
 
-          <div className="rounded-2xl overflow-hidden" style={CARD}>
+          <div className="rounded-2xl overflow-x-auto" style={CARD}>
             <table className="w-full text-sm" style={{ borderCollapse:"collapse" }}>
               <thead>
                 <tr style={{ background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>

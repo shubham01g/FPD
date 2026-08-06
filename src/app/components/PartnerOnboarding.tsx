@@ -173,7 +173,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               <div style={{ color:"#4A5A7A", fontSize:14, ...MONO, marginBottom:8 }}>ONE-TIME SETUP FEE</div>
               <div style={{ ...DISPLAY, fontSize:70, color:"#6E90C9", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
               <div style={{ color:"#8A9AB8", fontSize:17.5, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { icon:<Globe size={16}/>,    label:"Custom subdomain" },
                   { icon:<Shield size={16}/>,   label:"Partner dashboard" },
@@ -190,7 +190,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             {/* Volume tiers */}
             <div>
               <div style={{ color:"#8A9AB8", fontSize:14, ...MONO, marginBottom:12, textAlign:"center" }}>COMMISSION TIERS — ADVANCE AUTOMATICALLY BY VOLUME</div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {VOLUME_TIERS.map(t => (
                   <div key={t.tier} className="rounded-2xl p-6 text-center" style={{ ...GLASS, border:`2px solid ${t.color}30`, boxShadow:`0 0 24px ${t.glow}` }}>
                     <div style={{ color:t.color, fontSize:12.5, ...MONO, fontWeight:700, marginBottom:6 }}>{t.label.toUpperCase()}</div>
@@ -207,7 +207,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             {/* Earnings estimate */}
             <div className="rounded-2xl p-6" style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <div style={{ color:"#6E90C9", fontSize:14, ...MONO, marginBottom:12 }}>ESTIMATED MONTHLY EARNINGS AT SCALE</div>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 {[
                   { accounts:25,  tier:1, rate:20 },
                   { accounts:75,  tier:2, rate:25 },
@@ -576,7 +576,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   <Copy size={12}/> Copy Referral Link
                 </button>
               </div>
-              <div className="rounded-2xl overflow-hidden" style={GLASS}>
+              <div className="rounded-2xl overflow-x-auto" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
@@ -611,7 +611,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
           {tab === "payouts" && (
             <div className="space-y-4">
               <h2 style={{ ...DISPLAY, fontSize:25, color:"#E8EDF5" }}>Payout History</h2>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { label:"Total Earned",  value:`$${stats.totalEarned.toLocaleString()}`,  color:"#6E90C9" },
                   { label:"Pending",       value:`$${stats.pendingPayout.toLocaleString()}`, color:"#F6AD55" },
@@ -623,7 +623,7 @@ function PartnerDashboard({ onSignOut }: { onSignOut: () => void }) {
                   </div>
                 ))}
               </div>
-              <div className="rounded-2xl overflow-hidden" style={GLASS}>
+              <div className="rounded-2xl overflow-x-auto" style={GLASS}>
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom:"1px solid rgba(91,110,225,0.08)" }}>

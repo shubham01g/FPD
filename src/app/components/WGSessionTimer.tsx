@@ -369,7 +369,7 @@ export function WGSessionTimer({ clientId, clientName, specialistName, onSession
       <div style={{ color:"#8A9AB8", fontSize:16, marginBottom:12 }}>
         ${amount.toFixed(2)} charged to {card.brand} ****{card.last4}
       </div>
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
         {[
           { label:"Duration",  value:`${elapsedMinutes} min` },
           { label:"Blocks",    value:`${blocks} × 30 min` },
@@ -420,7 +420,7 @@ export function WGBillingHistory({ clientId }: { clientId?: string }) {
           </span>
         </div>
       </div>
-      <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
+      <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
         <div className="grid px-4 py-2.5 border-b"
           style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"rgba(255,255,255,0.06)", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
           {["Date","Client","Type","Duration","Blocks","Charged"].map(h => (
