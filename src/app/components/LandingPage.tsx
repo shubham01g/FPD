@@ -8,7 +8,7 @@ import {
   Star, Building2, Scale, Landmark, TrendingUp,
   Stethoscope, Wallet, Car, Folder, Globe, Zap, Eye, FileText,
   Bell, Calendar, Award, PawPrint, Video, DollarSign, HardDrive,
-  BarChart3, Layers,
+  BarChart3, Layers, ShieldAlert,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 
@@ -593,6 +593,34 @@ function Pricing({ onStart }: { onStart: () => void }) {
           ))}
         </div>
         <p className="text-center mt-8" style={{ color: MUTED, fontSize: 16 }}>All plans billed in USD. No contracts. Cancel anytime. Overage auto-billed at end of cycle.</p>
+
+        {/* Optional add-on — Disaster Recovery Protection */}
+        <div className="mt-14 rounded-2xl glow-surface" style={{ background: CARD, border: "1.5px solid rgba(217,154,107,0.35)", padding: "32px 34px" }}>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+            <div className="flex items-start gap-4 flex-1">
+              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 48, height: 48, background: "rgba(217,154,107,0.14)", color: "#D99A6B" }}>
+                <ShieldAlert size={22} />
+              </div>
+              <div>
+                <div style={{ ...MONO, color: "#D99A6B", fontSize: 13, letterSpacing: "0.1em", marginBottom: 6 }}>OPTIONAL ADD-ON · NOT INCLUDED IN ANY PLAN</div>
+                <div style={{ ...DISPLAY, fontSize: 24, fontWeight: 700, color: TEXT, marginBottom: 6 }}>Disaster Recovery Protection</div>
+                <p style={{ color: SOFT, fontSize: 16, lineHeight: 1.7, maxWidth: 520 }}>
+                  Unlocks the 48-hour Emergency Bypass Protocol for a full, encrypted bulk export of your vault (up to 100 GB) during a crisis. Add it to any plan — billed monthly or annually.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center lg:items-end gap-3 flex-shrink-0">
+              <div className="flex items-baseline gap-1">
+                <span style={{ ...DISPLAY, fontSize: 36, fontWeight: 800, color: TEXT }}>${annual ? "3.99" : "4.99"}</span>
+                <span style={{ color: MUTED, fontSize: 16 }}>/mo</span>
+              </div>
+              <div style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>{annual ? "Billed $47.88/yr · Save 20%" : "Billed monthly · switch to annual to save 20%"}</div>
+              <button onClick={onStart} className="py-3 px-6 rounded-xl font-semibold text-sm fpd-btn-lift" style={{ background: "rgba(217,154,107,0.12)", color: "#D99A6B", border: "1px solid rgba(217,154,107,0.35)" }}>
+                Add to Your Plan
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

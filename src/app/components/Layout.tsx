@@ -394,7 +394,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
                 )}
               </button>
               {notifOpen && (
-                <div className="absolute rounded-2xl fpd-fade-in-up" style={{ top: "calc(100% + 10px)", right: 0, width: 340, background: PANEL, border: `1px solid ${BORDER_S}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)", zIndex: 60, overflow: "hidden" }}>
+                <div className="absolute rounded-2xl fpd-fade-in-up" style={{ top: "calc(100% + 10px)", right: 0, width: "min(340px, calc(100vw - 32px))", maxWidth: "calc(100vw - 32px)", background: PANEL, border: `1px solid ${BORDER_S}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)", zIndex: 60, overflow: "hidden" }}>
                   <div className="flex items-center justify-between" style={{ padding: "13px 15px", borderBottom: `1px solid ${BORDER}` }}>
                     <span style={{ fontSize: 16, fontWeight: 700, color: TEXT }}>Notifications</span>
                     {unreadCount > 0 && <button onClick={markAllRead} style={{ fontSize: 14, color: "#6FAE8B", fontWeight: 600 }}>Mark all read</button>}

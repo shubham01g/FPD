@@ -449,7 +449,7 @@ export function DisasterRecoveryAdmin() {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label:"Active Bypasses",  value:stats.active,  color:"#F6AD55" },
             { label:"Granted Today",    value:stats.today,   color:"#6E90C9" },
@@ -503,7 +503,7 @@ export function DisasterRecoveryAdmin() {
           </div>
         )}
 
-        <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.16)" }}>
+        <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.16)" }}>
           <div className="flex items-center justify-between px-5 py-4 flex-wrap gap-3" style={{ background:"#101728" }}>
             <div style={{ fontSize:16, fontWeight:700, color:"#E8EDF5" }}>User Bypass Management</div>
             <div className="flex items-center gap-3">
@@ -601,7 +601,7 @@ export function DisasterRecoveryAdmin() {
 
                 {isExpanded && (
                   <div style={{ padding:"16px 20px 20px", background:"rgba(246,173,85,0.03)", borderBottom:"2px solid rgba(246,173,85,0.15)" }}>
-                    <div className="grid grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                       <div>
                         <div style={{ fontSize:11, color:"#8A9AB8", ...MONO, marginBottom:4 }}>EMAIL</div>
                         <div style={{ fontSize:13, color:"#E8EDF5" }}>{user.email}</div>

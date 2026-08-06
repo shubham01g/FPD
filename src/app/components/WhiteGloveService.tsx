@@ -115,7 +115,7 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
 
       <div className="field">
         <label>BEST TIME TO CALL</label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
             <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))} className="pick-btn"
               style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?"#6FAE8B":MUTED }}>

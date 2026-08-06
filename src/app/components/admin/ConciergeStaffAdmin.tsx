@@ -79,7 +79,7 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
           {/* Role */}
           <div>
             <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>ROLE</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {(Object.entries(ROLE_LABELS) as [StaffRole, string][]).map(([id, label]) => (
                 <button key={id} onClick={() => setForm(p => ({ ...p, role:id }))}
                   className="px-3 py-2.5 rounded-2xl text-xs font-bold text-center transition-all"
@@ -306,7 +306,7 @@ export function ConciergeStaffAdmin() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label:"Active Staff",   value:active,    color:"#D99A6B" },
           { label:"Pending Invite", value:invited,   color:"#F6AD55" },

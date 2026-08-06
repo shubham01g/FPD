@@ -211,7 +211,7 @@ export function PartnershipAdmin() {
       </div>
 
       {/* Partners table */}
-      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-2xl border overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
           style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}

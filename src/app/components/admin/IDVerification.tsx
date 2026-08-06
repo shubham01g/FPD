@@ -60,7 +60,7 @@ export function IDVerification() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Pending Review", value: 3, color: "#F6AD55", icon: <Clock size={16} /> },
           { label: "Approved Today", value: 7, color: "#D99A6B", icon: <CheckCircle size={16} /> },

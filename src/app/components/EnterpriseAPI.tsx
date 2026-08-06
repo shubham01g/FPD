@@ -271,7 +271,7 @@ export function EnterpriseAPI() {
 
       {/* ENDPOINTS TAB */}
       {activeTab === "endpoints" && (
-        <div className="grid" style={{ gridTemplateColumns: "260px 1fr", gap: 20, minHeight: 600 }}>
+        <div className="grid grid-cols-1 lg:[grid-template-columns:260px_1fr]" style={{ gap: 20, minHeight: 600 }}>
           {/* sidebar */}
           <div className="rounded-2xl overflow-hidden" style={GLASS}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
@@ -498,7 +498,7 @@ app.post('/fpd-webhook', (req, res) => {
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Usage This Month</h3>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[{ label:"API Calls", value:"84,291", limit:"1M included", color:"#6E90C9" }, { label:"Webhooks Sent", value:"12,841", limit:"Unlimited", color:"#D99A6B" }, { label:"Documents Accessed", value:"2,190", limit:"Unlimited", color:"#6FAE8B" }, { label:"Rate Limit Hits", value:"0", limit:"1,000/min", color:"#F6AD55" }].map(stat => (
                 <div key={stat.label} className="p-4 rounded-2xl" style={{ background: "rgba(91,110,225,0.04)", border: "1px solid rgba(91,110,225,0.1)" }}>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 27.5, color: stat.color }}>{stat.value}</div>

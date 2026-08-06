@@ -564,7 +564,7 @@ export function EmailTemplates() {
         </div>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: "300px 1fr", gap: 16, minHeight: 700 }}>
+      <div className="grid grid-cols-1 lg:[grid-template-columns:300px_1fr]" style={{ gap: 16, minHeight: 700 }}>
         {/* Template list */}
         <div className="rounded-2xl overflow-hidden flex flex-col" style={GLASS}>
           {/* Search + filter */}

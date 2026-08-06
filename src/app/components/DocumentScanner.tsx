@@ -317,7 +317,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
             {/* Scan mode picker */}
             <div className="px-5 py-4 border-t" style={{ borderColor:"rgba(255,255,255,0.05)" }}>
               <div style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)", marginBottom:8 }}>SCAN MODE</div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(Object.entries(SCAN_FILTERS) as [ScanMode, typeof SCAN_FILTERS[ScanMode]][]).map(([id, cfg]) => (
                   <button key={id} onClick={() => applyFilter(id)}
                     className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
@@ -341,7 +341,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
               </div>
               <div>
                 <label style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>SAVE TO FOLDER</label>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   {FOLDERS.map(f => (
                     <button key={f.id} onClick={() => setDocFolder(f.id)}
                       className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-center transition-all"

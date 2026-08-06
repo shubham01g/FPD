@@ -479,7 +479,7 @@ export function SystemHealth() {
         <div className="space-y-5">
 
           {/* KPI row */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label:"System Uptime",     value:"99.89%", sub:"30-day rolling avg",    color:T.green },
               { label:"Active Services",   value:`${operationalCount}/${services.length}`, sub:"All regions",   color:T.primary },
@@ -585,7 +585,7 @@ export function SystemHealth() {
       {activeTab === "performance" && (
         <div className="space-y-5">
           {/* KPI row */}
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
               { label:"p50 Latency",   value:"84 ms",    color:T.green },
               { label:"p95 Latency",   value:"172 ms",   color:T.primary },
@@ -1324,7 +1324,7 @@ function AlertRecipientsPanel({
       {adding && (
         <div style={CARD}>
           <SLabel>New Alert Recipient</SLabel>
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             {[
               { label:"FULL NAME *", key:"name",  ph:"e.g. Alex Rivera" },
               { label:"EMAIL *",     key:"email", ph:"a.rivera@email.com" },
@@ -1364,7 +1364,7 @@ function AlertRecipientsPanel({
       )}
 
       {/* Recipients table */}
-      <div style={{ ...CARD, padding:0, overflow:"hidden" }}>
+      <div style={{ ...CARD, padding:0, overflowX:"auto" }}>
         <div className="grid px-5 py-3"
           style={{ gridTemplateColumns:"1fr auto auto auto auto", gap:16,
             background:"rgba(10,20,40,0.9)", borderBottom:`1px solid ${T.border}` }}>
@@ -1600,7 +1600,7 @@ function ApiMonitorPanel() {
       </div>
 
       {/* ── KPI row ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
           { label:"Endpoints Up",      value:upCount,                          sub:"Healthy",           color:T.green  },
           { label:"Slow / Degraded",   value:slowCount,                        sub:"Above warn threshold",color:T.amber  },
@@ -1646,7 +1646,7 @@ function ApiMonitorPanel() {
               <input value={newEp.description} onChange={e=>setNewEp(p=>({...p,description:e.target.value}))}
                 placeholder="What this endpoint does" style={INPUT}/>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 { label:"WARN THRESHOLD (ms)", key:"thresholdWarnMs", ph:"200" },
                 { label:"DOWN THRESHOLD (ms)", key:"thresholdDownMs", ph:"1000" },
@@ -1699,11 +1699,11 @@ function ApiMonitorPanel() {
       </div>
 
       {/* ── Two-panel layout: list + detail ─────────────────────── */}
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
 
         {/* ── Endpoint list ─────────────────────────────────────── */}
-        <div style={{ flex:selected ? "0 0 52%" : "1", minWidth:0 }}>
-          <div style={{ ...CARD, padding:0, overflow:"hidden" }}>
+        <div className={`w-full ${selected ? "lg:flex-[0_0_52%]" : "lg:flex-1"}`} style={{ minWidth:0 }}>
+          <div style={{ ...CARD, padding:0, overflowX:"auto" }}>
             {/* Table header */}
             <div className="grid px-4 py-3"
               style={{ gridTemplateColumns:"56px 1fr 80px 80px 90px 70px 80px", gap:12,
@@ -1803,7 +1803,7 @@ function ApiMonitorPanel() {
 
         {/* ── Detail panel ──────────────────────────────────────── */}
         {selectedEp && (
-          <div style={{ flex:"0 0 46%", minWidth:0, position:"sticky", top:16 }}>
+          <div className="w-full lg:flex-[0_0_46%]" style={{ minWidth:0, position:"sticky", top:16 }}>
             <div style={CARD}>
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
@@ -1849,7 +1849,7 @@ function ApiMonitorPanel() {
               </div>
 
               {/* Stats grid */}
-              <div className="grid grid-cols-3 gap-3 mb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                 {[
                   { label:"24h Uptime",  value:`${selectedEp.uptime24h}%`,
                     color: selectedEp.uptime24h>=99.9?T.green:selectedEp.uptime24h>=99?T.amber:T.red },
@@ -1978,7 +1978,7 @@ function ApiMonitorPanel() {
       {/* ── Rate Limits ─────────────────────────────────────────── */}
       <div style={CARD}>
         <SLabel>Rate Limits — Per Plan</SLabel>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { tier:"Starter",        rps:10,   burst:50,    daily:1000,   color:"#8A9AB8" },
             { tier:"Foundation",     rps:30,   burst:150,   daily:5000,   color:"#6FAE8B" },

@@ -43,7 +43,7 @@ function BillingEditor({
     <div className="space-y-4">
       <div>
         <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>BILLING MODEL</label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {modelTypes.map(t => (
             <button key={t.id} onClick={() => switchModel(t.id)}
               className="flex flex-col items-center gap-1 p-3 rounded-2xl transition-all"
@@ -347,7 +347,7 @@ export function PartnerOnboardingAdmin() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label:"Active WL Accounts",  value:activeSales.length,                  color:"#6E90C9" },
             { label:"Total WL Users",       value:totalUsers.toLocaleString(),         color:"#D99A6B" },
@@ -424,7 +424,7 @@ export function PartnerOnboardingAdmin() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                     <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
                       <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>BILLING MODEL</div>
                       <div style={{ color:"#E8EDF5", fontSize:14, fontWeight:600, marginTop:2 }}>{billingStr}</div>

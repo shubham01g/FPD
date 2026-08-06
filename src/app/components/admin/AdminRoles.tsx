@@ -405,7 +405,7 @@ function AdminCard({
               </div>
             )}
 
-            <div className="rounded-2xl overflow-hidden" style={{ border:"1px solid rgba(91,110,225,0.08)" }}>
+            <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.08)" }}>
               <div className="grid px-3 py-2" style={{ gridTemplateColumns:"1fr auto auto auto", background:"rgba(91,110,225,0.04)", borderBottom:"1px solid rgba(91,110,225,0.08)" }}>
                 <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>MODULE</span>
                 {["VIEW","EDIT","DELETE"].map(h => (
@@ -521,7 +521,7 @@ export function AdminRoles() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map(s => (
           <div key={s.label} className="p-4 rounded-2xl text-center" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:s.color, fontWeight:700 }}>{s.value}</div>

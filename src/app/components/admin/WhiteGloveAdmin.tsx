@@ -154,7 +154,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           const sessionCost = Math.ceil(totalMins / 30) * RATE_PER_30;
           const totalCost = SETUP_FEE + sessionCost;
           return (
-            <div className="grid grid-cols-3 gap-2 mt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
               {[
                 { label:"Setup Fee", value:"$99", color:"#6FAE8B", sub:"one-time" },
                 { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`$${sessionCost} billed` },
@@ -378,7 +378,7 @@ export function WhiteGloveAdmin() {
 
       {mainTab === "clients" && <>
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label:"Active Clients",     value:activeCount,     color:"#6FAE8B" },
           { label:"Completed",          value:completedCount,  color:"#D99A6B" },
@@ -467,7 +467,7 @@ export function WhiteGloveAdmin() {
 
               <div>
                 <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {SPECIALISTS.map(s => (
                     <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
                       className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
