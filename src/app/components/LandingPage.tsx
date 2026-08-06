@@ -542,13 +542,14 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
 }
 
 /* ── PRICING (5 tiers + annual toggle) ────────────────────────── */
-type Plan = { name: string; price: number; storage: string; contacts: number; color: string; popular: boolean; features: string[] };
+type Plan = { name: string; price: number; storage: string; contacts: number; color: string; popular: boolean; features: string[]; overage: number };
+/* Overage rates match Storage & Usage exactly: $0.50/GB on Starter, $0.40/GB on every other plan. */
 const PLANS: Plan[] = [
-  { name: "Starter", price: 1.99, storage: "1 GB", contacts: 1, color: "#D99A6B", popular: false, features: ["1 GB Legacy Storage", "1 Legacy Contact", "1 Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Foundation", price: 9.99, storage: "50 GB", contacts: 3, color: "#6E90C9", popular: false, features: ["50 GB Legacy Storage", "3 Legacy Contacts", "3 Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Legacy Archive", price: 24.99, storage: "250 GB", contacts: -1, color: "#A98CC7", popular: true, features: ["250 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
-  { name: "Legacy Pro", price: 49.99, storage: "500 GB", contacts: -1, color: "#A98CC7", popular: false, features: ["500 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
-  { name: "Legacy Vault", price: 129.99, storage: "1 TB", contacts: -1, color: "#ED8936", popular: false, features: ["1 TB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  { name: "Starter", price: 1.99, storage: "1 GB", contacts: 1, color: "#D99A6B", popular: false, overage: 0.50, features: ["1 GB Legacy Storage", "1 Legacy Contact", "1 Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  { name: "Foundation", price: 9.99, storage: "50 GB", contacts: 3, color: "#6E90C9", popular: false, overage: 0.40, features: ["50 GB Legacy Storage", "3 Legacy Contacts", "3 Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  { name: "Legacy Archive", price: 24.99, storage: "250 GB", contacts: -1, color: "#A98CC7", popular: true, overage: 0.40, features: ["250 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  { name: "Legacy Pro", price: 49.99, storage: "500 GB", contacts: -1, color: "#A98CC7", popular: false, overage: 0.40, features: ["500 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  { name: "Legacy Vault", price: 129.99, storage: "1 TB", contacts: -1, color: "#ED8936", popular: false, overage: 0.40, features: ["1 TB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
 ];
 
 function Pricing({ onStart }: { onStart: () => void }) {
@@ -576,7 +577,12 @@ function Pricing({ onStart }: { onStart: () => void }) {
                 <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.price * 0.8).toFixed(2) : plan.price}</span>
                 <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
               </div>
-              <div style={{ color: MUTED, fontSize: 16, marginBottom: 22 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>
+              <div style={{ color: MUTED, fontSize: 16, marginBottom: 10 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>
+              <div style={{ ...MONO, color: MUTED, fontSize: 12.5, marginBottom: 22, padding: "4px 10px", background: "rgba(91,110,225,0.06)", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 4, width: "fit-content" }}>
+                <span>Overage:</span>
+                <span style={{ color: plan.color, fontWeight: 700 }}>${plan.overage.toFixed(2)}/GB</span>
+                <span>above limit</span>
+              </div>
               <ul className="flex flex-col gap-3 flex-1 mb-7">
                 {plan.features.map(f => (
                   <li key={f} className="flex items-start gap-2">
