@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
-import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge } from "lucide-react";
+import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
+import { DR_ADDON_KEY } from "./DisasterRecovery";
 import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.png";
 
@@ -147,11 +148,166 @@ const STORAGE_CSS = `
 .fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#0F1624;}
 .fpd-storage .alert-row + .alert-row{margin-top:10px;}
 .fpd-storage .alert-tag{border-radius:16px;padding:4px 9px;font-family:var(--font-mono);font-size:14px;font-weight:700;flex-shrink:0;}
+
+/* platform add-on */
+.fpd-storage .addon-card{padding:22px 26px;border-radius:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;background:#0F1624;border:1.5px solid rgba(255,255,255,0.08);transition:background .2s,border-color .2s;}
+.fpd-storage .addon-card.on{background:rgba(217,165,94,0.08);border-color:rgba(217,165,94,0.35);}
+.fpd-storage .addon-ico{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(217,165,94,0.1);border:1.5px solid rgba(217,165,94,0.25);}
+.fpd-storage .addon-badge{font-size:10.5px;padding:2px 9px;border-radius:20px;font-family:var(--font-mono);font-weight:700;flex-shrink:0;}
+.fpd-storage .addon-price{font-size:21px;font-weight:800;}
+.fpd-storage .addon-btn{padding:10px 20px;border-radius:99px;border:none;cursor:pointer;font-weight:700;font-size:14px;font-family:var(--font-body);background:linear-gradient(135deg,${WARN},#B4842E);color:#1C1608;box-shadow:0 6px 16px -8px rgba(217,165,94,0.6);}
+.fpd-storage .addon-cancel{margin-top:8px;font-size:12.5px;color:${MUTED};background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:4px 11px;cursor:pointer;font-family:var(--font-body);}
+
+/* addon purchase modal */
+.fpd-storage .backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.8);backdrop-filter:blur(8px);}
+.fpd-storage .modal{width:100%;max-width:460px;max-height:92vh;overflow-y:auto;background:#101728;border-radius:22px;border:1px solid rgba(255,255,255,0.08);}
+.fpd-storage .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;background:linear-gradient(135deg,${WARN},#B4842E);}
+.fpd-storage .modal-head-title{color:#1C1608;font-weight:700;font-size:15px;}
+.fpd-storage .modal-head-sub{color:rgba(28,22,8,0.75);font-size:12px;}
+.fpd-storage .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+.fpd-storage .field label{display:block;margin-bottom:5px;font-size:11px;font-weight:600;color:${MUTED};font-family:var(--font-mono);letter-spacing:0.05em;}
+.fpd-storage .field input{width:100%;padding:11px 13px;border-radius:10px;background:#0F1624;border:1.5px solid rgba(217,165,94,0.3);color:${TEXT};font-size:14px;outline:none;font-family:var(--font-body);}
+.fpd-storage .field input:focus{border-color:rgba(217,165,94,0.6);}
+.fpd-storage .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fpd-storage .modal-btn-primary{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:14.5px;font-family:var(--font-body);background:linear-gradient(135deg,${WARN},#B4842E);color:#1C1608;box-shadow:0 6px 16px -8px rgba(217,165,94,0.6);}
+.fpd-storage .modal-btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 `;
+
+const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+
+/* ── Disaster Recovery Protection — add-on purchase modal ──────────
+   Mirrors the modal in DisasterRecovery.tsx (same pricing, same
+   fpd_dr_addon_active localStorage key) so subscribing from either
+   page stays in sync. No bypass-simulation step here — that lives on
+   the dedicated Disaster Recovery page. */
+function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
+  const [step, setStep] = useState<"select" | "pay" | "done">("select");
+  const [cardNum, setCardNum] = useState("4242424242424242");
+  const [cardName, setCardName] = useState("James Doe");
+  const [expiry, setExpiry] = useState("12/28");
+  const [cvv, setCvv] = useState("424");
+  const [loading, setLoading] = useState(false);
+
+  const handlePay = async () => {
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1400));
+    localStorage.setItem(DR_ADDON_KEY, JSON.stringify({ active: true, billing, activatedAt: Date.now() }));
+    setLoading(false);
+    onSuccess();
+    setStep("done");
+  };
+
+  return (
+    <div className="backdrop">
+      <div className="modal">
+        <div className="modal-head">
+          <div className="flex items-center gap-3">
+            <ShieldAlert size={20} color="#1C1608" />
+            <div>
+              <div className="modal-head-title">Disaster Recovery Protection</div>
+              <div className="modal-head-sub">Platform Add-On</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "rgba(28,22,8,0.15)", border: "none",
+            borderRadius: 8, padding: 6, cursor: "pointer", color: "#1C1608" }}><X size={16} /></button>
+        </div>
+
+        <div className="modal-body">
+          {step === "select" && (<>
+            <div className="row2">
+              {(["monthly", "annual"] as const).map(b => (
+                <button key={b} onClick={() => setBilling(b)} style={{
+                  padding: "14px 12px", borderRadius: 12, cursor: "pointer", textAlign: "center",
+                  border: `2px solid ${billing === b ? WARN : "rgba(255,255,255,0.1)"}`,
+                  background: billing === b ? "rgba(217,165,94,0.1)" : "#0F1624" }}>
+                  <div style={{ fontSize: 11, color: MUTED, ...MONO, marginBottom: 4 }}>{b.toUpperCase()}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: billing === b ? WARN : TEXT }}>
+                    ${b === "annual" ? "3.99" : "4.99"}<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span>
+                  </div>
+                  {b === "annual" && <div style={{ fontSize: 11, color: POS, marginTop: 3 }}>Save 20% · $47.88/yr</div>}
+                </button>
+              ))}
+            </div>
+            <div style={{ background: "rgba(217,165,94,0.06)", border: "1px solid rgba(217,165,94,0.2)",
+              borderRadius: 12, padding: "14px 16px" }}>
+              {["48-hour emergency bypass window", "100 GB bulk vault export", "AES-256 encrypted archive",
+                "Secure 15-min download link", "Full audit trail"].map(item => (
+                <div key={item} className="flex items-center gap-2 py-1">
+                  <CheckCircle size={12} color={WARN} />
+                  <span style={{ fontSize: 13, color: SOFT }}>{item}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setStep("pay")} className="modal-btn-primary">
+              Continue to Payment — ${billing === "annual" ? "3.99" : "4.99"}/mo →
+            </button>
+          </>)}
+
+          {step === "pay" && (<>
+            <div style={{ background: "#0F1624", borderRadius: 10, padding: "11px 14px", fontSize: 13, color: SOFT }}>
+              <strong style={{ color: TEXT }}>Disaster Recovery Protection</strong> · {billing === "annual" ? "$47.88/yr ($3.99/mo)" : "$4.99/month"}
+            </div>
+            <div style={{ background: "rgba(91,110,225,0.08)", border: "1px dashed rgba(91,110,225,0.3)",
+              borderRadius: 8, padding: "8px 12px", fontSize: 12, color: ACCENT2 }}>
+              🎮 Pre-filled with Stripe test card — just click Pay
+            </div>
+            <div className="space-y-3">
+              <div className="field">
+                <label>CARD NUMBER</label>
+                <div style={{ position: "relative" }}>
+                  <input value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g, "").slice(0, 16))}
+                    style={{ paddingLeft: 36, letterSpacing: "0.05em" }} />
+                  <CreditCard size={14} color={WARN} style={{ position: "absolute", left: 12, top: 34, transform: "translateY(-50%)" }} />
+                </div>
+              </div>
+              <div className="field"><label>NAME ON CARD</label><input value={cardName} onChange={e => setCardName(e.target.value)} /></div>
+              <div className="row2">
+                <div className="field"><label>EXPIRY</label><input value={expiry} onChange={e => setExpiry(e.target.value)} maxLength={5} /></div>
+                <div className="field"><label>CVV</label><input value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} type="password" maxLength={4} /></div>
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: FAINT, textAlign: "center" }}>🔒 Secured by Stripe · PCI DSS Level 1</div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep("select")} style={{ flex: 1, padding: "11px", borderRadius: 10,
+                border: "1.5px solid rgba(255,255,255,0.12)", background: "transparent",
+                cursor: "pointer", color: MUTED, fontWeight: 600, fontSize: 13 }}>Back</button>
+              <button onClick={handlePay} disabled={loading} className="modal-btn-primary" style={{ flex: 2, width: "auto" }}>
+                {loading ? "Processing…" : `Pay $${billing === "annual" ? "47.88" : "4.99"} →`}
+              </button>
+            </div>
+          </>)}
+
+          {step === "done" && (
+            <div className="flex flex-col items-center gap-5 py-2">
+              <div style={{ width: 60, height: 60, borderRadius: "50%",
+                background: "rgba(95,190,145,0.12)", border: "2px solid rgba(95,190,145,0.3)",
+                display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <CheckCircle size={26} color={POS} />
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: TEXT, marginBottom: 4 }}>Add-On Activated!</div>
+                <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6 }}>
+                  Disaster Recovery Protection is now active on your account.<br />
+                  Contact support to request an emergency bypass when needed.
+                </p>
+              </div>
+              <button onClick={onClose} className="modal-btn-primary" style={{ width: "auto", padding: "11px 28px" }}>Done</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function StorageUsage() {
   const [overageBilling] = useState(true);
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
+  const [showDRModal, setShowDRModal] = useState(false);
+  const [drActive, setDrActive] = useState(() => {
+    try { return !!JSON.parse(localStorage.getItem(DR_ADDON_KEY) ?? "null")?.active; } catch { return false; }
+  });
   const plansRef = useRef<HTMLDivElement>(null);
   const used = STORAGE_USED_GB;
   const total = STORAGE_LIMIT_GB;
@@ -351,6 +507,47 @@ export function StorageUsage() {
           </div>
         </div>
 
+        {/* ── Platform Add-Ons ── */}
+        <div>
+          <h3 className="sec-title"><span className="tick"/>Platform Add-Ons</h3>
+          <div className={`addon-card ${drActive ? "on" : ""}`}>
+            <div className="addon-ico">🛡️</div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>Disaster Recovery Protection</span>
+                {drActive ? (
+                  <span className="addon-badge" style={{ background: "rgba(217,165,94,0.14)", color: WARN, border: "1px solid rgba(217,165,94,0.3)" }}>⚡ ACTIVE</span>
+                ) : (
+                  <span className="addon-badge" style={{ background: "rgba(163,173,201,0.1)", color: MUTED, border: "1px solid rgba(163,173,201,0.2)" }}>NOT SUBSCRIBED</span>
+                )}
+              </div>
+              <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
+                {drActive
+                  ? "Your account is protected. A Master Admin can activate a 48-hour emergency bypass window giving you bulk-export access to your entire vault."
+                  : "Emergency bulk-export access for your vault during a crisis — data loss, account compromise, or urgent estate needs. 48-hour admin-activated bypass, 100 GB export limit."}
+              </p>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              {drActive ? (
+                <div>
+                  <div style={{ fontSize: 11, color: WARN, ...MONO, marginBottom: 4 }}>SUBSCRIBED</div>
+                  <div className="addon-price" style={{ color: WARN }}>$4.99<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span></div>
+                  <button onClick={() => { localStorage.removeItem(DR_ADDON_KEY); setDrActive(false); toast.success("Add-on cancelled"); }} className="addon-cancel">
+                    Cancel Add-On
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 11, color: MUTED, ...MONO, marginBottom: 4 }}>FROM</div>
+                  <div className="addon-price" style={{ color: TEXT }}>$3.99<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span></div>
+                  <div style={{ fontSize: 11, color: MUTED, marginBottom: 10 }}>or $4.99/mo monthly</div>
+                  <button onClick={() => setShowDRModal(true)} className="addon-btn">Add for $4.99/mo</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* ── Alert history ── */}
         <div className="card pad">
           <h3 className="sec-title"><span className="tick"/>Notification History</h3>
@@ -373,6 +570,13 @@ export function StorageUsage() {
           label={`${cryptoPlan.name} Plan — $${cryptoPlan.price}/mo`}
           onSuccess={() => { setCryptoPlan(null); toast.success(`Upgraded to ${cryptoPlan.name} via crypto!`); }}
           onClose={() => setCryptoPlan(null)}
+        />
+      )}
+
+      {showDRModal && (
+        <DRAddonModal
+          onClose={() => setShowDRModal(false)}
+          onSuccess={() => { setDrActive(true); toast.success("Disaster Recovery Protection is now active"); }}
         />
       )}
     </div>

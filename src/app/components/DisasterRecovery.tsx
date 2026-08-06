@@ -120,7 +120,7 @@ interface FileCategory {
 
 /* ── demo state ──────────────────────────────────────────────────── */
 const DR_STORAGE_KEY = "fpd_disaster_recovery_bypass";
-const DR_ADDON_KEY   = "fpd_dr_addon_active";
+export const DR_ADDON_KEY = "fpd_dr_addon_active";
 
 function loadBypass(): BypassSession | null {
   try {
