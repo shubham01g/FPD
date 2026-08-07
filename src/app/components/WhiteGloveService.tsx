@@ -164,8 +164,8 @@ const WG_CSS = `
 
 /* hero — full-bleed photo, tinted toward the brand palette and scrimmed for text legibility */
 .fpd-wg .hero{position:relative;overflow:hidden;padding:76px 24px 90px;background:linear-gradient(135deg,#060B16,#0A1020);}
-.fpd-wg .hero-art{position:absolute;inset:-6%;z-index:0;background-image:linear-gradient(160deg,rgba(9,14,28,0.5),rgba(91,110,225,0.28)),url(${heroWhiteGlovePhoto});background-size:cover;background-position:center 30%;background-blend-mode:color;pointer-events:none;}
-.fpd-wg .hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(6,11,22,0.55) 0%,rgba(6,11,22,0.82) 55%,rgba(7,10,18,0.94) 100%);pointer-events:none;}
+.fpd-wg .hero-art{position:absolute;inset:-6%;z-index:0;background-image:url(${heroWhiteGlovePhoto});background-size:cover;background-position:center 25%;pointer-events:none;}
+.fpd-wg .hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(6,11,22,0.32) 0%,rgba(8,13,26,0.5) 45%,rgba(7,10,18,0.78) 100%),linear-gradient(160deg,rgba(9,14,28,0.15),rgba(91,110,225,0.22));pointer-events:none;}
 .fpd-wg .hero-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(91,110,225,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.04) 1px,transparent 1px);background-size:50px 50px;}
 .fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.14) 0%,transparent 70%);pointer-events:none;z-index:2;}
 .fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;z-index:2;}
