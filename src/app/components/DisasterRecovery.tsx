@@ -6,7 +6,8 @@ import {
   Copy, X, Info, ArrowRight, Package, CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
-import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_hero_photo.png";
+import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.png";
+import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -571,6 +572,25 @@ export function DisasterRecovery() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="hbanner" style={{ minHeight: 200 }}>
+          <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.55), rgba(76,63,168,0.4)), url(${wildfireDisasterPhoto})` }} />
+          <div className="scrim" />
+          <div className="hcontent">
+            <span className="heyebrow">Why It Matters</span>
+            <h1 style={{ fontSize: 26 }}>Disasters don't send <span className="accent">a warning.</span></h1>
+            <p>Wildfires, storms, and outages can take your devices — and your records — in minutes. Your bypass window, encrypted export, and audit trail are ready the moment you need them, not after.</p>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:14 }}>
+              {["48-HR WINDOW","100 GB EXPORT","AES-256 SECURE"].map(chip => (
+                <span key={chip} style={{
+                  ...MONO, fontSize:11, fontWeight:700, letterSpacing:"0.06em", color:"#fff",
+                  background:"rgba(255,255,255,0.14)", border:"1px solid rgba(255,255,255,0.22)",
+                  borderRadius:99, padding:"5px 12px",
+                }}>{chip}</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
