@@ -633,17 +633,6 @@ export function DisasterRecovery() {
                 Session was active · Reason: {session.reason} · Granted by: {session.activatedBy}
               </div>
             )}
-            <button onClick={() => {
-              const now = Date.now();
-              localStorage.setItem(DR_STORAGE_KEY, JSON.stringify({
-                activatedAt: now, expiresAt: now + 48 * 3600_000,
-                activatedBy: "Master Admin", reason: "Demo — Emergency Access"
-              }));
-              localStorage.setItem(DR_ADDON_KEY, JSON.stringify({ active:true, billing:"monthly", activatedAt:now }));
-              toast.success("Demo: new 48-hour bypass activated — page will update automatically");
-            }} className="btn-sec" style={{ color:ACCENT2 }}>
-              ⚡ Start a New Demo Session
-            </button>
           </div>
         </div>
       </div>
