@@ -79,6 +79,7 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  photoUrl: string;
   phone: string;
   plan: string;
   planId: string;
@@ -135,7 +136,7 @@ function mfaMethodLabel(method: AdminUser["mfaMethod"]): string {
 
 export const ADMIN_USERS: AdminUser[] = [
   {
-    id:"USR-8821", name:"James Doe", email:"james.doe@email.com", phone:"(404) 555-0182",
+    id:"USR-8821", name:"James Doe", email:"james.doe@email.com", photoUrl:"", phone:"(404) 555-0182",
     plan:"Legacy Archive", planId:"family_archive",
     status:"active", mfa:true, mfaMethod:"sms", joined:"Apr 8, 2026", lastLogin:"2 hours ago",
     nextBilling:"Aug 8, 2026", autoRenew:true,
@@ -158,7 +159,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8812", name:"Sarah Chen", email:"s.chen@email.com", phone:"(213) 555-0841",
+    id:"USR-8812", name:"Sarah Chen", email:"s.chen@email.com", photoUrl:"", phone:"(213) 555-0841",
     plan:"Legacy Archive", planId:"family_archive",
     status:"active", mfa:true, mfaMethod:"sms", joined:"Nov 15, 2024", lastLogin:"5 min ago",
     nextBilling:"Aug 15, 2026", autoRenew:true,
@@ -181,7 +182,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8805", name:"Marcus Johnson", email:"m.johnson@email.com", phone:"(312) 555-0294",
+    id:"USR-8805", name:"Marcus Johnson", email:"m.johnson@email.com", photoUrl:"", phone:"(312) 555-0294",
     plan:"Foundation", planId:"foundation",
     status:"active", mfa:false, mfaMethod:null, joined:"Jan 20, 2025", lastLogin:"1 day ago",
     nextBilling:"Jul 20, 2026", autoRenew:true,
@@ -200,7 +201,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8798", name:"Patricia Wells", email:"p.wells@email.com", phone:"(512) 555-0184",
+    id:"USR-8798", name:"Patricia Wells", email:"p.wells@email.com", photoUrl:"", phone:"(512) 555-0184",
     plan:"Legacy Pro", planId:"legacy_pro",
     status:"active", mfa:true, mfaMethod:"authenticator", joined:"Sep 3, 2024", lastLogin:"3 hours ago",
     nextBilling:"Aug 3, 2026", autoRenew:true,
@@ -222,7 +223,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8791", name:"Robert Kim", email:"r.kim@email.com", phone:"(503) 555-0029",
+    id:"USR-8791", name:"Robert Kim", email:"r.kim@email.com", photoUrl:"", phone:"(503) 555-0029",
     plan:"Foundation", planId:"foundation",
     status:"active", mfa:false, mfaMethod:null, joined:"May 22, 2026", lastLogin:"4 days ago",
     nextBilling:"Jun 22, 2026", autoRenew:false,
@@ -240,7 +241,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8784", name:"Amanda Torres", email:"a.torres@email.com", phone:"(786) 555-0338",
+    id:"USR-8784", name:"Amanda Torres", email:"a.torres@email.com", photoUrl:"", phone:"(786) 555-0338",
     plan:"Legacy Archive", planId:"family_archive",
     status:"active", mfa:true, mfaMethod:"email_otp", joined:"Mar 1, 2026", lastLogin:"30 min ago",
     nextBilling:"Aug 1, 2026", autoRenew:true,
@@ -260,7 +261,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8777", name:"Derek Mills", email:"d.mills@email.com", phone:"(614) 555-0091",
+    id:"USR-8777", name:"Derek Mills", email:"d.mills@email.com", photoUrl:"", phone:"(614) 555-0091",
     plan:"Legacy Archive", planId:"family_archive",
     status:"suspended", mfa:false, mfaMethod:null, joined:"Jul 12, 2024", lastLogin:"14 days ago",
     nextBilling:"—", autoRenew:false,
@@ -283,7 +284,7 @@ export const ADMIN_USERS: AdminUser[] = [
     ],
   },
   {
-    id:"USR-8770", name:"Grace Nakamura", email:"g.nakamura@email.com", phone:"(808) 555-0214",
+    id:"USR-8770", name:"Grace Nakamura", email:"g.nakamura@email.com", photoUrl:"", phone:"(808) 555-0214",
     plan:"Legacy Pro", planId:"legacy_pro",
     status:"active", mfa:true, mfaMethod:"authenticator", joined:"Feb 28, 2025", lastLogin:"1 hour ago",
     nextBilling:"Jul 28, 2026", autoRenew:true,
@@ -361,6 +362,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
   const plan        = PLANS.find(p => p.id === user.planId) ?? PLANS[2];
   const price       = plan.price;
   const initials    = user.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+  const [photoFailed, setPhotoFailed] = useState(false);
   const storagePct  = Math.round((user.storage / user.storageTotal) * 100);
   const warnStorage = storagePct >= 80;
 
@@ -430,11 +432,17 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
           style={{ borderColor:T.border, background:T.card }}>
 
           {/* Avatar */}
-          <div className="flex items-center justify-center rounded-2xl flex-shrink-0 font-bold text-xl"
-            style={{ width:58, height:58, background:`linear-gradient(135deg,#7E6BD8,#5B6EE1)`,
-              color:"#fff", boxShadow:"0 4px 16px rgba(91,110,225,0.4)", ...DISPLAY }}>
-            {initials}
-          </div>
+          {user.photoUrl && !photoFailed ? (
+            <img src={user.photoUrl} alt={user.name} onError={() => setPhotoFailed(true)}
+              className="rounded-2xl flex-shrink-0 object-cover"
+              style={{ width:58, height:58, boxShadow:"0 4px 16px rgba(91,110,225,0.4)" }}/>
+          ) : (
+            <div className="flex items-center justify-center rounded-2xl flex-shrink-0 font-bold text-xl"
+              style={{ width:58, height:58, background:`linear-gradient(135deg,#7E6BD8,#5B6EE1)`,
+                color:"#fff", boxShadow:"0 4px 16px rgba(91,110,225,0.4)", ...DISPLAY }}>
+              {initials}
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">

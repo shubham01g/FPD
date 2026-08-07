@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
-import heroAccountPhoto from "../../imports/accountsettings_hero_photo.png";
+import heroAccountPhoto from "../../imports/accountsettings_hero_photo_v2.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
