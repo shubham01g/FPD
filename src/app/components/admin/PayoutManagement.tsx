@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { DollarSign, CheckCircle, Clock, Filter, Download, Search, TrendingUp, Users, Handshake, Layers } from "lucide-react";
+import { UserAvatar } from "./UserAvatar";
 
 type PayoutType = "all" | "affiliate" | "partnership" | "white-label";
 type PayoutStatus = "all" | "pending" | "processing" | "paid";
@@ -159,8 +160,9 @@ export function PayoutManagement() {
       <div className="rounded-2xl border overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
-          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
+          style={{ gridTemplateColumns: "auto auto 1fr auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
+          <div />
           <div />
           {["Recipient", "Type", "Period", "Rate", "Amount", "Status"].map((h) => (
             <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
@@ -172,7 +174,7 @@ export function PayoutManagement() {
             <div
               key={payout.id}
               className="grid px-5 py-3 items-center border-b"
-              style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
+              style={{ gridTemplateColumns: "auto auto 1fr auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
             >
               <input
                 type="checkbox"
@@ -180,6 +182,7 @@ export function PayoutManagement() {
                 onChange={() => toggleSelect(payout.id)}
                 style={{ accentColor: "var(--gold)", width: 16, height: 16 }}
               />
+              <UserAvatar name={payout.recipient} />
               <div>
                 <div style={{ color: "var(--foreground)", fontSize: 16 }}>{payout.recipient}</div>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{payout.email} · {payout.id}</div>
