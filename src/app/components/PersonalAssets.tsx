@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroAssetsPhoto from "../../imports/personalassets_hero_photo.png";
+import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
