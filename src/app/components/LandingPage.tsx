@@ -602,29 +602,51 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
         {/* Optional add-on — Disaster Recovery Protection */}
         <div className="mt-14 rounded-2xl glow-surface" style={{ background: CARD, border: "1.5px solid rgba(217,154,107,0.35)", padding: "32px 34px" }}>
-          <div className="flex flex-col lg:flex-row lg:items-center gap-8">
-            <div className="flex items-start gap-4 flex-1">
-              <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 48, height: 48, background: "rgba(217,154,107,0.14)", color: "#D99A6B" }}>
-                <ShieldAlert size={22} />
-              </div>
-              <div>
-                <div style={{ ...MONO, color: "#D99A6B", fontSize: 13, letterSpacing: "0.1em", marginBottom: 6 }}>OPTIONAL ADD-ON · NOT INCLUDED IN ANY PLAN</div>
-                <div style={{ ...DISPLAY, fontSize: 24, fontWeight: 700, color: TEXT, marginBottom: 6 }}>Disaster Recovery Protection</div>
-                <p style={{ color: SOFT, fontSize: 16, lineHeight: 1.7, maxWidth: 520 }}>
-                  Unlocks the 48-hour Emergency Bypass Protocol for a full, encrypted bulk export of your vault (up to 100 GB) during a crisis. Add it to any plan — billed monthly or annually.
+          <div className="flex items-start gap-4">
+            <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 48, height: 48, background: "rgba(217,154,107,0.14)", color: "#D99A6B" }}>
+              <ShieldAlert size={22} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ ...MONO, color: "#D99A6B", fontSize: 13, letterSpacing: "0.1em", marginBottom: 6 }}>OPTIONAL ADD-ON · NOT INCLUDED IN ANY PLAN</div>
+              <div style={{ ...DISPLAY, fontSize: 24, fontWeight: 700, color: TEXT, marginBottom: 10 }}>Disaster Recovery Protection</div>
+              <p style={{ color: SOFT, fontSize: 16, lineHeight: 1.7, marginBottom: 14 }}>
+                When a natural disaster strikes—whether you are facing an impending wildfire, hurricane, flood, earthquake, tornado, or severe winter storm—swift preparation is everything. In the event of an active or imminent catastrophe, your Master Admin can initiate a secure 48-hour emergency bypass window, granting you instant bulk-download access to safeguard your entire vault before infrastructure fails.
+              </p>
+              <p style={{ color: SOFT, fontSize: 16, lineHeight: 1.7 }}>
+                If disaster recovery efforts require your full attention and you run out of time, you can easily call in to request additional time to finish downloading your documentation.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ ...MONO, color: MUTED, fontSize: 13, letterSpacing: "0.1em", margin: "28px 0 14px" }}>CORE PROTECTION FEATURES</div>
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            {[
+              { label: "Extended Window", desc: "A dedicated 48-hour access window to retrieve and secure your vital digital assets, with the flexibility to call in for additional time if disaster response demands your full attention." },
+              { label: "High-Capacity Export", desc: "Support for massive archives with up to 100 GB bulk export capability." },
+              { label: "Military-Grade Security", desc: "Delivered via an AES-256 encrypted link to protect your data in transit." },
+              { label: "Rapid Generation", desc: "A short-lived, 15-minute secure download link generation cycle to block unauthorized interception." },
+              { label: "Strict Authorization", desc: "Requires mandatory Admin MFA activation before the crisis bypass can be triggered." },
+              { label: "Complete Transparency", desc: "Generates a full audit trail to log every action taken during the emergency procedure." },
+            ].map(f => (
+              <div key={f.label} className="flex items-start gap-2">
+                <CheckCircle2 size={13} color="#D99A6B" style={{ marginTop: 4, flexShrink: 0 }} />
+                <p style={{ margin: 0 }}>
+                  <span style={{ color: TEXT, fontWeight: 600, fontSize: 15 }}>{f.label}:</span>{" "}
+                  <span style={{ color: SOFT, fontSize: 15, lineHeight: 1.6 }}>{f.desc}</span>
                 </p>
               </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6" style={{ borderTop: "1px solid rgba(217,154,107,0.2)" }}>
+            <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
+              <span style={{ ...DISPLAY, fontSize: 36, fontWeight: 800, color: TEXT }}>${annual ? "3.99" : "4.99"}</span>
+              <span style={{ color: MUTED, fontSize: 16 }}>/mo</span>
+              <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>{annual ? "Billed $47.88/yr · Save 20%" : "Billed monthly · switch to annual to save 20%"}</span>
             </div>
-            <div className="flex flex-col items-center lg:items-end gap-3 flex-shrink-0">
-              <div className="flex items-baseline gap-1">
-                <span style={{ ...DISPLAY, fontSize: 36, fontWeight: 800, color: TEXT }}>${annual ? "3.99" : "4.99"}</span>
-                <span style={{ color: MUTED, fontSize: 16 }}>/mo</span>
-              </div>
-              <div style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>{annual ? "Billed $47.88/yr · Save 20%" : "Billed monthly · switch to annual to save 20%"}</div>
-              <button onClick={onStart} className="py-3 px-6 rounded-xl font-semibold text-sm fpd-btn-lift" style={{ background: "rgba(217,154,107,0.12)", color: "#D99A6B", border: "1px solid rgba(217,154,107,0.35)" }}>
-                Add to Your Plan
-              </button>
-            </div>
+            <button onClick={onStart} className="py-3 px-6 rounded-xl font-semibold text-sm fpd-btn-lift flex-shrink-0" style={{ background: "rgba(217,154,107,0.12)", color: "#D99A6B", border: "1px solid rgba(217,154,107,0.35)" }}>
+              Add to Your Plan
+            </button>
           </div>
         </div>
       </div>
