@@ -58,6 +58,25 @@ const storageByPlan = [
 
 /* Users data is now in UserDetailModal.tsx as ADMIN_USERS */
 
+function UserAvatar({ name, photoUrl, size = 34 }: { name: string; photoUrl?: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  if (photoUrl && !failed) {
+    return (
+      <img src={photoUrl} alt={name} onError={() => setFailed(true)}
+        className="rounded-full flex-shrink-0 object-cover"
+        style={{ width: size, height: size }}/>
+    );
+  }
+  return (
+    <div className="flex items-center justify-center rounded-full flex-shrink-0 font-bold"
+      style={{ width: size, height: size, fontSize: size * 0.37,
+        background: "linear-gradient(135deg,#7E6BD8,#5B6EE1)", color: "#fff" }}>
+      {initials}
+    </div>
+  );
+}
+
 const auditLogs = [
   { id:"LOG-9912", user:"admin@fpd.com", action:"Approved ID verification", target:"VER-2026-0841", time:"2 min ago", severity:"info" },
   { id:"LOG-9911", user:"admin@fpd.com", action:"Suspended user account", target:"USR-8777 (Derek Mills)", time:"1 hour ago", severity:"warning" },
@@ -1489,13 +1508,15 @@ export function MasterAdmin() {
             </button>
           </div>
           <div className="rounded-2xl overflow-x-auto" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
-            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
-              {["ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map(h=>(
-                <div key={h} style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{h.toUpperCase()}</div>
+            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
+              {["","ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map((h,hi)=>(
+                <div key={hi} style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{h.toUpperCase()}</div>
               ))}
             </div>
-            {filteredUsers.map((user,i)=>(
-              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto 1fr auto auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
+            {filteredUsers.map((user,i)=>{
+              return (
+              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
+                <UserAvatar name={user.name} photoUrl={user.photoUrl}/>
                 <span style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{user.id}</span>
                 <div>
                   <div style={{color:"#E8EDF5",fontSize:16}}>{user.name}</div>
@@ -1512,7 +1533,8 @@ export function MasterAdmin() {
                   <button style={{color:"#FC8181"}}><XCircle size={13}/></button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div style={{color:"#8A9AB8",fontSize:15,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
 
