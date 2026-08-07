@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronUp, X
 } from "lucide-react";
 import { toast } from "sonner";
+import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -161,12 +162,15 @@ const WG_CSS = `
 .fpd-wg *{box-sizing:border-box;}
 .fpd-wg .grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 
-/* hero */
+/* hero — full-bleed photo, tinted toward the brand palette and scrimmed for text legibility */
 .fpd-wg .hero{position:relative;overflow:hidden;padding:76px 24px 90px;background:linear-gradient(135deg,#060B16,#0A1020);}
-.fpd-wg .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(91,110,225,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.04) 1px,transparent 1px);background-size:50px 50px;}
-.fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.14) 0%,transparent 70%);pointer-events:none;}
-.fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;}
-.fpd-wg .hero-inner{position:relative;max-width:720px;margin:0 auto;text-align:center;}
+.fpd-wg .hero-art{position:absolute;inset:-6%;z-index:0;overflow:hidden;pointer-events:none;}
+.fpd-wg .hero-art img{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;}
+.fpd-wg .hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(6,11,22,0.32) 0%,rgba(8,13,26,0.5) 45%,rgba(7,10,18,0.78) 100%),linear-gradient(160deg,rgba(9,14,28,0.15),rgba(91,110,225,0.22));pointer-events:none;}
+.fpd-wg .hero-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(91,110,225,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.04) 1px,transparent 1px);background-size:50px 50px;}
+.fpd-wg .hero-glow-a{position:absolute;top:20%;left:10%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.14) 0%,transparent 70%);pointer-events:none;z-index:2;}
+.fpd-wg .hero-glow-b{position:absolute;bottom:0;right:5%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,110,225,0.1) 0%,transparent 70%);pointer-events:none;z-index:2;}
+.fpd-wg .hero-inner{position:relative;z-index:3;max-width:720px;margin:0 auto;text-align:center;}
 .fpd-wg .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;margin-bottom:22px;background:rgba(91,110,225,0.16);border:1px solid rgba(91,110,225,0.32);}
 .fpd-wg .hero-badge span{color:#6FAE8B;font-size:15px;font-family:var(--font-mono);letter-spacing:0.1em;}
 .fpd-wg .hero h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.4rem);color:${TEXT};line-height:1.15;margin-bottom:18px;}
@@ -278,6 +282,8 @@ export function WhiteGloveService() {
 
       {/* Hero */}
       <div className="hero">
+        <div className="hero-art"><img src={heroWhiteGlovePhoto} alt=""/></div>
+        <div className="hero-scrim"/>
         <div className="hero-grid"/>
         <div className="hero-glow-a"/>
         <div className="hero-glow-b"/>

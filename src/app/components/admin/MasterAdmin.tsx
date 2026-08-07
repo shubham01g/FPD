@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
 import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal";
+import { UserAvatar } from "./UserAvatar";
 import { SystemHealth } from "./SystemHealth";
 import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
 import { AdminAIAgent } from "../AdminAIAgent";
@@ -57,25 +58,6 @@ const storageByPlan = [
 ];
 
 /* Users data is now in UserDetailModal.tsx as ADMIN_USERS */
-
-function UserAvatar({ name, photoUrl, size = 34 }: { name: string; photoUrl?: string; size?: number }) {
-  const [failed, setFailed] = useState(false);
-  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-  if (photoUrl && !failed) {
-    return (
-      <img src={photoUrl} alt={name} onError={() => setFailed(true)}
-        className="rounded-full flex-shrink-0 object-cover"
-        style={{ width: size, height: size }}/>
-    );
-  }
-  return (
-    <div className="flex items-center justify-center rounded-full flex-shrink-0 font-bold"
-      style={{ width: size, height: size, fontSize: size * 0.37,
-        background: "linear-gradient(135deg,#7E6BD8,#5B6EE1)", color: "#fff" }}>
-      {initials}
-    </div>
-  );
-}
 
 const auditLogs = [
   { id:"LOG-9912", user:"admin@fpd.com", action:"Approved ID verification", target:"VER-2026-0841", time:"2 min ago", severity:"info" },

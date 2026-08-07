@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Users, TrendingUp, DollarSign, Search, Filter, Eye, Edit, CheckCircle, XCircle, ArrowUp } from "lucide-react";
+import { UserAvatar } from "./UserAvatar";
 
 const affiliates = [
   { id: "AFF-0081", name: "Sarah Chen", email: "s.chen@email.com", joined: "Nov 15, 2024", activeReferrals: 32, totalReferrals: 38, tier: 2, rate: 25, monthlyEarn: 847.20, totalEarned: 6821.40, status: "active" },
@@ -110,9 +111,9 @@ export function AffiliateAdmin() {
       <div className="rounded-2xl border overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         <div
           className="grid px-5 py-3"
-          style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
+          style={{ gridTemplateColumns: "auto auto 1fr auto auto auto auto auto auto", background: "rgba(255,255,255,0.08)", borderBottom: "1px solid var(--border)", gap: 16, alignItems: "center" }}
         >
-          {["ID", "Affiliate", "Tier", "Active Refs", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
+          {["", "ID", "Affiliate", "Tier", "Active Refs", "Monthly Earn", "Total Earned", "Status", "Actions"].map((h) => (
             <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
           ))}
         </div>
@@ -120,8 +121,9 @@ export function AffiliateAdmin() {
           <div
             key={aff.id}
             className="grid px-5 py-3 items-center border-b"
-            style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
+            style={{ gridTemplateColumns: "auto auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
+            <UserAvatar name={aff.name} />
             <span style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{aff.id}</span>
             <div>
               <div style={{ color: "var(--foreground)", fontSize: 16 }}>{aff.name}</div>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Shield, Settings, CheckCircle, Clock, DollarSign, Search, Eye, RefreshCw, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { UserAvatar } from "./UserAvatar";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -117,14 +118,15 @@ export function ContinuationFeeAdmin() {
           </div>
 
           {/* Table header */}
-          <div className="grid px-5 py-3" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:"rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(91,110,225,0.08)", gap:16, alignItems:"center" }}>
-            {["ID","User","Paid By","Date","Amount","Status","Action"].map(h => (
+          <div className="grid px-5 py-3" style={{ gridTemplateColumns:"auto auto 1fr auto auto auto auto auto", background:"rgba(255,255,255,0.06)", borderBottom:"1px solid rgba(91,110,225,0.08)", gap:16, alignItems:"center" }}>
+            {["","ID","User","Paid By","Date","Amount","Status","Action"].map(h => (
               <div key={h} style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h.toUpperCase()}</div>
             ))}
           </div>
 
           {filtered.map((fee, i) => (
-            <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{ gridTemplateColumns:"auto 1fr auto auto auto auto auto", background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)", gap:16 }}>
+            <div key={fee.id} className="grid px-5 py-4 items-center border-b" style={{ gridTemplateColumns:"auto auto 1fr auto auto auto auto auto", background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)", gap:16 }}>
+              <UserAvatar name={fee.user}/>
               <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{fee.id}</span>
               <div>
                 <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:500 }}>{fee.user}</div>
