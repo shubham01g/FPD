@@ -11,6 +11,7 @@ import {
   BarChart3, Layers, ShieldAlert, BookOpen,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
+import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.png";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -144,24 +145,24 @@ function TopNav({ onStart }: { onStart: () => void }) {
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
-        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-2">
-          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 32, width: 49, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
+        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-1.5">
+          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 40, width: 61, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
         </button>
-        <div className="hidden xl:flex flex-1 items-center justify-between mr-4">
+        <div className="hidden xl:flex flex-1 items-center justify-between mr-3">
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="px-1.5 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
+            <button key={l} onClick={() => go(id)} className="px-1 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
               style={{ color: "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
+        <div className="flex items-center gap-1">
+          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
-          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
-          <button onClick={onStart} className="hidden sm:block px-2.5 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
+          <button onClick={onStart} className="hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
           <PrimaryBtn onClick={onStart} compact>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
@@ -187,13 +188,13 @@ function Hero({ onStart }: { onStart: () => void }) {
       <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
         <div className="fpd-fade-in-up flex flex-col items-center">
           <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(3.5rem,8.5vw,6.5rem)", fontWeight: 800, lineHeight: 1.06, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
+          <h1 style={{ ...DISPLAY, fontSize: "clamp(3rem,6.4vw,5rem)", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
             Get Your Life Together{" "}
-            <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>and Keep It</span>
+            <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
             <br />That Way
           </h1>
           <p style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20 }}>
-            Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for young adults, couples, and growing families.
+            Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for adults, couples, and growing families.
           </p>
           <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
@@ -527,7 +528,7 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
     <section id="family-story" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
-          <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
+          <MediaBackdrop poster={heroWhiteGlovePhoto} tone="deep" overlay={0.4} />
         </div>
         <div className="order-1 lg:order-2">
           <Kicker>When You're Gone</Kicker>
