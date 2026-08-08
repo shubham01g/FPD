@@ -8,7 +8,7 @@ import {
   Star, Building2, Scale, Landmark, TrendingUp,
   Stethoscope, Wallet, Car, Folder, Globe, Zap, Eye, FileText,
   Bell, Calendar, Award, PawPrint, Video, DollarSign, HardDrive,
-  BarChart3, Layers, ShieldAlert,
+  BarChart3, Layers, ShieldAlert, BookOpen,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 
@@ -188,12 +188,12 @@ function Hero({ onStart }: { onStart: () => void }) {
         <div className="fpd-fade-in-up flex flex-col items-center">
           <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
           <h1 style={{ ...DISPLAY, fontSize: "clamp(3.5rem,8.5vw,6.5rem)", fontWeight: 800, lineHeight: 1.06, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
-            My Life.{" "}
-            <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>My Wishes.</span>
-            <br />My Way.
+            Get Your Life Together{" "}
+            <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>and Keep It</span>
+            <br />That Way
           </h1>
           <p style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20 }}>
-            Final Pass Down is the world's most complete digital legacy platform — store your documents, record your wishes, protect your family, and ensure everything you care about is passed on exactly as you intend.
+            Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for young adults, couples, and growing families.
           </p>
           <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
@@ -356,16 +356,19 @@ const FEATURES: Feat[] = [
   { cat: "organize", icon: <Phone size={20} />, title: "Contacts Hub", desc: "All Legacy, Guardian, Emergency, and Pet Emergency contacts in one place." },
   { cat: "organize", icon: <HardDrive size={20} />, title: "Storage Metering", desc: "Real-time storage dashboard with overage alerts at 80%, 90%, 95%." },
   { cat: "organize", icon: <BarChart3 size={20} />, title: "Activity Log", desc: "Complete audit trail of all vault changes and contact access events." },
+  { cat: "personal", icon: <KeyRound size={20} />, title: "Password Manager", desc: "Store and auto-fill your logins with an encrypted password vault built into your account." },
+  { cat: "personal", icon: <BookOpen size={20} />, title: "Digital Diary", desc: "Journal your thoughts, milestones, and everyday moments in a private, encrypted diary." },
+  { cat: "legacy", icon: <HardDrive size={20} />, title: "Legacy Vault", desc: "A dedicated vault for your most important legacy documents, always ready when it matters." },
 ];
 /* curated flagship features — the rest live inside the app itself */
-const HIGHLIGHT_TITLES = ["Document Vault", "Digital File Cabinet", "Video Messages", "Will & Testament", "Insurance Policies", "Investment Portfolios", "Digital Assets", "Memories", "Pet Care"];
+const HIGHLIGHT_TITLES = ["Document Vault", "Digital File Cabinet", "Video Messages", "Will & Testament", "Insurance Policies", "Investment Portfolios", "Digital Assets", "Memories", "Pet Care", "Password Manager", "Digital Diary", "Legacy Vault"];
 
 function Features() {
   const highlighted = FEATURES.filter(f => HIGHLIGHT_TITLES.includes(f.title));
   return (
     <section id="features" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one military-grade encrypted vault." />
+        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one secure encrypted vault." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {highlighted.map(f => (
             <div key={f.title} className="p-6 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
@@ -374,6 +377,18 @@ function Features() {
               <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.65 }}>{f.desc}</p>
             </div>
           ))}
+        </div>
+        <div className="mt-14 max-w-3xl mx-auto text-center">
+          <h3 style={{ ...DISPLAY, fontSize: 26, fontWeight: 700, color: TEXT, marginBottom: 16 }}>Keep everything important organized in one place:</h3>
+          <p style={{ color: SOFT, fontSize: 18.5, lineHeight: 1.8, marginBottom: 18 }}>
+            Scan documents directly from your phone, find information when you need it, and safely share selected folders with people you trust.
+          </p>
+          <p style={{ color: SOFT, fontSize: 18.5, lineHeight: 1.8, marginBottom: 18 }}>
+            Whether you are moving into your first apartment, building a career, raising children, or managing a busy household, Final Pass Down helps you stay organized and prepared for everyday life.
+          </p>
+          <p style={{ color: SOFT, fontSize: 18.5, lineHeight: 1.8 }}>
+            Final Pass Down isn't just about preparing for the end of life it's about being better prepared to live it.
+          </p>
         </div>
       </div>
     </section>
