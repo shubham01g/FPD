@@ -11,7 +11,6 @@ import {
   BarChart3, Layers, ShieldAlert, BookOpen,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
-import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.png";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -528,7 +527,7 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
     <section id="family-story" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
-          <MediaBackdrop poster={heroWhiteGlovePhoto} tone="deep" overlay={0.4} />
+          <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
         </div>
         <div className="order-1 lg:order-2">
           <Kicker>When You're Gone</Kicker>
