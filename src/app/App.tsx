@@ -41,6 +41,7 @@ import { SubscriptionManager } from "./components/SubscriptionManager";
 import { LegacyContinuationFee } from "./components/LegacyContinuationFee";
 import { DisasterRecovery } from "./components/DisasterRecovery";
 import { PartnerOnboarding } from "./components/PartnerOnboarding";
+import { WhiteLabelOnboarding } from "./components/WhiteLabelOnboarding";
 import { PartnerOnboardingAdmin } from "./components/admin/PartnerOnboardingAdmin";
 import { AIAgent } from "./components/AIAgent";
 
@@ -300,6 +301,7 @@ function LandingRoute() {
         onAdminLogin={() => navigate("/admin/login")}
         onPartnerPortal={() => navigate("/partner")}
         onConciergeLogin={() => navigate("/concierge/login")}
+        onApplyWhiteLabel={tier => navigate(`/partner/onboard?tier=${tier}`)}
       />
       <DemoBar/>
     </div>
@@ -434,6 +436,16 @@ function PartnerRoute() {
   );
 }
 
+/* ── White label reseller application (public standalone page — no existing account needed) ── */
+function WhiteLabelOnboardRoute() {
+  return (
+    <div className="size-full overflow-y-auto">
+      <WhiteLabelOnboarding />
+      <DemoBar/>
+    </div>
+  );
+}
+
 /* ── Concierge staff login ── */
 function ConciergeLoginRoute() {
   const navigate = useNavigate();
@@ -485,6 +497,7 @@ function AppShell() {
       <Route path="/admin/login" element={<AdminLoginRoute/>}/>
       <Route path="/admin" element={<AdminRoute/>}/>
       <Route path="/partner" element={<PartnerRoute/>}/>
+      <Route path="/partner/onboard" element={<WhiteLabelOnboardRoute/>}/>
       <Route path="/concierge/login" element={<ConciergeLoginRoute/>}/>
       <Route path="/concierge" element={<ConciergeRoute/>}/>
       <Route path="/documents/submit" element={<DocSubmitRoute/>}/>
