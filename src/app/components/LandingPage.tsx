@@ -922,7 +922,7 @@ function getMonthlyPrice(p: WLPackage): number {
   return (b as any).minMonthly ?? 0;
 }
 
-function WhiteLabel({ onStart }: { onStart: () => void }) {
+function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
   const { packages } = useWLPackages();
   const active = packages.filter(p => p.active);
   const perks = [
@@ -965,7 +965,7 @@ function WhiteLabel({ onStart }: { onStart: () => void }) {
                       </li>
                     ))}
                   </ul>
-                  <button onClick={onStart} className="w-full py-3 rounded-xl font-bold text-sm fpd-btn-lift"
+                  <button onClick={() => onApply?.(p.id)} className="w-full py-3 rounded-xl font-bold text-sm fpd-btn-lift"
                     style={{ background: p.badge ? `linear-gradient(135deg,${p.color},${p.color}BB)` : "transparent", color: p.badge ? "#fff" : p.color, border: `1px solid ${p.color}60`, boxShadow: p.badge ? `0 0 24px ${p.color}40` : "none" }}>
                     Apply for {p.name} →
                   </button>
@@ -1129,8 +1129,8 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
 }
 
 /* ── ROOT EXPORT ──────────────────────────────────────────────── */
-export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onConciergeLogin }:
-  { onGetStarted: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void }) {
+export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onConciergeLogin, onApplyWhiteLabel }:
+  { onGetStarted: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void; onApplyWhiteLabel?: (tier: string) => void }) {
   if (typeof window !== "undefined") (window as any).__adminLogin = onAdminLogin;
   return (
     <div style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
@@ -1149,7 +1149,7 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
         <Affiliates onStart={onGetStarted} />
         <Partnerships onStart={onGetStarted} />
         <WhiteGlove onStart={onGetStarted} />
-        <WhiteLabel onStart={onGetStarted} />
+        <WhiteLabel onApply={onApplyWhiteLabel} />
         <Help />
         <CTA onStart={onGetStarted} />
       </main>

@@ -234,6 +234,40 @@ export async function getSales(): Promise<WLSale[]> {
   return [..._sales];
 }
 
+/** Records a new WL application submitted through the public onboarding wizard. Starts "pending" until an admin provisions the instance. */
+export async function createSale(input: {
+  org: string; contact: string; email: string; packageId: string; subdomain: string; processor: string;
+}): Promise<WLSale> {
+  const pkg = _packages.find(p => p.id === input.packageId);
+  const setupFee = pkg?.billing.setupFee ?? 0;
+  if (!DEMO_MODE) {
+    const res = await fetch(`${API_BASE}/sales`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    return res.json();
+  }
+  await new Promise(r => setTimeout(r, 400));
+  const sale: WLSale = {
+    id: `WL-${(_sales.length + 1).toString().padStart(3, "0")}`,
+    org: input.org,
+    contact: input.contact,
+    email: input.email,
+    packageId: input.packageId,
+    status: "pending",
+    users: 0,
+    mrr: 0,
+    totalPaid: setupFee,
+    startDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    subdomain: input.subdomain,
+    processor: input.processor,
+    lastPayout: "—",
+  };
+  _sales = [..._sales, sale];
+  return sale;
+}
+
 export async function getProcessors(): Promise<PaymentProcessor[]> {
   return [..._processors];
 }
