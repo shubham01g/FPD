@@ -250,15 +250,21 @@ function DemoBar() {
 
   return (
     /* right:24 aligns with AI Assistant (right-6 = 24px). top of this pill sits ~8px below the AI button. */
-    <div className="fpd-demo" style={{ position:"fixed", bottom:24, right:24, zIndex:9999, fontFamily:"var(--font-mono)" }}>
+    <div className="fpd-demo" style={{ zIndex:9999, fontFamily:"var(--font-mono)" }}>
       <style>{`
+        .fpd-demo{position:fixed;bottom:24px;right:24px;}
         .fpd-demo .demo-panel{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1.5px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 8px 40px rgba(0,0,0,0.6),0 0 18px -8px rgba(91,110,225,0.35);backdrop-filter:blur(20px);}
         .fpd-demo .demo-tab{color:#8A9AB8;background:transparent;border:1px solid transparent;transition:background .16s ease,color .16s ease,box-shadow .16s ease;}
         .fpd-demo .demo-tab:hover{background:rgba(91,110,225,0.14);color:#C7CEE8;}
         .fpd-demo .demo-tab.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
         .fpd-demo .demo-tab.on:hover{filter:brightness(1.08);}
-        .fpd-demo .demo-toggle{background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 4px 20px rgba(0,0,0,0.5);transition:border-color .18s ease,box-shadow .18s ease;}
+        .fpd-demo .demo-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;color:#6FAE8B;backdrop-filter:blur(16px);letter-spacing:0.06em;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 4px 20px rgba(0,0,0,0.5);transition:border-color .18s ease,box-shadow .18s ease;}
         .fpd-demo .demo-toggle:hover{border-color:rgba(91,110,225,0.6);box-shadow:0 0 0 1px rgba(91,110,225,0.14),0 4px 20px rgba(0,0,0,0.5),0 0 22px -6px rgba(91,110,225,0.45);}
+        @media (max-width:480px){
+          .fpd-demo{bottom:18px;right:16px;}
+          .fpd-demo .demo-toggle{width:48px;height:48px;padding:0;justify-content:center;gap:0;border-radius:50%;}
+          .fpd-demo .demo-toggle .dtext{display:none;}
+        }
       `}</style>
       {open && (
         <div className="demo-panel" style={{
@@ -276,16 +282,10 @@ function DemoBar() {
           ))}
         </div>
       )}
-      <button onClick={() => setOpen(!open)}
-        className="demo-toggle"
-        style={{
-          display:"flex", alignItems:"center", gap:8, padding:"8px 14px",
-          borderRadius:99, fontSize:12.5, fontWeight:700, cursor:"pointer",
-          color:"#6FAE8B", backdropFilter:"blur(16px)", letterSpacing:"0.06em",
-        }}>
+      <button onClick={() => setOpen(!open)} className="demo-toggle">
         <span style={{ fontSize:17.5 }}>{current.label.split(" ")[0]}</span>
-        <span>DEMO</span>
-        <span style={{ fontSize:10, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
+        <span className="dtext">DEMO</span>
+        <span className="dtext" style={{ fontSize:10, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
       </button>
     </div>
   );
