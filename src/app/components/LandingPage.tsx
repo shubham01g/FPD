@@ -29,6 +29,13 @@ const VIOLET_SOFT = "#7E6BD8";
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+/* Reveals a block of text top-to-bottom: each element waits for the one
+   before it to fully finish before it starts (no overlap). */
+const SEQ_STEP_MS = 420;
+function seq(i: number): React.CSSProperties {
+  return { animationDelay: `${i * SEQ_STEP_MS}ms` };
+}
+
 /* ── Swappable media backdrop ─────────────────────────────────────
    Renders a branded gradient placeholder always; a lightweight poster
    image paints instantly, and the <video> only mounts/streams once the
@@ -80,12 +87,12 @@ function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = 
 }
 
 /* ── primitives ───────────────────────────────────────────────── */
-function Kicker({ children, tone = "blue" }: { children: React.ReactNode; tone?: "blue" | "violet" }) {
+function Kicker({ children, tone = "blue", className, style }: { children: React.ReactNode; tone?: "blue" | "violet"; className?: string; style?: React.CSSProperties }) {
   const c = tone === "violet" ? VIOLET : ACCENT;
   const t = tone === "violet" ? VIOLET_SOFT : HILITE;
   return (
-    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full"
-      style={{ background: tone === "violet" ? "rgba(126,107,216,0.10)" : "rgba(91,110,225,0.10)", border: `1px solid ${tone === "violet" ? "rgba(126,107,216,0.28)" : "rgba(91,110,225,0.28)"}` }}>
+    <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full ${className ?? ""}`}
+      style={{ background: tone === "violet" ? "rgba(126,107,216,0.10)" : "rgba(91,110,225,0.10)", border: `1px solid ${tone === "violet" ? "rgba(126,107,216,0.28)" : "rgba(91,110,225,0.28)"}`, ...style }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: c, boxShadow: `0 0 8px ${c}` }} />
       <span style={{ color: t, fontSize: 14, letterSpacing: "0.12em", textTransform: "uppercase", ...MONO }}>{children}</span>
     </div>
@@ -95,25 +102,25 @@ function Kicker({ children, tone = "blue" }: { children: React.ReactNode; tone?:
 function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: React.ReactNode; sub?: string; tone?: "blue" | "violet" }) {
   return (
     <div className="text-center mb-14 flex flex-col items-center">
-      <Kicker tone={tone}>{kicker}</Kicker>
-      <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820 }}>{title}</h2>
-      {sub && <p style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7 }}>{sub}</p>}
+      <Kicker tone={tone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
+      <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820, ...seq(1) }}>{title}</h2>
+      {sub && <p className="fpd-seq" style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7, ...seq(2) }}>{sub}</p>}
     </div>
   );
 }
 
-function PrimaryBtn({ children, onClick, large, compact }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean }) {
+function PrimaryBtn({ children, onClick, large, compact, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
-    <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl fpd-btn-lift"
-      style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap" }}>
+    <button onClick={onClick} className={`inline-flex items-center gap-2 rounded-xl fpd-btn-lift ${className ?? ""}`}
+      style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap", ...style }}>
       {children}
     </button>
   );
 }
-function GhostBtn({ children, onClick, large }: { children: React.ReactNode; onClick?: () => void; large?: boolean }) {
+function GhostBtn({ children, onClick, large, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
-    <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl transition-colors"
-      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 20 : 17.5, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)" }}>
+    <button onClick={onClick} className={`inline-flex items-center gap-2 rounded-xl transition-colors ${className ?? ""}`}
+      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 20 : 17.5, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)", ...style }}>
       {children}
     </button>
   );
@@ -184,19 +191,19 @@ function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: s
     <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
       <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
       <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
-        <div className="fpd-fade-in-up flex flex-col items-center">
-          <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(2.75rem,6.5vw,5rem)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
+        <div className="flex flex-col items-center">
+          <Kicker className="fpd-seq" style={seq(0)}>Trusted Digital Legacy Platform · Est. 2024</Kicker>
+          <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.75rem,6.5vw,5rem)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px", ...seq(1) }}>
             Get Your Life Together
             <br />
             <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
             <br />That Way
           </h1>
-          <p style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20, ...seq(2) }}>
             Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for adults, couples, and growing families.
           </p>
-          <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
-          <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
+          <p className="fpd-seq" style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32, ...seq(3) }}>PREPARE · PROTECT · PASS DOWN</p>
+          <div className="fpd-seq flex flex-wrap items-center justify-center gap-3.5 mb-16" style={seq(4)}>
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
             <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
@@ -219,26 +226,26 @@ function About({ onStart }: { onStart: () => void }) {
     <section id="about" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>About Final Pass Down</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>About Final Pass Down</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             What Happens to Your<br />
             <span style={{ color: "#6FAE8B" }}>Life's Work</span> When You're Gone?
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Most families face chaos after a loved one passes — scrambling to find documents, discover accounts, and piece together final wishes. Final Pass Down changes everything.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             We give you a secure digital vault to organize every aspect of your life — from wills and insurance to personal memories and final messages — then deliver it to your trusted contacts exactly when and how you decide.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start your vault <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Start your vault <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-vault.mp4" tone="deep" overlay={0.35} showPlay />
@@ -296,26 +303,26 @@ function ContactsStory({ onNavigate }: { onNavigate: (id: string) => void }) {
           <MediaBackdrop src="/media/story-contacts.mp4" tone="blue" overlay={0.35} showPlay />
         </div>
         <div className="order-1 lg:order-2">
-          <Kicker>Trusted Contacts</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Trusted Contacts</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             The Right People,<br />
             <span style={{ color: "#6FAE8B" }}>At the Right Time</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             A vault is only as good as the people who can reach it. Final Pass Down lets you designate exactly who gets access, to what, and when — so nothing ever falls into the wrong hands or the wrong timing.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             From the people who inherit your legacy to the ones who step in during an emergency, every relationship is defined, verified, and ready before you ever need it.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={() => onNavigate("features")}>See how contacts work <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={() => onNavigate("features")} className="fpd-seq" style={seq(4 + points.length)}>See how contacts work <ChevronRight size={16} /></GhostBtn>
         </div>
       </div>
     </section>
@@ -407,23 +414,23 @@ function FamilyPetsStory({ onStart }: { onStart: () => void }) {
     <section id="family-pets" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>Kids & Pet Care</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Kids & Pet Care</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             For the Ones Who<br />
             <span style={{ color: "#6FAE8B" }}>Rely on You Most</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(2) }}>
             Kids and pets can't ask the right questions in an emergency — so the answers need to already be written down. Final Pass Down keeps every detail about your family, two-legged and four, organized and ready for whoever steps in.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(3 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start your family vault <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(3 + points.length)}>Start your family vault <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-pets.mp4" tone="warm" overlay={0.35} showPlay />
@@ -445,26 +452,26 @@ function MemoriesStory({ onStart }: { onStart: () => void }) {
     <section id="memories" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>Memories & Messages</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Memories & Messages</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             Memories That<br />
             <span style={{ color: "#6FAE8B" }}>Speak For You</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Photos fade and stories get lost. Final Pass Down keeps both — every picture, every keepsake, every video message — safe, organized, and ready to reach the people you love, in your own voice.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             Whether it's a birthday message for a grandchild not yet born or the story behind a family heirloom, your words outlive the moment they were recorded.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start preserving memories <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Start preserving memories <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-memories.mp4" tone="warm" overlay={0.35} showPlay />
@@ -530,26 +537,26 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
           <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
         </div>
         <div className="order-1 lg:order-2">
-          <Kicker>When You're Gone</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>When You're Gone</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             What Happens to Your<br />
             <span style={{ color: "#6FAE8B" }}>Family When You're Gone?</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Without a plan, the people you love are left to grieve while also guessing — what you would have wanted, what to say, what happens next. That uncertainty is a burden you can lift from them today.
           </p>
-          <p style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 600, lineHeight: 1.6, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 600, lineHeight: 1.6, marginBottom: 28, ...seq(3) }}>
             What matters most: write or leave a message for your loved ones — so your voice is still there when you no longer can be.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Write your message today <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Write your message today <ChevronRight size={16} /></GhostBtn>
         </div>
       </div>
     </section>
@@ -693,7 +700,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
           <p style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28 }}>
             Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
           </p>
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-3 mb-8 fpd-stagger">
             {benefits.map(([bold, rest]) => (
               <div key={bold} className="flex items-start gap-3">
                 <CheckCircle2 size={15} color="#FFFFFF" style={{ marginTop: 3, flexShrink: 0 }} />
@@ -872,7 +879,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         <div className="grid md:grid-cols-2 gap-10 items-center mb-16">
           <div>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 16 }}>EVERYTHING INCLUDED</div>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-3 fpd-stagger">
               {included.map(item => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle2 size={14} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
@@ -891,7 +898,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
             </div>
             <div className="p-8 text-center">
               <div style={{ ...DISPLAY, fontSize: 30, fontWeight: 700, color: TEXT, marginBottom: 8 }}>Perfect For</div>
-              <div className="flex flex-col gap-2 mb-8">
+              <div className="flex flex-col gap-2 mb-8 fpd-stagger">
                 {perfectFor.map(p => (<div key={p} style={{ color: SOFT, fontSize: 16 }}>· {p}</div>))}
               </div>
               <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 32.5, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
@@ -1029,7 +1036,7 @@ function Help() {
         </div>
 
         <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 20, textAlign: "center" }}>Frequently Asked Questions</div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 fpd-stagger">
           {faqs.map((faq, i) => (
             <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(91,110,225,0.16)" }}>
               <button className="w-full flex items-center justify-between px-6 py-5" onClick={() => setOpen(open === i ? null : i)}
