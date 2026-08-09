@@ -375,9 +375,9 @@ const AI_CSS = `
 
 /* panel shell */
 .fpd-ai .panel{position:relative;z-index:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 24px 60px -24px rgba(0,0,0,0.85);}
-.fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;max-width:calc(100vw - 32px);border-radius:16px;}
+.fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;max-width:calc(100vw - 32px);max-height:calc(100vh - 116px);border-radius:16px;}
 @media (max-width:480px){
-  .fpd-ai .panel.floating{right:16px;left:16px;bottom:88px;width:auto;max-width:none;}
+  .fpd-ai .panel.floating{right:16px;left:16px;bottom:88px;width:auto;max-width:none;max-height:calc(100vh - 108px);}
   .fpd-ai-launch{right:16px;bottom:88px;}
 }
 

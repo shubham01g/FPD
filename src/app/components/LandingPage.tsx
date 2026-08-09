@@ -187,7 +187,7 @@ function Hero({ onStart }: { onStart: () => void }) {
       <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
         <div className="fpd-fade-in-up flex flex-col items-center">
           <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(3rem,6.4vw,5rem)", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
+          <h1 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.4vw,4.25rem)", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
             Get Your Life Together{" "}
             <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
             <br />That Way
