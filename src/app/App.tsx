@@ -367,6 +367,7 @@ function UserRoute() {
       >
         {renderUserPage()}
       </Layout>
+      {userPage !== "fpd-ai" && <AIAgent/>}
       <DemoBar/>
     </div>
   );
