@@ -119,10 +119,9 @@ function GhostBtn({ children, onClick, large }: { children: React.ReactNode; onC
   );
 }
 
-/* smoothly scroll to an in-page section */
-function scrollToId(id: string) {
-  if (typeof document === "undefined") return;
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+function scrollToTop() {
+  if (typeof window === "undefined") return;
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 /* ── NAV ──────────────────────────────────────────────────────── */
@@ -132,33 +131,33 @@ const NAV_LINKS: [string, string][] = [
   ["Partners", "partners"], ["White Label", "white-label"],
 ];
 
-function TopNav({ onStart }: { onStart: () => void }) {
+function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: string; onNavigate: (id: string) => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", fn); return () => window.removeEventListener("scroll", fn);
   }, []);
-  const go = (id: string) => { setOpen(false); scrollToId(id); };
+  const go = (id: string) => { setOpen(false); onNavigate(id); };
   return (
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
-        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-1.5">
+        <button onClick={() => go("home")} className="flex items-center mr-1.5">
           <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 40, width: 61, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
         </button>
         <div className="hidden xl:flex flex-1 items-center justify-between mr-3">
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className="px-1 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
-              style={{ color: "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
+              style={{ color: page === id ? "#FFFFFF" : "#6B7595", background: page === id ? "rgba(91,110,225,0.18)" : "transparent", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
         <div className="flex items-center gap-1">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
-          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, background: page === "help" ? "rgba(91,110,225,0.16)" : "transparent", whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
           <button onClick={onStart} className="hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
@@ -169,10 +168,10 @@ function TopNav({ onStart }: { onStart: () => void }) {
       {open && (
         <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(91,110,225,0.14)" }}>
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === id ? "#FFFFFF" : SOFT, background: page === id ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}>{l}</button>
           ))}
-          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", fontSize: 17.5 }}>White Glove Concierge</button>
-          <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
+          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", fontSize: 17.5 }}>White Glove Concierge</button>
+          <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === "help" ? "#FFFFFF" : SOFT, background: page === "help" ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
         </div>
       )}
     </nav>
@@ -180,14 +179,14 @@ function TopNav({ onStart }: { onStart: () => void }) {
 }
 
 /* ── HERO ─────────────────────────────────────────────────────── */
-function Hero({ onStart }: { onStart: () => void }) {
+function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   return (
     <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
       <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
       <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
         <div className="fpd-fade-in-up flex flex-col items-center">
           <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(3.5rem,8.5vw,6.5rem)", fontWeight: 800, lineHeight: 1.06, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
+          <h1 style={{ ...DISPLAY, fontSize: "clamp(2.75rem,6.5vw,5rem)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
             Get Your Life Together
             <br />
             <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
@@ -199,7 +198,7 @@ function Hero({ onStart }: { onStart: () => void }) {
           <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
-            <GhostBtn onClick={() => scrollToId("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
         </div>
       </div>
@@ -283,7 +282,7 @@ function HowItWorks() {
 }
 
 /* ── TRUSTED CONTACTS STORY ───────────────────────────────────── */
-function ContactsStory() {
+function ContactsStory({ onNavigate }: { onNavigate: (id: string) => void }) {
   const points = [
     "Legacy Contacts receive your vault exactly when the time comes",
     "Guardian Contacts step in for approvals and emergencies",
@@ -316,7 +315,7 @@ function ContactsStory() {
               </div>
             ))}
           </div>
-          <GhostBtn onClick={() => scrollToId("features")}>See how contacts work <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={() => onNavigate("features")}>See how contacts work <ChevronRight size={16} /></GhostBtn>
         </div>
       </div>
     </section>
@@ -1082,8 +1081,8 @@ const FOOTER_COLS: [string, string[]][] = [
   ["Company", ["About Us", "Careers", "Press", "Contact", "Blog", "Investor Relations"]],
 ];
 
-function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
-  { onStart: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void }) {
+function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConciergeLogin }:
+  { onStart: () => void; onNavigate: (id: string) => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void }) {
   const linkTargets: Record<string, string> = {
     "Document Vault": "features", "Final Wishes": "features", "Medical Info": "features",
     "Financial Records": "features", "Personal Assets": "features", "Family & Memories": "features",
@@ -1110,7 +1109,7 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
               <div style={{ color: FAINT, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", ...MONO, marginBottom: 14 }}>{title}</div>
               <div className="flex flex-col gap-2.5">
                 {links.map((l, i) => (
-                  <button key={`${l}-${i}`} onClick={() => { const t = linkTargets[l]; if (t) scrollToId(t); else onStart(); }} className="text-left transition-colors hover:text-white" style={{ color: MUTED, fontSize: 17.5 }}>{l}</button>
+                  <button key={`${l}-${i}`} onClick={() => { const t = linkTargets[l]; if (t) onNavigate(t); else onStart(); }} className="text-left transition-colors hover:text-white" style={{ color: MUTED, fontSize: 17.5 }}>{l}</button>
                 ))}
               </div>
             </div>
@@ -1148,28 +1147,32 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
 export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onConciergeLogin, onApplyWhiteLabel }:
   { onGetStarted: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void; onApplyWhiteLabel?: (tier: string) => void }) {
   if (typeof window !== "undefined") (window as any).__adminLogin = onAdminLogin;
+  const [page, setPage] = useState("home");
+  const navigate = (id: string) => { setPage(id); scrollToTop(); };
+  let pageContent: React.ReactNode;
+  switch (page) {
+    case "about": pageContent = <About onStart={onGetStarted} />; break;
+    case "how-it-works": pageContent = <><HowItWorks /><ContactsStory onNavigate={navigate} /></>; break;
+    case "features": pageContent = <><Features /><MemoriesStory onStart={onGetStarted} /></>; break;
+    case "security": pageContent = <><Security /><FamilyStory onStart={onGetStarted} /></>; break;
+    case "pricing": pageContent = <><Pricing onStart={onGetStarted} /><FamilyPetsStory onStart={onGetStarted} /></>; break;
+    case "affiliates": pageContent = <Affiliates onStart={onGetStarted} />; break;
+    case "partners": pageContent = <Partnerships onStart={onGetStarted} />; break;
+    case "white-label": pageContent = <WhiteLabel onApply={onApplyWhiteLabel} />; break;
+    case "white-glove": pageContent = <WhiteGlove onStart={onGetStarted} />; break;
+    case "help": pageContent = <Help />; break;
+    default: pageContent = <Hero onStart={onGetStarted} onNavigate={navigate} />; break;
+  }
   return (
     <div style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
-      <TopNav onStart={onGetStarted} />
+      <TopNav onStart={onGetStarted} page={page} onNavigate={navigate} />
       <main>
-        <Hero onStart={onGetStarted} />
-        <About onStart={onGetStarted} />
-        <HowItWorks />
-        <ContactsStory />
-        <Features />
-        <MemoriesStory onStart={onGetStarted} />
-        <Security />
-        <FamilyStory onStart={onGetStarted} />
-        <Pricing onStart={onGetStarted} />
-        <FamilyPetsStory onStart={onGetStarted} />
-        <Affiliates onStart={onGetStarted} />
-        <Partnerships onStart={onGetStarted} />
-        <WhiteGlove onStart={onGetStarted} />
-        <WhiteLabel onApply={onApplyWhiteLabel} />
-        <Help />
-        <CTA onStart={onGetStarted} />
+        <div key={page} className="fpd-stagger">
+          {pageContent}
+          <CTA onStart={onGetStarted} />
+        </div>
       </main>
-      <Footer onStart={onGetStarted} onAdminLogin={onAdminLogin} onPartnerPortal={onPartnerPortal} onConciergeLogin={onConciergeLogin} />
+      <Footer onStart={onGetStarted} onNavigate={navigate} onAdminLogin={onAdminLogin} onPartnerPortal={onPartnerPortal} onConciergeLogin={onConciergeLogin} />
     </div>
   );
 }

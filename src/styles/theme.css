@@ -187,6 +187,16 @@
 .fpd-fade-in-up {
   animation: fpd-fade-in-up .5s cubic-bezier(.4,0,.2,1) backwards;
 }
+/* Reveals direct children one after another instead of all at once */
+.fpd-stagger > * {
+  animation: fpd-fade-in-up .55s cubic-bezier(.4,0,.2,1) backwards;
+}
+.fpd-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.fpd-stagger > *:nth-child(2) { animation-delay: 110ms; }
+.fpd-stagger > *:nth-child(3) { animation-delay: 220ms; }
+.fpd-stagger > *:nth-child(4) { animation-delay: 330ms; }
+.fpd-stagger > *:nth-child(5) { animation-delay: 440ms; }
+.fpd-stagger > *:nth-child(n+6) { animation-delay: 550ms; }
 .fpd-pulse-dot {
   animation: fpd-pulse-dot 1.8s ease-in-out infinite;
 }
@@ -207,7 +217,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fpd-hover-lift, .fpd-fade-in-up, .fpd-pulse-dot, .fpd-btn-lift,
+  .fpd-hover-lift, .fpd-fade-in-up, .fpd-stagger > *, .fpd-pulse-dot, .fpd-btn-lift,
   .fpd-spin-slow, .fpd-breathe {
     animation: none !important;
     transition: none !important;
