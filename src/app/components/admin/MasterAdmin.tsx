@@ -5,14 +5,13 @@ import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal"
 import { UserAvatar } from "./UserAvatar";
 import { SystemHealth } from "./SystemHealth";
 import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
-import { AdminAIAgent } from "../AdminAIAgent";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, ArrowUp, ArrowDown, Search, Filter, Eye,
   CheckCircle, XCircle, Clock, Edit, Trash2, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Lock, Settings,
   RefreshCw, Shield, UserPlus, X, ToggleLeft, ToggleRight,
-  Star, Send, Gift, Bot, Handshake, Layers, ShieldAlert
+  Star, Send, Gift, Handshake, Layers, ShieldAlert
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -74,7 +73,7 @@ const pendingVerifications = [
   { id:"VER-2026-0835", contact:"Grace Nakamura", forUser:"Kevin Park", type:"Driver's License", submitted:"Jun 9, 2026" },
 ];
 
-type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"admin_ai"|"system_health"|"disaster_recovery";
+type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"system_health"|"disaster_recovery";
 
 /* ─────────────────────────────────────────────────────────────────
    ANALYTICS DATA — all demo-mode seed data
@@ -936,7 +935,6 @@ export function MasterAdmin() {
     { id:"notifications",label:"Push Notifications",icon:<Bell size={13}/>, badge:"NEW" },
     { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/>,   badge:"New" },
     { id:"reports",      label:"Reports & Downloads", icon:<Download size={13}/> },
-    { id:"admin_ai",     label:"Admin AI Assistant",  icon:<Bot size={13}/>,      badge:"AI" },
   ];
 
   return (
@@ -1833,21 +1831,6 @@ export function MasterAdmin() {
       {tab === "reports"     && <ReportsDownloads/>}
       {tab === "system_health" && <SystemHealth/>}
       {tab === "disaster_recovery" && <DisasterRecoveryAdmin/>}
-      {tab === "admin_ai"    && (
-        <div className="p-6" style={{ maxWidth:900 }}>
-          <div className="mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Bot size={16} color="#FFFFFF"/>
-              <span style={{ color:"#6FAE8B", fontSize:14, fontFamily:"var(--font-mono)", letterSpacing:"0.1em" }}>COMMAND CENTER · ADMIN AI ASSISTANT</span>
-            </div>
-            <h2 style={{ fontFamily:"var(--font-display)", fontSize:27.5, color:"#E8EDF5" }}>Admin AI Assistant</h2>
-            <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
-              Your Command Center expert. Ask anything about tabs, workflows, reports, ID verification, vault activation, team roles, White Glove billing, or getting started as a new hire.
-            </p>
-          </div>
-          <AdminAIAgent inline={true}/>
-        </div>
-      )}
 
       {/* Manually Onboarded Users — shown in Users tab */}
       {tab === "users" && manualUsers.length > 0 && (
