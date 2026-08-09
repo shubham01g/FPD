@@ -303,6 +303,7 @@ function LandingRoute() {
         onConciergeLogin={() => navigate("/concierge/login")}
         onApplyWhiteLabel={tier => navigate(`/partner/onboard?tier=${tier}`)}
       />
+      <AIAgent/>
       <DemoBar/>
     </div>
   );
