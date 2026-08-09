@@ -157,6 +157,8 @@
   label  { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
   button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
   input  { font-size: var(--text-base); font-weight: var(--font-weight-normal);  line-height: 1.5; }
+  button:focus { outline: none; }
+  button:focus-visible { outline: 2px solid rgba(91,110,225,0.6); outline-offset: 2px; }
 }
 
 /* ── Motion — lifted from vital-clone's card/button hover language ── */
@@ -226,9 +228,30 @@
   filter: brightness(1.1);
 }
 
+/* Underline that draws itself left-to-right on hover; stays on for the active tab */
+.fpd-shine {
+  position: relative;
+}
+.fpd-shine::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, #5B6EE1, #94A8FF);
+  box-shadow: 0 0 8px rgba(120,150,255,0.7);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+.fpd-shine:hover::after,
+.fpd-shine.fpd-underline-on::after {
+  width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fpd-hover-lift, .fpd-fade-in-up, .fpd-stagger > *, .fpd-seq, .fpd-pulse-dot, .fpd-btn-lift,
-  .fpd-spin-slow, .fpd-breathe {
+  .fpd-spin-slow, .fpd-breathe, .fpd-shine::after {
     animation: none !important;
     transition: none !important;
   }

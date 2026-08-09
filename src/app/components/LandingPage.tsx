@@ -111,7 +111,7 @@ function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: Reac
 
 function PrimaryBtn({ children, onClick, large, compact, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
-    <button onClick={onClick} className={`inline-flex items-center gap-2 rounded-xl fpd-btn-lift ${className ?? ""}`}
+    <button onClick={onClick} className={`fpd-shine inline-flex items-center gap-2 rounded-xl fpd-btn-lift ${className ?? ""}`}
       style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap", ...style }}>
       {children}
     </button>
@@ -119,7 +119,7 @@ function PrimaryBtn({ children, onClick, large, compact, className, style }: { c
 }
 function GhostBtn({ children, onClick, large, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
-    <button onClick={onClick} className={`inline-flex items-center gap-2 rounded-xl transition-colors ${className ?? ""}`}
+    <button onClick={onClick} className={`fpd-shine inline-flex items-center gap-2 rounded-xl transition-colors ${className ?? ""}`}
       style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 20 : 17.5, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)", ...style }}>
       {children}
     </button>
@@ -155,19 +155,19 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
         </button>
         <div className="hidden xl:flex flex-1 items-center justify-between mr-3">
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="px-1 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
-              style={{ color: page === id ? "#FFFFFF" : "#6B7595", background: page === id ? "rgba(91,110,225,0.18)" : "transparent", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className={`fpd-shine px-1 py-2 rounded-lg transition-colors hover:text-white ${page === id ? "fpd-underline-on" : ""}`}
+              style={{ color: page === id ? "#FFFFFF" : "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
         <div className="flex items-center gap-1">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("white-glove")} className={`fpd-shine hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors ${page === "white-glove" ? "fpd-underline-on" : ""}`} style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
-          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, background: page === "help" ? "rgba(91,110,225,0.16)" : "transparent", whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("help")} className={`fpd-shine hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white ${page === "help" ? "fpd-underline-on" : ""}`} style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
-          <button onClick={onStart} className="hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
+          <button onClick={onStart} className="fpd-shine hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
           <PrimaryBtn onClick={onStart} compact>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
@@ -175,7 +175,7 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
       {open && (
         <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(91,110,225,0.14)" }}>
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === id ? "#FFFFFF" : SOFT, background: page === id ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="fpd-shine text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === id ? "#FFFFFF" : SOFT, background: page === id ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5, borderLeft: page === id ? "3px solid " + ACCENT : "3px solid transparent" }}>{l}</button>
           ))}
           <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", fontSize: 17.5 }}>White Glove Concierge</button>
           <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === "help" ? "#FFFFFF" : SOFT, background: page === "help" ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
@@ -273,7 +273,7 @@ function HowItWorks() {
     <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-7xl mx-auto">
         <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
-        <div className="grid md:grid-cols-4 gap-5">
+        <div className="grid md:grid-cols-4 gap-5 fpd-stagger">
           {STEPS.map(s => (
             <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ ...DISPLAY, fontSize: 55.5, fontWeight: 800, color: "rgba(147,168,124,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
@@ -376,7 +376,7 @@ function Features() {
     <section id="features" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one secure encrypted vault." />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 fpd-stagger">
           {highlighted.map(f => (
             <div key={f.title} className="p-6 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{f.icon}</div>
@@ -497,7 +497,7 @@ function Security() {
     <section id="security" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
         <SectionHead kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {SEC_ITEMS.map(item => (
             <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(91,110,225,0.14)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(91,110,225,0.15)" }}>{item.icon}</div>
@@ -587,7 +587,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </button>
           <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save 20%</span></span>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch fpd-stagger">
           {PLANS.map(plan => (
             <div key={plan.name} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
               style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none" }}>
@@ -641,7 +641,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </div>
 
           <div style={{ ...MONO, color: MUTED, fontSize: 13, letterSpacing: "0.1em", margin: "28px 0 14px" }}>CORE PROTECTION FEATURES</div>
-          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 gap-4 mb-8 fpd-stagger">
             {[
               { label: "Extended Window", desc: "A dedicated 48-hour access window to retrieve and secure your vital digital assets, with the flexibility to call in for additional time if disaster response demands your full attention." },
               { label: "High-Capacity Export", desc: "Support for massive archives with up to 100 GB bulk export capability." },
@@ -693,24 +693,24 @@ function Affiliates({ onStart }: { onStart: () => void }) {
     <section id="affiliates" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
         <div>
-          <Kicker>Affiliate Program</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Affiliate Program</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             Earn Up to <span style={{ color: "#6FAE8B" }}>30%</span><br />Referring Friends
           </h2>
-          <p style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28, ...seq(2) }}>
             Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
           </p>
-          <div className="flex flex-col gap-3 mb-8 fpd-stagger">
-            {benefits.map(([bold, rest]) => (
-              <div key={bold} className="flex items-start gap-3">
+          <div className="flex flex-col gap-3 mb-8">
+            {benefits.map(([bold, rest], i) => (
+              <div key={bold} className="fpd-seq flex items-start gap-3" style={seq(3 + i)}>
                 <CheckCircle2 size={15} color="#FFFFFF" style={{ marginTop: 3, flexShrink: 0 }} />
                 <span style={{ color: SOFT, fontSize: 17.5 }}><strong style={{ color: TEXT }}>{bold}</strong> — {rest}</span>
               </div>
             ))}
           </div>
-          <PrimaryBtn onClick={onStart}>Join Affiliate Program <ArrowRight size={16} /></PrimaryBtn>
+          <PrimaryBtn onClick={onStart} className="fpd-seq" style={seq(3 + benefits.length)}>Join Affiliate Program <ArrowRight size={16} /></PrimaryBtn>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 fpd-stagger">
           {tiers.map(t => (
             <div key={t.tier} className="p-6 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div className="flex items-center justify-between">
@@ -753,7 +753,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
     <section id="partners" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
-        <div className="grid md:grid-cols-3 gap-5 mb-12">
+        <div className="grid md:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {tiers.map(t => (
             <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div style={{ ...DISPLAY, fontSize: 65, fontWeight: 800, color: "#6FAE8B", lineHeight: 1 }}>{t.rate}</div>
@@ -765,7 +765,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
             </div>
           ))}
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12 fpd-stagger">
           {partners.map(p => (
             <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{p.icon}</div>
@@ -830,7 +830,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* 4 steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16 fpd-stagger">
           {steps.map(s => (
             <div key={s.num} className="relative p-6 rounded-2xl" style={{ background: "rgba(126,107,216,0.05)", border: `1px solid ${vBorder}`, borderTop: `3px solid rgba(126,107,216,0.5)` }}>
               <div style={{ ...DISPLAY, color: "rgba(185,140,166,0.28)", fontSize: 65, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
@@ -842,7 +842,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* Pricing — two cards */}
-        <div className="grid md:grid-cols-2 gap-5 mb-14">
+        <div className="grid md:grid-cols-2 gap-5 mb-14 fpd-stagger">
           <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(126,107,216,0.4)`, boxShadow: "0 0 48px rgba(126,107,216,0.15)" }}>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$99</div>
@@ -923,7 +923,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* trust strip */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 fpd-stagger">
           {trust.map(t => (
             <div key={t.title} className="p-5 rounded-2xl text-center" style={{ background: "rgba(126,107,216,0.04)", border: "1px solid rgba(126,107,216,0.12)" }}>
               <div style={{ color: "#FFFFFF", margin: "0 auto 10px", display: "flex", justifyContent: "center" }}>{t.icon}</div>
@@ -958,7 +958,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
       <div className="max-w-6xl mx-auto">
         <SectionHead kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>} sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
         {active.length > 0 && (
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
+          <div className="grid md:grid-cols-3 gap-6 mb-16 fpd-stagger">
             {active.map(p => {
               const monthly = getMonthlyPrice(p);
               return (
@@ -996,7 +996,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
             })}
           </div>
         )}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 fpd-stagger">
           {perks.map(f => (
             <div key={f.title} className="flex gap-3 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ color: "#FFFFFF", flexShrink: 0 }}>{f.icon}</div>
