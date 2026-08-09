@@ -187,6 +187,26 @@
 .fpd-fade-in-up {
   animation: fpd-fade-in-up .5s cubic-bezier(.4,0,.2,1) backwards;
 }
+/* Sequential text reveal: each element's animation-delay (set inline, see
+   the `seq()` helper) is a multiple of its own duration, so element N+1
+   only starts once element N has fully finished. */
+.fpd-seq {
+  animation: fpd-fade-in-up .42s cubic-bezier(.4,0,.2,1) backwards;
+}
+/* Reveals direct children one after another instead of all at once */
+.fpd-stagger > * {
+  animation: fpd-fade-in-up .55s cubic-bezier(.4,0,.2,1) backwards;
+}
+.fpd-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.fpd-stagger > *:nth-child(2) { animation-delay: 110ms; }
+.fpd-stagger > *:nth-child(3) { animation-delay: 220ms; }
+.fpd-stagger > *:nth-child(4) { animation-delay: 330ms; }
+.fpd-stagger > *:nth-child(5) { animation-delay: 440ms; }
+.fpd-stagger > *:nth-child(6) { animation-delay: 550ms; }
+.fpd-stagger > *:nth-child(7) { animation-delay: 660ms; }
+.fpd-stagger > *:nth-child(8) { animation-delay: 770ms; }
+.fpd-stagger > *:nth-child(9) { animation-delay: 880ms; }
+.fpd-stagger > *:nth-child(n+10) { animation-delay: 990ms; }
 .fpd-pulse-dot {
   animation: fpd-pulse-dot 1.8s ease-in-out infinite;
 }
@@ -207,7 +227,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fpd-hover-lift, .fpd-fade-in-up, .fpd-pulse-dot, .fpd-btn-lift,
+  .fpd-hover-lift, .fpd-fade-in-up, .fpd-stagger > *, .fpd-seq, .fpd-pulse-dot, .fpd-btn-lift,
   .fpd-spin-slow, .fpd-breathe {
     animation: none !important;
     transition: none !important;

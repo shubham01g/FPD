@@ -74,7 +74,7 @@ const ADMIN_KB: Record<string, string> = {
   "verify id": `**ID Verification Step-by-Step (Admin):**\n\n1. Check the **ID Verification** tab — badge shows pending count\n2. Click on a pending submission to review\n3. Examine the submitted ID photo for:\n   • Legibility (text must be readable)\n   • Match between name on ID and contact name in system\n   • ID expiry date (must be valid)\n   • Photo match (if available)\n4. If approved → click **Verify** → contact status changes to VERIFIED\n5. If rejected → click **Reject** → select reason → contact receives resubmit email\n6. SLA: Process within 1–2 business days\n7. Log your action — automatically recorded in Audit Log\n\n**Edge cases:**\n• Expired ID: Request renewal ID\n• Name mismatch: Request explanation or additional documentation\n• Photo unclear: Request resubmission with better lighting`,
 
   // ── Default ──────────────────────────────────────────────────────
-  "default": `I'm the **FPD Admin AI Assistant** — trained on every feature of the Command Center.\n\nI can help you with:\n\n📊 **Analytics & Reporting** — interpreting dashboards, running reports\n👥 **User Management** — searching users, onboarding, suspensions\n💰 **Revenue & Payouts** — MRR, commissions, affiliate tiers\n⭐ **White Glove Program** — clients, sessions, billing, staff\n🔔 **Push Notifications** — composing, targeting, delivery channels\n🛡️ **ID Verification** — queue management, approval workflow\n🔐 **Vault Activation** — $199 fee, confirmation of passing, admin activation\n👑 **Admin Team** — roles, permissions, inviting new admins\n📋 **Reports** — all 20 reports, formats, date ranges\n🆕 **New Hire Onboarding** — department-specific guidance\n\nJust ask — what do you need help with?`,
+  "default": `I'm **Josh** — the FPD Admin AI Assistant, trained on every feature of the Command Center.\n\nI can help you with:\n\n📊 **Analytics & Reporting** — interpreting dashboards, running reports\n👥 **User Management** — searching users, onboarding, suspensions\n💰 **Revenue & Payouts** — MRR, commissions, affiliate tiers\n⭐ **White Glove Program** — clients, sessions, billing, staff\n🔔 **Push Notifications** — composing, targeting, delivery channels\n🛡️ **ID Verification** — queue management, approval workflow\n🔐 **Vault Activation** — $199 fee, confirmation of passing, admin activation\n👑 **Admin Team** — roles, permissions, inviting new admins\n📋 **Reports** — all 20 reports, formats, date ranges\n🆕 **New Hire Onboarding** — department-specific guidance\n\nJust ask — what do you need help with?`,
 };
 
 function getAdminResponse(query: string): string {
@@ -188,7 +188,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
     <button onClick={() => setOpen(true)}
       className="fixed bottom-24 left-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl"
       style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
-      <Crown size={16}/> Admin Assistant
+      <Crown size={16}/> Ask Josh
     </button>
   );
 
@@ -201,7 +201,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
             <Crown size={18} color="#fff"/>
           </div>
           <div>
-            <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>Admin AI Assistant</div>
+            <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>Ask Josh</div>
             <div className="flex items-center gap-1">
               <div style={{ width:6, height:6, borderRadius:"50%", background:"#48BB78", boxShadow:"0 0 6px #48BB78" }}/>
               <span style={{ color:"rgba(255,255,255,0.7)", fontSize:12.5, ...MONO }}>Command Center Expert</span>
