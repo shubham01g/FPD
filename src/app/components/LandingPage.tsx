@@ -109,6 +109,22 @@ function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: Reac
   );
 }
 
+/* Full-bleed page-header banner (image backdrop + kicker/title/sub) used at the
+   top of secondary pages, mirroring the Hero's treatment at a shorter height. */
+function PageBanner({ poster, tone = "blue", overlay = 0.55, kicker, title, sub, kickerTone }:
+  { poster: string; tone?: "blue" | "deep" | "warm"; overlay?: number; kicker: React.ReactNode; title: React.ReactNode; sub?: React.ReactNode; kickerTone?: "blue" | "violet" }) {
+  return (
+    <header className="relative flex items-center justify-center" style={{ minHeight: "62vh" }}>
+      <MediaBackdrop poster={poster} tone={tone} overlay={overlay} />
+      <div className="relative max-w-4xl mx-auto w-full px-6 py-28 text-center flex flex-col items-center">
+        <Kicker tone={kickerTone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
+        <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820, ...seq(1) }}>{title}</h1>
+        {sub && <p className="fpd-seq" style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7, ...seq(2) }}>{sub}</p>}
+      </div>
+    </header>
+  );
+}
+
 function PrimaryBtn({ children, onClick, large, compact, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
     <button onClick={onClick} className={`fpd-shine inline-flex items-center gap-2 rounded-xl fpd-btn-lift ${className ?? ""}`}
@@ -223,7 +239,11 @@ function About({ onStart }: { onStart: () => void }) {
     "Keep medical, financial, and personal records organized",
   ];
   return (
-    <section id="about" className="relative py-28 px-6">
+    <>
+      <PageBanner poster="/media/about-bg.jpg" tone="deep" overlay={0.6}
+        kicker="Our Story" title={<>Built So Nothing<br />Important Is Ever Lost</>}
+        sub="Final Pass Down exists because too many families are left piecing together a lifetime of details when it matters most." />
+      <section id="about" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
           <Kicker className="fpd-seq" style={seq(0)}>About Final Pass Down</Kicker>
@@ -256,7 +276,8 @@ function About({ onStart }: { onStart: () => void }) {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }
 
@@ -270,9 +291,12 @@ const STEPS = [
 
 function HowItWorks() {
   return (
+    <>
+    <PageBanner poster="/media/how-it-works-bg.jpg" tone="blue" overlay={0.6}
+      kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>}
+      sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
     <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
         <div className="grid md:grid-cols-4 gap-5 fpd-stagger">
           {STEPS.map(s => (
             <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
@@ -285,6 +309,7 @@ function HowItWorks() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -373,9 +398,12 @@ const HIGHLIGHT_TITLES = ["Document Vault", "Digital File Cabinet", "Video Messa
 function Features() {
   const highlighted = FEATURES.filter(f => HIGHLIGHT_TITLES.includes(f.title));
   return (
+    <>
+    <PageBanner poster="/media/features-bg.jpg" tone="warm" overlay={0.6}
+      kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>}
+      sub="From legal documents to family memories, all in one secure encrypted vault." />
     <section id="features" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one secure encrypted vault." />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 fpd-stagger">
           {highlighted.map(f => (
             <div key={f.title} className="p-6 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
@@ -399,6 +427,7 @@ function Features() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -494,9 +523,12 @@ const SEC_BADGES = ["AES-256 Encrypted", "Zero-Knowledge", "SOC 2 Type II", "HIP
 
 function Security() {
   return (
+    <>
+    <PageBanner poster="/media/security-bg.jpg" tone="deep" overlay={0.6}
+      kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>}
+      sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
     <section id="security" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {SEC_ITEMS.map(item => (
             <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
@@ -519,6 +551,7 @@ function Security() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -577,9 +610,12 @@ const PLANS: Plan[] = [
 function Pricing({ onStart }: { onStart: () => void }) {
   const [annual, setAnnual] = useState(false);
   return (
+    <>
+    <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
+      kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
+      sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
     <section id="pricing" className="relative py-28 px-6">
       <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>} sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
         <div className="flex items-center justify-center gap-3 mb-12">
           <span style={{ color: MUTED, fontSize: 17.5 }}>Monthly</span>
           <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(91,110,225,0.3)", boxShadow: annual ? "0 0 20px rgba(91,110,225,0.4)" : "none" }}>
@@ -673,6 +709,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -690,6 +727,10 @@ function Affiliates({ onStart }: { onStart: () => void }) {
     ["No cap on referrals", "Refer as many people as you want — more referrals, more income"],
   ];
   return (
+    <>
+    <PageBanner poster="/media/affiliates-bg.jpg" tone="warm" overlay={0.6}
+      kicker="Affiliate Program" title={<>Share It.<br />Everyone Wins.</>}
+      sub="Earn a recurring commission every time someone you refer builds their vault with Final Pass Down." />
     <section id="affiliates" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
         <div>
@@ -731,6 +772,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -750,9 +792,12 @@ function Partnerships({ onStart }: { onStart: () => void }) {
     { icon: <Heart size={18} />, label: "Funeral Homes", desc: "Offer pre-planning services and connect families to organized digital records." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/partners-bg.jpg" tone="blue" overlay={0.6}
+      kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>}
+      sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
     <section id="partners" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
         <div className="grid md:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {tiers.map(t => (
             <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
@@ -781,6 +826,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -816,19 +862,13 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
     { icon: <Heart size={18} />, title: "At Your Pace, Always", desc: "Sessions happen when you're ready. Most clients finish in 2–3 calls over 1–2 weeks. We never rush." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/white-glove-bg.jpg" tone="deep" overlay={0.6} kickerTone="violet"
+      kicker="White Glove Concierge Service"
+      title={<>Not Comfortable With Technology?<br /><span style={{ color: "#A98CC7" }}>We Do Everything For You.</span></>}
+      sub="Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone." />
     <section id="white-glove" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0B0818,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16 flex flex-col items-center">
-          <Kicker tone="violet">White Glove Concierge Service</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.6vw,4rem)", fontWeight: 700, color: TEXT, lineHeight: 1.12, margin: "18px 0 16px", letterSpacing: "-0.02em" }}>
-            Not Comfortable With Technology?<br />
-            <span style={{ color: "#A98CC7" }}>We Do Everything For You.</span>
-          </h2>
-          <p style={{ color: SOFT, fontSize: 21.5, lineHeight: 1.85, maxWidth: 620 }}>
-            Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone.
-          </p>
-        </div>
-
         {/* 4 steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16 fpd-stagger">
           {steps.map(s => (
@@ -934,6 +974,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -954,9 +995,12 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
     { icon: <Zap size={18} />, title: "Stripe + More", desc: "Stripe, PayPal, Square or bring your own processor" },
   ];
   return (
+    <>
+    <PageBanner poster="/media/white-label-bg.jpg" tone="blue" overlay={0.6}
+      kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>}
+      sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
     <section id="white-label" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>} sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
         {active.length > 0 && (
           <div className="grid md:grid-cols-3 gap-6 mb-16 fpd-stagger">
             {active.map(p => {
@@ -1009,6 +1053,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -1026,9 +1071,12 @@ function Help() {
     { q: "What is the difference between affiliate and partnership?", a: "Affiliates earn a commission per referred user for 12 months (capped per referral). Partners — typically businesses like law firms or financial advisors — earn recurring lifetime commissions on every account they refer, with no time cap." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6}
+      kicker="Get in touch" title={<>Contact Us</>}
+      sub="Our team is available 7 days a week. Average response time: under 2 hours." />
     <section id="help" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-3xl mx-auto">
-        <SectionHead kicker="Get in touch" title={<>Contact Us</>} sub="Our team is available 7 days a week. Average response time: under 2 hours." />
         <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
             <a href="mailto:support@finalpassdown.com"><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
@@ -1052,6 +1100,7 @@ function Help() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
