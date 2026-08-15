@@ -520,7 +520,7 @@ const CAB_CSS = `
 .fpd-cab .uploadtile:hover{border-color:rgba(91,110,225,0.4);color:#6FAE8B;}
 
 /* detail panel */
-.fpd-cab .detail{position:fixed;bottom:24px;right:24px;width:290px;z-index:40;padding:18px;}
+.fpd-cab .detail{position:fixed;bottom:172px;right:24px;width:290px;z-index:40;padding:18px;max-height:calc(100vh - 200px);overflow-y:auto;}
 .fpd-cab .detail img{width:100%;height:110px;object-fit:cover;border-radius:18px;margin-bottom:12px;}
 .fpd-cab .detail .dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .fpd-cab .detail .dname{color:${TEXT};font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -889,8 +889,8 @@ export function DigitalFileCabinet() {
                   {file.starred && <Star size={13} fill="#D9A55E" color="#D9A55E"/>}
                   {file.locked && <Lock size={13} color={NEG}/>}
                   <div className="facts">
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.success(`Downloading: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
-                    <button onClick={e=>{e.stopPropagation(); continuationFeePaid ? toast.info(`Previewing: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to preview files");}}><Eye size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? toast.success(`Downloading: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); toast.info(`Previewing: ${file.name}`);}}><Eye size={13}/></button>
                     <button className="del" onClick={e=>{e.stopPropagation(); if((file as any)._synced){ removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); } else { toast.success(`Deleted: ${file.name}`); }}}><Trash2 size={13}/></button>
                   </div>
                 </div>
@@ -931,10 +931,10 @@ export function DigitalFileCabinet() {
             ))}
           </div>
           <div className="dbtns">
-            <button className="dbtn ghost" onClick={() => continuationFeePaid ? toast.success(`Downloading: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
+            <button className="dbtn ghost" onClick={() => (continuationFeePaid || current?.id === "taxes") ? toast.success(`Downloading: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
               <Download size={13}/> Download
             </button>
-            <button className="dbtn solid" onClick={() => continuationFeePaid ? toast.info(`Previewing: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to preview")}>
+            <button className="dbtn solid" onClick={() => toast.info(`Previewing: ${selected.name}`)}>
               <Eye size={13}/> Preview
             </button>
           </div>

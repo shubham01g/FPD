@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard } from "lucide-react";
+import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard, ShieldCheck, Save } from "lucide-react";
 import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
 import { DR_ADDON_KEY } from "./DisasterRecovery";
@@ -143,6 +143,25 @@ const STORAGE_CSS = `
 .fpd-storage .plan-btn.crypto{padding:9px;font-size:15px;background:rgba(247,147,26,0.1);color:#F7931A;border:1px solid rgba(247,147,26,0.3);}
 .fpd-storage .overage-note{margin-top:16px;padding:12px 16px;border-radius:16px;background:#0F1624;display:flex;align-items:center;gap:10px;}
 .fpd-storage .overage-note span{color:${MUTED};font-size:16px;}
+
+/* spending protection cap */
+.fpd-storage .cap-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.fpd-storage .cap-copy{color:${MUTED};font-size:15.5px;line-height:1.6;max-width:560px;}
+.fpd-storage .toggle{position:relative;width:44px;height:24px;border-radius:99px;flex-shrink:0;border:1px solid;cursor:pointer;transition:background .18s,border-color .18s;padding:0;}
+.fpd-storage .toggle .thumb{position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#0A0F1A;transition:left .18s;}
+.fpd-storage .cap-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.fpd-storage .cap-field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
+.fpd-storage .cap-field .cap-input-wrap{position:relative;}
+.fpd-storage .cap-field .cap-input-wrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:${MUTED};font-size:16px;}
+.fpd-storage .cap-field input{width:140px;padding:10px 13px 10px 26px;border-radius:14px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-mono);transition:border-color .18s;}
+.fpd-storage .cap-field input:focus{border-color:rgba(91,110,225,0.5);}
+.fpd-storage .cap-field input:disabled{opacity:.45;cursor:not-allowed;}
+.fpd-storage .cap-save{padding:10px 18px;border-radius:14px;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;transition:filter .18s;display:inline-flex;align-items:center;gap:7px;}
+.fpd-storage .cap-save:hover{filter:brightness(1.08);}
+.fpd-storage .cap-save:disabled{opacity:.5;cursor:not-allowed;}
+.fpd-storage .cap-meter{margin-top:16px;height:8px;border-radius:99px;background:#0F1624;overflow:hidden;}
+.fpd-storage .cap-meter-fill{height:100%;border-radius:99px;transition:width .3s;}
+.fpd-storage .cap-status{margin-top:10px;font-size:14px;color:${MUTED};}
 
 /* alert history */
 .fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#0F1624;}
@@ -301,12 +320,20 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   );
 }
 
+const SPEND_CAP_KEY = "fpd_spend_cap";
+
 export function StorageUsage() {
   const [overageBilling] = useState(true);
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
   const [showDRModal, setShowDRModal] = useState(false);
   const [drActive, setDrActive] = useState(() => {
     try { return !!JSON.parse(localStorage.getItem(DR_ADDON_KEY) ?? "null")?.active; } catch { return false; }
+  });
+  const [capEnabled, setCapEnabled] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SPEND_CAP_KEY) ?? "null")?.enabled ?? true; } catch { return true; }
+  });
+  const [capAmount, setCapAmount] = useState<number>(() => {
+    try { return JSON.parse(localStorage.getItem(SPEND_CAP_KEY) ?? "null")?.amount ?? 25; } catch { return 25; }
   });
   const plansRef = useRef<HTMLDivElement>(null);
   const used = STORAGE_USED_GB;
@@ -315,6 +342,14 @@ export function StorageUsage() {
   const overageRate = 0.40; // $0.40/GB on Legacy Archive (Starter is $0.50/GB)
   const projectedEOM = 21.4;
   const projectedOverage = Math.max(0, projectedEOM - total);
+  const projectedOverageCost = projectedOverage * overageRate;
+  const capPercent = capAmount > 0 ? Math.min(100, Math.round((projectedOverageCost / capAmount) * 100)) : 0;
+  const capColor = capPercent >= 100 ? "#E53E3E" : capPercent >= 80 ? NEG : capPercent >= 50 ? WARN : POS;
+
+  const saveCap = () => {
+    localStorage.setItem(SPEND_CAP_KEY, JSON.stringify({ enabled: capEnabled, amount: capAmount }));
+    toast.success(capEnabled ? `Spending cap set to $${capAmount.toFixed(2)}/mo` : "Spending cap disabled — overage charges are uncapped");
+  };
 
   const getBarColor = (pct: number) => {
     if (pct >= 95) return "#E53E3E";
@@ -505,6 +540,56 @@ export function StorageUsage() {
               Overage rate: <strong style={{ color: TEXT }}>${overageRate}/GB</strong> above your plan limit (Legacy Archive). Starter plan is $0.50/GB. Billed automatically at end of billing cycle.
             </span>
           </div>
+        </div>
+
+        {/* ── Spending protection cap ── */}
+        <div className="card pad">
+          <div className="cap-row">
+            <div>
+              <h3 className="sec-title" style={{ marginBottom: 8 }}><span className="tick"/>Spending Protection Cap</h3>
+              <p className="cap-copy">Set a maximum monthly overage spend. Once your projected overage charges reach this cap, new uploads pause instead of billing past it — no surprise charges on your card.</p>
+            </div>
+            <button
+              onClick={() => setCapEnabled(!capEnabled)}
+              className="toggle"
+              style={{ background: capEnabled ? "rgba(91,110,225,0.85)" : "rgba(255,255,255,0.06)", borderColor: capEnabled ? ACCENT : "rgba(255,255,255,0.14)" }}
+            >
+              <div className="thumb" style={{ left: capEnabled ? 24 : 4 }} />
+            </button>
+          </div>
+
+          <div className="cap-controls">
+            <div className="cap-field">
+              <label>MONTHLY OVERAGE CAP</label>
+              <div className="cap-input-wrap">
+                <span>$</span>
+                <input
+                  type="number" min={0} step={1} disabled={!capEnabled}
+                  value={capAmount}
+                  onChange={e => setCapAmount(Math.max(0, Number(e.target.value)))}
+                />
+              </div>
+            </div>
+            <button className="cap-save" onClick={saveCap}><Save size={14}/> Save Cap</button>
+          </div>
+
+          {capEnabled ? (
+            <>
+              <div className="cap-meter">
+                <div className="cap-meter-fill" style={{ width: `${capPercent}%`, background: capColor }} />
+              </div>
+              <div className="cap-status">
+                <ShieldCheck size={13} color={capColor} style={{ verticalAlign: -2, marginRight: 6 }}/>
+                ${projectedOverageCost.toFixed(2)} of ${capAmount.toFixed(2)} projected this cycle
+                {capPercent >= 100 ? " — uploads will pause until your next billing cycle or plan upgrade." : "."}
+              </div>
+            </>
+          ) : (
+            <div className="cap-status">
+              <AlertTriangle size={13} color={WARN} style={{ verticalAlign: -2, marginRight: 6 }}/>
+              No cap set — overage charges at ${overageRate}/GB will continue to bill automatically with no limit.
+            </div>
+          )}
         </div>
 
         {/* ── Platform Add-Ons ── */}
