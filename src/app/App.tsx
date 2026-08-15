@@ -30,6 +30,7 @@ import { FamilyMemories } from "./components/FamilyMemories";
 import { PetRecords } from "./components/PetRecords";
 import { ContactsHub } from "./components/ContactsHub";
 import { OrganizeHub } from "./components/OrganizeHub";
+import { LifeCalendar } from "./components/LifeCalendar";
 import { AffiliateProgram } from "./components/AffiliateProgram";
 import { DigitalFileCabinet } from "./components/DigitalFileCabinet";
 import { FamilyFriends } from "./components/FamilyFriends";
@@ -348,6 +349,7 @@ function UserRoute() {
       case "contacts-emergency": return <ContactsHub initialSection="emergency"/>;
       // legacy-verification merged into contacts-legacy
       case "organize":            return <OrganizeHub onNavigate={nav}/>;
+      case "calendar":            return <LifeCalendar onNavigate={nav}/>;
       case "storage-usage":       return <StorageUsage/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;

@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert
+  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert, Calendar
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
@@ -17,7 +17,7 @@ export type PageId =
   | "file-cabinet"
   | "legacy-vault" | "storage-usage"
   | "final-wishes" | "wills-trusts" | "medical-info" | "financial-records"
-  | "personal-assets" | "family-memories" | "organize"
+  | "personal-assets" | "family-memories" | "organize" | "calendar"
   | "family-friends"
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
@@ -45,6 +45,7 @@ const navGroups: NavGroup[] = [
       { id: "file-cabinet", label: "File Cabinet", icon: <FolderOpen size={16}/>, highlight: true },
       { id: "legacy-vault", label: "Legacy Vault Export", icon: <Archive size={16}/> },
       { id: "organize", label: "Folders & Reminders", icon: <Folder size={16}/> },
+      { id: "calendar", label: "Calendar", icon: <Calendar size={16}/> },
     ],
   },
   {
