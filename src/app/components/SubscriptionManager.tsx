@@ -201,9 +201,9 @@ const SUB_CSS = `
 @media (max-width:560px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
 `;
 
-function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscription)=>void }) {
+function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | null; onClose:()=>void; onSave:(s:Subscription)=>void }) {
   useEscapeKey(true, onClose);
-  const [form, setForm] = useState<Partial<Subscription>>({ frequency:"Monthly", paymentType:"Visa", status:"active", autoPay:true, category:"Other" });
+  const [form, setForm] = useState<Partial<Subscription>>(editing ?? { frequency:"Monthly", paymentType:"Visa", status:"active", autoPay:true, category:"Other" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -212,8 +212,8 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
     if (!form.title || !form.amount) { toast.error("Title and amount are required"); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 700));
-    onAdd({ ...form, id:`sub-${Date.now()}`, amount: Number(form.amount) } as Subscription);
-    toast.success(`"${form.title}" added to Auto Pay & Subscriptions`);
+    onSave({ ...form, id: editing?.id ?? `sub-${Date.now()}`, amount: Number(form.amount) } as Subscription);
+    toast.success(editing ? `"${form.title}" updated` : `"${form.title}" added to Auto Pay & Subscriptions`);
     onClose();
   };
 
@@ -237,7 +237,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal">
         <div className="modal-head">
-          <h3><CreditCard size={16} color="#FFFFFF" /> Add Subscription / Auto Pay</h3>
+          <h3><CreditCard size={16} color="#FFFFFF" /> {editing ? "Edit Subscription" : "Add Subscription / Auto Pay"}</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
@@ -305,7 +305,7 @@ function AddSubModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(s:Subscripti
         </div>
         <div className="modal-foot">
           <button className="save" onClick={submit} disabled={loading}>
-            {loading?"Saving...":"Save Subscription"}
+            {loading ? "Saving..." : editing ? "Save Changes" : "Save Subscription"}
           </button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
@@ -321,6 +321,11 @@ export function SubscriptionManager() {
   const [selected, setSelected] = useState<Subscription|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showPwFor, setShowPwFor] = useState<string|null>(null);
+  const [editingSub, setEditingSub] = useState<Subscription|null>(null);
+
+  const openAddSub = () => { setEditingSub(null); setShowAdd(true); };
+  const openEditSub = (s: Subscription) => { setEditingSub(s); setShowAdd(true); };
+  const closeSubModal = () => { setShowAdd(false); setEditingSub(null); };
 
   /* Chips follow the data. A fixed slice used to cut Utilities off the end,
      leaving live subscriptions with no reachable filter. */
@@ -361,7 +366,7 @@ export function SubscriptionManager() {
             <h1>Every auto-pay, <span className="accent">accounted for.</span></h1>
             <p>Subscriptions, utilities, and recurring charges — with the payment method and cancellation steps your legacy contacts will need.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Subscription</button>
+              <button className="hbtn primary" onClick={openAddSub}><Plus size={15} /> Add Subscription</button>
               <button className="hbtn ghost" onClick={() => setCategory("All")}><CreditCard size={15} /> View All</button>
             </div>
           </div>
@@ -374,7 +379,7 @@ export function SubscriptionManager() {
             <h1 className="pg-h1">Auto Pay &amp; Subscriptions</h1>
             <div className="pg-sub">{subs.filter(s=>s.status==="active").length} active subscriptions · ~${totalMonthly.toFixed(2)}/month total</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddSub}>
             <Plus size={14} /> Add Subscription
           </button>
         </div>
@@ -440,6 +445,7 @@ export function SubscriptionManager() {
                   <div className="val">${sub.amount.toFixed(2)}</div>
                   <div className="freq" style={{ color:frequencyColor[sub.frequency] }}>{sub.frequency}</div>
                 </div>
+                <button className="icon-btn" onClick={e => { e.stopPropagation(); openEditSub(sub); }}><Edit2 size={13}/></button>
                 <button className="icon-btn del" onClick={e => { e.stopPropagation(); deleteSub(sub.id); }}><Trash2 size={13}/></button>
               </div>
             ))}
@@ -505,7 +511,13 @@ export function SubscriptionManager() {
           </div>
         </div>
       </div>
-      {showAdd && <AddSubModal onClose={() => setShowAdd(false)} onAdd={s => setSubs(prev => [s, ...prev])}/>}
+      {showAdd && (
+        <AddSubModal
+          editing={editingSub}
+          onClose={closeSubModal}
+          onSave={s => setSubs(prev => editingSub ? prev.map(x => x.id === s.id ? s : x) : [s, ...prev])}
+        />
+      )}
     </div>
   );
 }

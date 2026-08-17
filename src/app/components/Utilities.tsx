@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Zap, Plus, X, Boxes } from "lucide-react";
+import { Zap, Plus, X, Boxes, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -114,13 +114,43 @@ export function Utilities() {
   const listRef = useRef<HTMLDivElement>(null);
   const [uForm, setUForm] = useState({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
   const [uDoc, setUDoc] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  function addUtility() {
-    if (!uForm.service || !uForm.provider) { toast.error("Service and provider required"); return; }
-    setUtilityList(p => [...p, { id: Date.now(), service: uForm.service, provider: uForm.provider, accountNum: uForm.accountNum, phone: uForm.phone, website: uForm.website, autopay: false, monthlyAvg: uForm.monthlyAvg || "$0", notes: uForm.notes, attachedDoc: uDoc }]);
-    toast.success(`${uForm.service} — ${uForm.provider} added`);
+  function resetUtilityForm() {
     setUForm({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
     setUDoc(null);
+  }
+
+  function openAddUtility() {
+    resetUtilityForm();
+    setEditingId(null);
+    setShowAdd(true);
+  }
+
+  function openEditUtility(u: typeof utilitiesInit[number] & { attachedDoc?: string | null }) {
+    setUForm({ service: u.service, provider: u.provider, accountNum: u.accountNum, phone: u.phone, website: u.website, monthlyAvg: u.monthlyAvg, notes: u.notes });
+    setUDoc(u.attachedDoc ?? null);
+    setEditingId(u.id);
+    setShowAdd(true);
+  }
+
+  function closeUtilityModal() {
+    setShowAdd(false);
+    setEditingId(null);
+    resetUtilityForm();
+  }
+
+  function saveUtility() {
+    if (!uForm.service || !uForm.provider) { toast.error("Service and provider required"); return; }
+    if (editingId !== null) {
+      setUtilityList(p => p.map(x => x.id === editingId ? { ...x, service: uForm.service, provider: uForm.provider, accountNum: uForm.accountNum, phone: uForm.phone, website: uForm.website, monthlyAvg: uForm.monthlyAvg || "$0", notes: uForm.notes, attachedDoc: uDoc } : x));
+      toast.success(`${uForm.service} — ${uForm.provider} updated`);
+    } else {
+      setUtilityList(p => [...p, { id: Date.now(), service: uForm.service, provider: uForm.provider, accountNum: uForm.accountNum, phone: uForm.phone, website: uForm.website, autopay: false, monthlyAvg: uForm.monthlyAvg || "$0", notes: uForm.notes, attachedDoc: uDoc }]);
+      toast.success(`${uForm.service} — ${uForm.provider} added`);
+    }
+    resetUtilityForm();
+    setEditingId(null);
     setShowAdd(false);
   }
 
@@ -146,7 +176,7 @@ export function Utilities() {
             <h1>Every utility account — <span className="accent">documented and easy to find.</span></h1>
             <p>Electricity, gas, internet, water, trash, and HOA — provider details, account numbers, and autopay status in one place.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAddUtility}>
                 <Plus size={15} /> Add Utility
               </button>
               <button className="hbtn ghost" onClick={() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -164,7 +194,7 @@ export function Utilities() {
         </div>
 
         <div className="toolbar-end">
-          <button className="btn-primary" onClick={() => setShowAdd(true)}><Plus size={14} /> Add Utility</button>
+          <button className="btn-primary" onClick={openAddUtility}><Plus size={14} /> Add Utility</button>
         </div>
 
         {/* ── Utilities list ── */}
@@ -192,19 +222,20 @@ export function Utilities() {
               {u.notes && <div className="notemuted">{u.notes}</div>}
               {(u as any).attachedDoc && <div className="notemuted">📄 {(u as any).attachedDoc}</div>}
               <div className="dacts">
+                <button className="btn-sec" onClick={() => openEditUtility(u)}><Edit2 size={13} /> Edit</button>
                 <ScanButton folder="utilities" onUpload={doc => { setUtilityList(p => p.map(x => x.id === u.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${u.service}`); }} size="sm" label="Scan Document" />
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add Utility Modal */}
+        {/* Add / Edit Utility Modal */}
         {showAdd && (
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Utility Account</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Utility" : "Add Utility Account"}</h3>
+                <button onClick={closeUtilityModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 {([["Service Type", "service", "e.g. Electricity, Internet, Water"], ["Provider", "provider", "e.g. AT&T, PG&E"], ["Account Number", "accountNum", ""], ["Phone", "phone", ""], ["Website", "website", ""], ["Monthly Average", "monthlyAvg", "e.g. $85"], ["Notes", "notes", "Optional"]] as [string, string, string][]).map(([label, key, ph]) => (
@@ -216,8 +247,8 @@ export function Utilities() {
                 <AttachDocumentField value={uDoc} onChange={setUDoc} folder="utilities" sectionId="utilities" sectionLabel="Utilities" label="Attach Document (bill, statement, account setup)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addUtility}>Add Utility</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveUtility}>{editingId !== null ? "Save Changes" : "Add Utility"}</button>
+                <button className="btn-sec" onClick={closeUtilityModal}>Cancel</button>
               </div>
             </div>
           </div>

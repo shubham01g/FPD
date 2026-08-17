@@ -433,6 +433,7 @@ export function DigitalDiary() {
   const [filterType, setFilterType] = useState<EntryType | "all">("all");
   const [selected, setSelected] = useState<DiaryEntry | null>(null);
   const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newType, setNewType] = useState<EntryType>("written");
   const [form, setForm] = useState({ title:"", body:"", mood:"good" as Mood, tags:"", private:false });
   const [audioSaved, setAudioSaved] = useState(false);
@@ -441,12 +442,37 @@ export function DigitalDiary() {
   const fileRef = useRef<HTMLInputElement>(null);
   const entriesRef = React.useRef<HTMLDivElement>(null);
 
+  function closeCreateModal() {
+    setCreating(false);
+    setEditingId(null);
+    setForm({ title:"", body:"", mood:"good", tags:"", private:false });
+    setAudioSaved(false); setVideoDuration(null);
+  }
+
+  function openAdd() {
+    setNewType("written");
+    setForm({ title:"", body:"", mood:"good", tags:"", private:false });
+    setAudioSaved(false);
+    setVideoDuration(null);
+    setEditingId(null);
+    setCreating(true);
+  }
+
+  function openEdit(entry: DiaryEntry) {
+    setNewType(entry.type);
+    setForm({ title: entry.title, body: entry.body ?? "", mood: entry.mood ?? "good", tags: entry.tags.join(", "), private: entry.private });
+    setAudioSaved(entry.type === "audio" ? !!entry.duration : false);
+    setVideoDuration(entry.type === "video" ? (entry.duration ?? null) : null);
+    setEditingId(entry.id);
+    setCreating(true);
+  }
+
   /* Escape closes the open overlay, matching Messages to Loved Ones. */
   useEffect(() => {
     if (!creating && !selected) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (creating) setCreating(false);
+      if (creating) closeCreateModal();
       else setSelected(null);
     };
     window.addEventListener("keydown", onKey);
@@ -462,17 +488,28 @@ export function DigitalDiary() {
   const handleSave = () => {
     if (!form.title.trim()) { toast.error("Please add a title"); return; }
     const tags = form.tags.split(",").map(t => t.trim()).filter(Boolean);
-    const entry: DiaryEntry = {
-      id: `d-${Date.now()}`, date: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-      title: form.title, body: form.body || undefined, type: newType,
-      mood: form.mood, tags, private: form.private,
-      duration: newType === "audio" && audioSaved ? "recorded" : newType === "video" && videoDuration ? videoDuration : undefined,
-    };
-    setEntries(prev => [entry, ...prev]);
-    setCreating(false);
-    setForm({ title:"", body:"", mood:"good", tags:"", private:false });
-    setAudioSaved(false); setVideoDuration(null);
-    toast.success("Diary entry saved securely 🔒");
+    const duration = newType === "audio" && audioSaved ? "recorded" : newType === "video" && videoDuration ? videoDuration : undefined;
+
+    if (editingId != null) {
+      setEntries(prev => prev.map(e => e.id === editingId ? {
+        ...e,
+        title: form.title.trim(), body: form.body || undefined, type: newType,
+        mood: form.mood, tags, private: form.private, duration,
+      } : e));
+      setSelected(s => s && s.id === editingId
+        ? { ...s, title: form.title.trim(), body: form.body || undefined, type: newType, mood: form.mood, tags, private: form.private, duration }
+        : s);
+      toast.success("Entry updated");
+    } else {
+      const entry: DiaryEntry = {
+        id: `d-${Date.now()}`, date: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
+        title: form.title.trim(), body: form.body || undefined, type: newType,
+        mood: form.mood, tags, private: form.private, duration,
+      };
+      setEntries(prev => [entry, ...prev]);
+      toast.success("Diary entry saved securely 🔒");
+    }
+    closeCreateModal();
   };
 
   const handleDelete = (id: string) => {
@@ -524,7 +561,7 @@ export function DigitalDiary() {
             <h1>Written, spoken, or filmed — <span className="accent">your thoughts, kept safe.</span></h1>
             <p>A private, encrypted diary for the entries only you can see — until you choose to pass them on.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setCreating(true)}>
+              <button className="hbtn primary" onClick={openAdd}>
                 <BookOpen size={15}/> New Entry
               </button>
               <button className="hbtn ghost" onClick={() => entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -541,7 +578,7 @@ export function DigitalDiary() {
             <h1 className="pg-h1">Digital Diary</h1>
             <div className="pg-sub">{today} · {entries.length} entries · Written, audio & video recordings</div>
           </div>
-          <button className="btn-primary" onClick={() => setCreating(true)}>
+          <button className="btn-primary" onClick={openAdd}>
             <Plus size={15}/> New Entry
           </button>
         </div>
@@ -644,14 +681,7 @@ export function DigitalDiary() {
                 <div className="dhead">
                   <div className="edate">{selected.date}</div>
                   <div className="dacts">
-                    <button onClick={() => {
-                      const newTitle = prompt("Edit entry title:", selected.title);
-                      if (newTitle && newTitle.trim()) {
-                        setEntries(prev => prev.map(e => e.id === selected.id ? { ...e, title: newTitle.trim() } : e));
-                        setSelected(s => s ? { ...s, title: newTitle.trim() } : s);
-                        toast.success("Entry updated");
-                      }
-                    }}><Edit2 size={13}/></button>
+                    <button onClick={() => openEdit(selected)} title="Edit entry"><Edit2 size={13}/></button>
                     <button onClick={() => { handleDelete(selected.id); }} style={{ color: NEG }}><Trash2 size={13}/></button>
                     <button onClick={() => setSelected(null)}><X size={13}/></button>
                   </div>
@@ -719,8 +749,8 @@ export function DigitalDiary() {
         <div className="backdrop">
           <div className="card modal">
             <div className="modal-head">
-              <h3>New Diary Entry</h3>
-              <button onClick={() => setCreating(false)}><X size={16}/></button>
+              <h3>{editingId != null ? "Edit Entry" : "New Diary Entry"}</h3>
+              <button onClick={closeCreateModal}><X size={16}/></button>
             </div>
             <div className="modal-body">
               <div className="type-grid">
@@ -806,8 +836,8 @@ export function DigitalDiary() {
               </div>
             </div>
             <div className="modal-foot">
-              <button className="save" onClick={handleSave}><Save size={14}/>Save Entry</button>
-              <button className="btn-sec" onClick={() => setCreating(false)}>Cancel</button>
+              <button className="save" onClick={handleSave}><Save size={14}/>{editingId != null ? "Save Changes" : "Save Entry"}</button>
+              <button className="btn-sec" onClick={closeCreateModal}>Cancel</button>
             </div>
           </div>
         </div>

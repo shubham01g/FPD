@@ -111,10 +111,10 @@ function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: Reac
 
 /* Full-bleed page-header banner (image backdrop + kicker/title/sub) used at the
    top of secondary pages, mirroring the Hero's treatment at a shorter height. */
-function PageBanner({ poster, tone = "blue", overlay = 0.55, kicker, title, sub, kickerTone }:
-  { poster: string; tone?: "blue" | "deep" | "warm"; overlay?: number; kicker: React.ReactNode; title: React.ReactNode; sub?: React.ReactNode; kickerTone?: "blue" | "violet" }) {
+function PageBanner({ poster, tone = "blue", overlay = 0.55, kicker, title, sub, kickerTone, minHeight = "62vh" }:
+  { poster: string; tone?: "blue" | "deep" | "warm"; overlay?: number; kicker: React.ReactNode; title: React.ReactNode; sub?: React.ReactNode; kickerTone?: "blue" | "violet"; minHeight?: string }) {
   return (
-    <header className="relative flex items-center justify-center" style={{ minHeight: "62vh" }}>
+    <header className="relative flex items-center justify-center" style={{ minHeight }}>
       <MediaBackdrop poster={poster} tone={tone} overlay={overlay} />
       <div className="relative max-w-4xl mx-auto w-full px-6 py-28 text-center flex flex-col items-center">
         <Kicker tone={kickerTone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
@@ -1072,7 +1072,7 @@ function Help() {
   ];
   return (
     <>
-    <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6}
+    <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6} minHeight="100vh"
       kicker="Get in touch" title={<>Contact Us</>}
       sub="Our team is available 7 days a week. Average response time: under 2 hours." />
     <section id="help" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>

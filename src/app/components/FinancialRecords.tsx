@@ -174,14 +174,17 @@ const FIN_CSS = `
 .fpd-fin .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
-function AddModal({ title, fields, onClose, onAdd }: {
+function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, onAdd }: {
   title: string;
+  submitLabel?: string;
   fields: { label: string; key: string; placeholder?: string; type?: string }[];
+  initial?: Record<string, string>;
+  initialDoc?: string | null;
   onClose: () => void;
-  onAdd: (form: Record<string, string>, attachedDoc?: string) => void;
+  onAdd: (form: Record<string, string>, attachedDoc: string | null) => void;
 }) {
-  const [form, setForm] = useState<Record<string, string>>(Object.fromEntries(fields.map(f => [f.key, ""])));
-  const [attachedDoc, setAttachedDoc] = useState<string | null>(null);
+  const [form, setForm] = useState<Record<string, string>>(initial ?? Object.fromEntries(fields.map(f => [f.key, ""])));
+  const [attachedDoc, setAttachedDoc] = useState<string | null>(initialDoc ?? null);
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -238,7 +241,7 @@ function AddModal({ title, fields, onClose, onAdd }: {
           </div>
         </div>
         <div className="modal-foot">
-          <button className="save" onClick={() => onAdd(form, attachedDoc ?? undefined)}>Add Record{attachedDoc ? " + Document" : ""}</button>
+          <button className="save" onClick={() => onAdd(form, attachedDoc)}>{submitLabel ?? `Add Record${attachedDoc ? " + Document" : ""}`}</button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
       </div>
@@ -246,9 +249,19 @@ function AddModal({ title, fields, onClose, onAdd }: {
   );
 }
 
+/* Generic upsert: replaces `original` in-place when editing, otherwise appends. */
+function upsert<T>(setList: React.Dispatch<React.SetStateAction<T[]>>, original: T | undefined, record: T) {
+  if (original) {
+    setList(list => list.map(item => (item === original ? record : item)));
+  } else {
+    setList(list => [...list, record]);
+  }
+}
+
 export function FinancialRecords() {
   const [tab, setTab] = useState<Tab>("insurance");
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
+  const [editingItem, setEditingItem] = useState<{ tab: Tab; original: any } | null>(null);
   const [policies, setPolicies]       = useState(insurancePolicies);
   const [personalList, setPersonalList] = useState(personalAccounts);
   const [investments, setInvestments] = useState(portfolios);
@@ -256,6 +269,28 @@ export function FinancialRecords() {
   const [taxList, setTaxList]         = useState(taxes);
   const [bizList, setBizList]         = useState(businessAccounts);
   const contentRef = React.useRef<HTMLDivElement>(null);
+
+  function openEdit(t: Tab, item: any) {
+    setEditingItem({ tab: t, original: item });
+    setShowAdd(t);
+  }
+  function closeModal() {
+    setShowAdd(null);
+    setEditingItem(null);
+  }
+
+  const insuranceFields = [{ label: "Type", key: "type", placeholder: "e.g. Life Insurance" }, { label: "Carrier", key: "carrier", placeholder: "e.g. MetLife" }, { label: "Policy Number", key: "policyNum" }, { label: "Coverage Amount", key: "coverage", placeholder: "e.g. $500,000" }, { label: "Premium", key: "premium", placeholder: "e.g. $182/month" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Agent", key: "agent" }, { label: "Status", key: "status", placeholder: "active" }];
+  const personalFields = [{ label: "Account Name", key: "accountName", placeholder: "e.g. Primary Checking" }, { label: "Bank", key: "bank", placeholder: "e.g. Wells Fargo" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Checking, Savings" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $8,000" }, { label: "Beneficiary", key: "beneficiary", placeholder: "e.g. Payable on Death (POD) name" }, { label: "Notes", key: "notes" }];
+  const portfolioFields = [{ label: "Institution", key: "institution", placeholder: "e.g. Fidelity Investments" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Brokerage, Roth IRA" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $50,000" }, { label: "Holdings", key: "holdings", placeholder: "e.g. S&P 500 Index" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Contact", key: "contact" }];
+  const retirementFields = [{ label: "Account Type", key: "type", placeholder: "e.g. 401(k), IRA, Pension" }, { label: "Employer (if 401k)", key: "employer", placeholder: "Optional" }, { label: "Institution", key: "institution" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $120,000" }, { label: "Contributions", key: "contributions", placeholder: "e.g. $500/month" }, { label: "Vesting", key: "vested", placeholder: "e.g. 100%" }, { label: "Beneficiary", key: "beneficiary" }];
+  const taxFields = [{ label: "Tax Year", key: "year", placeholder: "e.g. 2026" }, { label: "Filed Date", key: "filedDate", placeholder: "e.g. Apr 15, 2027" }, { label: "Filed With", key: "filedWith", placeholder: "e.g. TurboTax, H&R Block" }, { label: "Result", key: "refund", placeholder: "e.g. $1,200 refund or $800 owed" }, { label: "Accountant", key: "accountant", placeholder: "Name or Self-prepared" }, { label: "Document Location", key: "documents", placeholder: "e.g. 2026_1040.pdf in Legacy Vault" }];
+  const businessFields = [{ label: "Business Name", key: "businessName" }, { label: "Entity Type", key: "type", placeholder: "e.g. LLC, S-Corp, Sole Proprietor" }, { label: "EIN", key: "ein", placeholder: "XX-XXXXXXX" }, { label: "Bank", key: "bank" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Annual Revenue", key: "revenue", placeholder: "e.g. ~$60,000/year" }, { label: "Accountant", key: "accountant" }, { label: "Notes / Transfer Instructions", key: "notes" }];
+
+  /* Builds the AddModal's `initial` field values from the record being edited (undefined in add mode). */
+  function editInitial(t: Tab, fields: { key: string }[]): Record<string, string> | undefined {
+    if (editingItem?.tab !== t) return undefined;
+    return Object.fromEntries(fields.map(f => [f.key, String((editingItem.original as any)[f.key] ?? "")]));
+  }
 
   const kpis = [
     { label: "Insurance Policies", value: String(policies.length), sub: "On file", icon: <Shield size={14} />, dot: ACCENT2 },
@@ -339,7 +374,7 @@ export function FinancialRecords() {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span className="rbadge">{policy.status.toUpperCase()}</span>
-                      <button className="redit"><Edit2 size={14} /></button>
+                      <button className="redit" onClick={() => openEdit("insurance", policy)}><Edit2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid">
@@ -371,7 +406,10 @@ export function FinancialRecords() {
                         <div className="rsub">{acct.bank} · {acct.accountType}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: "#6FAE8B" }}>{acct.balance}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="bigval" style={{ color: "#6FAE8B" }}>{acct.balance}</div>
+                      <button className="redit" onClick={() => openEdit("personal", acct)}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Account Number</div><div className="tv">{acct.accountNum}</div></div>
@@ -400,7 +438,10 @@ export function FinancialRecords() {
                         <div className="rsub">{p.accountType} · {p.accountNum}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: "#D99A6B" }}>{p.value}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="bigval" style={{ color: "#D99A6B" }}>{p.value}</div>
+                      <button className="redit" onClick={() => openEdit("portfolios", p)}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Holdings</div><div className="tv">{p.holdings}</div></div>
@@ -430,7 +471,10 @@ export function FinancialRecords() {
                         <div className="rsub">{r.employer && `${r.employer} · `}{r.accountNum}</div>
                       </div>
                     </div>
-                    <div className="bigval" style={{ color: "#6FAE8B" }}>{r.balance}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="bigval" style={{ color: "#6FAE8B" }}>{r.balance}</div>
+                      <button className="redit" onClick={() => openEdit("retirement", r)}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Contributions</div><div className="tv">{r.contributions}</div></div>
@@ -453,7 +497,10 @@ export function FinancialRecords() {
                 <div key={t.year} className="card pad">
                   <div className="rtop">
                     <div className="rtitle" style={{ fontSize: 22.5 }}>Tax Year {t.year}</div>
-                    <div className="bigval" style={{ fontSize: 19, color: t.refund.includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="bigval" style={{ fontSize: 19, color: t.refund.includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
+                      <button className="redit" onClick={() => openEdit("taxes", t)}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   <div className="rgrid c2">
                     <div className="tile"><div className="tk">Filed Date</div><div className="tv">{t.filedDate}</div></div>
@@ -483,6 +530,7 @@ export function FinancialRecords() {
                         <div className="rsub">{b.type} · EIN: {b.ein}</div>
                       </div>
                     </div>
+                    <button className="redit" onClick={() => openEdit("business", b)}><Edit2 size={14} /></button>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Bank</div><div className="tv">{b.bank}</div></div>
@@ -499,29 +547,95 @@ export function FinancialRecords() {
         )}
         </div>
 
-        {showAdd === "insurance" && <AddModal title="Add Insurance Policy" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Type", key: "type", placeholder: "e.g. Life Insurance" }, { label: "Carrier", key: "carrier", placeholder: "e.g. MetLife" }, { label: "Policy Number", key: "policyNum" }, { label: "Coverage Amount", key: "coverage", placeholder: "e.g. $500,000" }, { label: "Premium", key: "premium", placeholder: "e.g. $182/month" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Agent", key: "agent" }, { label: "Status", key: "status", placeholder: "active" }]}
-          onAdd={(f, doc) => { setPolicies(p => [...p, { id: Date.now(), type: f.type || "Policy", carrier: f.carrier || "", policyNum: f.policyNum || "", coverage: f.coverage || "", premium: f.premium || "", beneficiary: f.beneficiary || "", agent: f.agent || "", status: f.status || "active", attachedDoc: doc || null }]); toast.success(`${f.type || "Policy"} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "insurance" && (() => {
+          const isEdit = editingItem?.tab === "insurance";
+          const orig = isEdit ? (editingItem!.original as typeof insurancePolicies[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Insurance Policy" : "Add Insurance Policy"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={insuranceFields} initial={editInitial("insurance", insuranceFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), type: f.type || "Policy", carrier: f.carrier || "", policyNum: f.policyNum || "", coverage: f.coverage || "", premium: f.premium || "", beneficiary: f.beneficiary || "", agent: f.agent || "", status: f.status || "active", attachedDoc: doc };
+                upsert(setPolicies, orig, record);
+                toast.success(isEdit ? `${record.type} updated` : `${record.type} added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
 
-        {showAdd === "personal" && <AddModal title="Add Personal Account" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Account Name", key: "accountName", placeholder: "e.g. Primary Checking" }, { label: "Bank", key: "bank", placeholder: "e.g. Wells Fargo" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Checking, Savings" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $8,000" }, { label: "Beneficiary", key: "beneficiary", placeholder: "e.g. Payable on Death (POD) name" }, { label: "Notes", key: "notes" }]}
-          onAdd={(f, doc) => { setPersonalList(p => [...p, { id: Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", attachedDoc: doc || null }]); toast.success(`${f.accountName || "Account"} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "personal" && (() => {
+          const isEdit = editingItem?.tab === "personal";
+          const orig = isEdit ? (editingItem!.original as typeof personalAccounts[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Personal Account" : "Add Personal Account"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={personalFields} initial={editInitial("personal", personalFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", attachedDoc: doc };
+                upsert(setPersonalList, orig, record);
+                toast.success(isEdit ? `${record.accountName} updated` : `${record.accountName} added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
 
-        {showAdd === "portfolios" && <AddModal title="Add Investment Account" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Institution", key: "institution", placeholder: "e.g. Fidelity Investments" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Brokerage, Roth IRA" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $50,000" }, { label: "Holdings", key: "holdings", placeholder: "e.g. S&P 500 Index" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Contact", key: "contact" }]}
-          onAdd={(f, doc) => { setInvestments(p => [...p, { id: Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", attachedDoc: doc || null }]); toast.success(`Investment account added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "portfolios" && (() => {
+          const isEdit = editingItem?.tab === "portfolios";
+          const orig = isEdit ? (editingItem!.original as typeof portfolios[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Investment Account" : "Add Investment Account"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={portfolioFields} initial={editInitial("portfolios", portfolioFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", attachedDoc: doc };
+                upsert(setInvestments, orig, record);
+                toast.success(isEdit ? `${record.institution} updated` : `Investment account added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
 
-        {showAdd === "retirement" && <AddModal title="Add Retirement Account" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Account Type", key: "type", placeholder: "e.g. 401(k), IRA, Pension" }, { label: "Employer (if 401k)", key: "employer", placeholder: "Optional" }, { label: "Institution", key: "institution" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $120,000" }, { label: "Contributions", key: "contributions", placeholder: "e.g. $500/month" }, { label: "Vesting", key: "vested", placeholder: "e.g. 100%" }, { label: "Beneficiary", key: "beneficiary" }]}
-          onAdd={(f, doc) => { setRetirement(p => [...p, { id: Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", attachedDoc: doc || null }]); toast.success(`Retirement account added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "retirement" && (() => {
+          const isEdit = editingItem?.tab === "retirement";
+          const orig = isEdit ? (editingItem!.original as typeof retirementAccounts[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Retirement Account" : "Add Retirement Account"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={retirementFields} initial={editInitial("retirement", retirementFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", attachedDoc: doc };
+                upsert(setRetirement, orig, record);
+                toast.success(isEdit ? `${record.type || "Retirement account"} updated` : `Retirement account added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
 
-        {showAdd === "taxes" && <AddModal title="Add Tax Year" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Tax Year", key: "year", placeholder: "e.g. 2026" }, { label: "Filed Date", key: "filedDate", placeholder: "e.g. Apr 15, 2027" }, { label: "Filed With", key: "filedWith", placeholder: "e.g. TurboTax, H&R Block" }, { label: "Result", key: "refund", placeholder: "e.g. $1,200 refund or $800 owed" }, { label: "Accountant", key: "accountant", placeholder: "Name or Self-prepared" }, { label: "Document Location", key: "documents", placeholder: "e.g. 2026_1040.pdf in Legacy Vault" }]}
-          onAdd={(f, doc) => { setTaxList(p => [...p, { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", documents: doc || f.documents || "" }]); toast.success(`Tax year ${f.year || ""} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "taxes" && (() => {
+          const isEdit = editingItem?.tab === "taxes";
+          const orig = isEdit ? (editingItem!.original as typeof taxes[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Tax Year" : "Add Tax Year"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={taxFields} initial={editInitial("taxes", taxFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", documents: doc || f.documents || "" };
+                upsert(setTaxList, orig, record);
+                toast.success(isEdit ? `Tax year ${record.year} updated` : `Tax year ${record.year} added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
 
-        {showAdd === "business" && <AddModal title="Add Business" onClose={() => setShowAdd(null)}
-          fields={[{ label: "Business Name", key: "businessName" }, { label: "Entity Type", key: "type", placeholder: "e.g. LLC, S-Corp, Sole Proprietor" }, { label: "EIN", key: "ein", placeholder: "XX-XXXXXXX" }, { label: "Bank", key: "bank" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Annual Revenue", key: "revenue", placeholder: "e.g. ~$60,000/year" }, { label: "Accountant", key: "accountant" }, { label: "Notes / Transfer Instructions", key: "notes" }]}
-          onAdd={(f, doc) => { setBizList(p => [...p, { id: Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", notes: f.notes || "", attachedDoc: doc || null }]); toast.success(`${f.businessName || "Business"} added${doc ? ` with document "${doc}"` : ""}`); setShowAdd(null); }} />}
+        {showAdd === "business" && (() => {
+          const isEdit = editingItem?.tab === "business";
+          const orig = isEdit ? (editingItem!.original as typeof businessAccounts[0]) : undefined;
+          return (
+            <AddModal title={isEdit ? "Edit Business" : "Add Business"} submitLabel={isEdit ? "Save Changes" : undefined}
+              fields={businessFields} initial={editInitial("business", businessFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={(f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", notes: f.notes || "", attachedDoc: doc };
+                upsert(setBizList, orig, record);
+                toast.success(isEdit ? `${record.businessName} updated` : `${record.businessName || "Business"} added${doc ? ` with document "${doc}"` : ""}`);
+                closeModal();
+              }} />
+          );
+        })()}
       </div>
     </div>
   );

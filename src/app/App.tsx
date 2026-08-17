@@ -24,6 +24,7 @@ import { KidsActivities } from "./components/KidsActivities";
 import { Warranties } from "./components/Warranties";
 import { MedicalInfo } from "./components/MedicalInfo";
 import { FinancialRecords } from "./components/FinancialRecords";
+import { ReceiptsExpenses } from "./components/ReceiptsExpenses";
 import { PersonalAssets } from "./components/PersonalAssets";
 import { Utilities } from "./components/Utilities";
 import { FamilyMemories } from "./components/FamilyMemories";
@@ -333,6 +334,7 @@ function UserRoute() {
       case "warranties":          return <Warranties/>;
       case "medical-info":        return <MedicalInfo/>;
       case "financial-records":   return <FinancialRecords/>;
+      case "receipts-expenses":   return <ReceiptsExpenses/>;
       case "personal-assets":     return <PersonalAssets/>;
       case "utilities":           return <Utilities/>;
       case "family-memories":     return <FamilyMemories/>;

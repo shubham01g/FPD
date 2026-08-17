@@ -130,19 +130,28 @@ const groupConfig = {
   other:     { label: "Other Contacts",   color: WARN,      icon: <Contact size={18}/> },
 };
 
-function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: Contact) => void }) {
+function AddContactModal({ editing, onClose, onAdd, onSave }: {
+  editing?: Contact | null; onClose: () => void; onAdd: (c: Contact) => void; onSave?: (id: string, updates: Partial<Contact>) => void;
+}) {
   useEscapeKey(true, onClose);
-  const [form, setForm] = useState({ name:"", relationship:"", phone:"", email:"", birthday:"", address:"", group:"immediate" as Contact["group"], notes:"" });
-  const [photo, setPhoto] = useState("");
+  const [form, setForm] = useState(() => editing
+    ? { name: editing.name, relationship: editing.relationship, phone: editing.phone ?? "", email: editing.email ?? "", birthday: editing.birthday ?? "", address: editing.address ?? "", group: editing.group, notes: editing.notes ?? "" }
+    : { name:"", relationship:"", phone:"", email:"", birthday:"", address:"", group:"immediate" as Contact["group"], notes:"" });
+  const [photo, setPhoto] = useState(editing?.photo ?? "");
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (!form.name) { toast.error("Name is required"); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
     const initials = form.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
-    onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
-    toast.success(`${form.name} added to Family & Friends`);
+    if (editing) {
+      onSave?.(editing.id, { ...form, initials, photo: photo || undefined });
+    } else {
+      onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
+      toast.success(`${form.name} added to Family & Friends`);
+    }
+    setLoading(false);
     onClose();
   };
 
@@ -150,7 +159,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
     <div className="backdrop">
       <div className="card modal">
         <div className="modal-head">
-          <h3>Add Contact</h3>
+          <h3>{editing ? "Edit Contact" : "Add Contact"}</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
@@ -181,7 +190,7 @@ function AddContactModal({ onClose, onAdd }: { onClose: () => void; onAdd: (c: C
         </div>
         <div className="modal-foot">
           <button onClick={submit} disabled={loading} className="save" style={{ opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Saving..." : "Add Contact"}
+            {loading ? "Saving..." : editing ? "Save Changes" : "Add Contact"}
           </button>
           <button onClick={onClose} className="btn-sec">Cancel</button>
         </div>
@@ -552,6 +561,7 @@ export function FamilyFriends() {
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState<Contact | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [showGroupsPanel, setShowGroupsPanel] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [blastGroup, setBlastGroup] = useState<ContactGroup | null>(null);
@@ -829,15 +839,8 @@ export function FamilyFriends() {
                     </div>
                   )}
                   <div className="flex gap-2" style={{ marginTop: 16 }}>
-                    <button onClick={() => {
-                      const newName = prompt("Edit name:", selected.name);
-                      if (newName && newName.trim()) {
-                        setContacts(prev => prev.map(c => c.id === selected.id ? { ...c, name: newName.trim() } : c));
-                        setSelected(s => s ? { ...s, name: newName.trim() } : s);
-                        toast.success(`Updated to "${newName.trim()}"`);
-                      }
-                    }} className="dedit">
-                      <Edit2 size={13} style={{ display:"inline", marginRight:4 }}/>Edit Name
+                    <button onClick={() => setEditingContact(selected)} className="dedit">
+                      <Edit2 size={13} style={{ display:"inline", marginRight:4 }}/>Edit Contact
                     </button>
                     <button onClick={() => { setContacts(prev => prev.filter(c => c.id !== selected.id)); setSelected(null); toast.success(`${selected.name} removed`); }} className="ddelete">
                       <Trash2 size={13}/>
@@ -856,6 +859,19 @@ export function FamilyFriends() {
       </div>
 
       {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => setContacts(prev => [c, ...prev])}/>}
+      {editingContact && (
+        <AddContactModal
+          editing={editingContact}
+          onClose={() => setEditingContact(null)}
+          onAdd={() => {}}
+          onSave={(id, updates) => {
+            setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+            setSelected(prev => prev && prev.id === id ? { ...prev, ...updates } : prev);
+            setEditingContact(null);
+            toast.success("Contact updated");
+          }}
+        />
+      )}
       {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={imported => setContacts(prev => [...imported, ...prev])}/>}
       {blastGroup && <BlastEmailModal group={blastGroup} contacts={contacts} onClose={() => setBlastGroup(null)}/>}
     </div>

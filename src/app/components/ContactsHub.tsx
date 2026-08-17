@@ -3,7 +3,7 @@ import {
   Users, Shield, AlertCircle, PawPrint, Plus, Phone, Mail,
   CheckCircle, Clock, X, Trash2, FolderOpen, Eye,
   ChevronDown, ChevronUp, Info, Crown, ArrowDown,
-  AlertTriangle, Upload, RefreshCw, UserCheck, Smartphone, FileUp
+  AlertTriangle, Upload, RefreshCw, UserCheck, Smartphone, FileUp, Edit2
 } from "lucide-react";
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
@@ -124,11 +124,14 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
   );
 }
 
-/* ── Add Contact Modal ───────────────────────────────────────────── */
-function AddContactModal({ defaultType, onClose, onAdd }: {
-  defaultType: ContactType; onClose:()=>void; onAdd:(c:Omit<Contact,"id">)=>Promise<void>;
+/* ── Add / Edit Contact Modal ────────────────────────────────────── */
+function AddContactModal({ defaultType, editing, onClose, onAdd, onSave }: {
+  defaultType: ContactType; editing?: Contact | null; onClose:()=>void;
+  onAdd:(c:Omit<Contact,"id">)=>Promise<void>; onSave?:(id:string, updates:Partial<Contact>)=>void;
 }) {
-  const [form, setForm] = useState({ name:"", email:"", phone:"", relationship:"", type:defaultType, accessLevel:"", notes:"", photo:"" });
+  const [form, setForm] = useState(() => editing
+    ? { name: editing.name, email: editing.email, phone: editing.phone, relationship: editing.relationship, type: editing.type, accessLevel: editing.accessLevel ?? "", notes: editing.notes ?? "", photo: editing.photo ?? "" }
+    : { name:"", email:"", phone:"", relationship:"", type:defaultType, accessLevel:"", notes:"", photo:"" });
   const [guardianFolders, setGuardianFolders] = useState<string[]>([]);
   const [showFolders, setShowFolders] = useState(false);
   const [selectedVerifications, setSelectedVerifications] = useState<string[]>(["death_cert"]);
@@ -147,8 +150,17 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
 
   const submit = async () => {
     if (!form.name || !form.email) { toast.error("Name and email are required"); return; }
-    if (isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
+    if (!editing && isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
     setLoading(true);
+    if (editing) {
+      onSave?.(editing.id, {
+        name: form.name, email: form.email, phone: form.phone, relationship: form.relationship,
+        notes: form.notes, photo: form.photo || undefined,
+        avatar: form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),
+      });
+      onClose();
+      return;
+    }
     const accessDesc = isGuardian
       ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned`
       : form.accessLevel;
@@ -161,8 +173,8 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
       <div className="card modal">
         <div className="modal-head">
           <div>
-            <h3>Add {typeConfig[form.type].label}</h3>
-            <p className="modal-sub">{typeConfig[form.type].desc}</p>
+            <h3>{editing ? `Edit ${typeConfig[form.type].label}` : `Add ${typeConfig[form.type].label}`}</h3>
+            <p className="modal-sub">{editing ? "Update this contact's details." : typeConfig[form.type].desc}</p>
           </div>
           <button onClick={onClose}><X size={16}/></button>
         </div>
@@ -182,7 +194,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
             </div>
           ))}
 
-          {isGuardian && (
+          {!editing && isGuardian && (
             <div className="folder-picker">
               <button onClick={()=>setShowFolders(!showFolders)} className="folder-picker-hd">
                 <div className="flex items-center gap-2">
@@ -197,7 +209,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
             </div>
           )}
 
-          {isLegacy && (
+          {!editing && isLegacy && (
             <div>
               <div style={{ color:MUTED, fontSize:14, fontFamily:"var(--font-mono)", marginBottom:8 }}>
                 VERIFICATION REQUIREMENTS (choose what your legacy contact must provide)
@@ -253,7 +265,7 @@ function AddContactModal({ defaultType, onClose, onAdd }: {
         </div>
         <div className="modal-foot">
           <button onClick={submit} disabled={loading} className="save" style={{ opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Sending Invite…" : "Send Verification Invite"}
+            {loading ? (editing ? "Saving…" : "Sending Invite…") : (editing ? "Save Changes" : "Send Verification Invite")}
           </button>
           <button onClick={onClose} className="btn-sec">Cancel</button>
         </div>
@@ -452,7 +464,7 @@ function BulkImportModal({ defaultType, onClose, onImport }: {
 
 /* ── Section wrapper with its own header + Add button ────────────── */
 function ContactSection({
-  type, contacts, onAdd, onImport, onRemove,
+  type, contacts, onAdd, onImport, onRemove, onEdit,
   getVerifStatus, advanceStatus, simulateVerify, verifying, onScanId,
 }: {
   type: ContactType;
@@ -460,6 +472,7 @@ function ContactSection({
   onAdd: () => void;
   onImport: () => void;
   onRemove: (id:string) => void;
+  onEdit: (c:Contact) => void;
   getVerifStatus?: (id:string) => VerifStatus;
   advanceStatus?: (id:string) => void;
   simulateVerify?: (id:string) => void;
@@ -628,6 +641,9 @@ function ContactSection({
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  <button onClick={()=>onEdit(c)} title="Edit contact" style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", padding: 6 }}>
+                    <Edit2 size={13}/>
+                  </button>
                   <button onClick={()=>{ if(window.confirm(`Remove ${c.name}?`)) onRemove(c.id); }} style={{ color: NEG, background: "none", border: "none", cursor: "pointer", padding: 6 }}>
                     <Trash2 size={13}/>
                   </button>
@@ -757,9 +773,15 @@ const CONTACTS_CSS = `
 
 /* ── Main Component ──────────────────────────────────────────────── */
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
-  const { contacts, addContact, removeContact, updateContactStatus } = useDemo();
+  const { contacts: rawContacts, addContact, removeContact, updateContactStatus } = useDemo();
+  // DemoContext only exposes add/remove/status for contacts — full-field edits are
+  // tracked locally here as an overlay keyed by contact id, merged on top of the
+  // context's list, so ids and verification tracking stay stable across an edit.
+  const [edits, setEdits] = useState<Record<string, Partial<Contact>>>({});
+  const contacts = rawContacts.map(c => (edits[c.id] ? { ...c, ...edits[c.id] } : c));
   const [addingType, setAddingType] = useState<ContactType | null>(null);
   const [importingType, setImportingType] = useState<ContactType | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
   // Extended verification status map — keyed by contact id
   const [verifStatus, setVerifStatus] = useState<Record<string, VerifStatus>>(() => {
@@ -900,6 +922,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           onAdd={() => setAddingType(activeType)}
           onImport={() => setImportingType(activeType)}
           onRemove={id => removeContact(id)}
+          onEdit={c => setEditingContact(c)}
           getVerifStatus={getVerifStatus}
           advanceStatus={advanceStatus}
           simulateVerify={simulateVerify}
@@ -912,6 +935,20 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             defaultType={addingType}
             onClose={() => setAddingType(null)}
             onAdd={async c => { await addContact(c); setAddingType(null); toast.success(`${typeConfig[c.type].label} added`); }}
+          />
+        )}
+
+        {editingContact && (
+          <AddContactModal
+            defaultType={editingContact.type}
+            editing={editingContact}
+            onClose={() => setEditingContact(null)}
+            onAdd={async () => {}}
+            onSave={(id, updates) => {
+              setEdits(prev => ({ ...prev, [id]: { ...prev[id], ...updates } }));
+              setEditingContact(null);
+              toast.success("Contact updated");
+            }}
           />
         )}
 

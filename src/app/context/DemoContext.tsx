@@ -148,8 +148,10 @@ interface DemoCtx {
   // Medical
   addAllergy: (a: Omit<Allergy,"id">) => Promise<void>;
   removeAllergy: (id: string) => Promise<void>;
+  updateAllergy: (id: string, a: Omit<Allergy,"id">) => Promise<void>;
   addMedication: (m: Omit<Medication,"id">) => Promise<void>;
   removeMedication: (id: string) => Promise<void>;
+  updateMedication: (id: string, m: Omit<Medication,"id">) => Promise<void>;
   // Reminders
   addReminder: (r: Omit<Reminder,"id">) => Promise<void>;
   completeReminder: (id: string) => void;
@@ -264,6 +266,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Allergy removed");
   }, []);
 
+  const updateAllergy = useCallback(async (id: string, a: Omit<Allergy,"id">) => {
+    await delay(300);
+    setAllergies(prev => prev.map(x => x.id === id ? { ...a, id } : x));
+  }, []);
+
   const addMedication = useCallback(async (m: Omit<Medication,"id">) => {
     const tid = toast.loading("Saving medication...");
     await delay();
@@ -275,6 +282,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     await delay(300);
     setMeds(m => m.filter(x => x.id !== id));
     toast.success("Medication removed");
+  }, []);
+
+  const updateMedication = useCallback(async (id: string, m: Omit<Medication,"id">) => {
+    await delay(300);
+    setMeds(prev => prev.map(x => x.id === id ? { ...m, id } : x));
   }, []);
 
   /* Reminders */
@@ -326,7 +338,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     <DemoContext.Provider value={{
       user, docs, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       updateUser, addDoc, deleteDoc, addContact, removeContact, updateContactStatus,
-      addWish, removeWish, addAllergy, removeAllergy, addMedication, removeMedication,
+      addWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, removeMemory, addOccasion,
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,
