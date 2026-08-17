@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../../imports/FPD_full_logo.png";
+import { AdminAIAgent } from "../AdminAIAgent";
 
 export type AdminPageId =
   | "master-admin" | "admin-affiliate" | "admin-partnership"
@@ -239,6 +240,8 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
           {children}
         </main>
       </div>
+
+      <AdminAIAgent/>
     </div>
   );
 }

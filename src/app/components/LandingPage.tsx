@@ -29,6 +29,13 @@ const VIOLET_SOFT = "#7E6BD8";
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+/* Reveals a block of text top-to-bottom: each element waits for the one
+   before it to fully finish before it starts (no overlap). */
+const SEQ_STEP_MS = 420;
+function seq(i: number): React.CSSProperties {
+  return { animationDelay: `${i * SEQ_STEP_MS}ms` };
+}
+
 /* ── Swappable media backdrop ─────────────────────────────────────
    Renders a branded gradient placeholder always; a lightweight poster
    image paints instantly, and the <video> only mounts/streams once the
@@ -80,12 +87,12 @@ function MediaBackdrop({ src, poster, tone = "blue", overlay = 0.55, showPlay = 
 }
 
 /* ── primitives ───────────────────────────────────────────────── */
-function Kicker({ children, tone = "blue" }: { children: React.ReactNode; tone?: "blue" | "violet" }) {
+function Kicker({ children, tone = "blue", className, style }: { children: React.ReactNode; tone?: "blue" | "violet"; className?: string; style?: React.CSSProperties }) {
   const c = tone === "violet" ? VIOLET : ACCENT;
   const t = tone === "violet" ? VIOLET_SOFT : HILITE;
   return (
-    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full"
-      style={{ background: tone === "violet" ? "rgba(126,107,216,0.10)" : "rgba(91,110,225,0.10)", border: `1px solid ${tone === "violet" ? "rgba(126,107,216,0.28)" : "rgba(91,110,225,0.28)"}` }}>
+    <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full ${className ?? ""}`}
+      style={{ background: tone === "violet" ? "rgba(126,107,216,0.10)" : "rgba(91,110,225,0.10)", border: `1px solid ${tone === "violet" ? "rgba(126,107,216,0.28)" : "rgba(91,110,225,0.28)"}`, ...style }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: c, boxShadow: `0 0 8px ${c}` }} />
       <span style={{ color: t, fontSize: 14, letterSpacing: "0.12em", textTransform: "uppercase", ...MONO }}>{children}</span>
     </div>
@@ -95,34 +102,49 @@ function Kicker({ children, tone = "blue" }: { children: React.ReactNode; tone?:
 function SectionHead({ kicker, title, sub, tone }: { kicker: string; title: React.ReactNode; sub?: string; tone?: "blue" | "violet" }) {
   return (
     <div className="text-center mb-14 flex flex-col items-center">
-      <Kicker tone={tone}>{kicker}</Kicker>
-      <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820 }}>{title}</h2>
-      {sub && <p style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7 }}>{sub}</p>}
+      <Kicker tone={tone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
+      <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820, ...seq(1) }}>{title}</h2>
+      {sub && <p className="fpd-seq" style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7, ...seq(2) }}>{sub}</p>}
     </div>
   );
 }
 
-function PrimaryBtn({ children, onClick, large, compact }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean }) {
+/* Full-bleed page-header banner (image backdrop + kicker/title/sub) used at the
+   top of secondary pages, mirroring the Hero's treatment at a shorter height. */
+function PageBanner({ poster, tone = "blue", overlay = 0.55, kicker, title, sub, kickerTone, minHeight = "62vh" }:
+  { poster: string; tone?: "blue" | "deep" | "warm"; overlay?: number; kicker: React.ReactNode; title: React.ReactNode; sub?: React.ReactNode; kickerTone?: "blue" | "violet"; minHeight?: string }) {
   return (
-    <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl fpd-btn-lift"
-      style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap" }}>
+    <header className="relative flex items-center justify-center" style={{ minHeight }}>
+      <MediaBackdrop poster={poster} tone={tone} overlay={overlay} />
+      <div className="relative max-w-4xl mx-auto w-full px-6 py-28 text-center flex flex-col items-center">
+        <Kicker tone={kickerTone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
+        <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820, ...seq(1) }}>{title}</h1>
+        {sub && <p className="fpd-seq" style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7, ...seq(2) }}>{sub}</p>}
+      </div>
+    </header>
+  );
+}
+
+function PrimaryBtn({ children, onClick, large, compact, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; compact?: boolean; className?: string; style?: React.CSSProperties }) {
+  return (
+    <button onClick={onClick} className={`fpd-shine inline-flex items-center gap-2 rounded-xl fpd-btn-lift ${className ?? ""}`}
+      style={{ padding: large ? "15px 30px" : compact ? "9px 16px" : "12px 24px", fontSize: large ? 20 : compact ? 15 : 17.5, fontWeight: 700, color: "#fff", background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, boxShadow: "0 8px 30px rgba(91,110,225,0.45)", whiteSpace: "nowrap", ...style }}>
       {children}
     </button>
   );
 }
-function GhostBtn({ children, onClick, large }: { children: React.ReactNode; onClick?: () => void; large?: boolean }) {
+function GhostBtn({ children, onClick, large, className, style }: { children: React.ReactNode; onClick?: () => void; large?: boolean; className?: string; style?: React.CSSProperties }) {
   return (
-    <button onClick={onClick} className="inline-flex items-center gap-2 rounded-xl transition-colors"
-      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 20 : 17.5, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)" }}>
+    <button onClick={onClick} className={`fpd-shine inline-flex items-center gap-2 rounded-xl transition-colors ${className ?? ""}`}
+      style={{ padding: large ? "15px 28px" : "12px 22px", fontSize: large ? 20 : 17.5, fontWeight: 600, color: SOFT, background: "rgba(91,110,225,0.08)", border: "1px solid rgba(91,110,225,0.28)", ...style }}>
       {children}
     </button>
   );
 }
 
-/* smoothly scroll to an in-page section */
-function scrollToId(id: string) {
-  if (typeof document === "undefined") return;
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+function scrollToTop() {
+  if (typeof window === "undefined") return;
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 /* ── NAV ──────────────────────────────────────────────────────── */
@@ -132,36 +154,36 @@ const NAV_LINKS: [string, string][] = [
   ["Partners", "partners"], ["White Label", "white-label"],
 ];
 
-function TopNav({ onStart }: { onStart: () => void }) {
+function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: string; onNavigate: (id: string) => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", fn); return () => window.removeEventListener("scroll", fn);
   }, []);
-  const go = (id: string) => { setOpen(false); scrollToId(id); };
+  const go = (id: string) => { setOpen(false); onNavigate(id); };
   return (
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
       style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
-        <button onClick={() => { setOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center mr-1.5">
+        <button onClick={() => go("home")} className="flex items-center mr-1.5">
           <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 40, width: 61, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
         </button>
         <div className="hidden xl:flex flex-1 items-center justify-between mr-3">
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="px-1 py-2 rounded-lg transition-colors hover:bg-[rgba(91,110,225,0.18)] hover:text-white active:bg-[rgba(91,110,225,0.34)]"
-              style={{ color: "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className={`fpd-shine px-1 py-2 rounded-lg transition-colors hover:text-white ${page === id ? "fpd-underline-on" : ""}`}
+              style={{ color: page === id ? "#FFFFFF" : "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
         <div className="flex items-center gap-1">
-          <button onClick={() => go("white-glove")} className="hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] active:bg-[rgba(91,110,225,0.3)]" style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("white-glove")} className={`fpd-shine hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors ${page === "white-glove" ? "fpd-underline-on" : ""}`} style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
-          <button onClick={() => go("help")} className="hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("help")} className={`fpd-shine hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white ${page === "help" ? "fpd-underline-on" : ""}`} style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
-          <button onClick={onStart} className="hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:bg-[rgba(91,110,225,0.16)] hover:text-white active:bg-[rgba(91,110,225,0.3)]" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
+          <button onClick={onStart} className="fpd-shine hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
           <PrimaryBtn onClick={onStart} compact>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
@@ -169,10 +191,10 @@ function TopNav({ onStart }: { onStart: () => void }) {
       {open && (
         <div className="xl:hidden px-6 pb-4 flex flex-col gap-1" style={{ background: "rgba(7,10,18,0.98)", borderBottom: "1px solid rgba(91,110,225,0.14)" }}>
           {NAV_LINKS.map(([l, id]) => (
-            <button key={l} onClick={() => go(id)} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}>{l}</button>
+            <button key={l} onClick={() => go(id)} className="fpd-shine text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === id ? "#FFFFFF" : SOFT, background: page === id ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5, borderLeft: page === id ? "3px solid " + ACCENT : "3px solid transparent" }}>{l}</button>
           ))}
-          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", fontSize: 17.5 }}>White Glove Concierge</button>
-          <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
+          <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", fontSize: 17.5 }}>White Glove Concierge</button>
+          <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === "help" ? "#FFFFFF" : SOFT, background: page === "help" ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
         </div>
       )}
     </nav>
@@ -180,25 +202,26 @@ function TopNav({ onStart }: { onStart: () => void }) {
 }
 
 /* ── HERO ─────────────────────────────────────────────────────── */
-function Hero({ onStart }: { onStart: () => void }) {
+function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   return (
     <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
       <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
       <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
-        <div className="fpd-fade-in-up flex flex-col items-center">
-          <Kicker>Trusted Digital Legacy Platform · Est. 2024</Kicker>
-          <h1 style={{ ...DISPLAY, fontSize: "clamp(3rem,6.4vw,5rem)", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px" }}>
-            Get Your Life Together{" "}
+        <div className="flex flex-col items-center">
+          <Kicker className="fpd-seq" style={seq(0)}>Trusted Digital Legacy Platform · Est. 2024</Kicker>
+          <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.75rem,6.5vw,5rem)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px", ...seq(1) }}>
+            Get Your Life Together
+            <br />
             <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
             <br />That Way
           </h1>
-          <p style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20, ...seq(2) }}>
             Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for adults, couples, and growing families.
           </p>
-          <p style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32 }}>PREPARE · PROTECT · PASS DOWN</p>
-          <div className="flex flex-wrap items-center justify-center gap-3.5 mb-16">
+          <p className="fpd-seq" style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32, ...seq(3) }}>PREPARE · PROTECT · PASS DOWN</p>
+          <div className="fpd-seq flex flex-wrap items-center justify-center gap-3.5 mb-16" style={seq(4)}>
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
-            <GhostBtn onClick={() => scrollToId("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
         </div>
       </div>
@@ -216,29 +239,33 @@ function About({ onStart }: { onStart: () => void }) {
     "Keep medical, financial, and personal records organized",
   ];
   return (
-    <section id="about" className="relative py-28 px-6">
+    <>
+      <PageBanner poster="/media/about-bg.jpg" tone="deep" overlay={0.6}
+        kicker="Our Story" title={<>Built So Nothing<br />Important Is Ever Lost</>}
+        sub="Final Pass Down exists because too many families are left piecing together a lifetime of details when it matters most." />
+      <section id="about" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>About Final Pass Down</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>About Final Pass Down</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             What Happens to Your<br />
             <span style={{ color: "#6FAE8B" }}>Life's Work</span> When You're Gone?
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Most families face chaos after a loved one passes — scrambling to find documents, discover accounts, and piece together final wishes. Final Pass Down changes everything.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             We give you a secure digital vault to organize every aspect of your life — from wills and insurance to personal memories and final messages — then deliver it to your trusted contacts exactly when and how you decide.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start your vault <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Start your vault <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-vault.mp4" tone="deep" overlay={0.35} showPlay />
@@ -249,7 +276,8 @@ function About({ onStart }: { onStart: () => void }) {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }
 
@@ -263,10 +291,13 @@ const STEPS = [
 
 function HowItWorks() {
   return (
+    <>
+    <PageBanner poster="/media/how-it-works-bg.jpg" tone="blue" overlay={0.6}
+      kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>}
+      sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
     <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>} sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
-        <div className="grid md:grid-cols-4 gap-5">
+        <div className="grid md:grid-cols-4 gap-5 fpd-stagger">
           {STEPS.map(s => (
             <div key={s.n} className="relative p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ ...DISPLAY, fontSize: 55.5, fontWeight: 800, color: "rgba(147,168,124,0.18)", lineHeight: 1, marginBottom: 8 }}>{s.n}</div>
@@ -278,11 +309,12 @@ function HowItWorks() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
 /* ── TRUSTED CONTACTS STORY ───────────────────────────────────── */
-function ContactsStory() {
+function ContactsStory({ onNavigate }: { onNavigate: (id: string) => void }) {
   const points = [
     "Legacy Contacts receive your vault exactly when the time comes",
     "Guardian Contacts step in for approvals and emergencies",
@@ -296,26 +328,26 @@ function ContactsStory() {
           <MediaBackdrop src="/media/story-contacts.mp4" tone="blue" overlay={0.35} showPlay />
         </div>
         <div className="order-1 lg:order-2">
-          <Kicker>Trusted Contacts</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Trusted Contacts</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             The Right People,<br />
             <span style={{ color: "#6FAE8B" }}>At the Right Time</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             A vault is only as good as the people who can reach it. Final Pass Down lets you designate exactly who gets access, to what, and when — so nothing ever falls into the wrong hands or the wrong timing.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             From the people who inherit your legacy to the ones who step in during an emergency, every relationship is defined, verified, and ready before you ever need it.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={() => scrollToId("features")}>See how contacts work <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={() => onNavigate("features")} className="fpd-seq" style={seq(4 + points.length)}>See how contacts work <ChevronRight size={16} /></GhostBtn>
         </div>
       </div>
     </section>
@@ -366,10 +398,13 @@ const HIGHLIGHT_TITLES = ["Document Vault", "Digital File Cabinet", "Video Messa
 function Features() {
   const highlighted = FEATURES.filter(f => HIGHLIGHT_TITLES.includes(f.title));
   return (
+    <>
+    <PageBanner poster="/media/features-bg.jpg" tone="warm" overlay={0.6}
+      kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>}
+      sub="From legal documents to family memories, all in one secure encrypted vault." />
     <section id="features" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>} sub="From legal documents to family memories, all in one secure encrypted vault." />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 fpd-stagger">
           {highlighted.map(f => (
             <div key={f.title} className="p-6 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 44, height: 44, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{f.icon}</div>
@@ -392,6 +427,7 @@ function Features() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -407,23 +443,23 @@ function FamilyPetsStory({ onStart }: { onStart: () => void }) {
     <section id="family-pets" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>Kids & Pet Care</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Kids & Pet Care</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             For the Ones Who<br />
             <span style={{ color: "#6FAE8B" }}>Rely on You Most</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(2) }}>
             Kids and pets can't ask the right questions in an emergency — so the answers need to already be written down. Final Pass Down keeps every detail about your family, two-legged and four, organized and ready for whoever steps in.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(3 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start your family vault <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(3 + points.length)}>Start your family vault <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-pets.mp4" tone="warm" overlay={0.35} showPlay />
@@ -445,26 +481,26 @@ function MemoriesStory({ onStart }: { onStart: () => void }) {
     <section id="memories" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
-          <Kicker>Memories & Messages</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Memories & Messages</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             Memories That<br />
             <span style={{ color: "#6FAE8B" }}>Speak For You</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Photos fade and stories get lost. Final Pass Down keeps both — every picture, every keepsake, every video message — safe, organized, and ready to reach the people you love, in your own voice.
           </p>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 28, ...seq(3) }}>
             Whether it's a birthday message for a grandchild not yet born or the story behind a family heirloom, your words outlive the moment they were recorded.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Start preserving memories <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Start preserving memories <ChevronRight size={16} /></GhostBtn>
         </div>
         <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-memories.mp4" tone="warm" overlay={0.35} showPlay />
@@ -487,10 +523,13 @@ const SEC_BADGES = ["AES-256 Encrypted", "Zero-Knowledge", "SOC 2 Type II", "HIP
 
 function Security() {
   return (
+    <>
+    <PageBanner poster="/media/security-bg.jpg" tone="deep" overlay={0.6}
+      kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>}
+      sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
     <section id="security" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>} sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {SEC_ITEMS.map(item => (
             <div key={item.title} className="p-7 rounded-2xl glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl mb-5" style={{ width: 48, height: 48, background: "rgba(91,110,225,0.14)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(91,110,225,0.15)" }}>{item.icon}</div>
@@ -512,6 +551,7 @@ function Security() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -530,26 +570,26 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
           <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
         </div>
         <div className="order-1 lg:order-2">
-          <Kicker>When You're Gone</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>When You're Gone</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             What Happens to Your<br />
             <span style={{ color: "#6FAE8B" }}>Family When You're Gone?</span>
           </h2>
-          <p style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20.5, lineHeight: 1.85, marginBottom: 18, ...seq(2) }}>
             Without a plan, the people you love are left to grieve while also guessing — what you would have wanted, what to say, what happens next. That uncertainty is a burden you can lift from them today.
           </p>
-          <p style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 600, lineHeight: 1.6, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 600, lineHeight: 1.6, marginBottom: 28, ...seq(3) }}>
             What matters most: write or leave a message for your loved ones — so your voice is still there when you no longer can be.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {points.map(p => (
-              <div key={p} className="flex items-start gap-3">
+            {points.map((p, i) => (
+              <div key={p} className="fpd-seq flex items-start gap-3" style={seq(4 + i)}>
                 <CheckCircle2 size={17} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
                 <span style={{ color: MUTED, fontSize: 19, lineHeight: 1.5 }}>{p}</span>
               </div>
             ))}
           </div>
-          <GhostBtn onClick={onStart}>Write your message today <ChevronRight size={16} /></GhostBtn>
+          <GhostBtn onClick={onStart} className="fpd-seq" style={seq(4 + points.length)}>Write your message today <ChevronRight size={16} /></GhostBtn>
         </div>
       </div>
     </section>
@@ -570,9 +610,12 @@ const PLANS: Plan[] = [
 function Pricing({ onStart }: { onStart: () => void }) {
   const [annual, setAnnual] = useState(false);
   return (
+    <>
+    <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
+      kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
+      sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
     <section id="pricing" className="relative py-28 px-6">
       <div className="max-w-7xl mx-auto">
-        <SectionHead kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>} sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
         <div className="flex items-center justify-center gap-3 mb-12">
           <span style={{ color: MUTED, fontSize: 17.5 }}>Monthly</span>
           <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(91,110,225,0.3)", boxShadow: annual ? "0 0 20px rgba(91,110,225,0.4)" : "none" }}>
@@ -580,7 +623,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </button>
           <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save 20%</span></span>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch fpd-stagger">
           {PLANS.map(plan => (
             <div key={plan.name} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
               style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none" }}>
@@ -634,7 +677,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </div>
 
           <div style={{ ...MONO, color: MUTED, fontSize: 13, letterSpacing: "0.1em", margin: "28px 0 14px" }}>CORE PROTECTION FEATURES</div>
-          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 gap-4 mb-8 fpd-stagger">
             {[
               { label: "Extended Window", desc: "A dedicated 48-hour access window to retrieve and secure your vital digital assets, with the flexibility to call in for additional time if disaster response demands your full attention." },
               { label: "High-Capacity Export", desc: "Support for massive archives with up to 100 GB bulk export capability." },
@@ -666,6 +709,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -683,27 +727,31 @@ function Affiliates({ onStart }: { onStart: () => void }) {
     ["No cap on referrals", "Refer as many people as you want — more referrals, more income"],
   ];
   return (
+    <>
+    <PageBanner poster="/media/affiliates-bg.jpg" tone="warm" overlay={0.6}
+      kicker="Affiliate Program" title={<>Share It.<br />Everyone Wins.</>}
+      sub="Earn a recurring commission every time someone you refer builds their vault with Final Pass Down." />
     <section id="affiliates" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
         <div>
-          <Kicker>Affiliate Program</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em" }}>
+          <Kicker className="fpd-seq" style={seq(0)}>Affiliate Program</Kicker>
+          <h2 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5vw,3.8rem)", fontWeight: 700, color: TEXT, lineHeight: 1.15, margin: "18px 0 20px", letterSpacing: "-0.02em", ...seq(1) }}>
             Earn Up to <span style={{ color: "#6FAE8B" }}>30%</span><br />Referring Friends
           </h2>
-          <p style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28 }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28, ...seq(2) }}>
             Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
           </p>
           <div className="flex flex-col gap-3 mb-8">
-            {benefits.map(([bold, rest]) => (
-              <div key={bold} className="flex items-start gap-3">
+            {benefits.map(([bold, rest], i) => (
+              <div key={bold} className="fpd-seq flex items-start gap-3" style={seq(3 + i)}>
                 <CheckCircle2 size={15} color="#FFFFFF" style={{ marginTop: 3, flexShrink: 0 }} />
                 <span style={{ color: SOFT, fontSize: 17.5 }}><strong style={{ color: TEXT }}>{bold}</strong> — {rest}</span>
               </div>
             ))}
           </div>
-          <PrimaryBtn onClick={onStart}>Join Affiliate Program <ArrowRight size={16} /></PrimaryBtn>
+          <PrimaryBtn onClick={onStart} className="fpd-seq" style={seq(3 + benefits.length)}>Join Affiliate Program <ArrowRight size={16} /></PrimaryBtn>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 fpd-stagger">
           {tiers.map(t => (
             <div key={t.tier} className="p-6 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div className="flex items-center justify-between">
@@ -724,6 +772,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -743,10 +792,13 @@ function Partnerships({ onStart }: { onStart: () => void }) {
     { icon: <Heart size={18} />, label: "Funeral Homes", desc: "Offer pre-planning services and connect families to organized digital records." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/partners-bg.jpg" tone="blue" overlay={0.6}
+      kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>}
+      sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
     <section id="partners" className="relative py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>} sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
-        <div className="grid md:grid-cols-3 gap-5 mb-12">
+        <div className="grid md:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {tiers.map(t => (
             <div key={t.tier} className="p-7 rounded-2xl text-center glow-surface fpd-hover-lift" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.18)" }}>
               <div style={{ ...DISPLAY, fontSize: 65, fontWeight: 800, color: "#6FAE8B", lineHeight: 1 }}>{t.rate}</div>
@@ -758,7 +810,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
             </div>
           ))}
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12 fpd-stagger">
           {partners.map(p => (
             <div key={p.label} className="flex items-start gap-4 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.12)", color: "#FFFFFF" }}>{p.icon}</div>
@@ -774,6 +826,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -809,21 +862,15 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
     { icon: <Heart size={18} />, title: "At Your Pace, Always", desc: "Sessions happen when you're ready. Most clients finish in 2–3 calls over 1–2 weeks. We never rush." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/white-glove-bg.jpg" tone="deep" overlay={0.6} kickerTone="violet"
+      kicker="White Glove Concierge Service"
+      title={<>Not Comfortable With Technology?<br /><span style={{ color: "#A98CC7" }}>We Do Everything For You.</span></>}
+      sub="Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone." />
     <section id="white-glove" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0B0818,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16 flex flex-col items-center">
-          <Kicker tone="violet">White Glove Concierge Service</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.6vw,4rem)", fontWeight: 700, color: TEXT, lineHeight: 1.12, margin: "18px 0 16px", letterSpacing: "-0.02em" }}>
-            Not Comfortable With Technology?<br />
-            <span style={{ color: "#A98CC7" }}>We Do Everything For You.</span>
-          </h2>
-          <p style={{ color: SOFT, fontSize: 21.5, lineHeight: 1.85, maxWidth: 620 }}>
-            Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone.
-          </p>
-        </div>
-
         {/* 4 steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16 fpd-stagger">
           {steps.map(s => (
             <div key={s.num} className="relative p-6 rounded-2xl" style={{ background: "rgba(126,107,216,0.05)", border: `1px solid ${vBorder}`, borderTop: `3px solid rgba(126,107,216,0.5)` }}>
               <div style={{ ...DISPLAY, color: "rgba(185,140,166,0.28)", fontSize: 65, fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>{s.num}</div>
@@ -835,7 +882,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* Pricing — two cards */}
-        <div className="grid md:grid-cols-2 gap-5 mb-14">
+        <div className="grid md:grid-cols-2 gap-5 mb-14 fpd-stagger">
           <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(126,107,216,0.4)`, boxShadow: "0 0 48px rgba(126,107,216,0.15)" }}>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
             <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$99</div>
@@ -872,7 +919,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         <div className="grid md:grid-cols-2 gap-10 items-center mb-16">
           <div>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 16 }}>EVERYTHING INCLUDED</div>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-3 fpd-stagger">
               {included.map(item => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle2 size={14} color="#FFFFFF" style={{ marginTop: 2, flexShrink: 0 }} />
@@ -891,7 +938,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
             </div>
             <div className="p-8 text-center">
               <div style={{ ...DISPLAY, fontSize: 30, fontWeight: 700, color: TEXT, marginBottom: 8 }}>Perfect For</div>
-              <div className="flex flex-col gap-2 mb-8">
+              <div className="flex flex-col gap-2 mb-8 fpd-stagger">
                 {perfectFor.map(p => (<div key={p} style={{ color: SOFT, fontSize: 16 }}>· {p}</div>))}
               </div>
               <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 32.5, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
@@ -916,7 +963,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* trust strip */}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 fpd-stagger">
           {trust.map(t => (
             <div key={t.title} className="p-5 rounded-2xl text-center" style={{ background: "rgba(126,107,216,0.04)", border: "1px solid rgba(126,107,216,0.12)" }}>
               <div style={{ color: "#FFFFFF", margin: "0 auto 10px", display: "flex", justifyContent: "center" }}>{t.icon}</div>
@@ -927,6 +974,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -947,11 +995,14 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
     { icon: <Zap size={18} />, title: "Stripe + More", desc: "Stripe, PayPal, Square or bring your own processor" },
   ];
   return (
+    <>
+    <PageBanner poster="/media/white-label-bg.jpg" tone="blue" overlay={0.6}
+      kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>}
+      sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
     <section id="white-label" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
-        <SectionHead kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>} sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
         {active.length > 0 && (
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
+          <div className="grid md:grid-cols-3 gap-6 mb-16 fpd-stagger">
             {active.map(p => {
               const monthly = getMonthlyPrice(p);
               return (
@@ -989,7 +1040,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
             })}
           </div>
         )}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 fpd-stagger">
           {perks.map(f => (
             <div key={f.title} className="flex gap-3 p-5 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
               <div style={{ color: "#FFFFFF", flexShrink: 0 }}>{f.icon}</div>
@@ -1002,6 +1053,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -1019,9 +1071,12 @@ function Help() {
     { q: "What is the difference between affiliate and partnership?", a: "Affiliates earn a commission per referred user for 12 months (capped per referral). Partners — typically businesses like law firms or financial advisors — earn recurring lifetime commissions on every account they refer, with no time cap." },
   ];
   return (
+    <>
+    <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6} minHeight="100vh"
+      kicker="Get in touch" title={<>Contact Us</>}
+      sub="Our team is available 7 days a week. Average response time: under 2 hours." />
     <section id="help" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-3xl mx-auto">
-        <SectionHead kicker="Get in touch" title={<>Contact Us</>} sub="Our team is available 7 days a week. Average response time: under 2 hours." />
         <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
             <a href="mailto:support@finalpassdown.com"><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
@@ -1029,7 +1084,7 @@ function Help() {
         </div>
 
         <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 20, textAlign: "center" }}>Frequently Asked Questions</div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 fpd-stagger">
           {faqs.map((faq, i) => (
             <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(91,110,225,0.16)" }}>
               <button className="w-full flex items-center justify-between px-6 py-5" onClick={() => setOpen(open === i ? null : i)}
@@ -1045,6 +1100,7 @@ function Help() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 
@@ -1081,8 +1137,8 @@ const FOOTER_COLS: [string, string[]][] = [
   ["Company", ["About Us", "Careers", "Press", "Contact", "Blog", "Investor Relations"]],
 ];
 
-function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
-  { onStart: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void }) {
+function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConciergeLogin }:
+  { onStart: () => void; onNavigate: (id: string) => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void }) {
   const linkTargets: Record<string, string> = {
     "Document Vault": "features", "Final Wishes": "features", "Medical Info": "features",
     "Financial Records": "features", "Personal Assets": "features", "Family & Memories": "features",
@@ -1109,7 +1165,7 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
               <div style={{ color: FAINT, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", ...MONO, marginBottom: 14 }}>{title}</div>
               <div className="flex flex-col gap-2.5">
                 {links.map((l, i) => (
-                  <button key={`${l}-${i}`} onClick={() => { const t = linkTargets[l]; if (t) scrollToId(t); else onStart(); }} className="text-left transition-colors hover:text-white" style={{ color: MUTED, fontSize: 17.5 }}>{l}</button>
+                  <button key={`${l}-${i}`} onClick={() => { const t = linkTargets[l]; if (t) onNavigate(t); else onStart(); }} className="text-left transition-colors hover:text-white" style={{ color: MUTED, fontSize: 17.5 }}>{l}</button>
                 ))}
               </div>
             </div>
@@ -1147,28 +1203,32 @@ function Footer({ onStart, onAdminLogin, onPartnerPortal, onConciergeLogin }:
 export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onConciergeLogin, onApplyWhiteLabel }:
   { onGetStarted: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void; onApplyWhiteLabel?: (tier: string) => void }) {
   if (typeof window !== "undefined") (window as any).__adminLogin = onAdminLogin;
+  const [page, setPage] = useState("home");
+  const navigate = (id: string) => { setPage(id); scrollToTop(); };
+  let pageContent: React.ReactNode;
+  switch (page) {
+    case "about": pageContent = <About onStart={onGetStarted} />; break;
+    case "how-it-works": pageContent = <><HowItWorks /><ContactsStory onNavigate={navigate} /></>; break;
+    case "features": pageContent = <><Features /><MemoriesStory onStart={onGetStarted} /></>; break;
+    case "security": pageContent = <><Security /><FamilyStory onStart={onGetStarted} /></>; break;
+    case "pricing": pageContent = <><Pricing onStart={onGetStarted} /><FamilyPetsStory onStart={onGetStarted} /></>; break;
+    case "affiliates": pageContent = <Affiliates onStart={onGetStarted} />; break;
+    case "partners": pageContent = <Partnerships onStart={onGetStarted} />; break;
+    case "white-label": pageContent = <WhiteLabel onApply={onApplyWhiteLabel} />; break;
+    case "white-glove": pageContent = <WhiteGlove onStart={onGetStarted} />; break;
+    case "help": pageContent = <Help />; break;
+    default: pageContent = <Hero onStart={onGetStarted} onNavigate={navigate} />; break;
+  }
   return (
     <div style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
-      <TopNav onStart={onGetStarted} />
+      <TopNav onStart={onGetStarted} page={page} onNavigate={navigate} />
       <main>
-        <Hero onStart={onGetStarted} />
-        <About onStart={onGetStarted} />
-        <HowItWorks />
-        <ContactsStory />
-        <Features />
-        <MemoriesStory onStart={onGetStarted} />
-        <Security />
-        <FamilyStory onStart={onGetStarted} />
-        <Pricing onStart={onGetStarted} />
-        <FamilyPetsStory onStart={onGetStarted} />
-        <Affiliates onStart={onGetStarted} />
-        <Partnerships onStart={onGetStarted} />
-        <WhiteGlove onStart={onGetStarted} />
-        <WhiteLabel onApply={onApplyWhiteLabel} />
-        <Help />
-        <CTA onStart={onGetStarted} />
+        <div key={page} className="fpd-stagger">
+          {pageContent}
+          <CTA onStart={onGetStarted} />
+        </div>
       </main>
-      <Footer onStart={onGetStarted} onAdminLogin={onAdminLogin} onPartnerPortal={onPartnerPortal} onConciergeLogin={onConciergeLogin} />
+      <Footer onStart={onGetStarted} onNavigate={navigate} onAdminLogin={onAdminLogin} onPartnerPortal={onPartnerPortal} onConciergeLogin={onConciergeLogin} />
     </div>
   );
 }

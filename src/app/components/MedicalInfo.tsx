@@ -165,6 +165,9 @@ button.chip:hover{opacity:.85;}
 .fpd-med .rgrid .tile:nth-child(n+4){border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-med .rdel{background:none;border:none;color:${MUTED};cursor:pointer;padding:6px;display:flex;flex-shrink:0;transition:color .16s;}
 .fpd-med .rdel:hover{color:${NEG};}
+.fpd-med .redit{background:none;border:none;color:${MUTED};cursor:pointer;padding:6px;display:flex;flex-shrink:0;transition:color .16s;}
+.fpd-med .redit:hover{color:#6FAE8B;}
+.fpd-med .racts{display:flex;align-items:center;gap:2px;flex-shrink:0;}
 @media (max-width:760px){
 .fpd-med .rgrid{grid-template-columns:1fr;}
 .fpd-med .rgrid .tile:nth-child(3n+2),.fpd-med .rgrid .tile:nth-child(3n){border-left:none;}
@@ -238,21 +241,24 @@ function TChip({ label, active, onToggle }: { label: string; active: boolean; on
   );
 }
 
-function AddAllergyModal({ onClose, onAdd }: { onClose: () => void; onAdd: (a: Omit<Allergy, "id">) => Promise<void> }) {
-  const [form, setForm] = useState({ allergen: "", severity: "mild" as Allergy["severity"], reaction: "", type: "food", diagnosed: new Date().getFullYear().toString() });
+function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null; onClose: () => void; onSave: (a: Omit<Allergy, "id">) => Promise<void> }) {
+  const [form, setForm] = useState(() => editing
+    ? { allergen: editing.allergen, severity: editing.severity, reaction: editing.reaction, type: editing.type, diagnosed: editing.diagnosed }
+    : { allergen: "", severity: "mild" as Allergy["severity"], reaction: "", type: "food", diagnosed: new Date().getFullYear().toString() });
   const [loading, setLoading] = useState(false);
   const set = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
   const submit = async () => {
     if (!form.allergen) { toast.error("Allergen name required"); return; }
     setLoading(true);
-    await onAdd(form);
+    await onSave(form);
     onClose();
+    if (editing) toast.success("Allergy updated");
   };
   return (
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal">
         <div className="modal-head">
-          <h3>Add Allergy</h3>
+          <h3>{editing ? "Edit Allergy" : "Add Allergy"}</h3>
           <button onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-body">
@@ -266,7 +272,7 @@ function AddAllergyModal({ onClose, onAdd }: { onClose: () => void; onAdd: (a: O
           <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (allergy test, prescription)" />
         </div>
         <div className="modal-foot">
-          <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : "Save Allergy"}</button>
+          <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : editing ? "Save Changes" : "Save Allergy"}</button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
       </div>
@@ -274,21 +280,24 @@ function AddAllergyModal({ onClose, onAdd }: { onClose: () => void; onAdd: (a: O
   );
 }
 
-function AddMedModal({ onClose, onAdd }: { onClose: () => void; onAdd: (m: Omit<Medication, "id">) => Promise<void> }) {
-  const [form, setForm] = useState({ name: "", dose: "", frequency: "", condition: "", prescriber: "", pharmacy: "", refillDate: "" });
+function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null; onClose: () => void; onSave: (m: Omit<Medication, "id">) => Promise<void> }) {
+  const [form, setForm] = useState(() => editing
+    ? { name: editing.name, dose: editing.dose, frequency: editing.frequency, condition: editing.condition, prescriber: editing.prescriber, pharmacy: editing.pharmacy, refillDate: editing.refillDate }
+    : { name: "", dose: "", frequency: "", condition: "", prescriber: "", pharmacy: "", refillDate: "" });
   const [loading, setLoading] = useState(false);
   const set = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
   const submit = async () => {
     if (!form.name || !form.dose) { toast.error("Medication name and dose required"); return; }
     setLoading(true);
-    await onAdd(form);
+    await onSave(form);
     onClose();
+    if (editing) toast.success("Medication updated");
   };
   return (
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal">
         <div className="modal-head">
-          <h3>Add Medication</h3>
+          <h3>{editing ? "Edit Medication" : "Add Medication"}</h3>
           <button onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-body">
@@ -308,7 +317,7 @@ function AddMedModal({ onClose, onAdd }: { onClose: () => void; onAdd: (m: Omit<
           <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (prescription, pharmacy receipt)" />
         </div>
         <div className="modal-foot">
-          <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : "Save Medication"}</button>
+          <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : editing ? "Save Changes" : "Save Medication"}</button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
       </div>
@@ -317,10 +326,12 @@ function AddMedModal({ onClose, onAdd }: { onClose: () => void; onAdd: (m: Omit<
 }
 
 export function MedicalInfo() {
-  const { allergies, medications, addAllergy, removeAllergy, addMedication, removeMedication } = useDemo();
+  const { allergies, medications, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication } = useDemo();
   const [tab, setTab] = useState<Tab>("emergency");
   const [showAddAllergy, setShowAddAllergy] = useState(false);
   const [showAddMed, setShowAddMed] = useState(false);
+  const [editingAllergy, setEditingAllergy] = useState<Allergy | null>(null);
+  const [editingMed, setEditingMed] = useState<Medication | null>(null);
 
   const [info, setInfo] = useState<EmergencyInfo>(initialEmergency);
   const [draft, setDraft] = useState<EmergencyInfo>(initialEmergency);
@@ -366,10 +377,10 @@ export function MedicalInfo() {
             <h1>The medical facts <span className="accent">that matter, at a glance.</span></h1>
             <p>Blood type, allergies, medications, and conditions — ready for first responders and the people you trust, the moment they need it.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAddMed(true)}>
+              <button className="hbtn primary" onClick={() => { setEditingMed(null); setShowAddMed(true); }}>
                 <Pill size={15}/> Add Medication
               </button>
-              <button className="hbtn ghost" onClick={() => setShowAddAllergy(true)}>
+              <button className="hbtn ghost" onClick={() => { setEditingAllergy(null); setShowAddAllergy(true); }}>
                 <AlertTriangle size={15}/> Add Allergy
               </button>
             </div>
@@ -546,7 +557,7 @@ export function MedicalInfo() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="toolbar">
               <p>Known allergies, reactions, and severity — critical for emergency responders.</p>
-              <button className="btn-primary" onClick={() => setShowAddAllergy(true)}><Plus size={14} /> Add Allergy</button>
+              <button className="btn-primary" onClick={() => { setEditingAllergy(null); setShowAddAllergy(true); }}><Plus size={14} /> Add Allergy</button>
             </div>
 
             {allergies.length === 0 && (
@@ -573,7 +584,10 @@ export function MedicalInfo() {
                           <div className="rsub">Diagnosed {a.diagnosed}</div>
                         </div>
                       </div>
-                      <button className="rdel" onClick={() => removeAllergy(a.id)} title="Remove allergy"><Trash2 size={16} /></button>
+                      <div className="racts">
+                        <button className="redit" onClick={() => { setEditingAllergy(a); setShowAddAllergy(true); }} title="Edit allergy"><Pencil size={15} /></button>
+                        <button className="rdel" onClick={() => removeAllergy(a.id)} title="Remove allergy"><Trash2 size={16} /></button>
+                      </div>
                     </div>
                     <div className="rgrid">
                       <div className="tile">
@@ -593,7 +607,7 @@ export function MedicalInfo() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="toolbar">
               <p>Current prescriptions, dosages, and pharmacy information.</p>
-              <button className="btn-primary" onClick={() => setShowAddMed(true)}><Plus size={14} /> Add Medication</button>
+              <button className="btn-primary" onClick={() => { setEditingMed(null); setShowAddMed(true); }}><Plus size={14} /> Add Medication</button>
             </div>
 
             {medications.length === 0 && (
@@ -614,7 +628,10 @@ export function MedicalInfo() {
                         <div className="rsub">{m.condition || "—"}</div>
                       </div>
                     </div>
-                    <button className="rdel" onClick={() => removeMedication(m.id)} title="Remove medication"><Trash2 size={16} /></button>
+                    <div className="racts">
+                      <button className="redit" onClick={() => { setEditingMed(m); setShowAddMed(true); }} title="Edit medication"><Pencil size={15} /></button>
+                      <button className="rdel" onClick={() => removeMedication(m.id)} title="Remove medication"><Trash2 size={16} /></button>
+                    </div>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Frequency</div><div className="tv">{m.frequency || "—"}</div></div>
@@ -628,8 +645,20 @@ export function MedicalInfo() {
           </div>
         )}
       </div>
-      {showAddAllergy && <AddAllergyModal onClose={() => setShowAddAllergy(false)} onAdd={addAllergy} />}
-      {showAddMed && <AddMedModal onClose={() => setShowAddMed(false)} onAdd={addMedication} />}
+      {showAddAllergy && (
+        <AddAllergyModal
+          editing={editingAllergy}
+          onClose={() => { setShowAddAllergy(false); setEditingAllergy(null); }}
+          onSave={editingAllergy ? (a) => updateAllergy(editingAllergy.id, a) : addAllergy}
+        />
+      )}
+      {showAddMed && (
+        <AddMedModal
+          editing={editingMed}
+          onClose={() => { setShowAddMed(false); setEditingMed(null); }}
+          onSave={editingMed ? (m) => updateMedication(editingMed.id, m) : addMedication}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText } from "lucide-react";
+import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -237,18 +237,49 @@ export function DaycareInfo() {
   const [records, setRecords] = useState<DaycareRecord[]>(initRecords);
   const [expanded, setExpanded] = useState<number | null>(1);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<DaycareRecord | null>(null);
   const [activeTab, setActiveTab] = useState<"info"|"pickups"|"docs">("info");
   const recordsRef = React.useRef<HTMLDivElement>(null);
-  const [form, setForm] = useState({ facilityName:"", childName:"", address:"", phone:"", email:"", directorName:"", teacherName:"", dropoffTime:"", pickupTime:"", days:"Monday – Friday", tuition:"", allergiesOnFile:"None known", emergencyContact:"", emergencyPhone:"", notes:"" });
+  const emptyForm = { facilityName:"", childName:"", address:"", phone:"", email:"", directorName:"", teacherName:"", dropoffTime:"", pickupTime:"", days:"Monday – Friday", tuition:"", allergiesOnFile:"None known", emergencyContact:"", emergencyPhone:"", notes:"" };
+  const [form, setForm] = useState(emptyForm);
 
   const F = (k: string) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function addRecord() {
-    if (!form.facilityName || !form.childName) { toast.error("Facility name and child's name required"); return; }
-    const rec: DaycareRecord = { ...form, id:Date.now(), website:"", teacherPhone:"", email:form.email, tuitionDue:"", paymentMethod:"", medicationsOnFile:"None", enrollDate:new Date().toLocaleDateString("en-US",{month:"short",year:"numeric"}), status:"active", authorizedPickups:[], documents:[] };
-    setRecords(p => [rec, ...p]);
-    toast.success(`${form.childName} at ${form.facilityName} added`);
+  function openAddRecord() {
+    setEditingRecord(null);
+    setForm(emptyForm);
+    setShowAdd(true);
+  }
+
+  function openEditRecord(rec: DaycareRecord) {
+    setEditingRecord(rec);
+    setForm({
+      facilityName: rec.facilityName, childName: rec.childName, address: rec.address, phone: rec.phone,
+      email: rec.email, directorName: rec.directorName, teacherName: rec.teacherName,
+      dropoffTime: rec.dropoffTime, pickupTime: rec.pickupTime, days: rec.days, tuition: rec.tuition,
+      allergiesOnFile: rec.allergiesOnFile, emergencyContact: rec.emergencyContact, emergencyPhone: rec.emergencyPhone,
+      notes: rec.notes,
+    });
+    setShowAdd(true);
+  }
+
+  function closeDaycareModal() {
     setShowAdd(false);
+    setEditingRecord(null);
+    setForm(emptyForm);
+  }
+
+  function saveRecord() {
+    if (!form.facilityName || !form.childName) { toast.error("Facility name and child's name required"); return; }
+    if (editingRecord) {
+      setRecords(p => p.map(r => r.id === editingRecord.id ? { ...r, ...form } : r));
+      toast.success(`${form.childName} at ${form.facilityName} updated`);
+    } else {
+      const rec: DaycareRecord = { ...form, id:Date.now(), website:"", teacherPhone:"", email:form.email, tuitionDue:"", paymentMethod:"", medicationsOnFile:"None", enrollDate:new Date().toLocaleDateString("en-US",{month:"short",year:"numeric"}), status:"active", authorizedPickups:[], documents:[] };
+      setRecords(p => [rec, ...p]);
+      toast.success(`${form.childName} at ${form.facilityName} added`);
+    }
+    closeDaycareModal();
   }
 
   const statusColor: Record<string, string> = { active: POS, inactive: MUTED };
@@ -268,7 +299,7 @@ export function DaycareInfo() {
             <h1>Facility details, <span className="accent">ready for anyone who needs them.</span></h1>
             <p>Contacts, schedules, allergies, and authorized pickups — everything a caregiver or emergency contact would need to know, in one place.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Daycare</button>
+              <button className="hbtn primary" onClick={openAddRecord}><Plus size={15} /> Add Daycare</button>
               <button className="hbtn ghost" onClick={() => recordsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Baby size={15} /> View All Records</button>
             </div>
           </div>
@@ -281,7 +312,7 @@ export function DaycareInfo() {
             <h1 className="pg-h1">Daycare Information</h1>
             <div className="pg-sub">Facility details, authorized pickup persons, allergies, schedules, and important documents for each child.</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddRecord}>
             <Plus size={14} /> Add Daycare
           </button>
         </div>
@@ -290,7 +321,7 @@ export function DaycareInfo() {
         <div className="rlist" ref={recordsRef}>
           {records.map(rec => (
             <div key={rec.id} className="card">
-              <button className="rhead" onClick={() => setExpanded(expanded === rec.id ? null : rec.id)}>
+              <div className="rhead" role="button" tabIndex={0} onClick={() => setExpanded(expanded === rec.id ? null : rec.id)}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
                   <div className="rico"><Baby size={22} /></div>
                   <div>
@@ -305,8 +336,13 @@ export function DaycareInfo() {
                     </div>
                   </div>
                 </div>
-                {expanded === rec.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
-              </button>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <button className="btn-sec" onClick={(e) => { e.stopPropagation(); openEditRecord(rec); }} title="Edit daycare record" style={{ padding: "6px 10px" }}>
+                    <Edit2 size={13} />
+                  </button>
+                  {expanded === rec.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+                </div>
+              </div>
 
               {expanded === rec.id && (
                 <div className="rbody">
@@ -405,11 +441,11 @@ export function DaycareInfo() {
 
         {/* ── Add daycare modal ── */}
         {showAdd && (
-          <div className="backdrop">
+          <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) closeDaycareModal(); }}>
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Daycare / Childcare</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingRecord ? "Edit Daycare / Childcare" : "Add Daycare / Childcare"}</h3>
+                <button onClick={closeDaycareModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 {[["Child's Full Name *","childName",""],["Facility Name *","facilityName",""],["Address","address",""],["Phone","phone",""],["Email","email",""],["Director's Name","directorName",""],["Teacher / Caregiver","teacherName",""],["Drop-off Time","dropoffTime","e.g. 7:30 AM"],["Pickup Time","pickupTime","e.g. 5:30 PM"],["Days Attended","days","e.g. Monday – Friday"],["Monthly Tuition","tuition","e.g. $1,200/month"],["Allergies on File","allergiesOnFile","e.g. Peanuts or None known"],["Emergency Contact","emergencyContact",""],["Emergency Phone","emergencyPhone",""],["Notes","notes",""]].map(([label,key,ph]) => (
@@ -421,8 +457,8 @@ export function DaycareInfo() {
                 <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addRecord}>Add Daycare</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveRecord}>{editingRecord ? "Save Changes" : "Add Daycare"}</button>
+                <button className="btn-sec" onClick={closeDaycareModal}>Cancel</button>
               </div>
             </div>
           </div>

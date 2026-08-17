@@ -232,9 +232,17 @@ function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"]
   );
 }
 
-function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:PasswordEntry)=>void }) {
+function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry | null; onClose:()=>void; onSave:(p:PasswordEntry)=>void }) {
   useEscapeKey(true, onClose);
-  const [form, setForm] = useState({ title:"", website:"", username:"", email:"", password:"", accountNumber:"", securityQuestion:"", securityAnswer:"", notes:"", category:"Other", twoFactor:false, importance:"normal" as Importance });
+  const [form, setForm] = useState(() => editing
+    ? {
+        title: editing.title, website: editing.website ?? "", username: editing.username ?? "",
+        email: editing.email ?? "", password: editing.password, accountNumber: editing.accountNumber ?? "",
+        securityQuestion: editing.securityQuestion ?? "", securityAnswer: editing.securityAnswer ?? "",
+        notes: editing.notes ?? "", category: editing.category, twoFactor: editing.twoFactor ?? false,
+        importance: editing.importance ?? "normal" as Importance,
+      }
+    : { title:"", website:"", username:"", email:"", password:"", accountNumber:"", securityQuestion:"", securityAnswer:"", notes:"", category:"Other", twoFactor:false, importance:"normal" as Importance });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -243,8 +251,14 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
     if (!form.title || !form.password) { toast.error("Title and password are required"); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 700));
-    onAdd({ ...form, id:`pw-${Date.now()}`, strength: getStrength(form.password), lastUpdated: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) });
-    toast.success(`"${form.title}" saved to Password Manager 🔒`);
+    onSave({
+      ...form,
+      id: editing?.id ?? `pw-${Date.now()}`,
+      strength: getStrength(form.password),
+      lastUpdated: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
+      documents: editing?.documents,
+    });
+    toast.success(editing ? "Password entry updated" : `"${form.title}" saved to Password Manager 🔒`);
     onClose();
   };
 
@@ -259,7 +273,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
     <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="card modal">
         <div className="modal-head">
-          <h3><Key size={16} color="#FFFFFF" /> Add Password Entry</h3>
+          <h3><Key size={16} color="#FFFFFF" /> {editing ? "Edit Password" : "Add Password Entry"}</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
@@ -336,7 +350,7 @@ function AddPasswordModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(p:Passw
         </div>
         <div className="modal-foot">
           <button className="save" onClick={submit} disabled={loading}>
-            <Lock size={13}/>{loading?"Encrypting & Saving...":"Save to Vault"}
+            <Lock size={13}/>{loading ? (editing ? "Saving..." : "Encrypting & Saving...") : (editing ? "Save Changes" : "Save to Vault")}
           </button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
@@ -352,6 +366,17 @@ export function PasswordManager() {
   const [selected, setSelected] = useState<PasswordEntry|null>(null);
   const [showPwFor, setShowPwFor] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingPw, setEditingPw] = useState<PasswordEntry|null>(null);
+
+  const openAddPw = () => { setEditingPw(null); setShowAdd(true); };
+  const openEditPw = (p: PasswordEntry) => { setEditingPw(p); setShowAdd(true); };
+  const closePwModal = () => { setShowAdd(false); setEditingPw(null); };
+  const savePw = (p: PasswordEntry) => {
+    setPasswords(prev => editingPw ? prev.map(x => x.id === p.id ? p : x) : [p, ...prev]);
+    if (editingPw && selected?.id === p.id) setSelected(p);
+    setShowAdd(false);
+    setEditingPw(null);
+  };
 
   /* Critical entries float to the top so a legacy contact opening this page
      under stress sees the accounts that unlock everything else first. */
@@ -387,7 +412,7 @@ export function PasswordManager() {
             <h1>Every login, <span className="accent">locked down and handed off.</span></h1>
             <p>Zero-knowledge, AES-256 encrypted credentials — accessible to your designated legacy contacts, and no one else.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Password</button>
+              <button className="hbtn primary" onClick={openAddPw}><Plus size={15} /> Add Password</button>
               <button className="hbtn ghost" onClick={() => setCategory("All")}><Shield size={15} /> View All Entries</button>
             </div>
           </div>
@@ -400,7 +425,7 @@ export function PasswordManager() {
             <h1 className="pg-h1">Password Manager</h1>
             <div className="pg-sub">{passwords.length} entries · Encrypted and accessible to your designated legacy contacts</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddPw}>
             <Plus size={14} /> Add Password
           </button>
         </div>
@@ -465,6 +490,9 @@ export function PasswordManager() {
                   <button className="icon-btn" onClick={e => { e.stopPropagation(); copy(p.password, "Password"); }}>
                     <Copy size={13}/>
                   </button>
+                  <button className="icon-btn" onClick={e => { e.stopPropagation(); openEditPw(p); }}>
+                    <Edit2 size={13}/>
+                  </button>
                   <button className="icon-btn del" onClick={e => { e.stopPropagation(); setPasswords(prev => prev.filter(x => x.id !== p.id)); if(selected?.id===p.id) setSelected(null); toast.success("Entry deleted"); }}>
                     <Trash2 size={13}/>
                   </button>
@@ -480,14 +508,7 @@ export function PasswordManager() {
                 <div className="dhead">
                   <div className="dname">{selected.title}</div>
                   <div style={{ display:"flex", gap:2 }}>
-                    <button className="icon-btn" onClick={() => {
-                      const newPw = prompt("Set new password for demo:", selected.password);
-                      if (newPw && newPw.trim()) {
-                        setPasswords(prev => prev.map(e => e.id === selected.id ? { ...e, password: newPw.trim() } : e));
-                        setSelected(s => s ? { ...s, password: newPw.trim() } : s);
-                        toast.success("Password updated");
-                      }
-                    }}><Edit2 size={13}/></button>
+                    <button className="icon-btn" onClick={() => openEditPw(selected)}><Edit2 size={13}/></button>
                     <button className="icon-btn" onClick={() => setSelected(null)}><X size={13}/></button>
                   </div>
                 </div>
@@ -552,7 +573,7 @@ export function PasswordManager() {
           </div>
         </div>
       </div>
-      {showAdd && <AddPasswordModal onClose={() => setShowAdd(false)} onAdd={p => setPasswords(prev => [p, ...prev])}/>}
+      {showAdd && <AddPasswordModal editing={editingPw} onClose={closePwModal} onSave={savePw}/>}
     </div>
   );
 }

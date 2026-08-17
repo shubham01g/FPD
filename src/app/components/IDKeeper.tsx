@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2 } from "lucide-react";
+import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -154,8 +154,10 @@ const IDK_CSS = `
 export function IDKeeper() {
   const [ids, setIds] = useState<IDRecord[]>(initIDs);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingID, setEditingID] = useState<IDRecord | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [form, setForm] = useState({ type:ID_TYPES[0], idNumber:"", holder:"James William Doe", issuedBy:"", issueDate:"", expiryDate:"", notes:"", photo:"" });
+  const emptyForm = { type:ID_TYPES[0], idNumber:"", holder:"James William Doe", issuedBy:"", issueDate:"", expiryDate:"", notes:"", photo:"" };
+  const [form, setForm] = useState(emptyForm);
   const idListRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
@@ -164,12 +166,36 @@ export function IDKeeper() {
     setIds(p => p.map(r => r.id===id ? {...r,masked:!r.masked} : r));
   }
 
-  function addID() {
-    if (!form.type || !form.holder) { toast.error("ID type and holder name required"); return; }
-    setIds(p => [...p, { ...form, id:Date.now(), documentScanned:form.photo?true:false, masked:true }]);
-    toast.success(`${form.type} added to ID Keeper`);
-    setForm({ type:ID_TYPES[0], idNumber:"", holder:"James William Doe", issuedBy:"", issueDate:"", expiryDate:"", notes:"", photo:"" });
+  function openAddID() {
+    setEditingID(null);
+    setForm(emptyForm);
+    setShowAdd(true);
+  }
+
+  function openEditID(rec: IDRecord) {
+    setEditingID(rec);
+    setForm({ type: rec.type, idNumber: rec.idNumber, holder: rec.holder, issuedBy: rec.issuedBy, issueDate: rec.issueDate, expiryDate: rec.expiryDate, notes: rec.notes, photo: "" });
+    setShowAdd(true);
+  }
+
+  function closeIDModal() {
     setShowAdd(false);
+    setEditingID(null);
+    setForm(emptyForm);
+  }
+
+  function saveID() {
+    if (!form.type || !form.holder) { toast.error("ID type and holder name required"); return; }
+    if (editingID) {
+      setIds(p => p.map(r => r.id === editingID.id
+        ? { ...r, type: form.type, idNumber: form.idNumber, holder: form.holder, issuedBy: form.issuedBy, issueDate: form.issueDate, expiryDate: form.expiryDate, notes: form.notes }
+        : r));
+      toast.success(`${form.type} updated`);
+    } else {
+      setIds(p => [...p, { ...form, id:Date.now(), documentScanned:form.photo?true:false, masked:true }]);
+      toast.success(`${form.type} added to ID Keeper`);
+    }
+    closeIDModal();
   }
 
   function isExpiringSoon(expiry:string) {
@@ -216,7 +242,7 @@ export function IDKeeper() {
             <h1>Passports, licenses, and cards — <span className="accent">never misplaced again.</span></h1>
             <p>Scan and store every identification document you own, with renewal reminders before anything expires.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAddID}>
                 <Plus size={15}/> Add ID
               </button>
               <button className="hbtn ghost" onClick={() => idListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -235,7 +261,7 @@ export function IDKeeper() {
               Securely store all identification documents — government IDs, insurance cards, professional licenses, and more.
             </div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddID}>
             <Plus size={14} /> Add ID
           </button>
         </div>
@@ -291,6 +317,7 @@ export function IDKeeper() {
                     {expired && <span className="ibadge" style={{ background: "rgba(208,107,107,0.16)", color: NEG }}>EXPIRED</span>}
                     {expiring && !expired && <span className="ibadge" style={{ background: "rgba(217,165,94,0.16)", color: WARN }}>EXPIRING SOON</span>}
                     {r.documentScanned && <span className="ibadge" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B" }}>✓ SCANNED</span>}
+                    <button className="eye-btn" onClick={() => openEditID(r)} title="Edit ID"><Edit2 size={14}/></button>
                   </div>
                 </div>
 
@@ -327,11 +354,11 @@ export function IDKeeper() {
 
         {/* ── Add modal ── */}
         {showAdd && (
-          <div className="backdrop">
+          <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) closeIDModal(); }}>
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add ID Document</h3>
-                <button onClick={()=>setShowAdd(false)}><X size={16}/></button>
+                <h3>{editingID ? "Edit ID Document" : "Add ID Document"}</h3>
+                <button onClick={closeIDModal}><X size={16}/></button>
               </div>
               <div className="modal-body">
                 <div className="scan-box">
@@ -357,8 +384,8 @@ export function IDKeeper() {
                 ))}
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addID}>Add to ID Keeper</button>
-                <button className="btn-sec" onClick={()=>setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveID}>{editingID ? "Save Changes" : "Add to ID Keeper"}</button>
+                <button className="btn-sec" onClick={closeIDModal}>Cancel</button>
               </div>
             </div>
           </div>

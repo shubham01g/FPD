@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, ChevronUp, Upload, CheckCircle } from "lucide-react";
+import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, ChevronUp, Upload, CheckCircle, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -147,18 +147,49 @@ export function JobHistory() {
   const [jobs, setJobs] = useState<Job[]>(initJobs);
   const [expanded, setExpanded] = useState<number | null>(1);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" });
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const emptyForm = { employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" };
+  const [form, setForm] = useState(emptyForm);
   const jlistRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
 
-  function addJob() {
+  function openAddModal() {
+    setEditingJob(null);
+    setForm(emptyForm);
+    setShowAdd(true);
+  }
+
+  function openEditModal(job: Job) {
+    setEditingJob(job);
+    setForm({
+      employer: job.employer, title: job.title, type: job.type, location: job.location,
+      startDate: job.startDate, endDate: job.current ? "" : job.endDate, current: job.current,
+      salary: job.salary, supervisor: job.supervisor, supervisorPhone: job.supervisorPhone,
+      reasonLeft: job.reasonLeft, achievements: job.achievements, notes: job.notes,
+    });
+    setShowAdd(true);
+  }
+
+  function closeModal() {
+    setShowAdd(false);
+    setEditingJob(null);
+  }
+
+  function saveJob() {
     if (!form.employer || !form.title) { toast.error("Employer and title required"); return; }
-    const job: Job = { ...form, id:Date.now(), endDate:form.current ? "Present" : form.endDate, documents:[] };
-    setJobs(p => [job, ...p]);
-    toast.success(`${form.title} at ${form.employer} added`);
-    setForm({ employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" });
+    const endDate = form.current ? "Present" : form.endDate;
+    if (editingJob) {
+      setJobs(p => p.map(j => j.id === editingJob.id ? { ...j, ...form, endDate } : j));
+      toast.success(`${form.title} at ${form.employer} updated`);
+    } else {
+      const job: Job = { ...form, id:Date.now(), endDate, documents:[] };
+      setJobs(p => [job, ...p]);
+      toast.success(`${form.title} at ${form.employer} added`);
+    }
+    setForm(emptyForm);
+    setEditingJob(null);
     setShowAdd(false);
   }
 
@@ -188,7 +219,7 @@ export function JobHistory() {
             <h1>Every role, every employer — <span className="accent">one complete timeline.</span></h1>
             <p>Titles, employers, dates, and documents — a full record of your career for reference or estate purposes.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAddModal}>
                 <Plus size={15}/> Add Position
               </button>
               <button className="hbtn ghost" onClick={() => jlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -207,7 +238,7 @@ export function JobHistory() {
               Complete employment record — positions, employers, supervisors, salaries, and important documents.
             </div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddModal}>
             <Plus size={14} /> Add Position
           </button>
         </div>
@@ -254,6 +285,11 @@ export function JobHistory() {
 
               {expanded === job.id && (
                 <div className="jbody">
+                  <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16 }}>
+                    <button className="btn-sec" onClick={() => openEditModal(job)}>
+                      <Edit2 size={12} /> Edit Record
+                    </button>
+                  </div>
                   <div className="jgrid">
                     {[
                       { label: "Supervisor", value: job.supervisor },
@@ -310,8 +346,8 @@ export function JobHistory() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Employment Record</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingJob ? "Edit Employment Record" : "Add Employment Record"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 {[["Job Title *","title","e.g. Senior Manager"],["Employer / Company *","employer","e.g. TechCorp Inc."],["Location","location","e.g. New York, NY"],["Start Date","startDate","e.g. Jan 2020"],["End Date","endDate","e.g. Mar 2024 (leave blank if current)"],["Salary","salary","e.g. $85,000/year"],["Supervisor Name","supervisor",""],["Supervisor Phone","supervisorPhone",""],["Reason for Leaving","reasonLeft","Leave blank if current position"],["Key Achievements","achievements","Notable accomplishments"],["Notes","notes","Benefits, pension info, etc."]].map(([label,key,ph]) => (
@@ -333,8 +369,8 @@ export function JobHistory() {
                 <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (offer letter, W-2, contract)" sectionId="job-history" sectionLabel="Job History" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addJob}>Add Record</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveJob}>{editingJob ? "Save Changes" : "Add Record"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope } from "lucide-react";
+import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import heroPetPhoto from "../../imports/petrecords_hero_photo.png";
@@ -226,6 +226,7 @@ export function PetRecords() {
   const [petVaccinations, setPetVaccinations] = useState<PetVaccination[]>([{type:"",date:""}]);
   const [petVet, setPetVet] = useState({vetName:"",vetPhone:"",vetEmail:""});
   const [petFeedings, setPetFeedings] = useState<PetFeeding[]>([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const petPhotoRef = useRef<HTMLInputElement>(null);
 
   function resetPetForm() {
@@ -235,10 +236,37 @@ export function PetRecords() {
     setPetVet({vetName:"",vetPhone:"",vetEmail:""}); setPetFeedings([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
   }
 
+  function openAddPet() {
+    resetPetForm();
+    setEditingId(null);
+    setShowPetForm(true);
+  }
+
+  function openEditPet(pet: PetRecord) {
+    setPetPhotos(pet.photos);
+    setPetCaretakers(pet.caretakers.length ? pet.caretakers : [{name:"",phone:""}]);
+    setPetProviders(pet.providers.length ? pet.providers : [{name:"",phone:""}]);
+    setPetInstructions(pet.instructions.length ? pet.instructions : [{name:"",phone:"",description:""}]);
+    setPetAbout({ name: pet.name, dateOfBirth: pet.dateOfBirth, gender: pet.gender, breed: pet.breed, colour: pet.colour });
+    setPetDocs(pet.documents);
+    setPetMedHistory(pet.medicalHistory);
+    setPetVaccinations(pet.vaccinations.length ? pet.vaccinations : [{type:"",date:""}]);
+    setPetVet({ vetName: pet.vetName, vetPhone: pet.vetPhone, vetEmail: pet.vetEmail });
+    setPetFeedings(pet.feedings.length ? pet.feedings : [{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
+    setEditingId(pet.id);
+    setShowPetForm(true);
+  }
+
+  function closePetForm() {
+    setShowPetForm(false);
+    resetPetForm();
+    setEditingId(null);
+  }
+
   function savePetRecord() {
     if (!petAbout.name) { toast.error("Pet name required"); return; }
-    const rec: PetRecord = {
-      id: Date.now(), photos: petPhotos,
+    const recFields = {
+      photos: petPhotos,
       caretakers: petCaretakers.filter(c=>c.name.trim()),
       providers: petProviders.filter(p=>p.name.trim()),
       instructions: petInstructions.filter(i=>i.description.trim()||i.name.trim()),
@@ -248,12 +276,18 @@ export function PetRecords() {
       ...petVet,
       feedings: petFeedings.filter(f=>f.foodType.trim()),
     };
-    setPetsList(p=>[...p, rec]);
-    toast.success(`${petAbout.name} added to Pet Records`);
-    resetPetForm(); setShowPetForm(false);
+    if (editingId !== null) {
+      setPetsList(p => p.map(x => x.id === editingId ? { ...x, ...recFields } : x));
+      toast.success(`${petAbout.name} updated`);
+    } else {
+      const rec: PetRecord = { id: Date.now(), ...recFields };
+      setPetsList(p=>[...p, rec]);
+      toast.success(`${petAbout.name} added to Pet Records`);
+    }
+    resetPetForm(); setEditingId(null); setShowPetForm(false);
   }
 
-  useEscapeKey(showPetForm, () => { setShowPetForm(false); resetPetForm(); });
+  useEscapeKey(showPetForm, closePetForm);
 
   const totalVaccinations = petsList.reduce((s, p) => s + p.vaccinations.length, 0);
   const totalCaretakers = petsList.reduce((s, p) => s + p.caretakers.length + p.providers.length, 0);
@@ -279,7 +313,7 @@ export function PetRecords() {
             <h1>Everything a caretaker <span className="accent">would need to know.</span></h1>
             <p>Vet info, feeding routines, medications, and emergency caretakers — so your pet is never left without instructions.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowPetForm(true)}>
+              <button className="hbtn primary" onClick={openAddPet}>
                 <Plus size={15}/> Add Pet Record
               </button>
               <button className="hbtn ghost" onClick={() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -296,7 +330,7 @@ export function PetRecords() {
             <h1 className="pg-h1">Pet Records</h1>
             <div className="pg-sub">Caretakers, vet info, feeding routines, and health history for every pet — kept separate so it's easy to hand off.</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowPetForm(true)}>
+          <button className="btn-primary" onClick={openAddPet}>
             <Plus size={14} /> Add Pet Record
           </button>
         </div>
@@ -330,12 +364,15 @@ export function PetRecords() {
 
               <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 20 }}>
                 {/* Header */}
-                <div className="pethead">
-                  <div className="r-icon" style={{ width: 52, height: 52, borderRadius: 16 }}><PawPrint size={24}/></div>
-                  <div>
-                    <div className="petname">{pet.name}</div>
-                    <div className="petmeta">{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
+                <div className="pethead" style={{ justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+                    <div className="r-icon" style={{ width: 52, height: 52, borderRadius: 16 }}><PawPrint size={24}/></div>
+                    <div>
+                      <div className="petname">{pet.name}</div>
+                      <div className="petmeta">{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
+                    </div>
                   </div>
+                  <button className="btn-mini" onClick={() => openEditPet(pet)}><Edit2 size={13}/> Edit</button>
                 </div>
 
                 {/* Emergency Pet Caretakers */}
@@ -446,8 +483,8 @@ export function PetRecords() {
           <div className="backdrop">
             <div className="card modal wide">
               <div className="modal-head">
-                <h3>Upload Pet Records</h3>
-                <button onClick={()=>{ setShowPetForm(false); resetPetForm(); }}><X size={18}/></button>
+                <h3>{editingId !== null ? "Edit Pet Record" : "Upload Pet Records"}</h3>
+                <button onClick={closePetForm}><X size={18}/></button>
               </div>
               <div className="modal-body">
 
@@ -578,7 +615,7 @@ export function PetRecords() {
 
               {/* Upload / Save button */}
               <div className="modal-foot">
-                <button className="save" onClick={savePetRecord}>Upload</button>
+                <button className="save" onClick={savePetRecord}>{editingId !== null ? "Save Changes" : "Upload"}</button>
               </div>
             </div>
           </div>
