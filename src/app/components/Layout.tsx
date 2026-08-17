@@ -60,7 +60,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "medical-info",      label: "Medical Info",       icon: <Stethoscope size={16}/> },
       { id: "financial-records", label: "Financial Records",  icon: <Wallet size={16}/> },
-      { id: "receipts-expenses", label: "Receipts & Expenses", icon: <ReceiptText size={16}/>, badge: "OCR" },
+      { id: "receipts-expenses", label: "Receipts & Expenses", icon: <ReceiptText size={16}/> },
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
       { id: "utilities",         label: "Utilities",          icon: <Zap size={16}/> },
       { id: "family-memories",   label: "Family & Memories",  icon: <Camera size={16}/> },
