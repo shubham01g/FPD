@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MapPin, Plus, X, Star, Phone, Globe, Heart, Trash2, Compass } from "lucide-react";
+import { MapPin, Plus, X, Star, Phone, Globe, Heart, Trash2, Compass, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { PhotoPicker } from "./PhotoPicker";
 import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.png";
@@ -184,19 +184,48 @@ const FAV_CSS = `
 export function FavoritePlaces() {
   const [places, setPlaces] = useState<Place[]>(initPlaces);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [filterCat, setFilterCat] = useState("all");
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ name:"", category:PLACE_CATEGORIES[0], address:"", phone:"", website:"", favoriteItem:"", whySpecial:"", rating:5, visited:"", tags:"", photo:"" });
+  const emptyForm = { name:"", category:PLACE_CATEGORIES[0], address:"", phone:"", website:"", favoriteItem:"", whySpecial:"", rating:5, visited:"", tags:"", photo:"" };
+  const [form, setForm] = useState(emptyForm);
   const placesListRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function addPlace() {
-    if (!form.name) { toast.error("Place name required"); return; }
-    setPlaces(p => [...p, { ...form, id:Date.now(), rating:Number(form.rating), tags:form.tags.split(",").map(t=>t.trim()).filter(Boolean) }]);
-    toast.success(`${form.name} saved to Favorite Places`);
-    setForm({ name:"", category:PLACE_CATEGORIES[0], address:"", phone:"", website:"", favoriteItem:"", whySpecial:"", rating:5, visited:"", tags:"", photo:"" });
+  function openAdd() {
+    setEditingPlace(null);
+    setForm(emptyForm);
+    setShowAdd(true);
+  }
+
+  function openEdit(place: Place) {
+    setEditingPlace(place);
+    setForm({
+      name: place.name, category: place.category, address: place.address, phone: place.phone,
+      website: place.website, favoriteItem: place.favoriteItem, whySpecial: place.whySpecial,
+      rating: place.rating, visited: place.visited, tags: place.tags.join(", "), photo: place.photo || "",
+    });
+    setShowAdd(true);
+  }
+
+  function closeModal() {
     setShowAdd(false);
+    setEditingPlace(null);
+    setForm(emptyForm);
+  }
+
+  function savePlace() {
+    if (!form.name) { toast.error("Place name required"); return; }
+    const tags = form.tags.split(",").map(t=>t.trim()).filter(Boolean);
+    if (editingPlace) {
+      setPlaces(p => p.map(x => x.id === editingPlace.id ? { ...x, ...form, rating:Number(form.rating), tags } : x));
+      toast.success(`${form.name} updated`);
+    } else {
+      setPlaces(p => [...p, { ...form, id:Date.now(), rating:Number(form.rating), tags }]);
+      toast.success(`${form.name} saved to Favorite Places`);
+    }
+    closeModal();
   }
 
   function removePlace(id:number) {
@@ -235,7 +264,7 @@ export function FavoritePlaces() {
             <h1>Restaurants, parks, and spots — <span className="accent">worth remembering.</span></h1>
             <p>Save the places tied to your favorite memories, so the people you love can find them too.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAdd}>
                 <Plus size={15}/> Add Place
               </button>
               <button className="hbtn ghost" onClick={() => placesListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -252,7 +281,7 @@ export function FavoritePlaces() {
             <h1 className="pg-h1">Favorite Places</h1>
             <div className="pg-sub">Record the places that matter most — restaurants, parks, family spots, and memories tied to locations.</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAdd}>
             <Plus size={14} /> Add Place
           </button>
         </div>
@@ -325,7 +354,10 @@ export function FavoritePlaces() {
                         </div>
                       </div>
                     </div>
-                    <button className="pdel" onClick={() => removePlace(place.id)} title="Remove place"><Trash2 size={14} /></button>
+                    <div style={{ display: "flex", gap: 2, flexShrink: 0 }}>
+                      <button className="pdel" onClick={() => openEdit(place)} title="Edit place"><Edit2 size={14} /></button>
+                      <button className="pdel" onClick={() => removePlace(place.id)} title="Remove place"><Trash2 size={14} /></button>
+                    </div>
                   </div>
 
                   {place.address && <div className="paddr"><MapPin size={10} />{place.address}</div>}
@@ -366,11 +398,11 @@ export function FavoritePlaces() {
 
         {/* ── Add place modal ── */}
         {showAdd && (
-          <div className="backdrop">
+          <div className="backdrop" onMouseDown={e => { if (e.target === e.currentTarget) closeModal(); }}>
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Favorite Place</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingPlace ? "Edit Favorite Place" : "Add Favorite Place"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={form.photo} onChange={url => setForm(p => ({ ...p, photo: url }))} label="Place Photo" aspectRatio="16/9" />
@@ -398,8 +430,8 @@ export function FavoritePlaces() {
                 </div>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addPlace}>Save Place</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={savePlace}>{editingPlace ? "Save Changes" : "Save Place"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>

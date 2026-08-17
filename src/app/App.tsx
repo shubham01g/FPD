@@ -24,12 +24,14 @@ import { KidsActivities } from "./components/KidsActivities";
 import { Warranties } from "./components/Warranties";
 import { MedicalInfo } from "./components/MedicalInfo";
 import { FinancialRecords } from "./components/FinancialRecords";
+import { ReceiptsExpenses } from "./components/ReceiptsExpenses";
 import { PersonalAssets } from "./components/PersonalAssets";
 import { Utilities } from "./components/Utilities";
 import { FamilyMemories } from "./components/FamilyMemories";
 import { PetRecords } from "./components/PetRecords";
 import { ContactsHub } from "./components/ContactsHub";
 import { OrganizeHub } from "./components/OrganizeHub";
+import { LifeCalendar } from "./components/LifeCalendar";
 import { AffiliateProgram } from "./components/AffiliateProgram";
 import { DigitalFileCabinet } from "./components/DigitalFileCabinet";
 import { FamilyFriends } from "./components/FamilyFriends";
@@ -332,6 +334,7 @@ function UserRoute() {
       case "warranties":          return <Warranties/>;
       case "medical-info":        return <MedicalInfo/>;
       case "financial-records":   return <FinancialRecords/>;
+      case "receipts-expenses":   return <ReceiptsExpenses/>;
       case "personal-assets":     return <PersonalAssets/>;
       case "utilities":           return <Utilities/>;
       case "family-memories":     return <FamilyMemories/>;
@@ -348,6 +351,7 @@ function UserRoute() {
       case "contacts-emergency": return <ContactsHub initialSection="emergency"/>;
       // legacy-verification merged into contacts-legacy
       case "organize":            return <OrganizeHub onNavigate={nav}/>;
+      case "calendar":            return <LifeCalendar onNavigate={nav}/>;
       case "storage-usage":       return <StorageUsage/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;

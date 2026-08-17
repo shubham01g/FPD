@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, House, ShieldCheck, Mail, Image as ImageIcon, Lock, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
-import { LifeCalendar } from "./LifeCalendar";
 import { toast } from "sonner";
 import heroFoldersPhoto from "../../imports/folders_hero_photo.png";
 import heroReminderPhoto from "../../imports/reminder_hero_photo.png";
@@ -17,7 +16,7 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-type Tab = "folders"|"reminders"|"occasions"|"calendar";
+type Tab = "folders"|"reminders"|"occasions";
 
 /* Refined per-folder accent — the same nine-hue harmonised family used across
    the Calendar, File Cabinet and Legacy Vault. */
@@ -63,13 +62,6 @@ const ORG_CSS = `
 .fpd-org *{box-sizing:border-box;}
 .fpd-org-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 .fpd-org .wrap{max-width:1180px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
-
-/* Calendar tab embeds the standalone LifeCalendar page component — strip its
-   own outer chrome (wrap padding/max-width, background, grain) so it reads as
-   this tab's content instead of a page nested inside a page. */
-.fpd-org .calendar-embed .fpd-cal{background:none;min-height:0;}
-.fpd-org .calendar-embed .fpd-cal-grain{display:none;}
-.fpd-org .calendar-embed .fpd-cal .wrap{max-width:none;margin:0;padding:0;}
 
 /* photo hero banner — same full-bleed treatment as the Dashboard's hero,
    tinted toward the brand palette via background-blend-mode so it reads as
@@ -317,7 +309,6 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
     { id:"folders" as Tab, label:"Folders", icon:<Folder size={13}/> },
     { id:"reminders" as Tab, label:`Reminders (${reminders.length})`, icon:<Bell size={13}/> },
     { id:"occasions" as Tab, label:`Occasions (${occasions.length})`, icon:<Calendar size={13}/> },
-    { id:"calendar" as Tab, label:"Calendar", icon:<Calendar size={13}/> },
   ];
 
   return (
@@ -522,12 +513,6 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
               })}
             </div>
             {showAddOcc && <AddOccasionModal onClose={()=>setShowAddOcc(false)} onAdd={addOccasion}/>}
-          </div>
-        )}
-
-        {tab==="calendar" && (
-          <div className="calendar-embed">
-            <LifeCalendar onNavigate={onNavigate}/>
           </div>
         )}
 

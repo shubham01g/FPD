@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText } from "lucide-react";
+import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -198,17 +198,50 @@ export function Warranties() {
   const [filterCat, setFilterCat] = useState("all");
   const [form, setForm] = useState({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
   const [wDoc, setWDoc] = useState<string|null>(null);
+  const [editingId, setEditingId] = useState<number|null>(null);
 
   const listRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function addWarranty() {
-    if (!form.product) { toast.error("Product name required"); return; }
-    setWarranties(p => [...p, { ...form, id:Date.now(), documents: wDoc ? [wDoc] : [], photo:form.photo||"" }]);
-    toast.success(`Warranty for "${form.product}" added`);
+  function resetWarrantyForm() {
+    setForm({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
     setWDoc(null);
-    setForm({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"" });
+  }
+
+  function openAddWarranty() {
+    resetWarrantyForm();
+    setEditingId(null);
+    setShowAdd(true);
+  }
+
+  function openEditWarranty(w: Warranty) {
+    setForm({ product:w.product, brand:w.brand, model:w.model, serialNum:w.serialNum, category:w.category, purchaseDate:w.purchaseDate, purchasedFrom:w.purchasedFrom, price:w.price, warrantyType:w.warrantyType, provider:w.provider, providerPhone:w.providerPhone, providerWebsite:w.providerWebsite, expiryDate:w.expiryDate, coverageDetails:w.coverageDetails, claimInstructions:w.claimInstructions, notes:w.notes, photo:w.photo||"" });
+    setWDoc(null);
+    setEditingId(w.id);
+    setShowAdd(true);
+  }
+
+  function closeWarrantyModal() {
+    setShowAdd(false);
+    setEditingId(null);
+    resetWarrantyForm();
+  }
+
+  function saveWarranty() {
+    if (!form.product) { toast.error("Product name required"); return; }
+    if (editingId !== null) {
+      setWarranties(p => p.map(x => x.id === editingId ? {
+        ...x, ...form,
+        documents: wDoc && !x.documents.includes(wDoc) ? [...x.documents, wDoc] : x.documents,
+      } : x));
+      toast.success(`Warranty for "${form.product}" updated`);
+    } else {
+      setWarranties(p => [...p, { ...form, id:Date.now(), documents: wDoc ? [wDoc] : [], photo:form.photo||"" }]);
+      toast.success(`Warranty for "${form.product}" added`);
+    }
+    resetWarrantyForm();
+    setEditingId(null);
     setShowAdd(false);
   }
 
@@ -239,7 +272,7 @@ export function Warranties() {
             <h1>Every warranty, tracked — <span className="accent">so nothing expires unnoticed.</span></h1>
             <p>Purchase dates, coverage terms, and claim instructions — kept together so you never lose a warranty to a lost receipt.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAddWarranty}>
                 <Plus size={15}/> Add Warranty
               </button>
               <button className="hbtn ghost" onClick={() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -256,7 +289,7 @@ export function Warranties() {
             <h1 className="pg-h1">Warranties</h1>
             <div className="pg-sub">Track warranties for all products — when they expire, how to claim, and where the documents are stored.</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddWarranty}>
             <Plus size={14} /> Add Warranty
           </button>
         </div>
@@ -321,6 +354,9 @@ export function Warranties() {
 
               {expanded === w.id && (
                 <div className="wr-body">
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button className="btn-sec" onClick={() => openEditWarranty(w)}><Edit2 size={12} /> Edit</button>
+                  </div>
                   <div className="dgrid">
                     {[["Brand / Make", w.brand], ["Model", w.model], ["Serial / Item #", w.serialNum || "—"], ["Purchase Date", w.purchaseDate], ["Purchased From", w.purchasedFrom], ["Purchase Price", w.price], ["Warranty Provider", w.provider], ["Provider Phone", w.providerPhone || "—"], ["Provider Website", w.providerWebsite || "—"], ["Expiry Date", w.expiryDate]].map(([label, value]) => (
                       <div key={label} className="tile">
@@ -382,8 +418,8 @@ export function Warranties() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Warranty</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Warranty" : "Add Warranty"}</h3>
+                <button onClick={closeWarrantyModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={form.photo} onChange={url => setForm(p => ({ ...p, photo: url }))} label="Product Photo (optional)" aspectRatio="4/3" />
@@ -418,8 +454,8 @@ export function Warranties() {
                 <AttachDocumentField value={wDoc} onChange={setWDoc} folder="personal" sectionId="warranties" sectionLabel="Warranties" label="Attach Document (receipt, warranty card, protection plan)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addWarranty}>Add Warranty</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveWarranty}>{editingId !== null ? "Save Changes" : "Add Warranty"}</button>
+                <button className="btn-sec" onClick={closeWarrantyModal}>Cancel</button>
               </div>
             </div>
           </div>

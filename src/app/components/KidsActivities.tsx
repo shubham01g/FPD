@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText } from "lucide-react";
+import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -239,21 +239,47 @@ export function KidsActivities() {
   const [expanded, setExpanded] = useState<number|null>(1);
   const [showAdd, setShowAdd] = useState(false);
   const [filterChild, setFilterChild] = useState("all");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const activitiesRef = React.useRef<HTMLDivElement>(null);
-  const [form, setForm] = useState({
+  const blankForm = {
     childName:"", activityType:ACTIVITY_TYPES[0], organizationName:"", teamOrGroup:"",
     location:"", locationPhone:"", coachInstructor:"", coachPhone:"", schedule:"",
     seasonDates:"", monthlyCost:"", paymentDue:"", uniformRequired:"", transportationNotes:"",
     emergencyContact:"", emergencyPhone:"", notes:"", status:"active" as "active"|"inactive"|"seasonal",
-  });
+  };
+  const [form, setForm] = useState(blankForm);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function addActivity() {
+  function openAdd() {
+    setForm(blankForm);
+    setEditingId(null);
+    setShowAdd(true);
+  }
+
+  function openEdit(act: Activity) {
+    const { id, documents, ...rest } = act;
+    setForm(rest);
+    setEditingId(act.id);
+    setShowAdd(true);
+  }
+
+  function closeModal() {
+    setShowAdd(false);
+    setEditingId(null);
+  }
+
+  function saveActivity() {
     if (!form.childName || !form.activityType) { toast.error("Child name and activity type required"); return; }
-    setActivities(p => [...p, { ...form, id:Date.now(), documents:[] }]);
-    toast.success(`${form.activityType} added for ${form.childName}`);
-    setForm({ childName:"", activityType:ACTIVITY_TYPES[0], organizationName:"", teamOrGroup:"", location:"", locationPhone:"", coachInstructor:"", coachPhone:"", schedule:"", seasonDates:"", monthlyCost:"", paymentDue:"", uniformRequired:"", transportationNotes:"", emergencyContact:"", emergencyPhone:"", notes:"", status:"active" });
+    if (editingId != null) {
+      setActivities(p => p.map(a => a.id === editingId ? { ...a, ...form } : a));
+      toast.success("Activity updated");
+    } else {
+      setActivities(p => [...p, { ...form, id:Date.now(), documents:[] }]);
+      toast.success(`${form.activityType} added for ${form.childName}`);
+    }
+    setForm(blankForm);
+    setEditingId(null);
     setShowAdd(false);
   }
 
@@ -284,7 +310,7 @@ export function KidsActivities() {
             <h1>The schedules, coaches, and costs — <span className="accent">all in one place.</span></h1>
             <p>Teams, instructors, transportation, and paperwork for every activity your kids are enrolled in — so nothing gets missed.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Activity</button>
+              <button className="hbtn primary" onClick={openAdd}><Plus size={15} /> Add Activity</button>
               <button className="hbtn ghost" onClick={() => activitiesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Star size={15} /> View All Activities</button>
             </div>
           </div>
@@ -297,7 +323,7 @@ export function KidsActivities() {
             <h1 className="pg-h1">Kids' Activities</h1>
             <div className="pg-sub">Track every activity for every child — schedules, coaches, transportation, costs, and important documents.</div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAdd}>
             <Plus size={14} /> Add Activity
           </button>
         </div>
@@ -343,7 +369,7 @@ export function KidsActivities() {
             const meta = getMeta(act.activityType);
             return (
               <div key={act.id} className="card">
-                <button className="ahead" onClick={() => setExpanded(expanded === act.id ? null : act.id)}>
+                <div className="ahead" role="button" tabIndex={0} onClick={() => setExpanded(expanded === act.id ? null : act.id)}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
                     <div className="aico" style={{ background: meta.bg }}>{meta.emoji}</div>
                     <div>
@@ -358,8 +384,15 @@ export function KidsActivities() {
                       </div>
                     </div>
                   </div>
-                  {expanded === act.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
-                </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                    <button
+                      title="Edit activity"
+                      onClick={(e) => { e.stopPropagation(); openEdit(act); }}
+                      style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 6, display: "flex" }}
+                    ><Edit2 size={14} /></button>
+                    {expanded === act.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
+                  </div>
+                </div>
 
                 {expanded === act.id && (
                   <div className="abody">
@@ -422,8 +455,8 @@ export function KidsActivities() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Activity</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingId != null ? "Edit Activity" : "Add Activity"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <div className="field">
@@ -466,8 +499,8 @@ export function KidsActivities() {
                 <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addActivity}>Add Activity</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveActivity}>{editingId != null ? "Save Changes" : "Add Activity"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>

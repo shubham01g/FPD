@@ -182,6 +182,7 @@ export function PersonalAssets() {
   const [collectiblesList, setCollectiblesList] = useState(collectiblesInit);
   const [weaponsLockerList, setWeaponsLockerList] = useState(weaponsLockerInit);
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const tabContentRef = React.useRef<HTMLDivElement>(null);
   const [pendingPhotoTarget, setPendingPhotoTarget] = useState<{type:"realestate"|"weapon"; id:number}|null>(null);
@@ -214,49 +215,122 @@ export function PersonalAssets() {
 
   function addRealEstate() {
     if (!rForm.address) { toast.error("Address required"); return; }
-    setRealEstateList(p => [...p, { id:Date.now(), type:rForm.type||"Property", address:rForm.address, city:rForm.city, value:rForm.value||"—", mortgage:rForm.mortgage||"—", mortgagePayment:rForm.mortgagePayment||"—", titleHolder:rForm.titleHolder, deed:rForm.deed, yearBuilt:rForm.yearBuilt, sqft:rForm.sqft, bedBath:rForm.bedBath, lotSize:rForm.lotSize, notes:rForm.notes, photo:rForm.photo }]);
-    toast.success(`${rForm.address} added`);
+    if (editingId !== null) {
+      setRealEstateList(p => p.map(r => r.id === editingId ? { ...r, type:rForm.type||"Property", address:rForm.address, city:rForm.city, value:rForm.value||"—", mortgage:rForm.mortgage||"—", mortgagePayment:rForm.mortgagePayment||"—", titleHolder:rForm.titleHolder, deed:rForm.deed, yearBuilt:rForm.yearBuilt, sqft:rForm.sqft, bedBath:rForm.bedBath, lotSize:rForm.lotSize, notes:rForm.notes, photo:rForm.photo } : r));
+      toast.success(`${rForm.address} updated`);
+    } else {
+      setRealEstateList(p => [...p, { id:Date.now(), type:rForm.type||"Property", address:rForm.address, city:rForm.city, value:rForm.value||"—", mortgage:rForm.mortgage||"—", mortgagePayment:rForm.mortgagePayment||"—", titleHolder:rForm.titleHolder, deed:rForm.deed, yearBuilt:rForm.yearBuilt, sqft:rForm.sqft, bedBath:rForm.bedBath, lotSize:rForm.lotSize, notes:rForm.notes, photo:rForm.photo }]);
+      toast.success(`${rForm.address} added`);
+    }
     setRForm({ type:"", address:"", city:"", value:"", mortgage:"", mortgagePayment:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"", notes:"", photo:"" });
+    setEditingId(null);
     setShowAdd(null);
   }
 
   function addVehicle() {
     if (!vForm.make || !vForm.model) { toast.error("Make and model required"); return; }
-    setVehicleList(p => [...p, { id:Date.now(), year:Number(vForm.year)||new Date().getFullYear(), make:vForm.make, model:vForm.model, color:vForm.color, vin:vForm.vin, plate:vForm.plate, title:vForm.title, lien:vForm.lien||"None", insurance:vForm.insurance, registration:vForm.registration, value:vForm.value||"—", notes:vForm.notes, photo:vForm.photo }]);
-    toast.success(`${vForm.year} ${vForm.make} ${vForm.model} added`);
+    if (editingId !== null) {
+      setVehicleList(p => p.map(v => v.id === editingId ? { ...v, year:Number(vForm.year)||v.year, make:vForm.make, model:vForm.model, color:vForm.color, vin:vForm.vin, plate:vForm.plate, title:vForm.title, lien:vForm.lien||"None", insurance:vForm.insurance, registration:vForm.registration, value:vForm.value||"—", notes:vForm.notes, photo:vForm.photo } : v));
+      toast.success(`${vForm.year} ${vForm.make} ${vForm.model} updated`);
+    } else {
+      setVehicleList(p => [...p, { id:Date.now(), year:Number(vForm.year)||new Date().getFullYear(), make:vForm.make, model:vForm.model, color:vForm.color, vin:vForm.vin, plate:vForm.plate, title:vForm.title, lien:vForm.lien||"None", insurance:vForm.insurance, registration:vForm.registration, value:vForm.value||"—", notes:vForm.notes, photo:vForm.photo }]);
+      toast.success(`${vForm.year} ${vForm.make} ${vForm.model} added`);
+    }
     setVForm({ year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", notes:"", photo:"" });
+    setEditingId(null);
     setShowAdd(null);
   }
   function addDigital() {
     if (!dForm.asset) { toast.error("Asset name required"); return; }
-    setDigitalList(p => [...p, { id:Date.now(), category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, walletAddress:"—", notes:dForm.notes, attachedDoc:dDoc }]);
-    toast.success(`${dForm.asset} added`);
+    if (editingId !== null) {
+      setDigitalList(p => p.map(d => d.id === editingId ? { ...d, category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, notes:dForm.notes, attachedDoc:dDoc } : d));
+      toast.success(`${dForm.asset} updated`);
+    } else {
+      setDigitalList(p => [...p, { id:Date.now(), category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, walletAddress:"—", notes:dForm.notes, attachedDoc:dDoc }]);
+      toast.success(`${dForm.asset} added`);
+    }
     setDForm({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
     setDDoc(null);
+    setEditingId(null);
     setShowAdd(null);
   }
   function addWeapon() {
     if (!wForm.make || !wForm.model) { toast.error("Make and model required"); return; }
-    setWeaponList(p => [...p, { id:Date.now(), type:wForm.type, make:wForm.make, model:wForm.model, caliber:wForm.caliber, serial:wForm.serial, registration:wForm.registration, storage:wForm.storage, transfer:wForm.transfer, photo:wForm.photo }]);
-    toast.success(`${wForm.make} ${wForm.model} added`);
+    if (editingId !== null) {
+      setWeaponList(p => p.map(w => w.id === editingId ? { ...w, type:wForm.type, make:wForm.make, model:wForm.model, caliber:wForm.caliber, serial:wForm.serial, registration:wForm.registration, storage:wForm.storage, transfer:wForm.transfer, photo:wForm.photo } : w));
+      toast.success(`${wForm.make} ${wForm.model} updated`);
+    } else {
+      setWeaponList(p => [...p, { id:Date.now(), type:wForm.type, make:wForm.make, model:wForm.model, caliber:wForm.caliber, serial:wForm.serial, registration:wForm.registration, storage:wForm.storage, transfer:wForm.transfer, photo:wForm.photo }]);
+      toast.success(`${wForm.make} ${wForm.model} added`);
+    }
     setWForm({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", storage:"", transfer:"", photo:"" });
+    setEditingId(null);
     setShowAdd(null);
   }
 
   function addCollectible() {
     if (!cForm.name) { toast.error("Item name required"); return; }
-    setCollectiblesList(p => [...p, { id:Date.now(), name:cForm.name, category:cForm.category, condition:cForm.condition, estimatedValue:cForm.estimatedValue||"—", purchaseDate:cForm.purchaseDate, purchasedFrom:cForm.purchasedFrom, intendedFor:cForm.intendedFor, serialNum:cForm.serialNum, notes:cForm.notes, photo:cForm.photo }]);
-    toast.success(`"${cForm.name}" added to Collectibles`);
+    if (editingId !== null) {
+      setCollectiblesList(p => p.map(c => c.id === editingId ? { ...c, name:cForm.name, category:cForm.category, condition:cForm.condition, estimatedValue:cForm.estimatedValue||"—", purchaseDate:cForm.purchaseDate, purchasedFrom:cForm.purchasedFrom, intendedFor:cForm.intendedFor, serialNum:cForm.serialNum, notes:cForm.notes, photo:cForm.photo } : c));
+      toast.success(`"${cForm.name}" updated`);
+    } else {
+      setCollectiblesList(p => [...p, { id:Date.now(), name:cForm.name, category:cForm.category, condition:cForm.condition, estimatedValue:cForm.estimatedValue||"—", purchaseDate:cForm.purchaseDate, purchasedFrom:cForm.purchasedFrom, intendedFor:cForm.intendedFor, serialNum:cForm.serialNum, notes:cForm.notes, photo:cForm.photo }]);
+      toast.success(`"${cForm.name}" added to Collectibles`);
+    }
     setCForm({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
+    setEditingId(null);
     setShowAdd(null);
   }
 
   function addWeaponsLocker() {
     if (!wlForm.make && !wlForm.model) { toast.error("Make or model required"); return; }
-    setWeaponsLockerList(p => [...p, { id:Date.now(), type:wlForm.type, make:wlForm.make, model:wlForm.model, blade:wlForm.blade, handle:wlForm.handle, storage:wlForm.storage, transfer:wlForm.transfer, notes:wlForm.notes, photo:wlForm.photo }]);
-    toast.success(`${wlForm.make} ${wlForm.model} added to Weapons Locker`);
+    if (editingId !== null) {
+      setWeaponsLockerList(p => p.map(w => w.id === editingId ? { ...w, type:wlForm.type, make:wlForm.make, model:wlForm.model, blade:wlForm.blade, handle:wlForm.handle, storage:wlForm.storage, transfer:wlForm.transfer, notes:wlForm.notes, photo:wlForm.photo } : w));
+      toast.success(`${wlForm.make} ${wlForm.model} updated`);
+    } else {
+      setWeaponsLockerList(p => [...p, { id:Date.now(), type:wlForm.type, make:wlForm.make, model:wlForm.model, blade:wlForm.blade, handle:wlForm.handle, storage:wlForm.storage, transfer:wlForm.transfer, notes:wlForm.notes, photo:wlForm.photo }]);
+      toast.success(`${wlForm.make} ${wlForm.model} added to Weapons Locker`);
+    }
     setWlForm({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
+    setEditingId(null);
     setShowAdd(null);
+  }
+
+  function editVehicle(v: typeof vehicles[number]) {
+    setVForm({ year:String(v.year), make:v.make, model:v.model, color:v.color, vin:v.vin, plate:v.plate, title:v.title, lien:v.lien, insurance:v.insurance, registration:v.registration, value:v.value, notes:v.notes, photo:(v as any).photo || "" });
+    setEditingId(v.id);
+    setShowAdd("vehicles");
+  }
+  function editRealEstate(r: typeof realEstateInit[number]) {
+    setRForm({ type:r.type, address:r.address, city:r.city, value:r.value, mortgage:r.mortgage, mortgagePayment:r.mortgagePayment, titleHolder:r.titleHolder, deed:r.deed, yearBuilt:r.yearBuilt, sqft:r.sqft, bedBath:r.bedBath, lotSize:r.lotSize, notes:r.notes, photo:r.photo });
+    setEditingId(r.id);
+    setShowAdd("realestate");
+  }
+  function editDigital(d: typeof digitalAssets[number]) {
+    setDForm({ category:d.category, platform:d.platform, asset:d.asset, holdings:d.holdings, value:d.value, accessMethod:d.accessMethod, notes:d.notes });
+    setDDoc((d as any).attachedDoc || null);
+    setEditingId(d.id);
+    setShowAdd("digital");
+  }
+  function editWeapon(w: typeof weapons[number]) {
+    setWForm({ type:w.type, make:w.make, model:w.model, caliber:w.caliber, serial:w.serial, registration:w.registration, storage:w.storage, transfer:w.transfer, photo:w.photo || "" });
+    setEditingId(w.id);
+    setShowAdd("weapons");
+  }
+  function editWeaponsLocker(w: typeof weaponsLockerInit[number]) {
+    setWlForm({ type:w.type, make:w.make, model:w.model, blade:w.blade, handle:w.handle, storage:w.storage, transfer:w.transfer, notes:w.notes, photo:w.photo || "" });
+    setEditingId(w.id);
+    setShowAdd("weapons_locker");
+  }
+  function editCollectible(c: typeof collectiblesInit[number]) {
+    setCForm({ name:c.name, category:c.category, condition:c.condition, estimatedValue:c.estimatedValue, purchaseDate:c.purchaseDate, purchasedFrom:c.purchasedFrom, intendedFor:c.intendedFor, serialNum:c.serialNum, notes:c.notes, photo:c.photo || "" });
+    setEditingId(c.id);
+    setShowAdd("collectibles");
+  }
+
+  function closeModal() {
+    setShowAdd(null);
+    setEditingId(null);
   }
 
   const COLLECTIBLE_CATEGORIES = ["Sports Cards","Coins / Currency","Stamps","Art / Paintings","Sculptures","Jewelry","Watches","Luxury Handbags","Rare Books","Vinyl / Music","Movie Memorabilia","Military Antiques","Musical Instruments","Wine / Whiskey","Toys / Action Figures","Other"];
@@ -355,6 +429,9 @@ export function PersonalAssets() {
                     <Field label="Registration Exp." value={v.registration} />
                   </div>
                   {v.notes && <div className="notewarn">{v.notes}</div>}
+                  <div className="dacts">
+                    <button className="btn-sec" onClick={() => editVehicle(v)}><Edit2 size={12} /> Edit</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -411,6 +488,7 @@ export function PersonalAssets() {
                   </div>
                   {r.notes && <div className="notewarn">{r.notes}</div>}
                   <div className="dacts">
+                    <button className="btn-sec" onClick={() => editRealEstate(r)}><Edit2 size={12} /> Edit</button>
                     <ScanButton folder="property" onUpload={doc => toast.success(`"${doc.name}" added to ${r.address}`)} size="sm" label="Scan Document" />
                   </div>
                 </div>
@@ -446,6 +524,7 @@ export function PersonalAssets() {
                 {d.notes && <div className="noteitalic">{d.notes}</div>}
                 {(d as any).attachedDoc && <div className="notemuted">📄 {(d as any).attachedDoc}</div>}
                 <div className="dacts">
+                  <button className="btn-sec" onClick={() => editDigital(d)}><Edit2 size={12} /> Edit</button>
                   <ScanButton folder="digital" onUpload={doc => { setDigitalList(p => p.map(x => x.id === d.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${d.asset}`); }} size="sm" label="Scan Document" />
                 </div>
               </div>
@@ -494,6 +573,9 @@ export function PersonalAssets() {
                     <Field label="Storage Location" value={w.storage} />
                     <Field label="Transfer Instructions" value={w.transfer} />
                   </div>
+                  <div className="dacts">
+                    <button className="btn-sec" onClick={() => editWeapon(w)}><Edit2 size={12} /> Edit</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -532,6 +614,9 @@ export function PersonalAssets() {
                     ))}
                   </div>
                   {(w as any).notes && <div className="notewarn">{(w as any).notes}</div>}
+                  <div className="dacts">
+                    <button className="btn-sec" onClick={() => editWeaponsLocker(w)}><Edit2 size={12} /> Edit</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -569,6 +654,7 @@ export function PersonalAssets() {
                   </div>
                   {c.notes && <div className="noteinfo">{c.notes}</div>}
                   <div className="dacts">
+                    <button className="btn-sec" onClick={() => editCollectible(c)}><Edit2 size={12} /> Edit</button>
                     <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" linked to ${c.name}`)} size="sm" label="Attach Document" />
                   </div>
                 </div>
@@ -583,8 +669,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Vehicle</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Vehicle" : "Add Vehicle"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={vForm.photo} onChange={url => setVForm(p => ({ ...p, photo: url }))} label="Vehicle Photo" aspectRatio="16/9" />
@@ -597,8 +683,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={vDoc} onChange={setVDoc} folder="vehicles" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (title, registration, insurance)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addVehicle}>Add Vehicle</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addVehicle}>{editingId !== null ? "Save Changes" : "Add Vehicle"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
@@ -609,8 +695,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Digital Asset</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Digital Asset" : "Add Digital Asset"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <div className="field">
@@ -628,8 +714,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={dDoc} onChange={setDDoc} folder="digital" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (account statement, ownership record)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addDigital}>Add Asset</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addDigital}>{editingId !== null ? "Save Changes" : "Add Asset"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
@@ -640,8 +726,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Firearm Record</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Firearm Record" : "Add Firearm Record"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={wForm.photo} onChange={url => setWForm(p => ({ ...p, photo: url }))} label="Firearm Photo" aspectRatio="4/3" />
@@ -660,8 +746,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={wDoc} onChange={setWDoc} folder="firearms" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (registration, purchase receipt)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addWeapon}>Add Firearm</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addWeapon}>{editingId !== null ? "Save Changes" : "Add Firearm"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
@@ -672,8 +758,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Property</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Property" : "Add Property"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={rForm.photo} onChange={url => setRForm(p => ({ ...p, photo: url }))} label="Property Photo" aspectRatio="16/9" />
@@ -700,8 +786,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={rDoc} onChange={setRDoc} folder="property" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (deed, mortgage statement, title)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addRealEstate}>Add Property</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addRealEstate}>{editingId !== null ? "Save Changes" : "Add Property"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
@@ -712,8 +798,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add to Weapons Locker</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Weapons Locker Item" : "Add to Weapons Locker"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={wlForm.photo} onChange={url => setWlForm(p => ({ ...p, photo: url }))} label="Photo of Item" aspectRatio="4/3" />
@@ -732,8 +818,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={wlDoc} onChange={setWlDoc} folder="weapons_locker" sectionId="weapons_locker" sectionLabel="Weapons Locker" label="Attach Document (appraisal, provenance, receipt)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addWeaponsLocker}>Add to Locker</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addWeaponsLocker}>{editingId !== null ? "Save Changes" : "Add to Locker"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
@@ -744,8 +830,8 @@ export function PersonalAssets() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Collectible</h3>
-                <button onClick={() => setShowAdd(null)}><X size={16} /></button>
+                <h3>{editingId !== null ? "Edit Collectible" : "Add Collectible"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={cForm.photo} onChange={url => setCForm(p => ({ ...p, photo: url }))} label="Photo of Item" aspectRatio="4/3" />
@@ -764,8 +850,8 @@ export function PersonalAssets() {
                 <AttachDocumentField value={cDoc} onChange={setCDoc} folder="personal" sectionId="collectibles" sectionLabel="Collectibles" label="Attach Document (appraisal, certificate of authenticity)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addCollectible}>Add Collectible</button>
-                <button className="btn-sec" onClick={() => setShowAdd(null)}>Cancel</button>
+                <button className="save" onClick={addCollectible}>{editingId !== null ? "Save Changes" : "Add Collectible"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>

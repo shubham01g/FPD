@@ -456,6 +456,7 @@ export function FamilyMemories() {
   const [goalsList, setGoalsList] = useState(goals);
   const [awardsList, setAwardsList] = useState(awards);
   const [showAdd, setShowAdd] = useState<Tab|null>(null);
+  const [editingId, setEditingId] = useState<number|null>(null);
 
   /* Closing without saving drops any staged media so blob URLs don't leak. */
   function closeAddModal() {
@@ -463,7 +464,7 @@ export function FamilyMemories() {
     if (pendingVideo) { URL.revokeObjectURL(pendingVideo.url); setPendingVideo(null); }
     if (pendingAudio) { URL.revokeObjectURL(pendingAudio.url); setPendingAudio(null); }
     resetItemMedia();
-    setShowAdd(null); setForm({});
+    setShowAdd(null); setForm({}); setEditingId(null);
   }
 
   useEscapeKey(showAdd !== null, closeAddModal);
@@ -476,54 +477,144 @@ export function FamilyMemories() {
   const [itemDoc, setItemDoc] = useState<string|null>(null);
   function resetItemMedia() { setItemPhoto(""); setItemDoc(null); }
 
+  // ── Edit handlers — pre-fill the shared Add modal with a record's current values ──
+  function editMemory(m: any) {
+    setForm({ title: m.title, date: m.date, desc: m.description, tags: m.tags.join(", ") });
+    setEditingId(m.id);
+    setShowAdd("memories");
+  }
+  function editVideoMemory(v: any) {
+    setForm({ title: v.title, filmed: v.filmed, source: v.source, desc: v.description });
+    setEditingId(v.id);
+    setShowAdd("messages");
+  }
+  function editAudioMemory(a: any) {
+    setForm({ title: a.title, recipient: a.recipient, desc: a.description });
+    setEditingId(a.id);
+    setShowAdd("audio");
+  }
+  function editKid(k: any) {
+    setForm({ name: k.child, school: k.school, activities: k.activities.join(", "), notes: k.notes });
+    setEditingId(k.id);
+    setShowAdd("kids");
+  }
+  function editKeepsake(k: any) {
+    setForm({ item: k.item, location: k.location, value: k.value, intendedFor: k.intendedFor, story: k.story });
+    setItemPhoto(k.photo || "");
+    setItemDoc(k.attachedDoc || null);
+    setEditingId(k.id);
+    setShowAdd("keepsakes");
+  }
+  function editGoal(g: any) {
+    setForm({ goal: g.goal, progress: String(g.progress), notes: g.notes });
+    setEditingId(g.id);
+    setShowAdd("goals");
+  }
+  function editAward(a: any) {
+    setForm({ award: a.award, year: a.year, org: a.organization, category: a.category, desc: a.description });
+    setItemPhoto(a.photo || "");
+    setItemDoc(a.attachedDoc || null);
+    setEditingId(a.id);
+    setShowAdd("awards");
+  }
+
   function quickAdd() {
+    const isEdit = editingId !== null;
     switch(showAdd) {
       case "memories": {
         if (!form.title) { toast.error("Title required"); return; }
-        setMemoriesList(p=>[...p,{id:Date.now(),title:form.title,date:form.date||new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",tags:(form.tags||"").split(",").map(t=>t.trim()).filter(Boolean),photos:pendingPhotos,count:pendingPhotos.length}]);
-        toast.success(pendingPhotos.length
-          ? `"${form.title}" saved — ${pendingPhotos.length} photo${pendingPhotos.length>1?"s":""}`
-          : `"${form.title}" added to Photo Memories`);
+        const tags = (form.tags||"").split(",").map(t=>t.trim()).filter(Boolean);
+        if (isEdit) {
+          setMemoriesList(p=>p.map(m=>m.id===editingId?{...m,title:form.title,date:form.date||m.date,description:form.desc||"",tags}:m));
+          toast.success(`"${form.title}" updated`);
+        } else {
+          setMemoriesList(p=>[...p,{id:Date.now(),title:form.title,date:form.date||new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",tags,photos:pendingPhotos,count:pendingPhotos.length}]);
+          toast.success(pendingPhotos.length
+            ? `"${form.title}" saved — ${pendingPhotos.length} photo${pendingPhotos.length>1?"s":""}`
+            : `"${form.title}" added to Photo Memories`);
+        }
         setPendingPhotos([]);   // ownership passes to the saved memory
         break;
       }
       case "messages": {
         if (!form.title) { toast.error("Title required"); return; }
-        const id = Date.now();
-        setVideoList(p=>[...p,{id,title:form.title,filmed:form.filmed||"Unknown",duration:pendingVideo?"…":"—",added:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",source:form.source||(pendingVideo?"Uploaded file":"Added manually"),url:pendingVideo?.url}]);
-        if (pendingVideo) probeDuration(pendingVideo.url, id);
-        toast.success(`"${form.title}" added to Video Memories`);
+        if (isEdit) {
+          setVideoList(p=>p.map(v=>v.id===editingId?{...v,title:form.title,filmed:form.filmed||v.filmed,source:form.source||v.source,description:form.desc||""}:v));
+          toast.success(`"${form.title}" updated`);
+        } else {
+          const id = Date.now();
+          setVideoList(p=>[...p,{id,title:form.title,filmed:form.filmed||"Unknown",duration:pendingVideo?"…":"—",added:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",source:form.source||(pendingVideo?"Uploaded file":"Added manually"),url:pendingVideo?.url}]);
+          if (pendingVideo) probeDuration(pendingVideo.url, id);
+          toast.success(`"${form.title}" added to Video Memories`);
+        }
         setPendingVideo(null);  // ownership passes to the saved memory
         break;
       }
       case "audio": {
         if (!form.title) { toast.error("Title required"); return; }
-        const id = Date.now();
-        setAudioList(p=>[...p,{id,title:form.title,recipient:form.recipient||"Family",duration:pendingAudio?"…":"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",url:pendingAudio?.url}]);
-        if (pendingAudio) probeAudioDuration(pendingAudio.url, id);
-        toast.success(`"${form.title}" added to Audio Memories`);
+        if (isEdit) {
+          setAudioList(p=>p.map(a=>a.id===editingId?{...a,title:form.title,recipient:form.recipient||a.recipient,description:form.desc||""}:a));
+          toast.success(`"${form.title}" updated`);
+        } else {
+          const id = Date.now();
+          setAudioList(p=>[...p,{id,title:form.title,recipient:form.recipient||"Family",duration:pendingAudio?"…":"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",url:pendingAudio?.url}]);
+          if (pendingAudio) probeAudioDuration(pendingAudio.url, id);
+          toast.success(`"${form.title}" added to Audio Memories`);
+        }
         setPendingAudio(null);  // ownership passes to the saved memory
         break;
       }
-      case "kids":
+      case "kids": {
         if (!form.name) { toast.error("Name required"); return; }
-        setKidsList(p=>[...p,{id:Date.now(),child:form.name,activities:(form.activities||"").split(",").map(t=>t.trim()).filter(Boolean),school:form.school||"",notes:form.notes||""}]);
-        toast.success(`${form.name} added`); break;
-      case "keepsakes":
+        const activities = (form.activities||"").split(",").map(t=>t.trim()).filter(Boolean);
+        if (isEdit) {
+          setKidsList(p=>p.map(k=>k.id===editingId?{...k,child:form.name,activities,school:form.school||"",notes:form.notes||""}:k));
+          toast.success(`${form.name} updated`);
+        } else {
+          setKidsList(p=>[...p,{id:Date.now(),child:form.name,activities,school:form.school||"",notes:form.notes||""}]);
+          toast.success(`${form.name} added`);
+        }
+        break;
+      }
+      case "keepsakes": {
         if (!form.item) { toast.error("Item name required"); return; }
-        setKeepsakesList(p=>[...p,{id:Date.now(),item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}]);
-        toast.success(`"${form.item}" added to Keepsakes`); resetItemMedia(); break;
-      case "goals":
+        if (isEdit) {
+          setKeepsakesList(p=>p.map(k=>k.id===editingId?{...k,item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}:k));
+          toast.success(`"${form.item}" updated`);
+        } else {
+          setKeepsakesList(p=>[...p,{id:Date.now(),item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}]);
+          toast.success(`"${form.item}" added to Keepsakes`);
+        }
+        resetItemMedia();
+        break;
+      }
+      case "goals": {
         if (!form.goal) { toast.error("Goal description required"); return; }
-        setGoalsList(p=>[...p,{id:Date.now(),goal:form.goal,status:"in_progress",progress:Number(form.progress)||0,notes:form.notes||""}]);
-        toast.success("Goal added"); break;
-      case "awards":
+        if (isEdit) {
+          setGoalsList(p=>p.map(g=>g.id===editingId?{...g,goal:form.goal,progress:Number(form.progress)||0,notes:form.notes||""}:g));
+          toast.success("Goal updated");
+        } else {
+          setGoalsList(p=>[...p,{id:Date.now(),goal:form.goal,status:"in_progress",progress:Number(form.progress)||0,notes:form.notes||""}]);
+          toast.success("Goal added");
+        }
+        break;
+      }
+      case "awards": {
         if (!form.award) { toast.error("Award name required"); return; }
-        setAwardsList(p=>[...p,{id:Date.now(),award:form.award,year:form.year||String(new Date().getFullYear()),organization:form.org||"",category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}]);
-        toast.success(`"${form.award}" added`); resetItemMedia(); break;
+        if (isEdit) {
+          setAwardsList(p=>p.map(a=>a.id===editingId?{...a,award:form.award,year:form.year||a.year,organization:form.org||a.organization,category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}:a));
+          toast.success(`"${form.award}" updated`);
+        } else {
+          setAwardsList(p=>[...p,{id:Date.now(),award:form.award,year:form.year||String(new Date().getFullYear()),organization:form.org||"",category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}]);
+          toast.success(`"${form.award}" added`);
+        }
+        resetItemMedia();
+        break;
+      }
     }
     setForm({});
     setShowAdd(null);
+    setEditingId(null);
   }
 
   const addFields: Record<Tab, {key:string;label:string;ph:string;type?:string}[]> = {
@@ -643,7 +734,10 @@ export function FamilyMemories() {
                       <Camera size={16} color="#FFFFFF" />
                       <span className="r-sub">{m.date}</span>
                     </div>
-                    <span className="pill" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{total} photo{total === 1 ? "" : "s"}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span className="pill" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{total} photo{total === 1 ? "" : "s"}</span>
+                      <button title="Edit memory" onClick={() => editMemory(m)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   {m.photos.length > 0 && (
                     <div className="thumbs" style={{ marginBottom: 12 }}>
@@ -704,6 +798,7 @@ export function FamilyMemories() {
                         <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                       </div>
                     </div>
+                    <button title="Edit video" onClick={() => editVideoMemory(vid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
                   </div>
                 </div>
               ))}
@@ -850,6 +945,7 @@ export function FamilyMemories() {
                             <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                           </div>
                         </div>
+                        <button title="Edit audio memory" onClick={() => editAudioMemory(msg)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
                       </div>
                     </div>
                   ))}
@@ -867,7 +963,10 @@ export function FamilyMemories() {
             </div>
             {kidsList.map(kid => (
               <div key={kid.id} className="card pad">
-                <div className="r-title" style={{ fontSize: 21.5 }}>{kid.child}</div>
+                <div className="r-top" style={{ marginBottom: 0 }}>
+                  <div className="r-title" style={{ fontSize: 21.5 }}>{kid.child}</div>
+                  <button title="Edit child" onClick={() => editKid(kid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                </div>
                 <div className="r-sub" style={{ marginBottom: 12 }}>School: {kid.school}</div>
                 <div style={{ marginBottom: 12 }}>
                   <div className="eyebrow" style={{ marginBottom: 8 }}>Activities</div>
@@ -913,7 +1012,7 @@ export function FamilyMemories() {
                         <ScanButton folder="personal" onUpload={doc => { setKeepsakesList(p => p.map(x => x.id === k.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${k.item}`); }} size="sm" label="Scan Document"/>
                       </div>
                     </div>
-                    <button style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                    <button title="Edit keepsake" onClick={() => editKeepsake(k)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
                   </div>
                 </div>
               </div>
@@ -933,7 +1032,10 @@ export function FamilyMemories() {
                 <div key={g.id} className="card pad">
                   <div className="r-top" style={{ marginBottom: 12 }}>
                     <div style={{ color: TEXT, fontSize: 19, fontWeight: 500 }}>{g.goal}</div>
-                    <span className="pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span className="pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
+                      <button title="Edit goal" onClick={() => editGoal(g)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                    </div>
                   </div>
                   <div style={{ marginBottom: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
@@ -977,6 +1079,7 @@ export function FamilyMemories() {
                         <ScanButton folder="personal" onUpload={doc => { setAwardsList(p => p.map(x => x.id === a.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${a.award}`); }} size="sm" label="Scan Document"/>
                       </div>
                     </div>
+                    <button title="Edit award" onClick={() => editAward(a)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
                   </div>
                 </div>
               </div>
@@ -991,7 +1094,8 @@ export function FamilyMemories() {
             <div className="card modal">
               <div className="modal-head">
                 <h3>
-                  Add {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : "Award"}
+                  {editingId !== null ? "Edit " : "Add "}
+                  {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : "Award"}
                 </h3>
                 <button onClick={closeAddModal}><X size={16}/></button>
               </div>
@@ -1075,7 +1179,7 @@ export function FamilyMemories() {
                 )}
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={quickAdd}>Add</button>
+                <button className="save" onClick={quickAdd}>{editingId !== null ? "Save Changes" : "Add"}</button>
                 <button className="btn-sec" onClick={closeAddModal}>Cancel</button>
               </div>
             </div>

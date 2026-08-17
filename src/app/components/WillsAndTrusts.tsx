@@ -147,27 +147,60 @@ const WILLS_CSS = `
 .fpd-wills .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
+const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" };
+
 export function WillsAndTrusts() {
   const [wills, setWills] = useState(initWills);
   const [showAdd, setShowAdd] = useState(false);
-  const [newDoc, setNewDoc] = useState({ type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [newDoc, setNewDoc] = useState(blankDoc);
 
-  useEscapeKey(showAdd, () => setShowAdd(false));
+  function closeModal() {
+    setShowAdd(false);
+    setEditingId(null);
+  }
 
-  function addDocument() {
+  useEscapeKey(showAdd, closeModal);
+
+  function openAdd() {
+    setNewDoc(blankDoc);
+    setEditingId(null);
+    setShowAdd(true);
+  }
+
+  function openEdit(will: typeof initWills[number]) {
+    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: "" });
+    setEditingId(will.id);
+    setShowAdd(true);
+  }
+
+  function saveDocument() {
     if (!newDoc.attorney.trim()) { toast.error("Attorney name is required"); return; }
-    const doc = {
-      id: Date.now(),
-      type: newDoc.type,
-      attorney: newDoc.attorney,
-      dateExecuted: newDoc.dateExecuted || new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
-      lastReviewed: new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
-      status: "current",
-      location: newDoc.location || "Legacy Vault",
-    };
-    setWills(prev => [doc, ...prev]);
-    toast.success(`${newDoc.type} added`);
-    setNewDoc({ type:DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" });
+    if (editingId != null) {
+      setWills(prev => prev.map(w => w.id === editingId ? {
+        ...w,
+        type: newDoc.type,
+        attorney: newDoc.attorney,
+        dateExecuted: newDoc.dateExecuted || w.dateExecuted,
+        location: newDoc.location || w.location,
+        lastReviewed: new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
+      } : w));
+      toast.success("Legal document updated");
+    } else {
+      const doc = {
+        id: Date.now(),
+        type: newDoc.type,
+        attorney: newDoc.attorney,
+        dateExecuted: newDoc.dateExecuted || new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
+        lastReviewed: new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
+        status: "current",
+        location: newDoc.location || "Legacy Vault",
+      };
+      setWills(prev => [doc, ...prev]);
+      toast.success(`${newDoc.type} added`);
+    }
+    setNewDoc(blankDoc);
+    setEditingId(null);
     setShowAdd(false);
   }
 
@@ -195,7 +228,7 @@ export function WillsAndTrusts() {
             <h1>The documents that make <span className="accent">your wishes binding.</span></h1>
             <p>Wills, trusts, and powers of attorney — executed with your attorney and kept current, so your intentions carry the full weight of the law.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}><Plus size={15} /> Add Document</button>
+              <button className="hbtn primary" onClick={openAdd}><Plus size={15} /> Add Document</button>
               <button className="hbtn ghost" onClick={() => toast.success(`Opening ${wills[0]?.type ?? "your documents"} in Legacy Vault`)}><Shield size={15} /> View in Vault</button>
             </div>
           </div>
@@ -211,7 +244,7 @@ export function WillsAndTrusts() {
               copies in your Legacy Vault.
             </div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAdd}>
             <Plus size={14} /> Add Document
           </button>
         </div>
@@ -287,7 +320,7 @@ export function WillsAndTrusts() {
                 <button className="btn-ghost" onClick={() => toast.success(`Opening ${will.type} in Legacy Vault`)}>
                   <FileText size={13} /> View in Vault
                 </button>
-                <button className="btn-sec" onClick={() => toast.success("Update record — opens edit form")}>
+                <button className="btn-sec" onClick={() => openEdit(will)}>
                   <Edit2 size={13} /> Update Record
                 </button>
                 <ScanButton
@@ -306,8 +339,8 @@ export function WillsAndTrusts() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Legal Document</h3>
-                <button onClick={() => setShowAdd(false)}><X size={16} /></button>
+                <h3>{editingId != null ? "Edit Legal Document" : "Add Legal Document"}</h3>
+                <button onClick={closeModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
                 <div className="field">
@@ -341,8 +374,8 @@ export function WillsAndTrusts() {
                 </div>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addDocument}>Add Document</button>
-                <button className="btn-sec" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveDocument}>{editingId != null ? "Save Changes" : "Add Document"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe } from "lucide-react";
+import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -163,17 +163,51 @@ export function TravelPlanner() {
   const [trips, setTrips] = useState<Trip[]>(initTrips);
   const [expanded, setExpanded] = useState<number|null>(1);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all"|"planned"|"completed">("all");
-  const [form, setForm] = useState({ destination:"", country:"", tripType:"Vacation", startDate:"", endDate:"", companions:"", accommodation:"", accommodationPhone:"", confirmationNum:"", transportation:"", budget:"", notes:"", status:"planned" as "planned"|"completed", photo:"" });
+  const emptyForm = { destination:"", country:"", tripType:"Vacation", startDate:"", endDate:"", companions:"", accommodation:"", accommodationPhone:"", confirmationNum:"", transportation:"", budget:"", notes:"", status:"planned" as "planned"|"completed", photo:"" };
+  const [form, setForm] = useState(emptyForm);
   const tripListRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function addTrip() {
+  function openAddModal() {
+    setEditingTrip(null);
+    setForm(emptyForm);
+    setShowAdd(true);
+  }
+
+  function openEditModal(trip: Trip) {
+    setEditingTrip(trip);
+    setForm({
+      destination: trip.destination, country: trip.country, tripType: trip.tripType,
+      startDate: trip.startDate, endDate: trip.endDate, companions: trip.companions,
+      accommodation: trip.accommodation, accommodationPhone: trip.accommodationPhone,
+      confirmationNum: trip.confirmationNum, transportation: trip.transportation,
+      budget: trip.budget, notes: trip.notes,
+      status: (trip.status === "cancelled" ? "planned" : trip.status) as "planned"|"completed",
+      photo: trip.photo ?? "",
+    });
+    setShowAdd(true);
+  }
+
+  function closeModal() {
+    setShowAdd(false);
+    setEditingTrip(null);
+  }
+
+  function saveTrip() {
     if (!form.destination) { toast.error("Destination required"); return; }
-    const trip: Trip = { ...form, id:Date.now(), actualCost:"", highlights:"", documents:[], photo:form.photo };
-    setTrips(p => [trip, ...p]);
-    toast.success(`${form.destination} added to Travel Planner`);
+    if (editingTrip) {
+      setTrips(p => p.map(t => t.id === editingTrip.id ? { ...t, ...form } : t));
+      toast.success(`${form.destination} updated`);
+    } else {
+      const trip: Trip = { ...form, id:Date.now(), actualCost:"", highlights:"", documents:[], photo:form.photo };
+      setTrips(p => [trip, ...p]);
+      toast.success(`${form.destination} added to Travel Planner`);
+    }
+    setForm(emptyForm);
+    setEditingTrip(null);
     setShowAdd(false);
   }
 
@@ -202,7 +236,7 @@ export function TravelPlanner() {
             <h1>Where you've been, <span className="accent">and where you're headed next.</span></h1>
             <p>Itineraries, bookings, and travel documents for trips past and upcoming — all in one place.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setShowAdd(true)}>
+              <button className="hbtn primary" onClick={openAddModal}>
                 <Plus size={15}/> Add Trip
               </button>
               <button className="hbtn ghost" onClick={() => tripListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
@@ -221,7 +255,7 @@ export function TravelPlanner() {
               Record every trip — past and future. Attach itineraries, tickets, hotel confirmations, and travel documents.
             </div>
           </div>
-          <button className="btn-primary" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary" onClick={openAddModal}>
             <Plus size={14} /> Add Trip
           </button>
         </div>
@@ -278,6 +312,11 @@ export function TravelPlanner() {
 
                 {expanded===trip.id && (
                   <div className="tbody">
+                    <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16 }}>
+                      <button className="btn-sec" onClick={() => openEditModal(trip)}>
+                        <Edit2 size={12} /> Edit Trip
+                      </button>
+                    </div>
                     <div className="tgrid">
                       {[
                         ["Accommodation",trip.accommodation||"—"],
@@ -333,8 +372,8 @@ export function TravelPlanner() {
           <div className="backdrop">
             <div className="card modal">
               <div className="modal-head">
-                <h3>Add Trip</h3>
-                <button onClick={()=>setShowAdd(false)}><X size={16}/></button>
+                <h3>{editingTrip ? "Edit Trip" : "Add Trip"}</h3>
+                <button onClick={closeModal}><X size={16}/></button>
               </div>
               <div className="modal-body">
                 <PhotoPicker value={form.photo} onChange={url => setForm(p=>({...p,photo:url}))} label="Cover Photo (destination)" aspectRatio="16/9"/>
@@ -355,8 +394,8 @@ export function TravelPlanner() {
                 <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addTrip}>Add Trip</button>
-                <button className="btn-sec" onClick={()=>setShowAdd(false)}>Cancel</button>
+                <button className="save" onClick={saveTrip}>{editingTrip ? "Save Changes" : "Add Trip"}</button>
+                <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
