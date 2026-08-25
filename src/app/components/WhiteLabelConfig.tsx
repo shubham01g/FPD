@@ -236,14 +236,19 @@ const WL_CSS = `
 `;
 
 export function WhiteLabelConfig() {
-  const { config, update, updateFeature, updatePlanName, reset } = useWhiteLabel();
+  const { config, update, updateFeature, updatePlanName, reset, publish, saving, dirty } = useWhiteLabel();
   const [tab, setTab] = useState<Tab>("brand");
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    setSaved(true);
-    toast.success(`White label configuration saved for "${config.companyName}"`);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    try {
+      await publish();
+      setSaved(true);
+      toast.success(`White label configuration saved for "${config.companyName}"`);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to publish configuration");
+    }
   };
 
   const applyPreset = (preset: typeof PRESET_BRANDS[0]) => {
@@ -294,9 +299,9 @@ export function WhiteLabelConfig() {
             <button onClick={reset} className="btn-ghost" style={{ color: WARN, background: "rgba(217,165,94,0.08)", borderColor: "rgba(217,165,94,0.24)" }}>
               <RefreshCw size={13} /> Reset
             </button>
-            <button onClick={handleSave} className="btn-primary" style={{ background: saved ? "rgba(95,190,145,0.16)" : undefined, color: saved ? "#D99A6B" : "#fff", boxShadow: saved ? "none" : undefined }}>
+            <button onClick={handleSave} disabled={saving || (!dirty && !saved)} className="btn-primary" style={{ background: saved ? "rgba(95,190,145,0.16)" : undefined, color: saved ? "#D99A6B" : "#fff", boxShadow: saved ? "none" : undefined, opacity: (saving || (!dirty && !saved)) ? 0.6 : 1 }}>
               {saved ? <CheckCircle size={13} /> : <Save size={13} />}
-              {saved ? "Saved!" : "Publish Config"}
+              {saved ? "Saved!" : saving ? "Publishing…" : "Publish Config"}
             </button>
           </div>
         </div>
@@ -507,8 +512,8 @@ export function WhiteLabelConfig() {
               ))}
             </div>
             <div className="flex gap-3 flex-wrap">
-              <button onClick={handleSave} className="btn-primary">
-                <Save size={14} /> Publish White Label Config
+              <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ opacity: saving ? 0.6 : 1 }}>
+                <Save size={14} /> {saving ? "Publishing…" : "Publish White Label Config"}
               </button>
               <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: "#6FAE8B", background: "rgba(91,110,225,0.10)", borderColor: "rgba(91,110,225,0.3)" }}>
                 <ExternalLink size={14} /> Open Staging Preview

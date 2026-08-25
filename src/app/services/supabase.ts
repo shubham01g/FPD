@@ -1,7 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL  ?? "";
-const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
+// createClient() throws synchronously if either value is empty, which — since
+// this module is imported from almost everywhere (adminApi, every context
+// provider, etc.) — took the entire app down to a blank white screen on any
+// checkout where VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY aren't set yet (no
+// project connected). Falling back to harmless placeholders keeps the app
+// rendering; real Supabase calls will simply fail at request time instead,
+// which every caller already handles via loading/error states.
+const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL  || "https://placeholder.supabase.co";
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY || "placeholder-anon-key";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: true, autoRefreshToken: true },

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { Code, Play, Copy, CheckCircle, Key, Zap, Globe, Lock, ChevronDown, ChevronRight, Terminal, Book, Webhook } from "lucide-react";
+import { Code, Play, Copy, Key, Zap, ChevronDown, ChevronRight, Terminal, Book, Webhook, Plus, XCircle, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { adminApi } from "../services/adminApi";
+import { useAdminFetch } from "../hooks/useAdminFetch";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const GRID: React.CSSProperties = { backgroundImage: "linear-gradient(rgba(91,110,225,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,110,225,0.025) 1px,transparent 1px)", backgroundSize:"60px 60px" };
@@ -213,16 +216,105 @@ const webhookEvents = [
   { event:"affiliate.payout.sent", desc:"Commission payout dispatched" },
 ];
 
+interface EnterpriseKey {
+  id: string;
+  name: string;
+  key_prefix: string;
+  scopes: string[];
+  rate_limit_per_min: number;
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+  owner_user_id: string | null;
+  partner_id: string | null;
+}
+
+interface PartnerOption { id: string; organization_name: string; }
+
+const AVAILABLE_SCOPES = ["vault:read", "contacts:read", "contacts:write", "billing:read", "webhooks:manage"];
+
 export function EnterpriseAPI() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeEndpoint, setActiveEndpoint] = useState<Endpoint | null>(null);
   const [sdkLang, setSdkLang] = useState("javascript");
-  const [apiKey, setApiKey] = useState("fpd_live_xxxxxxxxxxxxxxxxxxxxxxxx");
-  const [keyCopied, setKeyCopied] = useState(false);
   const [testResponse, setTestResponse] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [activeTab, setActiveTab] = useState<"endpoints"|"sdk"|"webhooks"|"keys">("endpoints");
   const [expandedGroup, setExpandedGroup] = useState<number | null>(0);
+
+  // ── API Keys tab state ──
+  const { data: keysData, loading: keysLoading, error: keysError, refetch: refetchKeys } =
+    useAdminFetch(() => adminApi.get<{ keys: EnterpriseKey[] }>("/enterprise-api/keys"), []);
+  const { data: partnersData } = useAdminFetch(() => adminApi.get<{ partners: PartnerOption[] }>("/partnerships"), []);
+  const keys = keysData?.keys ?? [];
+  const partners = partnersData?.partners ?? [];
+
+  const [showIssueForm, setShowIssueForm] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyPartnerId, setNewKeyPartnerId] = useState("");
+  const [newKeyScopes, setNewKeyScopes] = useState<string[]>(["vault:read"]);
+  const [newKeyRateLimit, setNewKeyRateLimit] = useState(60);
+  const [issuing, setIssuing] = useState(false);
+  const [issuedSecret, setIssuedSecret] = useState<string | null>(null);
+  const [secretVisible, setSecretVisible] = useState(true);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [revealingId, setRevealingId] = useState<string | null>(null);
+  const [revealedKey, setRevealedKey] = useState<{ id: string; name: string; secret: string } | null>(null);
+  const [usageForKey, setUsageForKey] = useState<EnterpriseKey | null>(null);
+  const { data: usageData, loading: usageLoading } = useAdminFetch(
+    () => usageForKey ? adminApi.get<{ usage: unknown[] }>(`/enterprise-api/keys/${usageForKey.id}/usage`) : Promise.resolve({ usage: [] }),
+    [usageForKey?.id],
+  );
+
+  function toggleScope(scope: string) {
+    setNewKeyScopes(s => s.includes(scope) ? s.filter(x => x !== scope) : [...s, scope]);
+  }
+
+  async function issueKey() {
+    if (!newKeyName.trim()) { toast.error("Give the key a name"); return; }
+    if (!newKeyPartnerId) { toast.error("Choose which partner this key is for"); return; }
+    setIssuing(true);
+    try {
+      const res = await adminApi.post<{ key: EnterpriseKey; secret: string }>("/enterprise-api/keys", {
+        name: newKeyName, partnerId: newKeyPartnerId, scopes: newKeyScopes, rateLimitPerMin: newKeyRateLimit,
+      });
+      setIssuedSecret(res.secret);
+      setNewKeyName("");
+      setNewKeyPartnerId("");
+      setNewKeyScopes(["vault:read"]);
+      refetchKeys();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to issue key");
+    } finally {
+      setIssuing(false);
+    }
+  }
+
+  async function revealKey(key: EnterpriseKey) {
+    setRevealingId(key.id);
+    try {
+      const res = await adminApi.post<{ secret: string }>(`/enterprise-api/keys/${key.id}/reveal`);
+      setRevealedKey({ id: key.id, name: key.name, secret: res.secret });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reveal key");
+    } finally {
+      setRevealingId(null);
+    }
+  }
+
+  async function revokeKey(key: EnterpriseKey) {
+    setRevokingId(key.id);
+    try {
+      await adminApi.post(`/enterprise-api/keys/${key.id}/revoke`);
+      toast.success(`Revoked "${key.name}"`);
+      refetchKeys();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to revoke key");
+    } finally {
+      setRevokingId(null);
+    }
+  }
 
   const runTest = (ep: Endpoint) => {
     setTesting(true);
@@ -231,11 +323,6 @@ export function EnterpriseAPI() {
       setTesting(false);
       setTestResponse(ep.response);
     }, 800 + Math.random() * 400);
-  };
-
-  const copyKey = () => {
-    setKeyCopied(true);
-    setTimeout(() => setKeyCopied(false), 2000);
   };
 
   const mc = (m: string) => (methodColor as any)[m] ?? "#8A9AB8";
@@ -461,53 +548,167 @@ app.post('/fpd-webhook', (req, res) => {
       {/* API KEYS TAB */}
       {activeTab === "keys" && (
         <div className="space-y-5">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Live API Keys</h3>
-              <div className="space-y-3">
-                {[{ label:"Live Secret Key", key:"fpd_live_sk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }, { label:"Live Publishable Key", key:"fpd_live_pk_xxxxxxxxxxxxxxxxxxxxxxxx", type:"live" }].map(k => (
-                  <div key={k.label}>
-                    <div style={{ color: "#8A9AB8", fontSize: 14, marginBottom: 6 }}>{k.label}</div>
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(91,110,225,0.2)" }}>
-                      <Lock size={12} color="#8A9AB8" />
-                      <span style={{ color: "#8A9AB8", fontSize: 15, ...MONO, flex: 1 }}>{k.key}</span>
-                      <button onClick={copyKey} style={{ color: "#6E90C9" }}>{keyCopied ? <CheckCircle size={13} /> : <Copy size={13} />}</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {keysError && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(252,129,129,0.1)", border: "1px solid rgba(252,129,129,0.25)" }}>
+              <AlertCircle size={15} color="#FC8181" />
+              <span style={{ color: "#FC8181", fontSize: 16 }}>{keysError}</span>
             </div>
-            <div className="p-6 rounded-2xl" style={GLASS}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Sandbox API Keys</h3>
-              <div className="space-y-3">
-                {[{ label:"Sandbox Secret Key", key:"fpd_test_sk_xxxxxxxxxxxxxxxxxxxxxxxx" }, { label:"Sandbox Publishable Key", key:"fpd_test_pk_xxxxxxxxxxxxxxxxxxxxxxxx" }].map(k => (
-                  <div key={k.label}>
-                    <div style={{ color: "#8A9AB8", fontSize: 14, marginBottom: 6 }}>{k.label}</div>
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(246,173,85,0.2)" }}>
-                      <Lock size={12} color="#F6AD55" />
-                      <span style={{ color: "#8A9AB8", fontSize: 15, ...MONO, flex: 1 }}>{k.key}</span>
-                      <button style={{ color: "#F6AD55" }}><Copy size={13} /></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 px-4 py-3 rounded-2xl" style={{ background: "rgba(246,173,85,0.06)", border: "1px solid rgba(246,173,85,0.2)" }}>
-                <span style={{ color: "#F6AD55", fontSize: 15 }}>Sandbox keys never charge real money and use isolated test data.</span>
-              </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5" }}>Issued API Keys</h3>
+              <p style={{ color: "#8A9AB8", fontSize: 15, marginTop: 2 }}>Keys are issued to a specific partner and can be scoped and revoked individually.</p>
             </div>
+            <button onClick={() => setShowIssueForm(v => !v)} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA" }}>
+              <Plus size={14} /> Issue New Key
+            </button>
           </div>
-          <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Usage This Month</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[{ label:"API Calls", value:"84,291", limit:"1M included", color:"#6E90C9" }, { label:"Webhooks Sent", value:"12,841", limit:"Unlimited", color:"#D99A6B" }, { label:"Documents Accessed", value:"2,190", limit:"Unlimited", color:"#6FAE8B" }, { label:"Rate Limit Hits", value:"0", limit:"1,000/min", color:"#F6AD55" }].map(stat => (
-                <div key={stat.label} className="p-4 rounded-2xl" style={{ background: "rgba(91,110,225,0.04)", border: "1px solid rgba(91,110,225,0.1)" }}>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: 27.5, color: stat.color }}>{stat.value}</div>
-                  <div style={{ color: "#E8EDF5", fontSize: 15, marginTop: 4 }}>{stat.label}</div>
-                  <div style={{ color: "#8A9AB8", fontSize: 12.5, marginTop: 2, ...MONO }}>{stat.limit}</div>
+
+          {issuedSecret && (
+            <div className="p-5 rounded-2xl" style={{ background: "rgba(72,187,120,0.06)", border: "1px solid rgba(72,187,120,0.25)" }}>
+              <div style={{ color: "#68D391", fontSize: 15, ...MONO, fontWeight: 700, marginBottom: 8 }}>✓ KEY ISSUED — copy it now, it will not be shown again</div>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(72,187,120,0.3)" }}>
+                <Key size={13} color="#68D391" />
+                <span style={{ color: "#E8EDF5", fontSize: 15, ...MONO, flex: 1 }}>{secretVisible ? issuedSecret : "•".repeat(issuedSecret.length)}</span>
+                <button onClick={() => setSecretVisible(v => !v)} style={{ color: "#8A9AB8" }}>{secretVisible ? <EyeOff size={13} /> : <Eye size={13} />}</button>
+                <button onClick={() => { navigator.clipboard?.writeText(issuedSecret); toast.success("Copied to clipboard"); }} style={{ color: "#6E90C9" }}><Copy size={13} /></button>
+              </div>
+              <button onClick={() => setIssuedSecret(null)} className="mt-3 text-sm" style={{ color: "#8A9AB8" }}>Dismiss</button>
+            </div>
+          )}
+
+          {showIssueForm && (
+            <div className="p-6 rounded-2xl space-y-4" style={GLASS}>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label style={{ color: "#8A9AB8", fontSize: 14, ...MONO, display: "block", marginBottom: 6 }}>KEY NAME</label>
+                  <input value={newKeyName} onChange={e => setNewKeyName(e.target.value)} placeholder="e.g. Greenfield Law — production"
+                    className="w-full px-4 py-2.5 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 16, outline: "none" }} />
                 </div>
-              ))}
+                <div>
+                  <label style={{ color: "#8A9AB8", fontSize: 14, ...MONO, display: "block", marginBottom: 6 }}>PARTNER</label>
+                  <select value={newKeyPartnerId} onChange={e => setNewKeyPartnerId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 16, outline: "none" }}>
+                    <option value="">Select a partner...</option>
+                    {partners.map(p => <option key={p.id} value={p.id}>{p.organization_name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ color: "#8A9AB8", fontSize: 14, ...MONO, display: "block", marginBottom: 6 }}>SCOPES</label>
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_SCOPES.map(scope => (
+                    <button key={scope} onClick={() => toggleScope(scope)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                      style={{ background: newKeyScopes.includes(scope) ? "rgba(91,110,225,0.15)" : "rgba(91,110,225,0.04)", border: `1px solid ${newKeyScopes.includes(scope) ? "#5B6EE1" : "rgba(91,110,225,0.15)"}`, color: newKeyScopes.includes(scope) ? "#6E90C9" : "#8A9AB8" }}>
+                      {scope}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="max-w-xs">
+                <label style={{ color: "#8A9AB8", fontSize: 14, ...MONO, display: "block", marginBottom: 6 }}>RATE LIMIT (REQ/MIN)</label>
+                <input type="number" min={1} value={newKeyRateLimit} onChange={e => setNewKeyRateLimit(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 16, ...MONO, outline: "none" }} />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={issueKey} disabled={issuing} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA" }}>
+                  {issuing ? <Loader2 size={14} className="animate-spin" /> : <Key size={14} />} {issuing ? "Issuing…" : "Issue Key"}
+                </button>
+                <button onClick={() => setShowIssueForm(false)} className="px-5 py-2.5 rounded-2xl text-sm" style={{ background: "rgba(91,110,225,0.06)", color: "#8A9AB8" }}>Cancel</button>
+              </div>
             </div>
+          )}
+
+          <div className="rounded-2xl overflow-hidden" style={GLASS}>
+            {keysLoading ? (
+              <div className="flex items-center gap-2 py-10 justify-center" style={{ color: "#8A9AB8" }}>
+                <Loader2 size={18} className="animate-spin" /> Loading keys…
+              </div>
+            ) : keys.length === 0 ? (
+              <div className="py-10 text-center" style={{ color: "#8A9AB8" }}>No API keys issued yet.</div>
+            ) : (
+              keys.map((k, i) => (
+                <div key={k.id} className="px-5 py-4 border-b" style={{ borderColor: "rgba(91,110,225,0.06)", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)" }}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span style={{ color: "#E8EDF5", fontSize: 17, fontWeight: 600 }}>{k.name}</span>
+                        <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: k.is_active ? "rgba(72,187,120,0.12)" : "rgba(252,129,129,0.12)", color: k.is_active ? "#68D391" : "#FC8181", ...MONO }}>
+                          {k.is_active ? "ACTIVE" : "REVOKED"}
+                        </span>
+                      </div>
+                      <div style={{ color: "#8A9AB8", fontSize: 15, ...MONO }}>{k.key_prefix}••••••••••••••••</div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {k.scopes.map(s => (
+                          <span key={s} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", ...MONO }}>{s}</span>
+                        ))}
+                      </div>
+                      <div style={{ color: "#8A9AB8", fontSize: 13.5, marginTop: 6 }}>
+                        {k.rate_limit_per_min} req/min · Created {new Date(k.created_at).toLocaleDateString()} · Last used {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : "never"}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <button onClick={() => revealKey(k)} disabled={revealingId === k.id} className="flex items-center gap-1.5 text-sm disabled:opacity-50" style={{ color: "#D99A6B" }}>
+                        {revealingId === k.id ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} />} View Key
+                      </button>
+                      <button onClick={() => setUsageForKey(k)} className="text-sm" style={{ color: "#6E90C9" }}>View Usage</button>
+                      {k.is_active && (
+                        <button onClick={() => revokeKey(k)} disabled={revokingId === k.id}
+                          className="flex items-center gap-1.5 text-sm disabled:opacity-50" style={{ color: "#FC8181" }}>
+                          <XCircle size={13} /> {revokingId === k.id ? "Revoking…" : "Revoke"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
+
+          {revealedKey && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+              <div className="w-full max-w-lg rounded-2xl p-6" style={GLASS}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5" }}>Key — {revealedKey.name}</h3>
+                  <button onClick={() => setRevealedKey(null)} style={{ color: "#8A9AB8" }}><XCircle size={16} /></button>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(217,154,107,0.3)" }}>
+                  <Key size={13} color="#D99A6B" />
+                  <span style={{ color: "#E8EDF5", fontSize: 15, ...MONO, flex: 1, wordBreak: "break-all" }}>{revealedKey.secret}</span>
+                  <button onClick={() => { navigator.clipboard?.writeText(revealedKey.secret); toast.success("Copied to clipboard"); }} style={{ color: "#6E90C9", flexShrink: 0 }}><Copy size={13} /></button>
+                </div>
+                <p style={{ color: "#8A9AB8", fontSize: 14, marginTop: 10 }}>This reveal was recorded in the audit log.</p>
+              </div>
+            </div>
+          )}
+
+          {usageForKey && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+              <div className="w-full max-w-lg rounded-2xl p-6" style={GLASS}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5" }}>Usage — {usageForKey.name}</h3>
+                  <button onClick={() => setUsageForKey(null)} style={{ color: "#8A9AB8" }}><XCircle size={16} /></button>
+                </div>
+                {usageLoading ? (
+                  <div className="flex items-center gap-2 py-6 justify-center" style={{ color: "#8A9AB8" }}><Loader2 size={16} className="animate-spin" /> Loading…</div>
+                ) : (usageData?.usage?.length ?? 0) === 0 ? (
+                  <p style={{ color: "#8A9AB8", fontSize: 15, lineHeight: 1.7 }}>
+                    No requests logged for this key yet. Usage only appears once a real API gateway starts enforcing and logging calls made with it — that piece isn't built yet, so this list will stay empty until it is.
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {(usageData?.usage as any[]).map((u, i) => (
+                      <div key={i} style={{ color: "#8A9AB8", fontSize: 14, ...MONO }}>{JSON.stringify(u)}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

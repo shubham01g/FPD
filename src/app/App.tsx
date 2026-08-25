@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import { Toaster } from "sonner";
+import { supabase } from "./services/supabase";
 import { DemoProvider } from "./context/DemoContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
@@ -68,6 +69,7 @@ import { WGClientSubmit } from "./components/WGClientSubmit";
 import { WGSchedulePage } from "./components/WGSchedulePage";
 import { createScheduleToken } from "./services/wgClientStore";
 import { CryptoMerchant } from "./components/admin/CryptoMerchant";
+import { AdminRoles } from "./components/admin/AdminRoles";
 import { ConciergeLogin } from "./components/ConciergeLogin";
 import { ConciergePortal } from "./components/ConciergePortal";
 import { conciergeEmployees, getEmployee } from "./services/conciergeStaff";
@@ -414,6 +416,7 @@ function AdminRoute() {
       case "partner-onboarding-admin":  return <PartnerOnboardingAdmin/>;
       case "white-glove-admin":         return <WhiteGloveAdmin/>;
       case "crypto-merchant":           return <CryptoMerchant/>;
+      case "admin-roles":               return <AdminRoles/>;
       default:                          return <MasterAdmin/>;
     }
   };
@@ -423,7 +426,7 @@ function AdminRoute() {
       <AdminLayout
         currentPage={adminPage}
         onNavigate={setAdminPage}
-        onSignOut={() => { clearAdminAuthed(); navigate("/"); }}
+        onSignOut={() => { supabase.auth.signOut(); clearAdminAuthed(); navigate("/"); }}
       >
         {renderAdminPage()}
       </AdminLayout>

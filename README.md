@@ -85,6 +85,7 @@ Five completely separate portals, each with its own authentication, navigation, 
 35. [New Features (Latest Sessions)](#35-new-features-latest-sessions)
 36. [Final Feature Updates](#36-final-feature-updates)
 37. [Developer Handoff Checklist](#37-developer-handoff-checklist)
+38. [Admin Backend API (Milestone 3)](#38-admin-backend-api-milestone-3)
 
 ---
 
@@ -207,7 +208,10 @@ supabase secrets set BITPAY_API_TOKEN=...
 supabase secrets set NOWPAYMENTS_API_KEY=...
 supabase secrets set NOWPAYMENTS_IPN_SECRET=...
 supabase secrets set APP_URL=https://finalpassdown.com
+supabase secrets set ENTERPRISE_KEY_ENCRYPTION_SECRET=$(openssl rand -hex 32)
 ```
+
+`ENTERPRISE_KEY_ENCRYPTION_SECRET` encrypts Enterprise API partner keys at rest (`supabase/functions/server/lib/keyCrypto.ts`) so an admin can reveal a key's original value again later instead of only seeing it once at creation. Losing this secret makes every previously-issued key unrecoverable (they'd need to be revoked and reissued), so store it in a password manager, not just in Supabase.
 
 ---
 
@@ -633,6 +637,8 @@ Admin → Command Center → **Admin Team** tab.
 
 Create administrator accounts for your internal team and control precisely what each person can access, modify, and delete across every platform module.
 
+**Backed by real data (Milestone 3, Phase 5):** accounts, roles, and permissions live in the `admin_accounts` table and are enforced **server-side** on every `/admin/*` API call, not just hidden in the UI — see [§38 Admin Backend API](#38-admin-backend-api-milestone-3). A `users.is_admin = true` account with no matching `admin_accounts` row still gets full legacy access for backward compatibility.
+
 ### Invite Flow — Full 3-Step Demo
 
 Click **Invite Admin** in the top-right of the Admin Team page. A modal walks through the entire invite lifecycle:
@@ -665,11 +671,11 @@ Click **Invite Admin** in the top-right of the Admin Team page. A modal walks th
 | **Content Admin** | Red | Email templates and push notifications only |
 | **Custom** | Grey | Every module toggled individually |
 
-### Per-Module Permission Matrix (16 modules)
+### Per-Module Permission Matrix (20 modules)
 
-Each admin has a **View / Edit / Delete** toggle per module. Click any admin card → expand → **Edit Permissions** → toggle → **Save**. Changes apply on next login.
+Each admin has a **View / Edit / Delete** toggle per module. Click any admin card → expand → **Edit Permissions** → toggle → **Save**. Every `/admin/*` API call re-checks permissions fresh against the database, so a change takes effect on that admin's very next request — no re-login needed.
 
-Modules: Dashboard Overview · Analytics · Users & Accounts · Revenue & MRR · Storage Management · ID Verification · Payouts & Commissions · $199 Legacy Fee · Audit Log · Push Notifications · White Glove Concierge · Subscription Config · White Label Packages · Partner Program · Email Templates · Crypto Merchant Config
+Modules: Dashboard Overview · Analytics · Users & Accounts · Revenue & MRR · Storage Management · ID Verification · Payouts & Commissions · $199 Legacy Fee · Audit Log · Push Notifications · White Glove Concierge · Subscription Config · White Label Packages · Partner Program · Email Templates · Crypto Merchant Config · **Affiliate Program · Enterprise API · Legacy Management · Admin Team & Roles** (last 4 added in Phase 5 — every route now maps to a module, including this one: only a Super Admin can grant admin access to someone else).
 
 ### Account Actions
 
@@ -840,7 +846,9 @@ Each template has an editable subject, `{{variable}}` placeholders, HTML body, l
 | `legacy_continuation_fees` | $199 fee + death cert verification + activation timestamps |
 | `vault_documents` | Encrypted document records — all encrypted: true |
 | `contacts` | All 4 types — guardian: view_only, no downloads ever |
-| `admin_accounts` | Internal admin team with role, permissions JSON, invite token, status |
+| `admin_accounts` | Internal admin team with role, permissions JSON, invite token, status — added `004_admin_accounts.sql` |
+| `email_templates` | Admin-editable transactional email templates — added `002_admin_backend_gaps.sql`, seeded `003_email_templates_seed.sql` |
+| `enterprise_api_keys` / `enterprise_api_usage` | Partner API keys (AES-256-GCM encrypted, revealable) + per-request usage log — added `002_admin_backend_gaps.sql` |
 | `concierge_employees` | WG staff accounts (separate from Supabase Auth) |
 | `wg_clients` | White Glove client records — shared store between admin + concierge portal |
 | `wg_sessions` | Session logs per client |
@@ -853,7 +861,9 @@ Each template has an editable subject, `{{variable}}` placeholders, HTML body, l
 | `contact_groups` | Family & Friends groups with member lists |
 | `account_2fa_settings` | Per-user 2FA method and secrets |
 | `wl_packages` | Live-editable WL package definitions |
-| `report_exports` | Download history: admin, report type, format, file size, timestamp |
+| `report_exports` | Download history: admin, report type, format, file size, timestamp — **documented here but not yet created by any migration; Reports & Downloads is still demo-only** |
+
+> **Migration files, in order:** `001_initial_schema.sql` (core schema) → `002_admin_backend_gaps.sql` (email templates, enterprise API keys, white-label config columns + default row) → `003_email_templates_seed.sql` (16 templates) → `004_admin_accounts.sql` (admin team/roles). **None of 002–004 have been applied to any project yet** — see [§38](#38-admin-backend-api-milestone-3).
 
 **Plan seed data (from `001_initial_schema.sql`):**
 
@@ -889,7 +899,18 @@ Crypto processors each have their own webhook endpoint: `/webhooks/coinbase`, `/
 
 ```bash
 supabase link --project-ref YOUR_REF
-supabase db push
+
+# database/migrations/*.sql are NOT under supabase/migrations, so `supabase db
+# push` will not pick them up on its own. Run them in order instead — paste
+# each into the SQL Editor, or:
+psql "$DATABASE_URL" -f database/migrations/001_initial_schema.sql
+psql "$DATABASE_URL" -f database/migrations/002_admin_backend_gaps.sql
+psql "$DATABASE_URL" -f database/migrations/003_email_templates_seed.sql
+psql "$DATABASE_URL" -f database/migrations/004_admin_accounts.sql
+
+# Admin backend (Milestone 3) — see §38 for the full route list
+supabase functions deploy server
+
 supabase functions deploy stripe-checkout
 supabase functions deploy stripe-payment-intent
 supabase functions deploy stripe-webhook
@@ -897,6 +918,8 @@ supabase functions deploy crypto-webhook-coinbase
 supabase functions deploy crypto-webhook-bitpay
 supabase functions deploy crypto-webhook-nowpay
 ```
+
+`stripe-checkout`, `stripe-payment-intent`, `stripe-webhook`, and the three `crypto-webhook-*` functions are referenced here and in §26/§29 but don't exist yet under `supabase/functions/` — only `server` (Milestone 3's admin + public API) has been built so far.
 
 **Storage buckets required:**
 
@@ -1243,14 +1266,72 @@ Before going live, verify every item:
 - [ ] Test White Glove flow: enroll client → send upload link → client submits → specialist receives in inbox → saves to account → session timer charges card
 - [ ] Verify Guardian contacts cannot download files in any scenario
 - [ ] Verify Starter plan limits: 1 GB storage, 1 legacy contact, 1 guardian contact
-- [ ] Admin Team: replace `_admins` in-memory store with real Supabase `admin_accounts` table queries
-- [ ] Admin invite: replace demo `setTimeout` with real Supabase Auth admin invite + email send via Edge Function
-- [ ] Admin permissions: enforce View/Edit/Delete rules at API layer (not just UI) using RLS and middleware
+- [x] Admin Team: `_admins` in-memory store replaced with real `admin_accounts` table queries (Milestone 3, Phase 5)
+- [ ] Admin invite: the invite link is generated for real (server-side token + 72h expiry), but no email is actually sent — no email provider is wired up anywhere in this backend yet. The admin has to copy/send the link manually for now.
+- [x] Admin permissions: View/Edit/Delete enforced server-side per module on every `/admin/*` call (Milestone 3, Phase 5) — see [§38](#38-admin-backend-api-milestone-3)
 - [ ] Reports: replace demo `setTimeout` generation with real Supabase `COPY` or Edge Function CSV/XLSX export
-- [ ] Reports: wire Download History to `report_exports` table in database
+- [ ] Reports: wire Download History to `report_exports` table in database — **table doesn't exist yet, not started**
 - [ ] WG client store (`wgClientStore.ts`): replace in-memory store with real Supabase queries — admin add → DB → concierge portal live via Supabase Realtime subscription
-- [ ] Test Admin invite flow end-to-end: invite → email received → link clicked → password set → portal login → correct modules visible per role
+- [ ] Test Admin invite flow end-to-end: invite → email received → link clicked → password set → portal login → correct modules visible per role — **blocked until an email provider is wired up**
 - [ ] Test Reports: generate each of the 6 categories, verify CSV row counts and column headers match schema
+- [ ] **Admin login is still fake** — `AdminLogin.tsx` checks a hardcoded email/password, not Supabase Auth. Every `/admin/*` API route already expects a real Supabase session token, so nobody can actually reach the newly-wired admin screens against a live backend until this is connected. See [§38](#38-admin-backend-api-milestone-3).
+- [ ] User Management (`MasterAdmin.tsx` Users/Revenue/Storage tabs, `UserDetailModal.tsx`) is still demo data — some of what it shows (per-category storage breakdown, a security/login event log, credit card details) has no real table to back it and needs a product decision, not just wiring, before it's built
+- [ ] Legacy Management module — scope still not defined by the client; `routes/legacy.ts` is a 501 stub
+- [ ] WL Sales and Payment Processor config (in `PartnerOnboardingAdmin.tsx`) still use in-memory demo data — no `wl_sales` table exists, and `crypto_processor_configs` has no API route yet
+- [ ] Run `database/migrations/002_admin_backend_gaps.sql`, `003_email_templates_seed.sql`, and `004_admin_accounts.sql` — **none of the Milestone 3 admin backend tables exist on any project yet**, this whole feature set is unusable against a live database until they're applied
+
+---
+
+## 38. Admin Backend API (Milestone 3)
+
+Everything in this section lives under `supabase/functions/server/`, one Deno/Hono edge function named `server`. Base URL once deployed: `https://<project-ref>.supabase.co/functions/v1/server/make-server-b5ad85e0`.
+
+### Auth model
+
+- Every `/admin/*` route requires `Authorization: Bearer <supabase-session-jwt>` from a **real Supabase Auth session** whose `users.is_admin = true`.
+- If that user also has a row in `admin_accounts`, the request is additionally checked against that account's per-module `permissions` (view/edit/delete) — see `middleware/modulePermission.ts`. No matching row = full legacy access (backward compatible with the simple `is_admin` flag).
+- A `suspended` or still-`invited` `admin_accounts` row is rejected outright, even if `users.is_admin` is true.
+- **This can't be exercised yet** — `AdminLogin.tsx` doesn't produce a real Supabase session (see the handoff checklist above). Frontend calls go through `src/app/services/adminApi.ts`, which reads the session token via `supabase.auth.getSession()`.
+- Every mutating request (`POST`/`PUT`/`PATCH`/`DELETE`) that succeeds is written to `audit_logs` automatically — no per-route logging code needed.
+
+### `/admin/*` routes (auth + per-module permission required)
+
+| Module | Base path | Covers |
+|---|---|---|
+| `analytics` | `/admin/analytics` | Overview stats (user/plan counts, MRR, revenue by type) — real numbers only; no demographic data exists in the schema |
+| `users` | `/admin/users` | List/search users, per-user detail (storage + payments + contacts), plan/status edit |
+| `verification` | `/admin/verification` | ID verification queue, approve/reject (auto-updates the linked contact) |
+| `audit` | `/admin/audit` | Read the audit log (filterable by actor/severity/target) |
+| `affiliates` | `/admin/affiliates` | Affiliate list + referrals, status/tier override |
+| `partners` | `/admin/partnerships` | Partner list + accounts, status/tier override |
+| `payouts` | `/admin/payouts` | Payout list, mark-paid, status update |
+| `continuation` | `/admin/subscriptions` | $199 Legacy Continuation Fee log, activate |
+| `subscription` | `/admin/pricing` | Plan pricing/storage/thresholds (`subscription_plans` + `admin_settings`) |
+| `email_templates` | `/admin/email-templates` | List/edit the 16 seeded templates |
+| `white_label` | `/admin/white-label` | `white_label_configs` (branding) + `wl_packages` (partner tiers) CRUD |
+| `legacy_management` | `/admin/legacy` | **501 stub only** — scope not yet defined |
+| `enterprise_api` | `/admin/enterprise-api` | Issue/revoke/reveal partner API keys, usage log |
+| `admin_team` | `/admin/admin-accounts` | The admin roster itself — invite, role/permission edit, suspend. Gated so only Super Admin (by default) can grant admin access |
+
+### `/public/*` routes (no auth — customer-facing pages)
+
+| Path | Covers |
+|---|---|
+| `GET /public/plans` | Live `subscription_plans` pricing — feeds the landing page pricing table and the storage upgrade screen |
+| `GET /public/wl-packages` | Live `wl_packages` — feeds the landing page's White Label section and the partner onboarding wizard |
+
+### Frontend API clients
+
+- `src/app/services/adminApi.ts` — admin-authenticated, points at `/admin`
+- `src/app/services/publicApi.ts` — unauthenticated, points at `/public`
+- `src/app/hooks/useAdminFetch.ts` — shared loading/error/data hook used by every admin (and some public) screen
+- Both clients throw if `VITE_SUPABASE_URL` isn't set, or if a response isn't JSON — earlier they silently built a broken relative URL and treated Vite's SPA-fallback HTML page as valid empty data (found during the Phase 6 smoke test; fixed).
+
+### Known gaps in this API surface
+
+- No rate limiting on any route.
+- `enterprise_api_usage` is never written to — no gateway exists yet that actually enforces/logs partner API keys, so `/admin/enterprise-api/keys/:id/usage` will always return empty until one is built.
+- `legacy` and `wl_sales`/processor-config endpoints don't exist (see handoff checklist).
 
 ---
 

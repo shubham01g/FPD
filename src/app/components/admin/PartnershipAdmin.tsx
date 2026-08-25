@@ -1,17 +1,26 @@
 import { copyToClipboard } from "../../utils/clipboard";
-import React, { useState } from "react";
-import { Handshake, Building, TrendingUp, Search, Eye, Edit, CheckCircle, XCircle, DollarSign, Send, Mail, X, Copy } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Handshake, Building, Search, Eye, Edit, CheckCircle, XCircle, Send, X, Copy, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
 
-const partners = [
-  { id: "PAR-0018", name: "First National Bank", type: "Banking Partner", email: "banking@fnb.com", joined: "Nov 1, 2024", accounts: 112, tier: 3, rate: 30, monthlyEarn: 3359.88, totalEarned: 38241.60, status: "active" },
-  { id: "PAR-0015", name: "Summit Financial Group", type: "Financial Advisor", email: "ap@summitfg.com", joined: "Mar 3, 2025", accounts: 34, tier: 1, rate: 20, monthlyEarn: 1049.74, totalEarned: 14821.40, status: "active" },
-  { id: "PAR-0012", name: "Sunrise Senior Living", type: "Senior Care", email: "admin@sunrise.com", joined: "Feb 28, 2025", accounts: 52, tier: 2, rate: 25, monthlyEarn: 1299.48, totalEarned: 18421.20, status: "active" },
-  { id: "PAR-0009", name: "Greenfield Law Offices", type: "Estate Attorney", email: "billing@greenfieldlaw.com", joined: "Jan 15, 2025", accounts: 18, tier: 1, rate: 20, monthlyEarn: 449.82, totalEarned: 6284.80, status: "active" },
-  { id: "PAR-0006", name: "Heritage Planning LLC", type: "Estate Planner", email: "contact@heritageplanning.com", joined: "Apr 20, 2026", accounts: 7, tier: 1, rate: 20, monthlyEarn: 174.93, totalEarned: 524.79, status: "active" },
-  { id: "PAR-0003", name: "Coastal Wealth Mgmt", type: "Financial Advisor", email: "ops@coastalwealth.com", joined: "Aug 8, 2024", accounts: 0, tier: 1, rate: 0, monthlyEarn: 0, totalEarned: 3210.50, status: "inactive" },
-];
+interface PartnerRow {
+  id: string;
+  organization_name: string;
+  organization_type: string;
+  contact_email: string;
+  tier: 1 | 2 | 3;
+  commission_rate: number;
+  total_accounts: number;
+  monthly_recurring: number;
+  total_earned: number;
+  status: "active" | "inactive" | "suspended";
+  joined_at: string;
+}
 
+// No revenue-history table exists yet (partners only stores a current snapshot),
+// so month-over-month MRR growth still has nothing real to bind to.
 const mrrGrowth = [
   { month: "Jan", mrr: 2840 }, { month: "Feb", mrr: 3920 }, { month: "Mar", mrr: 5140 },
   { month: "Apr", mrr: 6870 }, { month: "May", mrr: 8920 }, { month: "Jun", mrr: 10333 },
@@ -120,14 +129,36 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
 export function PartnershipAdmin() {
   const [search, setSearch] = useState("");
   const [showInvite, setShowInvite] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
-  const filtered = partners.filter(
-    (p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.email.includes(search) || p.id.includes(search)
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => adminApi.get<{ partners: PartnerRow[] }>("/partnerships"),
+    [],
   );
 
-  const totalAccounts = partners.filter(p => p.status === "active").reduce((s, p) => s + p.accounts, 0);
-  const totalMRR = partners.filter(p => p.status === "active").reduce((s, p) => s + p.monthlyEarn, 0);
+  const partners = data?.partners ?? [];
+
+  const filtered = partners.filter(
+    (p) => p.organization_name.toLowerCase().includes(search.toLowerCase()) || p.contact_email.includes(search) || p.id.includes(search)
+  );
+
+  const totalAccounts = partners.filter(p => p.status === "active").reduce((s, p) => s + p.total_accounts, 0);
+  const totalMRR = partners.filter(p => p.status === "active").reduce((s, p) => s + Number(p.monthly_recurring), 0);
   const activePartners = partners.filter(p => p.status === "active").length;
+
+  async function toggleStatus(partner: PartnerRow) {
+    const nextStatus = partner.status === "active" ? "suspended" : "active";
+    setSavingId(partner.id);
+    try {
+      await adminApi.patch(`/partnerships/${partner.id}`, { status: nextStatus });
+      toast.success(`Partner ${nextStatus === "active" ? "reactivated" : "suspended"}`);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update partner");
+    } finally {
+      setSavingId(null);
+    }
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -150,13 +181,28 @@ export function PartnershipAdmin() {
       </div>
       {showInvite && <SendInviteModal onClose={() => setShowInvite(false)}/>}
 
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(252,129,129,0.1)", border: "1px solid rgba(252,129,129,0.25)" }}>
+          <AlertCircle size={15} color="#FC8181" />
+          <span style={{ color: "#FC8181", fontSize: 16 }}>{error}</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center gap-2 py-12 justify-center" style={{ color: "var(--muted-foreground)" }}>
+          <Loader2 size={18} className="animate-spin" /> Loading partners…
+        </div>
+      )}
+
+      {!loading && (
+      <>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Active Partners", value: activePartners, sub: "Organizations", color: "#6FAE8B" },
           { label: "Total Referred Accounts", value: totalAccounts.toLocaleString(), sub: "Lifetime active", color: "var(--gold)" },
           { label: "Monthly Recurring Revenue", value: `$${totalMRR.toFixed(2)}`, sub: "Commission payouts", color: "#D99A6B" },
-          { label: "Avg Accounts/Partner", value: Math.round(totalAccounts / activePartners), sub: "Active partners only", color: "#6FAE8B" },
+          { label: "Avg Accounts/Partner", value: activePartners ? Math.round(totalAccounts / activePartners) : 0, sub: "Active partners only", color: "#6FAE8B" },
         ].map((stat) => (
           <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 30, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
@@ -220,29 +266,32 @@ export function PartnershipAdmin() {
             <div key={h} style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{h.toUpperCase()}</div>
           ))}
         </div>
+        {filtered.length === 0 && (
+          <div className="px-5 py-8 text-center" style={{ color: "var(--muted-foreground)" }}>No partners match this search.</div>
+        )}
         {filtered.map((partner, i) => (
           <div
             key={partner.id}
             className="grid px-5 py-3 items-center border-b"
             style={{ gridTemplateColumns: "auto 1fr auto auto auto auto auto auto", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)", gap: 16 }}
           >
-            <span style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{partner.id}</span>
+            <span style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{partner.id.slice(0, 8)}</span>
             <div className="flex items-center gap-3">
               <div className="rounded-xl p-1.5" style={{ background: "rgba(91,167,214,0.1)" }}>
                 <Building size={13} color="#FFFFFF" />
               </div>
               <div>
-                <div style={{ color: "var(--foreground)", fontSize: 16 }}>{partner.name}</div>
-                <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{partner.type} · {partner.email}</div>
+                <div style={{ color: "var(--foreground)", fontSize: 16 }}>{partner.organization_name}</div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{partner.organization_type} · {partner.contact_email}</div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="rounded-full" style={{ width: 8, height: 8, background: (tierColors as any)[partner.tier] }} />
               <span style={{ color: (tierColors as any)[partner.tier], fontSize: 15, fontFamily: "var(--font-mono)", fontWeight: 700 }}>{(tierLabels as any)[partner.tier]}</span>
             </div>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{partner.accounts}</span>
-            <span style={{ color: "#6FAE8B", fontFamily: "var(--font-mono)", fontSize: 16 }}>${partner.monthlyEarn.toFixed(2)}</span>
-            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>${partner.totalEarned.toLocaleString()}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{partner.total_accounts}</span>
+            <span style={{ color: "#6FAE8B", fontFamily: "var(--font-mono)", fontSize: 16 }}>${Number(partner.monthly_recurring).toFixed(2)}</span>
+            <span style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>${Number(partner.total_earned).toLocaleString()}</span>
             <div
               className="px-2 py-1 rounded"
               style={{
@@ -256,14 +305,19 @@ export function PartnershipAdmin() {
             <div className="flex items-center gap-2">
               <button style={{ color: "#6FAE8B" }}><Eye size={14} /></button>
               <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
-              {partner.status === "active"
-                ? <button style={{ color: "#FC8181" }}><XCircle size={14} /></button>
-                : <button style={{ color: "#D99A6B" }}><CheckCircle size={14} /></button>
-              }
+              <button
+                disabled={savingId === partner.id}
+                onClick={() => toggleStatus(partner)}
+                style={{ color: partner.status === "active" ? "#FC8181" : "#D99A6B", opacity: savingId === partner.id ? 0.5 : 1 }}
+              >
+                {partner.status === "active" ? <XCircle size={14} /> : <CheckCircle size={14} />}
+              </button>
             </div>
           </div>
         ))}
       </div>
+      </>
+      )}
     </div>
   );
 }

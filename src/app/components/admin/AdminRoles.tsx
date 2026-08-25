@@ -4,9 +4,12 @@ import {
   CheckCircle, Eye, EyeOff, Lock, Unlock, Send, UserX,
   Crown, Users, BarChart3, DollarSign, HardDrive, UserCheck,
   TrendingUp, Bell, Star, Settings, Mail, FileText, Key,
-  AlertTriangle, Save, ToggleLeft, ToggleRight, RefreshCw, Copy
+  AlertTriangle, Save, ToggleLeft, ToggleRight, RefreshCw, Copy,
+  Handshake, Code, Loader2, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none", width:"100%" };
@@ -39,6 +42,10 @@ const MODULE_DEFS: Omit<ModulePermission, "canView"|"canEdit"|"canDelete">[] = [
   { module:"partners",      label:"Partner Program",          icon:<Users size={13}/> },
   { module:"email_templates",label:"Email Templates",         icon:<Mail size={13}/> },
   { module:"crypto",        label:"Crypto Merchant Config",   icon:<Key size={13}/> },
+  { module:"affiliates",    label:"Affiliate Program",        icon:<Users size={13}/> },
+  { module:"enterprise_api",label:"Enterprise API",           icon:<Code size={13}/> },
+  { module:"legacy_management",label:"Legacy Management",     icon:<Shield size={13}/> },
+  { module:"admin_team",    label:"Admin Team & Roles",       icon:<Crown size={13}/> },
 ];
 
 function makePermissions(view: boolean, edit: boolean, del: boolean): ModulePermission[] {
@@ -84,7 +91,7 @@ const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; descriptio
     permissions: MODULE_DEFS.map(m => ({
       ...m,
       canView: true,
-      canEdit: ["revenue","payouts","continuation","crypto","subscription"].includes(m.module),
+      canEdit: ["revenue","payouts","continuation","crypto","subscription","affiliates"].includes(m.module),
       canDelete: ["payouts"].includes(m.module),
     })),
   },
@@ -133,60 +140,28 @@ export interface AdminAccount {
   notes: string;
 }
 
-/* ── Seed data ──────────────────────────────────────────────────────*/
-let _admins: AdminAccount[] = [
-  {
-    id: "ADM-001",
-    name: "Alex Johnson",
-    email: "alex.johnson@finalpassdown.com",
-    role: "super_admin",
-    status: "active",
-    permissions: ROLE_PRESETS.super_admin.permissions,
-    createdAt: "Jan 10, 2026",
-    lastLogin: "Jun 28, 2026 · 9:02 AM",
-    invitedBy: "System",
-    avatar: "AJ",
-    notes: "Platform founder account.",
-  },
-  {
-    id: "ADM-002",
-    name: "Simone Carter",
-    email: "s.carter@finalpassdown.com",
-    role: "operations_manager",
-    status: "active",
-    permissions: ROLE_PRESETS.operations_manager.permissions,
-    createdAt: "Mar 5, 2026",
-    lastLogin: "Jun 27, 2026 · 4:18 PM",
-    invitedBy: "Alex Johnson",
-    avatar: "SC",
-    notes: "Manages day-to-day operations and concierge team.",
-  },
-  {
-    id: "ADM-003",
-    name: "Derek Mills",
-    email: "d.mills@finalpassdown.com",
-    role: "finance_manager",
-    status: "active",
-    permissions: ROLE_PRESETS.finance_manager.permissions,
-    createdAt: "Apr 12, 2026",
-    lastLogin: "Jun 26, 2026 · 11:34 AM",
-    invitedBy: "Alex Johnson",
-    avatar: "DM",
-    notes: "Handles all payouts, revenue reporting, and crypto config.",
-  },
-  {
-    id: "ADM-004",
-    name: "Priya Nair",
-    email: "p.nair@finalpassdown.com",
-    role: "support_agent",
-    status: "invited",
-    permissions: ROLE_PRESETS.support_agent.permissions,
-    createdAt: "Jun 20, 2026",
-    invitedBy: "Simone Carter",
-    avatar: "PN",
-    notes: "New hire — awaiting first login.",
-  },
-];
+/* ── DB row shape (admin_accounts table) + mapping ───────────────────*/
+interface DBAdminAccount {
+  id: string; name: string; email: string; role: AdminRole; status: "active" | "invited" | "suspended";
+  permissions: ModulePermission[]; created_at: string; last_login_at: string | null;
+  invited_by: string | null; notes: string | null;
+}
+
+function initials(name: string): string {
+  return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function fromDB(row: DBAdminAccount): AdminAccount {
+  return {
+    id: row.id, name: row.name, email: row.email, role: row.role, status: row.status,
+    permissions: row.permissions?.length ? row.permissions : ROLE_PRESETS[row.role].permissions,
+    createdAt: new Date(row.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    lastLogin: row.last_login_at ? new Date(row.last_login_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : undefined,
+    invitedBy: row.invited_by ?? "System",
+    avatar: initials(row.name),
+    notes: row.notes ?? "",
+  };
+}
 
 /* ── Permission row ──────────────────────────────────────────────── */
 function PermissionRow({
@@ -432,50 +407,64 @@ function AdminCard({
 
 /* ── Main component ──────────────────────────────────────────────── */
 export function AdminRoles() {
-  const [admins, setAdmins] = useState<AdminAccount[]>(_admins);
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => adminApi.get<{ accounts: DBAdminAccount[] }>("/admin-accounts"),
+    [],
+  );
+  const admins = (data?.accounts ?? []).map(fromDB);
+
   const [showInvite, setShowInvite] = useState(false);
   const [inviteStep, setInviteStep] = useState<"form"|"sending"|"done">("form");
   const [filterRole, setFilterRole] = useState<AdminRole | "all">("all");
   const [filterStatus, setFilterStatus] = useState<"all"|"active"|"invited"|"suspended">("all");
   const [newAdmin, setNewAdmin] = useState({ name:"", email:"", role:"support_agent" as AdminRole, notes:"" });
   const [createdAdmin, setCreatedAdmin] = useState<AdminAccount | null>(null);
+  const [createdInviteToken, setCreatedInviteToken] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
-  const SELF_ID = "ADM-001";
+  // No real session lookup wired to this screen yet — nothing in `admins`
+  // is flagged "you" until admin auth carries the caller's own account id through.
+  const SELF_ID = "";
 
-  function updateAdmin(id: string, changes: Partial<AdminAccount>) {
-    setAdmins(prev => prev.map(a => a.id === id ? { ...a, ...changes } : a));
-    _admins = _admins.map(a => a.id === id ? { ...a, ...changes } : a);
+  async function updateAdmin(id: string, changes: Partial<AdminAccount>) {
+    const patch: Record<string, unknown> = {};
+    if (changes.role !== undefined) patch.role = changes.role;
+    if (changes.status !== undefined) patch.status = changes.status;
+    if (changes.permissions !== undefined) patch.permissions = changes.permissions;
+    if (changes.notes !== undefined) patch.notes = changes.notes;
+    try {
+      await adminApi.patch(`/admin-accounts/${id}`, patch);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update admin account");
+    }
   }
-  function revokeAdmin(id: string) { updateAdmin(id, { status:"suspended" }); }
+  async function revokeAdmin(id: string) { await updateAdmin(id, { status:"suspended" }); }
 
-  function sendInvite() {
+  async function sendInvite() {
     if (!newAdmin.name.trim() || !newAdmin.email.trim()) { toast.error("Name and email required"); return; }
     setInviteStep("sending");
-    setTimeout(() => {
-      const acct: AdminAccount = {
-        id: `ADM-${String(Date.now()).slice(-3)}`,
-        name: newAdmin.name, email: newAdmin.email, role: newAdmin.role,
-        status: "invited",
+    try {
+      const res = await adminApi.post<{ account: DBAdminAccount; inviteToken: string }>("/admin-accounts", {
+        name: newAdmin.name, email: newAdmin.email, role: newAdmin.role, notes: newAdmin.notes,
         permissions: ROLE_PRESETS[newAdmin.role].permissions,
-        createdAt: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-        invitedBy: "Alex Johnson",
-        avatar: newAdmin.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),
-        notes: newAdmin.notes,
-      };
-      setAdmins(prev => [acct, ...prev]);
-      _admins = [acct, ..._admins];
-      setCreatedAdmin(acct);
+      });
+      setCreatedAdmin(fromDB(res.account));
+      setCreatedInviteToken(res.inviteToken);
       setInviteStep("done");
-    }, 2000);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send invite");
+      setInviteStep("form");
+    }
   }
 
   function closeModal() {
     setShowInvite(false);
-    setTimeout(() => { setInviteStep("form"); setNewAdmin({ name:"", email:"", role:"support_agent", notes:"" }); setCreatedAdmin(null); setLinkCopied(false); }, 300);
+    setTimeout(() => { setInviteStep("form"); setNewAdmin({ name:"", email:"", role:"support_agent", notes:"" }); setCreatedAdmin(null); setCreatedInviteToken(null); setLinkCopied(false); }, 300);
   }
 
   function copyLink() {
-    const link = `https://admin.finalpassdown.com/accept?id=${createdAdmin?.id}&token=DEMO_${Date.now().toString(36).toUpperCase()}`;
+    const link = `https://admin.finalpassdown.com/accept?id=${createdAdmin?.id}&token=${createdInviteToken ?? ""}`;
     try { navigator.clipboard.writeText(link); } catch { /* fallback */ }
     setLinkCopied(true);
     toast.success("Login link copied");
@@ -519,6 +508,19 @@ export function AdminRoles() {
           <Plus size={14}/> Invite Admin
         </button>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
+          <AlertCircle size={15} color="#FC8181"/>
+          <span style={{ color:"#FC8181", fontSize:16 }}>{error}</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center gap-2 py-10 justify-center" style={{ color:"#8A9AB8" }}>
+          <Loader2 size={18} className="animate-spin"/> Loading admin team…
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
