@@ -100,7 +100,23 @@ export interface DBReminder {
 
 export interface DBMemory {
   id: string; user_id: string; title: string; memory_date?: string;
-  type: "photo"|"video"|"note"; description?: string; tags: string[];
+  type: "photo"|"video"|"note"|"audio"|"message"|"keepsake"|"goal"|"award";
+  description?: string; tags: string[];
+  recipient?: string; media_url?: string; achieved?: boolean; issuer?: string; child_name?: string;
+}
+
+export interface DBFuneralPlan {
+  user_id: string; service_type?: string; location?: string; preferred_date?: string; budget?: number | null;
+  prearranged: boolean; music: string[]; readings: string[]; flowers?: string; reception?: string;
+  obituary_draft?: string; special_requests?: string;
+}
+
+export interface DBEmergencyInfo {
+  user_id: string; blood_type?: string; height?: string; weight?: string; primary_language?: string;
+  code_status?: string; dnr: boolean; organ_donor: boolean; advance_directive: boolean; conditions: string[];
+  primary_doctor_name?: string; primary_doctor_specialty?: string; primary_doctor_phone?: string; primary_doctor_address?: string;
+  hospital_name?: string; hospital_phone?: string; pharmacy_name?: string; pharmacy_phone?: string;
+  insurance_carrier?: string; insurance_policy_number?: string; insurance_group_number?: string; insurance_member_id?: string;
 }
 
 export interface DBOccasion {
@@ -138,6 +154,9 @@ export const db = {
   },
   async addContact(contact: Omit<DBContact,"id"|"created_at">) {
     return supabase.from("contacts").insert(contact).select().single<DBContact>();
+  },
+  async updateContact(id: string, updates: Partial<Omit<DBContact,"id"|"owner_user_id"|"created_at">>) {
+    return supabase.from("contacts").update(updates).eq("id", id).select().single<DBContact>();
   },
   async updateGuardianFolderAccess(contactId: string, folderIds: string[]) {
     return supabase.from("contacts").update({ allowed_folder_ids: folderIds }).eq("id", contactId);
@@ -233,6 +252,9 @@ export const db = {
   async addFinalWish(w: Omit<DBFinalWish,"id"|"created_at">) {
     return supabase.from("final_wishes").insert(w).select().single<DBFinalWish>();
   },
+  async updateFinalWish(id: string, w: Partial<Omit<DBFinalWish,"id"|"user_id"|"created_at">>) {
+    return supabase.from("final_wishes").update(w).eq("id", id).select().single<DBFinalWish>();
+  },
   async deleteFinalWish(id: string) {
     return supabase.from("final_wishes").delete().eq("id", id);
   },
@@ -286,8 +308,27 @@ export const db = {
   async addMemory(m: Omit<DBMemory,"id">) {
     return supabase.from("memories").insert(m).select().single<DBMemory>();
   },
+  async updateMemory(id: string, m: Partial<Omit<DBMemory,"id"|"user_id">>) {
+    return supabase.from("memories").update(m).eq("id", id).select().single<DBMemory>();
+  },
   async deleteMemory(id: string) {
     return supabase.from("memories").delete().eq("id", id);
+  },
+
+  // Funeral plan (one row per user)
+  async getFuneralPlan(userId: string) {
+    return supabase.from("funeral_plans").select("*").eq("user_id", userId).maybeSingle<DBFuneralPlan>();
+  },
+  async saveFuneralPlan(userId: string, data: Partial<Omit<DBFuneralPlan,"user_id">>) {
+    return supabase.from("funeral_plans").upsert({ user_id: userId, ...data }).select().single<DBFuneralPlan>();
+  },
+
+  // Medical emergency info (one row per user)
+  async getEmergencyInfo(userId: string) {
+    return supabase.from("medical_emergency_info").select("*").eq("user_id", userId).maybeSingle<DBEmergencyInfo>();
+  },
+  async saveEmergencyInfo(userId: string, data: Partial<Omit<DBEmergencyInfo,"user_id">>) {
+    return supabase.from("medical_emergency_info").upsert({ user_id: userId, ...data }).select().single<DBEmergencyInfo>();
   },
 
   // Occasions

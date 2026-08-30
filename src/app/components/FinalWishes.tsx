@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import {
   Heart, Church, Plus, X,
-  CheckCircle, Edit2, Trash2, ArrowRight, Layers
+  CheckCircle, Edit2, Trash2, ArrowRight, Layers, Check
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDemo, type FinalWish as Wish, type FuneralPlan } from "../context/DemoContext";
 import heroWishesPhoto from "../../imports/finalwishes_hero_photo.png";
 import heroFuneralPhoto from "../../imports/funeral_hero_photo.png";
 
@@ -20,34 +21,7 @@ const NEG     = "#D06B6B";
 
 type Tab = "wishes" | "funeral";
 
-const funeralPlan = {
-  serviceType: "Memorial Service",
-  location: "Green Valley Funeral Services, 1240 Oak Street, Sacramento, CA 95814",
-  preferredDate: "Within 10 days of passing",
-  budget: "$8,000–$12,000",
-  prearranged: true,
-  prearrangedWith: "Green Valley Funeral Services — Contract #GV-2024-8821",
-  music: ["Amazing Grace", "How Great Thou Art", "Fly Me to the Moon"],
-  readings: ["Psalm 23", "John 14:1-6"],
-  flowers: "White lilies and blue hydrangeas",
-  reception: "Family home — catered by Mario's Italian Kitchen",
-  obituaryDraft: "James William Doe, beloved husband, father, and friend, passed peacefully surrounded by his family...",
-  specialRequests: "No black attire — please wear bright colors to celebrate a life well lived.",
-};
-
 const WISH_CATEGORIES = ["Personal Property", "Sentimental Items", "Financial", "Digital", "Charitable", "Other"];
-
-interface Wish {
-  id: number; category: string; item: string; recipient: string; notes: string;
-}
-
-const initialWishes: Wish[] = [
-  { id: 1, category: "Personal Property", item: "1967 Ford Mustang (Red)", recipient: "Michael Doe (Son)", notes: "Keep it in the family. Never sell it." },
-  { id: 2, category: "Sentimental Items", item: "Grandfather's pocket watch", recipient: "Emily Doe (Daughter)", notes: "Has been in the family since 1892." },
-  { id: 3, category: "Financial", item: "Savings account at First National", recipient: "Sarah Johnson (Spouse)", notes: "Primary beneficiary already designated." },
-  { id: 4, category: "Personal Property", item: "Book collection (600+ volumes)", recipient: "Local Public Library", notes: "Donate the entire collection." },
-  { id: 5, category: "Digital", item: "Photography portfolio (hard drives)", recipient: "Michael Doe (Son)", notes: "Archive and publish the wildlife series." },
-];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -174,7 +148,7 @@ const WISHES_CSS = `
 
 /* ── Add / edit a bequest ── */
 function WishModal({ editing, onClose, onSave }: {
-  editing: Wish | null; onClose: () => void; onSave: (w: Wish) => void;
+  editing: Wish | null; onClose: () => void; onSave: (w: Omit<Wish,"id">) => void;
 }) {
   const [form, setForm] = useState<Partial<Wish>>(editing ?? { category: WISH_CATEGORIES[0], item: "", recipient: "", notes: "" });
 
@@ -188,7 +162,6 @@ function WishModal({ editing, onClose, onSave }: {
     if (!form.item?.trim()) return toast.error("Describe the item or asset.");
     if (!form.recipient?.trim()) return toast.error("Name who should receive it.");
     onSave({
-      id: editing?.id ?? Date.now(),
       category: form.category ?? WISH_CATEGORIES[0],
       item: form.item.trim(),
       recipient: form.recipient.trim(),
@@ -239,26 +212,31 @@ function WishModal({ editing, onClose, onSave }: {
 }
 
 export function FinalWishes() {
+  const { wishes, addWish, updateWish, removeWish, funeralPlan, saveFuneralPlan } = useDemo();
   const [tab, setTab] = useState<Tab>("wishes");
-  const [wishes, setWishes] = useState<Wish[]>(initialWishes);
   const [wishModal, setWishModal] = useState(false);
   const [editingWish, setEditingWish] = useState<Wish | null>(null);
 
-  const saveWish = (w: Wish) => {
-    setWishes(prev => editingWish ? prev.map(x => x.id === w.id ? w : x) : [w, ...prev]);
-    toast.success(editingWish ? "Wish updated." : `"${w.item}" added to your final wishes.`);
+  const saveWish = async (w: Omit<Wish,"id">) => {
+    if (editingWish) await updateWish(editingWish.id, w);
+    else await addWish(w);
     setWishModal(false);
     setEditingWish(null);
   };
 
-  const deleteWish = (id: number) => {
-    const w = wishes.find(x => x.id === id);
-    setWishes(prev => prev.filter(x => x.id !== id));
-    toast.success(`"${w?.item}" removed.`);
-  };
+  const deleteWish = (id: string) => removeWish(id);
 
+  // Obituary draft is edited independently of the rest of the plan, but both
+  // live in the same funeral_plans row — saving always sends the full plan.
   const [obituary, setObituary] = useState(funeralPlan.obituaryDraft);
   const [editingObit, setEditingObit] = useState(false);
+  React.useEffect(() => { if (!editingObit) setObituary(funeralPlan.obituaryDraft); }, [funeralPlan.obituaryDraft, editingObit]);
+
+  // Service Details / Service Preferences edit mode
+  const [planDraft, setPlanDraft] = useState<FuneralPlan>(funeralPlan);
+  const [editingPlan, setEditingPlan] = useState(false);
+  React.useEffect(() => { if (!editingPlan) setPlanDraft(funeralPlan); }, [funeralPlan, editingPlan]);
+
   const wlistRef = React.useRef<HTMLDivElement>(null);
   const funeralGridRef = React.useRef<HTMLDivElement>(null);
   const obitRef = React.useRef<HTMLDivElement>(null);
@@ -387,43 +365,84 @@ export function FinalWishes() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="fgrid" ref={funeralGridRef}>
               <div className="card pad">
-                <h3 className="sec-title"><span className="tick" />Service Details</h3>
-                {[
-                  { label: "Service Type", value: funeralPlan.serviceType },
-                  { label: "Location / Funeral Home", value: funeralPlan.location },
-                  { label: "Preferred Timing", value: funeralPlan.preferredDate },
-                  { label: "Budget Range", value: funeralPlan.budget },
-                  { label: "Prearranged Contract", value: funeralPlan.prearranged ? funeralPlan.prearrangedWith : "Not prearranged" },
-                ].map(f => (
-                  <div key={f.label} className="tile">
-                    <div className="tk">{f.label}</div>
-                    <div className="tv">{f.value}</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick" />Service Details</h3>
+                  {!editingPlan && <button className="btn-ghost" onClick={() => setEditingPlan(true)}><Edit2 size={13} /> Edit Plan</button>}
+                </div>
+                {editingPlan ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div className="field"><label>SERVICE TYPE</label><input value={planDraft.serviceType} onChange={e => setPlanDraft(p => ({ ...p, serviceType: e.target.value }))} placeholder="e.g. Memorial Service" /></div>
+                    <div className="field"><label>LOCATION / FUNERAL HOME</label><input value={planDraft.location} onChange={e => setPlanDraft(p => ({ ...p, location: e.target.value }))} placeholder="Funeral home name and address" /></div>
+                    <div className="field"><label>PREFERRED TIMING</label><input value={planDraft.preferredDate} onChange={e => setPlanDraft(p => ({ ...p, preferredDate: e.target.value }))} placeholder="e.g. Within 10 days of passing" /></div>
+                    <div className="field"><label>ESTIMATED BUDGET ($)</label><input type="number" value={planDraft.budget} onChange={e => setPlanDraft(p => ({ ...p, budget: e.target.value }))} placeholder="10000" /></div>
+                    <div className="field">
+                      <label>PREARRANGED</label>
+                      <select value={planDraft.prearranged ? "yes" : "no"} onChange={e => setPlanDraft(p => ({ ...p, prearranged: e.target.value === "yes" }))}>
+                        <option value="no">Not prearranged</option>
+                        <option value="yes">Prearranged</option>
+                      </select>
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  [
+                    { label: "Service Type", value: funeralPlan.serviceType || "Not set" },
+                    { label: "Location / Funeral Home", value: funeralPlan.location || "Not set" },
+                    { label: "Preferred Timing", value: funeralPlan.preferredDate || "Not set" },
+                    { label: "Estimated Budget", value: funeralPlan.budget ? `$${Number(funeralPlan.budget).toLocaleString()}` : "Not set" },
+                    { label: "Prearranged", value: funeralPlan.prearranged ? "Yes" : "Not prearranged" },
+                  ].map(f => (
+                    <div key={f.label} className="tile">
+                      <div className="tk">{f.label}</div>
+                      <div className="tv">{f.value}</div>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="card pad">
                 <h3 className="sec-title"><span className="tick" />Service Preferences</h3>
-                <div className="tile">
-                  <div className="tk">Music</div>
-                  <div className="tags">
-                    {funeralPlan.music.map(m => <span key={m} className="tag music">{m}</span>)}
+                {editingPlan ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div className="field"><label>MUSIC (comma-separated)</label><input value={planDraft.music.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, music: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="Amazing Grace, How Great Thou Art" /></div>
+                    <div className="field"><label>READINGS (comma-separated)</label><input value={planDraft.readings.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, readings: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="Psalm 23, John 14:1-6" /></div>
+                    <div className="field"><label>FLOWERS</label><input value={planDraft.flowers} onChange={e => setPlanDraft(p => ({ ...p, flowers: e.target.value }))} placeholder="e.g. White lilies and blue hydrangeas" /></div>
+                    <div className="field"><label>RECEPTION</label><input value={planDraft.reception} onChange={e => setPlanDraft(p => ({ ...p, reception: e.target.value }))} placeholder="e.g. Family home — catered" /></div>
+                    <div className="field"><label>SPECIAL REQUESTS</label><textarea style={{ minHeight: 70 }} value={planDraft.specialRequests} onChange={e => setPlanDraft(p => ({ ...p, specialRequests: e.target.value }))} placeholder="Any special requests for the service" /></div>
+                    <div className="acts-row">
+                      <button className="btn-pos" onClick={async () => { await saveFuneralPlan(planDraft); setEditingPlan(false); }}>
+                        <Check size={13} /> Save Changes
+                      </button>
+                      <button className="btn-sec" onClick={() => { setPlanDraft(funeralPlan); setEditingPlan(false); }}>Cancel</button>
+                    </div>
                   </div>
-                </div>
-                <div className="tile">
-                  <div className="tk">Readings</div>
-                  <div className="tags">
-                    {funeralPlan.readings.map(r => <span key={r} className="tag read">{r}</span>)}
-                  </div>
-                </div>
-                <div className="tile">
-                  <div className="tk">Flowers</div>
-                  <div className="tv">{funeralPlan.flowers}</div>
-                </div>
-                <div className="tile">
-                  <div className="tk">Special Requests</div>
-                  <div className="tv">{funeralPlan.specialRequests}</div>
-                </div>
+                ) : (
+                  <>
+                    <div className="tile">
+                      <div className="tk">Music</div>
+                      <div className="tags">
+                        {funeralPlan.music.length ? funeralPlan.music.map(m => <span key={m} className="tag music">{m}</span>) : <span style={{ color: FAINT, fontSize: 15 }}>Not set</span>}
+                      </div>
+                    </div>
+                    <div className="tile">
+                      <div className="tk">Readings</div>
+                      <div className="tags">
+                        {funeralPlan.readings.length ? funeralPlan.readings.map(r => <span key={r} className="tag read">{r}</span>) : <span style={{ color: FAINT, fontSize: 15 }}>Not set</span>}
+                      </div>
+                    </div>
+                    <div className="tile">
+                      <div className="tk">Flowers</div>
+                      <div className="tv">{funeralPlan.flowers || "Not set"}</div>
+                    </div>
+                    <div className="tile">
+                      <div className="tk">Reception</div>
+                      <div className="tv">{funeralPlan.reception || "Not set"}</div>
+                    </div>
+                    <div className="tile">
+                      <div className="tk">Special Requests</div>
+                      <div className="tv">{funeralPlan.specialRequests || "Not set"}</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -433,7 +452,7 @@ export function FinalWishes() {
                 <>
                   <textarea style={{ minHeight: 160 }} value={obituary} onChange={e => setObituary(e.target.value)} />
                   <div className="acts-row">
-                    <button className="btn-pos" onClick={() => { setEditingObit(false); toast.success("Obituary draft saved."); }}>
+                    <button className="btn-pos" onClick={async () => { await saveFuneralPlan({ ...funeralPlan, obituaryDraft: obituary }); setEditingObit(false); }}>
                       <CheckCircle size={13} /> Save Draft
                     </button>
                     <button className="btn-sec" onClick={() => { setObituary(funeralPlan.obituaryDraft); setEditingObit(false); }}>

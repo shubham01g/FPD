@@ -775,13 +775,7 @@ const CONTACTS_CSS = `
 
 /* ── Main Component ──────────────────────────────────────────────── */
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
-  const { contacts: rawContacts, addContact, removeContact, sendVerificationInvite, submitIdVerification, updateGuardianFolders } = useDemo();
-  // DemoContext only exposes add/remove for contacts, plus targeted updates for
-  // verification and guardian folder access — other field edits (name/email/phone/notes)
-  // are tracked locally here as an overlay keyed by contact id, merged on top of the
-  // context's list, so ids and verification tracking stay stable across an edit.
-  const [edits, setEdits] = useState<Record<string, Partial<Contact>>>({});
-  const contacts = rawContacts.map(c => (edits[c.id] ? { ...c, ...edits[c.id] } : c));
+  const { contacts, addContact, removeContact, updateContact, sendVerificationInvite, submitIdVerification, updateGuardianFolders } = useDemo();
   const [addingType, setAddingType] = useState<ContactType | null>(null);
   const [importingType, setImportingType] = useState<ContactType | null>(null);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
@@ -918,9 +912,8 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             onClose={() => setEditingContact(null)}
             onAdd={async () => {}}
             onSave={(id, updates) => {
-              setEdits(prev => ({ ...prev, [id]: { ...prev[id], ...updates } }));
+              updateContact(id, updates);
               setEditingContact(null);
-              toast.success("Contact updated");
             }}
             onSaveFolders={updateGuardianFolders}
           />

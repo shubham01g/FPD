@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import {
   db, supabase, type DBDocument, type DBContact, type DBIdVerification,
   type DBFinalWish, type DBAllergy, type DBMedication, type DBReminder, type DBMemory, type DBOccasion,
+  type DBFuneralPlan, type DBEmergencyInfo,
 } from "../services/supabase";
 
 /* ─── Types ─────────────────────────────────────────────────────── */
@@ -32,10 +33,26 @@ export interface Reminder {
   id: string; title: string; dueDate: string; frequency: string; category: string; status: "upcoming"|"due_soon"|"overdue"|"completed"; notes: string;
 }
 export interface Memory {
-  id: string; title: string; date: string; type: "photo"|"video"|"note"; description: string; tags: string[];
+  id: string; title: string; date: string;
+  type: "photo"|"video"|"note"|"audio"|"message"|"keepsake"|"goal"|"award";
+  description: string; tags: string[];
+  recipient?: string; mediaUrl?: string; achieved?: boolean; issuer?: string; childName?: string;
 }
 export interface Occasion {
   id: string; name: string; date: string; type: "birthday"|"anniversary"|"holiday"; recipient: string; notes: string; recurring: boolean;
+}
+export interface FuneralPlan {
+  serviceType: string; location: string; preferredDate: string; budget: string; prearranged: boolean;
+  music: string[]; readings: string[]; flowers: string; reception: string; obituaryDraft: string; specialRequests: string;
+}
+export interface EmergencyInfo {
+  bloodType: string; height: string; weight: string; primaryLanguage: string; codeStatus: string;
+  dnr: boolean; organDonor: boolean; advanceDirective: boolean;
+  conditions: string[];
+  primaryDoctor: { name: string; specialty: string; phone: string; address: string };
+  hospital: { name: string; phone: string };
+  pharmacy: { name: string; phone: string };
+  insurance: { carrier: string; policyNum: string; groupNum: string; memberId: string };
 }
 export interface Notification {
   id: string; title: string; message: string; type: "info"|"warning"|"success"|"error"; time: string; read: boolean;
@@ -52,6 +69,20 @@ const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
+};
+
+const EMPTY_FUNERAL_PLAN: FuneralPlan = {
+  serviceType: "", location: "", preferredDate: "", budget: "", prearranged: false,
+  music: [], readings: [], flowers: "", reception: "", obituaryDraft: "", specialRequests: "",
+};
+
+const EMPTY_EMERGENCY_INFO: EmergencyInfo = {
+  bloodType: "", height: "", weight: "", primaryLanguage: "", codeStatus: "",
+  dnr: false, organDonor: false, advanceDirective: false, conditions: [],
+  primaryDoctor: { name: "", specialty: "", phone: "", address: "" },
+  hospital: { name: "", phone: "" },
+  pharmacy: { name: "", phone: "" },
+  insurance: { carrier: "", policyNum: "", groupNum: "", memberId: "" },
 };
 
 /* ─── Mappers: DB rows (canonical) <-> frontend shapes ─────────────── */
@@ -101,9 +132,28 @@ const rowToWish = (r: DBFinalWish): FinalWish => ({ id: r.id, category: r.catego
 const rowToAllergy = (r: DBAllergy): Allergy => ({ id: r.id, allergen: r.allergen, severity: r.severity, reaction: r.reaction ?? "", type: r.type ?? "", diagnosed: r.diagnosed ?? "" });
 const rowToMed = (r: DBMedication): Medication => ({ id: r.id, name: r.name, dose: r.dose ?? "", frequency: r.frequency ?? "", condition: r.condition ?? "", prescriber: r.prescriber ?? "", pharmacy: r.pharmacy ?? "", refillDate: r.refill_date ?? "" });
 const rowToReminder = (r: DBReminder): Reminder => ({ id: r.id, title: r.title, dueDate: r.due_date ?? "", frequency: r.frequency ?? "", category: r.category ?? "", status: r.status, notes: r.notes ?? "" });
-const rowToMemory = (r: DBMemory): Memory => ({ id: r.id, title: r.title, date: r.memory_date ?? "", type: r.type, description: r.description ?? "", tags: r.tags ?? [] });
+const rowToMemory = (r: DBMemory): Memory => ({
+  id: r.id, title: r.title, date: r.memory_date ?? "", type: r.type, description: r.description ?? "", tags: r.tags ?? [],
+  recipient: r.recipient ?? undefined, mediaUrl: r.media_url ?? undefined, achieved: r.achieved ?? undefined,
+  issuer: r.issuer ?? undefined, childName: r.child_name ?? undefined,
+});
 const rowToOccasion = (r: DBOccasion): Occasion => ({ id: r.id, name: r.name, date: r.occasion_date ?? "", type: r.type, recipient: r.recipient ?? "", notes: r.notes ?? "", recurring: r.recurring });
 const rowToNotif = (r: DBNotificationRow): Notification => ({ id: r.id, title: r.title, message: r.message, type: r.type, time: timeAgo(r.created_at), read: r.read });
+const rowToFuneralPlan = (r: DBFuneralPlan): FuneralPlan => ({
+  serviceType: r.service_type ?? "", location: r.location ?? "", preferredDate: r.preferred_date ?? "",
+  budget: r.budget != null ? String(r.budget) : "", prearranged: r.prearranged,
+  music: r.music ?? [], readings: r.readings ?? [], flowers: r.flowers ?? "", reception: r.reception ?? "",
+  obituaryDraft: r.obituary_draft ?? "", specialRequests: r.special_requests ?? "",
+});
+const rowToEmergencyInfo = (r: DBEmergencyInfo): EmergencyInfo => ({
+  bloodType: r.blood_type ?? "", height: r.height ?? "", weight: r.weight ?? "", primaryLanguage: r.primary_language ?? "",
+  codeStatus: r.code_status ?? "", dnr: r.dnr, organDonor: r.organ_donor, advanceDirective: r.advance_directive,
+  conditions: r.conditions ?? [],
+  primaryDoctor: { name: r.primary_doctor_name ?? "", specialty: r.primary_doctor_specialty ?? "", phone: r.primary_doctor_phone ?? "", address: r.primary_doctor_address ?? "" },
+  hospital: { name: r.hospital_name ?? "", phone: r.hospital_phone ?? "" },
+  pharmacy: { name: r.pharmacy_name ?? "", phone: r.pharmacy_phone ?? "" },
+  insurance: { carrier: r.insurance_carrier ?? "", policyNum: r.insurance_policy_number ?? "", groupNum: r.insurance_group_number ?? "", memberId: r.insurance_member_id ?? "" },
+});
 
 /* ─── Context ───────────────────────────────────────────────────── */
 interface DemoCtx {
@@ -122,15 +172,19 @@ interface DemoCtx {
   memories: Memory[];
   occasions: Occasion[];
   notifications: Notification[];
+  funeralPlan: FuneralPlan;
+  emergencyInfo: EmergencyInfo;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
   addDoc: (doc: Omit<Doc,"id"|"uploaded">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
   addContact: (c: Omit<Contact,"id">) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
+  updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<void>;
   sendVerificationInvite: (id: string) => Promise<void>;
   submitIdVerification: (contactId: string, file: File, idType: string) => Promise<void>;
   updateGuardianFolders: (id: string, folderIds: string[]) => Promise<void>;
   addWish: (w: Omit<FinalWish,"id">) => Promise<void>;
+  updateWish: (id: string, w: Omit<FinalWish,"id">) => Promise<void>;
   removeWish: (id: string) => Promise<void>;
   addAllergy: (a: Omit<Allergy,"id">) => Promise<void>;
   removeAllergy: (id: string) => Promise<void>;
@@ -142,8 +196,11 @@ interface DemoCtx {
   completeReminder: (id: string) => void;
   removeReminder: (id: string) => void;
   addMemory: (m: Omit<Memory,"id">) => Promise<void>;
+  updateMemory: (id: string, m: Partial<Omit<Memory,"id">>) => Promise<void>;
   removeMemory: (id: string) => Promise<void>;
   addOccasion: (o: Omit<Occasion,"id">) => Promise<void>;
+  saveFuneralPlan: (data: FuneralPlan) => Promise<void>;
+  saveEmergencyInfo: (data: EmergencyInfo) => Promise<void>;
   markNotifRead: (id: string) => void;
   markAllRead: () => void;
   unreadCount: number;
@@ -165,6 +222,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [occasions, setOccasions] = useState<Occasion[]>([]);
   const [notifications, setNotifs] = useState<Notification[]>([]);
+  const [funeralPlan, setFuneralPlan] = useState<FuneralPlan>(EMPTY_FUNERAL_PLAN);
+  const [emergencyInfo, setEmergencyInfo] = useState<EmergencyInfo>(EMPTY_EMERGENCY_INFO);
   const [continuationFeePaid, setContinuationFeePaid] = useState(false);
   const [deathVerifiedDoc, setDeathVerifiedDoc] = useState<string | null>(null);
 
@@ -173,6 +232,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     if (!uid) {
       setUser(EMPTY_USER); setDocs([]); setContacts([]); setWishes([]); setAllergies([]);
       setMeds([]); setReminders([]); setMemories([]); setOccasions([]); setNotifs([]);
+      setFuneralPlan(EMPTY_FUNERAL_PLAN); setEmergencyInfo(EMPTY_EMERGENCY_INFO);
       return;
     }
 
@@ -181,7 +241,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const [
         userRes, docsRes, contactsRes, idvRes, wishesRes, allergiesRes,
         medsRes, remindersRes, memoriesRes, occasionsRes, notifsRes,
-        feeRes,
+        feeRes, funeralPlanRes, emergencyInfoRes,
       ] = await Promise.all([
         db.getUser(uid),
         db.listDocuments(uid),
@@ -195,6 +255,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         db.listOccasions(uid),
         db.listNotifications(uid),
         db.getContinuationFee(uid),
+        db.getFuneralPlan(uid),
+        db.getEmergencyInfo(uid),
       ]);
       if (cancelled) return;
 
@@ -219,6 +281,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       setOccasions((occasionsRes.data ?? []).map(rowToOccasion));
       setNotifs(((notifsRes.data ?? []) as DBNotificationRow[]).map(rowToNotif));
       setContinuationFeePaid(!!feeRes.data);
+      setFuneralPlan(funeralPlanRes.data ? rowToFuneralPlan(funeralPlanRes.data) : EMPTY_FUNERAL_PLAN);
+      setEmergencyInfo(emergencyInfoRes.data ? rowToEmergencyInfo(emergencyInfoRes.data) : EMPTY_EMERGENCY_INFO);
     })();
 
     const channel = db.subscribeToNotifications(uid, () => {
@@ -297,6 +361,22 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Contact removed", { id: tid });
   }, []);
 
+  const updateContact = useCallback(async (id: string, updates: Partial<Omit<Contact,"id">>) => {
+    const tid = toast.loading("Saving contact...");
+    const { data, error } = await db.updateContact(id, {
+      full_name: updates.name, email: updates.email, phone: updates.phone, relationship: updates.relationship,
+      access_level: updates.accessLevel, notes: updates.notes,
+    });
+    if (error || !data) { toast.error("Could not save contact", { id: tid }); return; }
+    // Merge only the edited fields — rowToContact would also reset idVerificationStatus/
+    // idRejectionReason to null since `data` here has no joined id_verifications row.
+    setContacts(c => c.map(x => x.id === id ? {
+      ...x, name: data.full_name, email: data.email, phone: data.phone ?? "", relationship: data.relationship,
+      accessLevel: data.access_level, notes: data.notes, avatar: initials(data.full_name),
+    } : x));
+    toast.success("Contact updated", { id: tid });
+  }, []);
+
   const sendVerificationInvite = useCallback(async (id: string) => {
     const tid = toast.loading("Sending verification invite...");
     const { error } = await db.sendContactInvite(id);
@@ -335,6 +415,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setWishes(prev => [rowToWish(data), ...prev]);
     toast.success("Final wish saved to vault", { id: tid });
   }, [uid]);
+
+  const updateWish = useCallback(async (id: string, w: Omit<FinalWish,"id">) => {
+    const { data, error } = await db.updateFinalWish(id, { category: w.category, item: w.item, recipient: w.recipient, notes: w.notes });
+    if (error || !data) { toast.error("Could not update wish"); return; }
+    setWishes(prev => prev.map(x => x.id === id ? rowToWish(data) : x));
+    toast.success("Wish updated");
+  }, []);
 
   const removeWish = useCallback(async (id: string) => {
     const { error } = await db.deleteFinalWish(id);
@@ -414,11 +501,23 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const addMemory = useCallback(async (m: Omit<Memory,"id">) => {
     if (!uid) return;
     const tid = toast.loading("Saving memory...");
-    const { data, error } = await db.addMemory({ user_id: uid, title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags });
+    const { data, error } = await db.addMemory({
+      user_id: uid, title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
+      recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
+    });
     if (error || !data) { toast.error("Could not save memory", { id: tid }); return; }
     setMemories(prev => [rowToMemory(data), ...prev]);
     toast.success("Memory saved to vault", { id: tid });
   }, [uid]);
+
+  const updateMemory = useCallback(async (id: string, m: Partial<Omit<Memory,"id">>) => {
+    const { data, error } = await db.updateMemory(id, {
+      title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
+      recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
+    });
+    if (error || !data) { toast.error("Could not update memory"); return; }
+    setMemories(prev => prev.map(x => x.id === id ? rowToMemory(data) : x));
+  }, []);
 
   const removeMemory = useCallback(async (id: string) => {
     const { error } = await db.deleteMemory(id);
@@ -437,6 +536,41 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Occasion saved", { id: tid });
   }, [uid]);
 
+  /* Funeral plan (one row per user) */
+  const saveFuneralPlan = useCallback(async (data: FuneralPlan) => {
+    if (!uid) return;
+    const tid = toast.loading("Saving funeral plan...");
+    const { data: row, error } = await db.saveFuneralPlan(uid, {
+      service_type: data.serviceType, location: data.location, preferred_date: data.preferredDate,
+      budget: data.budget ? Number(data.budget) : null, prearranged: data.prearranged,
+      music: data.music, readings: data.readings, flowers: data.flowers, reception: data.reception,
+      obituary_draft: data.obituaryDraft, special_requests: data.specialRequests,
+    });
+    if (error || !row) { toast.error("Could not save funeral plan", { id: tid }); return; }
+    setFuneralPlan(rowToFuneralPlan(row));
+    toast.success("Funeral plan saved", { id: tid });
+  }, [uid]);
+
+  /* Medical emergency info (one row per user) */
+  const saveEmergencyInfo = useCallback(async (data: EmergencyInfo) => {
+    if (!uid) return;
+    const tid = toast.loading("Saving emergency information...");
+    const { data: row, error } = await db.saveEmergencyInfo(uid, {
+      blood_type: data.bloodType, height: data.height, weight: data.weight, primary_language: data.primaryLanguage,
+      code_status: data.codeStatus, dnr: data.dnr, organ_donor: data.organDonor, advance_directive: data.advanceDirective,
+      conditions: data.conditions,
+      primary_doctor_name: data.primaryDoctor.name, primary_doctor_specialty: data.primaryDoctor.specialty,
+      primary_doctor_phone: data.primaryDoctor.phone, primary_doctor_address: data.primaryDoctor.address,
+      hospital_name: data.hospital.name, hospital_phone: data.hospital.phone,
+      pharmacy_name: data.pharmacy.name, pharmacy_phone: data.pharmacy.phone,
+      insurance_carrier: data.insurance.carrier, insurance_policy_number: data.insurance.policyNum,
+      insurance_group_number: data.insurance.groupNum, insurance_member_id: data.insurance.memberId,
+    });
+    if (error || !row) { toast.error("Could not save emergency information", { id: tid }); return; }
+    setEmergencyInfo(rowToEmergencyInfo(row));
+    toast.success("Emergency information updated", { id: tid });
+  }, [uid]);
+
   /* Notifications */
   const markNotifRead = useCallback((id: string) => {
     db.markNotificationRead(id);
@@ -451,10 +585,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   return (
     <DemoContext.Provider value={{
       user, docs, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
-      updateUser, addDoc, deleteDoc, addContact, removeContact,
+      funeralPlan, emergencyInfo,
+      updateUser, addDoc, deleteDoc, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders,
-      addWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
-      addReminder, completeReminder, removeReminder, addMemory, removeMemory, addOccasion,
+      addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
+      addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,
+      saveFuneralPlan, saveEmergencyInfo,
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,
       deathVerified: deathVerifiedDoc !== null, deathVerifiedDoc, submitDeathRecord,

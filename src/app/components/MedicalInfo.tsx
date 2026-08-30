@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Heart, AlertTriangle, Pill, Phone, Plus, Trash2, X, Pencil, Check, Building2, Stethoscope, ShieldCheck, Droplet } from "lucide-react";
-import { useDemo, type Allergy, type Medication } from "../context/DemoContext";
+import { useDemo, type Allergy, type Medication, type EmergencyInfo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroMedicalPhoto from "../../imports/medicalinfo_hero_photo.png";
@@ -22,26 +22,6 @@ const sevStyle: Record<Allergy["severity"], { bg: string; color: string; label: 
   severe:   { bg: "rgba(208,107,107,0.14)", color: NEG,  label: "SEVERE" },
   moderate: { bg: "rgba(217,165,94,0.14)",  color: WARN, label: "MODERATE" },
   mild:     { bg: "rgba(95,190,145,0.14)",  color: "#D99A6B",  label: "MILD" },
-};
-
-type EmergencyInfo = {
-  bloodType: string; height: string; weight: string; primaryLanguage: string; codeStatus: string;
-  dnr: boolean; organDonor: boolean; advanceDirective: boolean;
-  conditions: string[];
-  primaryDoctor: { name: string; specialty: string; phone: string; address: string };
-  hospital: { name: string; phone: string };
-  pharmacy: { name: string; phone: string };
-  insurance: { carrier: string; policyNum: string; groupNum: string; memberId: string };
-};
-
-const initialEmergency: EmergencyInfo = {
-  bloodType: "O+", height: `5'11"`, weight: "182 lb", primaryLanguage: "English", codeStatus: "Full Code",
-  dnr: true, organDonor: true, advanceDirective: true,
-  conditions: ["Type 2 Diabetes (diagnosed 2019)", "Hypertension (controlled)", "Mild sleep apnea"],
-  primaryDoctor: { name: "Dr. Karen Fields, MD", specialty: "Internal Medicine", phone: "(916) 555-0182", address: "4200 Medical Center Dr, Sacramento, CA" },
-  hospital: { name: "UC Davis Medical Center", phone: "(916) 734-2011" },
-  pharmacy: { name: "CVS Pharmacy — Elk Grove", phone: "(916) 555-0311" },
-  insurance: { carrier: "Blue Cross Blue Shield", policyNum: "BCBS-X29841-CA", groupNum: "GRP-88213", memberId: "MEM-449201" },
 };
 
 const bloodOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
@@ -326,22 +306,24 @@ function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null;
 }
 
 export function MedicalInfo() {
-  const { allergies, medications, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication } = useDemo();
+  const {
+    allergies, medications, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
+    emergencyInfo, saveEmergencyInfo,
+  } = useDemo();
   const [tab, setTab] = useState<Tab>("emergency");
   const [showAddAllergy, setShowAddAllergy] = useState(false);
   const [showAddMed, setShowAddMed] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState<Allergy | null>(null);
   const [editingMed, setEditingMed] = useState<Medication | null>(null);
 
-  const [info, setInfo] = useState<EmergencyInfo>(initialEmergency);
-  const [draft, setDraft] = useState<EmergencyInfo>(initialEmergency);
+  const [draft, setDraft] = useState<EmergencyInfo>(emergencyInfo);
   const [editing, setEditing] = useState(false);
   const [newCondition, setNewCondition] = useState("");
 
-  const startEdit = () => { setDraft(info); setEditing(true); };
+  const startEdit = () => { setDraft(emergencyInfo); setEditing(true); };
   const cancelEdit = () => { setEditing(false); setNewCondition(""); };
-  const saveEdit = () => { setInfo(draft); setEditing(false); setNewCondition(""); toast.success("Emergency information updated"); };
-  const d = editing ? draft : info;
+  const saveEdit = async () => { await saveEmergencyInfo(draft); setEditing(false); setNewCondition(""); };
+  const d = editing ? draft : emergencyInfo;
   const setD = (patch: Partial<EmergencyInfo>) => setDraft(p => ({ ...p, ...patch }));
   const setNested = <K extends "primaryDoctor" | "hospital" | "pharmacy" | "insurance">(k: K, patch: Partial<EmergencyInfo[K]>) =>
     setDraft(p => ({ ...p, [k]: { ...p[k], ...patch } }));
@@ -356,10 +338,10 @@ export function MedicalInfo() {
 
   const severeCount = allergies.filter(a => a.severity === "severe").length;
   const kpis = [
-    { label: "Blood Type", value: info.bloodType, sub: info.codeStatus, icon: <Droplet size={14} />, dot: ACCENT2 },
+    { label: "Blood Type", value: emergencyInfo.bloodType || "—", sub: emergencyInfo.codeStatus || "Not set", icon: <Droplet size={14} />, dot: ACCENT2 },
     { label: "Allergies", value: String(allergies.length), sub: severeCount > 0 ? `${severeCount} severe` : "None marked severe", icon: <AlertTriangle size={14} />, dot: severeCount > 0 ? NEG : POS },
     { label: "Medications", value: String(medications.length), sub: "Active prescriptions", icon: <Pill size={14} />, dot: ACCENT2 },
-    { label: "Active Conditions", value: String(info.conditions.length), sub: "On file", icon: <Heart size={14} />, dot: ACCENT2 },
+    { label: "Active Conditions", value: String(emergencyInfo.conditions.length), sub: "On file", icon: <Heart size={14} />, dot: ACCENT2 },
   ];
 
   return (
