@@ -1,80 +1,29 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
+import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Trash2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
+import { useDemo, type Memory } from "../context/DemoContext";
 import heroFamilyPhoto from "../../imports/familymemories_hero_photo.png";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
 
-/* Photo Memories — photos you upload from a device or scan in from prints.
-   Each entry is one moment, holding one or many photos.                     */
-interface PhotoMemory {
-  id: number; title: string; date: string; description: string;
-  tags: string[]; photos: string[]; count: number;
-}
-
-const photoMemories: PhotoMemory[] = [
-  { id: 1, title: "Family Christmas 2024", date: "Dec 25, 2024", description: "Last Christmas at the Sacramento house. All four kids were home.", tags: ["family", "christmas", "2024"], photos: [], count: 42 },
-  { id: 2, title: "Michael's Wedding Day", date: "Jun 12, 2022", description: "Michael married Amanda Torres in Napa Valley. One of the best days of my life.", tags: ["michael", "wedding", "family"], photos: [], count: 168 },
-  { id: 3, title: "Scanned Prints — Summers 1978–1984", date: "Scanned Mar 3, 2026", description: "Shoebox of prints from the Oakland years, scanned in and labeled.", tags: ["scanned", "childhood", "archive"], photos: [], count: 96 },
-  { id: 4, title: "Dad's 60th Birthday Celebration", date: "Nov 14, 2021", description: "Surprise party at Mario's. Family flew in from three states.", tags: ["birthday", "family", "milestone"], photos: [], count: 31 },
-];
-
-/* Video Memories — old home videos you already have, uploaded or digitized.
-   Recording a new message for someone lives in Messages to Loved Ones.       */
-interface VideoMemory {
-  id: number; title: string; filmed: string; duration: string; added: string;
-  description: string; source: string; url?: string;
-}
-
-const videoMemories: VideoMemory[] = [
-  { id: 1, title: "Big Sur Camping Trip", filmed: "Aug 8, 2023", duration: "14:22", added: "Apr 10, 2026", description: "Three-day camping trip with the grandkids. Tyler caught his first fish.", source: "Uploaded from phone" },
-  { id: 2, title: "Michael & Amanda's Wedding — Full Ceremony", filmed: "Jun 12, 2022", duration: "1:04:38", added: "Apr 10, 2026", description: "The full ceremony and reception in Napa Valley, from the videographer's copy.", source: "Uploaded from camcorder" },
-  { id: 3, title: "Christmas Morning 1994", filmed: "Dec 25, 1994", duration: "22:10", added: "Apr 11, 2026", description: "The kids opening presents at the old house. Grandma Rose is on this one.", source: "Digitized VHS tape" },
-  { id: 4, title: "Dad's 60th Birthday Party", filmed: "Nov 14, 2021", duration: "31:47", added: "Apr 11, 2026", description: "Surprise party at Mario's — the toasts and the whole dinner.", source: "Uploaded from phone" },
-];
-
-/* Audio Memories — recorded here, in your own voice. */
-const audioMemories: { id:number; title:string; recipient:string; duration:string; recorded:string; description:string; url?:string }[] = [
-  { id: 1, title: "Bedtime Story for Emma", recipient: "Emma Doe (Granddaughter)", duration: "7:14", recorded: "Apr 12, 2026", description: "Grandfather reading 'The Velveteen Rabbit' — for her to hear when she's older." },
-  { id: 2, title: "Life Advice — 10 Things I Wish I Knew", recipient: "All Children & Grandchildren", duration: "18:32", recorded: "Apr 11, 2026", description: "Ten pieces of wisdom from a lifetime of lessons — work, love, money, health, and happiness." },
-  { id: 3, title: "Wedding Anniversary Message for Sarah", recipient: "Sarah Johnson (Spouse)", duration: "4:55", recorded: "Apr 10, 2026", description: "A private anniversary message — to be played on our anniversary each year." },
-  { id: 4, title: "The Day Michael Was Born", recipient: "Michael Doe (Son)", duration: "11:08", recorded: "Apr 10, 2026", description: "The story of the day Michael was born — told in full detail for the first time." },
-];
-
-const kidsActivities = [
-  { id: 1, child: "Tyler Doe (Grandson, age 8)", activities: ["Little League Baseball — Roseville Tigers", "Swimming Lessons — YMCA"], school: "Woodcreek Elementary, Roseville CA", notes: "Loves dinosaurs. Allergic to peanuts." },
-  { id: 2, child: "Lily Doe (Granddaughter, age 6)", activities: ["Ballet — Sacramento Ballet Academy", "Soccer — Roseville Youth Soccer"], school: "Woodcreek Elementary, Roseville CA", notes: "Loves painting. Very shy at first." },
-];
-
-const keepsakes = [
-  { id: 1, item: "Grandfather's Pocket Watch (1892)", location: "Safe deposit box — Wells Fargo downtown", value: "Sentimental / ~$800", intendedFor: "Emily Doe (Daughter)", story: "Brought from Italy by great-great-grandfather Giovanni. Never been repaired — still runs." },
-  { id: 2, item: "Wedding Ring (mine)", location: "Jewelry box — master bedroom dresser", value: "Sentimental / ~$2,400", intendedFor: "Emily Doe (Daughter)", story: "My father's wedding ring, given to me when he passed. May it continue through generations." },
-  { id: 3, item: "Photo Albums (1960s–1990s)", location: "Hall closet, top shelf in labeled boxes", value: "Sentimental", intendedFor: "All children — split equally", story: "Hard copies of family history before digital. Please digitize and share with everyone." },
-  { id: 4, item: "Military Service Medal Collection", location: "Display case — home office", value: "Sentimental / $200–$500", intendedFor: "Michael Doe (Son)", story: "U.S. Army service 1984–1988. Stories behind each medal are recorded in video message." },
-];
-
-const goals = [
-  { id: 1, goal: "Ensure family home is paid off before death", status: "in_progress", progress: 58, notes: "Mortgage balance $201,400. Consider life insurance payout." },
-  { id: 2, goal: "Digitize all family photo albums", status: "in_progress", progress: 35, notes: "Tyler is helping scan albums over summer." },
-  { id: 3, goal: "Complete Legacy Vault with all documents", status: "in_progress", progress: 78, notes: "Missing: tax returns pre-2023, retirement account beneficiary updates." },
-  { id: 4, goal: "Teach Michael photography business operations", status: "completed", progress: 100, notes: "Completed summer 2025. All business docs transferred." },
-  { id: 5, goal: "Reach $500k in retirement savings", status: "in_progress", progress: 82, notes: "$407k current. On track for 2028." },
-];
-
-const awards = [
-  { id: 1, award: "U.S. Army Good Conduct Medal", year: "1988", organization: "United States Army", category: "Military", description: "Awarded for exemplary behavior during service." },
-  { id: 2, award: "Wildlife Photographer of the Year — Regional Finalist", year: "2019", organization: "California Photography Guild", category: "Professional", description: "Shortlisted for Big Sur Wildlife Series." },
-  { id: 3, award: "Sacramento Business of the Year — Small Business", year: "2021", organization: "Sacramento Chamber of Commerce", category: "Business", description: "Awarded to Doe Photography LLC." },
-];
+/* Each of the 7 tabs is a filtered view over the single `memories` table
+   (see DemoContext), keyed by Memory.type. Fields with no dedicated column
+   are folded into `description` or `tags` per-type, as used below:
+     photos    -> type "photo"    (tags = freeform hashtags, mediaUrl = the photo)
+     messages  -> type "video"    (tags[0] = source, mediaUrl = the video)
+     audio     -> type "audio"    (recipient = "for", mediaUrl = the recording)
+     kids      -> type "note"     (childName = child, recipient = school, tags = activities)
+     keepsakes -> type "keepsake" (recipient = intended-for, tags = [location, value], mediaUrl = photo)
+     goals     -> type "goal"     (achieved = done y/n — no numeric progress column in the DB)
+     awards    -> type "award"    (issuer = organization, tags[0] = category, childName = optional recipient) */
 
 const statusStyles = {
   completed: { color: "#D99A6B", bg: "rgba(72,187,120,0.12)", label: "COMPLETED" },
   in_progress: { color: "#6E90C9", bg: "rgba(91,110,225,0.12)", label: "IN PROGRESS" },
-  not_started: { color: "var(--muted-foreground)", bg: "var(--secondary)", label: "NOT STARTED" },
 };
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar,
@@ -277,10 +226,17 @@ const FAM_CSS = `
 `;
 
 export function FamilyMemories() {
+  const { memories, addMemory, updateMemory, removeMemory } = useDemo();
   const [tab, setTab] = useState<Tab>("memories");
-  const [memoriesList, setMemoriesList] = useState(photoMemories);
-  const [videoList, setVideoList] = useState(videoMemories);
-  const [audioList, setAudioList] = useState(audioMemories);
+  // Every tab below is a filtered slice of the one real `memories` list (see the
+  // type-mapping comment at the top of this file) instead of its own mock array.
+  const memoriesList  = memories.filter(m => m.type === "photo");
+  const videoList     = memories.filter(m => m.type === "video");
+  const audioList     = memories.filter(m => m.type === "audio");
+  const kidsList      = memories.filter(m => m.type === "note");
+  const keepsakesList = memories.filter(m => m.type === "keepsake");
+  const goalsList     = memories.filter(m => m.type === "goal");
+  const awardsList    = memories.filter(m => m.type === "award");
   const tabContentRef = React.useRef<HTMLDivElement>(null);
 
   // ── Photo upload / scan staging ─────────────────────────────────────
@@ -315,22 +271,6 @@ export function FamilyMemories() {
     toast.success(`"${file.name}" ready — add the details to save it`);
   }
 
-  /* Read the real running time off the file once it is in the list. */
-  function probeDuration(url: string, id: number) {
-    const el = document.createElement("video");
-    el.preload = "metadata";
-    el.onloadedmetadata = () => {
-      const s = Math.round(el.duration || 0);
-      if (!s || !isFinite(s)) return;
-      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-      const dur = h
-        ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`
-        : `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-      setVideoList(p => p.map(v => v.id === id ? { ...v, duration: dur } : v));
-    };
-    el.src = url;
-  }
-
   // ── Audio upload staging ────────────────────────────────────────────
   const [pendingAudio, setPendingAudio] = useState<{ url:string; name:string } | null>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -344,18 +284,6 @@ export function FamilyMemories() {
     setForm(p => ({ ...p, title: p.title || file.name.replace(/\.[^.]+$/, "") }));
     setShowAdd("audio");
     toast.success(`"${file.name}" ready — add the details to save it`);
-  }
-
-  function probeAudioDuration(url: string, id: number) {
-    const el = document.createElement("audio");
-    el.preload = "metadata";
-    el.onloadedmetadata = () => {
-      const s = Math.round(el.duration || 0);
-      if (!s || !isFinite(s)) return;
-      const m = Math.floor(s / 60), sec = s % 60;
-      setAudioList(p => p.map(a => a.id === id ? { ...a, duration: `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}` } : a));
-    };
-    el.src = url;
   }
 
   // ── Audio Recorder state ────────────────────────────────────────────
@@ -429,19 +357,17 @@ export function FamilyMemories() {
     mediaRecorderRef.current?.stop();
   }
 
-  function saveAudioMemory() {
+  async function saveAudioMemory() {
     if (!recTitle.trim()) { toast.error("Please enter a title for the recording"); return; }
     const duration = formatTime(recSeconds);
-    setAudioList(p => [...p, {
-      id: Date.now(),
-      title: recTitle,
+    await addMemory({
+      title: recTitle, type: "audio",
+      date: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
       recipient: recRecipient || "Family",
-      duration,
-      recorded: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
       description: recDesc || `Audio memory — ${duration}`,
-      url: recUrl || undefined,   // kept so it plays back from the list
-    }]);
-    toast.success(`"${recTitle}" saved to Audio Memories`);
+      tags: [],
+      mediaUrl: recUrl || undefined,   // kept so it plays back from the list
+    });
     // cleanup — the blob URL stays alive for playback in the list
     setRecState("idle"); setRecTitle(""); setRecRecipient(""); setRecDesc("");
     setRecBlob(null); setRecUrl(null); setRecSeconds(0);
@@ -451,12 +377,8 @@ export function FamilyMemories() {
     if (recUrl) URL.revokeObjectURL(recUrl);
     setRecState("idle"); setRecBlob(null); setRecUrl(null); setRecSeconds(0);
   }
-  const [kidsList, setKidsList] = useState(kidsActivities);
-  const [keepsakesList, setKeepsakesList] = useState(keepsakes);
-  const [goalsList, setGoalsList] = useState(goals);
-  const [awardsList, setAwardsList] = useState(awards);
   const [showAdd, setShowAdd] = useState<Tab|null>(null);
-  const [editingId, setEditingId] = useState<number|null>(null);
+  const [editingId, setEditingId] = useState<string|null>(null);
 
   /* Closing without saving drops any staged media so blob URLs don't leak. */
   function closeAddModal() {
@@ -477,137 +399,105 @@ export function FamilyMemories() {
   const [itemDoc, setItemDoc] = useState<string|null>(null);
   function resetItemMedia() { setItemPhoto(""); setItemDoc(null); }
 
+  function confirmRemoveMemory(id: string, label: string) {
+    if (window.confirm(`Remove "${label}"?`)) removeMemory(id);
+  }
+
   // ── Edit handlers — pre-fill the shared Add modal with a record's current values ──
-  function editMemory(m: any) {
+  // (tags[] is reused positionally per-type — see the mapping comment at the top of this file)
+  function editMemory(m: Memory) {
     setForm({ title: m.title, date: m.date, desc: m.description, tags: m.tags.join(", ") });
     setEditingId(m.id);
     setShowAdd("memories");
   }
-  function editVideoMemory(v: any) {
-    setForm({ title: v.title, filmed: v.filmed, source: v.source, desc: v.description });
+  function editVideoMemory(v: Memory) {
+    setForm({ title: v.title, filmed: v.date, source: v.tags[0] || "", desc: v.description });
     setEditingId(v.id);
     setShowAdd("messages");
   }
-  function editAudioMemory(a: any) {
-    setForm({ title: a.title, recipient: a.recipient, desc: a.description });
+  function editAudioMemory(a: Memory) {
+    setForm({ title: a.title, recipient: a.recipient || "", desc: a.description });
     setEditingId(a.id);
     setShowAdd("audio");
   }
-  function editKid(k: any) {
-    setForm({ name: k.child, school: k.school, activities: k.activities.join(", "), notes: k.notes });
+  function editKid(k: Memory) {
+    setForm({ name: k.title, school: k.recipient || "", activities: k.tags.join(", "), notes: k.description });
     setEditingId(k.id);
     setShowAdd("kids");
   }
-  function editKeepsake(k: any) {
-    setForm({ item: k.item, location: k.location, value: k.value, intendedFor: k.intendedFor, story: k.story });
-    setItemPhoto(k.photo || "");
-    setItemDoc(k.attachedDoc || null);
+  function editKeepsake(k: Memory) {
+    setForm({ item: k.title, location: k.tags[0] || "", value: k.tags[1] || "", intendedFor: k.recipient || "", story: k.description });
+    setItemPhoto(k.mediaUrl || "");
     setEditingId(k.id);
     setShowAdd("keepsakes");
   }
-  function editGoal(g: any) {
-    setForm({ goal: g.goal, progress: String(g.progress), notes: g.notes });
+  function editGoal(g: Memory) {
+    setForm({ goal: g.title, notes: g.description, achieved: g.achieved ? "yes" : "" });
     setEditingId(g.id);
     setShowAdd("goals");
   }
-  function editAward(a: any) {
-    setForm({ award: a.award, year: a.year, org: a.organization, category: a.category, desc: a.description });
-    setItemPhoto(a.photo || "");
-    setItemDoc(a.attachedDoc || null);
+  function editAward(a: Memory) {
+    setForm({ award: a.title, year: a.date, org: a.issuer || "", category: a.tags[0] || "", desc: a.description, forChild: a.childName || "" });
+    setItemPhoto(a.mediaUrl || "");
     setEditingId(a.id);
     setShowAdd("awards");
   }
 
-  function quickAdd() {
+  async function quickAdd() {
     const isEdit = editingId !== null;
+    const today = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
     switch(showAdd) {
       case "memories": {
         if (!form.title) { toast.error("Title required"); return; }
         const tags = (form.tags||"").split(",").map(t=>t.trim()).filter(Boolean);
-        if (isEdit) {
-          setMemoriesList(p=>p.map(m=>m.id===editingId?{...m,title:form.title,date:form.date||m.date,description:form.desc||"",tags}:m));
-          toast.success(`"${form.title}" updated`);
-        } else {
-          setMemoriesList(p=>[...p,{id:Date.now(),title:form.title,date:form.date||new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",tags,photos:pendingPhotos,count:pendingPhotos.length}]);
-          toast.success(pendingPhotos.length
-            ? `"${form.title}" saved — ${pendingPhotos.length} photo${pendingPhotos.length>1?"s":""}`
-            : `"${form.title}" added to Photo Memories`);
-        }
+        const mediaUrl = pendingPhotos[0]; // only one photo per memory is persisted (media_url is a single column)
+        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.date, description: form.desc || "", tags, mediaUrl });
+        else await addMemory({ title: form.title, date: form.date || today, type: "photo", description: form.desc || "", tags, mediaUrl });
         setPendingPhotos([]);   // ownership passes to the saved memory
         break;
       }
       case "messages": {
         if (!form.title) { toast.error("Title required"); return; }
-        if (isEdit) {
-          setVideoList(p=>p.map(v=>v.id===editingId?{...v,title:form.title,filmed:form.filmed||v.filmed,source:form.source||v.source,description:form.desc||""}:v));
-          toast.success(`"${form.title}" updated`);
-        } else {
-          const id = Date.now();
-          setVideoList(p=>[...p,{id,title:form.title,filmed:form.filmed||"Unknown",duration:pendingVideo?"…":"—",added:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",source:form.source||(pendingVideo?"Uploaded file":"Added manually"),url:pendingVideo?.url}]);
-          if (pendingVideo) probeDuration(pendingVideo.url, id);
-          toast.success(`"${form.title}" added to Video Memories`);
-        }
+        const tags = [form.source || (pendingVideo ? "Uploaded file" : "Added manually")];
+        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.filmed, description: form.desc || "", tags, mediaUrl: pendingVideo?.url });
+        else await addMemory({ title: form.title, date: form.filmed || "Unknown", type: "video", description: form.desc || "", tags, mediaUrl: pendingVideo?.url });
         setPendingVideo(null);  // ownership passes to the saved memory
         break;
       }
       case "audio": {
         if (!form.title) { toast.error("Title required"); return; }
-        if (isEdit) {
-          setAudioList(p=>p.map(a=>a.id===editingId?{...a,title:form.title,recipient:form.recipient||a.recipient,description:form.desc||""}:a));
-          toast.success(`"${form.title}" updated`);
-        } else {
-          const id = Date.now();
-          setAudioList(p=>[...p,{id,title:form.title,recipient:form.recipient||"Family",duration:pendingAudio?"…":"0:00",recorded:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),description:form.desc||"",url:pendingAudio?.url}]);
-          if (pendingAudio) probeAudioDuration(pendingAudio.url, id);
-          toast.success(`"${form.title}" added to Audio Memories`);
-        }
+        if (isEdit) await updateMemory(editingId!, { title: form.title, recipient: form.recipient, description: form.desc || "", mediaUrl: pendingAudio?.url });
+        else await addMemory({ title: form.title, date: today, type: "audio", description: form.desc || "", tags: [], recipient: form.recipient || "Family", mediaUrl: pendingAudio?.url });
         setPendingAudio(null);  // ownership passes to the saved memory
         break;
       }
       case "kids": {
         if (!form.name) { toast.error("Name required"); return; }
         const activities = (form.activities||"").split(",").map(t=>t.trim()).filter(Boolean);
-        if (isEdit) {
-          setKidsList(p=>p.map(k=>k.id===editingId?{...k,child:form.name,activities,school:form.school||"",notes:form.notes||""}:k));
-          toast.success(`${form.name} updated`);
-        } else {
-          setKidsList(p=>[...p,{id:Date.now(),child:form.name,activities,school:form.school||"",notes:form.notes||""}]);
-          toast.success(`${form.name} added`);
-        }
+        if (isEdit) await updateMemory(editingId!, { title: form.name, childName: form.name, recipient: form.school, tags: activities, description: form.notes || "" });
+        else await addMemory({ title: form.name, date: "", type: "note", description: form.notes || "", tags: activities, recipient: form.school, childName: form.name });
         break;
       }
       case "keepsakes": {
         if (!form.item) { toast.error("Item name required"); return; }
-        if (isEdit) {
-          setKeepsakesList(p=>p.map(k=>k.id===editingId?{...k,item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}:k));
-          toast.success(`"${form.item}" updated`);
-        } else {
-          setKeepsakesList(p=>[...p,{id:Date.now(),item:form.item,location:form.location||"—",value:form.value||"Sentimental",intendedFor:form.intendedFor||"",story:form.story||"",photo:itemPhoto,attachedDoc:itemDoc}]);
-          toast.success(`"${form.item}" added to Keepsakes`);
-        }
+        const tags = [form.location || "—", form.value || "Sentimental"];
+        if (isEdit) await updateMemory(editingId!, { title: form.item, recipient: form.intendedFor, tags, description: form.story || "", mediaUrl: itemPhoto });
+        else await addMemory({ title: form.item, date: "", type: "keepsake", description: form.story || "", tags, recipient: form.intendedFor, mediaUrl: itemPhoto });
         resetItemMedia();
         break;
       }
       case "goals": {
         if (!form.goal) { toast.error("Goal description required"); return; }
-        if (isEdit) {
-          setGoalsList(p=>p.map(g=>g.id===editingId?{...g,goal:form.goal,progress:Number(form.progress)||0,notes:form.notes||""}:g));
-          toast.success("Goal updated");
-        } else {
-          setGoalsList(p=>[...p,{id:Date.now(),goal:form.goal,status:"in_progress",progress:Number(form.progress)||0,notes:form.notes||""}]);
-          toast.success("Goal added");
-        }
+        const achieved = form.achieved === "yes";
+        if (isEdit) await updateMemory(editingId!, { title: form.goal, description: form.notes || "", achieved });
+        else await addMemory({ title: form.goal, date: "", type: "goal", description: form.notes || "", tags: [], achieved });
         break;
       }
       case "awards": {
         if (!form.award) { toast.error("Award name required"); return; }
-        if (isEdit) {
-          setAwardsList(p=>p.map(a=>a.id===editingId?{...a,award:form.award,year:form.year||a.year,organization:form.org||a.organization,category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}:a));
-          toast.success(`"${form.award}" updated`);
-        } else {
-          setAwardsList(p=>[...p,{id:Date.now(),award:form.award,year:form.year||String(new Date().getFullYear()),organization:form.org||"",category:form.category||"Other",description:form.desc||"",photo:itemPhoto,attachedDoc:itemDoc}]);
-          toast.success(`"${form.award}" added`);
-        }
+        const tags = [form.category || "Other"];
+        if (isEdit) await updateMemory(editingId!, { title: form.award, date: form.year, issuer: form.org, tags, description: form.desc || "", mediaUrl: itemPhoto, childName: form.forChild || undefined });
+        else await addMemory({ title: form.award, date: form.year || String(new Date().getFullYear()), type: "award", description: form.desc || "", tags, issuer: form.org, achieved: true, mediaUrl: itemPhoto, childName: form.forChild || undefined });
         resetItemMedia();
         break;
       }
@@ -623,8 +513,8 @@ export function FamilyMemories() {
     audio:     [{key:"title",label:"Audio Memory Title *",ph:"e.g. Life Advice for Michael"},{key:"recipient",label:"For",ph:"e.g. Michael Doe (Son)"},{key:"desc",label:"Description",ph:"What this recording covers"}],
     kids:      [{key:"name",label:"Child's Name & Relation *",ph:"e.g. Tyler Doe (Grandson, age 8)"},{key:"school",label:"School",ph:""},{key:"activities",label:"Activities (comma-separated)",ph:"Baseball, Swimming"},{key:"notes",label:"Notes",ph:""}],
     keepsakes: [{key:"item",label:"Item Name *",ph:"e.g. Grandfather's Watch"},{key:"location",label:"Where It Is",ph:""},{key:"value",label:"Value",ph:"e.g. Sentimental / ~$500"},{key:"intendedFor",label:"Intended For",ph:""},{key:"story",label:"Story / Significance",ph:"Why this item matters"}],
-    goals:     [{key:"goal",label:"Goal *",ph:"e.g. Pay off mortgage"},{key:"progress",label:"Current Progress (%)",ph:"0"},{key:"notes",label:"Notes",ph:""}],
-    awards:    [{key:"award",label:"Award Name *",ph:""},{key:"year",label:"Year",ph:String(new Date().getFullYear())},{key:"org",label:"Organization",ph:""},{key:"category",label:"Category",ph:"e.g. Military, Professional"},{key:"desc",label:"Description",ph:""}],
+    goals:     [{key:"goal",label:"Goal *",ph:"e.g. Pay off mortgage"},{key:"notes",label:"Notes",ph:""}],
+    awards:    [{key:"award",label:"Award Name *",ph:""},{key:"year",label:"Year",ph:String(new Date().getFullYear())},{key:"org",label:"Organization",ph:""},{key:"category",label:"Category",ph:"e.g. Military, Professional"},{key:"desc",label:"Description",ph:""},{key:"forChild",label:"For (child, if applicable)",ph:"e.g. Tyler Doe (Grandson)"}],
   };
 
   const tabs = [
@@ -725,28 +615,21 @@ export function FamilyMemories() {
               </div>
             </div>
             <div className="mgrid">
-              {memoriesList.map(m => {
-                const total = m.photos.length || m.count;
-                return (
+              {memoriesList.map(m => (
                 <div key={m.id} className="card pad">
                   <div className="r-top" style={{ marginBottom: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <Camera size={16} color="#FFFFFF" />
                       <span className="r-sub">{m.date}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span className="pill" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{total} photo{total === 1 ? "" : "s"}</span>
+                    <div style={{ display: "flex", gap: 4 }}>
                       <button title="Edit memory" onClick={() => editMemory(m)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                      <button title="Delete memory" onClick={() => confirmRemoveMemory(m.id, m.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
                     </div>
                   </div>
-                  {m.photos.length > 0 && (
+                  {m.mediaUrl && (
                     <div className="thumbs" style={{ marginBottom: 12 }}>
-                      {m.photos.slice(0,4).map((src,i) => (
-                        <img key={i} className="thumb" src={src} alt=""/>
-                      ))}
-                      {m.photos.length > 4 && (
-                        <div className="thumb-more">+{m.photos.length - 4}</div>
-                      )}
+                      <img className="thumb" src={m.mediaUrl} alt=""/>
                     </div>
                   )}
                   <div className="r-title">{m.title}</div>
@@ -755,7 +638,7 @@ export function FamilyMemories() {
                     {m.tags.map(tag => <span key={tag} className="tag">#{tag}</span>)}
                   </div>
                 </div>
-              );})}
+              ))}
             </div>
           </div>
         )}
@@ -789,16 +672,17 @@ export function FamilyMemories() {
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="r-title">{vid.title}</div>
-                      <div className="r-sub accent" style={{ marginBottom: 4 }}>Filmed: {vid.filmed}</div>
+                      <div className="r-sub accent" style={{ marginBottom: 4 }}>Filmed: {vid.date}</div>
                       <div className="r-desc">{vid.description}</div>
                       <div className="r-meta">
-                        <span className="mono">{vid.duration}</span>
-                        <span className="txt">{vid.source}</span>
-                        <span className="txt">Added {vid.added}</span>
+                        <span className="txt">{vid.tags[0]}</span>
                         <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                       </div>
                     </div>
-                    <button title="Edit video" onClick={() => editVideoMemory(vid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
+                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                      <button title="Edit video" onClick={() => editVideoMemory(vid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                      <button title="Delete video" onClick={() => confirmRemoveMemory(vid.id, vid.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -932,11 +816,10 @@ export function FamilyMemories() {
                           <div className="r-title">{msg.title}</div>
                           <div className="r-sub accent" style={{ marginBottom: 4 }}>For: {msg.recipient}</div>
                           <div className="r-desc">{msg.description}</div>
-                          {msg.url && <audio src={msg.url} controls style={{ marginTop:10 }}/>}
+                          {msg.mediaUrl && <audio src={msg.mediaUrl} controls style={{ marginTop:10 }}/>}
                           <div className="r-meta">
-                            <span className="mono">{msg.duration}</span>
-                            <span className="txt">Recorded {msg.recorded}</span>
-                            {!msg.url && (
+                            <span className="txt">Recorded {msg.date}</span>
+                            {!msg.mediaUrl && (
                               <button className="btn-ghost" style={{ padding: "6px 12px", fontSize: 14 }}
                                 onClick={() => toast.success(`▶ Playing: ${msg.title}`)}>
                                 <Play size={11}/> Play
@@ -945,7 +828,10 @@ export function FamilyMemories() {
                             <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                           </div>
                         </div>
-                        <button title="Edit audio memory" onClick={() => editAudioMemory(msg)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
+                        <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                          <button title="Edit audio memory" onClick={() => editAudioMemory(msg)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                          <button title="Delete audio memory" onClick={() => confirmRemoveMemory(msg.id, msg.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -964,17 +850,22 @@ export function FamilyMemories() {
             {kidsList.map(kid => (
               <div key={kid.id} className="card pad">
                 <div className="r-top" style={{ marginBottom: 0 }}>
-                  <div className="r-title" style={{ fontSize: 21.5 }}>{kid.child}</div>
-                  <button title="Edit child" onClick={() => editKid(kid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
-                </div>
-                <div className="r-sub" style={{ marginBottom: 12 }}>School: {kid.school}</div>
-                <div style={{ marginBottom: 12 }}>
-                  <div className="eyebrow" style={{ marginBottom: 8 }}>Activities</div>
-                  <div className="chiprow">
-                    {kid.activities.map(a => <span key={a} className="tag" style={{ padding: "7px 12px", fontSize: 16 }}>{a}</span>)}
+                  <div className="r-title" style={{ fontSize: 21.5 }}>{kid.title}</div>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button title="Edit child" onClick={() => editKid(kid)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                    <button title="Delete child" onClick={() => confirmRemoveMemory(kid.id, kid.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
                   </div>
                 </div>
-                {kid.notes && <div className="tile"><span className="tv">Notes: {kid.notes}</span></div>}
+                {kid.recipient && <div className="r-sub" style={{ marginBottom: 12 }}>School: {kid.recipient}</div>}
+                {kid.tags.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div className="eyebrow" style={{ marginBottom: 8 }}>Activities</div>
+                    <div className="chiprow">
+                      {kid.tags.map(a => <span key={a} className="tag" style={{ padding: "7px 12px", fontSize: 16 }}>{a}</span>)}
+                    </div>
+                  </div>
+                )}
+                {kid.description && <div className="tile"><span className="tv">Notes: {kid.description}</span></div>}
               </div>
             ))}
           </div>
@@ -988,31 +879,33 @@ export function FamilyMemories() {
             </div>
             {keepsakesList.map(k => (
               <div key={k.id} className="card" style={{ overflow: "hidden" }}>
-                {(k as any).photo && (
+                {k.mediaUrl && (
                   <div className="photo-frame" style={{ height: 180 }}>
-                    <img src={(k as any).photo} alt={k.item}/>
+                    <img src={k.mediaUrl} alt={k.title}/>
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
                   <div className="r-top">
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="r-title">{k.item}</div>
-                      <div className="r-sub accent" style={{ marginBottom: 8 }}>→ {k.intendedFor}</div>
+                      <div className="r-title">{k.title}</div>
+                      <div className="r-sub accent" style={{ marginBottom: 8 }}>→ {k.recipient}</div>
                       <div className="r-grid">
-                        {[{ label: "Location", value: k.location }, { label: "Estimated Value", value: k.value }].map(f => (
+                        {[{ label: "Location", value: k.tags[0] }, { label: "Estimated Value", value: k.tags[1] }].map(f => (
                           <div key={f.label} className="tile">
                             <div className="tk">{f.label}</div>
                             <div className="tv">{f.value}</div>
                           </div>
                         ))}
                       </div>
-                      <div style={{ color: SOFT, fontSize: 16, fontStyle: "italic", lineHeight: 1.6 }}>"{k.story}"</div>
-                      {(k as any).attachedDoc && <div className="r-sub" style={{ marginTop: 10 }}>📄 {(k as any).attachedDoc}</div>}
+                      <div style={{ color: SOFT, fontSize: 16, fontStyle: "italic", lineHeight: 1.6 }}>"{k.description}"</div>
                       <div style={{ marginTop: 12 }}>
-                        <ScanButton folder="personal" onUpload={doc => { setKeepsakesList(p => p.map(x => x.id === k.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${k.item}`); }} size="sm" label="Scan Document"/>
+                        <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" scanned and saved to File Cabinet`)} size="sm" label="Scan Document"/>
                       </div>
                     </div>
-                    <button title="Edit keepsake" onClick={() => editKeepsake(k)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button title="Edit keepsake" onClick={() => editKeepsake(k)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                      <button title="Delete keepsake" onClick={() => confirmRemoveMemory(k.id, k.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1027,24 +920,18 @@ export function FamilyMemories() {
               <button className="btn-primary" onClick={()=>setShowAdd("goals")}><Plus size={14} /> Add Goal</button>
             </div>
             {goalsList.map(g => {
-              const s = statusStyles[g.status as keyof typeof statusStyles];
+              const s = g.achieved ? statusStyles.completed : statusStyles.in_progress;
               return (
                 <div key={g.id} className="card pad">
                   <div className="r-top" style={{ marginBottom: 12 }}>
-                    <div style={{ color: TEXT, fontSize: 19, fontWeight: 500 }}>{g.goal}</div>
+                    <div style={{ color: TEXT, fontSize: 19, fontWeight: 500 }}>{g.title}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span className="pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
                       <button title="Edit goal" onClick={() => editGoal(g)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                      <button title="Delete goal" onClick={() => confirmRemoveMemory(g.id, g.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
                     </div>
                   </div>
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span className="r-sub">Progress</span>
-                      <span className="mono" style={{ color: s.color, fontSize: 15 }}>{g.progress}%</span>
-                    </div>
-                    <div className="pbar"><i style={{ width: `${g.progress}%`, background: s.color }} /></div>
-                  </div>
-                  {g.notes && <div className="r-sub" style={{ marginTop: 6 }}>{g.notes}</div>}
+                  {g.description && <div className="r-sub" style={{ marginTop: 6 }}>{g.description}</div>}
                 </div>
               );
             })}
@@ -1059,27 +946,29 @@ export function FamilyMemories() {
             </div>
             {awardsList.map(a => (
               <div key={a.id} className="card" style={{ overflow: "hidden" }}>
-                {(a as any).photo && (
+                {a.mediaUrl && (
                   <div className="photo-frame" style={{ height: 180 }}>
-                    <img src={(a as any).photo} alt={a.award}/>
+                    <img src={a.mediaUrl} alt={a.title}/>
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
                     <div className="r-icon"><Trophy size={20} /></div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="r-title">{a.award}</div>
-                      <div className="r-sub">{a.organization} · {a.year}</div>
+                      <div className="r-title">{a.title}</div>
+                      <div className="r-sub">{a.issuer} · {a.date}{a.childName ? ` · For ${a.childName}` : ""}</div>
                       <div style={{ marginTop: 8 }}>
-                        <span className="tag" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{a.category}</span>
+                        <span className="tag" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{a.tags[0]}</span>
                       </div>
                       {a.description && <div className="r-desc" style={{ marginTop: 6 }}>{a.description}</div>}
-                      {(a as any).attachedDoc && <div className="r-sub" style={{ marginTop: 10 }}>📄 {(a as any).attachedDoc}</div>}
                       <div style={{ marginTop: 12 }}>
-                        <ScanButton folder="personal" onUpload={doc => { setAwardsList(p => p.map(x => x.id === a.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${a.award}`); }} size="sm" label="Scan Document"/>
+                        <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" scanned and saved to File Cabinet`)} size="sm" label="Scan Document"/>
                       </div>
                     </div>
-                    <button title="Edit award" onClick={() => editAward(a)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}><Edit2 size={14} /></button>
+                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                      <button title="Edit award" onClick={() => editAward(a)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                      <button title="Delete award" onClick={() => confirmRemoveMemory(a.id, a.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1162,6 +1051,17 @@ export function FamilyMemories() {
                     <input value={form[f.key]||""} onChange={F(f.key)} placeholder={f.ph}/>
                   </div>
                 ))}
+
+                {/* Goals — achieved y/n (the DB tracks a done flag, not a numeric progress %) */}
+                {showAdd === "goals" && (
+                  <div className="field">
+                    <label>STATUS</label>
+                    <select value={form.achieved||""} onChange={F("achieved")}>
+                      <option value="">In Progress</option>
+                      <option value="yes">Achieved</option>
+                    </select>
+                  </div>
+                )}
 
                 {/* Keepsakes & Awards — picture + document upload/scan */}
                 {(showAdd === "keepsakes" || showAdd === "awards") && (

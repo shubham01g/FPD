@@ -6,8 +6,12 @@ import {
   Shield, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "../context/DemoContext";
+import { useDemo, type Doc } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
+// docSyncStore is a shared bridge used by many other sections (Warranties, TravelPlanner,
+// PetRecords, JobHistory, DaycareInfo, etc. via AttachDocumentField/SyncToFileCabinet) to push
+// documents into the File Cabinet — it's entangled with all of those unrelated components, so
+// it's left as-is here rather than folded into the new vault_documents-backed `docs` list.
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
 import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.png";
 
@@ -359,6 +363,18 @@ function formatMB(mb: number): string {
   return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
 }
 
+/* Map a real vault_documents row (already loaded onto DemoContext.docs) onto the
+   FolderFile shape the folder-contents UI renders, so uploaded files display
+   identically to the static demo files already seeded per folder. */
+function docToFolderFile(d: Doc): FolderFile {
+  const type: FolderFile["type"] =
+    d.type.includes("image") ? "image" :
+    d.type.includes("video") ? "video" :
+    d.type.includes("pdf") ? "pdf" :
+    d.type.includes("doc") ? "doc" : "other";
+  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded };
+}
+
 function relativeTime(date?: Date): string {
   if (!date) return "—";
   const days = Math.floor((Date.now() - date.getTime()) / 86400000);
@@ -543,13 +559,12 @@ const CAB_CSS = `
 `;
 
 export function DigitalFileCabinet() {
-  const { continuationFeePaid } = useDemo();
+  const { continuationFeePaid, docs, addDoc, deleteDoc } = useDemo();
   const [current, setCurrent] = useState<Cabinet | null>(null);
   const [view, setView]       = useState<"grid"|"list">("grid");
   const [search, setSearch]   = useState("");
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [extras, setExtras]   = useState<Record<string, FolderFile[]>>({});
   const [selected, setSelected] = useState<FolderFile | null>(null);
   const [syncedDocs, setSyncedDocs] = useState<SyncedDoc[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -562,23 +577,25 @@ export function DigitalFileCabinet() {
     c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()),
   [search]);
 
+  // Real uploads are stored in vault_documents (via DemoContext.docs/addDoc), keyed by the
+  // static folder id as `category` — that's how "current files" for a folder are filtered below.
+  const docsForFolder = useCallback((folderId: string) =>
+    docs.filter(d => d.category === folderId).map(docToFolderFile),
+  [docs]);
+
   const doUpload = useCallback((folderId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    const tid = toast.loading(`Uploading ${files.length} file${files.length > 1 ? "s" : ""}...`);
-    setTimeout(() => {
-      const newFiles: FolderFile[] = Array.from(files).map(f => ({
-        id: `u-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        name: f.name, size: `${(f.size/1024/1024).toFixed(1)} MB`,
-        modified: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-        type: f.type.startsWith("image") ? "image" : f.type.startsWith("video") ? "video" : f.type.includes("pdf") ? "pdf" : "other",
-        thumbnail: f.type.startsWith("image") ? URL.createObjectURL(f) : undefined,
-      }));
-      setExtras(e => ({ ...e, [folderId]: [...(e[folderId]??[]), ...newFiles] }));
-      setUploading(false);
-      toast.success(`${files.length} file${files.length>1?"s":""} uploaded & encrypted`, { id: tid });
-    }, 1000 + Math.random()*500);
-  }, []);
+    Promise.all(Array.from(files).map(f => addDoc({
+      name: f.name,
+      category: folderId,
+      size: Number((f.size/1024/1024).toFixed(1)),
+      sizeUnit: "MB",
+      type: f.type.startsWith("image") ? "image" : f.type.startsWith("video") ? "video" : f.type.includes("pdf") ? "pdf" : "other",
+      status: "verified",
+      encrypted: true,
+    }, f))).finally(() => setUploading(false));
+  }, [addDoc]);
 
   const openFolder = (c: Cabinet) => {
     if ((c as any).locked === true) { toast.info("🔒 Enter your PIN to access the Secret Vault"); return; }
@@ -586,19 +603,19 @@ export function DigitalFileCabinet() {
   };
 
   const folderCount = (folder: Cabinet) =>
-    folder.files.length + (extras[folder.id]?.length ?? 0) + syncedDocs.filter(d => d.targetFolderId === folder.id).length;
+    folder.files.length + docsForFolder(folder.id).length + syncedDocs.filter(d => d.targetFolderId === folder.id).length;
 
   // Card-grid stats — size total & most-recent-activity, derived from the same
-  // files/extras/synced docs as folderCount, nothing added or removed.
+  // files/uploaded docs/synced docs as folderCount, nothing added or removed.
   const folderStats = (folder: Cabinet) => {
     const sizes: (string | undefined)[] = [
       ...folder.files.map(f => f.size),
-      ...(extras[folder.id]?.map(f => f.size) ?? []),
+      ...docsForFolder(folder.id).map(f => f.size),
       ...syncedDocs.filter(d => d.targetFolderId === folder.id).map(d => d.size),
     ];
     const dateStrs: (string | undefined)[] = [
       ...folder.files.map(f => f.modified),
-      ...(extras[folder.id]?.map(f => f.modified) ?? []),
+      ...docsForFolder(folder.id).map(f => f.modified),
       ...syncedDocs.filter(d => d.targetFolderId === folder.id).map(d => d.syncedAt),
     ];
     const totalMB = sizes.reduce((s, sz) => s + parseSizeMB(sz), 0);
@@ -618,10 +635,10 @@ export function DigitalFileCabinet() {
         }))
     : [];
 
-  const currentFiles = current ? [...current.files, ...(extras[current.id]??[]), ...syncedForCurrent] : [];
+  const currentFiles = current ? [...current.files, ...docsForFolder(current.id), ...syncedForCurrent] : [];
   const filteredFiles = currentFiles.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
 
-  const totalFiles = themedCabinets.reduce((s,c) => s + c.files.length + (extras[c.id]?.length??0), 0) + syncedDocs.length;
+  const totalFiles = themedCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0) + syncedDocs.length;
   const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
 
   const kpis = [
@@ -891,7 +908,12 @@ export function DigitalFileCabinet() {
                   <div className="facts">
                     <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? toast.success(`Downloading: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
                     <button onClick={e=>{e.stopPropagation(); toast.info(`Previewing: ${file.name}`);}}><Eye size={13}/></button>
-                    <button className="del" onClick={e=>{e.stopPropagation(); if((file as any)._synced){ removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); } else { toast.success(`Deleted: ${file.name}`); }}}><Trash2 size={13}/></button>
+                    <button className="del" onClick={e=>{
+                      e.stopPropagation();
+                      if ((file as any)._synced) { removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); }
+                      else if (docs.some(d => d.id === file.id)) { deleteDoc(file.id); if (selected?.id === file.id) setSelected(null); }
+                      else { toast.success(`Deleted: ${file.name}`); }
+                    }}><Trash2 size={13}/></button>
                   </div>
                 </div>
               ))}
