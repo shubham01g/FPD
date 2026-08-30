@@ -7,8 +7,19 @@ import { createClient } from "@supabase/supabase-js";
 // project connected). Falling back to harmless placeholders keeps the app
 // rendering; real Supabase calls will simply fail at request time instead,
 // which every caller already handles via loading/error states.
-const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL  || "https://placeholder.supabase.co";
+const DIRECT_URL    = import.meta.env.VITE_SUPABASE_URL  || "https://placeholder.supabase.co";
 const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY || "placeholder-anon-key";
+
+// Dev-only: with VITE_USE_SUPABASE_PROXY=true, requests go to the Vite dev
+// server on the page's own origin, which forwards them to Supabase (see the
+// `/sb-api` proxy in vite.config.ts). This is for machines where a browser
+// extension or security suite blocks *.supabase.co directly — the symptom is
+// every call failing as "Failed to fetch" even though the project is reachable
+// outside the browser. Production builds always use DIRECT_URL.
+const SUPABASE_URL =
+  import.meta.env.DEV && import.meta.env.VITE_USE_SUPABASE_PROXY === "true"
+    ? `${window.location.origin}/sb-api`
+    : DIRECT_URL;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: true, autoRefreshToken: true },
