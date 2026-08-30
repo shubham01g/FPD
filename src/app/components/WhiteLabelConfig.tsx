@@ -258,7 +258,7 @@ export function WhiteLabelConfig() {
 
   const featureList: { key: keyof WhiteLabelConfig["features"]; label: string; desc: string }[] = [
     { key: "vault", label: "Document Vault", desc: "Encrypted document storage" },
-    { key: "finalWishes", label: "Final Wishes & Wills", desc: "Funeral planning, wills, questionnaire" },
+    { key: "finalWishes", label: "Final Wishes & Wills", desc: "Funeral planning, wills" },
     { key: "medicalInfo", label: "Medical Info", desc: "Emergency info, allergies, medications" },
     { key: "financialRecords", label: "Financial Records", desc: "Insurance, real estate, portfolios" },
     { key: "personalAssets", label: "Assets & Property", desc: "Vehicles, utilities, digital assets" },

@@ -181,6 +181,14 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                   {loading ? "Authenticating..." : "Sign In to Admin Portal"}
                 </button>
               </form>
+
+              {/* TEMP local preview only — not pushed, remove before shipping.
+                  Skips real auth so the admin screens can be clicked through
+                  with no live Supabase project connected. */}
+              <button onClick={onLogin} className="w-full mt-4 py-3 rounded-xl text-sm"
+                style={{ background:"rgba(246,173,85,0.1)", border:"1px dashed rgba(246,173,85,0.4)", color:"#F6AD55" }}>
+                ⚠ Preview admin UI without login (local only)
+              </button>
             </>
           ) : (
             <>

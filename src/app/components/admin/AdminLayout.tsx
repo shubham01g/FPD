@@ -41,7 +41,7 @@ const adminGroups: { label: string; items: AdminNavItem[] }[] = [
   {
     label: "Operations",
     items: [
-      { id: "id-verification",     label: "ID Verification",   icon: <UserCheck size={16}/>, badge: "3" },
+      { id: "id-verification",     label: "ID Verification",   icon: <UserCheck size={16}/> },
       { id: "payout-management",   label: "Payouts",           icon: <DollarSign size={16}/> },
       { id: "subscription-config", label: "Subscription Config", icon: <Settings size={16}/> },
     ],

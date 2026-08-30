@@ -182,13 +182,13 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
 
   const wrapStyle: React.CSSProperties = inline
     ? { display:"flex", flexDirection:"column", height:"calc(100vh - 120px)", borderRadius:22, overflow:"hidden", border:"1.5px solid rgba(91,167,214,0.35)", background:"#101728", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)" }
-    : { position:"fixed", bottom:24, left:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:22, overflow:"hidden", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 20px 60px rgba(0,0,0,0.5)", width:"min(390px, calc(100vw - 48px))", maxHeight:"calc(100vh - 48px)", height:minimized?"auto":580, background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" };
+    : { position:"fixed", bottom:96, right:24, zIndex:50, display:"flex", flexDirection:"column", borderRadius:22, overflow:"hidden", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 20px 60px rgba(0,0,0,0.5)", width:"min(390px, calc(100vw - 48px))", maxHeight:"calc(100vh - 116px)", height:minimized?"auto":580, background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" };
 
   if (!open && !inline) return (
-    <button onClick={() => setOpen(true)}
-      className="fixed bottom-24 left-6 z-50 flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-2xl"
-      style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
-      <Crown size={16}/> Ask Josh
+    <button onClick={() => setOpen(true)} title="Ask Josh" aria-label="Ask Josh"
+      className="flex items-center justify-center rounded-full shadow-2xl"
+      style={{ position:"fixed", bottom:96, right:24, zIndex:50, width:58, height:58, background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 8px 32px rgba(91,167,214,0.45)" }}>
+      <Crown size={22}/>
     </button>
   );
 

@@ -364,7 +364,6 @@ const FEATURES: Feat[] = [
   { cat: "legacy", icon: <Users size={20} />, title: "Funeral Planning", desc: "Pre-plan your service: location, music, readings, obituary draft." },
   { cat: "legacy", icon: <Archive size={20} />, title: "Document Vault", desc: "AES-256 encrypted storage for every important document you own." },
   { cat: "legacy", icon: <Video size={20} />, title: "Video Messages", desc: "Record personal video messages delivered to loved ones after you pass." },
-  { cat: "legacy", icon: <Eye size={20} />, title: "Questionnaire", desc: "Answer life questions so your family truly knows your story and values." },
   { cat: "personal", icon: <Stethoscope size={20} />, title: "Emergency Info", desc: "Blood type, doctors, hospital preferences, DNR and organ donor status." },
   { cat: "personal", icon: <Bell size={20} />, title: "Allergies", desc: "Complete allergy registry with severity ratings and reaction details." },
   { cat: "personal", icon: <Shield size={20} />, title: "Medications", desc: "Active medications, dosages, prescribers, and refill schedules." },

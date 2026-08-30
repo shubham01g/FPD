@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
-import { ScanButton } from "./DocumentScanner";
+import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.png";
 import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.png";
@@ -24,7 +24,8 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-// Extended verification status — richer than DemoContext's 3-state
+// Extended verification status — derived from the contact's real DB verification_status
+// plus the status of its latest id_verifications submission (see computeVerifStatus below).
 type VerifStatus = "not_sent" | "pending" | "id_submitted" | "verified" | "rejected";
 
 const verifConfig: Record<VerifStatus, { label:string; color:string; icon:React.ReactNode }> = {
@@ -35,11 +36,14 @@ const verifConfig: Record<VerifStatus, { label:string; color:string; icon:React.
   rejected:     { label:"REJECTED",     color:NEG,   icon:<AlertTriangle size={11}/> },
 };
 
-// Map DemoContext status → VerifStatus
-function toVerifStatus(s: string): VerifStatus {
-  if (s === "verified") return "verified";
-  if (s === "pending")  return "pending";
-  return "not_sent";
+// A contact's verification_status only tracks not_sent/pending/verified/rejected — "id submitted,
+// awaiting admin review" is derived by also checking whether its latest id_verifications row
+// (loaded by DemoContext) is still pending.
+function computeVerifStatus(c: Contact): VerifStatus {
+  if (c.verificationStatus === "verified") return "verified";
+  if (c.verificationStatus === "rejected") return "rejected";
+  if (c.verificationStatus === "not_sent") return "not_sent";
+  return c.idVerificationStatus === "pending" ? "id_submitted" : "pending";
 }
 
 type ContactType = "legacy"|"guardian"|"emergency"|"pet_emergency";
@@ -67,6 +71,7 @@ const verStyle = {
   verified: { color:"#D99A6B",  label:"VERIFIED", icon:<CheckCircle size={11}/> },
   pending:  { color:WARN, label:"PENDING",  icon:<Clock size={11}/> },
   not_sent: { color:MUTED,label:"NOT SENT", icon:<X size={11}/> },
+  rejected: { color:NEG,  label:"REJECTED", icon:<AlertTriangle size={11}/> },
 };
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
@@ -125,15 +130,16 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
 }
 
 /* ── Add / Edit Contact Modal ────────────────────────────────────── */
-function AddContactModal({ defaultType, editing, onClose, onAdd, onSave }: {
+function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveFolders }: {
   defaultType: ContactType; editing?: Contact | null; onClose:()=>void;
   onAdd:(c:Omit<Contact,"id">)=>Promise<void>; onSave?:(id:string, updates:Partial<Contact>)=>void;
+  onSaveFolders?:(id:string, folderIds:string[])=>Promise<void>;
 }) {
   const [form, setForm] = useState(() => editing
     ? { name: editing.name, email: editing.email, phone: editing.phone, relationship: editing.relationship, type: editing.type, accessLevel: editing.accessLevel ?? "", notes: editing.notes ?? "", photo: editing.photo ?? "" }
     : { name:"", email:"", phone:"", relationship:"", type:defaultType, accessLevel:"", notes:"", photo:"" });
-  const [guardianFolders, setGuardianFolders] = useState<string[]>([]);
-  const [showFolders, setShowFolders] = useState(false);
+  const [guardianFolders, setGuardianFolders] = useState<string[]>(() => editing?.allowedFolderIds ?? []);
+  const [showFolders, setShowFolders] = useState(!!editing);
   const [selectedVerifications, setSelectedVerifications] = useState<string[]>(["death_cert"]);
   const [securityWord, setSecurityWord] = useState("");
   const [securityQ, setSecurityQ] = useState("");
@@ -150,21 +156,23 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave }: {
 
   const submit = async () => {
     if (!form.name || !form.email) { toast.error("Name and email are required"); return; }
-    if (!editing && isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
+    if (isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
     setLoading(true);
     if (editing) {
       onSave?.(editing.id, {
         name: form.name, email: form.email, phone: form.phone, relationship: form.relationship,
         notes: form.notes, photo: form.photo || undefined,
+        accessLevel: isGuardian ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned` : form.accessLevel,
         avatar: form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),
       });
+      if (isGuardian) await onSaveFolders?.(editing.id, guardianFolders);
       onClose();
       return;
     }
     const accessDesc = isGuardian
       ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned`
       : form.accessLevel;
-    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:"pending", avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
+    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:"pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
     onClose();
   };
 
@@ -194,7 +202,7 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave }: {
             </div>
           ))}
 
-          {!editing && isGuardian && (
+          {isGuardian && (
             <div className="folder-picker">
               <button onClick={()=>setShowFolders(!showFolders)} className="folder-picker-hd">
                 <div className="flex items-center gap-2">
@@ -465,7 +473,7 @@ function BulkImportModal({ defaultType, onClose, onImport }: {
 /* ── Section wrapper with its own header + Add button ────────────── */
 function ContactSection({
   type, contacts, onAdd, onImport, onRemove, onEdit,
-  getVerifStatus, advanceStatus, simulateVerify, verifying, onScanId,
+  onSendInvite, submittingId, onScanId,
 }: {
   type: ContactType;
   contacts: Contact[];
@@ -473,11 +481,9 @@ function ContactSection({
   onImport: () => void;
   onRemove: (id:string) => void;
   onEdit: (c:Contact) => void;
-  getVerifStatus?: (id:string) => VerifStatus;
-  advanceStatus?: (id:string) => void;
-  simulateVerify?: (id:string) => void;
-  verifying?: string | null;
-  onScanId?: (id:string, name:string) => void;
+  onSendInvite?: (id:string) => void;
+  submittingId?: string | null;
+  onScanId?: (id:string, name:string, doc:ScannedDocument) => void;
 }) {
   const cfg = typeConfig[type];
   const isLegacy  = type === "legacy";
@@ -585,9 +591,10 @@ function ContactSection({
                     </div>
                   )}
 
-                  {isLegacy && getVerifStatus && (() => {
-                    const vs2 = getVerifStatus(c.id);
+                  {isLegacy && (() => {
+                    const vs2 = computeVerifStatus(c);
                     const vc = verifConfig[vs2];
+                    const submitting = submittingId === c.id;
                     return (
                       <div className="space-y-2" style={{ marginTop: 12 }}>
                         <div className="flex items-center gap-2 flex-wrap">
@@ -599,40 +606,35 @@ function ContactSection({
                             {vs2==="pending" && "Invite sent — awaiting ID submission"}
                             {vs2==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
                             {vs2==="verified" && "Government ID verified by compliance team ✓"}
-                            {vs2==="rejected" && "ID rejected — please resubmit"}
+                            {vs2==="rejected" && (c.idRejectionReason ? `Rejected: ${c.idRejectionReason}` : "ID rejected — please resubmit")}
                           </span>
                         </div>
 
                         <div className="flex gap-2 flex-wrap">
                           {vs2 === "not_sent" && (
-                            <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
+                            <button onClick={()=>onSendInvite?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
                               <Mail size={10}/> Send Verification Invite
                             </button>
                           )}
                           {vs2 === "pending" && (
-                            <>
-                              <button onClick={()=>advanceStatus?.(c.id)} className="btn-ghost" style={{ color: "#6FAE8B" }}>
-                                <Upload size={10}/> Simulate ID Submission
-                              </button>
-                              <button onClick={()=>toast.success(`Invite resent to ${c.email}`)} className="btn-sec">
-                                Resend Invite
-                              </button>
-                            </>
+                            <button onClick={()=>onSendInvite?.(c.id)} className="btn-sec">
+                              Resend Invite
+                            </button>
                           )}
                           {vs2 === "id_submitted" && (
-                            <button onClick={()=>simulateVerify?.(c.id)} disabled={verifying===c.id} className="btn-ghost" style={{ color: "#D99A6B", background: "rgba(95,190,145,0.10)", borderColor: "rgba(95,190,145,0.3)" }}>
-                              {verifying===c.id
-                                ? <><RefreshCw size={10} style={{ animation:"spin 1s linear infinite" }}/> Verifying…</>
-                                : <><CheckCircle size={10}/> Simulate Verify</>}
-                            </button>
+                            <div className="flex items-center gap-1.5" style={{ fontSize: 15, color: WARN }}>
+                              <Clock size={11}/> Awaiting compliance team review
+                            </div>
                           )}
                           {vs2 === "verified" && (
                             <div className="flex items-center gap-1.5" style={{ fontSize: 15, color: "#D99A6B" }}>
                               <UserCheck size={11}/> Vault access activates upon verified passing
                             </div>
                           )}
-                          {(vs2 === "not_sent" || vs2 === "pending") && (
-                            <ScanButton folder="legal" onUpload={() => onScanId?.(c.id, c.name)} size="sm" label="Scan ID"/>
+                          {(vs2 === "not_sent" || vs2 === "pending" || vs2 === "rejected") && (
+                            submitting
+                              ? <div className="flex items-center gap-1.5" style={{ fontSize: 14, color: MUTED }}><RefreshCw size={10} style={{ animation:"spin 1s linear infinite" }}/> Uploading…</div>
+                              : <ScanButton folder="legal" onUpload={doc => onScanId?.(c.id, c.name, doc)} size="sm" label={vs2==="rejected" ? "Resubmit ID" : "Scan ID"}/>
                           )}
                         </div>
                       </div>
@@ -773,49 +775,22 @@ const CONTACTS_CSS = `
 
 /* ── Main Component ──────────────────────────────────────────────── */
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
-  const { contacts: rawContacts, addContact, removeContact, updateContactStatus } = useDemo();
-  // DemoContext only exposes add/remove/status for contacts — full-field edits are
-  // tracked locally here as an overlay keyed by contact id, merged on top of the
+  const { contacts: rawContacts, addContact, removeContact, sendVerificationInvite, submitIdVerification, updateGuardianFolders } = useDemo();
+  // DemoContext only exposes add/remove for contacts, plus targeted updates for
+  // verification and guardian folder access — other field edits (name/email/phone/notes)
+  // are tracked locally here as an overlay keyed by contact id, merged on top of the
   // context's list, so ids and verification tracking stay stable across an edit.
   const [edits, setEdits] = useState<Record<string, Partial<Contact>>>({});
   const contacts = rawContacts.map(c => (edits[c.id] ? { ...c, ...edits[c.id] } : c));
   const [addingType, setAddingType] = useState<ContactType | null>(null);
   const [importingType, setImportingType] = useState<ContactType | null>(null);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
-  // Extended verification status map — keyed by contact id
-  const [verifStatus, setVerifStatus] = useState<Record<string, VerifStatus>>(() => {
-    const map: Record<string, VerifStatus> = {};
-    contacts.forEach(c => {
-      if (c.type === "legacy") map[c.id] = toVerifStatus(c.verificationStatus);
-    });
-    return map;
-  });
-  const [verifying, setVerifying] = useState<string | null>(null);
-
-  function getVerifStatus(id: string): VerifStatus {
-    return verifStatus[id] ?? "not_sent";
-  }
-
-  async function simulateVerify(id: string) {
-    setVerifying(id);
-    const tid = toast.loading("Simulating compliance team review…");
-    await new Promise(r => setTimeout(r, 1800));
-    setVerifStatus(p => ({ ...p, [id]: "verified" }));
-    updateContactStatus(id, "verified");
-    setVerifying(null);
-    toast.success("✅ Identity verified — vault access granted on trigger condition", { id: tid });
-  }
-
-  function advanceStatus(id: string) {
-    const current = getVerifStatus(id);
-    if (current === "not_sent") {
-      setVerifStatus(p => ({ ...p, [id]: "pending" }));
-      toast.success("Verification invite sent");
-    } else if (current === "pending") {
-      setVerifStatus(p => ({ ...p, [id]: "id_submitted" }));
-      toast.success("ID submission simulated");
-    }
+  async function handleScanId(id: string, name: string, doc: ScannedDocument) {
+    setSubmittingId(id);
+    await submitIdVerification(id, doc.file, "Government-Issued Photo ID");
+    setSubmittingId(null);
   }
 
   // Only show contacts for the active section — never mix types
@@ -923,11 +898,9 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           onImport={() => setImportingType(activeType)}
           onRemove={id => removeContact(id)}
           onEdit={c => setEditingContact(c)}
-          getVerifStatus={getVerifStatus}
-          advanceStatus={advanceStatus}
-          simulateVerify={simulateVerify}
-          verifying={verifying}
-          onScanId={(id, name) => { setVerifStatus(p => ({ ...p, [id]: "id_submitted" })); toast.success(`ID scanned for ${name}`); }}
+          onSendInvite={sendVerificationInvite}
+          submittingId={submittingId}
+          onScanId={handleScanId}
         />
 
         {addingType && (
@@ -949,6 +922,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
               setEditingContact(null);
               toast.success("Contact updated");
             }}
+            onSaveFolders={updateGuardianFolders}
           />
         )}
 

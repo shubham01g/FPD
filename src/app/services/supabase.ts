@@ -42,7 +42,13 @@ export interface DBContact {
   verification_status: "not_sent"|"pending"|"verified"|"rejected";
   access_level?: string; access_trigger?: string; notes?: string;
   allowed_folder_ids: string[]; id_document_url?: string; id_type?: string;
-  id_verified_at?: string; created_at: string;
+  id_verified_at?: string; invite_sent_at?: string; created_at: string;
+}
+
+export interface DBIdVerification {
+  id: string; contact_id: string; document_url: string; document_back_url?: string;
+  id_type: string; status: "pending"|"approved"|"rejected";
+  rejection_reason?: string | null; submitted_at: string; reviewed_at?: string | null;
 }
 
 export interface DBStorageUsage {
@@ -70,6 +76,36 @@ export interface DBLegacyContinuationFee {
 
 export interface DBAdminSetting {
   key: string; value: string; updated_at: string;
+}
+
+export interface DBFinalWish {
+  id: string; user_id: string; category: string; item: string;
+  recipient?: string; notes?: string; created_at: string;
+}
+
+export interface DBAllergy {
+  id: string; user_id: string; allergen: string;
+  severity: "severe"|"moderate"|"mild"; reaction?: string; type?: string; diagnosed?: string;
+}
+
+export interface DBMedication {
+  id: string; user_id: string; name: string; dose?: string; frequency?: string;
+  condition?: string; prescriber?: string; pharmacy?: string; refill_date?: string;
+}
+
+export interface DBReminder {
+  id: string; user_id: string; title: string; due_date?: string; frequency?: string;
+  category?: string; status: "upcoming"|"due_soon"|"overdue"|"completed"; notes?: string;
+}
+
+export interface DBMemory {
+  id: string; user_id: string; title: string; memory_date?: string;
+  type: "photo"|"video"|"note"; description?: string; tags: string[];
+}
+
+export interface DBOccasion {
+  id: string; user_id: string; name: string; occasion_date?: string;
+  type: "birthday"|"anniversary"|"holiday"; recipient?: string; notes?: string; recurring: boolean;
 }
 
 // ── Service functions ───────────────────────────────────────
@@ -103,11 +139,34 @@ export const db = {
   async addContact(contact: Omit<DBContact,"id"|"created_at">) {
     return supabase.from("contacts").insert(contact).select().single<DBContact>();
   },
-  async updateContactVerification(id: string, status: DBContact["verification_status"]) {
-    return supabase.from("contacts").update({ verification_status: status }).eq("id", id);
-  },
   async updateGuardianFolderAccess(contactId: string, folderIds: string[]) {
     return supabase.from("contacts").update({ allowed_folder_ids: folderIds }).eq("id", contactId);
+  },
+  async sendContactInvite(id: string) {
+    return supabase.from("contacts").update({ verification_status: "pending", invite_sent_at: new Date().toISOString() }).eq("id", id);
+  },
+
+  // ID verification
+  async listIdVerificationsForOwner(ownerId: string) {
+    return supabase.from("id_verifications")
+      .select("*, contacts!inner(owner_user_id)")
+      .eq("contacts.owner_user_id", ownerId)
+      .order("submitted_at", { ascending: false })
+      .returns<DBIdVerification[]>();
+  },
+  async uploadIdDocument(ownerId: string, contactId: string, file: File) {
+    const path = `${ownerId}/${contactId}/${crypto.randomUUID()}-${file.name}`;
+    const { error } = await supabase.storage.from("id-verifications").upload(path, file);
+    if (error) throw error;
+    return path;
+  },
+  async submitIdVerification(contactId: string, documentPath: string, idType: string) {
+    const { data, error } = await supabase.from("id_verifications")
+      .insert({ contact_id: contactId, document_url: documentPath, id_type: idType, status: "pending" })
+      .select().single<DBIdVerification>();
+    if (error) throw error;
+    await supabase.from("contacts").update({ id_document_url: documentPath, id_type: idType }).eq("id", contactId);
+    return data;
   },
 
   // Storage usage
@@ -158,10 +217,93 @@ export const db = {
   async markNotificationRead(id: string) {
     return supabase.from("notifications").update({ read: true }).eq("id", id);
   },
+  async markAllNotificationsRead(userId: string) {
+    return supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
+  },
 
   // Audit logs
   async logAction(entry: { actor_id?: string; actor_email: string; action: string; target_type?: string; target_id?: string; severity?: string; metadata?: Record<string,unknown> }) {
     return supabase.from("audit_logs").insert({ ...entry, severity: entry.severity ?? "info" });
+  },
+
+  // Final wishes
+  async listFinalWishes(userId: string) {
+    return supabase.from("final_wishes").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBFinalWish[]>();
+  },
+  async addFinalWish(w: Omit<DBFinalWish,"id"|"created_at">) {
+    return supabase.from("final_wishes").insert(w).select().single<DBFinalWish>();
+  },
+  async deleteFinalWish(id: string) {
+    return supabase.from("final_wishes").delete().eq("id", id);
+  },
+
+  // Allergies
+  async listAllergies(userId: string) {
+    return supabase.from("allergies").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBAllergy[]>();
+  },
+  async addAllergy(a: Omit<DBAllergy,"id">) {
+    return supabase.from("allergies").insert(a).select().single<DBAllergy>();
+  },
+  async updateAllergy(id: string, a: Partial<Omit<DBAllergy,"id"|"user_id">>) {
+    return supabase.from("allergies").update(a).eq("id", id).select().single<DBAllergy>();
+  },
+  async deleteAllergy(id: string) {
+    return supabase.from("allergies").delete().eq("id", id);
+  },
+
+  // Medications
+  async listMedications(userId: string) {
+    return supabase.from("medications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBMedication[]>();
+  },
+  async addMedication(m: Omit<DBMedication,"id">) {
+    return supabase.from("medications").insert(m).select().single<DBMedication>();
+  },
+  async updateMedication(id: string, m: Partial<Omit<DBMedication,"id"|"user_id">>) {
+    return supabase.from("medications").update(m).eq("id", id).select().single<DBMedication>();
+  },
+  async deleteMedication(id: string) {
+    return supabase.from("medications").delete().eq("id", id);
+  },
+
+  // Reminders
+  async listReminders(userId: string) {
+    return supabase.from("reminders").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBReminder[]>();
+  },
+  async addReminder(r: Omit<DBReminder,"id">) {
+    return supabase.from("reminders").insert(r).select().single<DBReminder>();
+  },
+  async updateReminder(id: string, r: Partial<Omit<DBReminder,"id"|"user_id">>) {
+    return supabase.from("reminders").update(r).eq("id", id).select().single<DBReminder>();
+  },
+  async deleteReminder(id: string) {
+    return supabase.from("reminders").delete().eq("id", id);
+  },
+
+  // Memories
+  async listMemories(userId: string) {
+    return supabase.from("memories").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBMemory[]>();
+  },
+  async addMemory(m: Omit<DBMemory,"id">) {
+    return supabase.from("memories").insert(m).select().single<DBMemory>();
+  },
+  async deleteMemory(id: string) {
+    return supabase.from("memories").delete().eq("id", id);
+  },
+
+  // Occasions
+  async listOccasions(userId: string) {
+    return supabase.from("occasions").select("*").eq("user_id", userId).order("created_at", { ascending: false }).returns<DBOccasion[]>();
+  },
+  async addOccasion(o: Omit<DBOccasion,"id">) {
+    return supabase.from("occasions").insert(o).select().single<DBOccasion>();
+  },
+
+  // Storage
+  async uploadVaultFile(userId: string, file: File) {
+    const path = `${userId}/${crypto.randomUUID()}-${file.name}`;
+    const { error } = await supabase.storage.from("vault-documents").upload(path, file);
+    if (error) throw error;
+    return path;
   },
 
   // Realtime subscriptions

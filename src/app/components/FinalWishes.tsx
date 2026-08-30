@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import {
-  Heart, Church, HelpCircle, Plus, X,
-  CheckCircle, Edit2, Trash2, ChevronDown, ArrowRight, Layers
+  Heart, Church, Plus, X,
+  CheckCircle, Edit2, Trash2, ArrowRight, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import heroWishesPhoto from "../../imports/finalwishes_hero_photo.png";
 import heroFuneralPhoto from "../../imports/funeral_hero_photo.png";
-import heroQuestionnairePhoto from "../../imports/questionnaire_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
 const TEXT    = "#EFF2F9";
@@ -19,34 +18,7 @@ const LAVENDER= "#7E6BD8";
 const POS     = "#5FBE91";
 const NEG     = "#D06B6B";
 
-type Tab = "wishes" | "funeral" | "questionnaire";
-
-const questionnaireCategories = [
-  {
-    title: "Personal Values & Beliefs",
-    questions: [
-      { id: "q1", q: "What values do you most want passed on to your family?", a: "Integrity, compassion, and always putting family first. Work hard but never sacrifice health for money." },
-      { id: "q2", q: "What is your religious or spiritual preference for end-of-life?", a: "Non-denominational Christian service preferred. Simple and intimate." },
-      { id: "q3", q: "Do you have any cultural traditions to be honored?", a: "" },
-    ],
-  },
-  {
-    title: "Medical Wishes",
-    questions: [
-      { id: "q4", q: "Do you have a Do Not Resuscitate (DNR) order?", a: "Yes — on file with my primary care physician Dr. Karen Fields." },
-      { id: "q5", q: "Do you wish to be an organ donor?", a: "Yes, all viable organs." },
-      { id: "q6", q: "Your wishes regarding life-sustaining treatment?", a: "If in a permanent vegetative state, discontinue life support after 30 days." },
-    ],
-  },
-  {
-    title: "Final Arrangements",
-    questions: [
-      { id: "q7", q: "Burial or cremation?", a: "Cremation. Scatter ashes at Big Sur, California." },
-      { id: "q8", q: "Preferred funeral home or service?", a: "Green Valley Funeral Services, Sacramento CA." },
-      { id: "q9", q: "Music or readings for memorial service?", a: "Amazing Grace, reading from Psalm 23." },
-    ],
-  },
-];
+type Tab = "wishes" | "funeral";
 
 const funeralPlan = {
   serviceType: "Memorial Service",
@@ -91,7 +63,7 @@ const WISHES_CSS = `
 /* photo hero banner — same full-bleed treatment as the Dashboard's hero,
    tinted toward the brand palette via background-blend-mode so it reads as
    one system rather than a flat stock photo. Hover zooms the art only.
-   One banner per sub-section (wishes / funeral / questionnaire), swapped by active tab. */
+   One banner per sub-section (wishes / funeral), swapped by active tab. */
 .fpd-wishes .hbanner{position:relative;overflow:hidden;border-radius:22px;min-height:200px;display:flex;align-items:stretch;background:#0A0F1A;border:1px solid rgba(255,255,255,0.06);isolation:isolate;flex-shrink:0;}
 .fpd-wishes .hbanner .art{position:absolute;inset:-6%;z-index:0;transition:transform .7s cubic-bezier(.16,1,.3,1);transform:scale(1);pointer-events:none;background-size:cover;background-position:center;background-blend-mode:color;}
 .fpd-wishes .hbanner:hover .art{transform:scale(1.08);}
@@ -181,26 +153,8 @@ const WISHES_CSS = `
 
 /* obituary */
 .fpd-wishes .obit{padding:16px 18px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};font-size:17px;line-height:1.85;white-space:pre-wrap;}
-.fpd-wishes textarea,.fpd-wishes .qedit textarea{width:100%;padding:13px 15px;border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:17px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
+.fpd-wishes textarea{width:100%;padding:13px 15px;border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:17px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
 .fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
-
-/* questionnaire */
-.fpd-wishes .qcount{padding:7px 13px;border-radius:99px;background:rgba(91,110,225,0.10);color:#6FAE8B;font-size:15.5px;font-family:var(--font-mono);flex-shrink:0;}
-.fpd-wishes .qbar{height:7px;border-radius:99px;background:rgba(255,255,255,0.05);overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.035);}
-.fpd-wishes .qbar i{display:block;height:100%;background:linear-gradient(90deg,${ACCENT2},${ACCENT});transition:width .4s cubic-bezier(.4,0,.2,1);}
-.fpd-wishes .qcat{border-radius:18px;overflow:hidden;}
-.fpd-wishes .qcat + .qcat{margin-top:10px;}
-.fpd-wishes .qhead{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:none;border:none;cursor:pointer;text-align:left;}
-.fpd-wishes .qhead .qtitle{font-family:var(--font-display);font-size:18px;color:${TEXT};font-weight:600;}
-.fpd-wishes .qhead .qright{display:flex;align-items:center;gap:12px;}
-.fpd-wishes .qhead .qn{color:${MUTED};font-size:14.5px;font-family:var(--font-mono);}
-.fpd-wishes .qbody{padding:6px 18px 18px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:16px;}
-.fpd-wishes .qq{color:${TEXT};font-size:17px;font-weight:600;margin-bottom:8px;}
-.fpd-wishes .qans{position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:border-color .16s;}
-.fpd-wishes .qans:hover{border-color:rgba(91,110,225,0.3);}
-.fpd-wishes .qans .qa-text{flex:1;font-size:16px;line-height:1.6;}
-.fpd-wishes .qans .qa-text.filled{color:${SOFT};}
-.fpd-wishes .qans .qa-text.empty{color:${FAINT};font-style:italic;}
 
 @media (max-width:820px){.fpd-wishes .fgrid{grid-template-columns:1fr;}}
 
@@ -286,14 +240,9 @@ function WishModal({ editing, onClose, onSave }: {
 
 export function FinalWishes() {
   const [tab, setTab] = useState<Tab>("wishes");
-  const [expandedCat, setExpandedCat] = useState<number | null>(0);
-  const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
   const [wishes, setWishes] = useState<Wish[]>(initialWishes);
   const [wishModal, setWishModal] = useState(false);
   const [editingWish, setEditingWish] = useState<Wish | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>(
-    Object.fromEntries(questionnaireCategories.flatMap(c => c.questions).map(q => [q.id, q.a]))
-  );
 
   const saveWish = (w: Wish) => {
     setWishes(prev => editingWish ? prev.map(x => x.id === w.id ? w : x) : [w, ...prev]);
@@ -313,23 +262,17 @@ export function FinalWishes() {
   const wlistRef = React.useRef<HTMLDivElement>(null);
   const funeralGridRef = React.useRef<HTMLDivElement>(null);
   const obitRef = React.useRef<HTMLDivElement>(null);
-  const qlistRef = React.useRef<HTMLDivElement>(null);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "wishes",        label: "Final Wishes",     icon: <Heart size={14} /> },
     { id: "funeral",       label: "Funeral Planning", icon: <Church size={14} /> },
-    { id: "questionnaire", label: "Questionnaire",    icon: <HelpCircle size={14} /> },
   ];
-
-  const completedAnswers = Object.values(answers).filter(a => a.trim().length > 0).length;
-  const totalQuestions = questionnaireCategories.flatMap(c => c.questions).length;
 
   const wishCategoryCount = new Set(wishes.map(w => w.category)).size;
   const kpis = [
     { label: "Wishes Recorded", value: String(wishes.length), sub: `${wishCategoryCount} categor${wishCategoryCount === 1 ? "y" : "ies"}`, icon: <Heart size={14} />, dot: ACCENT2 },
     { label: "Categories", value: String(WISH_CATEGORIES.length), sub: "Available to assign", icon: <Layers size={14} />, dot: ACCENT2 },
     { label: "Funeral Plan", value: funeralPlan.prearranged ? "Prearranged" : "Not Set", sub: funeralPlan.prearranged ? "Contract on file" : "Add your plan", icon: <Church size={14} />, dot: funeralPlan.prearranged ? POS : ACCENT2 },
-    { label: "Questionnaire", value: `${completedAnswers}/${totalQuestions}`, sub: `${Math.round((completedAnswers / totalQuestions) * 100)}% complete`, icon: <HelpCircle size={14} />, dot: ACCENT2 },
   ];
 
   return (
@@ -372,21 +315,6 @@ export function FinalWishes() {
               <div className="hactions">
                 <button className="hbtn primary" onClick={() => { setEditingObit(true); obitRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}><Edit2 size={15} /> Edit Obituary</button>
                 <button className="hbtn ghost" onClick={() => funeralGridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><Church size={15} /> View Service Details</button>
-              </div>
-            </div>
-          </div>
-        )}
-        {tab === "questionnaire" && (
-          <div className="hbanner">
-            <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroQuestionnairePhoto})` }} />
-            <div className="scrim" />
-            <div className="hcontent">
-              <span className="heyebrow">Help Them Understand You</span>
-              <h1>Answer a few questions, <span className="accent">ease a hundred decisions.</span></h1>
-              <p>Your values, medical wishes, and final arrangements — in your own words, for the people who'll need them most.</p>
-              <div className="hactions">
-                <button className="hbtn primary" onClick={() => { setExpandedCat(0); qlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}><HelpCircle size={15} /> Answer Questions</button>
-                <button className="hbtn ghost" onClick={() => qlistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><CheckCircle size={15} /> View Progress</button>
               </div>
             </div>
           </div>
@@ -524,59 +452,6 @@ export function FinalWishes() {
                 </>
               )}
             </div>
-          </div>
-        )}
-
-        {/* ── Questionnaire ── */}
-        {tab === "questionnaire" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div className="toolbar">
-              <p>Answer these questions to help your loved ones understand your wishes and values.</p>
-              <span className="qcount">{completedAnswers}/{totalQuestions} Answered</span>
-            </div>
-            <div className="qbar" ref={qlistRef}><i style={{ width: `${(completedAnswers / totalQuestions) * 100}%` }} /></div>
-
-            {questionnaireCategories.map((cat, ci) => (
-              <div key={ci} className="card qcat">
-                <button className="qhead" onClick={() => setExpandedCat(expandedCat === ci ? null : ci)}>
-                  <span className="qtitle">{cat.title}</span>
-                  <div className="qright">
-                    <span className="qn">{cat.questions.filter(q => answers[q.id]?.trim()).length}/{cat.questions.length} answered</span>
-                    <ChevronDown size={16} color={MUTED} style={{ transform: expandedCat === ci ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
-                  </div>
-                </button>
-                {expandedCat === ci && (
-                  <div className="qbody">
-                    {cat.questions.map(q => (
-                      <div key={q.id}>
-                        <div className="qq">{q.q}</div>
-                        {editingAnswer === q.id ? (
-                          <div className="qedit">
-                            <textarea
-                              value={answers[q.id]}
-                              onChange={e => setAnswers({ ...answers, [q.id]: e.target.value })}
-                              rows={3}
-                            />
-                            <div className="acts-row">
-                              <button className="btn-pos" onClick={() => setEditingAnswer(null)}>
-                                <CheckCircle size={13} /> Save
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="qans" onClick={() => setEditingAnswer(q.id)}>
-                            <span className={`qa-text ${answers[q.id] ? "filled" : "empty"}`}>
-                              {answers[q.id] || "Click to answer..."}
-                            </span>
-                            <Edit2 size={13} color={MUTED} />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
         )}
 
