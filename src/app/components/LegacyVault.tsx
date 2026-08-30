@@ -41,8 +41,8 @@ const PACKAGE_SECTIONS = [
   {
     icon: <Heart size={18}/>,
     label: "Final Wishes & Legacy Planning",
-    desc: "Specific bequests, funeral preferences, estate instructions, questionnaire answers",
-    itemCount: "3 tabs",
+    desc: "Specific bequests, funeral preferences, estate instructions",
+    itemCount: "2 tabs",
   },
   {
     icon: <FileText size={18}/>,

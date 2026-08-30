@@ -1,6 +1,7 @@
 ﻿import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
 import fpdFullLogo from "../../../imports/FPD_full_logo.png";
+import { supabase } from "../../services/supabase";
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -17,34 +18,80 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
   const [error, setError] = useState("");
   const [mfa, setMfa] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!email || !password) { setError("Please enter your admin credentials."); return; }
     setLoading(true);
-    setTimeout(() => {
+
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError || !signInData.user) {
       setLoading(false);
-      if (email === "admin@finalpassdown.com" && password === "Admin2026!") {
-        setMfa(true);
-      } else {
-        setError("Invalid credentials. Use admin@finalpassdown.com / Admin2026!");
+      setError(signInError?.message ?? "Invalid credentials.");
+      return;
+    }
+
+    const { data: userRow, error: userError } = await supabase
+      .from("users")
+      .select("is_admin")
+      .eq("id", signInData.user.id)
+      .maybeSingle();
+
+    if (userError || !userRow?.is_admin) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      setError("This account does not have admin access.");
+      return;
+    }
+
+    // Supabase MFA: if this account has an enrolled TOTP factor, the session
+    // above only satisfies AAL1 — a real challenge/verify step is required
+    // to reach AAL2 before we let them into the portal.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel) {
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const totpFactor = factors?.totp?.[0];
+      if (!totpFactor) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        setError("MFA is required for this account but no factor is enrolled. Contact a super admin.");
+        return;
       }
-    }, 900);
+      setMfaFactorId(totpFactor.id);
+      setLoading(false);
+      setMfa(true);
+      return;
+    }
+
+    setLoading(false);
+    onLogin();
   };
 
-  const handleMfa = (e: React.FormEvent) => {
+  const handleMfa = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!mfaFactorId) { setError("No MFA factor to verify — please sign in again."); return; }
     setLoading(true);
-    setTimeout(() => {
+
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+    if (challengeError || !challenge) {
       setLoading(false);
-      if (mfaCode === "482910" || mfaCode.length === 6) {
-        onLogin();
-      } else {
-        setError("Invalid verification code. Try 482910 for demo.");
-      }
-    }, 700);
+      setError(challengeError?.message ?? "Failed to start MFA challenge.");
+      return;
+    }
+
+    const { error: verifyError } = await supabase.auth.mfa.verify({
+      factorId: mfaFactorId, challengeId: challenge.id, code: mfaCode,
+    });
+
+    setLoading(false);
+    if (verifyError) {
+      setError(verifyError.message);
+      return;
+    }
+    onLogin();
   };
 
   return (
@@ -111,11 +158,6 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                 </div>
               )}
 
-              <div className="mb-3 px-4 py-3 rounded-xl" style={{ background:"rgba(91,167,214,0.08)", border:"1px solid rgba(91,167,214,0.2)" }}>
-                <p style={{ color:"#6FAE8B", fontSize:14, ...MONO }}>DEMO CREDENTIALS</p>
-                <p style={{ color:"#B8C8E0", fontSize:15, marginTop:2 }}>admin@finalpassdown.com / Admin2026!</p>
-              </div>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ADMIN EMAIL</label>
@@ -139,6 +181,14 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                   {loading ? "Authenticating..." : "Sign In to Admin Portal"}
                 </button>
               </form>
+
+              {/* TEMP local preview only — not pushed, remove before shipping.
+                  Skips real auth so the admin screens can be clicked through
+                  with no live Supabase project connected. */}
+              <button onClick={onLogin} className="w-full mt-4 py-3 rounded-xl text-sm"
+                style={{ background:"rgba(246,173,85,0.1)", border:"1px dashed rgba(246,173,85,0.4)", color:"#F6AD55" }}>
+                ⚠ Preview admin UI without login (local only)
+              </button>
             </>
           ) : (
             <>
@@ -149,7 +199,6 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
                 </div>
                 <h2 style={{ fontFamily:"var(--font-display)", fontSize:30, color:"#E8EDF5", marginBottom:8 }}>Two-Factor Verification</h2>
                 <p style={{ color:"#6B7FA8", fontSize:17.5 }}>Enter the 6-digit code from your authenticator app.</p>
-                <p style={{ color:"#6FAE8B", fontSize:15, marginTop:6, ...MONO }}>Demo: use any 6 digits</p>
               </div>
               {error && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>

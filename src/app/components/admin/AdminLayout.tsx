@@ -13,7 +13,7 @@ export type AdminPageId =
   | "id-verification" | "payout-management" | "subscription-config"
   | "enterprise-api" | "email-templates" | "white-label"
   | "continuation-fee-admin" | "partner-onboarding-admin"
-  | "white-glove-admin" | "crypto-merchant";
+  | "white-glove-admin" | "crypto-merchant" | "admin-roles";
 
 interface AdminNavItem {
   id: AdminPageId;
@@ -27,6 +27,7 @@ const adminGroups: { label: string; items: AdminNavItem[] }[] = [
     label: "Command Center",
     items: [
       { id: "master-admin", label: "Master Admin", icon: <BarChart3 size={16}/> },
+      { id: "admin-roles",  label: "Admin Team & Roles", icon: <Shield size={16}/> },
     ],
   },
   {
@@ -40,7 +41,7 @@ const adminGroups: { label: string; items: AdminNavItem[] }[] = [
   {
     label: "Operations",
     items: [
-      { id: "id-verification",     label: "ID Verification",   icon: <UserCheck size={16}/>, badge: "3" },
+      { id: "id-verification",     label: "ID Verification",   icon: <UserCheck size={16}/> },
       { id: "payout-management",   label: "Payouts",           icon: <DollarSign size={16}/> },
       { id: "subscription-config", label: "Subscription Config", icon: <Settings size={16}/> },
     ],

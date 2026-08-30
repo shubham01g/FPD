@@ -56,7 +56,7 @@ const KB: Record<string, string> = {
   "emergency contact": `**Emergency Contacts** are people notified by first responders in an emergency. They have NO vault access — purely informational.\n\nTo add: Go to **People → Emergency Contacts** in the sidebar.\n\nYou can store their name, phone, email, and relationship. This information appears on your profile for emergency services.`,
 
   // ── Final Wishes ──────────────────────────────────────────────────
-  "final wishes": `The **Final Wishes** section has 3 tabs:\n\n1. **Family Wishes** — specific bequests (who gets what item/asset), written instructions to family\n2. **Funeral Planning** — service type, location, music, readings, flowers, special requests, obituary draft\n3. **Questionnaire** — 30+ life questions covering values, beliefs, medical wishes, messages to loved ones\n\nTo access: **Wishes & Trusts → Final Wishes** in the sidebar.`,
+  "final wishes": `The **Final Wishes** section has 2 tabs:\n\n1. **Family Wishes** — specific bequests (who gets what item/asset), written instructions to family\n2. **Funeral Planning** — service type, location, music, readings, flowers, special requests, obituary draft\n\nTo access: **Wishes & Trusts → Final Wishes** in the sidebar.`,
 
   // ── Wills and Living Trusts ───────────────────────────────────────
   "wills": `The **Wills and Living Trusts** section stores all your legal documents executed with an attorney:\n\n**Document types:** Last Will & Testament, Living Will / Advance Directive, Durable Power of Attorney, Healthcare Power of Attorney, Revocable Living Trust, Irrevocable Trust, and more.\n\n**Each record includes:** Attorney name, date executed, last reviewed date, document location, and status (Current/Outdated).\n\n**Actions:** View in Vault, Update Record, Scan & Upload a copy, Sync to File Cabinet → Legal Documents.\n\nTo access: **Wishes & Trusts → Wills and Living Trusts** in the sidebar.`,
@@ -166,7 +166,7 @@ function getResponse(query: string): string {
   if (q.match(/emergency contact|first responder|emergency/)) return KB["emergency contact"];
 
   // Final Wishes / Funeral
-  if (q.match(/final wish|funeral|burial|bequest|estate instruction|obituary|questionnaire/)) return KB["final wishes"];
+  if (q.match(/final wish|funeral|burial|bequest|estate instruction|obituary/)) return KB["final wishes"];
 
   // Wills
   if (q.match(/will\b|wills|trust|living trust|power of attorney|advance directive/)) return KB["wills"];
@@ -369,8 +369,8 @@ const AI_CSS = `
 .fpd-ai.page{position:relative;min-height:100%;padding:22px;box-sizing:border-box;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-ai .grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
 
-/* launcher pill */
-.fpd-ai-launch{position:fixed;bottom:96px;right:24px;z-index:50;display:inline-flex;align-items:center;gap:9px;padding:13px 19px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 14px 34px -12px rgba(91,110,225,0.8),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform .18s,filter .18s;}
+/* launcher circle */
+.fpd-ai-launch{position:fixed;bottom:96px;right:24px;z-index:50;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;cursor:pointer;box-shadow:0 14px 34px -12px rgba(91,110,225,0.8),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform .18s,filter .18s;}
 .fpd-ai-launch:hover{transform:translateY(-2px);filter:brightness(1.06);}
 
 /* panel shell */
@@ -378,8 +378,7 @@ const AI_CSS = `
 .fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;max-width:calc(100vw - 32px);max-height:calc(100vh - 116px);border-radius:16px;}
 @media (max-width:480px){
   .fpd-ai .panel.floating{right:16px;left:16px;bottom:84px;width:auto;max-width:none;max-height:calc(100vh - 104px);}
-  .fpd-ai-launch{right:16px;bottom:80px;width:50px;height:50px;padding:0;justify-content:center;border-radius:50%;gap:0;}
-  .fpd-ai-launch .label{display:none;}
+  .fpd-ai-launch{right:16px;bottom:80px;width:50px;height:50px;}
 }
 
 /* header */
@@ -714,8 +713,8 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
   if (!open) return (
     <>
       <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
-      <button className="fpd-ai-launch" onClick={() => setOpen(true)}>
-        <Sparkles size={16}/> <span className="label">Ask Carlos</span>
+      <button className="fpd-ai-launch" onClick={() => setOpen(true)} title="Ask Carlos" aria-label="Ask Carlos">
+        <Sparkles size={22}/>
       </button>
     </>
   );

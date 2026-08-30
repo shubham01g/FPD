@@ -1,6 +1,8 @@
 ﻿import React, { useState, useEffect, useRef } from "react";
 import { useWLPackages } from "../context/WLPackagesContext";
 import type { WLPackage } from "../services/wlPackages";
+import { publicApi } from "../services/publicApi";
+import { useAdminFetch } from "../hooks/useAdminFetch";
 import {
   Shield, Lock, Archive, Users, ArrowRight, CheckCircle2, Heart,
   KeyRound, Camera, Menu, X, Play, ChevronRight, ChevronDown,
@@ -362,7 +364,6 @@ const FEATURES: Feat[] = [
   { cat: "legacy", icon: <Users size={20} />, title: "Funeral Planning", desc: "Pre-plan your service: location, music, readings, obituary draft." },
   { cat: "legacy", icon: <Archive size={20} />, title: "Document Vault", desc: "AES-256 encrypted storage for every important document you own." },
   { cat: "legacy", icon: <Video size={20} />, title: "Video Messages", desc: "Record personal video messages delivered to loved ones after you pass." },
-  { cat: "legacy", icon: <Eye size={20} />, title: "Questionnaire", desc: "Answer life questions so your family truly knows your story and values." },
   { cat: "personal", icon: <Stethoscope size={20} />, title: "Emergency Info", desc: "Blood type, doctors, hospital preferences, DNR and organ donor status." },
   { cat: "personal", icon: <Bell size={20} />, title: "Allergies", desc: "Complete allergy registry with severity ratings and reaction details." },
   { cat: "personal", icon: <Shield size={20} />, title: "Medications", desc: "Active medications, dosages, prescribers, and refill schedules." },
@@ -597,18 +598,47 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
 }
 
 /* ── PRICING (5 tiers + annual toggle) ────────────────────────── */
-type Plan = { name: string; price: number; storage: string; contacts: number; color: string; popular: boolean; features: string[]; overage: number };
-/* Overage rates match Storage & Usage exactly: $0.50/GB on Starter, $0.40/GB on every other plan. */
-const PLANS: Plan[] = [
-  { name: "Starter", price: 1.99, storage: "1 GB", contacts: 1, color: "#D99A6B", popular: false, overage: 0.50, features: ["1 GB Legacy Storage", "1 Legacy Contact", "1 Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Foundation", price: 9.99, storage: "50 GB", contacts: 3, color: "#6E90C9", popular: false, overage: 0.40, features: ["50 GB Legacy Storage", "3 Legacy Contacts", "3 Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
-  { name: "Legacy Archive", price: 24.99, storage: "250 GB", contacts: -1, color: "#A98CC7", popular: true, overage: 0.40, features: ["250 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
-  { name: "Legacy Pro", price: 49.99, storage: "500 GB", contacts: -1, color: "#A98CC7", popular: false, overage: 0.40, features: ["500 GB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
-  { name: "Legacy Vault", price: 129.99, storage: "1 TB", contacts: -1, color: "#ED8936", popular: false, overage: 0.40, features: ["1 TB Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+type Plan = { id: string; name: string; price: number; priceAnnual: number; storage: string; contacts: number; color: string; popular: boolean; features: string[]; overage: number };
+
+interface DBPlan { id: string; name: string; price_monthly: number; price_annual: number; storage_gb: number; max_contacts: number; overage_rate: number; }
+
+/* Marketing copy (feature bullets, color, "most popular" flag) isn't admin-editable data —
+ * it stays here, keyed by the same plan id as subscription_plans, and is merged with the
+ * live pricing/storage/contacts/overage numbers fetched from /public/plans. */
+const PLAN_META: Record<string, Pick<Plan, "color" | "popular" | "features">> = {
+  starter: { color: "#D99A6B", popular: false, features: ["Legacy Storage", "Legacy Contact", "Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  foundation: { color: "#6E90C9", popular: false, features: ["Legacy Storage", "Legacy Contacts", "Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
+  family_archive: { color: "#A98CC7", popular: true, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  legacy_pro: { color: "#A98CC7", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+  legacy_vault: { color: "#ED8936", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email and Chat"] },
+};
+
+/* Same 5 plans, same numbers, kept as a fallback so the pricing page still
+ * renders if the backend isn't reachable (no project connected yet, etc). */
+const FALLBACK_PLANS: Plan[] = [
+  { id: "starter", name: "Starter", price: 1.99, priceAnnual: 24.00, storage: "1 GB", contacts: 1, overage: 0.50, ...PLAN_META.starter },
+  { id: "foundation", name: "Foundation", price: 9.99, priceAnnual: 95.90, storage: "50 GB", contacts: 3, overage: 0.40, ...PLAN_META.foundation },
+  { id: "family_archive", name: "Legacy Archive", price: 24.99, priceAnnual: 239.90, storage: "250 GB", contacts: -1, overage: 0.40, ...PLAN_META.family_archive },
+  { id: "legacy_pro", name: "Legacy Pro", price: 49.99, priceAnnual: 479.90, storage: "500 GB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_pro },
+  { id: "legacy_vault", name: "Legacy Vault", price: 129.99, priceAnnual: 1559.90, storage: "1 TB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_vault },
 ];
+
+function formatStorage(gb: number): string {
+  return gb >= 1024 ? `${(gb / 1024).toFixed(gb % 1024 === 0 ? 0 : 1)} TB` : `${gb} GB`;
+}
 
 function Pricing({ onStart }: { onStart: () => void }) {
   const [annual, setAnnual] = useState(false);
+
+  const { data } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
+  const PLANS: Plan[] = data?.plans?.length
+    ? data.plans.map(p => ({
+        id: p.id, name: p.name, price: Number(p.price_monthly), priceAnnual: Number(p.price_annual),
+        storage: formatStorage(p.storage_gb), contacts: p.max_contacts, overage: Number(p.overage_rate),
+        ...(PLAN_META[p.id] ?? { color: "#6E90C9", popular: false, features: [] }),
+      }))
+    : FALLBACK_PLANS;
+
   return (
     <>
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
@@ -625,14 +655,14 @@ function Pricing({ onStart }: { onStart: () => void }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch fpd-stagger">
           {PLANS.map(plan => (
-            <div key={plan.name} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
+            <div key={plan.id} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
               style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none" }}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap" }}>MOST POPULAR</div>
               )}
               <div style={{ ...MONO, color: plan.color, fontSize: 14, letterSpacing: "0.12em", marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
               <div className="flex items-baseline gap-1 mb-2">
-                <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.price * 0.8).toFixed(2) : plan.price}</span>
+                <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}</span>
                 <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
               </div>
               <div style={{ color: MUTED, fontSize: 16, marginBottom: 10 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>

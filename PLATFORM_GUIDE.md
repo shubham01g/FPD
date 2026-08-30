@@ -609,6 +609,8 @@ Processed on the 1st of each month. Minimum payout: $50. Payment via ACH or PayP
 
 ## 11. Admin Portal — Command Center
 
+> **Backend status (Milestone 3):** the tabs described below are the `MasterAdmin.tsx` Command Center — its Overview/Analytics/Revenue/Storage tabs are still demo data. The *separate* top-level admin screens (ID Verification, Affiliate Admin, Partnership Admin, Payouts, Email Templates, White Label, Subscription Config, $199 Fee, Enterprise API, Admin Team & Roles) are now backed by a real API — see the README's [§38 Admin Backend API](README.md#38-admin-backend-api-milestone-3) for routes, and its Developer Handoff Checklist for what's still outstanding (most notably: admin login is still fake, so none of this can be exercised against a live project yet).
+
 ### How to Access
 
 Landing page footer → **MASTER ADMIN LOGIN** button (purple, bottom-right).
@@ -1143,21 +1145,7 @@ The admin package editor shows a live charge preview at 50, 200, and 1,000 users
 
 ### Live Frontend Sync — How It Works
 
-This is a key architectural feature. When an admin changes a package price:
-
-1. Admin edits a package in the WL Onboarding Control admin panel
-2. Admin clicks "Save Changes"
-3. `updatePackage(id, changes)` is called in `wlPackages.ts`
-4. The in-memory `_packages` array is updated immediately
-5. All registered listeners (stored in a `Set<Listener>`) are notified
-6. `WLPackagesContext.tsx` is subscribed and receives the update
-7. React state is updated → triggers re-render
-8. The landing page's `WhiteLabel` component reads `useWLPackages()` and re-renders
-9. The new price, billing model, and features are now visible on the public website
-
-**Zero delay. Zero deploy.** The frontend and admin panel share the same data source via pub/sub.
-
-In production, step 3 makes a real API call (`PATCH /v1/wl/packages/:id`) and the server broadcasts the update to all connected clients via WebSocket.
+When an admin changes a package price, it now writes through to the real `wl_packages` table and is visible on the public site on the next load — see [§19](#19-wl-package-api--live-frontend-sync) for the exact request flow and file (`wlPackages.ts`). Short version: same-tab updates are instant via the existing pub/sub cache; a second visitor sees the change on their next page load/fetch, since there's no WebSocket push between separate browser sessions — updates aren't literally real-time across tabs/users, just always-current on fetch.
 
 ### WL Commission on FPD Subscriptions
 
@@ -1171,42 +1159,44 @@ Example (Enterprise tier, 25% commission):
 
 ## 19. WL Package API — Live Frontend Sync
 
+> **Milestone 3 update:** packages now round-trip through the real `wl_packages` table, not just in-memory state. Sales and payment-processor config are the one part of this file still demo-only (see below) — no `wl_sales` table exists yet.
+
 ### Architecture
 
 ```
-Admin edits package
+Admin edits package (PartnerOnboardingAdmin.tsx)
         ↓
 wlPackages.ts: updatePackage(id, changes)
         ↓
-_packages[] updated in memory
+PATCH /admin/white-label/packages/:id  (adminApi, admin-authenticated)
         ↓
-notify() broadcasts to all listeners
+wl_packages row updated in Postgres
+        ↓
+_packages[] cache updated + notify() broadcasts to listeners
         ↓
 WLPackagesContext.tsx: setPackages(updated)
         ↓
 useWLPackages() consumers re-render
         ↓
-LandingPage WhiteLabel section shows new price
+LandingPage WhiteLabel section (and WhiteLabelOnboarding.tsx) show the new price
 ```
+
+Reads (`getPackages()`) go through `GET /public/wl-packages` — unauthenticated, since the landing page and the partner onboarding wizard both need it before anyone is logged in. Writes (`updatePackage`/`createPackage`/`deletePackage`) go through the admin-authenticated `/admin/white-label/packages` routes.
 
 ### The Service File (wlPackages.ts)
 
-**`DEMO_MODE = true`:** Uses in-memory store. To switch to production, set `DEMO_MODE = false` and configure `API_BASE`.
+No more `DEMO_MODE` flag — packages always hit the real backend now (`src/app/services/publicApi.ts` for reads, `adminApi.ts` for writes). It keeps a small in-memory `_packages[]` cache purely so `subscribeToPackages()` can emit instantly on subscribe and again after every write, without every consumer re-fetching.
 
 **Key functions:**
-- `subscribeToPackages(fn)` — registers a listener, immediately emits current state, returns unsubscribe function
-- `getPackages()` — returns all packages
-- `updatePackage(id, changes)` — updates a package and notifies all listeners
-- `createPackage(pkg)` — adds a new package
-- `deletePackage(id)` — removes a package
-- `getSales()` — returns all WL sales records
-- `getProcessors()` — returns payment processor list
-- `updateProcessor(id, changes)` — updates processor config, handles default switching
-- `calcMonthlyCharge(billing, activeUsers, avgUserMrr)` — pure function for charge calculation
+- `subscribeToPackages(fn)` — registers a listener, immediately emits the cached state, kicks off a fresh `getPackages()` fetch, returns an unsubscribe function
+- `getPackages()` — `GET /public/wl-packages`, maps DB rows to `WLPackage` (see `packageFromDB`/`packageToDB` for the billing-model shape translation)
+- `updatePackage(id, changes)` / `createPackage(pkg)` / `deletePackage(id)` — admin-only writes, each updates the local cache and calls `notify()` after the API call succeeds
+- `getSales()` / `createSale()` / `getProcessors()` / `updateProcessor()` — **still the in-memory demo store.** `createSale()` is what `WhiteLabelOnboarding.tsx` calls when a prospective partner applies; until a `wl_sales` table + endpoint exist, those applications aren't actually persisted anywhere durable.
+- `calcMonthlyCharge(billing, activeUsers, avgUserMrr)` — pure function for charge calculation, unchanged
 
 ### The Context (WLPackagesContext.tsx)
 
-Uses `useEffect` to subscribe on mount and unsubscribe on unmount:
+Unchanged — still subscribes on mount, unsubscribes on unmount:
 
 ```typescript
 useEffect(() => {
@@ -1215,7 +1205,7 @@ useEffect(() => {
 }, []);
 ```
 
-This means the context is always in sync with the service store — no polling, no manual refresh.
+The context itself didn't need to change; only what `subscribeToPackages` does underneath it did.
 
 ---
 
@@ -1391,6 +1381,8 @@ const response = await anthropic.messages.create({
 
 ## 23. Email Templates System
 
+> **Milestone 3 update:** these 16 templates used to be hardcoded inside `EmailTemplates.tsx`. They now live in the `email_templates` table (seeded by `database/migrations/003_email_templates_seed.sql`) and are served via `GET/PUT /admin/email-templates` — see README [§38](README.md#38-admin-backend-api-milestone-3). The content below is still accurate; only where it's stored changed.
+
 ### How Templates Are Structured
 
 Each of the 16 email templates has:
@@ -1511,6 +1503,8 @@ Concierge staff authenticate through a completely separate service (`conciergeSt
 ---
 
 ## 25. Database Schema
+
+> This table is illustrative (projected row counts, some names differ slightly from the actual SQL). For the authoritative, current schema, read `database/migrations/*.sql` directly — `001_initial_schema.sql` is the base schema; `002`–`004` are Milestone 3 additions (admin backend tables, email template seed data, admin roles) not yet applied to any project. See README [§32](README.md#32-database-schema) and [§38](README.md#38-admin-backend-api-milestone-3) for what each migration adds and the API built on top of it.
 
 ### Complete Table List
 

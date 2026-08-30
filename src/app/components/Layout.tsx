@@ -37,6 +37,8 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "dashboard", label: "Dashboard", icon: <Home size={16}/> },
       { id: "fpd-ai", label: "Ask Carlos", icon: <MessageCircle size={16}/> },
+      { id: "contacts-legacy",    label: "Legacy Contacts",    icon: <ShieldCheck size={16}/> },
+      { id: "contacts-guardian",  label: "Guardian Contacts",  icon: <UserCheck size={16}/> },
     ],
   },
   {
@@ -85,8 +87,6 @@ const navGroups: NavGroup[] = [
     label: "People & Contacts",
     items: [
       { id: "family-friends",     label: "Family & Friends",   icon: <Users size={16}/> },
-      { id: "contacts-legacy",    label: "Legacy Contacts",    icon: <ShieldCheck size={16}/> },
-      { id: "contacts-guardian",  label: "Guardian Contacts",  icon: <UserCheck size={16}/> },
       { id: "contacts-emergency", label: "Emergency Contacts", icon: <AlertCircle size={16}/> },
     ],
   },

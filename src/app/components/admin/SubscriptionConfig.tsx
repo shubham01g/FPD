@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { Settings, Save, AlertTriangle, CheckCircle, DollarSign, HardDrive, Bell, RefreshCw } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Settings, Save, AlertTriangle, CheckCircle, DollarSign, HardDrive, Bell, RefreshCw, Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
 
 interface PlanConfig {
   id: string;
@@ -8,17 +11,39 @@ interface PlanConfig {
   annualDiscount: number;
   storage: number;
   overageRate: number;
-  maxContacts: number;
+  maxContacts: number; // UI sentinel 999 = unlimited; DB stores -1
   color: string;
 }
 
-const initialPlans: PlanConfig[] = [
-  { id: "starter",        name: "Starter",        price: 1.99,   annualDiscount: 15, storage: 1,    overageRate: 0.50, maxContacts: 1,   color: "#D99A6B" },
-  { id: "foundation",     name: "Foundation",     price: 9.99,   annualDiscount: 20, storage: 50,   overageRate: 0.40, maxContacts: 3,   color: "#6FAE8B" },
-  { id: "family_archive", name: "Legacy Archive", price: 24.99,  annualDiscount: 20, storage: 250,  overageRate: 0.40, maxContacts: 999, color: "#6E90C9" },
-  { id: "legacy_pro",     name: "Legacy Pro",     price: 49.99,  annualDiscount: 20, storage: 500,  overageRate: 0.40, maxContacts: 999, color: "#6FAE8B" },
-  { id: "legacy_vault",   name: "Legacy Vault",   price: 129.99, annualDiscount: 20, storage: 1024, overageRate: 0.40, maxContacts: 999, color: "#ED8936" },
-];
+interface DBPlan {
+  id: string;
+  name: string;
+  price_monthly: number;
+  price_annual: number;
+  storage_gb: number;
+  overage_rate: number;
+  max_contacts: number;
+}
+
+interface ThresholdSetting { key: string; value: string; updated_at: string; }
+
+const PLAN_COLORS: Record<string, string> = {
+  starter: "#D99A6B", foundation: "#6FAE8B", family_archive: "#6E90C9", legacy_pro: "#6FAE8B", legacy_vault: "#ED8936",
+};
+
+function toPlanConfig(p: DBPlan): PlanConfig {
+  const annualDiscount = p.price_monthly > 0 ? Math.round((1 - Number(p.price_annual) / (Number(p.price_monthly) * 12)) * 100) : 0;
+  return {
+    id: p.id,
+    name: p.name,
+    price: Number(p.price_monthly),
+    annualDiscount,
+    storage: p.storage_gb,
+    overageRate: Number(p.overage_rate),
+    maxContacts: p.max_contacts === -1 ? 999 : p.max_contacts,
+    color: PLAN_COLORS[p.id] ?? "#6E90C9",
+  };
+}
 
 interface AlertThresholds {
   warning: number;
@@ -28,10 +53,29 @@ interface AlertThresholds {
 }
 
 export function SubscriptionConfig() {
-  const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
+  const [plans, setPlans] = useState<PlanConfig[]>([]);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [thresholds, setThresholds] = useState<AlertThresholds>({ warning: 80, recommended: 90, critical: 95, overage: 100 });
+
+  const { data, loading, error } = useAdminFetch(
+    () => adminApi.get<{ plans: DBPlan[]; thresholds: ThresholdSetting[] }>("/pricing"),
+    [],
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    setPlans(data.plans.map(toPlanConfig));
+    const byKey = Object.fromEntries(data.thresholds.map(t => [t.key, t.value]));
+    setThresholds({
+      warning: byKey.storage_alert_80 ? Number(byKey.storage_alert_80) : 80,
+      recommended: byKey.storage_alert_90 ? Number(byKey.storage_alert_90) : 90,
+      critical: byKey.storage_alert_95 ? Number(byKey.storage_alert_95) : 95,
+      overage: 100, // billing always begins at 100% — no configurable key backs this
+    });
+    setDirty(false);
+  }, [data]);
 
   const updatePlan = (id: string, field: keyof PlanConfig, value: number | string) => {
     setPlans(plans.map((p) => p.id === id ? { ...p, [field]: value } : p));
@@ -45,10 +89,30 @@ export function SubscriptionConfig() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setDirty(false);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        ...plans.map((p) => adminApi.patch(`/pricing/plans/${p.id}`, {
+          price_monthly: p.price,
+          price_annual: Math.round(p.price * 12 * (1 - p.annualDiscount / 100) * 100) / 100,
+          storage_gb: p.storage,
+          overage_rate: p.overageRate,
+          max_contacts: p.maxContacts === 999 ? -1 : p.maxContacts,
+        })),
+        adminApi.patch("/pricing/settings/storage_alert_80", { value: String(thresholds.warning) }),
+        adminApi.patch("/pricing/settings/storage_alert_90", { value: String(thresholds.recommended) }),
+        adminApi.patch("/pricing/settings/storage_alert_95", { value: String(thresholds.critical) }),
+      ]);
+      setSaved(true);
+      setDirty(false);
+      toast.success("Pricing configuration saved");
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save configuration");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -72,7 +136,8 @@ export function SubscriptionConfig() {
           )}
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl transition-all"
+            disabled={saving || loading}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl transition-all disabled:opacity-50"
             style={{
               background: saved ? "rgba(72,187,120,0.15)" : "linear-gradient(135deg, #5B6EE1, #5B6EE1)",
               color: saved ? "#D99A6B" : "#070D1A",
@@ -80,11 +145,18 @@ export function SubscriptionConfig() {
               fontWeight: 600, fontSize: 17.5,
             }}
           >
-            {saved ? <CheckCircle size={15} /> : <Save size={15} />}
-            {saved ? "Saved!" : "Save Changes"}
+            {saved ? <CheckCircle size={15} /> : saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {saved ? "Saved!" : saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(252,129,129,0.1)", border: "1px solid rgba(252,129,129,0.25)" }}>
+          <AlertCircle size={15} color="#FC8181" />
+          <span style={{ color: "#FC8181", fontSize: 16 }}>{error}</span>
+        </div>
+      )}
 
       {/* Live preview notice */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
@@ -94,6 +166,12 @@ export function SubscriptionConfig() {
         </span>
       </div>
 
+      {loading ? (
+        <div className="flex items-center gap-2 py-12 justify-center" style={{ color: "var(--muted-foreground)" }}>
+          <Loader2 size={18} className="animate-spin" /> Loading plans…
+        </div>
+      ) : (
+      <>
       {/* Plan pricing */}
       <div className="space-y-4">
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>Subscription Plans</h2>
@@ -216,7 +294,7 @@ export function SubscriptionConfig() {
             { key: "warning", label: "Usage Warning", color: "#F6AD55", desc: "General usage warning email" },
             { key: "recommended", label: "Upgrade Recommended", color: "#ED8936", desc: "Upgrade recommended email" },
             { key: "critical", label: "Critical Alert", color: "#FC8181", desc: "Critical alert email sent" },
-            { key: "overage", label: "Overage Begins", color: "#E53E3E", desc: "Overage billing triggered" },
+            { key: "overage", label: "Overage Begins", color: "#E53E3E", desc: "Fixed at 100% — not configurable" },
           ].map((t) => (
             <div key={t.key}>
               <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>{t.label.toUpperCase()}</label>
@@ -226,6 +304,7 @@ export function SubscriptionConfig() {
                   type="number"
                   min="1"
                   max="100"
+                  disabled={t.key === "overage"}
                   value={(thresholds as any)[t.key]}
                   onChange={(e) => updateThreshold(t.key as keyof AlertThresholds, parseInt(e.target.value))}
                   style={{ background: "transparent", border: "none", outline: "none", color: t.color, fontSize: 25, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
@@ -242,12 +321,15 @@ export function SubscriptionConfig() {
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-8 py-3 rounded-2xl"
+          disabled={saving}
+          className="flex items-center gap-2 px-8 py-3 rounded-2xl disabled:opacity-50"
           style={{ background: "linear-gradient(135deg, #5B6EE1, #5B6EE1)", color: "#070D1A", fontWeight: 700, fontSize: 19 }}
         >
-          <Save size={16} /> Save All Configuration
+          <Save size={16} /> {saving ? "Saving…" : "Save All Configuration"}
         </button>
       </div>
+      </>
+      )}
     </div>
   );
 }

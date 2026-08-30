@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import { Toaster } from "sonner";
+import { supabase } from "./services/supabase";
 import { DemoProvider } from "./context/DemoContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
 import { WLEntitlementProvider } from "./context/WLEntitlementContext";
+import { UserLogin } from "./components/UserLogin";
+import { UserSignup } from "./components/UserSignup";
+import { signOut } from "./services/auth";
 
 /* User portal */
 import { Layout, type PageId } from "./components/Layout";
 import { LandingPage } from "./components/LandingPage";
 import { UserDashboard } from "./components/UserDashboard";
 import { LegacyVault } from "./components/LegacyVault";
-import { LegacyVerification } from "./components/LegacyVerification";
 import { StorageUsage } from "./components/StorageUsage";
 import { FinalWishes } from "./components/FinalWishes";
 import { WillsAndTrusts } from "./components/WillsAndTrusts";
@@ -68,6 +72,7 @@ import { WGClientSubmit } from "./components/WGClientSubmit";
 import { WGSchedulePage } from "./components/WGSchedulePage";
 import { createScheduleToken } from "./services/wgClientStore";
 import { CryptoMerchant } from "./components/admin/CryptoMerchant";
+import { AdminRoles } from "./components/admin/AdminRoles";
 import { ConciergeLogin } from "./components/ConciergeLogin";
 import { ConciergePortal } from "./components/ConciergePortal";
 import { conciergeEmployees, getEmployee } from "./services/conciergeStaff";
@@ -239,7 +244,6 @@ function DemoBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const current = DEMO_TABS.find(t => t.path === location.pathname) ?? DEMO_TABS[0];
 
   function goTo(tab: DemoTab) {
     // The demo switcher stays frictionless: jumping straight into a gated
@@ -260,12 +264,11 @@ function DemoBar() {
         .fpd-demo .demo-tab:hover{background:rgba(91,110,225,0.14);color:#C7CEE8;}
         .fpd-demo .demo-tab.on{background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;box-shadow:0 6px 16px -8px rgba(91,110,225,0.8);}
         .fpd-demo .demo-tab.on:hover{filter:brightness(1.08);}
-        .fpd-demo .demo-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;font-size:12.5px;font-weight:700;cursor:pointer;color:#6FAE8B;backdrop-filter:blur(16px);letter-spacing:0.06em;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(91,110,225,0.4);box-shadow:0 0 0 1px rgba(91,110,225,0.1),0 4px 20px rgba(0,0,0,0.5);transition:border-color .18s ease,box-shadow .18s ease;}
-        .fpd-demo .demo-toggle:hover{border-color:rgba(91,110,225,0.6);box-shadow:0 0 0 1px rgba(91,110,225,0.14),0 4px 20px rgba(0,0,0,0.5),0 0 22px -6px rgba(91,110,225,0.45);}
+        .fpd-demo .demo-toggle{display:flex;align-items:center;justify-content:center;width:58px;height:58px;padding:0;border-radius:50%;font-size:22.5px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);border:1px solid rgba(255,255,255,0.08);box-shadow:0 14px 34px -12px rgba(91,110,225,0.8),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform .18s ease,filter .18s ease;}
+        .fpd-demo .demo-toggle:hover{transform:translateY(-2px);filter:brightness(1.06);}
         @media (max-width:480px){
           .fpd-demo{bottom:18px;right:16px;}
-          .fpd-demo .demo-toggle{width:48px;height:48px;padding:0;justify-content:center;gap:0;border-radius:50%;}
-          .fpd-demo .demo-toggle .dtext{display:none;}
+          .fpd-demo .demo-toggle{width:48px;height:48px;font-size:19px;}
         }
       `}</style>
       {open && (
@@ -284,10 +287,8 @@ function DemoBar() {
           ))}
         </div>
       )}
-      <button onClick={() => setOpen(!open)} className="demo-toggle">
-        <span style={{ fontSize:17.5 }}>{current.label.split(" ")[0]}</span>
-        <span className="dtext">DEMO</span>
-        <span className="dtext" style={{ fontSize:10, opacity:0.6 }}>{open ? "▲" : "▼"}</span>
+      <button onClick={() => setOpen(!open)} className="demo-toggle" title="Switch Demo View" aria-label="Switch Demo View">
+        👤
       </button>
     </div>
   );
@@ -299,7 +300,7 @@ function LandingRoute() {
   return (
     <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
       <LandingPage
-        onGetStarted={() => navigate("/dashboard")}
+        onGetStarted={() => navigate("/signup")}
         onAdminLogin={() => navigate("/admin/login")}
         onPartnerPortal={() => navigate("/partner")}
         onConciergeLogin={() => navigate("/concierge/login")}
@@ -311,10 +312,41 @@ function LandingRoute() {
   );
 }
 
-/* ── User portal ─────────────────────────────────────────────────── */
+/* ── User login / signup ─────────────────────────────────────────── */
+function UserLoginRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="size-full">
+      <UserLogin
+        onLogin={() => navigate("/dashboard")}
+        onGoSignup={() => navigate("/signup")}
+        onBackToSite={() => navigate("/")}
+      />
+    </div>
+  );
+}
+
+function UserSignupRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="size-full">
+      <UserSignup
+        onSignedUp={() => navigate("/dashboard")}
+        onGoLogin={() => navigate("/login")}
+        onBackToSite={() => navigate("/")}
+      />
+    </div>
+  );
+}
+
+/* ── User portal (gated — redirects to /login without a session) ──── */
 function UserRoute() {
   const navigate = useNavigate();
+  const { session, loading } = useAuth();
   const [userPage, setUserPage] = useState<PageId>("dashboard");
+
+  if (loading) return null;
+  if (!session) return <Navigate to="/login" replace/>;
 
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
@@ -368,7 +400,7 @@ function UserRoute() {
         currentPage={userPage}
         onNavigate={setUserPage}
         onGoAdmin={() => navigate("/admin/login")}
-        onSignOut={() => navigate("/")}
+        onSignOut={() => { signOut(); navigate("/"); }}
       >
         {renderUserPage()}
       </Layout>
@@ -414,6 +446,7 @@ function AdminRoute() {
       case "partner-onboarding-admin":  return <PartnerOnboardingAdmin/>;
       case "white-glove-admin":         return <WhiteGloveAdmin/>;
       case "crypto-merchant":           return <CryptoMerchant/>;
+      case "admin-roles":               return <AdminRoles/>;
       default:                          return <MasterAdmin/>;
     }
   };
@@ -423,7 +456,7 @@ function AdminRoute() {
       <AdminLayout
         currentPage={adminPage}
         onNavigate={setAdminPage}
-        onSignOut={() => { clearAdminAuthed(); navigate("/"); }}
+        onSignOut={() => { supabase.auth.signOut(); clearAdminAuthed(); navigate("/"); }}
       >
         {renderAdminPage()}
       </AdminLayout>
@@ -499,6 +532,8 @@ function AppShell() {
   return (
     <Routes>
       <Route path="/" element={<LandingRoute/>}/>
+      <Route path="/login" element={<UserLoginRoute/>}/>
+      <Route path="/signup" element={<UserSignupRoute/>}/>
       <Route path="/dashboard" element={<UserRoute/>}/>
       <Route path="/admin/login" element={<AdminLoginRoute/>}/>
       <Route path="/admin" element={<AdminRoute/>}/>
@@ -515,17 +550,19 @@ function AppShell() {
 
 export default function App() {
   return (
-    <WLPackagesProvider>
-      <WhiteLabelProvider>
-        <WLEntitlementProvider>
-        <DemoProvider>
-          <BrowserRouter>
-            <Toaster position="bottom-right" toastOptions={{ style: TOASTER_STYLE }} theme="dark"/>
-            <AppShell/>
-          </BrowserRouter>
-        </DemoProvider>
-        </WLEntitlementProvider>
-      </WhiteLabelProvider>
-    </WLPackagesProvider>
+    <AuthProvider>
+      <WLPackagesProvider>
+        <WhiteLabelProvider>
+          <WLEntitlementProvider>
+          <DemoProvider>
+            <BrowserRouter>
+              <Toaster position="bottom-right" toastOptions={{ style: TOASTER_STYLE }} theme="dark"/>
+              <AppShell/>
+            </BrowserRouter>
+          </DemoProvider>
+          </WLEntitlementProvider>
+        </WhiteLabelProvider>
+      </WLPackagesProvider>
+    </AuthProvider>
   );
 }

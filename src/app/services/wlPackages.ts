@@ -1,13 +1,16 @@
 /**
  * White Label Package API Service
  *
- * In production this hits your backend REST API / Supabase edge function.
- * In demo mode it operates on the in-memory store so UI changes are instant.
- * Swap DEMO_MODE = false and set API_BASE to your real endpoint.
+ * Packages (read + admin write) are backed by the wl_packages table via the
+ * Supabase edge function backend — see supabase/functions/server/routes/public.ts
+ * (GET, unauthenticated) and routes/whiteLabel.ts (POST/PATCH/DELETE, admin-only).
+ *
+ * Sales and payment processor config have no backing table yet (there's no
+ * wl_sales table, and crypto_processor_configs isn't wired to an endpoint) —
+ * those two stay on the in-memory demo store below until that's built.
  */
-
-const DEMO_MODE = true;
-const API_BASE = "https://api.finalpassdown.com/v1/wl";
+import { publicApi } from "./publicApi";
+import { adminApi } from "./adminApi";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -59,90 +62,69 @@ export interface PaymentProcessor {
   config:  Record<string, string>;
 }
 
-/* ── Demo seed data ─────────────────────────────────────────────────── */
+/* ── DB row shape (wl_packages table) + mapping ──────────────────────── */
 
-let _packages: WLPackage[] = [
-  {
-    id: "agency",
-    name: "Agency Partner",
-    tier: "AGENCY",
-    userLimit: 500,
-    userLimitLabel: "Up to 500 users",
-    billing: { type: "flat_monthly", flatMonthly: 2999, setupFee: 2500 },
-    commission: 20,
-    color: "#6E90C9",
-    badge: null,
-    features: [
-      "Up to 500 user accounts",
-      "Full white label (your domain + branding)",
-      "Priority support (24h SLA)",
-      "Partner analytics dashboard",
-      "Custom email templates",
-      "Dedicated onboarding manager",
-      "API access",
-      "Marketing & sales materials",
-    ],
-    active: true,
-    stripeProductId: "prod_agency_demo",
-    stripePriceId: "price_agency_demo",
-    onboardingLink: "finalpassdown.com/partner/onboard?tier=agency",
-    processorOverride: null,
-  },
-  {
-    id: "legacy_vault",
-    name: "Enterprise Partner",
-    tier: "ENTERPRISE",
-    userLimit: 5000,
-    userLimitLabel: "501 – 5,000 users",
-    billing: { type: "per_user_flat", perUserAmount: 2.99, setupFee: 5000, minMonthly: 7499 },
-    commission: 25,
-    color: "#6FAE8B",
-    badge: "Most Popular",
-    features: [
-      "501 – 5,000 user accounts",
-      "Fully custom branded platform",
-      "24/7 dedicated support line",
-      "Real-time white-label analytics",
-      "Custom feature development",
-      "99.9% SLA uptime guarantee",
-      "White-glove onboarding",
-      "Revenue sharing dashboard",
-      "Enterprise API + webhooks",
-    ],
-    active: true,
-    stripeProductId: "prod_enterprise_demo",
-    stripePriceId: "price_enterprise_demo",
-    onboardingLink: "finalpassdown.com/partner/onboard?tier=enterprise",
-    processorOverride: null,
-  },
-  {
-    id: "institutional",
-    name: "Institutional Partner",
-    tier: "INSTITUTIONAL",
-    userLimit: null,
-    userLimitLabel: "5,000+ users",
-    billing: { type: "per_user_percentage", percentOfRevenue: 15, setupFee: 5000, minMonthly: 15000 },
-    commission: 30,
-    color: "#D99A6B",
-    badge: "Best Value",
-    features: [
-      "5,000+ user accounts (unlimited)",
-      "Custom-built branded platform",
-      "Named account executive",
-      "Custom SLA & infrastructure",
-      "HIPAA / SOC 2 compliance package",
-      "On-site onboarding & training",
-      "Custom API rate limits",
-      "Quarterly business reviews",
-      "Co-marketing opportunities",
-    ],
-    active: true,
-    stripeProductId: "prod_institutional_demo",
-    stripePriceId: null,
-    onboardingLink: "finalpassdown.com/partner/onboard?tier=institutional",
-    processorOverride: null,
-  },
-];
+interface DBPackage {
+  id: string; name: string; tier: string; user_limit: number | null; user_limit_label: string;
+  billing_type: BillingModel["type"]; flat_monthly: number | null; per_user_amount: number | null;
+  percent_of_revenue: number | null; min_monthly: number | null; setup_fee: number;
+  commission_pct: number; color: string; badge: string | null; features: string[]; active: boolean;
+  stripe_product_id: string | null; stripe_price_id: string | null;
+  onboarding_link: string; processor_override: string | null;
+}
+
+function billingFromDB(row: DBPackage): BillingModel {
+  const setupFee = Number(row.setup_fee);
+  if (row.billing_type === "per_user_flat") {
+    return { type: "per_user_flat", perUserAmount: Number(row.per_user_amount), setupFee, minMonthly: Number(row.min_monthly) };
+  }
+  if (row.billing_type === "per_user_percentage") {
+    return { type: "per_user_percentage", percentOfRevenue: Number(row.percent_of_revenue), setupFee, minMonthly: Number(row.min_monthly) };
+  }
+  return { type: "flat_monthly", flatMonthly: Number(row.flat_monthly), setupFee };
+}
+
+function billingToDB(b: BillingModel): Record<string, unknown> {
+  const base = { billing_type: b.type, setup_fee: b.setupFee, flat_monthly: null, per_user_amount: null, percent_of_revenue: null, min_monthly: null };
+  if (b.type === "flat_monthly") return { ...base, flat_monthly: b.flatMonthly };
+  if (b.type === "per_user_flat") return { ...base, per_user_amount: b.perUserAmount, min_monthly: b.minMonthly };
+  return { ...base, percent_of_revenue: b.percentOfRevenue, min_monthly: b.minMonthly };
+}
+
+function packageFromDB(row: DBPackage): WLPackage {
+  return {
+    id: row.id, name: row.name, tier: row.tier, userLimit: row.user_limit, userLimitLabel: row.user_limit_label,
+    billing: billingFromDB(row), commission: row.commission_pct, color: row.color, badge: row.badge,
+    features: row.features ?? [], active: row.active,
+    stripeProductId: row.stripe_product_id, stripePriceId: row.stripe_price_id,
+    onboardingLink: row.onboarding_link, processorOverride: row.processor_override,
+  };
+}
+
+function packageToDB(p: Partial<WLPackage>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (p.name !== undefined) out.name = p.name;
+  if (p.tier !== undefined) out.tier = p.tier;
+  if (p.userLimit !== undefined) out.user_limit = p.userLimit;
+  if (p.userLimitLabel !== undefined) out.user_limit_label = p.userLimitLabel;
+  if (p.billing !== undefined) Object.assign(out, billingToDB(p.billing));
+  if (p.commission !== undefined) out.commission_pct = p.commission;
+  if (p.color !== undefined) out.color = p.color;
+  if (p.badge !== undefined) out.badge = p.badge;
+  if (p.features !== undefined) out.features = p.features;
+  if (p.active !== undefined) out.active = p.active;
+  if (p.stripeProductId !== undefined) out.stripe_product_id = p.stripeProductId;
+  if (p.stripePriceId !== undefined) out.stripe_price_id = p.stripePriceId;
+  if (p.onboardingLink !== undefined) out.onboarding_link = p.onboardingLink;
+  if (p.processorOverride !== undefined) out.processor_override = p.processorOverride;
+  return out;
+}
+
+/* Local cache of the last-fetched packages, so subscribeToPackages() keeps its
+ * existing "instant cross-component sync" behavior after a write. */
+let _packages: WLPackage[] = [];
+
+/* ── Demo seed data (sales + processors only — see file header) ──────── */
 
 let _sales: WLSale[] = [
   { id:"WL-001", org:"Greenfield Law Offices",     contact:"Rebecca Hayes",  email:"r.hayes@greenfieldlaw.com",  packageId:"agency",       status:"active",    users:18,   mrr:2999,  totalPaid:12496,  startDate:"Jun 1, 2026",  subdomain:"greenfield.finalpassdown.com",  processor:"stripe", lastPayout:"Jun 1, 2026" },
@@ -174,58 +156,39 @@ function notify() {
 
 /* ── API methods ────────────────────────────────────────────────────── */
 
-/** Subscribe to real-time package updates */
+/** Subscribe to package updates — fetches once on subscribe, then re-emits after every write below. */
 export function subscribeToPackages(fn: Listener): () => void {
   _listeners.add(fn);
-  fn([..._packages]); // emit current state immediately
+  fn([..._packages]); // emit whatever's cached immediately, then refresh
+  getPackages().then(notify).catch(() => {});
   return () => _listeners.delete(fn);
 }
 
 export async function getPackages(): Promise<WLPackage[]> {
-  if (!DEMO_MODE) {
-    const res = await fetch(`${API_BASE}/packages`);
-    return res.json();
-  }
+  const res = await publicApi.get<{ packages: DBPackage[] }>("/wl-packages");
+  _packages = res.packages.map(packageFromDB);
   return [..._packages];
 }
 
 export async function updatePackage(id: string, updates: Partial<WLPackage>): Promise<WLPackage> {
-  if (!DEMO_MODE) {
-    const res = await fetch(`${API_BASE}/packages/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    return res.json();
-  }
-  await new Promise(r => setTimeout(r, 400)); // simulate latency
-  _packages = _packages.map(p => p.id === id ? { ...p, ...updates } : p);
+  const res = await adminApi.patch<{ package: DBPackage }>(`/white-label/packages/${id}`, packageToDB(updates));
+  const updated = packageFromDB(res.package);
+  _packages = _packages.map(p => p.id === id ? updated : p);
   notify();
-  return _packages.find(p => p.id === id)!;
+  return updated;
 }
 
-export async function createPackage(pkg: Omit<WLPackage, "id">): Promise<WLPackage> {
-  if (!DEMO_MODE) {
-    const res = await fetch(`${API_BASE}/packages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pkg),
-    });
-    return res.json();
-  }
-  await new Promise(r => setTimeout(r, 500));
-  const newPkg = { ...pkg, id: `pkg_${Date.now().toString(36)}` };
-  _packages = [..._packages, newPkg];
+export async function createPackage(pkg: Omit<WLPackage, "id"> & { id?: string }): Promise<WLPackage> {
+  const id = pkg.id ?? `pkg_${Date.now().toString(36)}`;
+  const res = await adminApi.post<{ package: DBPackage }>("/white-label/packages", { id, ...packageToDB(pkg) });
+  const created = packageFromDB(res.package);
+  _packages = [..._packages, created];
   notify();
-  return newPkg;
+  return created;
 }
 
 export async function deletePackage(id: string): Promise<void> {
-  if (!DEMO_MODE) {
-    await fetch(`${API_BASE}/packages/${id}`, { method: "DELETE" });
-    return;
-  }
-  await new Promise(r => setTimeout(r, 300));
+  await adminApi.del(`/white-label/packages/${id}`);
   _packages = _packages.filter(p => p.id !== id);
   notify();
 }
@@ -240,14 +203,7 @@ export async function createSale(input: {
 }): Promise<WLSale> {
   const pkg = _packages.find(p => p.id === input.packageId);
   const setupFee = pkg?.billing.setupFee ?? 0;
-  if (!DEMO_MODE) {
-    const res = await fetch(`${API_BASE}/sales`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    return res.json();
-  }
+  // No wl_sales table exists yet — this stays in-memory only (see file header).
   await new Promise(r => setTimeout(r, 400));
   const sale: WLSale = {
     id: `WL-${(_sales.length + 1).toString().padStart(3, "0")}`,

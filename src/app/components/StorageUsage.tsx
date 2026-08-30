@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
 import { DR_ADDON_KEY } from "./DisasterRecovery";
 import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
+import { publicApi } from "../services/publicApi";
+import { useAdminFetch } from "../hooks/useAdminFetch";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -26,12 +28,18 @@ const usageByMonth = [
 /* Shared with the Dashboard breakdown so the two views always agree. */
 const usageByCategory = STORAGE_BREAKDOWN.map(c => ({ category: c.label, gb: c.gb, color: c.color }));
 
-const plans = [
-  { name: "Starter",       storage: 1,   price: 1.99,   overage: 0.50, current: false },
-  { name: "Foundation",    storage: 50,  price: 9.99,   overage: 0.40, current: false },
-  { name: "Legacy Archive",storage: 250, price: 24.99,  overage: 0.40, current: true  },
-  { name: "Legacy Pro",    storage: 500, price: 49.99,  overage: 0.40, current: false },
-  { name: "Legacy Vault",  storage: 1024,price: 129.99, overage: 0.40, current: false },
+interface DBPlan { id: string; name: string; price_monthly: number; storage_gb: number; overage_rate: number; }
+
+// "current" is hardcoded to Legacy Archive — there's no logged-in-user session
+// wired up on this screen yet, so it can't look up the real subscriber's plan.
+const CURRENT_PLAN_ID = "family_archive";
+
+const FALLBACK_PLANS = [
+  { id: "starter",        name: "Starter",       storage: 1,    price: 1.99,   overage: 0.50 },
+  { id: "foundation",     name: "Foundation",    storage: 50,   price: 9.99,   overage: 0.40 },
+  { id: "family_archive", name: "Legacy Archive",storage: 250,  price: 24.99,  overage: 0.40 },
+  { id: "legacy_pro",     name: "Legacy Pro",    storage: 500,  price: 49.99,  overage: 0.40 },
+  { id: "legacy_vault",   name: "Legacy Vault",  storage: 1024, price: 129.99, overage: 0.40 },
 ];
 
 const alertHistory = [
@@ -336,6 +344,11 @@ export function StorageUsage() {
     try { return JSON.parse(localStorage.getItem(SPEND_CAP_KEY) ?? "null")?.amount ?? 25; } catch { return 25; }
   });
   const plansRef = useRef<HTMLDivElement>(null);
+  const { data: plansData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
+  const plans = (plansData?.plans?.length
+    ? plansData.plans.map(p => ({ id: p.id, name: p.name, storage: p.storage_gb, price: Number(p.price_monthly), overage: Number(p.overage_rate) }))
+    : FALLBACK_PLANS
+  ).map(p => ({ ...p, current: p.id === CURRENT_PLAN_ID }));
   const used = STORAGE_USED_GB;
   const total = STORAGE_LIMIT_GB;
   const percent = Math.round((used / total) * 100);
@@ -507,7 +520,7 @@ export function StorageUsage() {
           <h3 className="sec-title"><span className="tick"/>Your Plan & Upgrade Options</h3>
           <div className="plan-grid">
             {plans.map(plan => (
-              <div key={plan.name} className={`plan-card ${plan.current ? "current" : ""}`}>
+              <div key={plan.id} className={`plan-card ${plan.current ? "current" : ""}`}>
                 {plan.current && <div className="plan-tag">CURRENT PLAN</div>}
                 <div className="plan-name">{plan.name}</div>
                 <div className="flex items-baseline gap-1" style={{ marginBottom: 12 }}>

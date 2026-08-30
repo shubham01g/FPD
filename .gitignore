@@ -2,6 +2,9 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+.env
+.env.local
+supabase/.temp
 .DS_Store
 FPD.zip
 .vercel

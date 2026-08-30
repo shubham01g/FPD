@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import {
   Edit, Lock, Gift, Shield, CreditCard,
   CheckCircle, ToggleLeft, ToggleRight, Eye, EyeOff,
-  Save, Activity, Download
+  Save, Activity, Download, Loader2, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { supabase } from "../../services/supabase";
 
 /* ── Design tokens — matches the admin panel's white/Royal Vault Blue theme ── */
 const T = {
@@ -307,6 +310,73 @@ export const ADMIN_USERS: AdminUser[] = [
   },
 ];
 
+/* ── Real backend wiring (Milestone 3, Phase 2 finish-up) ─────────
+ * GET /admin/users/:id returns real rows for identity, plan, storage,
+ * contacts, payments, legacy-fee status, referral count, and 2FA method.
+ * Several fields this modal was designed around have no backing column
+ * anywhere in the schema (per-category storage breakdown, a login/security
+ * event log, real card details, subscription-fee waivers) — those are
+ * filled with honest placeholders below rather than fabricated numbers,
+ * and the JSX further down shows an explicit "not tracked" state for them
+ * instead of pretending they're real.
+ */
+interface DBUserDetail {
+  user: {
+    id: string; full_name: string; email: string; phone: string | null; avatar_url: string | null;
+    plan: string; plan_status: "active" | "paused" | "cancelled" | "past_due"; created_at: string;
+  };
+  storage: { used_bytes: number; plan_limit_gb: number } | null;
+  payments: { id: string; type: string; description: string | null; amount_usd: number; status: string; created_at: string }[];
+  contacts: { contact_type: string }[];
+  legacyFeePaid: boolean;
+  referralCount: number;
+  twoFa: { enabled: boolean; method: AdminUser["mfaMethod"] };
+}
+
+function mapDbUserDetail(d: DBUserDetail): AdminUser {
+  const planDef = PLANS.find((p) => p.id === d.user.plan);
+  const guardians = d.contacts.filter((c) => c.contact_type === "guardian").length;
+  const usedGb = d.storage ? Math.round((d.storage.used_bytes / 1024 ** 3) * 10) / 10 : 0;
+  // storage_gb from the plan definition, TB plans stored as "1 TB" — parse either unit.
+  const planStorageGb = planDef ? (planDef.storage.includes("TB") ? parseFloat(planDef.storage) * 1024 : parseFloat(planDef.storage)) : 1;
+  const totalGb = d.storage?.plan_limit_gb ?? planStorageGb;
+
+  return {
+    id: d.user.id,
+    name: d.user.full_name,
+    email: d.user.email,
+    photoUrl: d.user.avatar_url ?? "",
+    phone: d.user.phone ?? "—",
+    plan: planDef?.name ?? d.user.plan,
+    planId: d.user.plan,
+    status: d.user.plan_status === "paused" ? "suspended" : d.user.plan_status === "cancelled" ? "cancelled" : "active",
+    mfa: d.twoFa.enabled,
+    mfaMethod: d.twoFa.method,
+    joined: new Date(d.user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    lastLogin: "Not tracked",
+    nextBilling: "Not tracked",
+    autoRenew: d.user.plan_status === "active",
+    storage: usedGb,
+    storageTotal: totalGb,
+    storageVideos: 0, storagePhotos: 0, storageDocs: 0, storageOther: 0, // breakdown not tracked — see JSX below
+    contacts: d.contacts.length,
+    guardians,
+    referrals: d.referralCount,
+    legacyFeePaid: d.legacyFeePaid,
+    subscriptionWaived: false, waiveMonths: 0, waiveReason: "", // waivers not tracked — no column yet
+    cardBrand: "On file", cardLast4: "••••", cardExpiry: "—", cardHolder: d.user.full_name, billingZip: "—",
+    adminNotes: "",
+    billingHistory: d.payments.map((p) => ({
+      id: p.id.slice(0, 8).toUpperCase(),
+      date: new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      description: p.description ?? p.type,
+      amount: `$${Number(p.amount_usd).toFixed(2)}`,
+      status: p.status === "succeeded" ? "paid" : p.status === "refunded" ? "refunded" : "failed",
+    })),
+    securityEvents: [], // no login/security event log table exists yet
+  };
+}
+
 type ModalTab = "overview" | "edit" | "billing" | "security";
 
 /* ── Helpers ────────────────────────────────────────────────────── */
@@ -329,8 +399,41 @@ function DRow({ label, value, accent }: { label:string; value:React.ReactNode; a
   );
 }
 
-/* ── Main Modal ─────────────────────────────────────────────────── */
-export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onClose: () => void }) {
+/* ── Main Modal — fetches by id, then hands a fully-mapped AdminUser
+ * down to the body component below (kept as a separate component so
+ * hooks in the body always run in the same order regardless of loading
+ * state). ─────────────────────────────────────────────────────────── */
+export function UserDetailModal({ userId, onClose }: { userId: string; onClose: () => void }) {
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => adminApi.get<DBUserDetail>(`/users/${userId}`),
+    [userId],
+  );
+
+  if (loading || error || !data) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: "rgba(13,20,40,0.85)", backdropFilter: "blur(12px)" }}>
+        <div className="w-full max-w-md rounded-2xl p-8 text-center" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+          {loading && <div className="flex items-center justify-center gap-2" style={{ color: T.sub }}><Loader2 size={18} className="animate-spin" /> Loading account…</div>}
+          {error && (
+            <div className="flex flex-col items-center gap-3">
+              <AlertCircle size={20} color={T.red} />
+              <span style={{ color: T.red, fontSize: 16 }}>{error}</span>
+            </div>
+          )}
+          <button onClick={onClose} className="mt-5 px-5 py-2.5 rounded-2xl text-sm font-semibold"
+            style={{ background: T.primaryBg, color: T.primary, border: `1px solid ${T.primaryBd}` }}>
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <UserDetailModalBody user={mapDbUserDetail(data)} onClose={onClose} onRefetch={refetch} />;
+}
+
+function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUser; onClose: () => void; onRefetch: () => void }) {
   const [tab, setTab]   = useState<ModalTab>("overview");
   const [user, setUser] = useState<AdminUser>(init);
 
@@ -371,46 +474,64 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
   const statusBd    = user.status === "active" ? T.greenBd : T.redBd;
 
   /* ── Handlers ──────────────────────────────────────────────────── */
-  function saveEdit() {
+  async function saveEdit() {
     if (!eName.trim() || !eEmail.trim()) { toast.error("Name and email are required"); return; }
     setSaving(true);
-    setTimeout(() => {
+    try {
+      // Only the plan is a real column this endpoint can change today — name/
+      // email/phone edits aren't wired (email changes need Supabase Auth admin
+      // APIs, phone/notes have no column) so they only update local view state.
+      if (ePlan !== user.planId) {
+        await adminApi.patch(`/users/${user.id}`, { plan: ePlan });
+      }
       const np = PLANS.find(p => p.id === ePlan)!;
       setUser(u => ({ ...u, name:eName, email:eEmail, phone:ePhone,
         plan:np.name, planId:ePlan, autoRenew:eRenew, adminNotes:eNotes }));
-      setSaving(false);
-      toast.success("Account updated");
+      toast.success(ePlan !== user.planId ? "Account updated — plan change saved" : "Account updated (plan unchanged)");
       setTab("overview");
-    }, 700);
+      onRefetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function saveCard() {
-    if (!cardNum || !cardExp || !cardCvv) { toast.error("All card fields are required"); return; }
-    setSavingCard(true);
-    setTimeout(() => {
-      const last4 = cardNum.replace(/\D/g,"").slice(-4);
-      setUser(u => ({ ...u, cardLast4:last4, cardExpiry:cardExp, cardHolder:cardName, billingZip:cardZip }));
-      setSavingCard(false); setEditCard(false);
-      setCardNum(""); setCardExp(""); setCardCvv("");
-      toast.success("Payment method updated");
-    }, 800);
+    toast.error("Card management isn't wired up — payment methods would need a real Stripe integration (none exists in this backend yet) to edit safely.");
   }
 
   function applyWaive() {
-    if (!wReason) { toast.error("Please select a reason for the waiver"); return; }
-    setSavingWaive(true);
-    setTimeout(() => {
-      setUser(u => ({ ...u, subscriptionWaived:true, waiveMonths:wMonths, waiveReason:wReason }));
-      setSavingWaive(false);
-      toast.success(`Waiver applied — ${wMonths} month${wMonths>1?"s":""} · $${(price * wMonths).toFixed(2)} waived`);
-      setWMonths(1); setWReason(""); setWNote("");
-    }, 800);
+    toast.error("Subscription waivers aren't backed by a database column yet — this needs a schema decision (e.g. a waived_until column) before it can be wired up.");
   }
 
-  function toggleSuspend() {
+  async function toggleSuspend() {
     const next: AdminUser["status"] = user.status === "suspended" ? "active" : "suspended";
-    setUser(u => ({ ...u, status:next }));
-    toast.success(next === "active" ? `${user.name} reinstated` : `${user.name} suspended`);
+    try {
+      await adminApi.patch(`/users/${user.id}`, { plan_status: next === "active" ? "active" : "paused" });
+      setUser(u => ({ ...u, status:next }));
+      toast.success(next === "active" ? `${user.name} reinstated` : `${user.name} suspended`);
+      onRefetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update account status");
+    }
+  }
+
+  async function resetMfa() {
+    const label = mfaMethodLabel(user.mfaMethod);
+    try {
+      await adminApi.post(`/users/${user.id}/reset-mfa`);
+      setUser(u => ({ ...u, mfa:false, mfaMethod:null }));
+      toast.success(`${label} reset — user must re-enroll on next login`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reset 2FA");
+    }
+  }
+
+  async function sendPasswordReset() {
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email);
+    if (error) toast.error(error.message);
+    else toast.success(`Password reset email sent to ${user.email}`);
   }
 
   const TABS: { id:ModalTab; label:string; icon:React.ReactNode }[] = [
@@ -547,27 +668,12 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                     {storagePct}% used {warnStorage && "· ⚠ Near limit"}
                   </div>
 
-                  {/* Segmented bar */}
-                  <div className="flex h-3.5 rounded-full overflow-hidden mb-5" style={{ background:T.card3 }}>
-                    <div style={{ width:`${(user.storageVideos/user.storageTotal)*100}%`, background:T.purple }}/>
-                    <div style={{ width:`${(user.storagePhotos/user.storageTotal)*100}%`, background:T.amber }}/>
-                    <div style={{ width:`${(user.storageDocs/user.storageTotal)*100}%`, background:T.green }}/>
-                    <div style={{ width:`${(user.storageOther/user.storageTotal)*100}%`, background:T.muted }}/>
+                  {/* Category breakdown isn't tracked by the schema — no per-file-type
+                   * aggregation exists, only total used_bytes. Being honest about that
+                   * instead of showing a fabricated split. */}
+                  <div className="px-4 py-3 rounded-2xl mb-2" style={{ background:T.card3, border:`1px solid ${T.border}` }}>
+                    <span style={{ color:T.muted, fontSize:14 }}>Category breakdown (videos/photos/docs) isn't tracked — only total usage is metered.</span>
                   </div>
-                  {[
-                    { label:"Videos & Audio", val:user.storageVideos, color:T.purple },
-                    { label:"Photos",          val:user.storagePhotos, color:T.amber },
-                    { label:"Documents",       val:user.storageDocs,   color:T.green },
-                    { label:"Other",           val:user.storageOther,  color:T.muted },
-                  ].map(s => (
-                    <div key={s.label} className="flex items-center justify-between py-1.5">
-                      <div className="flex items-center gap-2">
-                        <div style={{ width:9, height:9, borderRadius:2, background:s.color }}/>
-                        <span style={{ color:T.sub, fontSize:15 }}>{s.label}</span>
-                      </div>
-                      <span style={{ color:T.text, fontSize:15, ...MONO }}>{s.val} GB</span>
-                    </div>
-                  ))}
                   <div className="grid grid-cols-2 gap-3 mt-4">
                     <div className="px-3 py-2.5 rounded-2xl text-center" style={{ background:T.card3 }}>
                       <div style={{ color:warnStorage?T.red:T.primary, fontSize:22.5, fontWeight:700, ...DISPLAY }}>{storagePct}%</div>
@@ -642,6 +748,9 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   </button>
                 </div>
                 <div className="space-y-2">
+                  {user.securityEvents.length === 0 && (
+                    <div style={{ color:T.muted, fontSize:15 }}>No login/security event tracking is wired up yet.</div>
+                  )}
                   {user.securityEvents.slice(0,3).map((ev, i) => (
                     <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                       style={{ background:ev.flag ? T.redBg : T.card3,
@@ -993,7 +1102,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                       <Shield size={20} color={user.mfa ? T.green : T.red}/>
                     </div>
                   </div>
-                  <button onClick={() => { const label = mfaMethodLabel(user.mfaMethod); setUser(u=>({...u,mfa:false,mfaMethod:null})); toast.success(`${label} reset — user must re-enroll on next login`); }}
+                  <button onClick={resetMfa}
                     disabled={!user.mfa}
                     className="w-full py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ background:T.redBg, color:T.red, border:`1px solid ${T.redBd}` }}>
@@ -1007,7 +1116,7 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
                   <p style={{ color:T.sub, fontSize:15, marginBottom:20, lineHeight:1.7 }}>
                     Send a password reset link to the user's registered email. The link expires in 24 hours.
                   </p>
-                  <button onClick={() => toast.success(`Password reset email sent to ${user.email}`)}
+                  <button onClick={sendPasswordReset}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold"
                     style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                     <Lock size={13}/> Send Password Reset Email
@@ -1036,6 +1145,9 @@ export function UserDetailModal({ user: init, onClose }: { user: AdminUser; onCl
               <div style={CARD}>
                 <SLabel>Full Security Event Log</SLabel>
                 <div className="space-y-2">
+                  {user.securityEvents.length === 0 && (
+                    <div style={{ color:T.muted, fontSize:15 }}>No login/security event tracking is wired up yet — this would need a dedicated event-logging table.</div>
+                  )}
                   {user.securityEvents.map((ev, i) => (
                     <div key={i} className="flex items-center gap-4 px-4 py-3 rounded-2xl"
                       style={{ background:ev.flag ? T.redBg : T.card3,

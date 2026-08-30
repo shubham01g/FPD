@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
-import { UserDetailModal, ADMIN_USERS, type AdminUser } from "./UserDetailModal";
+import { UserDetailModal } from "./UserDetailModal";
 import { UserAvatar } from "./UserAvatar";
 import { SystemHealth } from "./SystemHealth";
 import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, ArrowUp, ArrowDown, Search, Filter, Eye,
@@ -50,13 +52,9 @@ const planDist = [
   { name:"Legacy Pro", value:7890, color:"#6FAE8B" },
 ];
 
-const storageByPlan = [
-  { plan:"Foundation", avgUsed:3.2, limit:50 },
-  { plan:"Legacy Archive", avgUsed:12.4, limit:250 },
-  { plan:"Legacy Pro", avgUsed:38.8, limit:1000 },
-];
-
-/* Users data is now in UserDetailModal.tsx as ADMIN_USERS */
+/* Users/Revenue/Storage tabs now fetch real data — see useAdminFetch calls
+ * in MasterAdmin() below. Overview/Analytics tabs (revenueData, userGrowth,
+ * planDist above) are still demo — out of scope for this pass. */
 
 const auditLogs = [
   { id:"LOG-9912", user:"admin@fpd.com", action:"Approved ID verification", target:"VER-2026-0841", time:"2 min ago", severity:"info" },
@@ -906,18 +904,39 @@ function PushNotificationCenter() {
   );
 }
 
+/* DB row shape returned by GET /admin/users (list) — see routes/users.ts */
+interface DBUserRow {
+  id: string; email: string; full_name: string; phone: string | null; avatar_url: string | null;
+  plan: string; plan_status: "active" | "paused" | "cancelled" | "past_due";
+  is_admin: boolean; email_verified: boolean; created_at: string;
+  contact_count: number; used_bytes: number;
+}
+
 export function MasterAdmin() {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
   const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
   const [payoutTypeFilter, setPayoutTypeFilter] = useState<"all"|"Affiliate"|"Partnership"|"White Label">("all");
 
-  const filteredUsers = ADMIN_USERS.filter(u =>
-    u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.id.toLowerCase().includes(userSearch.toLowerCase())
+  const { data: usersData, loading: usersLoading, error: usersError } = useAdminFetch(
+    () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?search=${encodeURIComponent(userSearch)}&pageSize=50`),
+    [userSearch],
+  );
+  const filteredUsers = usersData?.users ?? [];
+
+  const { data: revenueTrendData } = useAdminFetch(
+    () => adminApi.get<{ trend: { month: string; mrr: number; overage: number; affiliates: number }[] }>("/analytics/revenue-trend"),
+    [],
+  );
+  const { data: overviewData } = useAdminFetch(
+    () => adminApi.get<{ mrr: number; totalRevenue: number; revenueByType: Record<string, number> }>("/analytics/overview"),
+    [],
+  );
+  const { data: storageData } = useAdminFetch(
+    () => adminApi.get<{ perPlan: { plan: string; planName: string; avgUsedGb: number; limitGb: number }[]; totals: { totalStorageGb: number; totalOverageGb: number; avgPerUserGb: number; overageRatePerGb: number | null } }>("/analytics/storage"),
+    [],
   );
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; badge?: string }[] = [
@@ -1487,49 +1506,69 @@ export function MasterAdmin() {
               <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
             </button>
           </div>
+          {usersError && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
+              <span style={{ color:"#FC8181", fontSize:16 }}>{usersError}</span>
+            </div>
+          )}
           <div className="rounded-2xl overflow-x-auto" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
-            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
-              {["","ID","User","Plan","Storage","Contacts","Referrals","Status","Actions"].map((h,hi)=>(
+            <div className="grid px-5 py-3" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto",background:"rgba(10,10,15,0.9)",borderBottom:"1px solid rgba(91,110,225,0.1)",gap:12,alignItems:"center"}}>
+              {["","ID","User","Plan","Storage","Contacts","Status","Actions"].map((h,hi)=>(
                 <div key={hi} style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{h.toUpperCase()}</div>
               ))}
             </div>
+            {usersLoading && (
+              <div className="px-5 py-8 text-center" style={{color:"#8A9AB8"}}>Loading users…</div>
+            )}
+            {!usersLoading && filteredUsers.length === 0 && (
+              <div className="px-5 py-8 text-center" style={{color:"#8A9AB8"}}>No users match this search.</div>
+            )}
             {filteredUsers.map((user,i)=>{
+              const usedGb = Math.round((user.used_bytes / 1024 ** 3) * 10) / 10;
+              const isActive = user.plan_status === "active";
               return (
-              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
-                <UserAvatar name={user.name} photoUrl={user.photoUrl}/>
-                <span style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{user.id}</span>
+              <div key={user.id} className="grid px-5 py-3 items-center border-b" style={{gridTemplateColumns:"auto auto 1fr auto auto auto auto auto",background:i%2===0?"transparent":"rgba(255,255,255,0.025)",borderColor:"rgba(91,110,225,0.06)",gap:12}}>
+                <UserAvatar name={user.full_name} photoUrl={user.avatar_url ?? undefined}/>
+                <span style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{user.id.slice(0,8)}</span>
                 <div>
-                  <div style={{color:"#E8EDF5",fontSize:16}}>{user.name}</div>
+                  <div style={{color:"#E8EDF5",fontSize:16}}>{user.full_name}</div>
                   <div style={{color:"#8A9AB8",fontSize:14}}>{user.email}</div>
                 </div>
                 <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:12.5}}>{user.plan}</span>
-                <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{user.storage} GB</span>
-                <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{user.contacts}</span>
-                <span style={{color:"#6E90C9",fontSize:15,...MONO}}>{user.referrals}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:user.status==="active"?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:user.status==="active"?"#D99A6B":"#FC8181",...MONO,fontSize:11}}>{user.status.toUpperCase()}</span>
+                <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{usedGb} GB</span>
+                <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{user.contact_count}</span>
+                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:isActive?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:isActive?"#D99A6B":"#FC8181",...MONO,fontSize:11}}>{user.plan_status.toUpperCase()}</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={()=>setSelectedUser(user)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
-                  <button style={{color:"#8A9AB8"}}><Edit size={13}/></button>
-                  <button style={{color:"#FC8181"}}><XCircle size={13}/></button>
+                  <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
+                  <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#8A9AB8"}}><Edit size={13}/></button>
                 </div>
               </div>
               );
             })}
           </div>
-          <div style={{color:"#8A9AB8",fontSize:15,...MONO}}>Showing {filteredUsers.length} of 51,490 users</div>
+          <div style={{color:"#8A9AB8",fontSize:15,...MONO}}>Showing {filteredUsers.length} of {usersData?.total ?? 0} users</div>
 
           {/* User detail modal — Overview / Edit Account / Billing / Security */}
-          {selectedUser && (
-            <UserDetailModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+          {selectedUserId && (
+            <UserDetailModal userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
           )}
         </div>
       )}
 
       {/* REVENUE */}
-      {tab === "revenue" && (
+      {tab === "revenue" && (() => {
+        const trend = revenueTrendData?.trend ?? [];
+        const thisMonth = trend[trend.length - 1];
+        const revenueByType = overviewData?.revenueByType ?? {};
+        return (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[{label:"Jun MRR",value:"$112,340",sub:"+22.1% MoM",color:"#6E90C9"},{label:"Jun Overage",value:"$5,212",sub:"52,120 GB billed",color:"#6FAE8B"},{label:"Affiliate Paid",value:"$23,040",sub:"Jun payouts",color:"#D99A6B"},{label:"Partnership Paid",value:"$33,710",sub:"Jun recurring",color:"#F6AD55"}].map(s=>(
+            {[
+              {label:"This Month MRR",value:`$${(overviewData?.mrr ?? 0).toLocaleString()}`,sub:"Active subscriptions",color:"#6E90C9"},
+              {label:"This Month Overage",value:`$${(thisMonth?.overage ?? 0).toLocaleString()}`,sub:"Billed overage this month",color:"#6FAE8B"},
+              {label:"Affiliate Paid",value:`$${(thisMonth?.affiliates ?? 0).toLocaleString()}`,sub:"This month's payouts",color:"#D99A6B"},
+              {label:"Continuation Fees",value:`$${(revenueByType["continuation_fee"] ?? 0).toLocaleString()}`,sub:"$199 fees, last 1,000 payments",color:"#F6AD55"},
+            ].map(s=>(
               <div key={s.label} className="p-5 rounded-2xl" style={GLASS}>
                 <div style={{fontFamily:"var(--font-display)",fontSize:32.5,color:s.color}}>{s.value}</div>
                 <div style={{color:"#E8EDF5",fontSize:16,marginTop:4}}>{s.label}</div>
@@ -1538,15 +1577,18 @@ export function MasterAdmin() {
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5",marginBottom:8}}>Full Revenue Breakdown — 6 Months</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5",marginBottom:8}}>Revenue Breakdown — 6 Months</h3>
             <div className="flex items-center gap-4 mb-4">
               {[{color:"#6E90C9",label:"Subscriptions"},{color:"#6FAE8B",label:"Overage"},{color:"#D99A6B",label:"Affiliates"}].map(l=>(
                 <div key={l.label} className="flex items-center gap-1.5"><div style={{width:10,height:10,borderRadius:2,background:l.color}}/><span style={{color:"#8A9AB8",fontSize:15}}>{l.label}</span></div>
               ))}
             </div>
+            {trend.length === 0 ? (
+              <div style={{color:"#8A9AB8",fontSize:15,textAlign:"center",padding:"40px 0"}}>No succeeded payments or paid payouts in the last 6 months.</div>
+            ) : (
             <div style={{ display:"flex", alignItems:"flex-end", gap:8, height:200 }}>
-              {revenueData.map(d => {
-                const maxV = Math.max(...revenueData.map(x=>x.mrr));
+              {trend.map(d => {
+                const maxV = Math.max(1, ...trend.map(x=>x.mrr));
                 return (
                   <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
                     <div style={{display:"flex",alignItems:"flex-end",gap:2,height:170,width:"100%"}}>
@@ -1554,35 +1596,48 @@ export function MasterAdmin() {
                       <div style={{flex:1,background:"#5BA7D6",borderRadius:"3px 3px 0 0",height:Math.round((d.overage/maxV)*160),opacity:0.85}}/>
                       <div style={{flex:1,background:"#48BB78",borderRadius:"3px 3px 0 0",height:Math.round((d.affiliates/maxV)*160),opacity:0.85}}/>
                     </div>
-                    <span style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{d.month}</span>
+                    <span style={{color:"#8A9AB8",fontSize:12.5,...MONO}}>{d.month.slice(5)}</span>
                   </div>
                 );
               })}
             </div>
+            )}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* STORAGE */}
-      {tab === "storage" && (
+      {tab === "storage" && (() => {
+        const perPlan = storageData?.perPlan ?? [];
+        const totals = storageData?.totals;
+        return (
         <div className="space-y-5">
           <div className="grid md:grid-cols-3 gap-5">
-            {storageByPlan.map(s=>(
+            {perPlan.length === 0 && (
+              <div className="p-6 rounded-2xl md:col-span-3 text-center" style={{...GLASS, color:"#8A9AB8"}}>No storage usage recorded for the current billing period yet.</div>
+            )}
+            {perPlan.map(s=>(
               <div key={s.plan} className="p-6 rounded-2xl" style={GLASS}>
-                <div style={{color:"#6E90C9",fontSize:14,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.plan.toUpperCase()} PLAN</div>
-                <div style={{fontFamily:"var(--font-display)",fontSize:35.5,color:"#E8EDF5"}}>{s.avgUsed} GB</div>
-                <div style={{color:"#8A9AB8",fontSize:16,marginBottom:12}}>avg. used of {s.limit} GB limit</div>
+                <div style={{color:"#6E90C9",fontSize:14,...MONO,letterSpacing:"0.1em",marginBottom:8}}>{s.planName.toUpperCase()} PLAN</div>
+                <div style={{fontFamily:"var(--font-display)",fontSize:35.5,color:"#E8EDF5"}}>{s.avgUsedGb} GB</div>
+                <div style={{color:"#8A9AB8",fontSize:16,marginBottom:12}}>avg. used of {s.limitGb} GB limit</div>
                 <div className="h-2 rounded-full" style={{background:"rgba(91,110,225,0.1)"}}>
-                  <div className="h-2 rounded-full" style={{width:`${(s.avgUsed/s.limit)*100}%`,background:"linear-gradient(90deg,#5B6EE1,#5B6EE1)",boxShadow:"0 0 8px rgba(91,110,225,0.4)"}}/>
+                  <div className="h-2 rounded-full" style={{width:`${s.limitGb ? Math.min(100,(s.avgUsedGb/s.limitGb)*100) : 0}%`,background:"linear-gradient(90deg,#5B6EE1,#5B6EE1)",boxShadow:"0 0 8px rgba(91,110,225,0.4)"}}/>
                 </div>
-                <div style={{color:"#8A9AB8",fontSize:14,marginTop:6,...MONO}}>{Math.round((s.avgUsed/s.limit)*100)}% average utilization</div>
+                <div style={{color:"#8A9AB8",fontSize:14,marginTop:6,...MONO}}>{s.limitGb ? Math.round((s.avgUsedGb/s.limitGb)*100) : 0}% average utilization</div>
               </div>
             ))}
           </div>
           <div className="p-6 rounded-2xl" style={GLASS}>
-            <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals</h3>
+            <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5",marginBottom:16}}>Platform Storage Totals — Current Billing Period</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[{label:"Total Data Stored",value:"428.4 TB",color:"#6E90C9"},{label:"Total Overage Billed",value:"52,120 GB",color:"#6FAE8B"},{label:"Avg per User",value:"12.4 GB",color:"#D99A6B"},{label:"Storage Revenue/GB",value:"$0.10",color:"#F6AD55"}].map(s=>(
+              {[
+                {label:"Total Data Stored",value:`${(totals?.totalStorageGb ?? 0).toLocaleString()} GB`,color:"#6E90C9"},
+                {label:"Total Overage",value:`${(totals?.totalOverageGb ?? 0).toLocaleString()} GB`,color:"#6FAE8B"},
+                {label:"Avg per User",value:`${totals?.avgPerUserGb ?? 0} GB`,color:"#D99A6B"},
+                {label:"Overage Rate/GB",value:totals?.overageRatePerGb != null ? `$${totals.overageRatePerGb}` : "—",color:"#F6AD55"},
+              ].map(s=>(
                 <div key={s.label} className="p-4 rounded-2xl" style={{background:"rgba(91,110,225,0.04)",border:"1px solid rgba(91,110,225,0.1)"}}>
                   <div style={{fontFamily:"var(--font-display)",fontSize:27.5,color:s.color}}>{s.value}</div>
                   <div style={{color:"#8A9AB8",fontSize:15,marginTop:4}}>{s.label}</div>
@@ -1591,7 +1646,8 @@ export function MasterAdmin() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* VERIFICATION */}
       {tab === "verification" && (
