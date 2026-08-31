@@ -1095,7 +1095,7 @@ function Help() {
     { q: "What happens to my data if I cancel?", a: "Your data is retained for 90 days after cancellation so you can export everything. After 90 days it is permanently and irreversibly deleted per our privacy policy." },
     { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. If you exceed your plan limit, overage is billed at $0.50/GB on Starter or $0.40/GB on all other plans." },
     { q: "What happens when I pass away?", a: "Your designated executor or Legacy Contact initiates the release process. They submit a death certificate, complete identity verification, and our compliance team reviews the request within 24–48 hours before granting access." },
-    { q: "Is Final Pass Down available on mobile?", a: "Yes — iOS and Android apps are available, plus a Progressive Web App (PWA) that works on any device without an app store download." },
+    { q: "Is Final Pass Down available on mobile?", a: "Yes. Final Pass Down installs straight from your browser as a Progressive Web App (PWA) — no app store download required — and runs full-screen like any other app on iPhone, Android, Windows and Mac. On Android and desktop, use the Install app button in the header; on iPhone, tap Share and then Add to Home Screen." },
     { q: "Can I update my documents anytime?", a: "Yes. You can add, replace, or delete any document at any time. Your contacts only ever receive the most current version of your vault when access is triggered." },
     { q: "How do I verify my legacy contacts?", a: "You invite them via email. They click a secure link, create a limited account, and upload a government-issued photo ID. Our team verifies within 1–2 business days." },
     { q: "What is the difference between affiliate and partnership?", a: "Affiliates earn a commission per referred user for 12 months (capped per referral). Partners — typically businesses like law firms or financial advisors — earn recurring lifetime commissions on every account they refer, with no time cap." },
@@ -1204,7 +1204,7 @@ function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConcierg
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: "1px solid rgba(91,110,225,0.1)" }}>
           <span style={{ color: FAINT, fontSize: 16 }}>© {new Date().getFullYear()} Final Pass Down Inc. All rights reserved.</span>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {["App Store", "Google Play", "PWA"].map(p => (
+            {["PWA · Installs on iOS, Android & Desktop"].map(p => (
               <span key={p} className="px-3 py-1 rounded-lg text-xs" style={{ background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.2)", ...MONO }}>{p}</span>
             ))}
             {onPartnerPortal && (

@@ -10,6 +10,7 @@ import {
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { VaultClone } from "./VaultClone";
+import { InstallApp } from "./InstallApp";
 import { useDemo } from "../context/DemoContext";
 
 export type PageId =
@@ -374,6 +375,8 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: SUCCESS, boxShadow: `0 0 6px ${SUCCESS}` }}/>
               <span style={{ color: "#D99A6B", fontSize: 14.5, fontWeight: 600 }}>Vault Active</span>
             </div>
+
+            <InstallApp />
 
             {onGoAdmin && (
               <button onClick={onGoAdmin} title="Admin portal"
