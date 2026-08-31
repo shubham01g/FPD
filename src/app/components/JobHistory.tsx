@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, ChevronUp, Upload, CheckCircle, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroJobPhoto from "../../imports/jobhistory_hero_photo.png";
@@ -18,7 +20,7 @@ const WARN    = "#D9A55E";
 const EMP_TYPES = ["Full-time","Part-time","Contract","Freelance","Internship","Self-employed","Volunteer"];
 
 interface Job {
-  id: number;
+  id: string;
   employer: string;
   title: string;
   type: string;
@@ -35,12 +37,8 @@ interface Job {
   documents: string[];
 }
 
-const initJobs: Job[] = [
-  { id:1, employer:"TechCorp Inc.", title:"Senior Software Engineer", type:"Full-time", location:"Sacramento, CA (Hybrid)", startDate:"Mar 2019", endDate:"Present", current:true, salary:"$138,000/year", supervisor:"Angela Brooks", supervisorPhone:"(916) 555-0281", reasonLeft:"", achievements:"Led migration to cloud infrastructure saving $400K/year. Promoted twice.", notes:"Health insurance through employer. 401(k) with 5% match.", documents:["Offer Letter 2019","2023 W-2","2024 W-2"] },
-  { id:2, employer:"DataSoft LLC", title:"Software Engineer", type:"Full-time", location:"San Francisco, CA", startDate:"Jun 2015", endDate:"Feb 2019", current:false, salary:"$95,000/year", supervisor:"Mark Chen", supervisorPhone:"(415) 555-0492", reasonLeft:"Better opportunity + relocation to Sacramento", achievements:"Built core analytics pipeline. Employee of the Quarter Q3 2017.", notes:"Reference available from Mark Chen.", documents:["DataSoft Offer Letter","2018 W-2"] },
-  { id:3, employer:"Freelance Web Development", title:"Freelance Developer", type:"Freelance", location:"Remote", startDate:"Jan 2013", endDate:"May 2015", current:false, salary:"~$60,000/year", supervisor:"N/A — Self-employed", supervisorPhone:"", reasonLeft:"Transitioned to full-time employment", achievements:"Served 12 clients. Built e-commerce sites and CMS platforms.", notes:"Tax records filed as Schedule C. Copies in Legacy Vault.", documents:["2013–2014 Tax Returns"] },
-  { id:4, employer:"City of Sacramento", title:"IT Help Desk Technician", type:"Full-time", location:"Sacramento, CA", startDate:"Aug 2010", endDate:"Dec 2012", current:false, salary:"$42,000/year", supervisor:"Linda Hayes", supervisorPhone:"(916) 555-0184", reasonLeft:"Career advancement — moved to software development", achievements:"Supported 400+ city employees. Reduced ticket resolution time by 35%.", notes:"State pension contributions — check CalPERS for balance.", documents:["2012 W-2","CalPERS Statement"] },
-];
+/* Rows come from the `job_history` table — the screen used to open on sample
+   employers that were identical for every account and lost on refresh. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -144,8 +142,37 @@ const JOB_CSS = `
 `;
 
 export function JobHistory() {
-  const [jobs, setJobs] = useState<Job[]>(initJobs);
-  const [expanded, setExpanded] = useState<number | null>(1);
+  const { authUser } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setJobs([]); setLoading(false); return; }
+    const { data, error } = await tables.jobHistory.list(authUser.id);
+    if (error) { toast.error(`Could not load job history: ${error.message}`); setLoading(false); return; }
+    setJobs((data ?? []).map(r => ({
+      id: String(r.id),
+      employer: String(r.employer ?? ""),
+      title: String(r.title ?? ""),
+      type: String(r.employment_type ?? ""),
+      location: String(r.location ?? ""),
+      startDate: String(r.start_date ?? ""),
+      // `is_current` is the stored fact; "Present" is only how it is displayed.
+      endDate: r.is_current ? "Present" : String(r.end_date ?? ""),
+      current: Boolean(r.is_current),
+      salary: String(r.salary ?? ""),
+      supervisor: String(r.supervisor_name ?? ""),
+      supervisorPhone: String(r.supervisor_phone ?? ""),
+      reasonLeft: String(r.reason_left ?? ""),
+      achievements: String(r.achievements ?? ""),
+      notes: String(r.notes ?? ""),
+      documents: (r.document_urls as string[] | null) ?? [],
+    })));
+    setLoading(false);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const emptyForm = { employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" };
@@ -177,17 +204,29 @@ export function JobHistory() {
     setEditingJob(null);
   }
 
-  function saveJob() {
+  async function saveJob() {
     if (!form.employer || !form.title) { toast.error("Employer and title required"); return; }
-    const endDate = form.current ? "Present" : form.endDate;
-    if (editingJob) {
-      setJobs(p => p.map(j => j.id === editingJob.id ? { ...j, ...form, endDate } : j));
-      toast.success(`${form.title} at ${form.employer} updated`);
-    } else {
-      const job: Job = { ...form, id:Date.now(), endDate, documents:[] };
-      setJobs(p => [job, ...p]);
-      toast.success(`${form.title} at ${form.employer} added`);
-    }
+    if (!authUser) { toast.error("Sign in to save job history."); return; }
+
+    const row = {
+      employer: form.employer, title: form.title, employment_type: form.type,
+      location: form.location, start_date: form.startDate,
+      // Store the flag, not the word — "Present" is presentation only.
+      end_date: form.current ? null : form.endDate,
+      is_current: form.current,
+      salary: form.salary, supervisor_name: form.supervisor,
+      supervisor_phone: form.supervisorPhone, reason_left: form.reasonLeft,
+      achievements: form.achievements, notes: form.notes,
+    };
+
+    const { error } = editingJob
+      ? await tables.jobHistory.update(editingJob.id, row)
+      : await tables.jobHistory.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(`${form.title} at ${form.employer} ${editingJob ? "updated" : "added"}`);
     setForm(emptyForm);
     setEditingJob(null);
     setShowAdd(false);
