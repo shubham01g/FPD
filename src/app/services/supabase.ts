@@ -21,6 +21,15 @@ const SUPABASE_URL =
     ? `${window.location.origin}/sb-api`
     : DIRECT_URL;
 
+// True only when both values came from real env vars. On a host that builds from
+// git (Vercel), .env is gitignored and never uploaded, so a project without the
+// variables set in its dashboard silently ships the placeholders above — every
+// request then aims at a domain that does not resolve and surfaces as a bare
+// "Failed to fetch". Callers use this to say what is actually wrong instead.
+export const isSupabaseConfigured =
+  Boolean(import.meta.env.VITE_SUPABASE_URL) &&
+  Boolean(import.meta.env.VITE_SUPABASE_ANON_KEY);
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: true, autoRefreshToken: true },
   realtime: { params: { eventsPerSecond: 10 } },

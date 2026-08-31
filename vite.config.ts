@@ -17,7 +17,11 @@ function figmaAssetResolver() {
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  // Load from the config's own directory, not process.cwd(): running the dev
+  // server from a parent folder otherwise leaves this `env` empty while Vite
+  // still injects import.meta.env from here — the client would then aim at
+  // /sb-api with no proxy registered to serve it.
+  const env = loadEnv(mode, __dirname, '')
 
   // Dev-only escape hatch: some browsers/extensions/security suites block requests
   // to *.supabase.co outright, which surfaces in the app as an opaque
