@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard, ShieldCheck, Save } from "lucide-react";
 import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
-import { DR_ADDON_KEY } from "./DisasterRecovery";
+import { db } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
@@ -203,10 +204,10 @@ const STORAGE_CSS = `
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
 /* ── Disaster Recovery Protection — add-on purchase modal ──────────
-   Mirrors the modal in DisasterRecovery.tsx (same pricing, same
-   fpd_dr_addon_active localStorage key) so subscribing from either
-   page stays in sync. No bypass-simulation step here — that lives on
-   the dedicated Disaster Recovery page. */
+   Mirrors the modal in DisasterRecovery.tsx (same pricing). Both read the
+   add-on flag from disaster_recovery_state, so subscribing from either page
+   stays in sync without either of them being able to set the flag: the row
+   grants the owner SELECT only, and the processor webhook is the writer. */
 function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
   const [step, setStep] = useState<"select" | "pay" | "done">("select");
@@ -219,7 +220,6 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   const handlePay = async () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
-    localStorage.setItem(DR_ADDON_KEY, JSON.stringify({ active: true, billing, activatedAt: Date.now() }));
     setLoading(false);
     onSuccess();
     setStep("done");
@@ -328,21 +328,36 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   );
 }
 
-const SPEND_CAP_KEY = "fpd_spend_cap";
-
 export function StorageUsage() {
   const [overageBilling] = useState(true);
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
   const [showDRModal, setShowDRModal] = useState(false);
-  const [drActive, setDrActive] = useState(() => {
-    try { return !!JSON.parse(localStorage.getItem(DR_ADDON_KEY) ?? "null")?.active; } catch { return false; }
-  });
-  const [capEnabled, setCapEnabled] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(SPEND_CAP_KEY) ?? "null")?.enabled ?? true; } catch { return true; }
-  });
-  const [capAmount, setCapAmount] = useState<number>(() => {
-    try { return JSON.parse(localStorage.getItem(SPEND_CAP_KEY) ?? "null")?.amount ?? 25; } catch { return 25; }
-  });
+  const { authUser } = useAuth();
+  const [drActive, setDrActive] = useState(false);
+  const [capEnabled, setCapEnabled] = useState(true);
+  const [capAmount, setCapAmount] = useState<number>(25);
+
+  const refreshDr = useCallback(async () => {
+    if (!authUser) return;
+    const { data } = await db.getDisasterRecoveryState(authUser.id);
+    setDrActive(Boolean(data?.addon_active));
+  }, [authUser]);
+
+  useEffect(() => { void refreshDr(); }, [refreshDr]);
+
+  // The spend cap is the one piece of state on this page the user genuinely
+  // owns, so it round-trips to storage_spend_caps rather than localStorage —
+  // the limit then applies to billing wherever the account is signed in.
+  useEffect(() => {
+    if (!authUser) return;
+    let cancelled = false;
+    void db.getStorageSpendCap(authUser.id).then(({ data }) => {
+      if (cancelled || !data) return;
+      setCapEnabled(data.cap_enabled);
+      if (data.cap_amount_usd !== null) setCapAmount(Number(data.cap_amount_usd));
+    });
+    return () => { cancelled = true; };
+  }, [authUser]);
   const plansRef = useRef<HTMLDivElement>(null);
   const { data: plansData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
   const plans = (plansData?.plans?.length
@@ -359,8 +374,10 @@ export function StorageUsage() {
   const capPercent = capAmount > 0 ? Math.min(100, Math.round((projectedOverageCost / capAmount) * 100)) : 0;
   const capColor = capPercent >= 100 ? "#E53E3E" : capPercent >= 80 ? NEG : capPercent >= 50 ? WARN : POS;
 
-  const saveCap = () => {
-    localStorage.setItem(SPEND_CAP_KEY, JSON.stringify({ enabled: capEnabled, amount: capAmount }));
+  const saveCap = async () => {
+    if (!authUser) { toast.error("Sign in to save your spending cap."); return; }
+    const { error } = await db.saveStorageSpendCap(authUser.id, capEnabled, capEnabled ? capAmount : null);
+    if (error) { toast.error(`Could not save spending cap: ${error.message}`); return; }
     toast.success(capEnabled ? `Spending cap set to $${capAmount.toFixed(2)}/mo` : "Spending cap disabled — overage charges are uncapped");
   };
 
@@ -630,7 +647,7 @@ export function StorageUsage() {
                 <div>
                   <div style={{ fontSize: 11, color: WARN, ...MONO, marginBottom: 4 }}>SUBSCRIBED</div>
                   <div className="addon-price" style={{ color: WARN }}>$4.99<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span></div>
-                  <button onClick={() => { localStorage.removeItem(DR_ADDON_KEY); setDrActive(false); toast.success("Add-on cancelled"); }} className="addon-cancel">
+                  <button onClick={() => { toast.info("Cancellation is processed through billing — the add-on stays active until the current period ends."); void refreshDr(); }} className="addon-cancel">
                     Cancel Add-On
                   </button>
                 </div>

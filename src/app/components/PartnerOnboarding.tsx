@@ -84,29 +84,24 @@ function StepTracker({ step }: { step: WizardStep }) {
 }
 
 function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
-  const { activate } = useWLEntitlement();
+  const { refresh: refreshEntitlement } = useWLEntitlement();
   const [step, setStep] = useState<WizardStep>("overview");
   const [org, setOrg] = useState({ name:"", type:"law_firm", email:"", phone:"", contact:"", website:"", why:"" });
   const [paying, setPaying] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
   const [refCode] = useState(`FPD-PART-${Math.random().toString(36).slice(2,8).toUpperCase()}`);
 
-  /* Unlocks the White Label Studio. Only ever called from a settled payment,
-     never from package selection. In production the paymentRef must come from
-     the processor webhook, not the client. */
-  const unlockWhiteLabel = (processor: string) => {
-    activate({
-      packageId:   "partner_program",
-      packageName: "Partner Program",
-      paymentRef:  `${processor}_${Date.now().toString(36).toUpperCase()}`,
-    });
-  };
-
+  /* The Studio unlocks only once the backend has recorded a confirmed payment
+     against wl_entitlements. This used to mint its own paymentRef client-side,
+     which meant the paywall could be lifted from devtools; the client can no
+     longer grant anything, so all it does here is re-read the server's answer.
+     Until the processor webhook (or an admin) records the grant, the wizard's
+     "activated within 1 business day" copy is the accurate state. */
   const submitPayment = () => {
     setPaying(true);
     setTimeout(() => {
       setPaying(false);
-      unlockWhiteLabel("card");
+      void refreshEntitlement();
       setStep("complete");
     }, 1500);
   };
@@ -382,7 +377,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
       open={showCrypto}
       amountUSD={SETUP_FEE}
       label={`$${SETUP_FEE} Partner Program Setup Fee`}
-      onSuccess={() => { setShowCrypto(false); unlockWhiteLabel("crypto"); setStep("complete"); }}
+      onSuccess={() => { setShowCrypto(false); void refreshEntitlement(); setStep("complete"); }}
       onClose={() => setShowCrypto(false)}
     />
     </>

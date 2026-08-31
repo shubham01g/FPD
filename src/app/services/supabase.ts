@@ -94,6 +94,24 @@ export interface DBLegacyContinuationFee {
   activated_at?: string; expires_at?: string; paid_at?: string;
 }
 
+export interface DBWLEntitlement {
+  user_id: string; entitled: boolean; package_id: string | null;
+  payment_ref: string | null; granted_at: string | null; granted_by: string | null;
+  updated_at: string;
+  wl_packages?: { name: string } | null;
+}
+
+export interface DBDisasterRecoveryState {
+  user_id: string; addon_active: boolean; bypass_granted: boolean;
+  bypass_granted_at: string | null; bypass_granted_by: string | null;
+  bypass_expires_at: string | null; bypass_reason: string | null;
+  updated_at: string;
+}
+
+export interface DBStorageSpendCap {
+  user_id: string; cap_enabled: boolean; cap_amount_usd: number | null; updated_at: string;
+}
+
 export interface DBAdminSetting {
   key: string; value: string; updated_at: string;
 }
@@ -359,6 +377,35 @@ export const db = {
     return supabase.from("occasions").insert(o).select().single<DBOccasion>();
   },
 
+  // Entitlement state — read-only for the owner. Both tables grant owner SELECT
+  // and no user write policy, so a client write silently affects nothing; the
+  // admin backend's service role is the only writer. maybeSingle() because a
+  // user who has never been granted anything simply has no row.
+  async getWLEntitlement(userId: string) {
+    return supabase.from("wl_entitlements")
+      .select("*, wl_packages(name)")
+      .eq("user_id", userId)
+      .maybeSingle<DBWLEntitlement>();
+  },
+  // Unlike the two tables above this one IS user-editable — it is a
+  // self-imposed spend limit, not a paywall gate — so it keeps a FOR ALL
+  // policy and the client may write it directly.
+  async getStorageSpendCap(userId: string) {
+    return supabase.from("storage_spend_caps").select("*")
+      .eq("user_id", userId).maybeSingle<DBStorageSpendCap>();
+  },
+  async saveStorageSpendCap(userId: string, capEnabled: boolean, capAmountUsd: number | null) {
+    return supabase.from("storage_spend_caps")
+      .upsert({ user_id: userId, cap_enabled: capEnabled, cap_amount_usd: capAmountUsd, updated_at: new Date().toISOString() })
+      .select().single<DBStorageSpendCap>();
+  },
+
+  async getDisasterRecoveryState(userId: string) {
+    return supabase.from("disaster_recovery_state")
+      .select("*").eq("user_id", userId)
+      .maybeSingle<DBDisasterRecoveryState>();
+  },
+
   // Storage
   async uploadVaultFile(userId: string, file: File) {
     const path = `${userId}/${crypto.randomUUID()}-${file.name}`;
@@ -378,4 +425,77 @@ export const db = {
       .on("postgres_changes", { event:"UPDATE", schema:"public", table:"storage_usage", filter:`user_id=eq.${userId}` }, (payload) => callback(payload.new))
       .subscribe();
   },
+};
+
+// ── Owner-scoped CRUD ───────────────────────────────────────
+//
+// The 24 tables below are all the same shape: rows belong to one user, RLS
+// restricts them with `auth.uid() = <owner column>`, and the UI needs exactly
+// list/add/update/remove. Hand-writing ~100 near-identical methods on `db`
+// buys nothing, so they share one factory. The older bespoke `db.*` methods
+// stay as they are — several of them do more than plain CRUD (joins, storage
+// uploads, derived expiry), which is why they were written out by hand.
+//
+// `ownerColumn` exists because family_friends and contact_groups key off
+// owner_user_id while everything else uses user_id.
+
+export interface OwnerScopedRow { id: string; [key: string]: unknown }
+
+function ownerTable<T extends OwnerScopedRow>(table: string, ownerColumn: "user_id" | "owner_user_id" = "user_id") {
+  return {
+    table,
+    ownerColumn,
+    list(userId: string) {
+      return supabase.from(table).select("*")
+        .eq(ownerColumn, userId)
+        .order("created_at", { ascending: false })
+        .returns<T[]>();
+    },
+    add(userId: string, row: Partial<Omit<T, "id">>) {
+      return supabase.from(table)
+        .insert({ ...row, [ownerColumn]: userId })
+        .select().single<T>();
+    },
+    // The owner column is deliberately not patchable — RLS would reject a
+    // handover anyway, and silently dropping it here makes that explicit.
+    update(id: string, patch: Partial<Omit<T, "id" | "user_id" | "owner_user_id">>) {
+      return supabase.from(table).update(patch).eq("id", id).select().single<T>();
+    },
+    remove(id: string) {
+      return supabase.from(table).delete().eq("id", id);
+    },
+  };
+}
+
+export const tables = {
+  passwordVault:      ownerTable("password_vault"),
+  diaryEntries:       ownerTable("diary_entries"),
+  subscriptionTracker: ownerTable("subscription_tracker"),
+  vaultFolders:       ownerTable("vault_folders"),
+  contactGroups:      ownerTable("contact_groups", "owner_user_id"),
+  familyFriends:      ownerTable("family_friends", "owner_user_id"),
+
+  petRecords:         ownerTable("pet_records"),
+  daycareRecords:     ownerTable("daycare_records"),
+  kidsActivities:     ownerTable("kids_activities"),
+
+  warranties:         ownerTable("warranties"),
+  idKeeperRecords:    ownerTable("id_keeper_records"),
+  jobHistory:         ownerTable("job_history"),
+  travelTrips:        ownerTable("travel_trips"),
+  utilities:          ownerTable("utilities"),
+  willsTrusts:        ownerTable("wills_trusts"),
+  favoritePlaces:     ownerTable("favorite_places"),
+  messagesToLovedOnes: ownerTable("messages_to_loved_ones"),
+
+  vehicles:           ownerTable("vehicles"),
+  realEstate:         ownerTable("real_estate"),
+  digitalAssets:      ownerTable("digital_assets"),
+  weapons:            ownerTable("weapons"),
+  weaponsLocker:      ownerTable("weapons_locker"),
+  collectibles:       ownerTable("collectibles"),
+
+  // Created in migration 009 — these two screens had no table at all.
+  receipts:           ownerTable("receipts"),
+  financialRecords:   ownerTable("financial_records"),
 };
