@@ -118,7 +118,7 @@ function PageBanner({ poster, tone = "blue", overlay = 0.55, kicker, title, sub,
   return (
     <header className="relative flex items-center justify-center" style={{ minHeight }}>
       <MediaBackdrop poster={poster} tone={tone} overlay={overlay} />
-      <div className="relative max-w-4xl mx-auto w-full px-6 py-28 text-center flex flex-col items-center">
+      <div className="relative max-w-4xl mx-auto w-full px-6 py-16 sm:py-28 text-center flex flex-col items-center">
         <Kicker tone={kickerTone} className="fpd-seq" style={seq(0)}>{kicker}</Kicker>
         <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.5rem,5.3vw,4rem)", fontWeight: 700, color: TEXT, margin: "18px 0 14px", lineHeight: 1.12, letterSpacing: "-0.02em", maxWidth: 820, ...seq(1) }}>{title}</h1>
         {sub && <p className="fpd-seq" style={{ color: MUTED, fontSize: 21.5, maxWidth: 620, lineHeight: 1.7, ...seq(2) }}>{sub}</p>}
@@ -203,12 +203,31 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
   );
 }
 
+/* Landing-page mobile rules.
+   This page is styled with Tailwind utilities plus inline style objects. An
+   inline value outranks a media query, so anything that has to change with
+   viewport width lives here and is kept OUT of the style objects. Scoped
+   under .fpd-landing so nothing else in the app is affected. */
+const LANDING_CSS = `
+.fpd-hero{min-height:100vh;min-height:100dvh;padding-top:env(safe-area-inset-top);}
+.fpd-hero-tag{font-size:15px;letter-spacing:0.22em;}
+
+@media (max-width:640px){
+  /* The hero photo is the point on desktop; on a phone a full-viewport band
+     pushed the CTA under the fold and left a dead strip below it. */
+  .fpd-hero{min-height:auto;}
+  /* 15px at 0.22em tracking wrapped onto a second line that then sat behind
+     the floating action buttons. */
+  .fpd-hero-tag{font-size:12px;letter-spacing:0.14em;}
+}
+`;
+
 /* ── HERO ─────────────────────────────────────────────────────── */
 function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   return (
-    <header className="relative flex items-center" style={{ minHeight: "100vh" }}>
+    <header className="fpd-hero relative flex items-center">
       <MediaBackdrop src="/media/hero.mp4" tone="warm" overlay={0.5} eager />
-      <div className="relative max-w-6xl mx-auto w-full px-6 py-32 text-center flex flex-col items-center">
+      <div className="relative max-w-6xl mx-auto w-full px-5 sm:px-6 py-20 sm:py-32 text-center flex flex-col items-center">
         <div className="flex flex-col items-center">
           <Kicker className="fpd-seq" style={seq(0)}>Trusted Digital Legacy Platform · Est. 2024</Kicker>
           <h1 className="fpd-seq" style={{ ...DISPLAY, fontSize: "clamp(2.75rem,6.5vw,5rem)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: TEXT, margin: "22px 0 20px", ...seq(1) }}>
@@ -217,11 +236,11 @@ function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: s
             <span style={{ background: `linear-gradient(120deg,${ACCENT},${HILITE})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", whiteSpace: "nowrap" }}>and Keep It</span>
             <br />That Way
           </h1>
-          <p className="fpd-seq" style={{ color: SOFT, fontSize: 24, lineHeight: 1.7, maxWidth: 640, marginBottom: 20, ...seq(2) }}>
+          <p className="fpd-seq" style={{ color: SOFT, fontSize: "clamp(1.05rem,3.6vw,1.5rem)", lineHeight: 1.7, maxWidth: 640, marginBottom: 20, ...seq(2) }}>
             Final Pass Down is more than a legacy app. It is a secure, everyday life organizer built for adults, couples, and growing families.
           </p>
-          <p className="fpd-seq" style={{ color: FAINT, fontSize: 15, letterSpacing: "0.22em", ...MONO, marginBottom: 32, ...seq(3) }}>PREPARE · PROTECT · PASS DOWN</p>
-          <div className="fpd-seq flex flex-wrap items-center justify-center gap-3.5 mb-16" style={seq(4)}>
+          <p className="fpd-seq fpd-hero-tag" style={{ color: FAINT, ...MONO, marginBottom: 32, ...seq(3) }}>PREPARE · PROTECT · PASS DOWN</p>
+          <div className="fpd-seq flex flex-wrap items-center justify-center gap-3 sm:gap-3.5 mb-6 sm:mb-16" style={seq(4)}>
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
             <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
           </div>
@@ -245,7 +264,7 @@ function About({ onStart }: { onStart: () => void }) {
       <PageBanner poster="/media/about-bg.jpg" tone="deep" overlay={0.6}
         kicker="Our Story" title={<>Built So Nothing<br />Important Is Ever Lost</>}
         sub="Final Pass Down exists because too many families are left piecing together a lifetime of details when it matters most." />
-      <section id="about" className="relative py-28 px-6">
+      <section id="about" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
           <Kicker className="fpd-seq" style={seq(0)}>About Final Pass Down</Kicker>
@@ -297,7 +316,7 @@ function HowItWorks() {
     <PageBanner poster="/media/how-it-works-bg.jpg" tone="blue" overlay={0.6}
       kicker="How it works" title={<>Four Steps to a<br />Secure Legacy</>}
       sub="Getting started takes less than 10 minutes. Your family will thank you forever." />
-    <section id="how-it-works" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+    <section id="how-it-works" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-5 fpd-stagger">
           {STEPS.map(s => (
@@ -324,7 +343,7 @@ function ContactsStory({ onNavigate }: { onNavigate: (id: string) => void }) {
     "Every contact verifies their identity with government-issued ID",
   ];
   return (
-    <section id="trusted-contacts" className="relative py-28 px-6">
+    <section id="trusted-contacts" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-contacts.mp4" tone="blue" overlay={0.35} showPlay />
@@ -403,7 +422,7 @@ function Features() {
     <PageBanner poster="/media/features-bg.jpg" tone="warm" overlay={0.6}
       kicker="Platform features" title={<>Everything Your<br />Legacy Needs</>}
       sub="From legal documents to family memories, all in one secure encrypted vault." />
-    <section id="features" className="relative py-28 px-6">
+    <section id="features" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 fpd-stagger">
           {highlighted.map(f => (
@@ -441,7 +460,7 @@ function FamilyPetsStory({ onStart }: { onStart: () => void }) {
     "Nothing about the ones who depend on you gets left to memory",
   ];
   return (
-    <section id="family-pets" className="relative py-28 px-6">
+    <section id="family-pets" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
           <Kicker className="fpd-seq" style={seq(0)}>Kids & Pet Care</Kicker>
@@ -479,7 +498,7 @@ function MemoriesStory({ onStart }: { onStart: () => void }) {
     "Every memory stays private until you decide it's time to share",
   ];
   return (
-    <section id="memories" className="relative py-28 px-6">
+    <section id="memories" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div>
           <Kicker className="fpd-seq" style={seq(0)}>Memories & Messages</Kicker>
@@ -528,7 +547,7 @@ function Security() {
     <PageBanner poster="/media/security-bg.jpg" tone="deep" overlay={0.6}
       kicker="Enterprise-grade security" title={<>Your Data is<br />Fortress-Protected</>}
       sub="We built Final Pass Down with the same security standards used by banks and defense contractors." />
-    <section id="security" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+    <section id="security" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {SEC_ITEMS.map(item => (
@@ -565,7 +584,7 @@ function FamilyStory({ onStart }: { onStart: () => void }) {
     "Your family grieves with guidance, not uncertainty",
   ];
   return (
-    <section id="family-story" className="relative py-28 px-6">
+    <section id="family-story" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="relative rounded-3xl overflow-hidden order-2 lg:order-1" style={{ aspectRatio: "4 / 3", border: "1px solid rgba(91,110,225,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
           <MediaBackdrop src="/media/story-family.mp4" tone="deep" overlay={0.4} showPlay />
@@ -644,7 +663,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
       kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
       sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
-    <section id="pricing" className="relative py-28 px-6">
+    <section id="pricing" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-12">
           <span style={{ color: MUTED, fontSize: 17.5 }}>Monthly</span>
@@ -761,7 +780,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
     <PageBanner poster="/media/affiliates-bg.jpg" tone="warm" overlay={0.6}
       kicker="Affiliate Program" title={<>Share It.<br />Everyone Wins.</>}
       sub="Earn a recurring commission every time someone you refer builds their vault with Final Pass Down." />
-    <section id="affiliates" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+    <section id="affiliates" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
         <div>
           <Kicker className="fpd-seq" style={seq(0)}>Affiliate Program</Kicker>
@@ -826,7 +845,7 @@ function Partnerships({ onStart }: { onStart: () => void }) {
     <PageBanner poster="/media/partners-bg.jpg" tone="blue" overlay={0.6}
       kicker="Strategic partnerships" title={<>Recurring <span style={{ color: "#6FAE8B" }}>Lifetime</span> Commissions</>}
       sub="Built for professionals who serve clients going through major life transitions. Refer once, earn forever." />
-    <section id="partners" className="relative py-28 px-6">
+    <section id="partners" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-3 gap-5 mb-12 fpd-stagger">
           {tiers.map(t => (
@@ -897,7 +916,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
       kicker="White Glove Concierge Service"
       title={<>Not Comfortable With Technology?<br /><span style={{ color: "#A98CC7" }}>We Do Everything For You.</span></>}
       sub="Final Pass Down's White Glove Concierge Service is for people who want their legacy protected but don't want to deal with apps, uploads, or anything technical. A real person calls you, listens to you, and handles everything — start to finish — over the phone." />
-    <section id="white-glove" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0B0818,#070A12)" }}>
+    <section id="white-glove" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0B0818,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
         {/* 4 steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-16 fpd-stagger">
@@ -1029,7 +1048,7 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
     <PageBanner poster="/media/white-label-bg.jpg" tone="blue" overlay={0.6}
       kicker="White label solutions" title={<>Launch Your Own<br />Legacy Platform</>}
       sub="License the full Final Pass Down platform under your brand. Pricing updates live when admin adjusts packages." />
-    <section id="white-label" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+    <section id="white-label" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
         {active.length > 0 && (
           <div className="grid md:grid-cols-3 gap-6 mb-16 fpd-stagger">
@@ -1105,7 +1124,7 @@ function Help() {
     <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6} minHeight="100vh"
       kicker="Get in touch" title={<>Contact Us</>}
       sub="Our team is available 7 days a week. Average response time: under 2 hours." />
-    <section id="help" className="relative py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
+    <section id="help" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-3xl mx-auto">
         <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
@@ -1137,8 +1156,8 @@ function Help() {
 /* ── CTA ──────────────────────────────────────────────────────── */
 function CTA({ onStart }: { onStart: () => void }) {
   return (
-    <section className="relative py-28 px-6">
-      <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-20" style={{ border: "1px solid rgba(91,110,225,0.24)" }}>
+    <section className="relative py-16 sm:py-28 px-6">
+      <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-12 sm:py-20" style={{ border: "1px solid rgba(91,110,225,0.24)" }}>
         <MediaBackdrop src="/media/cta.mp4" tone="blue" overlay={0.6} />
         <div className="relative flex flex-col items-center">
           <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 76, width: 115, flexShrink: 0, borderRadius: 14, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(91,110,225,0.3)" }} />
@@ -1250,7 +1269,8 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
     default: pageContent = <Hero onStart={onGetStarted} onNavigate={navigate} />; break;
   }
   return (
-    <div style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
+    <div className="fpd-landing" style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
+      <style>{LANDING_CSS}</style>
       <TopNav onStart={onGetStarted} page={page} onNavigate={navigate} />
       <main>
         <div key={page} className="fpd-stagger">
