@@ -106,7 +106,7 @@ const IDK_CSS = `
 .fpd-idk .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-idk .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-idk .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-idk .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-idk .kpi-stack{grid-template-columns:1fr;}}
 
 /* filter chips */
 .fpd-idk .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -114,7 +114,7 @@ const IDK_CSS = `
 
 /* ID cards */
 .fpd-idk .igrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media (max-width:820px){.fpd-idk .igrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-idk .igrid{grid-template-columns:1fr;}}
 .fpd-idk .iico{width:48px;height:48px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:27.5px;}
 .fpd-idk .itype{color:${TEXT};font-size:17.5px;font-weight:600;}
 .fpd-idk .iholder{color:${MUTED};font-size:15px;margin-top:1px;}

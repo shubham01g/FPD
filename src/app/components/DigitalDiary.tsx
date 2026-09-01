@@ -319,7 +319,7 @@ const DIARY_CSS = `
 .fpd-diary .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-diary .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-diary .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-diary .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-diary .kpi-stack{grid-template-columns:1fr;}}
 
 /* search + filter toolbar */
 .fpd-diary .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
@@ -331,7 +331,7 @@ const DIARY_CSS = `
 
 /* bento layout */
 .fpd-diary .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
-@media (max-width:1000px){.fpd-diary .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-diary .bento{grid-template-columns:1fr;}}
 .fpd-diary .elist{display:flex;flex-direction:column;gap:12px;}
 
 /* entry cards */

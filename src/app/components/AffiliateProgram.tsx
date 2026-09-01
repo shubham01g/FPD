@@ -96,7 +96,7 @@ const AFF_CSS = `
 .fpd-aff .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-aff .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-aff .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-aff .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-aff .kpi-stack{grid-template-columns:1fr;}}
 
 /* referral link */
 .fpd-aff .link-row{display:flex;gap:10px;flex-wrap:wrap;}

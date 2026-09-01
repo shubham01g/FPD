@@ -110,7 +110,7 @@ const FAM_CSS = `
 .fpd-fam .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-fam .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-fam .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-fam .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-fam .kpi-stack{grid-template-columns:1fr;}}
 
 /* generic record-card parts, reused across every tab */
 .fpd-fam .r-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
@@ -131,7 +131,7 @@ const FAM_CSS = `
 .fpd-fam .r-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px;}
 .fpd-fam .r-meta .mono{font-family:var(--font-mono);font-size:15px;color:${MUTED};}
 .fpd-fam .r-meta .txt{font-size:15px;color:${MUTED};}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-fam .r-grid,.fpd-fam .r-grid.c3,.fpd-fam .r-grid.c4{grid-template-columns:1fr 1fr;}
 .fpd-fam .r-grid.c3 .tile:nth-child(3n+2),.fpd-fam .r-grid.c3 .tile:nth-child(3n){border-left:none;}
 .fpd-fam .r-grid.c4 .tile:nth-child(4n+2),.fpd-fam .r-grid.c4 .tile:nth-child(4n+3),.fpd-fam .r-grid.c4 .tile:nth-child(4n){border-left:none;}
@@ -165,7 +165,7 @@ const FAM_CSS = `
 
 /* grids of cards */
 .fpd-fam .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media (max-width:820px){.fpd-fam .mgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-fam .mgrid{grid-template-columns:1fr;}}
 .fpd-fam .stack{display:flex;flex-direction:column;gap:14px;}
 
 /* progress bar (goals) */

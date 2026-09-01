@@ -108,7 +108,7 @@ const SUB_CSS = `
 .fpd-sub .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-sub .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-sub .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-sub .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-sub .kpi-stack{grid-template-columns:1fr;}}
 
 /* alert banner (warning variant of the shared footnote) */
 .fpd-sub .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.22);}
@@ -127,7 +127,7 @@ const SUB_CSS = `
 
 /* two-column bento */
 .fpd-sub .bento{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start;}
-@media (max-width:980px){.fpd-sub .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-sub .bento{grid-template-columns:1fr;}}
 
 /* subscription list rows */
 .fpd-sub .plist{display:flex;flex-direction:column;gap:10px;}
@@ -198,7 +198,7 @@ const SUB_CSS = `
 .fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-sub .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-sub .modal-foot .save[disabled]{opacity:.6;cursor:default;}
-@media (max-width:560px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
 `;
 
 function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | null; onClose:()=>void; onSave:(s:Subscription)=>void }) {

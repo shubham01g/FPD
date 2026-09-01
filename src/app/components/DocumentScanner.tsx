@@ -208,11 +208,20 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center"
+    // A camera UI is used on a phone more than anywhere else: edge-to-edge
+    // bottom sheet below sm, centred card above it.
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
       style={{ background:"rgba(0,0,0,0.85)", backdropFilter:"blur(12px)" }}>
 
-      <div className="w-full max-w-2xl mx-4 rounded-3xl overflow-hidden flex flex-col"
-        style={{ background:"#0A0F1E", border:"1px solid rgba(91,110,225,0.2)", maxHeight:"96vh" }}>
+      <div className="w-full max-w-2xl mx-0 sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+        style={{
+          background:"#0A0F1E", border:"1px solid rgba(91,110,225,0.2)",
+          // dvh tracks the address bar; plain vh overflows once it is showing.
+          // No vh fallback is possible in a style object (a duplicate key just
+          // overwrites), and dvh has been baseline since 2022.
+          maxHeight:"96dvh",
+          paddingBottom:"env(safe-area-inset-bottom)",
+        }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"

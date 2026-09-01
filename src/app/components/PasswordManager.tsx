@@ -122,7 +122,7 @@ const PWD_CSS = `
 .fpd-pwd .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-pwd .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-pwd .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-pwd .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-pwd .kpi-stack{grid-template-columns:1fr;}}
 
 /* search + category filters */
 .fpd-pwd .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -136,7 +136,7 @@ const PWD_CSS = `
 
 /* two-column bento */
 .fpd-pwd .bento{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start;}
-@media (max-width:980px){.fpd-pwd .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-pwd .bento{grid-template-columns:1fr;}}
 
 /* password list rows */
 .fpd-pwd .plist{display:flex;flex-direction:column;gap:10px;}
@@ -215,7 +215,7 @@ const PWD_CSS = `
 .fpd-pwd .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;opacity:1;}
 .fpd-pwd .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-pwd .modal-foot .save[disabled]{opacity:.6;cursor:default;}
-@media (max-width:560px){.fpd-pwd .field-grid{grid-template-columns:1fr;}.fpd-pwd .imp-grid{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-pwd .field-grid{grid-template-columns:1fr;}.fpd-pwd .imp-grid{grid-template-columns:1fr;}}
 `;
 
 function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"] }) {

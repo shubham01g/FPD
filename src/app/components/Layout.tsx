@@ -137,6 +137,45 @@ const PLAN_LABEL: Record<string, string> = {
   legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
 };
 
+/* ── Shell responsive rules ──
+   The shell is built from inline style objects, which cannot express a media
+   query, so the phone-specific bits live here instead of in more
+   `window.innerWidth` JS. `isMobile` still drives the drawer-vs-sidebar
+   switch below, because that one is structural rather than stylistic.
+
+   Safe-area insets matter most here: installed on an iPhone the app runs
+   chrome-less, so without these the header sits under the Dynamic Island and
+   the drawer's user card under the home indicator. They resolve to 0 in a
+   normal browser tab, so these are no-ops off iOS.  */
+const SHELL_CSS = `
+.fpd-shell{height:100vh;height:100dvh;}
+.fpd-shell .fpd-topbar{padding-top:env(safe-area-inset-top);height:calc(64px + env(safe-area-inset-top));}
+.fpd-shell .fpd-drawer{padding-bottom:env(safe-area-inset-bottom);}
+.fpd-shell .fpd-drawer.is-overlay{height:100vh;height:100dvh;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);}
+.fpd-shell .fpd-main{padding-bottom:env(safe-area-inset-bottom);}
+
+/* Base values live here rather than in the inline style objects, because an
+   inline value would outrank the media query below and silently win. */
+.fpd-shell .fpd-iconbtn{width:34px;height:34px;flex-shrink:0;}
+.fpd-shell .fpd-install{height:34px;flex-shrink:0;}
+.fpd-shell .fpd-title{font-size:22.5px;}
+.fpd-shell .fpd-crumb{font-size:14.5px;}
+
+@media (max-width:640px){
+  /* A 64px bar with an eight-item right cluster leaves the title ~120px.  */
+  .fpd-shell .fpd-topbar{height:calc(56px + env(safe-area-inset-top));padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));gap:10px;}
+  .fpd-shell .fpd-title{font-size:18px;}
+  .fpd-shell .fpd-crumb{font-size:12.5px;}
+  /* 34px is below the 44px minimum touch target. */
+  .fpd-shell .fpd-iconbtn{width:44px;height:44px;}
+  .fpd-shell .fpd-install{height:44px;padding:0 12px;}
+  .fpd-shell .fpd-actions{gap:6px;}
+  /* The install control stays: a phone is where installing actually matters.
+     It is already icon-only below the lg breakpoint, so it costs one 44px
+     square and the title truncates around it. */
+}
+`;
+
 interface LayoutProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
@@ -153,6 +192,8 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
   const { unreadCount, user, notifications, markAllRead, markNotifRead } = useDemo();
 
   const isActive = (id: PageId) => currentPage === id;
@@ -190,6 +231,28 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  /* Drawer: Escape to close, and stop the page behind it from scrolling —
+     without the lock, dragging over the backdrop scrolls the page underneath
+     and the drawer appears to drift. Focus moves into the drawer on open and
+     returns to the menu button on close. */
+  useEffect(() => {
+    if (!isMobile || !mobileOpen) return;
+
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileOpen(false); };
+    document.addEventListener("keydown", onKey);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    drawerRef.current?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      menuBtnRef.current?.focus();
+    };
+  }, [isMobile, mobileOpen]);
+
   const SIDEBAR_W = collapsed ? 74 : 264;
 
   /* ── Single nav item renderer (shared by expanded + collapsed) ── */
@@ -225,7 +288,9 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   };
 
   return (
-    <div className="flex overflow-hidden" style={{ background: BG, fontFamily: "var(--font-body)", height: "100vh" }}>
+    <div className="fpd-shell flex overflow-hidden" style={{ background: BG, fontFamily: "var(--font-body)" }}>
+      <style>{SHELL_CSS}</style>
+
       {/* Mobile drawer backdrop */}
       {isMobile && mobileOpen && (
         <div onClick={() => setMobileOpen(false)}
@@ -233,11 +298,20 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
       )}
 
       {/* ───────── Sidebar ───────── */}
-      <aside className="flex flex-col flex-shrink-0" style={{
+      <aside
+        ref={drawerRef}
+        tabIndex={-1}
+        aria-label="Sections"
+        aria-hidden={isMobile && !mobileOpen}
+        className={`fpd-drawer flex flex-col flex-shrink-0${isMobile ? " is-overlay" : ""}`}
+        style={{
         width: SIDEBAR_W, background: SIDEBAR, borderRight: `1px solid ${BORDER}`,
+        outline: "none",
         transition: "width 0.22s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1)",
         ...(isMobile ? {
-          position: "fixed", top: 0, left: 0, height: "100vh", zIndex: 70,
+          /* height comes from `.fpd-drawer.is-overlay` so it can carry a
+             100vh fallback ahead of 100dvh; an inline value would win both. */
+          position: "fixed", top: 0, left: 0, zIndex: 70,
           transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
           boxShadow: mobileOpen ? "8px 0 60px rgba(0,0,0,0.6)" : "none",
         } : {}),
@@ -348,26 +422,29 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
       {/* ───────── Main ───────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-between gap-4 flex-shrink-0" style={{
-          height: 64, padding: "0 22px", background: "rgba(7,10,18,0.82)",
+        <header className="fpd-topbar flex items-center justify-between gap-4 flex-shrink-0" style={{
+          padding: "0 22px", background: "rgba(7,10,18,0.82)",
           borderBottom: `1px solid ${BORDER}`, backdropFilter: "blur(12px)",
         }}>
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => isMobile ? setMobileOpen(o => !o) : setCollapsed(c => !c)}
+            <button ref={menuBtnRef}
+              onClick={() => isMobile ? setMobileOpen(o => !o) : setCollapsed(c => !c)}
               title={isMobile ? "Menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="flex items-center justify-center rounded-lg flex-shrink-0"
-              style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
+              aria-label={isMobile ? "Menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={isMobile ? mobileOpen : undefined}
+              className="fpd-iconbtn flex items-center justify-center rounded-lg"
+              style={{ background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
               {isMobile ? <Menu size={16}/> : collapsed ? <PanelLeft size={16}/> : <PanelLeftClose size={16}/>}
             </button>
             <div style={{ minWidth: 0 }}>
-              <div className="flex items-center gap-1.5" style={{ fontSize: 14.5, color: FAINT }}>
+              <div className="fpd-crumb flex items-center gap-1.5" style={{ color: FAINT }}>
                 <span>{meta.group}</span><ChevronRight size={10}/><span style={{ color: "#6FAE8B" }}>{meta.label}</span>
               </div>
-              <h1 style={{ fontSize: 22.5, fontWeight: 600, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
+              <h1 className="fpd-title" style={{ fontWeight: 600, color: TEXT, lineHeight: 1.2, letterSpacing: "-0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{meta.label}</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="fpd-actions flex items-center gap-2.5 flex-shrink-0">
             <div className="hidden md:block" style={{ color: MUTED, fontSize: 15, whiteSpace: "nowrap" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
             </div>
@@ -379,9 +456,9 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             <InstallApp />
 
             {onGoAdmin && (
-              <button onClick={onGoAdmin} title="Admin portal"
-                className="flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}
+              <button onClick={onGoAdmin} title="Admin portal" aria-label="Admin portal"
+                className="fpd-iconbtn flex items-center justify-center rounded-lg"
+                style={{ background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(91,110,225,0.2)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(91,110,225,0.1)"}>
                 <ShieldCheck size={16}/>
               </button>
@@ -389,8 +466,11 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
 
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
-              <button onClick={() => setNotifOpen(o => !o)} className="relative flex items-center justify-center rounded-lg"
-                style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
+              <button onClick={() => setNotifOpen(o => !o)}
+                title="Notifications"
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+                className="fpd-iconbtn relative flex items-center justify-center rounded-lg"
+                style={{ background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
                 <Bell size={16}/>
                 {unreadCount > 0 && (
                   <span className="absolute flex items-center justify-center rounded-full" style={{ top: -5, right: -5, minWidth: 16, height: 16, padding: "0 4px", background: "#E53E3E", color: "#fff", fontSize: 11, fontWeight: 700, border: `2px solid ${BG}` }}>
@@ -439,7 +519,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
         </header>
 
         {/* Page */}
-        <main className="flex-1 overflow-y-auto fpd-scroll relative" style={{ background: BG }}>
+        <main className="fpd-main flex-1 overflow-y-auto fpd-scroll relative" style={{ background: BG }}>
           {children}
         </main>
       </div>

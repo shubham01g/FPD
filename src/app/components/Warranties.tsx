@@ -119,7 +119,7 @@ const WARR_CSS = `
 .fpd-warr .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-warr .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-warr .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-warr .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-warr .kpi-stack{grid-template-columns:1fr;}}
 
 /* filter chips */
 .fpd-warr .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}

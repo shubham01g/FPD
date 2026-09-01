@@ -24,7 +24,7 @@
  *
  * Bump VERSION to force every client onto a fresh cache.
  */
-const VERSION = "fpd-v1";
+const VERSION = "fpd-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const KEEP = [SHELL_CACHE, ASSET_CACHE];

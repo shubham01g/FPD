@@ -73,6 +73,18 @@ export function initInstallPrompt(): void {
   });
 }
 
+/**
+ * Fires when a newer service worker has installed and is ready to take over.
+ * The worker calls skipWaiting()/clients.claim(), so the swap happens whether
+ * or not anyone reloads — this just makes it visible instead of silent, so a
+ * user mid-form is told rather than surprised.
+ */
+export function onUpdateReady(fn: () => void): void {
+  updateHandler = fn;
+}
+
+let updateHandler: (() => void) | null = null;
+
 export function registerServiceWorker(): void {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
@@ -90,6 +102,21 @@ export function registerServiceWorker(): void {
   window.addEventListener("load", () => {
     // Registration failing is never worth breaking the app over — the site
     // simply stays a normal, uninstallable website.
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        reg.addEventListener("updatefound", () => {
+          const incoming = reg.installing;
+          if (!incoming) return;
+          incoming.addEventListener("statechange", () => {
+            // `controller` is null on the very first install — that is a fresh
+            // visit, not an update, and must not raise a "new version" notice.
+            if (incoming.state === "installed" && navigator.serviceWorker.controller) {
+              updateHandler?.();
+            }
+          });
+        });
+      })
+      .catch(() => {});
   });
 }

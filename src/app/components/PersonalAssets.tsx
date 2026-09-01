@@ -138,7 +138,7 @@ const PASSETS_CSS = `
 .fpd-passets .tile{padding:12px 14px;}
 .fpd-passets .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-passets .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-passets .dgrid,.fpd-passets .dgrid.two{grid-template-columns:1fr;}
 .fpd-passets .dgrid:not(.two) .tile:nth-child(3n+2),.fpd-passets .dgrid:not(.two) .tile:nth-child(3n){border-left:none;}
 .fpd-passets .dgrid.two .tile:nth-child(2n){border-left:none;}

@@ -105,7 +105,7 @@ const STORAGE_CSS = `
 .fpd-storage .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-storage .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-storage .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-storage .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-storage .kpi-stack{grid-template-columns:1fr;}}
 
 /* meter */
 .fpd-storage .meter-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}

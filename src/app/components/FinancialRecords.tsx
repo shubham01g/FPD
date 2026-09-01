@@ -120,7 +120,7 @@ const FIN_CSS = `
 .fpd-fin .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-fin .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-fin .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-fin .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-fin .kpi-stack{grid-template-columns:1fr;}}
 
 /* record cards */
 .fpd-fin .rlist{display:flex;flex-direction:column;gap:14px;}
@@ -146,7 +146,7 @@ const FIN_CSS = `
 .fpd-fin .redit:hover{color:#6FAE8B;}
 .fpd-fin .docpill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:15px;background:rgba(95,190,145,0.08);color:#D99A6B;border:1px solid rgba(95,190,145,0.22);margin-top:14px;}
 .fpd-fin .notewarn{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.22);color:${WARN};font-size:16px;line-height:1.6;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-fin .rgrid,.fpd-fin .rgrid.c2{grid-template-columns:1fr;}
 .fpd-fin .rgrid:not(.c2) .tile:nth-child(3n+2),.fpd-fin .rgrid:not(.c2) .tile:nth-child(3n){border-left:none;}
 .fpd-fin .rgrid.c2 .tile:nth-child(2n){border-left:none;}

@@ -278,7 +278,7 @@ const VAULT_CSS = `
 .fpd-vault .foot .ft{color:${MUTED};font-size:15.5px;line-height:1.7;}
 .fpd-vault .foot .ft b{color:${SOFT};font-weight:600;}
 
-@media (max-width:760px){.fpd-vault .psgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-vault .psgrid{grid-template-columns:1fr;}}
 `;
 
 /* ── Two-condition checklist row ─────────────────────────────────── */

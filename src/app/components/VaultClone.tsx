@@ -103,6 +103,19 @@ const VCLONE_CSS = `
 .fpd-vclone .important-box p{color:${MUTED};font-size:15px;line-height:1.7;}
 .fpd-vclone .btn-row{display:flex;gap:10px;width:100%;}
 .fpd-vclone .btn-save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;font-weight:700;font-size:16px;color:#fff;border:none;cursor:pointer;background:linear-gradient(135deg,#5B6EE1,#5B6EE1);box-shadow:0 8px 20px -8px rgba(91,110,225,0.5);font-family:var(--font-body);}
+
+/* This dialog opens from the sidebar footer on every page, so it is one of
+   the most reachable surfaces on a phone. The .fpd-vclone element is its own
+   backdrop (there is no shared .backdrop element here), so the bottom-sheet
+   treatment in styles/mobile.css cannot reach it — spelled out below. */
+@media (max-width:640px){
+  .fpd-vclone{align-items:flex-end;padding:0;}
+  .fpd-vclone .modal{max-width:none;border-radius:22px 22px 0 0;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;}
+  .fpd-vclone .modal-head{padding:22px 20px 16px;}
+  /* The explicit 75vh here would otherwise fight the flex body. */
+  .fpd-vclone .modal-body{max-height:none;flex:1 1 auto;min-height:0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));}
+  .fpd-vclone .preview-grid{grid-template-columns:1fr;}
+}
 `;
 
 export function VaultClone({ onClose, mode }: VaultCloneProps) {

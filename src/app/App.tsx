@@ -343,7 +343,14 @@ function UserSignupRoute() {
 function UserRoute() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const [userPage, setUserPage] = useState<PageId>("dashboard");
+  /* The portal's page is component state rather than a route, so the PWA
+     manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
+     target in as a query param. Read once, for the initial value only —
+     afterwards the sidebar owns navigation and the URL stays put. */
+  const [userPage, setUserPage] = useState<PageId>(() => {
+    const p = new URLSearchParams(window.location.search).get("page");
+    return (p as PageId) || "dashboard";
+  });
 
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace/>;

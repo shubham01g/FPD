@@ -92,7 +92,7 @@ const UTIL_CSS = `
 .fpd-util .tile{padding:12px 14px;}
 .fpd-util .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-util .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-util .dgrid{grid-template-columns:1fr;}
 .fpd-util .dgrid .tile:nth-child(3n+2),.fpd-util .dgrid .tile:nth-child(3n){border-left:none;}
 .fpd-util .dgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}

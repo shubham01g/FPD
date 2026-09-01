@@ -83,9 +83,12 @@ export function InstallApp() {
       <button
         onClick={onClick}
         title="Install Final Pass Down as an app"
-        className="flex items-center gap-1.5 rounded-lg"
+        aria-label="Install Final Pass Down as an app"
+        // fpd-install: the shell grows this to a 44px touch target on phones
+        // (see SHELL_CSS in Layout.tsx). Height is set there, not here, so the
+        // media query is not outranked by an inline value.
+        className="fpd-install flex items-center gap-1.5 rounded-lg"
         style={{
-          height: 34,
           padding: "0 10px",
           background: "rgba(91,110,225,0.1)",
           border: BORDER,
@@ -105,9 +108,10 @@ export function InstallApp() {
         <div
           className="absolute rounded-xl"
           style={{
-            top: 42,
+            // Tracks the button, which grows to 44px on phones.
+            top: "calc(100% + 8px)",
             right: 0,
-            width: 268,
+            width: "min(268px, calc(100vw - 24px))",
             zIndex: 60,
             background: "#0D1421",
             border: BORDER,
