@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import heroPetPhoto from "../../imports/petrecords_hero_photo.png";
 
@@ -22,7 +24,7 @@ interface PetProvider { name: string; phone: string; }
 interface PetInstruction { name: string; phone: string; description: string; }
 interface PetFeeding { foodType: string; timeType: string; quantity: string; locationOfFood: string; }
 interface PetRecord {
-  id: number;
+  id: string;
   photos: string[];
   caretakers: PetCaretaker[];
   providers: PetProvider[];
@@ -41,42 +43,8 @@ interface PetRecord {
   feedings: PetFeeding[];
 }
 
-const pets: PetRecord[] = [
-  {
-    id: 1,
-    photos: [],
-    caretakers: [
-      { name: "Emily Doe (Daughter)", phone: "(916) 555-0392" },
-    ],
-    providers: [
-      { name: "Sacramento Animal Boarding — Oak Park", phone: "(916) 555-0841" },
-    ],
-    instructions: [
-      { name: "Dr. Patricia Moore", phone: "(916) 555-0721", description: "Biscuit requires 0.8mg Methimazole thyroid medication daily — mixed into wet food. Give in the morning with breakfast. Keep away from chocolate, grapes, onions." },
-      { name: "Emily Doe", phone: "(916) 555-0392", description: "Biscuit is scared of thunderstorms. Keep him in the laundry room during storms. He loves tennis balls — bring 2 when boarding." },
-    ],
-    name: "Biscuit",
-    dateOfBirth: "Mar 15, 2017",
-    gender: "Male",
-    breed: "Golden Retriever",
-    colour: "Golden / Cream",
-    documents: ["Adoption Certificate 2017", "Microchip Registration"],
-    medicalHistory: "Healthy adult male Golden Retriever. Diagnosed with hypothyroidism in 2022 — managed with daily Methimazole. Annual wellness exams at Sacramento Animal Hospital. No known allergies. Microchip ID: 985121084982110.",
-    vaccinations: [
-      { type: "Rabies", date: "Mar 10, 2026" },
-      { type: "DHPP (Distemper/Parvo)", date: "Mar 10, 2026" },
-      { type: "Bordetella", date: "Mar 10, 2026" },
-      { type: "Leptospirosis", date: "Mar 10, 2026" },
-    ],
-    vetName: "Dr. Patricia Moore",
-    vetPhone: "(916) 555-0721",
-    vetEmail: "pmoore@sacanimalhospital.com",
-    feedings: [
-      { foodType: "Royal Canin Medium Adult (dry)", timeType: "Morning", quantity: "2 cups", locationOfFood: "Kitchen — cabinet under sink" },
-      { foodType: "Royal Canin Medium Adult (dry)", timeType: "Evening", quantity: "2 cups", locationOfFood: "Kitchen — cabinet under sink" },
-    ],
-  },
-];
+/* Rows come from the `pet_records` table — the screen used to open on sample
+   pets identical for every account and lost on refresh. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -133,7 +101,7 @@ const PETS_CSS = `
 .fpd-pets .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-pets .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-pets .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-pets .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-pets .kpi-stack{grid-template-columns:1fr;}}
 
 .fpd-pets .stack{display:flex;flex-direction:column;gap:14px;}
 .fpd-pets .r-icon{width:44px;height:44px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;}
@@ -146,7 +114,7 @@ const PETS_CSS = `
 .fpd-pets .r-grid.c3 .tile:nth-child(n+4){border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-pets .r-grid.c4 .tile:nth-child(4n+2),.fpd-pets .r-grid.c4 .tile:nth-child(4n+3),.fpd-pets .r-grid.c4 .tile:nth-child(4n){border-left:1px solid rgba(255,255,255,0.08);}
 .fpd-pets .r-grid.c4 .tile:nth-child(n+5){border-top:1px solid rgba(255,255,255,0.08);}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-pets .r-grid,.fpd-pets .r-grid.c3,.fpd-pets .r-grid.c4{grid-template-columns:1fr 1fr;}
 .fpd-pets .r-grid.c3 .tile:nth-child(3n+2),.fpd-pets .r-grid.c3 .tile:nth-child(3n){border-left:none;}
 .fpd-pets .r-grid.c4 .tile:nth-child(4n+2),.fpd-pets .r-grid.c4 .tile:nth-child(4n+3),.fpd-pets .r-grid.c4 .tile:nth-child(4n){border-left:none;}
@@ -211,7 +179,37 @@ const PETS_CSS = `
 `;
 
 export function PetRecords() {
-  const [petsList, setPetsList] = useState<PetRecord[]>(pets);
+  const { authUser } = useAuth();
+  const [petsList, setPetsList] = useState<PetRecord[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setPetsList([]); return; }
+    const { data, error } = await tables.petRecords.list(authUser.id);
+    if (error) { toast.error(`Could not load pet records: ${error.message}`); return; }
+    setPetsList((data ?? []).map(r => ({
+      id: String(r.id),
+      name: String(r.name ?? ""),
+      dateOfBirth: String(r.date_of_birth ?? ""),
+      gender: String(r.gender ?? ""),
+      breed: String(r.breed ?? ""),
+      colour: String(r.color ?? ""),
+      medicalHistory: String(r.medical_history ?? ""),
+      vetName: String(r.vet_name ?? ""),
+      vetPhone: String(r.vet_phone ?? ""),
+      vetEmail: String(r.vet_email ?? ""),
+      documents: (r.document_urls as string[] | null) ?? [],
+      // These four are lists in the UI; 012 gave each one a column that can
+      // actually hold a list rather than collapsing it to a single value.
+      photos: (r.photo_urls as string[] | null) ?? [],
+      caretakers: (r.caretakers as PetCaretaker[] | null) ?? [],
+      providers: (r.providers as PetProvider[] | null) ?? [],
+      instructions: (r.instructions as PetInstruction[] | null) ?? [],
+      vaccinations: (r.vaccinations as PetVaccination[] | null) ?? [],
+      feedings: (r.feedings as PetFeeding[] | null) ?? [],
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [showPetForm, setShowPetForm] = useState(false);
   const listRef = React.useRef<HTMLDivElement>(null);
 
@@ -226,7 +224,7 @@ export function PetRecords() {
   const [petVaccinations, setPetVaccinations] = useState<PetVaccination[]>([{type:"",date:""}]);
   const [petVet, setPetVet] = useState({vetName:"",vetPhone:"",vetEmail:""});
   const [petFeedings, setPetFeedings] = useState<PetFeeding[]>([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const petPhotoRef = useRef<HTMLInputElement>(null);
 
   function resetPetForm() {
@@ -263,27 +261,37 @@ export function PetRecords() {
     setEditingId(null);
   }
 
-  function savePetRecord() {
+  async function savePetRecord() {
     if (!petAbout.name) { toast.error("Pet name required"); return; }
-    const recFields = {
-      photos: petPhotos,
-      caretakers: petCaretakers.filter(c=>c.name.trim()),
-      providers: petProviders.filter(p=>p.name.trim()),
-      instructions: petInstructions.filter(i=>i.description.trim()||i.name.trim()),
-      ...petAbout, documents: petDocs,
-      medicalHistory: petMedHistory,
-      vaccinations: petVaccinations.filter(v=>v.type.trim()),
-      ...petVet,
-      feedings: petFeedings.filter(f=>f.foodType.trim()),
+    if (!authUser) { toast.error("Sign in to save pet records."); return; }
+
+    const row = {
+      name: petAbout.name,
+      date_of_birth: petAbout.dateOfBirth,
+      gender: petAbout.gender,
+      breed: petAbout.breed,
+      color: petAbout.colour,
+      medical_history: petMedHistory,
+      vet_name: petVet.vetName,
+      vet_phone: petVet.vetPhone,
+      vet_email: petVet.vetEmail,
+      document_urls: petDocs,
+      photo_urls: petPhotos,
+      caretakers: petCaretakers.filter(c => c.name.trim()),
+      providers: petProviders.filter(p => p.name.trim()),
+      instructions: petInstructions.filter(i => i.description.trim() || i.name.trim()),
+      vaccinations: petVaccinations.filter(v => v.type.trim()),
+      feedings: petFeedings.filter(f => f.foodType.trim()),
     };
-    if (editingId !== null) {
-      setPetsList(p => p.map(x => x.id === editingId ? { ...x, ...recFields } : x));
-      toast.success(`${petAbout.name} updated`);
-    } else {
-      const rec: PetRecord = { id: Date.now(), ...recFields };
-      setPetsList(p=>[...p, rec]);
-      toast.success(`${petAbout.name} added to Pet Records`);
-    }
+
+    const { error } = editingId !== null
+      ? await tables.petRecords.update(editingId, row)
+      : await tables.petRecords.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingId !== null ? `${petAbout.name} updated` : `${petAbout.name} added to Pet Records`);
     resetPetForm(); setEditingId(null); setShowPetForm(false);
   }
 

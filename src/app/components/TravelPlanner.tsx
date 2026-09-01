@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -21,7 +23,7 @@ const TRIP_TYPES = ["Vacation","Family Visit","Business Travel","Medical Travel"
 
 interface TravelDoc { name:string; type:string; }
 interface Trip {
-  id: number;
+  id: string;
   destination: string;
   country: string;
   tripType: string;
@@ -41,12 +43,12 @@ interface Trip {
   photo?: string;
 }
 
-const initTrips: Trip[] = [
-  { id:1, destination:"Maui, Hawaii", country:"USA", tripType:"Vacation", startDate:"Jul 4, 2025", endDate:"Jul 11, 2025", companions:"Sarah, Emma, Lucas", accommodation:"Wailea Beach Resort & Spa", accommodationPhone:"(808) 879-1922", confirmationNum:"WBR-48291-X", transportation:"Delta Flight DL-1204 (SFO→OGG)", budget:"$8,500", actualCost:"$9,120", highlights:"Snorkeling at Molokini Crater, Road to Hana, Emma's first plane ride, sunrise at Haleakalā.", notes:"Travel insurance purchased through AAA. Passports used for inter-island travel verification.", status:"completed", documents:[{name:"Delta Confirmation",type:"Flight"},{name:"Hotel Reservation",type:"Accommodation"},{name:"Travel Insurance Policy",type:"Insurance"},{name:"Car Rental Agreement",type:"Transportation"}] },
-  { id:2, destination:"New Orleans, LA", country:"USA", tripType:"Vacation", startDate:"Nov 1, 2024", endDate:"Nov 5, 2024", companions:"Sarah", accommodation:"Hotel Monteleone", accommodationPhone:"(504) 523-3341", confirmationNum:"HM-29184", transportation:"Southwest Airlines (SMF→MSY)", budget:"$3,200", actualCost:"$3,050", highlights:"Jazz Fest, beignets at Café Du Monde, Garden District tour, Preservation Hall jazz concert.", notes:"Anniversary trip. Highly recommend Commander's Palace restaurant.", status:"completed", documents:[{name:"Southwest Booking",type:"Flight"},{name:"Hotel Monteleone Reservation",type:"Accommodation"}] },
-  { id:3, destination:"Rome & Amalfi Coast, Italy", country:"Italy", tripType:"Vacation", startDate:"Sep 15, 2026", endDate:"Sep 27, 2026", companions:"Sarah", accommodation:"Hotel de Russie (Rome), Villa Cimbrone (Ravello)", accommodationPhone:"", confirmationNum:"", transportation:"United Airlines EWR layover", budget:"$18,000", actualCost:"", highlights:"", notes:"25th anniversary trip. Still planning — need to book flights. Passports expire 2029, good. Get international phone plan.", status:"planned", documents:[] },
-  { id:4, destination:"Cancún, Mexico", country:"Mexico", tripType:"Vacation", startDate:"Mar 20, 2023", endDate:"Mar 27, 2023", companions:"Sarah, Emma, Lucas", accommodation:"Sandos Caracol Eco Resort (all-inclusive)", accommodationPhone:"(998) 884-9800", confirmationNum:"SC-77481", transportation:"Alaska Airlines (SMF→CUN)", budget:"$7,000", actualCost:"$6,840", highlights:"Kids' first international trip. Emma loved the snorkeling. Lucas fed parrots at the resort.", notes:"Both kids needed Mexican tourist cards (FMT). Kept copies in this vault.", status:"completed", documents:[{name:"Alaska Airlines Booking",type:"Flight"},{name:"Resort Reservation",type:"Accommodation"},{name:"Travel Insurance",type:"Insurance"},{name:"Kids FMT Tourist Cards",type:"Legal"}] },
-];
+/* Rows come from the `travel_trips` table — the screen used to open on sample
+   trips identical for every account and lost on refresh. */
+
+// budget / actual_cost are NUMERIC in the table but free-text in the form.
+const toMoney = (n: number | null | undefined) => (n === null || n === undefined ? "" : `$${Number(n).toLocaleString()}`);
+const fromMoney = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
 
 const statusConfig = {
   planned:   { color:"#6FAE8B", bg:"rgba(91,167,214,0.14)", label:"PLANNED" },
@@ -112,7 +114,7 @@ const TRAVEL_CSS = `
 .fpd-travel .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-travel .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-travel .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-travel .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-travel .kpi-stack{grid-template-columns:1fr;}}
 
 /* trip cards */
 .fpd-travel .tlist{display:flex;flex-direction:column;gap:14px;}
@@ -160,8 +162,38 @@ const TRAVEL_CSS = `
 `;
 
 export function TravelPlanner() {
-  const [trips, setTrips] = useState<Trip[]>(initTrips);
-  const [expanded, setExpanded] = useState<number|null>(1);
+  const { authUser } = useAuth();
+  const [trips, setTrips] = useState<Trip[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setTrips([]); return; }
+    const { data, error } = await tables.travelTrips.list(authUser.id);
+    if (error) { toast.error(`Could not load trips: ${error.message}`); return; }
+    setTrips((data ?? []).map(r => ({
+      id: String(r.id),
+      destination: String(r.destination ?? ""),
+      country: String(r.country ?? ""),
+      tripType: String(r.trip_type ?? ""),
+      startDate: String(r.start_date ?? ""),
+      endDate: String(r.end_date ?? ""),
+      companions: String(r.companions ?? ""),
+      accommodation: String(r.accommodation ?? ""),
+      accommodationPhone: String(r.accommodation_phone ?? ""),
+      confirmationNum: String(r.confirmation_number ?? ""),
+      transportation: String(r.transportation ?? ""),
+      budget: toMoney(r.budget as number | null),
+      actualCost: toMoney(r.actual_cost as number | null),
+      highlights: String(r.highlights ?? ""),
+      notes: String(r.notes ?? ""),
+      status: (r.status as Trip["status"]) ?? "planned",
+      // document_urls is JSONB on this table, so it round-trips as objects.
+      documents: (r.document_urls as TravelDoc[] | null) ?? [],
+      photo: (r.photo_url as string | null) ?? undefined,
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+  const [expanded, setExpanded] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all"|"planned"|"completed">("all");
@@ -196,16 +228,27 @@ export function TravelPlanner() {
     setEditingTrip(null);
   }
 
-  function saveTrip() {
+  async function saveTrip() {
     if (!form.destination) { toast.error("Destination required"); return; }
-    if (editingTrip) {
-      setTrips(p => p.map(t => t.id === editingTrip.id ? { ...t, ...form } : t));
-      toast.success(`${form.destination} updated`);
-    } else {
-      const trip: Trip = { ...form, id:Date.now(), actualCost:"", highlights:"", documents:[], photo:form.photo };
-      setTrips(p => [trip, ...p]);
-      toast.success(`${form.destination} added to Travel Planner`);
-    }
+    if (!authUser) { toast.error("Sign in to save trips."); return; }
+
+    const row = {
+      destination: form.destination, country: form.country, trip_type: form.tripType,
+      start_date: form.startDate, end_date: form.endDate, companions: form.companions,
+      accommodation: form.accommodation, accommodation_phone: form.accommodationPhone,
+      confirmation_number: form.confirmationNum, transportation: form.transportation,
+      budget: fromMoney(form.budget), notes: form.notes, status: form.status,
+      photo_url: form.photo || null,
+    };
+
+    const { error } = editingTrip
+      ? await tables.travelTrips.update(editingTrip.id, row)
+      : await tables.travelTrips.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingTrip ? `${form.destination} updated` : `${form.destination} added to Travel Planner`);
     setForm(emptyForm);
     setEditingTrip(null);
     setShowAdd(false);

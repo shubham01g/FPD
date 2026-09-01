@@ -456,6 +456,13 @@ function ownerTable<T extends OwnerScopedRow>(table: string, ownerColumn: "user_
         .insert({ ...row, [ownerColumn]: userId })
         .select().single<T>();
     },
+    // Bulk insert for importers (contacts from a phone or CSV). One round
+    // trip rather than N, and one all-or-nothing failure to report.
+    addMany(userId: string, rows: Partial<Omit<T, "id">>[]) {
+      return supabase.from(table)
+        .insert(rows.map(row => ({ ...row, [ownerColumn]: userId })))
+        .select().returns<T[]>();
+    },
     // The owner column is deliberately not patchable — RLS would reject a
     // handover anyway, and silently dropping it here makes that explicit.
     update(id: string, patch: Partial<Omit<T, "id" | "user_id" | "owner_user_id">>) {

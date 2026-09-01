@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { MapPin, Plus, X, Star, Phone, Globe, Heart, Trash2, Compass, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
 import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.png";
 
@@ -40,7 +42,7 @@ const CAT_META: Record<string, { emoji:string; color:string; bg:string }> = {
 function getMeta(cat:string) { return CAT_META[cat] || { emoji:"📍", color:"rgba(255,255,255,0.65)", bg:"rgba(138,154,184,0.1)" }; }
 
 interface Place {
-  id: number;
+  id: string;
   name: string;
   category: string;
   address: string;
@@ -54,15 +56,8 @@ interface Place {
   photo?: string;
 }
 
-const initPlaces: Place[] = [
-  { id:1, name:"Grange Restaurant", category:"Restaurant", address:"926 J Street, Sacramento, CA 95814", phone:"(916) 492-4450", website:"grangerestaurant.com", favoriteItem:"Braised short rib, house-made bread", whySpecial:"Our anniversary spot every year since 2012. Sarah loves the wine selection.", rating:5, visited:"Multiple times a year", tags:["anniversary","fine dining","date night"] },
-  { id:2, name:"Insight Coffee Roasters", category:"Coffee Shop", address:"1901 8th Street, Sacramento, CA 95811", phone:"(916) 594-8911", website:"insightcoffee.com", favoriteItem:"Single-origin pour-over, almond croissant", whySpecial:"My daily morning stop. Staff knows my order.", rating:5, visited:"Almost daily", tags:["coffee","morning routine","work"] },
-  { id:3, name:"Effie Yeaw Nature Center", category:"Park / Nature", address:"2850 San Lorenzo Way, Carmichael, CA 95608", phone:"(916) 489-4918", website:"effieyeaw.org", favoriteItem:"Morning wildlife walk trail", whySpecial:"Where we took Emma and Lucas for their first nature walks. Deer always out at sunrise.", rating:5, visited:"Monthly", tags:["nature","family","hiking","kids"] },
-  { id:4, name:"Temple Coffee Roasters", category:"Coffee Shop", address:"2829 S Street, Sacramento, CA 95816", phone:"(916) 454-1272", website:"templecoffee.com", favoriteItem:"Ethiopian single origin, lavender latte", whySpecial:"Best quiet workspace in the city. Go for afternoon focus sessions.", rating:4, visited:"Weekly", tags:["coffee","work","quiet"] },
-  { id:5, name:"The Fox & Goose", category:"Restaurant", address:"1001 R Street, Sacramento, CA 95811", phone:"(916) 443-8825", website:"foxandgoose.com", favoriteItem:"Full English breakfast, Irish coffee", whySpecial:"Sunday brunch tradition with the family. Kids love the atmosphere.", rating:5, visited:"Sunday mornings", tags:["brunch","family","sunday tradition"] },
-  { id:6, name:"Folsom Lake State Recreation Area", category:"Park / Nature", address:"7806 Folsom-Auburn Rd, Folsom, CA 95630", phone:"(916) 988-0205", website:"parks.ca.gov", favoriteItem:"Beals Point beach, kayaking on the lake", whySpecial:"Summer family tradition since 2015. Emma learned to swim here.", rating:5, visited:"Every summer", tags:["lake","swimming","family","summer"] },
-  { id:7, name:"Crocker Art Museum", category:"Museum / Art", address:"216 O Street, Sacramento, CA 95814", phone:"(916) 808-7000", website:"crockerart.org", favoriteItem:"European Masters gallery, First Saturdays events", whySpecial:"Date nights with Sarah. We're members. Michael did his first painting class here.", rating:4, visited:"Monthly", tags:["art","date night","museum","members"] },
-];
+/* Rows come from the `favorite_places` table — the screen used to open on
+   seven sample places identical for every account and lost on refresh. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -120,7 +115,7 @@ const FAV_CSS = `
 .fpd-fav .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-fav .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-fav .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-fav .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-fav .kpi-stack{grid-template-columns:1fr;}}
 
 /* filters */
 .fpd-fav .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -133,7 +128,7 @@ const FAV_CSS = `
 
 /* place cards */
 .fpd-fav .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media (max-width:820px){.fpd-fav .pgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-fav .pgrid{grid-template-columns:1fr;}}
 .fpd-fav .pcard{overflow:hidden;}
 .fpd-fav .pphoto{width:100%;height:160px;object-fit:cover;display:block;}
 .fpd-fav .pbody{padding:20px;}
@@ -182,7 +177,32 @@ const FAV_CSS = `
 `;
 
 export function FavoritePlaces() {
-  const [places, setPlaces] = useState<Place[]>(initPlaces);
+  const { authUser } = useAuth();
+  const [places, setPlaces] = useState<Place[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setPlaces([]); return; }
+    const { data, error } = await tables.favoritePlaces.list(authUser.id);
+    if (error) { toast.error(`Could not load places: ${error.message}`); return; }
+    setPlaces((data ?? []).map(r => ({
+      id: String(r.id),
+      name: String(r.name ?? ""),
+      category: String(r.category ?? ""),
+      address: String(r.address ?? ""),
+      phone: String(r.phone ?? ""),
+      website: String(r.website ?? ""),
+      favoriteItem: String(r.favorite_item ?? ""),
+      whySpecial: String(r.why_special ?? ""),
+      rating: Number(r.rating ?? 0),
+      // The form's "Visited" is a frequency in words, not a yes/no, so it has
+      // its own column — `visited` stays a plain been-there flag.
+      visited: String(r.visit_frequency ?? ""),
+      tags: (r.tags as string[] | null) ?? [],
+      photo: (r.photo_url as string | null) ?? undefined,
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [showAdd, setShowAdd] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [filterCat, setFilterCat] = useState("all");
@@ -215,21 +235,39 @@ export function FavoritePlaces() {
     setForm(emptyForm);
   }
 
-  function savePlace() {
+  async function savePlace() {
     if (!form.name) { toast.error("Place name required"); return; }
+    if (!authUser) { toast.error("Sign in to save places."); return; }
     const tags = form.tags.split(",").map(t=>t.trim()).filter(Boolean);
-    if (editingPlace) {
-      setPlaces(p => p.map(x => x.id === editingPlace.id ? { ...x, ...form, rating:Number(form.rating), tags } : x));
-      toast.success(`${form.name} updated`);
-    } else {
-      setPlaces(p => [...p, { ...form, id:Date.now(), rating:Number(form.rating), tags }]);
-      toast.success(`${form.name} saved to Favorite Places`);
-    }
+
+    const rating = Number(form.rating);
+    const row = {
+      name: form.name, category: form.category, address: form.address,
+      phone: form.phone, website: form.website, favorite_item: form.favoriteItem,
+      why_special: form.whySpecial,
+      // The column is CHECK (rating BETWEEN 1 AND 5), so an unset rating must
+      // go in as NULL rather than 0 or the insert is rejected outright.
+      rating: rating >= 1 && rating <= 5 ? rating : null,
+      visit_frequency: form.visited,
+      tags,
+      photo_url: form.photo || null,
+    };
+
+    const { error } = editingPlace
+      ? await tables.favoritePlaces.update(editingPlace.id, row)
+      : await tables.favoritePlaces.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingPlace ? `${form.name} updated` : `${form.name} saved to Favorite Places`);
     closeModal();
   }
 
-  function removePlace(id:number) {
-    setPlaces(p => p.filter(x => x.id!==id));
+  async function removePlace(id:string) {
+    const { error } = await tables.favoritePlaces.remove(id);
+    if (error) { toast.error(`Could not remove: ${error.message}`); return; }
+    await reload();
     toast.success("Place removed");
   }
 

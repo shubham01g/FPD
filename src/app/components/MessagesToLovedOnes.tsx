@@ -6,13 +6,15 @@
  * has a delivery trigger: on your passing, on a fixed date, or on a recurring
  * birthday/anniversary. Nothing is sent until its trigger fires.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Heart, Plus, X, Mic, Video, FileText, Play, Pause, Square, Trash2,
   Clock, CalendarDays, Send, Lock, CheckCircle2, Pencil, Search,
   ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import heroMessagesPhoto from "../../imports/messages_hero_photo.png";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
@@ -85,36 +87,20 @@ const RECIPIENTS = [
   { name: "Robert Doe",    relationship: "Brother" },
 ];
 
-const INITIAL: Message[] = [
-  {
-    id: "m1", title: "To my wife, on the day I'm gone", recipient: "Sarah Johnson", relationship: "Spouse",
-    medium: "letter", trigger: "on_passing", status: "sealed", created: "Mar 2, 2026", sealedOn: "Mar 2, 2026",
-    body: "Sarah — if you're reading this, it means I ran out of time before I ran out of things to say to you. Thirty-eight years and I still never got tired of watching you make coffee in the morning. Don't stay in the house if it's too quiet. Go see Emily. Take the Mustang out at least once a year and let it be loud.",
-  },
-  {
-    id: "m2", title: "Advice for when you buy your first house", recipient: "Michael Doe", relationship: "Son",
-    medium: "voice", trigger: "on_passing", status: "sealed", created: "Feb 14, 2026", sealedOn: "Feb 14, 2026",
-    duration: "12:04",
-    body: "Recorded walkthrough of everything I learned buying and losing property — the 1998 mistake, the inspection I skipped, and what I'd do differently.",
-  },
-  {
-    id: "m3", title: "Happy 21st, Tyler", recipient: "Tyler Doe", relationship: "Grandson",
-    medium: "video", trigger: "birthday", triggerDate: "2032-12-02", status: "sealed", created: "Jan 20, 2026",
-    sealedOn: "Jan 20, 2026", duration: "6:38",
-    body: "A message for Tyler's 21st birthday — recorded while he was still ten, so he can see what his grandfather looked like when he still had all his hair.",
-  },
-  {
-    id: "m4", title: "For Emily — the letter I should have written in 2019", recipient: "Emily Doe", relationship: "Daughter",
-    medium: "letter", trigger: "on_passing", status: "draft", created: "Jun 11, 2026",
-    body: "Em — I've started this one four times. What I want to say is that the year we didn't speak was my fault, not yours, and I never found the right moment to say it out loud...",
-  },
-  {
-    id: "m5", title: "Our 40th anniversary", recipient: "Sarah Johnson", relationship: "Spouse",
-    medium: "video", trigger: "anniversary", triggerDate: "2028-07-24", status: "sealed", created: "May 30, 2026",
-    sealedOn: "May 30, 2026", duration: "4:12",
-    body: "In case I don't make it to forty — a message to play on the day.",
-  },
-];
+/* Rows come from the `messages_to_loved_ones` table — the screen used to open
+   on sample letters identical for every account and lost on refresh. */
+
+// duration_s is INTEGER in the table; the UI shows "6:38".
+const toDuration = (secs: number | null | undefined) => {
+  if (secs === null || secs === undefined) return undefined;
+  const m = Math.floor(Number(secs) / 60), ss = Math.floor(Number(secs) % 60);
+  return `${m}:${String(ss).padStart(2, "0")}`;
+};
+const fromDuration = (v: string | undefined) => {
+  if (!v) return null;
+  const [m, ss] = v.split(":").map(Number);
+  return Number.isFinite(m) && Number.isFinite(ss) ? m * 60 + ss : null;
+};
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -172,7 +158,7 @@ const MSG_CSS = `
 .fpd-msg .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-msg .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-msg .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-msg .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-msg .kpi-stack{grid-template-columns:1fr;}}
 
 /* segmented tabs + search */
 .fpd-msg .seg{display:flex;gap:3px;padding:3px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);width:fit-content;}
@@ -221,7 +207,7 @@ const MSG_CSS = `
 
 /* delivery-works notes */
 .fpd-msg .dgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media (max-width:720px){.fpd-msg .dgrid2{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-msg .dgrid2{grid-template-columns:1fr;}}
 .fpd-msg .note{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
 .fpd-msg .note .nt-title{color:${TEXT};font-size:16px;font-weight:600;margin-bottom:3px;}
 .fpd-msg .note .nt-desc{color:${MUTED};font-size:14.5px;line-height:1.6;}
@@ -254,7 +240,7 @@ const MSG_CSS = `
 .fpd-msg .field input::placeholder,.fpd-msg .field textarea::placeholder{color:${FAINT};}
 .fpd-msg .field input:focus,.fpd-msg .field select:focus,.fpd-msg .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
 .fpd-msg .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media (max-width:520px){.fpd-msg .field-row{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-msg .field-row{grid-template-columns:1fr;}}
 .fpd-msg .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-msg .save{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-msg .save:hover{filter:brightness(1.08);}
@@ -563,7 +549,31 @@ function ComposeModal({
 }
 
 export function MessagesToLovedOnes() {
-  const [messages, setMessages] = useState<Message[]>(INITIAL);
+  const { authUser } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setMessages([]); return; }
+    const { data, error } = await tables.messagesToLovedOnes.list(authUser.id);
+    if (error) { toast.error(`Could not load messages: ${error.message}`); return; }
+    setMessages((data ?? []).map(r => ({
+      id: String(r.id),
+      title: String(r.title ?? ""),
+      recipient: String(r.recipient_name ?? ""),
+      relationship: String(r.relationship ?? ""),
+      medium: (r.medium as Medium) ?? "letter",
+      trigger: (r.trigger_type as Trigger) ?? "on_passing",
+      triggerDate: (r.trigger_date as string | null) ?? undefined,
+      status: (r.status as Status) ?? "draft",
+      body: String(r.body ?? ""),
+      duration: toDuration(r.duration_s as number | null),
+      mediaUrl: (r.media_url as string | null) ?? undefined,
+      created: r.created_at ? new Date(String(r.created_at)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+      sealedOn: r.sealed_at ? new Date(String(r.sealed_at)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : undefined,
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [tab, setTab] = useState<"all" | Medium>("all");
   const [query, setQuery] = useState("");
   const [composing, setComposing] = useState(false);
@@ -591,27 +601,51 @@ export function MessagesToLovedOnes() {
     return [...map.entries()].sort((a, b) => b[1].length - a[1].length);
   }, [filtered]);
 
-  const save = (m: Message) => {
-    setMessages(prev => editing ? prev.map(x => x.id === m.id ? m : x) : [m, ...prev]);
+  const save = async (m: Message) => {
+    if (!authUser) { toast.error("Sign in to save messages."); return; }
+
+    const row = {
+      title: m.title, recipient_name: m.recipient, relationship: m.relationship,
+      medium: m.medium, trigger_type: m.trigger,
+      trigger_date: m.triggerDate ?? null, status: m.status,
+      body: m.body, duration_s: fromDuration(m.duration),
+      // m.mediaUrl is an in-memory blob: URL for a just-recorded take. It is
+      // meaningless in another session, so it is deliberately not stored —
+      // persisting recordings needs a Storage upload, which is separate work.
+    };
+
+    const { error } = editing
+      ? await tables.messagesToLovedOnes.update(m.id, row)
+      : await tables.messagesToLovedOnes.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
     setComposing(false);
     setEditing(null);
     toast.success(editing ? "Message updated." : `Message saved for ${m.recipient}.`);
   };
 
-  const seal = (id: string) => {
-    setMessages(prev => prev.map(m => m.id === id
-      ? { ...m, status: "sealed", sealedOn: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }
-      : m));
+  const seal = async (id: string) => {
+    const { error } = await tables.messagesToLovedOnes.update(id, {
+      status: "sealed", sealed_at: new Date().toISOString(),
+    });
+    if (error) { toast.error(`Could not seal: ${error.message}`); return; }
+    await reload();
     toast.success("Message sealed — it can't be edited until you unseal it.");
   };
 
-  const unseal = (id: string) => {
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, status: "draft", sealedOn: undefined } : m));
+  const unseal = async (id: string) => {
+    const { error } = await tables.messagesToLovedOnes.update(id, { status: "draft", sealed_at: null });
+    if (error) { toast.error(`Could not unseal: ${error.message}`); return; }
+    await reload();
     toast.info("Message unsealed and returned to drafts.");
   };
 
-  const remove = (id: string) => {
-    setMessages(prev => prev.filter(m => m.id !== id));
+  const remove = async (id: string) => {
+    const { error } = await tables.messagesToLovedOnes.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
     toast.success("Message deleted.");
   };
 

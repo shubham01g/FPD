@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroKidsPhoto from "../../imports/kidsactivities_hero_photo.png";
@@ -43,7 +45,7 @@ const ACT_META: Record<string, {emoji:string; color:string; bg:string}> = {
 function getMeta(type:string) { return ACT_META[type] || {emoji:"⭐",color:"rgba(255,255,255,0.65)",bg:"rgba(138,154,184,0.1)"}; }
 
 interface Activity {
-  id: number;
+  id: string;
   childName: string;
   activityType: string;
   organizationName: string;
@@ -65,57 +67,11 @@ interface Activity {
   documents: string[];
 }
 
-const initActivities: Activity[] = [
-  {
-    id:1, childName:"Emma Doe", activityType:"Soccer", organizationName:"Sacramento Youth Soccer League",
-    teamOrGroup:"U6 Ladybugs — Team #14", location:"William Land Park, Field 3 — 3800 Land Park Dr, Sacramento",
-    locationPhone:"(916) 555-0291", coachInstructor:"Coach Maria Santos", coachPhone:"(916) 555-0482",
-    schedule:"Saturdays 9:00 AM – 10:30 AM · Practice Tuesdays 4:30 PM", seasonDates:"Sep 2025 – Nov 2025",
-    monthlyCost:"$85/season registration", paymentDue:"Paid in full at registration",
-    uniformRequired:"Team jersey #7, shin guards, cleats (all provided by league)",
-    transportationNotes:"James drops off Saturdays. Sarah covers Tuesday practices. Carpooling with the Kim family on alternating weeks — Linda Kim: (916) 555-0841.",
-    emergencyContact:"Sarah Johnson (mother)", emergencyPhone:"(916) 555-0182",
-    notes:"Emma loves playing left forward. Bring water bottle, snack for after game. Team party at season end — TBD location.",
-    status:"active", documents:["SYSL Registration 2025","Medical Release Form","Team Photo Waiver"],
-  },
-  {
-    id:2, childName:"Emma Doe", activityType:"Dance", organizationName:"Sacramento Dance Academy",
-    teamOrGroup:"Creative Movement — Beginner (Ages 4–5)", location:"4821 Manzanita Ave, Sacramento, CA 95821",
-    locationPhone:"(916) 555-0844", coachInstructor:"Ms. Brianna Cole", coachPhone:"(916) 555-0844",
-    schedule:"Thursdays 4:00 PM – 4:45 PM", seasonDates:"Sep 2025 – Jun 2026",
-    monthlyCost:"$95/month", paymentDue:"1st of each month — auto-pay on file",
-    uniformRequired:"Pink leotard, pink tights, ballet slippers (purchased at studio — $45)",
-    transportationNotes:"Sarah picks up from daycare at 3:45, drives directly to studio. James covers when Sarah travels for work.",
-    emergencyContact:"Sarah Johnson (mother)", emergencyPhone:"(916) 555-0182",
-    notes:"Annual recital in June — costume fee approximately $60. Hair must be in a bun. Studio has strict no-perfume policy.",
-    status:"active", documents:["Enrollment Contract 2025-26","Recital Permission Form"],
-  },
-  {
-    id:3, childName:"Lucas Doe", activityType:"Swimming", organizationName:"Gold River Aquatic Center",
-    teamOrGroup:"Parent & Tot Swim — Level 1", location:"2250 Gold River Rd, Rancho Cordova, CA 95670",
-    locationPhone:"(916) 555-0372", coachInstructor:"Instructor Keanu Makoa", coachPhone:"(916) 555-0372",
-    schedule:"Wednesdays & Fridays 10:30 AM – 11:00 AM", seasonDates:"Rolling enrollment — current session Jan–Mar 2026",
-    monthlyCost:"$120/session (8 classes)", paymentDue:"At session registration",
-    uniformRequired:"Swim diaper, swim trunks, swim cap (optional)",
-    transportationNotes:"Parent must be in water with child. Sarah attends all sessions. James covers when Sarah is unavailable.",
-    emergencyContact:"Sarah Johnson (mother)", emergencyPhone:"(916) 555-0182",
-    notes:"Bring 2 swim diapers, towel, change of clothes. Shower before entering pool. Lucas is terrified of the splash pad — avoid it.",
-    status:"active", documents:["Aquatic Center Enrollment","Medical Clearance Form"],
-  },
-  {
-    id:4, childName:"Emma Doe", activityType:"Art Class", organizationName:"Crocker Art Museum",
-    teamOrGroup:"Little Artists Saturday Workshop", location:"216 O Street, Sacramento, CA 95814",
-    locationPhone:"(916) 808-7000", coachInstructor:"Instructor Rosa Mendez", coachPhone:"",
-    schedule:"2nd & 4th Saturday 10:00 AM – 11:30 AM", seasonDates:"Oct 2025 – May 2026",
-    monthlyCost:"$50/month (museum member discount applied)",
-    paymentDue:"Quarterly — next due Jan 1, 2026",
-    uniformRequired:"Wear clothes that can get messy. Smock provided.",
-    transportationNotes:"James drops off. Emma joins parents for museum visit afterward — family activity.",
-    emergencyContact:"James Doe (father)", emergencyPhone:"(916) 555-0291",
-    notes:"We are museum members — membership card at front desk. Emma keeps all artwork — labeled folder in her bedroom.",
-    status:"seasonal", documents:["Museum Workshop Registration"],
-  },
-];
+/* Rows come from the `kids_activities` table — the screen used to open on
+   sample activities identical for every account and lost on refresh. */
+
+const toMoney = (n: number | null | undefined) => (n === null || n === undefined ? "" : `$${Number(n).toLocaleString()}`);
+const fromMoney = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -171,7 +127,7 @@ const KIDS_CSS = `
 .fpd-kids .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-kids .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-kids .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-kids .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-kids .kpi-stack{grid-template-columns:1fr;}}
 
 /* child filter */
 .fpd-kids .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -195,7 +151,7 @@ const KIDS_CSS = `
 .fpd-kids .igrid{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);overflow:hidden;}
 .fpd-kids .igrid .tile:nth-child(2n){border-left:1px solid rgba(255,255,255,0.08);}
 .fpd-kids .igrid .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-kids .igrid{grid-template-columns:1fr;}
 .fpd-kids .igrid .tile:nth-child(2n){border-left:none;}
 .fpd-kids .igrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
@@ -235,11 +191,44 @@ const KIDS_CSS = `
 `;
 
 export function KidsActivities() {
-  const [activities, setActivities] = useState<Activity[]>(initActivities);
-  const [expanded, setExpanded] = useState<number|null>(1);
+  const { authUser } = useAuth();
+  const [activities, setActivities] = useState<Activity[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setActivities([]); return; }
+    const { data, error } = await tables.kidsActivities.list(authUser.id);
+    if (error) { toast.error(`Could not load activities: ${error.message}`); return; }
+    setActivities((data ?? []).map(r => ({
+      id: String(r.id),
+      childName: String(r.child_name ?? ""),
+      activityType: String(r.activity_type ?? ""),
+      organizationName: String(r.organization_name ?? ""),
+      teamOrGroup: String(r.team_or_group ?? ""),
+      location: String(r.location ?? ""),
+      locationPhone: String(r.location_phone ?? ""),
+      coachInstructor: String(r.coach_name ?? ""),
+      coachPhone: String(r.coach_phone ?? ""),
+      schedule: String(r.schedule ?? ""),
+      seasonDates: String(r.season_dates ?? ""),
+      monthlyCost: toMoney(r.monthly_cost as number | null),
+      paymentDue: String(r.payment_due ?? ""),
+      // The form describes the uniform rather than answering yes/no, so the
+      // text lives in its own column and the boolean stays a plain flag.
+      uniformRequired: String(r.uniform_details ?? ""),
+      transportationNotes: String(r.transportation_notes ?? ""),
+      emergencyContact: String(r.emergency_contact ?? ""),
+      emergencyPhone: String(r.emergency_phone ?? ""),
+      notes: String(r.notes ?? ""),
+      status: (r.status as Activity["status"]) ?? "active",
+      documents: (r.document_urls as string[] | null) ?? [],
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+  const [expanded, setExpanded] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [filterChild, setFilterChild] = useState("all");
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const activitiesRef = React.useRef<HTMLDivElement>(null);
   const blankForm = {
     childName:"", activityType:ACTIVITY_TYPES[0], organizationName:"", teamOrGroup:"",
@@ -269,15 +258,32 @@ export function KidsActivities() {
     setEditingId(null);
   }
 
-  function saveActivity() {
+  async function saveActivity() {
     if (!form.childName || !form.activityType) { toast.error("Child name and activity type required"); return; }
-    if (editingId != null) {
-      setActivities(p => p.map(a => a.id === editingId ? { ...a, ...form } : a));
-      toast.success("Activity updated");
-    } else {
-      setActivities(p => [...p, { ...form, id:Date.now(), documents:[] }]);
-      toast.success(`${form.activityType} added for ${form.childName}`);
-    }
+    if (!authUser) { toast.error("Sign in to save activities."); return; }
+
+    const row = {
+      child_name: form.childName, activity_type: form.activityType,
+      organization_name: form.organizationName, team_or_group: form.teamOrGroup,
+      location: form.location, location_phone: form.locationPhone,
+      coach_name: form.coachInstructor, coach_phone: form.coachPhone,
+      schedule: form.schedule, season_dates: form.seasonDates,
+      monthly_cost: fromMoney(form.monthlyCost), payment_due: form.paymentDue,
+      uniform_details: form.uniformRequired,
+      uniform_required: Boolean(form.uniformRequired.trim()),
+      transportation_notes: form.transportationNotes,
+      emergency_contact: form.emergencyContact, emergency_phone: form.emergencyPhone,
+      notes: form.notes, status: form.status,
+    };
+
+    const { error } = editingId != null
+      ? await tables.kidsActivities.update(editingId, row)
+      : await tables.kidsActivities.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingId != null ? "Activity updated" : `${form.activityType} added for ${form.childName}`);
     setForm(blankForm);
     setEditingId(null);
     setShowAdd(false);
