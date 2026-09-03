@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Trash2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
+import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -243,12 +244,18 @@ export function FamilyMemories() {
   const [pendingPhotos, setPendingPhotos] = useState<string[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  function stagePhotos(files: FileList | null) {
+  async function stagePhotos(files: FileList | null) {
     const images = Array.from(files || []).filter(f => f.type.startsWith("image/"));
     if (!images.length) { toast.error("Please choose image files"); return; }
-    setPendingPhotos(p => [...p, ...images.map(f => URL.createObjectURL(f))]);
+    const urls: string[] = [];
+    for (const f of images) {
+      try { urls.push((await prepareImage(f)).url); }
+      catch (err) { toast.error(`${f.name}: ${(err as Error).message}`); }
+    }
+    if (!urls.length) return;
+    setPendingPhotos(p => [...p, ...urls]);
     setShowAdd("memories");
-    toast.success(`${images.length} photo${images.length > 1 ? "s" : ""} ready — give this memory a title`);
+    toast.success(`${urls.length} photo${urls.length > 1 ? "s" : ""} ready — give this memory a title`);
   }
 
   function clearPendingPhotos() {

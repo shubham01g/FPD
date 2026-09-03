@@ -3,7 +3,9 @@
  * Shows a click-to-upload zone, previews the selected image, and
  * allows clearing. Returns a blob URL string via onChange.
  */
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { toast } from "sonner";
+import { prepareImage, shrinkNotice, MAX_MB } from "../utils/imageInput";
 import { Camera, X, ImageIcon } from "lucide-react";
 
 interface PhotoPickerProps {
@@ -16,17 +18,30 @@ interface PhotoPickerProps {
 export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio = "16/9" }: PhotoPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  const [busy, setBusy] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = ""; // let the same file be re-picked after an error
     if (!file) return;
-    onChange(URL.createObjectURL(file));
-    e.target.value = "";
+    setBusy(true);
+    try {
+      // Shrinks first and only complains if it is still oversized, so an
+      // ordinary 5MB phone photo is accepted rather than refused.
+      const img = await prepareImage(file);
+      const note = shrinkNotice(img);
+      if (note) toast.success(note);
+      onChange(img.url);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+    setBusy(false);
   }
 
   return (
     <div>
       <label style={{ color:"var(--muted-foreground)", fontSize:12.5, display:"block", marginBottom:6, fontFamily:"var(--font-mono)" }}>
-        {label.toUpperCase()}
+        {label.toUpperCase()} <span style={{ opacity:.65, letterSpacing:0 }}>· max {MAX_MB}MB</span>
       </label>
 
       {value ? (
@@ -37,6 +52,7 @@ export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio 
             style={{ background:"linear-gradient(transparent 50%, rgba(0,0,0,0.5))" }}>
             <button
               type="button"
+              disabled={busy}
               onClick={() => inputRef.current?.click()}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
               style={{ background:"rgba(255,255,255,0.15)", color:"#fff", backdropFilter:"blur(4px)" }}>
@@ -55,16 +71,21 @@ export function PhotoPicker({ value, onChange, label = "Add Photo", aspectRatio 
         /* Upload zone */
         <button
           type="button"
+          disabled={busy}
           onClick={() => inputRef.current?.click()}
           className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-all"
-          style={{ aspectRatio, borderColor:"rgba(91,110,225,0.25)", background:"rgba(91,110,225,0.03)", color:"var(--muted-foreground)" }}>
+          style={{ aspectRatio, borderColor:"rgba(91,110,225,0.25)", background:"rgba(91,110,225,0.03)", color:"var(--muted-foreground)", opacity: busy ? 0.6 : 1, cursor: busy ? "wait" : "pointer" }}>
           <div className="flex items-center justify-center rounded-full"
             style={{ width:44, height:44, background:"rgba(91,110,225,0.08)" }}>
             <ImageIcon size={20} color="var(--primary)"/>
           </div>
           <div>
-            <div style={{ fontSize:16, fontWeight:600, color:"var(--primary)" }}>Click to add photo</div>
-            <div style={{ fontSize:14, marginTop:2 }}>JPG, PNG, HEIC — from camera or files</div>
+            <div style={{ fontSize:16, fontWeight:600, color:"var(--primary)" }}>
+              {busy ? "Optimising photo…" : "Click to add photo"}
+            </div>
+            <div style={{ fontSize:14, marginTop:2 }}>
+              {busy ? "Large photos are resized automatically" : `JPG, PNG, HEIC — resized automatically, max ${MAX_MB}MB`}
+            </div>
           </div>
         </button>
       )}

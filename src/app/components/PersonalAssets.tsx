@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Car, Lock, Bitcoin, Plus, Edit2, Trash2, Key, X, Home, Camera, Image, Gem, Sword, Boxes } from "lucide-react";
 import { toast } from "sonner";
+import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
@@ -200,9 +201,11 @@ export function PersonalAssets() {
   const [wlForm, setWlForm] = useState({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
   const [wlDoc, setWlDoc] = useState<string|null>(null);
 
-  function uploadPhoto(file: File) {
+  async function uploadPhoto(file: File) {
     if (!pendingPhotoTarget) return;
-    const url = URL.createObjectURL(file);
+    let url: string;
+    try { url = (await prepareImage(file)).url; }
+    catch (err) { toast.error((err as Error).message); return; }
     if (pendingPhotoTarget.type === "realestate") {
       setRealEstateList(p => p.map(r => r.id === pendingPhotoTarget.id ? { ...r, photo: url } : r));
       toast.success("Property photo added");

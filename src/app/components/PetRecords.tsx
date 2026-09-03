@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { prepareImage, shrinkNotice, MAX_MB } from "../utils/imageInput";
 import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
@@ -501,13 +502,24 @@ export function PetRecords() {
                   <button className="dropzone" onClick={()=>petPhotoRef.current?.click()}>
                     <ImageIcon size={32} color="#FFFFFF"/>
                     <div className="dt">Upload Images or Videos</div>
-                    <div className="ds">Minimum 1 Maximum 10 images or videos</div>
+                    <div className="ds">Minimum 1 Maximum 10 images or videos · photos resized automatically, max {MAX_MB}MB</div>
                   </button>
-                  <input ref={petPhotoRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => {
+                  <input ref={petPhotoRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async e => {
                     const files = Array.from(e.target.files||[]).slice(0, 10 - petPhotos.length);
-                    const urls = files.map(f => URL.createObjectURL(f));
-                    setPetPhotos(p => [...p, ...urls].slice(0,10));
                     e.target.value = "";
+                    const urls: string[] = [];
+                    for (const f of files) {
+                      // Videos are passed through untouched; only images can be
+                      // resized, and rejecting a clip here would be surprising.
+                      if (!f.type.startsWith("image/")) { urls.push(URL.createObjectURL(f)); continue; }
+                      try {
+                        const img = await prepareImage(f);
+                        const note = shrinkNotice(img);
+                        if (note) toast.success(note);
+                        urls.push(img.url);
+                      } catch (err) { toast.error((err as Error).message); }
+                    }
+                    if (urls.length) setPetPhotos(p => [...p, ...urls].slice(0,10));
                   }}/>
                   {petPhotos.length > 0 && (
                     <div className="pfthumbs">

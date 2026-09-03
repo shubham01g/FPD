@@ -6,6 +6,7 @@ import {
   Send, CheckCircle, Layers, Smartphone, FileUp
 } from "lucide-react";
 import { toast } from "sonner";
+import { prepareImage } from "../utils/imageInput";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
@@ -637,12 +638,16 @@ export function FamilyFriends() {
     await reload();
   };
 
-  const handlePhotoUpload = (id: string, file: File | null) => {
+  const handlePhotoUpload = async (id: string, file: File | null) => {
     if (!file) return;
-    // URL.createObjectURL gives an in-memory blob: URL that means nothing in
-    // another session, so this stays a preview only. Persisting the image
-    // needs a Storage upload, which is separate work from this wiring.
-    const url = URL.createObjectURL(file);
+    // Resized here so the eventual Storage upload has a sane file to send.
+    // The result is still a blob: URL, which means nothing in another session,
+    // so this remains a preview only — persisting it needs the Storage work.
+    let url: string;
+    try {
+      const img = await prepareImage(file);
+      url = img.url;
+    } catch (err) { toast.error((err as Error).message); return; }
     setContacts(prev => prev.map(c => c.id === id ? { ...c, photo: url } : c));
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, photo: url } : prev);
     toast.success("Photo updated for this session — not yet saved to your vault");
