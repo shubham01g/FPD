@@ -13,7 +13,7 @@ import { ScanButton } from "./DocumentScanner";
 // documents into the File Cabinet — it's entangled with all of those unrelated components, so
 // it's left as-is here rather than folded into the new vault_documents-backed `docs` list.
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
-import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.png";
+import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar & AI assistant) ── */
 const TEXT    = "#EFF2F9";

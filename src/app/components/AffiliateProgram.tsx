@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "lucide-react";
-import heroAffiliatePhoto from "../../imports/affiliateprogram_hero_photo.png";
+import heroAffiliatePhoto from "../../imports/affiliateprogram_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

@@ -3,7 +3,7 @@ import { Heart, AlertTriangle, Pill, Phone, Plus, Trash2, X, Pencil, Check, Buil
 import { useDemo, type Allergy, type Medication, type EmergencyInfo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroMedicalPhoto from "../../imports/medicalinfo_hero_photo.png";
+import heroMedicalPhoto from "../../imports/medicalinfo_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";

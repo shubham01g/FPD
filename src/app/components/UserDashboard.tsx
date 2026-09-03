@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
-import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
+import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 

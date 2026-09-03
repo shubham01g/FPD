@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
-import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.png";
+import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";

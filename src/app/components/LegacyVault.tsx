@@ -18,7 +18,7 @@ import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
 import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
-import heroVaultPhoto from "../../imports/legacyvault_hero_photo.png";
+import heroVaultPhoto from "../../imports/legacyvault_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant & file cabinet) ── */
 const TEXT    = "#EFF2F9";

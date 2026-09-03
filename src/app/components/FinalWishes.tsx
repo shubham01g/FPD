@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type FinalWish as Wish, type FuneralPlan } from "../context/DemoContext";
-import heroWishesPhoto from "../../imports/finalwishes_hero_photo.png";
-import heroFuneralPhoto from "../../imports/funeral_hero_photo.png";
+import heroWishesPhoto from "../../imports/finalwishes_hero_photo.webp";
+import heroFuneralPhoto from "../../imports/funeral_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
 const TEXT    = "#EFF2F9";

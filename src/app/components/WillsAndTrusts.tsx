@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import heroWillsPhoto from "../../imports/wills_hero_photo.png";
-import trustSidePhoto from "../../imports/trust_side_photo.png";
+import heroWillsPhoto from "../../imports/wills_hero_photo.webp";
+import trustSidePhoto from "../../imports/trust_side_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";

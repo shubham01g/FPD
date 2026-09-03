@@ -9,9 +9,9 @@ import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
 import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
-import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.png";
-import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.png";
-import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.png";
+import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.webp";
+import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.webp";
+import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

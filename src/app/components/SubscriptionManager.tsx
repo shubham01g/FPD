@@ -7,7 +7,7 @@ import {
   DollarSign, Lock, Eye, EyeOff, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import heroSubscriptionPhoto from "../../imports/subscriptionmanager_hero_photo.png";
+import heroSubscriptionPhoto from "../../imports/subscriptionmanager_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";

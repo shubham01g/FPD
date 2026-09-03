@@ -5,7 +5,7 @@ import {
   BookOpen, LayoutGrid, Zap, Clock, List,
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
-import heroQAPhoto from "../../imports/ai_hero_qa.png";
+import heroQAPhoto from "../../imports/ai_hero_qa.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";

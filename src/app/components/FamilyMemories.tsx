@@ -6,7 +6,7 @@ import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
 import { useDemo, type Memory } from "../context/DemoContext";
-import heroFamilyPhoto from "../../imports/familymemories_hero_photo.png";
+import heroFamilyPhoto from "../../imports/familymemories_hero_photo.webp";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
 

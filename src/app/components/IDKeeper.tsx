@@ -5,7 +5,7 @@ import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
-import heroIDPhoto from "../../imports/idkeeper_hero_photo.png";
+import heroIDPhoto from "../../imports/idkeeper_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

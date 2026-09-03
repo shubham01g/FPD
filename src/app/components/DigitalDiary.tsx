@@ -6,7 +6,7 @@ import {
   CloudRain, Smile, Meh, Search, Eye
 } from "lucide-react";
 import { toast } from "sonner";
-import heroDiaryPhoto from "../../imports/diary_hero_photo.png";
+import heroDiaryPhoto from "../../imports/diary_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

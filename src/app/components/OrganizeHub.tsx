@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, House, ShieldCheck, Mail, Image as ImageIcon, Lock, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
-import heroFoldersPhoto from "../../imports/folders_hero_photo.png";
-import heroReminderPhoto from "../../imports/reminder_hero_photo.png";
+import heroFoldersPhoto from "../../imports/folders_hero_photo.webp";
+import heroReminderPhoto from "../../imports/reminder_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet & legacy vault) ── */
 const TEXT    = "#EFF2F9";

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
-import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.png";
+import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";

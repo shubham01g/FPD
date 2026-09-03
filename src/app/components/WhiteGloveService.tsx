@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronUp, X
 } from "lucide-react";
 import { toast } from "sonner";
-import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.png";
+import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

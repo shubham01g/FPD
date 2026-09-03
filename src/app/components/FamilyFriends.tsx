@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
-import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.png";
+import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";

@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroWarrantyPhoto from "../../imports/warranties_hero_photo.png";
+import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
 const TEXT    = "#EFF2F9";

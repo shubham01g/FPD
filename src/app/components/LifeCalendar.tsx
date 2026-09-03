@@ -29,7 +29,7 @@ import {
   eventsForMonth, upcomingEvents, monthlyBillingTotal, iso, daysInMonth,
   SOURCE_META, type CalendarEvent, type EventSource,
 } from "../services/calendarEvents";
-import heroCalendarPhoto from "../../imports/calendar_hero_photo.png";
+import heroCalendarPhoto from "../../imports/calendar_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard) ── */
 const TEXT   = "#EFF2F9";

@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { CryptoPayment } from "./CryptoPayment";
-import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.png";
+import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";

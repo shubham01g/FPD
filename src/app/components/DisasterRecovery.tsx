@@ -8,8 +8,8 @@ import {
 import { toast } from "sonner";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
-import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.png";
-import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.png";
+import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
+import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";

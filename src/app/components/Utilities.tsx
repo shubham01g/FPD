@@ -5,7 +5,7 @@ import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.png";
+import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";

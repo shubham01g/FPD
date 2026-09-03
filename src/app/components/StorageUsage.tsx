@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
-import heroStoragePhoto from "../../imports/storageusage_hero_photo.png";
+import heroStoragePhoto from "../../imports/storageusage_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
