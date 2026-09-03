@@ -44,6 +44,12 @@ export interface DBUser {
   stripe_customer_id?: string; stripe_subscription_id?: string;
   is_admin: boolean; email_verified: boolean; two_fa_enabled: boolean;
   created_at: string;
+  /* Credential-vault key material (migration 014). Both NULL until the user
+     sets a passphrase, which is how the app tells "never set up" from
+     "set up, currently locked". Neither can decrypt anything on its own —
+     see services/vaultCrypto.ts. */
+  vault_salt?: string | null;
+  vault_verifier?: string | null;
 }
 
 export interface DBDocument {
