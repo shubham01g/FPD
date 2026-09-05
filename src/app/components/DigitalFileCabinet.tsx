@@ -13,7 +13,7 @@ import { ScanButton } from "./DocumentScanner";
 // documents into the File Cabinet — it's entangled with all of those unrelated components, so
 // it's left as-is here rather than folded into the new vault_documents-backed `docs` list.
 import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
-import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.png";
+import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar & AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -464,7 +464,7 @@ const CAB_CSS = `
 .fpd-cab .kpi-mini-lbl{font-size:14.5px;color:${MUTED};margin-top:4px;}
 .fpd-cab .kpi-mini-sub{font-size:14px;color:${SOFT};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-cab .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:520px){.fpd-cab .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-cab .kpi-stack{grid-template-columns:1fr;}}
 
 /* drop zone */
 .fpd-cab .drop{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:16px;border:1.5px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.012);cursor:pointer;transition:border-color .18s,background .18s;}

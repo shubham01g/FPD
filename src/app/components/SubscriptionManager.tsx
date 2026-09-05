@@ -1,13 +1,16 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { ScanButton } from "./DocumentScanner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
+import { encryptField, decryptField } from "../services/vaultCrypto";
 import {
   CreditCard, Plus, X, Search, Trash2, Edit2, Upload,
   Globe, Phone, AlertTriangle, CheckCircle, Calendar,
   DollarSign, Lock, Eye, EyeOff, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
-import heroSubscriptionPhoto from "../../imports/subscriptionmanager_hero_photo.png";
+import heroSubscriptionPhoto from "../../imports/subscriptionmanager_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -34,14 +37,8 @@ interface Subscription {
 
 const categories = ["All","Streaming","Software","News","Health & Fitness","Finance","Shopping","Insurance","Utilities","Other"];
 
-const initSubs: Subscription[] = [
-  { id:"s1", title:"Netflix", amount:22.99, frequency:"Monthly", website:"https://netflix.com", username:"james.doe@gmail.com", password:"Netflix@2024!", paymentType:"Visa", lastFour:"8821", category:"Streaming", status:"active", nextBilling:"Jul 1, 2026", autoPay:true, cancelInstructions:"Log in → Account → Cancel Membership" },
-  { id:"s2", title:"Spotify Premium", amount:11.99, frequency:"Monthly", website:"https://spotify.com", username:"james.doe@gmail.com", password:"Spot!fy24!", paymentType:"Mastercard", lastFour:"4492", category:"Streaming", status:"active", nextBilling:"Jun 28, 2026", autoPay:true },
-  { id:"s3", title:"Adobe Creative Cloud", amount:59.99, frequency:"Monthly", phone:"1-800-833-6687", website:"https://adobe.com", username:"james.doe@gmail.com", password:"Adobe@CC24!", billingAccountNumber:"ADO-8821-CC", paymentType:"American Express", lastFour:"3321", category:"Software", status:"active", nextBilling:"Jul 5, 2026", autoPay:true, cancelInstructions:"Call 1-800-833-6687 or log in → Account → Plans → Cancel" },
-  { id:"s4", title:"SMUD Electric", amount:142.00, frequency:"Monthly", phone:"(916) 452-3211", website:"https://smud.org", username:"jdoe8821", billingAccountNumber:"SMUD-9284-01", paymentType:"Checking Account", lastFour:"8821", category:"Utilities", status:"active", nextBilling:"Jul 3, 2026", autoPay:true },
-  { id:"s5", title:"New York Times Digital", amount:25.00, frequency:"Quarterly", website:"https://nytimes.com", username:"james.doe@gmail.com", password:"NYT@Read24!", paymentType:"Visa", lastFour:"8821", category:"News", status:"active", nextBilling:"Aug 1, 2026", autoPay:true },
-  { id:"s6", title:"Planet Fitness", amount:24.99, frequency:"Monthly", phone:"(916) 555-0291", website:"https://planetfitness.com", billingAccountNumber:"PF-8821", paymentType:"Checking Account", lastFour:"8821", category:"Health & Fitness", status:"active", nextBilling:"Jun 30, 2026", autoPay:true, cancelInstructions:"Must cancel IN PERSON at the gym or via certified mail." },
-];
+/* Rows come from `subscription_tracker`. The screen used to open on sample
+   subscriptions identical for every account and lost on refresh. */
 
 const frequencyColor: Record<Frequency,string> = { Weekly:POS, Biweekly:"#6F9E94", Monthly:ACCENT, Quarterly:ACCENT2, Yearly:WARN };
 const statusColor: Record<string, { color:string; bg:string }> = {
@@ -108,7 +105,7 @@ const SUB_CSS = `
 .fpd-sub .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-sub .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-sub .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-sub .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-sub .kpi-stack{grid-template-columns:1fr;}}
 
 /* alert banner (warning variant of the shared footnote) */
 .fpd-sub .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(217,165,94,0.06);border:1px solid rgba(217,165,94,0.22);}
@@ -127,7 +124,7 @@ const SUB_CSS = `
 
 /* two-column bento */
 .fpd-sub .bento{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start;}
-@media (max-width:980px){.fpd-sub .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-sub .bento{grid-template-columns:1fr;}}
 
 /* subscription list rows */
 .fpd-sub .plist{display:flex;flex-direction:column;gap:10px;}
@@ -198,7 +195,7 @@ const SUB_CSS = `
 .fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-sub .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-sub .modal-foot .save[disabled]{opacity:.6;cursor:default;}
-@media (max-width:560px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
 `;
 
 function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | null; onClose:()=>void; onSave:(s:Subscription)=>void }) {
@@ -315,7 +312,8 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
 }
 
 export function SubscriptionManager() {
-  const [subs, setSubs] = useState<Subscription[]>(initSubs);
+  const { authUser } = useAuth();
+  const [subs, setSubs] = useState<Subscription[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState<Subscription|null>(null);
@@ -342,7 +340,71 @@ export function SubscriptionManager() {
     return sum + s.amount * (mult[s.frequency]??1);
   }, 0);
 
-  const deleteSub = (id: string) => { setSubs(p => p.filter(s => s.id !== id)); if(selected?.id===id) setSelected(null); toast.success("Subscription removed"); };
+  /* Rows come from `subscription_tracker`. The account password is the one
+     secret here and is encrypted in the browser (services/vaultCrypto.ts);
+     amounts, billing dates and card last-four are ordinary metadata. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const { data, error } = await tables.subscriptionTracker.list(authUser.id);
+    if (error) { toast.error(`Could not load subscriptions: ${error.message}`); return; }
+    const rows = await Promise.all((data ?? []).map(async r => ({
+      id: String(r.id),
+      title: String(r.title ?? ""),
+      amount: Number(r.amount_usd ?? 0),
+      frequency: (String(r.billing_frequency ?? "Monthly") as Frequency),
+      phone: (r.phone as string | null) ?? undefined,
+      website: (r.website_url as string | null) ?? undefined,
+      username: (r.username as string | null) ?? undefined,
+      password: await decryptField(r.encrypted_password as string | null),
+      billingAccountNumber: (r.billing_account_number as string | null) ?? undefined,
+      paymentType: (String(r.payment_type ?? "Visa") as PaymentType),
+      lastFour: (r.last_four_digits as string | null) ?? undefined,
+      category: String(r.category ?? "Other"),
+      status: (String(r.status ?? "active") as "active"|"paused"|"cancelled"),
+      nextBilling: (r.next_billing_date as string | null) ?? undefined,
+      cancelInstructions: (r.cancel_instructions as string | null) ?? undefined,
+      autoPay: Boolean(r.auto_pay),
+    })));
+    setSubs(rows);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
+  const saveSub = async (sub: Subscription) => {
+    if (!authUser) return;
+    const row = {
+      title: sub.title,
+      amount_usd: sub.amount,
+      billing_frequency: sub.frequency,
+      category: sub.category,
+      phone: sub.phone || null,
+      website_url: sub.website || null,
+      username: sub.username || null,
+      encrypted_password: await encryptField(sub.password ?? ""),
+      billing_account_number: sub.billingAccountNumber || null,
+      payment_type: sub.paymentType,
+      last_four_digits: sub.lastFour || null,
+      next_billing_date: sub.nextBilling || null,
+      cancel_instructions: sub.cancelInstructions || null,
+      auto_pay: sub.autoPay,
+      status: sub.status,
+    };
+    const { error } = editingSub
+      ? await tables.subscriptionTracker.update(sub.id, row)
+      : await tables.subscriptionTracker.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    setSelected(null);
+    toast.success(editingSub ? `${sub.title} updated` : `${sub.title} added`);
+  };
+
+  const deleteSub = async (id: string) => {
+    const { error } = await tables.subscriptionTracker.remove(id);
+    if (error) { toast.error(`Could not remove: ${error.message}`); return; }
+    await reload();
+    if (selected?.id === id) setSelected(null);
+    toast.success("Subscription removed");
+  };
 
   const kpis = [
     { label: "Monthly Cost", value: `$${totalMonthly.toFixed(2)}`, sub: "Across active subscriptions", icon: <DollarSign size={14} />, dot: ACCENT2 },
@@ -515,7 +577,7 @@ export function SubscriptionManager() {
         <AddSubModal
           editing={editingSub}
           onClose={closeSubModal}
-          onSave={s => setSubs(prev => editingSub ? prev.map(x => x.id === s.id ? s : x) : [s, ...prev])}
+          onSave={s => void saveSub(s)}
         />
       )}
     </div>

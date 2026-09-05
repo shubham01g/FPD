@@ -162,10 +162,16 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
   const DARK: React.CSSProperties = { background:"#060D1A" };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
       style={{ background:"rgba(0,0,0,0.85)", backdropFilter:"blur(12px)" }}>
-      <div className="w-full max-w-md rounded-3xl overflow-hidden flex flex-col"
-        style={{ ...DARK, border:"1px solid rgba(255,255,255,0.08)", maxHeight:"96vh" }}>
+      <div className="w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+        style={{
+          ...DARK, border:"1px solid rgba(255,255,255,0.08)",
+          // dvh, not vh: with the address bar showing, 96vh overflows and the
+          // confirm button ends up below the fold in a payment flow.
+          maxHeight:"96dvh",
+          paddingBottom:"env(safe-area-inset-bottom)",
+        }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"

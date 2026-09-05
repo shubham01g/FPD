@@ -5,7 +5,7 @@ import {
   BookOpen, LayoutGrid, Zap, Clock, List,
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
-import heroQAPhoto from "../../imports/ai_hero_qa.png";
+import heroQAPhoto from "../../imports/ai_hero_qa.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";
@@ -376,9 +376,9 @@ const AI_CSS = `
 /* panel shell */
 .fpd-ai .panel{position:relative;z-index:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.035),0 24px 60px -24px rgba(0,0,0,0.85);}
 .fpd-ai .panel.floating{position:fixed;bottom:96px;right:24px;z-index:50;width:400px;max-width:calc(100vw - 32px);max-height:calc(100vh - 116px);border-radius:16px;}
-@media (max-width:480px){
-  .fpd-ai .panel.floating{right:16px;left:16px;bottom:84px;width:auto;max-width:none;max-height:calc(100vh - 104px);}
-  .fpd-ai-launch{right:16px;bottom:80px;width:50px;height:50px;}
+@media (max-width:430px){
+  .fpd-ai .panel.floating{right:16px;left:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:auto;max-width:none;max-height:calc(100dvh - 104px);}
+  .fpd-ai-launch{right:16px;bottom:calc(80px + env(safe-area-inset-bottom));width:50px;height:50px;}
 }
 
 /* header */
@@ -527,12 +527,12 @@ const AI_CSS = `
 .fpd-ai .send.on:hover{filter:brightness(1.08);transform:translateY(-1px);}
 .fpd-ai .send.off{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${FAINT};cursor:default;}
 
-@media (max-width:1080px){
+@media (max-width:1024px){
   .fpd-ai .bento{grid-template-columns:1fr;}
   .fpd-ai .chatcard{height:560px;}
   .fpd-ai .kpi-stack{grid-template-columns:1fr 1fr;}
 }
-@media (max-width:520px){
+@media (max-width:430px){
   .fpd-ai .kpi-stack{grid-template-columns:1fr;}
 }
 @media (prefers-reduced-motion:reduce){

@@ -2,3 +2,6 @@
 @import './tailwind.css';
 @import './theme.css';
 @import './globals.css';
+/* Last: shared phone/tablet rules for the portal. Wins ties on source order
+   as well as specificity — see the header comment in mobile.css. */
+@import './mobile.css';

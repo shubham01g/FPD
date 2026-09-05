@@ -18,7 +18,7 @@ import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
 import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
-import heroVaultPhoto from "../../imports/legacyvault_hero_photo.png";
+import heroVaultPhoto from "../../imports/legacyvault_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant & file cabinet) ── */
 const TEXT    = "#EFF2F9";
@@ -278,7 +278,7 @@ const VAULT_CSS = `
 .fpd-vault .foot .ft{color:${MUTED};font-size:15.5px;line-height:1.7;}
 .fpd-vault .foot .ft b{color:${SOFT};font-weight:600;}
 
-@media (max-width:760px){.fpd-vault .psgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-vault .psgrid{grid-template-columns:1fr;}}
 `;
 
 /* ── Two-condition checklist row ─────────────────────────────────── */

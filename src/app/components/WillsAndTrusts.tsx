@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { FileText, Plus, Edit2, CheckCircle, Shield, X, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import heroWillsPhoto from "../../imports/wills_hero_photo.png";
-import trustSidePhoto from "../../imports/trust_side_photo.png";
+import heroWillsPhoto from "../../imports/wills_hero_photo.webp";
+import trustSidePhoto from "../../imports/trust_side_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -28,11 +30,14 @@ const DOCUMENT_TYPES = [
   "Charitable Remainder Trust",
 ];
 
-const initWills = [
-  { id:1, type:"Last Will & Testament",          attorney:"Linda Torres, Esq.", dateExecuted:"March 15, 2026", lastReviewed:"March 15, 2026", status:"current", location:"Original: Safe deposit box, Copy: Legacy Vault" },
-  { id:2, type:"Living Will / Advance Directive", attorney:"Linda Torres, Esq.", dateExecuted:"March 15, 2026", lastReviewed:"March 15, 2026", status:"current", location:"On file with Dr. Karen Fields & Legacy Vault" },
-  { id:3, type:"Durable Power of Attorney",       attorney:"Linda Torres, Esq.", dateExecuted:"March 15, 2026", lastReviewed:"March 15, 2026", status:"current", location:"Legacy Vault" },
-];
+interface WillRow {
+  id: string; type: string; attorney: string; dateExecuted: string;
+  lastReviewed: string; status: string; location: string; notes: string;
+}
+
+/* Rows come from the `wills_trusts` table. The screen used to open on three
+   sample documents naming the same attorney for every account, which then
+   vanished on refresh. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -71,7 +76,7 @@ const WILLS_CSS = `
 .fpd-wills .side-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 .fpd-wills .side-photo .sp-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,18,0) 45%,rgba(7,10,18,0.6) 100%);}
 .fpd-wills .side-photo .sp-label{position:absolute;left:14px;bottom:12px;right:14px;color:#fff;font-family:var(--font-display);font-size:16px;font-weight:600;letter-spacing:-0.01em;}
-@media (max-width:760px){.fpd-wills .infogrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-wills .infogrid{grid-template-columns:1fr;}}
 
 .fpd-wills .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
 .fpd-wills .card.pad{padding:28px;}
@@ -98,7 +103,7 @@ const WILLS_CSS = `
 .fpd-wills .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-wills .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-wills .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-wills .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-wills .kpi-stack{grid-template-columns:1fr;}}
 
 /* info banner */
 .fpd-wills .foot{display:flex;align-items:flex-start;gap:12px;padding:15px 18px;border-radius:16px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.16);}
@@ -119,7 +124,7 @@ const WILLS_CSS = `
 .fpd-wills .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-wills .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;}
 .fpd-wills .dacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-wills .dgrid{grid-template-columns:1fr;}
 .fpd-wills .dgrid .tile:nth-child(3n+2),.fpd-wills .dgrid .tile:nth-child(3n){border-left:none;}
 .fpd-wills .dgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
@@ -150,9 +155,28 @@ const WILLS_CSS = `
 const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" };
 
 export function WillsAndTrusts() {
-  const [wills, setWills] = useState(initWills);
+  const { authUser } = useAuth();
+  const [wills, setWills] = useState<WillRow[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setWills([]); return; }
+    const { data, error } = await tables.willsTrusts.list(authUser.id);
+    if (error) { toast.error(`Could not load legal documents: ${error.message}`); return; }
+    setWills((data ?? []).map(r => ({
+      id: String(r.id),
+      type: String(r.doc_type ?? ""),
+      attorney: String(r.attorney_name ?? ""),
+      dateExecuted: String(r.date_executed ?? ""),
+      lastReviewed: String(r.last_reviewed ?? ""),
+      status: String(r.status ?? "current"),
+      location: String(r.location ?? ""),
+      notes: String(r.notes ?? ""),
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [showAdd, setShowAdd] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newDoc, setNewDoc] = useState(blankDoc);
 
   function closeModal() {
@@ -168,37 +192,37 @@ export function WillsAndTrusts() {
     setShowAdd(true);
   }
 
-  function openEdit(will: typeof initWills[number]) {
-    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: "" });
+  function openEdit(will: WillRow) {
+    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: will.notes });
     setEditingId(will.id);
     setShowAdd(true);
   }
 
-  function saveDocument() {
+  async function saveDocument() {
     if (!newDoc.attorney.trim()) { toast.error("Attorney name is required"); return; }
-    if (editingId != null) {
-      setWills(prev => prev.map(w => w.id === editingId ? {
-        ...w,
-        type: newDoc.type,
-        attorney: newDoc.attorney,
-        dateExecuted: newDoc.dateExecuted || w.dateExecuted,
-        location: newDoc.location || w.location,
-        lastReviewed: new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
-      } : w));
-      toast.success("Legal document updated");
-    } else {
-      const doc = {
-        id: Date.now(),
-        type: newDoc.type,
-        attorney: newDoc.attorney,
-        dateExecuted: newDoc.dateExecuted || new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
-        lastReviewed: new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}),
-        status: "current",
-        location: newDoc.location || "Legacy Vault",
-      };
-      setWills(prev => [doc, ...prev]);
-      toast.success(`${newDoc.type} added`);
-    }
+    if (!authUser) { toast.error("Sign in to save legal documents."); return; }
+
+    const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    const existing = editingId != null ? wills.find(w => w.id === editingId) : undefined;
+
+    const row = {
+      doc_type: newDoc.type,
+      attorney_name: newDoc.attorney,
+      date_executed: newDoc.dateExecuted || existing?.dateExecuted || today,
+      last_reviewed: today,
+      location: newDoc.location || existing?.location || "Legacy Vault",
+      notes: newDoc.notes,
+      ...(editingId == null ? { status: "current" } : {}),
+    };
+
+    const { error } = editingId != null
+      ? await tables.willsTrusts.update(editingId, row)
+      : await tables.willsTrusts.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingId != null ? "Legal document updated" : `${newDoc.type} added`);
     setNewDoc(blankDoc);
     setEditingId(null);
     setShowAdd(false);

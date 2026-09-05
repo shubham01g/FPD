@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import {
   Users, Users2, Contact, Phone, Mail, MapPin, Gift, Heart, Plus, Search,
@@ -6,8 +6,11 @@ import {
   Send, CheckCircle, Layers, Smartphone, FileUp
 } from "lucide-react";
 import { toast } from "sonner";
+import { prepareImage } from "../utils/imageInput";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
-import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.png";
+import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -110,18 +113,7 @@ function BlastEmailModal({
 
 const COLORS = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#6F9E94","#ED8936","#5BA7D6"];
 
-const initContacts: Contact[] = [
-  { id:"c1", name:"Sarah Johnson", relationship:"Spouse", phone:"(916) 555-0234", email:"sarah.j@email.com", address:"1842 Oak Ridge Dr, Sacramento CA", birthday:"Aug 14", group:"immediate", starred:true, initials:"SJ", color:"#6E90C9", notes:"My partner for 36 years. She loves peonies and dark chocolate.", photo:"https://images.unsplash.com/photo-1625690988276-0a7b0cdf3d5d?w=80&h=80&fit=crop&auto=format" },
-  { id:"c2", name:"Michael Doe", relationship:"Son", phone:"(415) 555-0871", email:"m.doe@email.com", birthday:"Mar 5", group:"immediate", starred:true, initials:"MD", color:"#D99A6B", notes:"Married to Amanda. Has Tyler and Lily." },
-  { id:"c3", name:"Emily Doe", relationship:"Daughter", phone:"(916) 555-0392", email:"e.doe@email.com", birthday:"Oct 22", group:"immediate", starred:true, initials:"ED", color:"#6E90C9", notes:"Lives in Sacramento. Loves art and teaching." },
-  { id:"c4", name:"Tyler Doe", relationship:"Grandson", birthday:"Mar 5", group:"immediate", initials:"TD", color:"#F6AD55", notes:"Age 8. Loves dinosaurs and baseball. Peanut allergy." },
-  { id:"c5", name:"Lily Doe", relationship:"Granddaughter", birthday:"Jul 19", group:"immediate", initials:"LD", color:"#FC8181", notes:"Age 6. Loves ballet and painting." },
-  { id:"c6", name:"Robert Doe", relationship:"Brother", phone:"(213) 555-0481", email:"r.doe@email.com", address:"2240 Maple Ave, Los Angeles CA", birthday:"Feb 28", group:"extended", initials:"RD", color:"#D68FA8" },
-  { id:"c7", name:"Linda Torres", relationship:"Sister-in-law", phone:"(916) 555-0821", email:"ltorres@email.com", birthday:"Apr 12", group:"extended", initials:"LT", color:"#ED8936" },
-  { id:"c8", name:"George Martinez", relationship:"Best Friend", phone:"(916) 555-0192", email:"g.martinez@email.com", birthday:"Jul 4", group:"friends", starred:true, initials:"GM", color:"#6FAE8B", notes:"We go back to Army days. Fishing partner." },
-  { id:"c9", name:"Carol & Dave Wilson", relationship:"Neighbors", phone:"(916) 555-0283", email:"c.wilson@email.com", group:"friends", initials:"CW", color:"#6E90C9", notes:"Next door neighbors, 15 years. Feed Biscuit when we travel." },
-  { id:"c10", name:"Pastor James Collins", relationship:"Pastor", phone:"(916) 555-0541", email:"jcollins@gracechurch.com", group:"other", initials:"JC", color:"#6E90C9", notes:"Grace Community Church. Has conducted family funerals." },
-];
+/* Rows come from Supabase — see reload() below. */
 
 const groupConfig = {
   immediate: { label: "Immediate Family", color: "#6FAE8B", icon: <Heart size={18}/> },
@@ -400,11 +392,7 @@ function BulkImportModal({ onClose, onImport }: {
   );
 }
 
-const initGroups: ContactGroup[] = [
-  { id:"g1", name:"Estate Team", color:"#6E90C9", description:"People involved in estate and legal matters", memberIds:["c1","c2","c3"], createdAt:"Jun 1, 2026" },
-  { id:"g2", name:"Close Family", color:"#6E90C9", description:"Immediate family members", memberIds:["c1","c2","c3","c4","c5"], createdAt:"Jun 1, 2026" },
-  { id:"g3", name:"Sacramento Neighbors", color:"#D99A6B", description:"Local friends and neighbors", memberIds:["c8","c9"], createdAt:"Jun 5, 2026" },
-];
+/* Rows come from Supabase — see reload() below. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -452,7 +440,7 @@ const FF_CSS = `
 
 /* group summary — clickable filter tiles */
 .fpd-ff .gstat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-@media (max-width:760px){.fpd-ff .gstat-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:900px){.fpd-ff .gstat-grid{grid-template-columns:1fr 1fr;}}
 .fpd-ff .gstat{display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.065);text-align:left;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;}
 .fpd-ff .gstat:hover{background:#101728;transform:translateY(-1px);}
 .fpd-ff .gstat-ico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);}
@@ -486,7 +474,7 @@ const FF_CSS = `
 
 /* bento layout */
 .fpd-ff .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
-@media (max-width:1000px){.fpd-ff .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-ff .bento{grid-template-columns:1fr;}}
 .fpd-ff .clist{display:flex;flex-direction:column;gap:10px;}
 .fpd-ff .empty{padding:44px 12px;text-align:center;}
 
@@ -554,8 +542,72 @@ const FF_CSS = `
 `;
 
 export function FamilyFriends() {
-  const [contacts, setContacts] = useState<Contact[]>(initContacts);
-  const [groups, setGroups] = useState<ContactGroup[]>(initGroups);
+  const { authUser } = useAuth();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [groups, setGroups] = useState<ContactGroup[]>([]);
+
+  // family_friends and contact_groups both key off owner_user_id, not user_id
+  // — the ownerTable() helper is configured for that. Custom-group membership
+  // lives only on contact_groups.member_contact_ids, so each contact's
+  // customGroups is derived from the groups rather than stored twice.
+  const reload = useCallback(async () => {
+    if (!authUser) { setContacts([]); setGroups([]); return; }
+
+    const [contactsRes, groupsRes] = await Promise.all([
+      tables.familyFriends.list(authUser.id),
+      tables.contactGroups.list(authUser.id),
+    ]);
+    if (contactsRes.error) { toast.error(`Could not load contacts: ${contactsRes.error.message}`); return; }
+    if (groupsRes.error) { toast.error(`Could not load groups: ${groupsRes.error.message}`); return; }
+
+    const loadedGroups: ContactGroup[] = (groupsRes.data ?? []).map(g => ({
+      id: String(g.id),
+      name: String(g.name ?? ""),
+      color: String(g.color ?? GROUP_COLORS[0]),
+      description: String(g.description ?? ""),
+      memberIds: (g.member_contact_ids as string[] | null) ?? [],
+      createdAt: g.created_at ? new Date(String(g.created_at)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+    }));
+    setGroups(loadedGroups);
+
+    setContacts((contactsRes.data ?? []).map(r => {
+      const id = String(r.id);
+      const name = String(r.full_name ?? "");
+      return {
+        id,
+        name,
+        relationship: String(r.relationship ?? ""),
+        phone: (r.phone as string | null) ?? undefined,
+        email: (r.email as string | null) ?? undefined,
+        address: (r.address as string | null) ?? undefined,
+        birthday: (r.birthday as string | null) ?? undefined,
+        photo: (r.photo_url as string | null) ?? undefined,
+        notes: (r.notes as string | null) ?? undefined,
+        group: (r.group_category as Contact["group"]) ?? "other",
+        starred: Boolean(r.starred),
+        initials: name.split(" ").map(w => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase(),
+        color: GROUP_COLORS[name.length % GROUP_COLORS.length],
+        customGroups: loadedGroups.filter(g => g.memberIds.includes(id)).map(g => g.id),
+      };
+    }));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
+  // Shared mapping from the UI's Contact shape to family_friends columns.
+  const toRow = (c: Partial<Contact>) => ({
+    full_name: c.name, relationship: c.relationship, phone: c.phone ?? null,
+    email: c.email ?? null, address: c.address ?? null, birthday: c.birthday ?? null,
+    notes: c.notes ?? null, group_category: c.group ?? "other",
+    ...(c.starred === undefined ? {} : { starred: c.starred }),
+  });
+
+  const addContact = async (c: Contact) => {
+    if (!authUser) { toast.error("Sign in to save contacts."); return; }
+    const { error } = await tables.familyFriends.add(authUser.id, toRow(c));
+    if (error) { toast.error(`Could not add contact: ${error.message}`); return; }
+    await reload();
+  };
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<Contact["group"] | "all" | "starred">("all");
   const [showAdd, setShowAdd] = useState(false);
@@ -579,16 +631,26 @@ export function FamilyFriends() {
 
   const byGroup = (g: Contact["group"]) => contacts.filter(c => c.group === g);
 
-  const toggleStar = (id: string) => {
-    setContacts(prev => prev.map(c => c.id === id ? { ...c, starred: !c.starred } : c));
+  const toggleStar = async (id: string) => {
+    const current = contacts.find(c => c.id === id);
+    const { error } = await tables.familyFriends.update(id, { starred: !current?.starred });
+    if (error) { toast.error(`Could not update: ${error.message}`); return; }
+    await reload();
   };
 
-  const handlePhotoUpload = (id: string, file: File | null) => {
+  const handlePhotoUpload = async (id: string, file: File | null) => {
     if (!file) return;
-    const url = URL.createObjectURL(file);
+    // Resized here so the eventual Storage upload has a sane file to send.
+    // The result is still a blob: URL, which means nothing in another session,
+    // so this remains a preview only — persisting it needs the Storage work.
+    let url: string;
+    try {
+      const img = await prepareImage(file);
+      url = img.url;
+    } catch (err) { toast.error((err as Error).message); return; }
     setContacts(prev => prev.map(c => c.id === id ? { ...c, photo: url } : c));
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, photo: url } : prev);
-    toast.success("Photo updated");
+    toast.success("Photo updated for this session — not yet saved to your vault");
   };
 
   return (
@@ -666,7 +728,11 @@ export function FamilyFriends() {
                     <button onClick={() => setBlastGroup(g)} className="btn-ghost" style={{ color: g.color, background: `${g.color}14`, borderColor: `${g.color}40` }}>
                       <Send size={11}/> Blast Email
                     </button>
-                    <button onClick={() => setGroups(prev => prev.filter(x => x.id !== g.id))} style={{ color: NEG, background:"none", border:"none", cursor:"pointer" }}><Trash2 size={13}/></button>
+                    <button onClick={() => { void (async () => {
+                      const { error } = await tables.contactGroups.remove(g.id);
+                      if (error) { toast.error(`Could not delete group: ${error.message}`); return; }
+                      await reload();
+                    })(); }} style={{ color: NEG, background:"none", border:"none", cursor:"pointer" }}><Trash2 size={13}/></button>
                   </div>
                 </div>
               );
@@ -724,11 +790,19 @@ export function FamilyFriends() {
                 <div className="flex gap-2">
                   <button onClick={() => {
                     if (!newGroupName.trim()) { toast.error("Group name required"); return; }
-                    const ng: ContactGroup = { id:`g${Date.now()}`, name:newGroupName.trim(), color:newGroupColor, description:newGroupDesc, memberIds:newGroupMembers, createdAt:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) };
-                    setGroups(prev => [...prev, ng]);
-                    setNewGroupName(""); setNewGroupDesc(""); setNewGroupMembers([]); setNewGroupColor(GROUP_COLORS[0]);
-                    setShowCreateGroup(false);
-                    toast.success(`Group "${ng.name}" created with ${newGroupMembers.length} members`);
+                    if (!authUser) { toast.error("Sign in to create groups."); return; }
+                    const groupName = newGroupName.trim();
+                    void (async () => {
+                      const { error } = await tables.contactGroups.add(authUser.id, {
+                        name: groupName, color: newGroupColor,
+                        description: newGroupDesc, member_contact_ids: newGroupMembers,
+                      });
+                      if (error) { toast.error(`Could not create group: ${error.message}`); return; }
+                      await reload();
+                      setNewGroupName(""); setNewGroupDesc(""); setNewGroupMembers([]); setNewGroupColor(GROUP_COLORS[0]);
+                      setShowCreateGroup(false);
+                      toast.success(`Group "${groupName}" created with ${newGroupMembers.length} members`);
+                    })();
                   }} className="btn-primary">
                     <Plus size={11}/> Create Group
                   </button>
@@ -842,7 +916,13 @@ export function FamilyFriends() {
                     <button onClick={() => setEditingContact(selected)} className="dedit">
                       <Edit2 size={13} style={{ display:"inline", marginRight:4 }}/>Edit Contact
                     </button>
-                    <button onClick={() => { setContacts(prev => prev.filter(c => c.id !== selected.id)); setSelected(null); toast.success(`${selected.name} removed`); }} className="ddelete">
+                    <button onClick={() => { void (async () => {
+                      const { error } = await tables.familyFriends.remove(selected.id);
+                      if (error) { toast.error(`Could not remove: ${error.message}`); return; }
+                      await reload();
+                      setSelected(null);
+                      toast.success(`${selected.name} removed`);
+                    })(); }} className="ddelete">
                       <Trash2 size={13}/>
                     </button>
                   </div>
@@ -858,21 +938,28 @@ export function FamilyFriends() {
         </div>
       </div>
 
-      {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => setContacts(prev => [c, ...prev])}/>}
+      {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => { void addContact(c); }}/>}
       {editingContact && (
         <AddContactModal
           editing={editingContact}
           onClose={() => setEditingContact(null)}
           onAdd={() => {}}
-          onSave={(id, updates) => {
-            setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+          onSave={(id, updates) => { void (async () => {
+            const { error } = await tables.familyFriends.update(id, toRow(updates));
+            if (error) { toast.error(`Could not update: ${error.message}`); return; }
+            await reload();
             setSelected(prev => prev && prev.id === id ? { ...prev, ...updates } : prev);
             setEditingContact(null);
             toast.success("Contact updated");
-          }}
+          })(); }}
         />
       )}
-      {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={imported => setContacts(prev => [...imported, ...prev])}/>}
+      {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={imported => { void (async () => {
+        if (!authUser) { toast.error("Sign in to import contacts."); return; }
+        const { error } = await tables.familyFriends.addMany(authUser.id, imported.map(toRow));
+        if (error) { toast.error(`Could not import: ${error.message}`); return; }
+        await reload();
+      })(); }}/>}
       {blastGroup && <BlastEmailModal group={blastGroup} contacts={contacts} onClose={() => setBlastGroup(null)}/>}
     </div>
   );

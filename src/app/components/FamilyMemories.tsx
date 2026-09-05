@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Trash2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
+import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
 import { useDemo, type Memory } from "../context/DemoContext";
-import heroFamilyPhoto from "../../imports/familymemories_hero_photo.png";
+import heroFamilyPhoto from "../../imports/familymemories_hero_photo.webp";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
 
@@ -110,7 +111,7 @@ const FAM_CSS = `
 .fpd-fam .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-fam .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-fam .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-fam .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-fam .kpi-stack{grid-template-columns:1fr;}}
 
 /* generic record-card parts, reused across every tab */
 .fpd-fam .r-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
@@ -131,7 +132,7 @@ const FAM_CSS = `
 .fpd-fam .r-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:12px;}
 .fpd-fam .r-meta .mono{font-family:var(--font-mono);font-size:15px;color:${MUTED};}
 .fpd-fam .r-meta .txt{font-size:15px;color:${MUTED};}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-fam .r-grid,.fpd-fam .r-grid.c3,.fpd-fam .r-grid.c4{grid-template-columns:1fr 1fr;}
 .fpd-fam .r-grid.c3 .tile:nth-child(3n+2),.fpd-fam .r-grid.c3 .tile:nth-child(3n){border-left:none;}
 .fpd-fam .r-grid.c4 .tile:nth-child(4n+2),.fpd-fam .r-grid.c4 .tile:nth-child(4n+3),.fpd-fam .r-grid.c4 .tile:nth-child(4n){border-left:none;}
@@ -165,7 +166,7 @@ const FAM_CSS = `
 
 /* grids of cards */
 .fpd-fam .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media (max-width:820px){.fpd-fam .mgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-fam .mgrid{grid-template-columns:1fr;}}
 .fpd-fam .stack{display:flex;flex-direction:column;gap:14px;}
 
 /* progress bar (goals) */
@@ -243,12 +244,18 @@ export function FamilyMemories() {
   const [pendingPhotos, setPendingPhotos] = useState<string[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  function stagePhotos(files: FileList | null) {
+  async function stagePhotos(files: FileList | null) {
     const images = Array.from(files || []).filter(f => f.type.startsWith("image/"));
     if (!images.length) { toast.error("Please choose image files"); return; }
-    setPendingPhotos(p => [...p, ...images.map(f => URL.createObjectURL(f))]);
+    const urls: string[] = [];
+    for (const f of images) {
+      try { urls.push((await prepareImage(f)).url); }
+      catch (err) { toast.error(`${f.name}: ${(err as Error).message}`); }
+    }
+    if (!urls.length) return;
+    setPendingPhotos(p => [...p, ...urls]);
     setShowAdd("memories");
-    toast.success(`${images.length} photo${images.length > 1 ? "s" : ""} ready — give this memory a title`);
+    toast.success(`${urls.length} photo${urls.length > 1 ? "s" : ""} ready — give this memory a title`);
   }
 
   function clearPendingPhotos() {

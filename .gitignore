@@ -11,3 +11,11 @@ FPD.zip
 
 # Internal engagement / working notes — not for the client repo
 memory/
+
+# Local scratch: screenshot scripts and their output, plus loose source
+# assets dropped in the project root. Nothing here is referenced by src/.
+shots/
+screenshot_*.cjs
+family-story-section.png
+*.mp4
+*.zip

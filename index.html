@@ -4,7 +4,10 @@
     <head>
       
       <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <!-- viewport-fit=cover is load-bearing: without it every env(safe-area-inset-*)
+           in the stylesheets resolves to 0 and the notch/home-indicator padding
+           silently does nothing. -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
       <title>Final Pass Down — My Life, My Wishes, My Way</title>
       <meta name="description" content="The secure digital vault for everything that matters — prepared by you, passed down to those you love." />
       <meta name="robots" content="noindex, nofollow" />
@@ -14,6 +17,17 @@
       <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
       <link rel="icon" type="image/png" sizes="512x512" href="/logo-mark.png" />
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+      <!-- Installable app (PWA). iOS ignores the manifest's display/name, so it
+           needs the apple-* pair below to launch chrome-less with the right title. -->
+      <link rel="manifest" href="/manifest.webmanifest" />
+      <meta name="application-name" content="Final Pass Down" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-title" content="Final Pass Down" />
+      <!-- black-translucent lets the app paint behind the status bar / notch.
+           Only safe now that the shell pads itself with safe-area insets. -->
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
       <!-- Open Graph (link previews: WhatsApp, LinkedIn, Slack, iMessage) -->
       <meta property="og:type" content="website" />

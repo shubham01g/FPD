@@ -185,7 +185,9 @@ export function VitalClone() {
 
   /* ── Configured: render the frame ── */
   const frame = (
-    <div className="frame-wrap" style={{ height: fullscreen ? "calc(100vh - 96px)" : 720 }}>
+    // dvh rather than vh so the frame does not sit under the mobile address
+    // bar; a flat 720px is taller than most phone viewports, so cap it.
+    <div className="frame-wrap" style={{ height: fullscreen ? "calc(100dvh - 96px)" : "min(720px, 70dvh)" }}>
       {state !== "ready" && (
         <div className="frame-overlay">
           {state === "loading" ? (

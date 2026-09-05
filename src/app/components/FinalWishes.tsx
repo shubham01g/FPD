@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type FinalWish as Wish, type FuneralPlan } from "../context/DemoContext";
-import heroWishesPhoto from "../../imports/finalwishes_hero_photo.png";
-import heroFuneralPhoto from "../../imports/funeral_hero_photo.png";
+import heroWishesPhoto from "../../imports/finalwishes_hero_photo.webp";
+import heroFuneralPhoto from "../../imports/funeral_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
 const TEXT    = "#EFF2F9";
@@ -91,7 +91,7 @@ const WISHES_CSS = `
 .fpd-wishes .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-wishes .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-wishes .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-wishes .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-wishes .kpi-stack{grid-template-columns:1fr;}}
 
 /* wish rows */
 .fpd-wishes .wlist{display:flex;flex-direction:column;gap:10px;}
@@ -130,7 +130,7 @@ const WISHES_CSS = `
 .fpd-wishes textarea{width:100%;padding:13px 15px;border-radius:16px;background:#0F1624;border:1px solid rgba(91,110,225,0.35);color:${TEXT};font-size:17px;line-height:1.8;outline:none;font-family:var(--font-body);resize:vertical;}
 .fpd-wishes .acts-row{display:flex;gap:8px;margin-top:12px;}
 
-@media (max-width:820px){.fpd-wishes .fgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-wishes .fgrid{grid-template-columns:1fr;}}
 
 /* modal (shared pattern) */
 .fpd-wishes .backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}

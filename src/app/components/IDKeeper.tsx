@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
-import heroIDPhoto from "../../imports/idkeeper_hero_photo.png";
+import heroIDPhoto from "../../imports/idkeeper_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -38,7 +40,7 @@ const typeCategory: Record<string, string> = {
 };
 
 interface IDRecord {
-  id: number;
+  id: string;
   type: string;
   idNumber: string;
   holder: string;
@@ -50,14 +52,8 @@ interface IDRecord {
   masked: boolean;
 }
 
-const initIDs: IDRecord[] = [
-  { id:1, type:"Driver's License", idNumber:"D1234567", holder:"James William Doe", issuedBy:"CA DMV", issueDate:"Mar 12, 2021", expiryDate:"Mar 12, 2029", notes:"Real ID compliant. Star on upper right corner.", documentScanned:true, masked:true },
-  { id:2, type:"Passport", idNumber:"A12345678", holder:"James William Doe", issuedBy:"U.S. Department of State", issueDate:"Jun 5, 2019", expiryDate:"Jun 4, 2029", notes:"Valid for international travel. Keep with travel documents.", documentScanned:true, masked:true },
-  { id:3, type:"Social Security Card", idNumber:"XXX-XX-4821", holder:"James William Doe", issuedBy:"Social Security Administration", issueDate:"N/A", expiryDate:"No Expiry", notes:"Original card stored in home safe. Do not carry in wallet.", documentScanned:false, masked:true },
-  { id:4, type:"Medicare Card", idNumber:"1EG4-TE5-MK72", holder:"James William Doe", issuedBy:"Centers for Medicare & Medicaid", issueDate:"Jan 1, 2024", expiryDate:"No Expiry", notes:"Medicare Part A and B. Supplemental plan through Aetna.", documentScanned:true, masked:false },
-  { id:5, type:"Health Insurance Card", idNumber:"GEH292847200", holder:"James William Doe", issuedBy:"Blue Shield of California", issueDate:"Jan 1, 2026", expiryDate:"Dec 31, 2026", notes:"Group plan through TechCorp Inc. Rx Group: BSC-RX-2024. PCP: Dr. Karen Fields.", documentScanned:true, masked:false },
-  { id:6, type:"Global Entry / TSA PreCheck", idNumber:"KTN: 882941024", holder:"James William Doe", issuedBy:"U.S. Customs & Border Protection", issueDate:"Sep 15, 2022", expiryDate:"Sep 14, 2027", notes:"Known Traveler Number. Add to all airline bookings for PreCheck lanes.", documentScanned:false, masked:false },
-];
+/* Rows come from the `id_keeper_records` table — the screen used to open on
+   sample IDs that were identical for every account and lost on refresh. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -110,7 +106,7 @@ const IDK_CSS = `
 .fpd-idk .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-idk .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-idk .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-idk .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-idk .kpi-stack{grid-template-columns:1fr;}}
 
 /* filter chips */
 .fpd-idk .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -118,7 +114,7 @@ const IDK_CSS = `
 
 /* ID cards */
 .fpd-idk .igrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media (max-width:820px){.fpd-idk .igrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-idk .igrid{grid-template-columns:1fr;}}
 .fpd-idk .iico{width:48px;height:48px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:27.5px;}
 .fpd-idk .itype{color:${TEXT};font-size:17.5px;font-weight:600;}
 .fpd-idk .iholder{color:${MUTED};font-size:15px;margin-top:1px;}
@@ -152,7 +148,30 @@ const IDK_CSS = `
 `;
 
 export function IDKeeper() {
-  const [ids, setIds] = useState<IDRecord[]>(initIDs);
+  const { authUser } = useAuth();
+  const [ids, setIds] = useState<IDRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setIds([]); setLoading(false); return; }
+    const { data, error } = await tables.idKeeperRecords.list(authUser.id);
+    if (error) { toast.error(`Could not load IDs: ${error.message}`); setLoading(false); return; }
+    setIds((data ?? []).map(r => ({
+      id: String(r.id),
+      type: String(r.id_type ?? ""),
+      idNumber: String(r.id_number_masked ?? ""),
+      holder: String(r.holder_name ?? ""),
+      issuedBy: String(r.issued_by ?? ""),
+      issueDate: String(r.issue_date ?? ""),
+      expiryDate: String(r.expiry_date ?? ""),
+      notes: String(r.notes ?? ""),
+      documentScanned: Boolean(r.document_url),
+      masked: true,
+    })));
+    setLoading(false);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [showAdd, setShowAdd] = useState(false);
   const [editingID, setEditingID] = useState<IDRecord | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -184,17 +203,29 @@ export function IDKeeper() {
     setForm(emptyForm);
   }
 
-  function saveID() {
+  async function saveID() {
     if (!form.type || !form.holder) { toast.error("ID type and holder name required"); return; }
-    if (editingID) {
-      setIds(p => p.map(r => r.id === editingID.id
-        ? { ...r, type: form.type, idNumber: form.idNumber, holder: form.holder, issuedBy: form.issuedBy, issueDate: form.issueDate, expiryDate: form.expiryDate, notes: form.notes }
-        : r));
-      toast.success(`${form.type} updated`);
-    } else {
-      setIds(p => [...p, { ...form, id:Date.now(), documentScanned:form.photo?true:false, masked:true }]);
-      toast.success(`${form.type} added to ID Keeper`);
-    }
+    if (!authUser) { toast.error("Sign in to save IDs."); return; }
+
+    const row = {
+      id_type: form.type,
+      id_number_masked: form.idNumber,
+      holder_name: form.holder,
+      issued_by: form.issuedBy,
+      issue_date: form.issueDate,
+      expiry_date: form.expiryDate,
+      notes: form.notes,
+      ...(form.photo ? { document_url: form.photo } : {}),
+    };
+
+    const { error } = editingID
+      ? await tables.idKeeperRecords.update(editingID.id, row)
+      : await tables.idKeeperRecords.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(editingID ? `${form.type} updated` : `${form.type} added to ID Keeper`);
     closeIDModal();
   }
 

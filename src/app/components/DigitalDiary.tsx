@@ -1,12 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ScanButton } from "./DocumentScanner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import {
   BookOpen, Mic, Video, Upload, Plus, Play, Pause, Square,
   Trash2, Edit2, X, Save, Lock, Sun, Cloud,
   CloudRain, Smile, Meh, Search, Eye
 } from "lucide-react";
 import { toast } from "sonner";
-import heroDiaryPhoto from "../../imports/diary_hero_photo.png";
+import heroDiaryPhoto from "../../imports/diary_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -45,39 +47,8 @@ const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: st
   difficult: { icon: <CloudRain size={16}/>,label: "Difficult", color: NEG },
 };
 
-const sampleEntries: DiaryEntry[] = [
-  {
-    id:"d1", date:"Jun 12, 2026", title:"Thinking about legacy and what matters",
-    body:`Today I had a long conversation with Sarah about what we want our kids to remember about us. Not the house, not the money — just who we were as people. I want them to know I was present, that I laughed at dinner, that I cried at movies and wasn't ashamed of it.\n\nI've been working on Final Pass Down lately which has me thinking a lot about what we leave behind. Not just documents and accounts, but the feeling of being loved.`,
-    type:"written", mood:"good", tags:["reflection","family","legacy"], private:false,
-  },
-  {
-    id:"d2", date:"Jun 8, 2026", title:"Audio message for my 70th birthday",
-    body:"Recorded a voice message for my family to hear on my 70th birthday — wherever I am.",
-    type:"audio", mood:"great", tags:["birthday","family","audio"], private:false, duration:"4:23",
-  },
-  {
-    id:"d3", date:"Jun 1, 2026", title:"Video diary — Big Sur memories",
-    body:"Recorded myself talking about our Big Sur trip and what it meant to me. The grandkids were there.",
-    type:"video", mood:"great", tags:["memories","camping","outdoors"], private:false, duration:"8:41",
-    thumbnail:"https://images.unsplash.com/photo-1507272854533-a279b57229bb?w=300&h=200&fit=crop&auto=format",
-  },
-  {
-    id:"d4", date:"May 28, 2026", title:"Private thoughts — for Sarah only",
-    body:"Private entry. Only visible to Sarah after I'm gone.",
-    type:"written", mood:"okay", tags:["private","sarah"], private:true,
-  },
-  {
-    id:"d5", date:"May 15, 2026", title:"The day Michael got married — my words",
-    body:`I remember standing in the back of that Napa vineyard watching my son become a husband. Amanda looked beautiful. Michael was shaking — I could see his hands from twenty feet away.\n\nI didn't cry when he walked down the aisle. I cried when Amanda's mother gave her blessing. Because I thought: someday someone will say words like that about Emily. About all of them.\n\nI am so proud of the man he became.`,
-    type:"written", mood:"great", tags:["michael","wedding","family","love"], private:false,
-  },
-  {
-    id:"d6", date:"Apr 10, 2026", title:"Voice memo — advice for the grandkids",
-    body:"15-minute audio recording with life advice for Tyler, Lily and Jack.",
-    type:"audio", mood:"good", tags:["grandkids","advice","legacy"], private:false, duration:"15:02",
-  },
-];
+/* Rows come from `diary_entries`. The screen used to open on sample entries
+   identical for every account and lost on refresh. */
 
 const TAGS_PALETTE = ["#5B6EE1","#48BB78","#5B6EE1","#F6AD55","#FC8181","#6F9E94","#ED8936","#E53E3E"];
 
@@ -319,7 +290,7 @@ const DIARY_CSS = `
 .fpd-diary .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-diary .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-diary .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-diary .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-diary .kpi-stack{grid-template-columns:1fr;}}
 
 /* search + filter toolbar */
 .fpd-diary .toolbar{display:flex;flex-wrap:wrap;gap:10px;}
@@ -331,7 +302,7 @@ const DIARY_CSS = `
 
 /* bento layout */
 .fpd-diary .bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:16px;align-items:start;}
-@media (max-width:1000px){.fpd-diary .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-diary .bento{grid-template-columns:1fr;}}
 .fpd-diary .elist{display:flex;flex-direction:column;gap:12px;}
 
 /* entry cards */
@@ -428,7 +399,8 @@ const DIARY_CSS = `
 `;
 
 export function DigitalDiary() {
-  const [entries, setEntries] = useState<DiaryEntry[]>(sampleEntries);
+  const { authUser } = useAuth();
+  const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<EntryType | "all">("all");
   const [selected, setSelected] = useState<DiaryEntry | null>(null);
@@ -479,41 +451,69 @@ export function DigitalDiary() {
     return () => window.removeEventListener("keydown", onKey);
   }, [creating, selected]);
 
+  /* Rows come from the `diary_entries` table. The screen used to open on
+     sample entries identical for every account and lost on refresh. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const { data, error } = await tables.diaryEntries.list(authUser.id);
+    if (error) { toast.error(`Could not load diary: ${error.message}`); return; }
+    setEntries((data ?? []).map(r => ({
+      id: String(r.id),
+      date: r.created_at
+        ? new Date(String(r.created_at)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : "",
+      title: String(r.title ?? ""),
+      body: (r.body as string | null) ?? undefined,
+      type: (String(r.entry_type ?? "written") as EntryType),
+      mood: (r.mood as Mood | null) ?? undefined,
+      tags: (r.tags as string[] | null) ?? [],
+      private: Boolean(r.is_private),
+      duration: r.duration_s ? String(r.duration_s) : undefined,
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
   const filtered = entries.filter(e => {
     const matchSearch = e.title.toLowerCase().includes(search.toLowerCase()) || (e.body??"").toLowerCase().includes(search.toLowerCase()) || e.tags.some(t => t.includes(search.toLowerCase()));
     const matchType = filterType === "all" || e.type === filterType;
     return matchSearch && matchType;
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!authUser) return;
     if (!form.title.trim()) { toast.error("Please add a title"); return; }
     const tags = form.tags.split(",").map(t => t.trim()).filter(Boolean);
-    const duration = newType === "audio" && audioSaved ? "recorded" : newType === "video" && videoDuration ? videoDuration : undefined;
+    // duration_s is INTEGER in the table; the UI's "duration" is a label, so
+    // only a real recorded length is worth storing.
+    const durationS = newType === "video" && videoDuration ? Number(String(videoDuration).replace(/[^0-9]/g, "")) || null : null;
 
-    if (editingId != null) {
-      setEntries(prev => prev.map(e => e.id === editingId ? {
-        ...e,
-        title: form.title.trim(), body: form.body || undefined, type: newType,
-        mood: form.mood, tags, private: form.private, duration,
-      } : e));
-      setSelected(s => s && s.id === editingId
-        ? { ...s, title: form.title.trim(), body: form.body || undefined, type: newType, mood: form.mood, tags, private: form.private, duration }
-        : s);
-      toast.success("Entry updated");
-    } else {
-      const entry: DiaryEntry = {
-        id: `d-${Date.now()}`, date: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-        title: form.title.trim(), body: form.body || undefined, type: newType,
-        mood: form.mood, tags, private: form.private, duration,
-      };
-      setEntries(prev => [entry, ...prev]);
-      toast.success("Diary entry saved securely 🔒");
-    }
+    const row = {
+      title: form.title.trim(),
+      body: form.body || null,
+      entry_type: newType,
+      mood: form.mood || null,
+      tags,
+      is_private: form.private,
+      duration_s: durationS,
+    };
+
+    const { error } = editingId != null
+      ? await tables.diaryEntries.update(editingId, row)
+      : await tables.diaryEntries.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    setSelected(null);
+    toast.success(editingId != null ? "Entry updated" : "Diary entry saved securely 🔒");
     closeCreateModal();
   };
 
-  const handleDelete = (id: string) => {
-    setEntries(prev => prev.filter(e => e.id !== id));
+  const handleDelete = async (id: string) => {
+    const { error } = await tables.diaryEntries.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
     if (selected?.id === id) setSelected(null);
     toast.success("Entry deleted");
   };

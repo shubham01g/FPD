@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.png";
+import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -17,38 +19,17 @@ const NEG     = "#D06B6B";
 
 type Tab = "insurance" | "personal" | "portfolios" | "retirement" | "taxes" | "business";
 
-const insurancePolicies = [
-  { id: 1, type: "Life Insurance", carrier: "MetLife", policyNum: "ML-88291-CA", coverage: "$500,000", premium: "$182/month", beneficiary: "Sarah Johnson (100%)", agent: "Tom Richards — (916) 555-0291", status: "active" },
-  { id: 2, type: "Homeowner's Insurance", carrier: "State Farm", policyNum: "SF-44821-CA", coverage: "$420,000 dwelling", premium: "$142/month", beneficiary: "N/A — Property", agent: "Linda Park — (916) 555-0482", status: "active" },
-  { id: 3, type: "Auto Insurance", carrier: "GEICO", policyNum: "GI-293847-CA", coverage: "Full Coverage", premium: "$98/month", beneficiary: "N/A", agent: "Online Policy", status: "active" },
-  { id: 4, type: "Umbrella Policy", carrier: "State Farm", policyNum: "SF-UMB-1029-CA", coverage: "$1,000,000", premium: "$28/month", beneficiary: "N/A", agent: "Linda Park — (916) 555-0482", status: "active" },
-];
 
-const personalAccounts = [
-  { id: 1, accountName: "Primary Checking", bank: "Wells Fargo", accountType: "Checking", accountNum: "XXXX-2891", balance: "$8,420", beneficiary: "Sarah Johnson (POD)", notes: "Direct deposit and all household bills run through this account." },
-  { id: 2, accountName: "Emergency Savings", bank: "Ally Bank", accountType: "High-Yield Savings", accountNum: "XXXX-7734", balance: "$32,100", beneficiary: "Sarah Johnson (POD)", notes: "6 months of expenses. Do not touch except in emergency." },
-];
 
-const portfolios = [
-  { id: 1, institution: "Fidelity Investments", accountType: "Brokerage", accountNum: "XXXX-8821", value: "$184,200", holdings: "60% S&P 500 Index, 25% Bonds, 15% International", beneficiary: "Sarah Johnson", contact: "fidelity.com / 1-800-343-3548" },
-  { id: 2, institution: "Vanguard", accountType: "Roth IRA", accountNum: "XXXX-4492", value: "$88,400", holdings: "Total Market Index Fund", beneficiary: "Sarah Johnson (primary), Michael Doe (contingent)", contact: "vanguard.com / 1-800-662-7447" },
-];
 
-const retirementAccounts = [
-  { id: 1, type: "401(k)", employer: "TechCorp Inc.", institution: "Fidelity", accountNum: "XXXX-7721", balance: "$312,800", contributions: "$2,100/month", vested: "100%", beneficiary: "Sarah Johnson" },
-  { id: 2, type: "Traditional IRA", institution: "Charles Schwab", accountNum: "XXXX-3381", balance: "$94,200", contributions: "$500/month", vested: "N/A", beneficiary: "Sarah Johnson" },
-  { id: 3, type: "Social Security", institution: "SSA", accountNum: "SSN on file", balance: "Est. $2,841/month at age 67", contributions: "N/A", vested: "N/A", beneficiary: "Contact SSA at 1-800-772-1213" },
-];
 
-const taxes = [
-  { year: "2025", filedDate: "Apr 12, 2026", filedWith: "TurboTax / E-filed", refund: "$2,180 refund", accountant: "Self-prepared", documents: "2025_1040.pdf in Legacy Vault" },
-  { year: "2024", filedDate: "Apr 8, 2025", filedWith: "H&R Block (Karen Mills)", refund: "$941 refund", accountant: "Karen Mills, CPA — (916) 555-0812", documents: "2024_1040.pdf in Legacy Vault" },
-  { year: "2023", filedDate: "Apr 11, 2024", filedWith: "H&R Block (Karen Mills)", refund: "$1,440 owed", accountant: "Karen Mills, CPA — (916) 555-0812", documents: "2023_1040.pdf in Legacy Vault" },
-];
 
-const businessAccounts = [
-  { id: 1, businessName: "Doe Photography LLC", type: "LLC", ein: "XX-XXXXXXX", bank: "Chase Business", accountNum: "XXXX-9281", revenue: "~$48,000/year", accountant: "Karen Mills, CPA", notes: "Business should be dissolved or transferred to Michael Doe upon death." },
-];
+
+
+
+
+
+
 
 const tabConfig = [
   { id: "insurance" as Tab, label: "Insurance", icon: <Shield size={14} /> },
@@ -120,7 +101,7 @@ const FIN_CSS = `
 .fpd-fin .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-fin .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-fin .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-fin .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-fin .kpi-stack{grid-template-columns:1fr;}}
 
 /* record cards */
 .fpd-fin .rlist{display:flex;flex-direction:column;gap:14px;}
@@ -146,7 +127,7 @@ const FIN_CSS = `
 .fpd-fin .redit:hover{color:#6FAE8B;}
 .fpd-fin .docpill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:15px;background:rgba(95,190,145,0.08);color:#D99A6B;border:1px solid rgba(95,190,145,0.22);margin-top:14px;}
 .fpd-fin .notewarn{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(217,165,94,0.08);border:1px solid rgba(217,165,94,0.22);color:${WARN};font-size:16px;line-height:1.6;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-fin .rgrid,.fpd-fin .rgrid.c2{grid-template-columns:1fr;}
 .fpd-fin .rgrid:not(.c2) .tile:nth-child(3n+2),.fpd-fin .rgrid:not(.c2) .tile:nth-child(3n){border-left:none;}
 .fpd-fin .rgrid.c2 .tile:nth-child(2n){border-left:none;}
@@ -250,24 +231,66 @@ function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, on
 }
 
 /* Generic upsert: replaces `original` in-place when editing, otherwise appends. */
-function upsert<T>(setList: React.Dispatch<React.SetStateAction<T[]>>, original: T | undefined, record: T) {
-  if (original) {
-    setList(list => list.map(item => (item === original ? record : item)));
-  } else {
-    setList(list => [...list, record]);
-  }
-}
-
 export function FinancialRecords() {
   const [tab, setTab] = useState<Tab>("insurance");
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
   const [editingItem, setEditingItem] = useState<{ tab: Tab; original: any } | null>(null);
-  const [policies, setPolicies]       = useState(insurancePolicies);
-  const [personalList, setPersonalList] = useState(personalAccounts);
-  const [investments, setInvestments] = useState(portfolios);
-  const [retirement, setRetirement]   = useState(retirementAccounts);
-  const [taxList, setTaxList]         = useState(taxes);
-  const [bizList, setBizList]         = useState(businessAccounts);
+  const { authUser } = useAuth();
+  const [policies, setPolicies]       = useState<any[]>([]);
+  const [personalList, setPersonalList] = useState<any[]>([]);
+  const [investments, setInvestments] = useState<any[]>([]);
+  const [retirement, setRetirement]   = useState<any[]>([]);
+  const [taxList, setTaxList]         = useState<any[]>([]);
+  const [bizList, setBizList]         = useState<any[]>([]);
+
+  /* Rows come from `financial_records`. The six tabs collect genuinely
+     different fields, so each record's own shape is kept in the table's
+     `details` JSONB and the common ones are mirrored into real columns so
+     they stay queryable. `section` is the tab. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const { data, error } = await tables.financialRecords.list(authUser.id);
+    if (error) { toast.error(`Could not load financial records: ${error.message}`); return; }
+    const bySection: Record<string, any[]> = { insurance: [], personal: [], portfolios: [], retirement: [], taxes: [], business: [] };
+    for (const r of data ?? []) {
+      const details = (r.details ?? {}) as Record<string, unknown>;
+      const docs = (r.document_urls as string[] | null) ?? [];
+      (bySection[String(r.section)] ??= []).push({ ...details, id: String(r.id), attachedDoc: docs[0] ?? null });
+    }
+    setPolicies(bySection.insurance);
+    setPersonalList(bySection.personal);
+    setInvestments(bySection.portfolios);
+    setRetirement(bySection.retirement);
+    setTaxList(bySection.taxes);
+    setBizList(bySection.business);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
+  const persist = async (section: Tab, original: any | undefined, record: any) => {
+    if (!authUser) return;
+    const { id: _dbId, attachedDoc, ...details } = record;
+    const row = {
+      section,
+      // title is NOT NULL; each tab has a different "primary" field.
+      title: String(record.type || record.accountName || record.institution || record.year || record.businessName || "Untitled"),
+      institution: record.carrier || record.bank || record.institution || null,
+      account_type: record.accountType || record.type || null,
+      account_number_masked: record.accountNum || null,
+      amount: record.coverage || record.balance || record.value || record.revenue || record.refund || null,
+      beneficiary: record.beneficiary || null,
+      contact: record.agent || record.accountant || record.contact || null,
+      status: record.status || "active",
+      notes: record.notes || null,
+      details,
+      document_urls: attachedDoc ? [attachedDoc] : [],
+    };
+    const { error } = original?.id
+      ? await tables.financialRecords.update(String(original.id), row)
+      : await tables.financialRecords.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+  };
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   function openEdit(t: Tab, item: any) {
@@ -555,7 +578,7 @@ export function FinancialRecords() {
               fields={insuranceFields} initial={editInitial("insurance", insuranceFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), type: f.type || "Policy", carrier: f.carrier || "", policyNum: f.policyNum || "", coverage: f.coverage || "", premium: f.premium || "", beneficiary: f.beneficiary || "", agent: f.agent || "", status: f.status || "active", attachedDoc: doc };
-                upsert(setPolicies, orig, record);
+                void persist("insurance", orig, record);
                 toast.success(isEdit ? `${record.type} updated` : `${record.type} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />
@@ -570,7 +593,7 @@ export function FinancialRecords() {
               fields={personalFields} initial={editInitial("personal", personalFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", attachedDoc: doc };
-                upsert(setPersonalList, orig, record);
+                void persist("personal", orig, record);
                 toast.success(isEdit ? `${record.accountName} updated` : `${record.accountName} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />
@@ -585,7 +608,7 @@ export function FinancialRecords() {
               fields={portfolioFields} initial={editInitial("portfolios", portfolioFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", attachedDoc: doc };
-                upsert(setInvestments, orig, record);
+                void persist("portfolios", orig, record);
                 toast.success(isEdit ? `${record.institution} updated` : `Investment account added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />
@@ -600,7 +623,7 @@ export function FinancialRecords() {
               fields={retirementFields} initial={editInitial("retirement", retirementFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", attachedDoc: doc };
-                upsert(setRetirement, orig, record);
+                void persist("retirement", orig, record);
                 toast.success(isEdit ? `${record.type || "Retirement account"} updated` : `Retirement account added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />
@@ -615,7 +638,7 @@ export function FinancialRecords() {
               fields={taxFields} initial={editInitial("taxes", taxFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", documents: doc || f.documents || "" };
-                upsert(setTaxList, orig, record);
+                void persist("taxes", orig, record);
                 toast.success(isEdit ? `Tax year ${record.year} updated` : `Tax year ${record.year} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />
@@ -630,7 +653,7 @@ export function FinancialRecords() {
               fields={businessFields} initial={editInitial("business", businessFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", notes: f.notes || "", attachedDoc: doc };
-                upsert(setBizList, orig, record);
+                void persist("business", orig, record);
                 toast.success(isEdit ? `${record.businessName} updated` : `${record.businessName || "Business"} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
               }} />

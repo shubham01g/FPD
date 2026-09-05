@@ -1,0 +1,137 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Shared mobile layer for the signed-in portal.
+
+   ── WHY THIS FILE EXISTS ─────────────────────────────────────────────────
+   Every portal page ships its own scoped <style> block, and they follow one
+   naming convention almost perfectly: `.wrap` (page container) in 35 files,
+   `.hbanner` in 32, `.backdrop`/`.modal-body` in 28, `.pg-head` in 27,
+   `.kpi-stack` in 22. Their own `@media (max-width:640px)` blocks only ever
+   fix two things — the hero banner and the KPI stack. Nothing touches page
+   gutters, dialogs, or page headers.
+
+   So the mobile rules those pages are all missing live here once, keyed on
+   the shared class names, instead of being copy-pasted into 35 files.
+
+   ── THE SPECIFICITY TRICK ────────────────────────────────────────────────
+   Pages scope their rules as `.fpd-warr .modal` — specificity (0,2,0) — and
+   their <style> tags are injected into the DOM *after* this stylesheet, so a
+   plain `.modal` here (0,1,0) would lose every tie. Repeating the class name
+   (`.modal.modal.modal` → (0,3,0)) outranks the page's own rule without
+   needing !important or knowing each page's `.fpd-*` prefix.
+
+   Do not "clean up" the repeated class names. They are the mechanism.
+
+   ── BREAKPOINT TIERS ─────────────────────────────────────────────────────
+   The portal had accumulated 14 different hand-picked max-widths, so
+   neighbouring sections reflowed at different points. Everything is being
+   standardized onto these four. Pick from this list; do not invent new ones.
+
+     430px   small phone   (iPhone SE / mini)
+     640px   phone         (the main phone/tablet boundary)
+     900px   tablet
+    1024px   desktop       (also Layout.tsx's drawer cutoff, and Tailwind `lg`)
+
+   ───────────────────────────────────────────────────────────────────────── */
+
+
+/* ═══ PHONE ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Backstop against horizontal scroll. `clip` is preferred because, unlike
+     `hidden`, it does not turn the element into a scroll container and so
+     cannot break `position:sticky` descendants; `hidden` is the fallback for
+     browsers without it. */
+  html, body {
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  /* ── Page container ──────────────────────────────────────────────────────
+     `padding:24px 30px 42px` costs 60px of gutter on a 390px screen. Side
+     padding drops to 16px, and respects the landscape notch on iOS. */
+  .wrap.wrap.wrap {
+    padding-top: 18px;
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  /* Media never widens the page past the viewport. */
+  .wrap.wrap.wrap img,
+  .wrap.wrap.wrap video,
+  .wrap.wrap.wrap canvas {
+    max-width: 100%;
+  }
+
+  /* ── Page header ─────────────────────────────────────────────────────────
+     Title and primary action share a row in 27 files. Stack them and let the
+     button go full width rather than squeezing to a two-word ellipsis. */
+  .pg-head.pg-head.pg-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .pg-head.pg-head.pg-head > .btn-primary {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* ── Dialogs become bottom sheets ────────────────────────────────────────
+     28 pages share `.backdrop` (centred flex, 16px padding) + `.modal`
+     (max-width ~520px, max-height 90vh). Centred cards waste the screen on a
+     phone and 90vh overflows once the address bar is showing. */
+  .backdrop.backdrop.backdrop {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .modal.modal.modal {
+    width: 100%;
+    max-width: none;
+    /* dvh tracks the address bar; vh does not. Fallback first. */
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 22px 22px 0 0;
+  }
+
+  /* Where a modal has a distinct body, pin the head and foot and scroll only
+     the middle — a far better sheet than scrolling the whole card. Pages
+     without a `.modal-body` keep their existing whole-card scroll untouched. */
+  .modal.modal.modal:has(> .modal-body) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal.modal.modal:has(> .modal-body) > .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* Keep the save/cancel row clear of the home indicator. */
+  .modal-foot.modal-foot.modal-foot {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  /* ── Multi-column grids with no mobile rule of their own ────────────────
+     Most two-up grids (`.field-grid`, `.mgrid`, `.igrid`, `.tgrid`,
+     `.tgrid2`, `.step-grid`, `.pgrid`) already collapse themselves in their
+     page's own media block. These three are the only ones that never did. */
+  .row2.row2.row2,
+  .kpi-grid.kpi-grid.kpi-grid,
+  .pstat.pstat.pstat {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ═══ SMALL PHONE ═════════════════════════════════════════════════════════ */
+@media (max-width: 430px) {
+
+  /* Pages already drop `.kpi-stack` from 4 columns to 2 at 640px. Two-up KPI
+     tiles still truncate their values on an SE-sized screen. */
+  .kpi-stack.kpi-stack.kpi-stack {
+    grid-template-columns: 1fr;
+  }
+}

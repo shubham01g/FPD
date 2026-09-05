@@ -1,18 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { db } from "../services/supabase";
+import { useAuth } from "./AuthContext";
 
 /**
  * White Label entitlement — the paywall for the White Label Studio.
  *
- * The Studio (brand name, logo, colours, custom domain) stays completely
- * hidden until a partner package has been PAID FOR. Nothing here unlocks on
- * "package selected" — only on a confirmed payment reference.
+ * The Studio (brand name, logo, colours, custom domain) stays hidden until a
+ * partner package has been PAID FOR. Nothing unlocks on "package selected" —
+ * only on a payment the server has confirmed.
  *
- * ⚠️ SERVER ENFORCEMENT REQUIRED BEFORE LAUNCH
- * This is a client-side gate. It hides UI, it does not secure anything — a
- * determined user can flip localStorage in devtools. Before taking real money,
- * `activate()` must be driven by a webhook-confirmed payment on your backend,
- * and every White Label write (config save, publish, domain provisioning) must
- * re-check entitlement server-side. Treat `isEntitled` as a UX hint only.
+ * This used to be a localStorage record, which meant the paywall could be
+ * lifted from devtools. It now reads `wl_entitlements`, which grants the owner
+ * SELECT and carries no user write policy at all: the only writer is the
+ * service-role admin backend (routes/entitlements.ts), driven by a confirmed
+ * payment. There is deliberately no client-side `activate()` any more.
+ *
+ * `isEntitled` remains a UX hint — every White Label *write* (config save,
+ * publish, domain provisioning) must still re-check entitlement server-side.
  */
 
 export type WLEntitlementStatus = "none" | "active";
@@ -29,56 +33,56 @@ export const NO_ENTITLEMENT: WLEntitlement = {
   status: "none", packageId: null, packageName: null, purchasedAt: null, paymentRef: null,
 };
 
-const STORAGE_KEY = "fpd_wl_entitlement";
-
-/** Demo persistence. Replace with a GET /v1/wl/entitlement call server-side. */
-function load(): WLEntitlement {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return NO_ENTITLEMENT;
-    const parsed = JSON.parse(raw) as WLEntitlement;
-    // A record without a payment reference is not a valid entitlement.
-    if (parsed?.status === "active" && parsed?.paymentRef) return parsed;
-    return NO_ENTITLEMENT;
-  } catch {
-    return NO_ENTITLEMENT;
-  }
-}
-
 interface WLEntitlementCtx {
   entitlement: WLEntitlement;
-  /** True only after a confirmed payment. Gate all White Label UI on this. */
+  /** True only after a payment the server confirmed. Gate White Label UI on this. */
   isEntitled: boolean;
-  /** Call ONLY from a successful payment callback. */
-  activate: (p: { packageId: string; packageName: string; paymentRef: string }) => void;
-  /** Refund / chargeback / cancellation — re-locks the Studio. */
-  revoke: () => void;
+  /** False once the first fetch settles — gate on this to avoid flashing the paywall. */
+  loading: boolean;
+  /** Re-read after a purchase completes or an admin changes the grant. */
+  refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<WLEntitlementCtx | null>(null);
 
 export function WLEntitlementProvider({ children }: { children: React.ReactNode }) {
-  const [entitlement, setEntitlement] = useState<WLEntitlement>(load);
+  const { authUser, loading: authLoading } = useAuth();
+  const [entitlement, setEntitlement] = useState<WLEntitlement>(NO_ENTITLEMENT);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    if (!authUser) { setEntitlement(NO_ENTITLEMENT); setLoading(false); return; }
+
+    const { data, error } = await db.getWLEntitlement(authUser.id);
+    // A missing row is the normal "never purchased" case, not a failure. On a
+    // real error we stay locked: failing closed is the only safe default for a
+    // paywall.
+    if (error || !data) { setEntitlement(NO_ENTITLEMENT); setLoading(false); return; }
+
+    // Same rule the local version enforced, now against a value only the
+    // service role can write: no payment reference, no unlock.
+    setEntitlement(
+      data.entitled && data.payment_ref
+        ? {
+            status: "active",
+            packageId: data.package_id,
+            packageName: data.wl_packages?.name ?? null,
+            purchasedAt: data.granted_at,
+            paymentRef: data.payment_ref,
+          }
+        : NO_ENTITLEMENT,
+    );
+    setLoading(false);
+  }, [authUser]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entitlement)); } catch { /* quota / private mode */ }
-  }, [entitlement]);
-
-  const activate: WLEntitlementCtx["activate"] = ({ packageId, packageName, paymentRef }) => {
-    if (!paymentRef) return; // no payment reference → no unlock
-    setEntitlement({
-      status: "active",
-      packageId,
-      packageName,
-      purchasedAt: new Date().toISOString(),
-      paymentRef,
-    });
-  };
-
-  const revoke = () => setEntitlement(NO_ENTITLEMENT);
+    if (authLoading) return;
+    setLoading(true);
+    void refresh();
+  }, [authLoading, refresh]);
 
   return (
-    <Ctx.Provider value={{ entitlement, isEntitled: entitlement.status === "active", activate, revoke }}>
+    <Ctx.Provider value={{ entitlement, isEntitled: entitlement.status === "active", loading, refresh }}>
       {children}
     </Ctx.Provider>
   );

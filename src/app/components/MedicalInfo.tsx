@@ -3,7 +3,7 @@ import { Heart, AlertTriangle, Pill, Phone, Plus, Trash2, X, Pencil, Check, Buil
 import { useDemo, type Allergy, type Medication, type EmergencyInfo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroMedicalPhoto from "../../imports/medicalinfo_hero_photo.png";
+import heroMedicalPhoto from "../../imports/medicalinfo_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -93,7 +93,7 @@ const MED_CSS = `
 .fpd-med .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-med .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-med .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-med .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-med .kpi-stack{grid-template-columns:1fr;}}
 
 /* emergency info grid */
 .fpd-med .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -104,7 +104,7 @@ const MED_CSS = `
 .fpd-med .hero-tile .hval{font-family:var(--font-display);font-size:30px;color:#6FAE8B;font-weight:700;}
 .fpd-med .hero-tile select{width:130px;padding:9px 11px;border-radius:99px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);}
 .fpd-med .chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-@media (max-width:820px){.fpd-med .mgrid{grid-template-columns:1fr;}.fpd-med .tgrid2{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-med .mgrid{grid-template-columns:1fr;}.fpd-med .tgrid2{grid-template-columns:1fr;}}
 
 /* tiles (view mode) */
 .fpd-med .tile{padding:12px 14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
@@ -148,7 +148,7 @@ button.chip:hover{opacity:.85;}
 .fpd-med .redit{background:none;border:none;color:${MUTED};cursor:pointer;padding:6px;display:flex;flex-shrink:0;transition:color .16s;}
 .fpd-med .redit:hover{color:#6FAE8B;}
 .fpd-med .racts{display:flex;align-items:center;gap:2px;flex-shrink:0;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-med .rgrid{grid-template-columns:1fr;}
 .fpd-med .rgrid .tile:nth-child(3n+2),.fpd-med .rgrid .tile:nth-child(3n){border-left:none;}
 .fpd-med .rgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
@@ -170,7 +170,7 @@ button.chip:hover{opacity:.85;}
 .fpd-med .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-med .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-med .modal-foot .save:hover{filter:brightness(1.08);}
-@media (max-width:520px){.fpd-med .modal-body .row2{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-med .modal-body .row2{grid-template-columns:1fr;}}
 `;
 
 /* ── small local field helpers (replace the old FormControls presentation with the new scoped classes) ── */

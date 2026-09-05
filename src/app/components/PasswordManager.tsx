@@ -1,7 +1,10 @@
 import { copyToClipboard } from "../utils/clipboard";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ScanButton } from "./DocumentScanner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
+import { encryptField, decryptField } from "../services/vaultCrypto";
 import {
   Key, Eye, EyeOff, Copy, Plus, Trash2, Edit2, X, Search,
   Lock, Globe, User, FileText, Shield, CheckCircle, Upload,
@@ -55,14 +58,9 @@ function getStrength(pw: string): PasswordEntry["strength"] {
   return "good";
 }
 
-const initPasswords: PasswordEntry[] = [
-  { id:"p1", title:"Gmail – Primary", website:"https://mail.google.com", username:"james.doe", email:"james.doe@gmail.com", password:"MyP@ssw0rd2024!", category:"Email", strength:"strong", lastUpdated:"Jun 8, 2026", importance:"critical", twoFactor:true, securityQuestion:"What was your first car?", securityAnswer:"1967 Ford Mustang", notes:"Password resets for almost every other account land here. Open this one first." },
-  { id:"p2", title:"Wells Fargo Online Banking", website:"https://wellsfargo.com", username:"jdoe8821", accountNumber:"XXXX-XXXX-8821", password:"WF@Banking99!", category:"Banking", strength:"strong", lastUpdated:"May 15, 2026", importance:"critical", twoFactor:true, securityQuestion:"Mother's maiden name", securityAnswer:"Williams" },
-  { id:"p3", title:"Fidelity Investments", website:"https://fidelity.com", username:"james.doe@fidelity", accountNumber:"7721-XXXX", password:"Fid3lity$Invest!", category:"Banking", strength:"strong", lastUpdated:"Apr 1, 2026", importance:"high", twoFactor:true },
-  { id:"p4", title:"Facebook", website:"https://facebook.com", username:"james.doe.1962", email:"james.doe@gmail.com", password:"FB#Social24!", category:"Social Media", strength:"good", lastUpdated:"Mar 20, 2026", importance:"normal" },
-  { id:"p5", title:"Amazon Shopping", website:"https://amazon.com", email:"james.doe@gmail.com", password:"Amaz0n@Shop!", category:"Shopping", strength:"good", lastUpdated:"Feb 10, 2026", importance:"normal" },
-  { id:"p6", title:"Kaiser Permanente Patient Portal", website:"https://kp.org", username:"jdoe8821", password:"KP$Health22", category:"Healthcare", strength:"fair", lastUpdated:"Jan 5, 2026", importance:"high", notes:"Use this to access all medical records and test results online." },
-];
+/* Rows come from `password_vault`. The screen used to open on hardcoded
+   sample logins — the same Gmail and Wells Fargo passwords for every
+   account — so a new account now starts empty instead. */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -122,7 +120,7 @@ const PWD_CSS = `
 .fpd-pwd .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-pwd .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-pwd .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-pwd .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-pwd .kpi-stack{grid-template-columns:1fr;}}
 
 /* search + category filters */
 .fpd-pwd .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -136,7 +134,7 @@ const PWD_CSS = `
 
 /* two-column bento */
 .fpd-pwd .bento{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px;align-items:start;}
-@media (max-width:980px){.fpd-pwd .bento{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-pwd .bento{grid-template-columns:1fr;}}
 
 /* password list rows */
 .fpd-pwd .plist{display:flex;flex-direction:column;gap:10px;}
@@ -215,7 +213,7 @@ const PWD_CSS = `
 .fpd-pwd .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;opacity:1;}
 .fpd-pwd .modal-foot .save:hover{filter:brightness(1.08);}
 .fpd-pwd .modal-foot .save[disabled]{opacity:.6;cursor:default;}
-@media (max-width:560px){.fpd-pwd .field-grid{grid-template-columns:1fr;}.fpd-pwd .imp-grid{grid-template-columns:1fr;}}
+@media (max-width:640px){.fpd-pwd .field-grid{grid-template-columns:1fr;}.fpd-pwd .imp-grid{grid-template-columns:1fr;}}
 `;
 
 function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"] }) {
@@ -360,7 +358,8 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
 }
 
 export function PasswordManager() {
-  const [passwords, setPasswords] = useState<PasswordEntry[]>(initPasswords);
+  const { authUser } = useAuth();
+  const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState<PasswordEntry|null>(null);
@@ -368,14 +367,84 @@ export function PasswordManager() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingPw, setEditingPw] = useState<PasswordEntry|null>(null);
 
+  /* Rows come from `password_vault`. Secrets are decrypted here, in the
+     browser, with the key held by VaultUnlock — the column stores ciphertext
+     the server cannot read. See services/vaultCrypto.ts. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const { data, error } = await tables.passwordVault.list(authUser.id);
+    if (error) { toast.error(`Could not load vault: ${error.message}`); return; }
+    const rows = await Promise.all((data ?? []).map(async r => {
+      // Decrypt once and reuse — deriving the plaintext twice per row was
+      // needless work on a screen that can hold hundreds of entries.
+      const password = await decryptField(r.encrypted_password as string | null);
+      return {
+        id: String(r.id),
+        title: String(r.title ?? ""),
+        website: (r.website_url as string | null) ?? undefined,
+        username: (r.username as string | null) ?? undefined,
+        email: (r.email as string | null) ?? undefined,
+        password,
+        accountNumber: (r.account_number as string | null) ?? undefined,
+        securityQuestion: (r.security_question as string | null) ?? undefined,
+        securityAnswer: await decryptField(r.encrypted_security_answer as string | null),
+        notes: (r.notes as string | null) ?? undefined,
+        category: String(r.category ?? "Other"),
+        strength: getStrength(password),
+        lastUpdated: r.last_updated
+          ? new Date(String(r.last_updated)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+          : "",
+        twoFactor: Boolean(r.two_fa_enabled),
+        importance: (r.starred ? "critical" : undefined) as Importance | undefined,
+      };
+    }));
+    setPasswords(rows);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
   const openAddPw = () => { setEditingPw(null); setShowAdd(true); };
   const openEditPw = (p: PasswordEntry) => { setEditingPw(p); setShowAdd(true); };
   const closePwModal = () => { setShowAdd(false); setEditingPw(null); };
-  const savePw = (p: PasswordEntry) => {
-    setPasswords(prev => editingPw ? prev.map(x => x.id === p.id ? p : x) : [p, ...prev]);
-    if (editingPw && selected?.id === p.id) setSelected(p);
+  const savePw = async (p: PasswordEntry) => {
+    if (!authUser) return;
+    // The two secret fields are encrypted before they leave the browser;
+    // everything else is ordinary metadata and stored as-is.
+    const row = {
+      title: p.title,
+      website_url: p.website || null,
+      username: p.username || null,
+      email: p.email || null,
+      encrypted_password: await encryptField(p.password),
+      account_number: p.accountNumber || null,
+      security_question: p.securityQuestion || null,
+      encrypted_security_answer: await encryptField(p.securityAnswer ?? ""),
+      notes: p.notes || null,
+      category: p.category,
+      two_fa_enabled: Boolean(p.twoFactor),
+      starred: p.importance === "critical",
+      last_updated: new Date().toISOString(),
+    };
+
+    const { error } = editingPw
+      ? await tables.passwordVault.update(p.id, row)
+      : await tables.passwordVault.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    setSelected(null);
+    toast.success(editingPw ? `${p.title} updated` : `${p.title} added to your vault`);
     setShowAdd(false);
     setEditingPw(null);
+  };
+
+  const deletePw = async (id: string) => {
+    const { error } = await tables.passwordVault.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    if (selected?.id === id) setSelected(null);
+    toast.success("Entry deleted");
   };
 
   /* Critical entries float to the top so a legacy contact opening this page
@@ -493,7 +562,7 @@ export function PasswordManager() {
                   <button className="icon-btn" onClick={e => { e.stopPropagation(); openEditPw(p); }}>
                     <Edit2 size={13}/>
                   </button>
-                  <button className="icon-btn del" onClick={e => { e.stopPropagation(); setPasswords(prev => prev.filter(x => x.id !== p.id)); if(selected?.id===p.id) setSelected(null); toast.success("Entry deleted"); }}>
+                  <button className="icon-btn del" onClick={e => { e.stopPropagation(); void deletePw(p.id); }}>
                     <Trash2 size={13}/>
                   </button>
                 </div>

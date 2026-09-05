@@ -6,8 +6,10 @@ import {
   Copy, X, Info, ArrowRight, Package, CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
-import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.png";
-import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.png";
+import { db } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
+import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
+import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -119,34 +121,59 @@ interface FileCategory {
   selected: boolean;
 }
 
-/* ── demo state ──────────────────────────────────────────────────── */
-const DR_STORAGE_KEY = "fpd_disaster_recovery_bypass";
-export const DR_ADDON_KEY = "fpd_dr_addon_active";
+/* ── server-authoritative bypass state ───────────────────────────── */
+// The add-on flag and the 48-hour emergency window used to live in
+// localStorage, which meant a user could unlock the vault export from
+// devtools. Both now come from disaster_recovery_state, which grants the owner
+// SELECT and has no user write policy — only the service-role admin backend
+// (routes/entitlements.ts) can open or revoke a window.
 
-function loadBypass(): BypassSession | null {
-  try {
-    const raw = localStorage.getItem(DR_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
+const DEFAULT_DOWNLOAD_LIMIT_GB = 100;
 
 function useBypassState() {
-  const [session, setSession] = useState<BypassSession | null>(loadBypass);
+  const { authUser } = useAuth();
+  const [session, setSession] = useState<BypassSession | null>(null);
+  const [addonActive, setAddonActive] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Poll localStorage so admin-granted bypass appears automatically
+  const load = useCallback(async () => {
+    if (!authUser) { setSession(null); setAddonActive(false); setLoading(false); return; }
+
+    const { data, error } = await db.getDisasterRecoveryState(authUser.id);
+    // No row is the normal "never purchased the add-on" case. On a real error
+    // we stay locked — failing closed is the only safe default for a gate that
+    // releases the whole vault.
+    if (error || !data) { setSession(null); setAddonActive(false); setLoading(false); return; }
+
+    setAddonActive(data.addon_active);
+    setSession(
+      data.bypass_granted && data.bypass_expires_at
+        ? {
+            activatedAt: data.bypass_granted_at ? Date.parse(data.bypass_granted_at) : Date.now(),
+            expiresAt: Date.parse(data.bypass_expires_at),
+            activatedBy: "Master Admin",
+            reason: data.bypass_reason ?? "Emergency Access Request",
+            downloadLimit: DEFAULT_DOWNLOAD_LIMIT_GB,
+          }
+        : null,
+    );
+    setLoading(false);
+  }, [authUser]);
+
+  // Re-read so an admin-granted window appears without a reload. Slower than
+  // the old 1.5s localStorage poll because this is a network round trip.
   useEffect(() => {
-    const id = setInterval(() => {
-      setSession(loadBypass());
-    }, 1500);
+    void load();
+    const id = setInterval(() => { void load(); }, 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [load]);
 
   const bypassState: BypassState =
     !session ? "locked"
     : Date.now() < session.expiresAt ? "active"
     : "expired";
 
-  return { session, bypassState };
+  return { session, bypassState, addonActive, loading, refresh: load };
 }
 
 /* ── countdown hook ──────────────────────────────────────────────── */
@@ -190,30 +217,17 @@ function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:(
   const [expiry, setExpiry]     = useState("12/28");
   const [cvv, setCvv]           = useState("424");
   const [loading, setLoading]   = useState(false);
-  const [bypassLoading, setBypassLoading] = useState(false);
 
+  // The add-on becomes active when the processor's webhook records the payment
+  // against disaster_recovery_state. The client cannot set that flag — it has
+  // SELECT on the row and nothing more — so all this does is re-read once the
+  // simulated charge settles.
   const handlePay = async () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
-    localStorage.setItem(DR_ADDON_KEY, JSON.stringify({ active:true, billing, activatedAt:Date.now() }));
     setLoading(false);
     onSuccess();
     setStep("done");
-  };
-
-  const handleSimulateBypass = async () => {
-    setBypassLoading(true);
-    await new Promise(r => setTimeout(r, 1800));
-    const now = Date.now();
-    localStorage.setItem(DR_STORAGE_KEY, JSON.stringify({
-      activatedAt: now,
-      expiresAt: now + 48 * 3600_000,
-      activatedBy: "Master Admin",
-      reason: "Demo — Emergency Access Request"
-    }));
-    setBypassLoading(false);
-    toast.success("Emergency bypass activated — your vault is now unlocked for 48 hours");
-    onClose();
   };
 
   return (
@@ -235,7 +249,7 @@ function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:(
           <div className="demo-text" style={{ padding:"2px 0" }}>
             {step==="select" && "Choose a billing period, then continue to the pre-filled payment form."}
             {step==="pay"    && "Card is pre-filled with Stripe test credentials. Click Pay to complete instantly."}
-            {step==="done"   && "Add-on purchased! Now simulate admin granting you the emergency bypass."}
+            {step==="done"   && "Add-on purchased. A Master Admin opens the emergency window on request."}
             {step==="bypass" && "Bypass activated — close to see your Emergency Recovery Dashboard unlock."}
           </div>
         </div>
@@ -325,29 +339,26 @@ function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:(
                   Add-On Purchased! ✓
                 </div>
                 <p style={{ fontSize:13, color:MUTED, lineHeight:1.6 }}>
-                  Disaster Recovery Protection is active on your account.<br/>
-                  Now simulate a Master Admin granting you the emergency bypass.
+                  Disaster Recovery Protection is being activated on your account.<br/>
+                  A Master Admin opens the emergency window when you request it.
                 </p>
               </div>
 
               <div style={{ width:"100%", background:"rgba(91,110,225,0.07)",
                 border:"1px dashed rgba(91,110,225,0.4)", borderRadius:12, padding:"16px" }}>
                 <div style={{ fontSize:11, ...MONO, color:"#6FAE8B", fontWeight:700, marginBottom:6 }}>
-                  🎮 DEMO STEP 2 — SIMULATE ADMIN BYPASS GRANT
+                  NEXT — REQUEST YOUR EMERGENCY WINDOW
                 </div>
-                <p style={{ fontSize:12, color:SOFT, lineHeight:1.6, marginBottom:12 }}>
-                  In production, you'd contact FPD support. In demo mode, click below to instantly
-                  simulate a Master Admin activating your 48-hour emergency window.
+                <p style={{ fontSize:12, color:SOFT, lineHeight:1.6 }}>
+                  Contact FPD support to open your 48-hour window. A Master Admin authenticates
+                  via MFA and enters a reason code, and this page unlocks on its own once the
+                  grant is recorded — it is never something your browser can switch on.
                 </p>
-                <button onClick={handleSimulateBypass} disabled={bypassLoading}
-                  className="btn-primary" style={{ width:"100%", justifyContent:"center" }}>
-                  {bypassLoading ? <>Activating bypass…</> : <><ShieldAlert size={16}/> Simulate Admin Granting Bypass</>}
-                </button>
               </div>
 
               <button onClick={onClose} style={{ fontSize:13, color:MUTED, background:"transparent",
                 border:"none", cursor:"pointer", textDecoration:"underline" }}>
-                Skip — I'll request bypass later
+                Close
               </button>
             </div>
           )}
@@ -361,11 +372,8 @@ function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:(
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 export function DisasterRecovery() {
-  const { session, bypassState } = useBypassState();
+  const { session, bypassState, addonActive, refresh: refreshBypass } = useBypassState();
   const countdown = useCountdown(session?.expiresAt ?? null);
-  const [addonActive, setAddonActive] = useState(() => {
-    try { return !!JSON.parse(localStorage.getItem(DR_ADDON_KEY) ?? "null")?.active; } catch { return false; }
-  });
   const [showPurchase, setShowPurchase] = useState(false);
 
   const [categories, setCategories] = useState<FileCategory[]>(INIT_CATEGORIES);
@@ -448,22 +456,17 @@ export function DisasterRecovery() {
             <div className="demo-tag">🎮 DEMO MODE — FULL FLOW GUIDE</div>
             <div className="demo-text">
               <strong>Step 1:</strong> Click <em>"Add Disaster Recovery"</em> below to purchase the add-on (pre-filled Stripe test card).<br/>
-              <strong>Step 2:</strong> After payment, click <em>"Simulate Admin Granting Bypass"</em> inside the modal.<br/>
-              <strong>Step 3:</strong> This page unlocks — select your file categories and generate a bulk archive.
+              <strong>Step 2:</strong> A Master Admin grants the 48-hour window from Admin → Disaster Recovery.<br/>
+              <strong>Step 3:</strong> This page unlocks on its own — select file categories and generate a bulk archive.
             </div>
           </div>
           <div className="demo-acts">
             <button onClick={() => setShowPurchase(true)} className="btn-ghost">1. Add Add-On →</button>
             <button onClick={() => {
-              const now = Date.now();
-              localStorage.setItem(DR_STORAGE_KEY, JSON.stringify({
-                activatedAt: now, expiresAt: now + 48 * 3600_000,
-                activatedBy: "Master Admin", reason: "Demo — Emergency Access"
-              }));
-              localStorage.setItem(DR_ADDON_KEY, JSON.stringify({ active:true, billing:"monthly", activatedAt:now }));
-              toast.success("Demo: bypass activated — page will update automatically");
+              void refreshBypass();
+              toast.info("Checked for an active bypass — a Master Admin grants the window from the admin console.");
             }} className="btn-sec" style={{ color:ACCENT2 }}>
-              ⚡ Skip to Full Demo (bypass immediately)
+              <RefreshCw size={14}/> Check for Bypass Grant
             </button>
           </div>
         </div>
@@ -597,7 +600,7 @@ export function DisasterRecovery() {
       {showPurchase && (
         <DRPurchaseModal
           onClose={() => setShowPurchase(false)}
-          onSuccess={() => setAddonActive(true)}
+          onSuccess={() => { void refreshBypass(); }}
         />
       )}
     </div>);

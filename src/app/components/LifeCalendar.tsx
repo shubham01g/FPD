@@ -29,7 +29,7 @@ import {
   eventsForMonth, upcomingEvents, monthlyBillingTotal, iso, daysInMonth,
   SOURCE_META, type CalendarEvent, type EventSource,
 } from "../services/calendarEvents";
-import heroCalendarPhoto from "../../imports/calendar_hero_photo.png";
+import heroCalendarPhoto from "../../imports/calendar_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard) ── */
 const TEXT   = "#EFF2F9";
@@ -165,7 +165,7 @@ const CAL_CSS = `
 .fpd-cal .kpi-mini-lbl{font-size:14.5px;color:${MUTED};margin-top:4px;}
 .fpd-cal .kpi-mini-sub{font-size:14px;color:${SOFT};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-cal .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-@media (max-width:520px){.fpd-cal .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-cal .kpi-stack{grid-template-columns:1fr;}}
 
 /* filters */
 .fpd-cal .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -182,7 +182,7 @@ const CAL_CSS = `
 .fpd-cal .col{display:flex;flex-direction:column;gap:18px;min-width:0;overflow:hidden;}
 .fpd-cal .col>.card:last-child{flex:1;min-height:0;display:flex;flex-direction:column;}
 .fpd-cal .col>.card:last-child .evlist{flex:1;min-height:0;overflow-y:auto;padding-right:2px;margin-right:-2px;}
-@media (max-width:1080px){.fpd-cal .bento{grid-template-columns:1fr;} .fpd-cal .col{height:auto !important;} .fpd-cal .col>.card:last-child .evlist{overflow-y:visible;}}
+@media (max-width:1024px){.fpd-cal .bento{grid-template-columns:1fr;} .fpd-cal .col{height:auto !important;} .fpd-cal .col>.card:last-child .evlist{overflow-y:visible;}}
 
 /* month grid — perfect squares. Width comes from the 7-column track; height
    is locked to width via aspect-ratio, so cells can never be stretched
@@ -278,7 +278,7 @@ const CAL_CSS = `
 
 /* agenda view — grouped by real week, every week shown (even quiet ones) */
 .fpd-cal .agenda-bento{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:18px;align-items:start;}
-@media (max-width:1080px){.fpd-cal .agenda-bento{grid-template-columns:1fr;} .fpd-cal .agenda-bento .col{height:auto !important;}}
+@media (max-width:1024px){.fpd-cal .agenda-bento{grid-template-columns:1fr;} .fpd-cal .agenda-bento .col{height:auto !important;}}
 .fpd-cal .weekgroup{border-radius:16px;border:1px solid rgba(255,255,255,0.08);padding:14px 16px;margin-bottom:10px;}
 .fpd-cal .weekgroup:last-child{margin-bottom:0;}
 .fpd-cal .weekhead{display:flex;align-items:center;gap:10px;margin-bottom:2px;}

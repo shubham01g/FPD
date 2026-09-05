@@ -21,6 +21,7 @@ import whiteLabel from "./routes/whiteLabel.ts";
 import legacy from "./routes/legacy.ts";
 import enterpriseApi from "./routes/enterpriseApi.ts";
 import adminAccounts from "./routes/adminAccounts.ts";
+import { wlEntitlements, drState } from "./routes/entitlements.ts";
 import publicRoutes from "./routes/public.ts";
 
 const app = new Hono();
@@ -70,6 +71,11 @@ whiteLabel.use("*", requireModulePermission("white_label"));
 legacy.use("*", requireModulePermission("legacy_management"));
 enterpriseApi.use("*", requireModulePermission("enterprise_api"));
 adminAccounts.use("*", requireModulePermission("admin_team"));
+// Entitlement writes are the only way to unlock a paid add-on, so they sit
+// behind the same module gates as the features they unlock: the WL Studio
+// paywall under white_label, the per-user emergency bypass under users.
+wlEntitlements.use("*", requireModulePermission("white_label"));
+drState.use("*", requireModulePermission("users"));
 
 admin.route("/analytics", analytics);
 admin.route("/users", users);
@@ -85,6 +91,8 @@ admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);
 admin.route("/enterprise-api", enterpriseApi);
 admin.route("/admin-accounts", adminAccounts);
+admin.route("/wl-entitlements", wlEntitlements);
+admin.route("/disaster-recovery", drState);
 
 app.route(`${BASE}/admin`, admin);
 

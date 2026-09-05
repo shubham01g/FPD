@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Zap, Plus, X, Boxes, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.png";
+import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";
@@ -13,14 +15,21 @@ const FAINT   = "#929CBC";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 
-const utilitiesInit = [
-  { id: 1, service: "Electricity", provider: "SMUD", accountNum: "SMUD-9284-01", phone: "(916) 452-3211", website: "smud.org", autopay: true, monthlyAvg: "$142", notes: "" },
-  { id: 2, service: "Natural Gas", provider: "PG&E", accountNum: "PGE-481-2291-X", phone: "1-800-743-5000", website: "pge.com", autopay: true, monthlyAvg: "$68", notes: "" },
-  { id: 3, service: "Internet", provider: "AT&T Fiber", accountNum: "ATT-882-4291", phone: "1-800-288-2020", website: "att.com", autopay: true, monthlyAvg: "$65", notes: "1 Gig plan. Router in home office closet." },
-  { id: 4, service: "Water / Sewer", provider: "Sacramento Water District", accountNum: "SWD-2941-B", phone: "(916) 808-5454", website: "cityofsacramento.org", autopay: false, monthlyAvg: "$88", notes: "Bill arrives first of month." },
-  { id: 5, service: "Trash Collection", provider: "Republic Services", accountNum: "RS-4821-SAC", phone: "1-800-237-9840", website: "republicservices.com", autopay: true, monthlyAvg: "$44", notes: "Pickup Tuesdays." },
-  { id: 6, service: "HOA", provider: "Oak Ridge HOA", accountNum: "ORHA-29", phone: "(916) 555-0192", website: "oakridgehoa.com", autopay: false, monthlyAvg: "$220", notes: "Quarterly billing — $660/quarter." },
-];
+interface UtilityRow {
+  id: string; service: string; provider: string; accountNum: string;
+  phone: string; website: string; autopay: boolean; monthlyAvg: string;
+  notes: string; attachedDoc?: string | null;
+}
+
+/* The screen used to open on six hardcoded sample providers, identical for
+   every account and gone on refresh. Rows now come from the `utilities` table,
+   so a new account starts empty and what you enter is still there tomorrow. */
+
+// The table stores monthly_avg as NUMERIC; the UI has always shown it as a
+// "$142"-style string, so convert at the boundary rather than changing either.
+const toMoney = (n: number | null | undefined) => (n === null || n === undefined ? "$0" : `$${Number(n).toFixed(0)}`);
+const fromMoney = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) ? n : 0; };
+
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -83,7 +92,7 @@ const UTIL_CSS = `
 .fpd-util .tile{padding:12px 14px;}
 .fpd-util .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-util .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-util .dgrid{grid-template-columns:1fr;}
 .fpd-util .dgrid .tile:nth-child(3n+2),.fpd-util .dgrid .tile:nth-child(3n){border-left:none;}
 .fpd-util .dgrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
@@ -109,12 +118,35 @@ const UTIL_CSS = `
 `;
 
 export function Utilities() {
-  const [utilityList, setUtilityList] = useState(utilitiesInit);
+  const { authUser } = useAuth();
+  const [utilityList, setUtilityList] = useState<UtilityRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [uForm, setUForm] = useState({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
   const [uDoc, setUDoc] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setUtilityList([]); setLoading(false); return; }
+    const { data, error } = await tables.utilities.list(authUser.id);
+    if (error) { toast.error(`Could not load utilities: ${error.message}`); setLoading(false); return; }
+    setUtilityList((data ?? []).map(r => ({
+      id: String(r.id),
+      service: String(r.service ?? ""),
+      provider: String(r.provider ?? ""),
+      accountNum: String(r.account_number ?? ""),
+      phone: String(r.phone ?? ""),
+      website: String(r.website ?? ""),
+      autopay: Boolean(r.autopay),
+      monthlyAvg: toMoney(r.monthly_avg as number | null),
+      notes: String(r.notes ?? ""),
+      attachedDoc: (r.document_url as string | null) ?? null,
+    })));
+    setLoading(false);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
 
   function resetUtilityForm() {
     setUForm({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
@@ -127,7 +159,7 @@ export function Utilities() {
     setShowAdd(true);
   }
 
-  function openEditUtility(u: typeof utilitiesInit[number] & { attachedDoc?: string | null }) {
+  function openEditUtility(u: UtilityRow) {
     setUForm({ service: u.service, provider: u.provider, accountNum: u.accountNum, phone: u.phone, website: u.website, monthlyAvg: u.monthlyAvg, notes: u.notes });
     setUDoc(u.attachedDoc ?? null);
     setEditingId(u.id);
@@ -140,15 +172,31 @@ export function Utilities() {
     resetUtilityForm();
   }
 
-  function saveUtility() {
+  async function saveUtility() {
     if (!uForm.service || !uForm.provider) { toast.error("Service and provider required"); return; }
-    if (editingId !== null) {
-      setUtilityList(p => p.map(x => x.id === editingId ? { ...x, service: uForm.service, provider: uForm.provider, accountNum: uForm.accountNum, phone: uForm.phone, website: uForm.website, monthlyAvg: uForm.monthlyAvg || "$0", notes: uForm.notes, attachedDoc: uDoc } : x));
-      toast.success(`${uForm.service} — ${uForm.provider} updated`);
-    } else {
-      setUtilityList(p => [...p, { id: Date.now(), service: uForm.service, provider: uForm.provider, accountNum: uForm.accountNum, phone: uForm.phone, website: uForm.website, autopay: false, monthlyAvg: uForm.monthlyAvg || "$0", notes: uForm.notes, attachedDoc: uDoc }]);
-      toast.success(`${uForm.service} — ${uForm.provider} added`);
-    }
+    if (!authUser) { toast.error("Sign in to save utilities."); return; }
+
+    const row = {
+      service: uForm.service,
+      provider: uForm.provider,
+      account_number: uForm.accountNum,
+      phone: uForm.phone,
+      website: uForm.website,
+      monthly_avg: fromMoney(uForm.monthlyAvg),
+      notes: uForm.notes,
+      document_url: uDoc,
+    };
+
+    const { error } = editingId !== null
+      ? await tables.utilities.update(editingId, row)
+      : await tables.utilities.add(authUser.id, { ...row, autopay: false });
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    // Re-read rather than patching local state, so what is on screen is what
+    // the database actually holds (defaults, triggers and all).
+    await reload();
+    toast.success(`${uForm.service} — ${uForm.provider} ${editingId !== null ? "updated" : "added"}`);
     resetUtilityForm();
     setEditingId(null);
     setShowAdd(false);
@@ -199,6 +247,18 @@ export function Utilities() {
 
         {/* ── Utilities list ── */}
         <div className="dlist" ref={listRef}>
+          {/* The list can genuinely be empty now that it is not seeded with
+              sample providers, so both states need saying out loud. */}
+          {loading && (
+            <div className="card pad" style={{ textAlign: "center", color: MUTED }}>
+              Loading your utilities…
+            </div>
+          )}
+          {!loading && utilityList.length === 0 && (
+            <div className="card pad" style={{ textAlign: "center", color: MUTED }}>
+              No utilities saved yet — add your first provider above and it will be here next time you sign in.
+            </div>
+          )}
           {utilityList.map(u => (
             <div key={u.id} className="card pad">
               <div className="dtop">

@@ -1,10 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Car, Lock, Bitcoin, Plus, Edit2, Trash2, Key, X, Home, Camera, Image, Gem, Sword, Boxes } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
+import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.png";
+import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -19,41 +22,17 @@ const NEG     = "#D06B6B";
 
 type Tab = "vehicles" | "realestate" | "digital" | "weapons" | "weapons_locker" | "collectibles";
 
-const vehicles = [
-  { id: 1, year: 2021, make: "Toyota", model: "Camry XSE", color: "Midnight Black", vin: "4T1BZ1HK8MU024891", plate: "7KBH421 CA", title: "James Doe", lien: "None — Owned free & clear", insurance: "GEICO — Policy GI-293847-CA", registration: "Exp. Dec 2026", value: "$28,400", notes: "Primary vehicle. Keys in kitchen drawer." },
-  { id: 2, year: 1967, make: "Ford", model: "Mustang Fastback", color: "Candy Apple Red", vin: "7F02S100433", plate: "CLASIC67 CA", title: "James Doe", lien: "None", insurance: "Hagerty Collector — Policy HG-88421", registration: "Exp. Mar 2027", value: "$68,000", notes: "Do NOT sell. Bequeathed to Michael Doe per will." },
-];
 
-const digitalAssets = [
-  { id: 1, category: "Cryptocurrency", platform: "Coinbase", asset: "Bitcoin (BTC)", holdings: "0.84 BTC", value: "~$58,200", accessMethod: "Seed phrase stored in Secret Vault", walletAddress: "bc1q...8f2k (full address in vault)", notes: "Do NOT share seed phrase digitally." },
-  { id: 2, category: "Cryptocurrency", platform: "Coinbase", asset: "Ethereum (ETH)", holdings: "4.2 ETH", value: "~$14,100", accessMethod: "Same Coinbase account as BTC", walletAddress: "0x8f2k...a91b (full in vault)", notes: "" },
-  { id: 3, category: "Online Accounts", platform: "Google Account", asset: "james.doe@gmail.com", holdings: "25 GB Drive Storage", value: "Inactive Memorial Policy", accessMethod: "Password in Password Manager", walletAddress: "N/A", notes: "Designate as memorial account via Google's Inactive Account Manager." },
-  { id: 4, category: "Domain Names", platform: "GoDaddy", asset: "doephotography.com", holdings: "Domain + Hosting", value: "$120/year", accessMethod: "GoDaddy login in Password Manager", walletAddress: "N/A", notes: "Transfer to Michael Doe or let expire." },
-  { id: 5, category: "Social Media", platform: "Instagram", asset: "@doewildlife", holdings: "42,000 followers", value: "Photography portfolio", accessMethod: "Password in Password Manager", walletAddress: "N/A", notes: "Memorialize or transfer to Michael Doe." },
-];
 
-const realEstateInit = [
-  { id:1, type:"Primary Residence", address:"1842 Oak Ridge Drive", city:"Sacramento, CA 95825", value:"$485,000", mortgage:"Wells Fargo — Balance: $201,400", mortgagePayment:"$1,842/month", titleHolder:"James & Sarah Doe", deed:"Recorded — Sacramento County", yearBuilt:"1998", sqft:"2,240 sq ft", bedBath:"4 bed / 2.5 bath", lotSize:"0.18 acres", notes:"Paid off 2034. Keys: main + spare in kitchen drawer.", photo:"" },
-  { id:2, type:"Rental Property", address:"524 Elm Street", city:"Roseville, CA 95678", value:"$320,000", mortgage:"None — Owned free & clear", mortgagePayment:"N/A", titleHolder:"James Doe", deed:"Recorded — Placer County", yearBuilt:"2005", sqft:"1,480 sq ft", bedBath:"3 bed / 2 bath", lotSize:"0.12 acres", notes:"Rented — $1,800/month income. Tenant lease expires Dec 2026.", photo:"" },
-];
 
-const weapons = [
-  { id: 1, type: "Handgun", make: "Glock", model: "19 Gen 5", caliber: "9mm", serial: "BKPL241", registration: "CA DOJ Registered — #CA-2019-882941", storage: "Gun safe — master bedroom closet, combination: in Secret Vault", transfer: "Transfer to Michael Doe per will. Must follow CA transfer laws.", photo:"" },
-  { id: 2, type: "Rifle", make: "Ruger", model: "10/22", caliber: ".22 LR", serial: "249-48821", registration: "CA DOJ Registered — #CA-2021-441892", storage: "Gun safe — same as above", transfer: "Transfer to Michael Doe per will.", photo:"" },
-];
 
-const collectiblesInit = [
-  { id:1, name:"1952 Topps Mickey Mantle Rookie Card", category:"Sports Cards", condition:"VG+", estimatedValue:"$38,000", purchaseDate:"Mar 2009", purchasedFrom:"Heritage Auctions, New York", intendedFor:"Michael Doe (Son) — per will", serialNum:"", notes:"PSA graded VG+ 4.5. Stored in acid-free sleeve inside the fireproof safe.", photo:"" },
-  { id:2, name:"Louis Vuitton Speedy 35 (Limited Edition 2006)", category:"Luxury Handbags", condition:"Excellent", estimatedValue:"$2,800", purchaseDate:"Jun 2006", purchasedFrom:"Louis Vuitton Flagship, San Francisco", intendedFor:"Emily Doe (Daughter)", serialNum:"LV-SP35-2006-0482", notes:"Original dust bag and box stored in hall closet. Authenticate before selling.", photo:"" },
-  { id:3, name:"1964 Fender Stratocaster (Sunburst)", category:"Musical Instruments", condition:"Good — original hardware", estimatedValue:"$22,000", purchaseDate:"Nov 2002", purchasedFrom:"Guitar Center Vintage — Los Angeles", intendedFor:"Michael Doe (Son) — musician", serialNum:"L58291", notes:"Original case. Has been played — minor fret wear. Certificate of authenticity in Legacy Vault.", photo:"" },
-  { id:4, name:"18k Gold Rolex Submariner (Ref. 116618LB)", category:"Watches", condition:"Excellent", estimatedValue:"$45,000", purchaseDate:"Dec 2015", purchasedFrom:"Shreve & Co., San Francisco", intendedFor:"Sell — proceeds to grandchildren's education fund", serialNum:"RSW-G882N1", notes:"Blue dial, ceramic bezel. Box and papers included. Serviced 2022.", photo:"" },
-];
 
-const weaponsLockerInit = [
-  { id:1, type:"Hunting Knife", make:"Buck Knives", model:"110 Folding Hunter", blade:"3.75 inch clip point, 420HC steel", handle:"Genuine ebony wood with brass bolsters", storage:"Leather sheath — displayed in home office", transfer:"Michael Doe per will", notes:"Grandfather's knife — sentimental value. Purchased 1968.", photo:"" },
-  { id:2, type:"Katana", make:"Unknown Maker (Edo period)", model:"Antique Japanese Katana", blade:"28 inch hand-forged tamahagane steel", handle:"Traditional tsuka with ray skin wrap", storage:"Custom wall mount — home office. NOT for handling.", transfer:"Estate auction — contact Bonhams Asian Art Division", notes:"Appraised 2021 at $12,000–$18,000. Authentication certificate in Legacy Vault. DO NOT separate from saya.", photo:"" },
-  { id:3, type:"Tactical Tomahawk", make:"SOG", model:"Fasthawk", blade:"2.75 inch 420 stainless", handle:"GRN reinforced polymer", storage:"Canvas roll bag — garage cabinet", transfer:"Michael Doe", notes:"Camping / utility tool.", photo:"" },
-];
+
+
+
+
+
+
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -138,7 +117,7 @@ const PASSETS_CSS = `
 .fpd-passets .tile{padding:12px 14px;}
 .fpd-passets .tile .tk{font-size:12px;font-weight:600;color:${MUTED};margin-bottom:5px;}
 .fpd-passets .tile .tv{color:${TEXT};font-size:16px;line-height:1.5;}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-passets .dgrid,.fpd-passets .dgrid.two{grid-template-columns:1fr;}
 .fpd-passets .dgrid:not(.two) .tile:nth-child(3n+2),.fpd-passets .dgrid:not(.two) .tile:nth-child(3n){border-left:none;}
 .fpd-passets .dgrid.two .tile:nth-child(2n){border-left:none;}
@@ -173,16 +152,93 @@ const PASSETS_CSS = `
 .fpd-passets .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
+/* NUMERIC columns <-> the "$45,000" strings the UI shows. Converting at
+   this boundary keeps both the schema and the screens as they are. */
+const toMoney = (n: unknown) => (n === null || n === undefined || n === "" ? "" : "$" + Number(n).toLocaleString());
+const fromMoney = (v: string) => {
+  const raw = String(v ?? "").trim();
+  if (!raw) return null;
+  const n = Number(raw.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? n : null;
+};
+
 export function PersonalAssets() {
   const [tab, setTab] = useState<Tab>("vehicles");
-  const [vehicleList, setVehicleList] = useState(vehicles);
-  const [realEstateList, setRealEstateList] = useState(realEstateInit);
-  const [digitalList, setDigitalList] = useState(digitalAssets);
-  const [weaponList, setWeaponList] = useState(weapons);
-  const [collectiblesList, setCollectiblesList] = useState(collectiblesInit);
-  const [weaponsLockerList, setWeaponsLockerList] = useState(weaponsLockerInit);
+  const { authUser } = useAuth();
+  const [vehicleList, setVehicleList] = useState<any[]>([]);
+  const [realEstateList, setRealEstateList] = useState<any[]>([]);
+  const [digitalList, setDigitalList] = useState<any[]>([]);
+  const [weaponList, setWeaponList] = useState<any[]>([]);
+  const [collectiblesList, setCollectiblesList] = useState<any[]>([]);
+  const [weaponsLockerList, setWeaponsLockerList] = useState<any[]>([]);
+
+  /* Each tab has its own table (migration 007, columns completed by 015).
+     Money is NUMERIC in the database but the UI shows "$45,000" strings, so
+     it converts at this boundary rather than changing either side. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const fail = (what: string, e: { message: string }) => toast.error(`Could not load ${what}: ${e.message}`);
+
+    const [v, re, d, w, wl, c] = await Promise.all([
+      tables.vehicles.list(authUser.id),
+      tables.realEstate.list(authUser.id),
+      tables.digitalAssets.list(authUser.id),
+      tables.weapons.list(authUser.id),
+      tables.weaponsLocker.list(authUser.id),
+      tables.collectibles.list(authUser.id),
+    ]);
+
+    if (v.error) fail("vehicles", v.error); else setVehicleList((v.data ?? []).map(r => ({
+      id: String(r.id), year: Number(r.year) || "", make: String(r.make ?? ""), model: String(r.model ?? ""),
+      color: String(r.color ?? ""), vin: String(r.vin ?? ""), plate: String(r.license_plate ?? ""),
+      title: String(r.title_holder ?? ""), lien: String(r.loan_lender ?? "None"),
+      insurance: String(r.insurance_provider ?? ""), registration: String(r.registration_expiry ?? ""),
+      value: toMoney(r.current_value), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+    })));
+
+    if (re.error) fail("real estate", re.error); else setRealEstateList((re.data ?? []).map(r => ({
+      id: String(r.id), type: String(r.property_type ?? ""), address: String(r.address ?? ""),
+      city: String(r.city ?? ""), value: toMoney(r.current_value), mortgage: toMoney(r.mortgage_balance),
+      mortgagePayment: toMoney(r.mortgage_payment), titleHolder: String(r.title_holder ?? ""),
+      deed: String(r.deed_location ?? ""), yearBuilt: String(r.year_built ?? ""), sqft: String(r.sqft ?? ""),
+      bedBath: String(r.bed_bath ?? ""), lotSize: String(r.lot_size ?? ""), notes: String(r.notes ?? ""),
+      photo: String(r.photo_url ?? ""), attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+    })));
+
+    if (d.error) fail("digital assets", d.error); else setDigitalList((d.data ?? []).map(r => ({
+      id: String(r.id), category: String(r.asset_type ?? ""), platform: String(r.platform ?? ""),
+      asset: String(r.asset_name ?? ""), holdings: String(r.holdings ?? ""), value: toMoney(r.estimated_value),
+      accessMethod: String(r.access_instructions ?? ""), notes: String(r.notes ?? ""), attachedDoc: null,
+    })));
+
+    if (w.error) fail("weapons", w.error); else setWeaponList((w.data ?? []).map(r => ({
+      id: String(r.id), type: String(r.weapon_type ?? ""), make: String(r.make ?? ""), model: String(r.model ?? ""),
+      caliber: String(r.caliber ?? ""), serial: String(r.serial_number ?? ""), registration: String(r.permit_number ?? ""),
+      storage: String(r.storage_location ?? ""), transfer: String(r.transfer_to ?? ""), photo: String(r.photo_url ?? ""),
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+    })));
+
+    if (wl.error) fail("weapons locker", wl.error); else setWeaponsLockerList((wl.data ?? []).map(r => ({
+      id: String(r.id), type: String(r.item_type ?? ""), make: String(r.make ?? ""), model: String(r.model ?? ""),
+      blade: String(r.blade ?? ""), handle: String(r.handle ?? ""), storage: String(r.location ?? ""),
+      transfer: String(r.transfer_to ?? ""), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+    })));
+
+    if (c.error) fail("collectibles", c.error); else setCollectiblesList((c.data ?? []).map(r => ({
+      id: String(r.id), name: String(r.item_name ?? ""), category: String(r.category ?? ""),
+      condition: String(r.condition ?? ""), estimatedValue: toMoney(r.current_value),
+      purchaseDate: String(r.acquired_date ?? ""), purchasedFrom: String(r.acquired_from ?? ""),
+      intendedFor: String(r.intended_for ?? ""), serialNum: String(r.serial_number ?? ""),
+      notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const tabContentRef = React.useRef<HTMLDivElement>(null);
   const [pendingPhotoTarget, setPendingPhotoTarget] = useState<{type:"realestate"|"weapon"; id:number}|null>(null);
@@ -200,9 +256,11 @@ export function PersonalAssets() {
   const [wlForm, setWlForm] = useState({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
   const [wlDoc, setWlDoc] = useState<string|null>(null);
 
-  function uploadPhoto(file: File) {
+  async function uploadPhoto(file: File) {
     if (!pendingPhotoTarget) return;
-    const url = URL.createObjectURL(file);
+    let url: string;
+    try { url = (await prepareImage(file)).url; }
+    catch (err) { toast.error((err as Error).message); return; }
     if (pendingPhotoTarget.type === "realestate") {
       setRealEstateList(p => p.map(r => r.id === pendingPhotoTarget.id ? { ...r, photo: url } : r));
       toast.success("Property photo added");
@@ -213,116 +271,152 @@ export function PersonalAssets() {
     setPendingPhotoTarget(null);
   }
 
-  function addRealEstate() {
+  async function addRealEstate() {
+    if (!authUser) return;
     if (!rForm.address) { toast.error("Address required"); return; }
-    if (editingId !== null) {
-      setRealEstateList(p => p.map(r => r.id === editingId ? { ...r, type:rForm.type||"Property", address:rForm.address, city:rForm.city, value:rForm.value||"—", mortgage:rForm.mortgage||"—", mortgagePayment:rForm.mortgagePayment||"—", titleHolder:rForm.titleHolder, deed:rForm.deed, yearBuilt:rForm.yearBuilt, sqft:rForm.sqft, bedBath:rForm.bedBath, lotSize:rForm.lotSize, notes:rForm.notes, photo:rForm.photo } : r));
-      toast.success(`${rForm.address} updated`);
-    } else {
-      setRealEstateList(p => [...p, { id:Date.now(), type:rForm.type||"Property", address:rForm.address, city:rForm.city, value:rForm.value||"—", mortgage:rForm.mortgage||"—", mortgagePayment:rForm.mortgagePayment||"—", titleHolder:rForm.titleHolder, deed:rForm.deed, yearBuilt:rForm.yearBuilt, sqft:rForm.sqft, bedBath:rForm.bedBath, lotSize:rForm.lotSize, notes:rForm.notes, photo:rForm.photo }]);
-      toast.success(`${rForm.address} added`);
-    }
+    const row = {
+      property_name: rForm.address, property_type: rForm.type || null, address: rForm.address,
+      city: rForm.city || null, current_value: fromMoney(rForm.value),
+      mortgage_balance: fromMoney(rForm.mortgage), mortgage_payment: fromMoney(rForm.mortgagePayment),
+      title_holder: rForm.titleHolder || null, deed_location: rForm.deed || null,
+      year_built: rForm.yearBuilt || null, sqft: rForm.sqft || null, bed_bath: rForm.bedBath || null,
+      lot_size: rForm.lotSize || null, notes: rForm.notes || null, photo_url: rForm.photo || null,
+      document_urls: rDoc ? [rDoc] : [],
+    };
+    const { error } = editingId !== null
+      ? await tables.realEstate.update(String(editingId), row)
+      : await tables.realEstate.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${rForm.address} ${editingId !== null ? "updated" : "added"}`);
     setRForm({ type:"", address:"", city:"", value:"", mortgage:"", mortgagePayment:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"", notes:"", photo:"" });
-    setEditingId(null);
-    setShowAdd(null);
+    setRDoc(null); setEditingId(null); setShowAdd(null);
   }
 
-  function addVehicle() {
+  async function addVehicle() {
+    if (!authUser) return;
     if (!vForm.make || !vForm.model) { toast.error("Make and model required"); return; }
-    if (editingId !== null) {
-      setVehicleList(p => p.map(v => v.id === editingId ? { ...v, year:Number(vForm.year)||v.year, make:vForm.make, model:vForm.model, color:vForm.color, vin:vForm.vin, plate:vForm.plate, title:vForm.title, lien:vForm.lien||"None", insurance:vForm.insurance, registration:vForm.registration, value:vForm.value||"—", notes:vForm.notes, photo:vForm.photo } : v));
-      toast.success(`${vForm.year} ${vForm.make} ${vForm.model} updated`);
-    } else {
-      setVehicleList(p => [...p, { id:Date.now(), year:Number(vForm.year)||new Date().getFullYear(), make:vForm.make, model:vForm.model, color:vForm.color, vin:vForm.vin, plate:vForm.plate, title:vForm.title, lien:vForm.lien||"None", insurance:vForm.insurance, registration:vForm.registration, value:vForm.value||"—", notes:vForm.notes, photo:vForm.photo }]);
-      toast.success(`${vForm.year} ${vForm.make} ${vForm.model} added`);
-    }
+    const row = {
+      year: vForm.year || null, make: vForm.make, model: vForm.model, color: vForm.color || null,
+      vin: vForm.vin || null, license_plate: vForm.plate || null, title_holder: vForm.title || null,
+      loan_lender: vForm.lien || null, insurance_provider: vForm.insurance || null,
+      registration_expiry: vForm.registration || null, current_value: fromMoney(vForm.value),
+      notes: vForm.notes || null, photo_url: vForm.photo || null,
+      document_urls: vDoc ? [vDoc] : [],
+    };
+    const { error } = editingId !== null
+      ? await tables.vehicles.update(String(editingId), row)
+      : await tables.vehicles.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${vForm.year} ${vForm.make} ${vForm.model} ${editingId !== null ? "updated" : "added"}`);
     setVForm({ year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", notes:"", photo:"" });
-    setEditingId(null);
-    setShowAdd(null);
+    setVDoc(null); setEditingId(null); setShowAdd(null);
   }
-  function addDigital() {
+  async function addDigital() {
+    if (!authUser) return;
     if (!dForm.asset) { toast.error("Asset name required"); return; }
-    if (editingId !== null) {
-      setDigitalList(p => p.map(d => d.id === editingId ? { ...d, category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, notes:dForm.notes, attachedDoc:dDoc } : d));
-      toast.success(`${dForm.asset} updated`);
-    } else {
-      setDigitalList(p => [...p, { id:Date.now(), category:dForm.category, platform:dForm.platform, asset:dForm.asset, holdings:dForm.holdings, value:dForm.value||"—", accessMethod:dForm.accessMethod, walletAddress:"—", notes:dForm.notes, attachedDoc:dDoc }]);
-      toast.success(`${dForm.asset} added`);
-    }
+    const row = {
+      asset_name: dForm.asset, asset_type: dForm.category || null, platform: dForm.platform || null,
+      holdings: dForm.holdings || null, estimated_value: fromMoney(dForm.value),
+      access_instructions: dForm.accessMethod || null, notes: dForm.notes || null,
+    };
+    const { error } = editingId !== null
+      ? await tables.digitalAssets.update(String(editingId), row)
+      : await tables.digitalAssets.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${dForm.asset} ${editingId !== null ? "updated" : "added"}`);
     setDForm({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
-    setDDoc(null);
-    setEditingId(null);
-    setShowAdd(null);
+    setDDoc(null); setEditingId(null); setShowAdd(null);
   }
-  function addWeapon() {
-    if (!wForm.make || !wForm.model) { toast.error("Make and model required"); return; }
-    if (editingId !== null) {
-      setWeaponList(p => p.map(w => w.id === editingId ? { ...w, type:wForm.type, make:wForm.make, model:wForm.model, caliber:wForm.caliber, serial:wForm.serial, registration:wForm.registration, storage:wForm.storage, transfer:wForm.transfer, photo:wForm.photo } : w));
-      toast.success(`${wForm.make} ${wForm.model} updated`);
-    } else {
-      setWeaponList(p => [...p, { id:Date.now(), type:wForm.type, make:wForm.make, model:wForm.model, caliber:wForm.caliber, serial:wForm.serial, registration:wForm.registration, storage:wForm.storage, transfer:wForm.transfer, photo:wForm.photo }]);
-      toast.success(`${wForm.make} ${wForm.model} added`);
-    }
+  async function addWeapon() {
+    if (!authUser) return;
+    if (!wForm.make) { toast.error("Make required"); return; }
+    const row = {
+      weapon_type: wForm.type, make: wForm.make, model: wForm.model || null, caliber: wForm.caliber || null,
+      serial_number: wForm.serial || null, permit_number: wForm.registration || null,
+      storage_location: wForm.storage || null, transfer_to: wForm.transfer || null,
+      photo_url: wForm.photo || null, document_urls: wDoc ? [wDoc] : [],
+    };
+    const { error } = editingId !== null
+      ? await tables.weapons.update(String(editingId), row)
+      : await tables.weapons.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${wForm.make} ${wForm.model} ${editingId !== null ? "updated" : "added"}`);
     setWForm({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", storage:"", transfer:"", photo:"" });
-    setEditingId(null);
-    setShowAdd(null);
+    setWDoc(null); setEditingId(null); setShowAdd(null);
   }
 
-  function addCollectible() {
+  async function addCollectible() {
+    if (!authUser) return;
     if (!cForm.name) { toast.error("Item name required"); return; }
-    if (editingId !== null) {
-      setCollectiblesList(p => p.map(c => c.id === editingId ? { ...c, name:cForm.name, category:cForm.category, condition:cForm.condition, estimatedValue:cForm.estimatedValue||"—", purchaseDate:cForm.purchaseDate, purchasedFrom:cForm.purchasedFrom, intendedFor:cForm.intendedFor, serialNum:cForm.serialNum, notes:cForm.notes, photo:cForm.photo } : c));
-      toast.success(`"${cForm.name}" updated`);
-    } else {
-      setCollectiblesList(p => [...p, { id:Date.now(), name:cForm.name, category:cForm.category, condition:cForm.condition, estimatedValue:cForm.estimatedValue||"—", purchaseDate:cForm.purchaseDate, purchasedFrom:cForm.purchasedFrom, intendedFor:cForm.intendedFor, serialNum:cForm.serialNum, notes:cForm.notes, photo:cForm.photo }]);
-      toast.success(`"${cForm.name}" added to Collectibles`);
-    }
+    const row = {
+      item_name: cForm.name, category: cForm.category || null, condition: cForm.condition || null,
+      current_value: fromMoney(cForm.estimatedValue), acquired_date: cForm.purchaseDate || null,
+      acquired_from: cForm.purchasedFrom || null, intended_for: cForm.intendedFor || null,
+      serial_number: cForm.serialNum || null, notes: cForm.notes || null, photo_url: cForm.photo || null,
+      document_urls: cDoc ? [cDoc] : [],
+    };
+    const { error } = editingId !== null
+      ? await tables.collectibles.update(String(editingId), row)
+      : await tables.collectibles.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${cForm.name} ${editingId !== null ? "updated" : "added"}`);
     setCForm({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
-    setEditingId(null);
-    setShowAdd(null);
+    setCDoc(null); setEditingId(null); setShowAdd(null);
   }
 
-  function addWeaponsLocker() {
-    if (!wlForm.make && !wlForm.model) { toast.error("Make or model required"); return; }
-    if (editingId !== null) {
-      setWeaponsLockerList(p => p.map(w => w.id === editingId ? { ...w, type:wlForm.type, make:wlForm.make, model:wlForm.model, blade:wlForm.blade, handle:wlForm.handle, storage:wlForm.storage, transfer:wlForm.transfer, notes:wlForm.notes, photo:wlForm.photo } : w));
-      toast.success(`${wlForm.make} ${wlForm.model} updated`);
-    } else {
-      setWeaponsLockerList(p => [...p, { id:Date.now(), type:wlForm.type, make:wlForm.make, model:wlForm.model, blade:wlForm.blade, handle:wlForm.handle, storage:wlForm.storage, transfer:wlForm.transfer, notes:wlForm.notes, photo:wlForm.photo }]);
-      toast.success(`${wlForm.make} ${wlForm.model} added to Weapons Locker`);
-    }
+  async function addWeaponsLocker() {
+    if (!authUser) return;
+    if (!wlForm.make) { toast.error("Make required"); return; }
+    // This tab is an inventory of bladed weapons, not a physical locker --
+    // see the note in migration 015 about the original column shape.
+    const row = {
+      item_type: wlForm.type, make: wlForm.make, model: wlForm.model || null,
+      blade: wlForm.blade || null, handle: wlForm.handle || null, location: wlForm.storage || null,
+      transfer_to: wlForm.transfer || null, notes: wlForm.notes || null, photo_url: wlForm.photo || null,
+      document_urls: wlDoc ? [wlDoc] : [],
+    };
+    const { error } = editingId !== null
+      ? await tables.weaponsLocker.update(String(editingId), row)
+      : await tables.weaponsLocker.add(authUser.id, row);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${wlForm.make} ${wlForm.model} ${editingId !== null ? "updated" : "added"}`);
     setWlForm({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
-    setEditingId(null);
-    setShowAdd(null);
+    setWlDoc(null); setEditingId(null); setShowAdd(null);
   }
 
-  function editVehicle(v: typeof vehicles[number]) {
+  function editVehicle(v: any) {
     setVForm({ year:String(v.year), make:v.make, model:v.model, color:v.color, vin:v.vin, plate:v.plate, title:v.title, lien:v.lien, insurance:v.insurance, registration:v.registration, value:v.value, notes:v.notes, photo:(v as any).photo || "" });
     setEditingId(v.id);
     setShowAdd("vehicles");
   }
-  function editRealEstate(r: typeof realEstateInit[number]) {
+  function editRealEstate(r: any) {
     setRForm({ type:r.type, address:r.address, city:r.city, value:r.value, mortgage:r.mortgage, mortgagePayment:r.mortgagePayment, titleHolder:r.titleHolder, deed:r.deed, yearBuilt:r.yearBuilt, sqft:r.sqft, bedBath:r.bedBath, lotSize:r.lotSize, notes:r.notes, photo:r.photo });
     setEditingId(r.id);
     setShowAdd("realestate");
   }
-  function editDigital(d: typeof digitalAssets[number]) {
+  function editDigital(d: any) {
     setDForm({ category:d.category, platform:d.platform, asset:d.asset, holdings:d.holdings, value:d.value, accessMethod:d.accessMethod, notes:d.notes });
     setDDoc((d as any).attachedDoc || null);
     setEditingId(d.id);
     setShowAdd("digital");
   }
-  function editWeapon(w: typeof weapons[number]) {
+  function editWeapon(w: any) {
     setWForm({ type:w.type, make:w.make, model:w.model, caliber:w.caliber, serial:w.serial, registration:w.registration, storage:w.storage, transfer:w.transfer, photo:w.photo || "" });
     setEditingId(w.id);
     setShowAdd("weapons");
   }
-  function editWeaponsLocker(w: typeof weaponsLockerInit[number]) {
+  function editWeaponsLocker(w: any) {
     setWlForm({ type:w.type, make:w.make, model:w.model, blade:w.blade, handle:w.handle, storage:w.storage, transfer:w.transfer, notes:w.notes, photo:w.photo || "" });
     setEditingId(w.id);
     setShowAdd("weapons_locker");
   }
-  function editCollectible(c: typeof collectiblesInit[number]) {
+  function editCollectible(c: any) {
     setCForm({ name:c.name, category:c.category, condition:c.condition, estimatedValue:c.estimatedValue, purchaseDate:c.purchaseDate, purchasedFrom:c.purchasedFrom, intendedFor:c.intendedFor, serialNum:c.serialNum, notes:c.notes, photo:c.photo || "" });
     setEditingId(c.id);
     setShowAdd("collectibles");

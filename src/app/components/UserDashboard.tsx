@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
-import heroFamilyPhoto from "../../imports/dashboard_hero_family.png";
+import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
 
@@ -157,7 +157,7 @@ const DASH_CSS = `
 /* ── Recent documents + notifications (shared evrow pattern, same
    colour-coded-card language LifeCalendar uses for its event rows) ── */
 .fpd-dash .row4{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
-@media (max-width:980px){.fpd-dash .row4{grid-template-columns:1fr;}}
+@media (max-width:1024px){.fpd-dash .row4{grid-template-columns:1fr;}}
 .fpd-dash .evlist{display:flex;flex-direction:column;gap:11px;}
 .fpd-dash .evrow{display:flex;align-items:center;gap:14px;padding:15px 17px;border-radius:16px;background:rgba(255,255,255,0.024);border:1px solid;transition:opacity .15s;width:100%;text-align:left;cursor:pointer;font-family:var(--font-body);}
 .fpd-dash .evrow.read{opacity:0.6;cursor:default;}

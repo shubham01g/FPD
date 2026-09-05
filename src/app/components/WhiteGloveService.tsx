@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronUp, X
 } from "lucide-react";
 import { toast } from "sonner";
-import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.png";
+import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -186,7 +186,7 @@ const WG_CSS = `
 
 /* pricing */
 .fpd-wg .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-@media (max-width:760px){.fpd-wg .pricing-grid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-wg .pricing-grid{grid-template-columns:1fr;}}
 .fpd-wg .price-card{padding:32px;text-align:center;}
 .fpd-wg .price-card.featured{border:2px solid rgba(91,110,225,0.4);box-shadow:0 0 48px rgba(91,110,225,0.15),inset 0 1px 0 rgba(255,255,255,0.035);}
 .fpd-wg .price-eyebrow{color:${SOFT};font-size:14px;font-family:var(--font-mono);letter-spacing:0.14em;margin-bottom:12px;}
@@ -207,7 +207,7 @@ const WG_CSS = `
 
 /* steps */
 .fpd-wg .step-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-@media (max-width:700px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-wg .step-grid{grid-template-columns:1fr;}}
 .fpd-wg .step-card{display:flex;align-items:flex-start;gap:16px;padding:20px;}
 .fpd-wg .step-ico{width:48px;height:48px;border-radius:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.10);color:#FFFFFF;}
 .fpd-wg .step-num{color:#6FAE8B;font-size:12.5px;font-weight:700;font-family:var(--font-mono);}
@@ -257,7 +257,7 @@ const WG_CSS = `
 
 /* reassurance strip */
 .fpd-wg .reassure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-@media (max-width:700px){.fpd-wg .reassure-grid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-wg .reassure-grid{grid-template-columns:1fr;}}
 .fpd-wg .reassure-card{padding:20px;text-align:center;}
 .fpd-wg .reassure-card .ri{color:#6E90C9;margin:0 auto 10px;display:flex;justify-content:center;}
 .fpd-wg .reassure-card .rt{font-family:var(--font-display);font-size:17.5px;color:${TEXT};margin-bottom:4px;}

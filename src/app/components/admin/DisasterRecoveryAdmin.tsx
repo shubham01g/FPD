@@ -5,12 +5,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ADMIN_USERS } from "./UserDetailModal";
+import { adminApi, AdminApiError } from "../../services/adminApi";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
-/* ── shared localStorage key (same as user-facing DisasterRecovery component) ── */
-const DR_STORAGE_KEY = "fpd_disaster_recovery_bypass";
+/* Granting a bypass releases a user's entire vault, so it is written by the
+   service-role backend (routes/entitlements.ts) against disaster_recovery_state
+   — never by the browser. This used to be a shared localStorage key that the
+   user-facing screen also wrote, which let any user open their own window. */
 
 /* ── types ───────────────────────────────────────────────────────── */
 type BypassStatus = "none" | "active" | "expired";
@@ -37,10 +40,6 @@ interface AuditEntry {
 }
 
 type ModalStep = "acknowledge" | "mfa" | "complete";
-
-/* Demo bypass state syncs with the first admin user — matches the user-facing
-   DisasterRecovery component, which is always viewed as this account. */
-const DEMO_USER_ID = ADMIN_USERS[0]?.id ?? "";
 
 const INITIAL_USERS: UserBypass[] = ADMIN_USERS.slice(0, 6).map(u => ({
   userId: u.id, userName: u.name, email: u.email, plan: u.plan,
@@ -341,40 +340,26 @@ export function DisasterRecoveryAdmin() {
   const [filterStatus, setFilterStatus] = useState<"all"|BypassStatus>("all");
   const [showAudit, setShowAudit] = useState(false);
 
-  // Poll for any bypass the user-facing component granted itself in the demo flow
-  useEffect(() => {
-    const id = setInterval(() => {
-      try {
-        const raw = localStorage.getItem(DR_STORAGE_KEY);
-        if (!raw) return;
-        const s = JSON.parse(raw);
-        setUsers(us => us.map(u =>
-          u.userId === DEMO_USER_ID && u.status !== "active"
-            ? { ...u, status:"active", activatedAt:s.activatedAt, expiresAt:s.expiresAt, activatedBy:s.activatedBy, reason:s.reason }
-            : u
-        ));
-      } catch {}
-    }, 1500);
-    return () => clearInterval(id);
-  }, []);
-
-  const handleGrant = (userId: string, reason: string) => {
+  const handleGrant = async (userId: string, reason: string) => {
     const now = Date.now();
     const expiresAt = now + 48 * 3600_000;
+    const targetUser = users.find(u => u.userId === userId);
+
+    // Persist first: if the backend refuses (restricted role, or a row that is
+    // not a real account) the window must not appear open in the console.
+    try {
+      await adminApi.put(`/disaster-recovery/${userId}`, { grant_bypass: true, reason });
+    } catch (e) {
+      const msg = e instanceof AdminApiError ? e.message : "Could not reach the admin backend";
+      toast.error(`Bypass not granted for ${targetUser?.userName ?? userId}: ${msg}`);
+      return;
+    }
 
     setUsers(us => us.map(u =>
       u.userId === userId
         ? { ...u, status:"active", activatedAt:now, expiresAt, activatedBy:"admin@fpd.com", reason }
         : u
     ));
-
-    const targetUser = users.find(u => u.userId === userId);
-
-    if (targetUser?.userId === DEMO_USER_ID) {
-      localStorage.setItem(DR_STORAGE_KEY, JSON.stringify({
-        activatedAt: now, expiresAt, activatedBy: "Master Admin", reason
-      }));
-    }
 
     setAudit(a => [{
       id: `DR-${Math.floor(Math.random()*9000)+1000}`,
@@ -386,17 +371,22 @@ export function DisasterRecoveryAdmin() {
     setGrantTarget(null);
   };
 
-  const handleRevoke = (userId: string) => {
+  const handleRevoke = async (userId: string) => {
     const targetUser = users.find(u => u.userId === userId);
+
+    try {
+      await adminApi.del(`/disaster-recovery/${userId}`);
+    } catch (e) {
+      const msg = e instanceof AdminApiError ? e.message : "Could not reach the admin backend";
+      toast.error(`Bypass not revoked for ${targetUser?.userName ?? userId}: ${msg}`);
+      return;
+    }
+
     setUsers(us => us.map(u =>
       u.userId === userId
         ? { ...u, status:"expired", activatedAt:null, expiresAt:null, activatedBy:null, reason:null }
         : u
     ));
-
-    if (userId === DEMO_USER_ID) {
-      localStorage.removeItem(DR_STORAGE_KEY);
-    }
 
     setAudit(a => [{
       id: `DR-${Math.floor(Math.random()*9000)+1000}`,

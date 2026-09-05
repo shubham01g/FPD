@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroDaycarePhoto from "../../imports/daycare_hero_photo.png";
+import heroDaycarePhoto from "../../imports/daycare_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -24,7 +26,7 @@ interface AuthorizedPerson {
 }
 
 interface DaycareRecord {
-  id: number;
+  id: string;
   facilityName: string;
   childName: string;
   address: string;
@@ -51,70 +53,14 @@ interface DaycareRecord {
   documents: string[];
 }
 
-const initRecords: DaycareRecord[] = [
-  {
-    id: 1,
-    facilityName: "Sunshine Learning Center",
-    childName: "Emma Doe",
-    address: "4821 Amber Oaks Drive, Sacramento, CA 95841",
-    phone: "(916) 555-0291",
-    email: "info@sunshinelearning.com",
-    website: "sunshinelearningcenter.com",
-    directorName: "Ms. Patricia Rivera",
-    teacherName: "Ms. Amanda Cole",
-    teacherPhone: "(916) 555-0384",
-    dropoffTime: "7:30 AM",
-    pickupTime: "5:30 PM",
-    days: "Monday – Friday",
-    tuition: "$1,450/month",
-    tuitionDue: "1st of each month",
-    paymentMethod: "Auto-pay — Chase checking account",
-    allergiesOnFile: "Peanuts (severe — EpiPen on file), Tree nuts",
-    medicationsOnFile: "EpiPen Jr. — stored in Emma's cubby and director's office",
-    emergencyContact: "Sarah Johnson (mother)",
-    emergencyPhone: "(916) 555-0182",
-    enrollDate: "Sep 2023",
-    status: "active",
-    notes: "Emma is in the Butterfly Room (3–4 year olds). Nap time 1:00–2:30 PM. Bring labeled lunch and two snacks daily.",
-    authorizedPickups: [
-      { name: "Sarah Johnson", relationship: "Mother", phone: "(916) 555-0182", photoId: "Driver's License on file" },
-      { name: "James Doe", relationship: "Father", phone: "(916) 555-0291", photoId: "Driver's License on file" },
-      { name: "Margaret Thompson", relationship: "Grandmother", phone: "(916) 555-0841", photoId: "Passport on file" },
-      { name: "Linda Torres", relationship: "Emergency Backup", phone: "(916) 555-0492", photoId: "State ID on file" },
-    ],
-    documents: ["Enrollment Agreement 2023","Immunization Records","EpiPen Authorization Form","Emergency Contact Form"],
-  },
-  {
-    id: 2,
-    facilityName: "Little Stars Academy",
-    childName: "Lucas Doe",
-    address: "2210 Fair Oaks Blvd, Sacramento, CA 95825",
-    phone: "(916) 555-0481",
-    email: "admin@littlestarsacademy.com",
-    website: "littlestarsacademy.com",
-    directorName: "Mr. David Park",
-    teacherName: "Ms. Jennifer Lee",
-    teacherPhone: "(916) 555-0572",
-    dropoffTime: "8:00 AM",
-    pickupTime: "4:00 PM",
-    days: "Monday, Wednesday, Friday",
-    tuition: "$880/month",
-    tuitionDue: "15th of each month",
-    paymentMethod: "Check mailed monthly",
-    allergiesOnFile: "None known",
-    medicationsOnFile: "None",
-    emergencyContact: "Sarah Johnson (mother)",
-    emergencyPhone: "(916) 555-0182",
-    enrollDate: "Jan 2024",
-    status: "active",
-    notes: "Lucas is in the Sunshine Room (18 months – 2 years). Bring 3 changes of clothes, diapers, wipes. Sippy cup labeled with name.",
-    authorizedPickups: [
-      { name: "Sarah Johnson", relationship: "Mother", phone: "(916) 555-0182", photoId: "Driver's License on file" },
-      { name: "James Doe", relationship: "Father", phone: "(916) 555-0291", photoId: "Driver's License on file" },
-    ],
-    documents: ["Enrollment Agreement 2024","Immunization Records","Emergency Contact Form"],
-  },
-];
+/* Rows come from the `daycare_records` table — the screen used to open on
+   sample enrolments identical for every account and lost on refresh. */
+
+// `days` is TEXT[] in the table but a single comma-separated field in the form.
+const toDays = (v: unknown) => Array.isArray(v) ? (v as string[]).join(", ") : String(v ?? "");
+const fromDays = (v: string) => v.split(",").map(d => d.trim()).filter(Boolean);
+const fromMoney = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
+const toMoney = (n: number | null | undefined) => (n === null || n === undefined ? "" : `$${Number(n).toLocaleString()}`);
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -182,7 +128,7 @@ const DAYCARE_CSS = `
 .fpd-daycare .igrid{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);overflow:hidden;}
 .fpd-daycare .igrid .tile:nth-child(2n){border-left:1px solid rgba(255,255,255,0.08);}
 .fpd-daycare .igrid .tile:nth-child(n+3){border-top:1px solid rgba(255,255,255,0.08);}
-@media (max-width:760px){
+@media (max-width:900px){
 .fpd-daycare .igrid{grid-template-columns:1fr;}
 .fpd-daycare .igrid .tile:nth-child(2n){border-left:none;}
 .fpd-daycare .igrid .tile:nth-child(n+2){border-top:1px solid rgba(255,255,255,0.08);}
@@ -234,8 +180,44 @@ const DAYCARE_CSS = `
 `;
 
 export function DaycareInfo() {
-  const [records, setRecords] = useState<DaycareRecord[]>(initRecords);
-  const [expanded, setExpanded] = useState<number | null>(1);
+  const { authUser } = useAuth();
+  const [records, setRecords] = useState<DaycareRecord[]>([]);
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setRecords([]); return; }
+    const { data, error } = await tables.daycareRecords.list(authUser.id);
+    if (error) { toast.error(`Could not load daycare records: ${error.message}`); return; }
+    setRecords((data ?? []).map(r => ({
+      id: String(r.id),
+      facilityName: String(r.facility_name ?? ""),
+      childName: String(r.child_name ?? ""),
+      address: String(r.address ?? ""),
+      phone: String(r.phone ?? ""),
+      email: String(r.email ?? ""),
+      website: String(r.website ?? ""),
+      directorName: String(r.director_name ?? ""),
+      teacherName: String(r.teacher_name ?? ""),
+      teacherPhone: String(r.teacher_phone ?? ""),
+      dropoffTime: String(r.dropoff_time ?? ""),
+      pickupTime: String(r.pickup_time ?? ""),
+      days: toDays(r.days),
+      tuition: toMoney(r.tuition as number | null),
+      tuitionDue: String(r.tuition_due ?? ""),
+      paymentMethod: String(r.payment_method ?? ""),
+      allergiesOnFile: String(r.allergies_on_file ?? ""),
+      medicationsOnFile: String(r.medications_on_file ?? ""),
+      emergencyContact: String(r.emergency_contact ?? ""),
+      emergencyPhone: String(r.emergency_phone ?? ""),
+      enrollDate: String(r.enroll_date ?? ""),
+      status: (r.status as DaycareRecord["status"]) ?? "active",
+      notes: String(r.notes ?? ""),
+      authorizedPickups: (r.authorized_pickups as AuthorizedPerson[] | null) ?? [],
+      documents: (r.document_urls as string[] | null) ?? [],
+    })));
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingRecord, setEditingRecord] = useState<DaycareRecord | null>(null);
   const [activeTab, setActiveTab] = useState<"info"|"pickups"|"docs">("info");
@@ -269,16 +251,33 @@ export function DaycareInfo() {
     setForm(emptyForm);
   }
 
-  function saveRecord() {
+  async function saveRecord() {
     if (!form.facilityName || !form.childName) { toast.error("Facility name and child's name required"); return; }
-    if (editingRecord) {
-      setRecords(p => p.map(r => r.id === editingRecord.id ? { ...r, ...form } : r));
-      toast.success(`${form.childName} at ${form.facilityName} updated`);
-    } else {
-      const rec: DaycareRecord = { ...form, id:Date.now(), website:"", teacherPhone:"", email:form.email, tuitionDue:"", paymentMethod:"", medicationsOnFile:"None", enrollDate:new Date().toLocaleDateString("en-US",{month:"short",year:"numeric"}), status:"active", authorizedPickups:[], documents:[] };
-      setRecords(p => [rec, ...p]);
-      toast.success(`${form.childName} at ${form.facilityName} added`);
-    }
+    if (!authUser) { toast.error("Sign in to save daycare records."); return; }
+
+    const row = {
+      facility_name: form.facilityName, child_name: form.childName,
+      address: form.address, phone: form.phone, email: form.email,
+      director_name: form.directorName, teacher_name: form.teacherName,
+      dropoff_time: form.dropoffTime, pickup_time: form.pickupTime,
+      days: fromDays(form.days), tuition: fromMoney(form.tuition),
+      allergies_on_file: form.allergiesOnFile, emergency_contact: form.emergencyContact,
+      emergency_phone: form.emergencyPhone, notes: form.notes,
+      ...(editingRecord ? {} : {
+        medications_on_file: "None",
+        enroll_date: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+        status: "active",
+      }),
+    };
+
+    const { error } = editingRecord
+      ? await tables.daycareRecords.update(editingRecord.id, row)
+      : await tables.daycareRecords.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(`${form.childName} at ${form.facilityName} ${editingRecord ? "updated" : "added"}`);
     closeDaycareModal();
   }
 

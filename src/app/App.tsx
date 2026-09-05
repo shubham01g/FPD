@@ -43,6 +43,7 @@ import { DigitalDiary } from "./components/DigitalDiary";
 import { MessagesToLovedOnes } from "./components/MessagesToLovedOnes";
 import { VitalClone } from "./components/VitalClone";
 import { PasswordManager } from "./components/PasswordManager";
+import { VaultUnlock } from "./components/VaultUnlock";
 import { SubscriptionManager } from "./components/SubscriptionManager";
 import { LegacyContinuationFee } from "./components/LegacyContinuationFee";
 import { DisasterRecovery } from "./components/DisasterRecovery";
@@ -343,7 +344,14 @@ function UserSignupRoute() {
 function UserRoute() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const [userPage, setUserPage] = useState<PageId>("dashboard");
+  /* The portal's page is component state rather than a route, so the PWA
+     manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
+     target in as a query param. Read once, for the initial value only —
+     afterwards the sidebar owns navigation and the URL stays put. */
+  const [userPage, setUserPage] = useState<PageId>(() => {
+    const p = new URLSearchParams(window.location.search).get("page");
+    return (p as PageId) || "dashboard";
+  });
 
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace/>;
@@ -374,8 +382,10 @@ function UserRoute() {
       case "digital-diary":         return <DigitalDiary/>;
       case "messages-loved-ones":   return <MessagesToLovedOnes/>;
       case "vital-clone":           return <VitalClone/>;
-      case "password-manager":      return <PasswordManager/>;
-      case "subscription-manager":   return <SubscriptionManager/>;
+      // Credentials are encrypted client-side, so the screen cannot render
+      // anything readable until the passphrase has derived the key.
+      case "password-manager":      return <VaultUnlock><PasswordManager/></VaultUnlock>;
+      case "subscription-manager":   return <VaultUnlock><SubscriptionManager/></VaultUnlock>;
       case "legacy-continuation":    return <LegacyContinuationFee/>;
       case "disaster-recovery":      return <DisasterRecovery/>;
       case "contacts-legacy":    return <ContactsHub initialSection="legacy"/>;

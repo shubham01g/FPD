@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
-import heroAccountPhoto from "../../imports/accountsettings_hero_photo_v2.png";
+import heroAccountPhoto from "../../imports/accountsettings_hero_photo_v2.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -93,7 +93,7 @@ const ACCT_CSS = `
 .fpd-acct .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-acct .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-acct .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-acct .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-acct .kpi-stack{grid-template-columns:1fr;}}
 
 /* fields */
 .fpd-acct .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
@@ -135,7 +135,7 @@ const ACCT_CSS = `
 .fpd-acct .mcard .mtagline{font-family:var(--font-mono);font-size:12.5px;font-weight:700;margin-top:8px;}
 .fpd-acct .mcard .mbtn{margin-top:12px;padding:9px;border-radius:18px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:var(--font-body);transition:filter .18s;}
 .fpd-acct .mcard .mbtn:hover{filter:brightness(1.1);}
-@media (max-width:760px){.fpd-acct .mgrid{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-acct .mgrid{grid-template-columns:1fr;}}
 
 .fpd-acct .active-note{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:16px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:#D99A6B;font-size:15px;}
 .fpd-acct .active-note strong{font-weight:700;}
@@ -153,7 +153,7 @@ const ACCT_CSS = `
 .fpd-acct .stat3 .sval{font-family:var(--font-display);font-size:19px;font-weight:700;}
 .fpd-acct .stat3 .slbl{color:${TEXT};font-size:14px;font-weight:500;margin-top:4px;}
 .fpd-acct .stat3 .ssub{color:${MUTED};font-size:12.5px;margin-top:2px;}
-@media (max-width:700px){.fpd-acct .stat3{grid-template-columns:1fr;}}
+@media (max-width:900px){.fpd-acct .stat3{grid-template-columns:1fr;}}
 
 /* encrypted file chips */
 .fpd-acct .filetag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:18px;background:rgba(95,190,145,0.07);border:1px solid rgba(95,190,145,0.22);color:${TEXT};font-size:15px;}

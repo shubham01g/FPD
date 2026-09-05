@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { AttachDocumentField } from "./AttachDocumentField";
-import heroWarrantyPhoto from "../../imports/warranties_hero_photo.png";
+import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
 const TEXT    = "#EFF2F9";
@@ -20,7 +22,7 @@ const NEG     = "#D06B6B";
 const CATEGORIES = ["Electronics","Appliances","HVAC / Plumbing","Roofing / Structure","Vehicles","Furniture","Jewelry","Tools / Power Tools","Lawn & Garden","Sporting Goods","Medical Devices","Other"];
 
 interface Warranty {
-  id: number;
+  id: string;
   product: string;
   brand: string;
   model: string;
@@ -41,13 +43,14 @@ interface Warranty {
   photo: string;
 }
 
-const initWarranties: Warranty[] = [
-  { id:1, product:"55\" OLED Smart TV", brand:"LG", model:"OLED55C3PUA", serialNum:"LG-SN-8821492", category:"Electronics", purchaseDate:"Nov 25, 2023", purchasedFrom:"Best Buy — Sacramento", price:"$1,299", warrantyType:"Manufacturer + Extended (Geek Squad)", provider:"LG / Best Buy Geek Squad", providerPhone:"1-800-243-0000", providerWebsite:"geeksquad.com", expiryDate:"Nov 25, 2026", coverageDetails:"Manufacturer 1 year (expired). Geek Squad extended 3-year plan covers screen defects, remote, and all components. Does NOT cover physical damage.", claimInstructions:"Call 1-800-GEEKSQUAD or visit Best Buy with proof of purchase. Purchase ID: GSP-8821492.", notes:"Extended protection plan purchased separately. Registration confirmed online.", documents:["LG_Warranty_Card.pdf","Geek_Squad_Protection_Plan.pdf"] },
-  { id:2, product:"Central Air Conditioning System", brand:"Carrier", model:"24ACC636A003", serialNum:"CAR-29182-CA", category:"HVAC / Plumbing", purchaseDate:"May 18, 2022", purchasedFrom:"Sacramento Heating & Cooling Co.", price:"$8,400 (installed)", warrantyType:"Manufacturer (10-year parts / 10-year compressor)", provider:"Carrier HVAC", providerPhone:"1-800-227-7437", providerWebsite:"carrier.com/warranty", expiryDate:"May 18, 2032", coverageDetails:"10-year limited warranty on all parts. 10-year compressor warranty. Labor NOT included after first year — use licensed Carrier dealer for service.", claimInstructions:"Call Carrier warranty line or contact Sacramento Heating & Cooling (original installer). Must use authorized dealer or warranty is void.", notes:"Unit is registered with Carrier under our home address. Annual maintenance required to keep warranty valid — scheduled every May.", documents:["Carrier_Warranty_Registration.pdf","Installation_Receipt.pdf"] },
-  { id:3, product:"French Door Refrigerator", brand:"Samsung", model:"RF28R7201SR", serialNum:"SN-RF28-0492818", category:"Appliances", purchaseDate:"Jan 12, 2023", purchasedFrom:"Home Depot", price:"$1,899", warrantyType:"Manufacturer (1-year parts & labor / 5-year compressor)", provider:"Samsung Electronics", providerPhone:"1-800-726-7864", providerWebsite:"samsung.com/us/support", expiryDate:"Jan 12, 2028 (compressor)", coverageDetails:"1-year full warranty expired. 5-year sealed system and compressor warranty still active through Jan 2028.", claimInstructions:"Call Samsung support or schedule service at samsung.com. Have model and serial number ready.", notes:"Ice maker had minor issue in 2024 — repaired under original warranty. Compressor warranty still active.", documents:["Samsung_Warranty_Card.pdf"] },
-  { id:4, product:"2021 Toyota Camry XSE", brand:"Toyota", model:"Camry XSE", serialNum:"4T1BZ1HK8MU024891", category:"Vehicles", purchaseDate:"Feb 8, 2021", purchasedFrom:"Toyota of Sacramento", price:"$28,400", warrantyType:"Manufacturer (3-year/36k basic + 5-year/60k powertrain)", provider:"Toyota Motor Corp.", providerPhone:"1-800-331-4331", providerWebsite:"toyota.com/upcoming-vehicle-maintenance", expiryDate:"Feb 8, 2026 (powertrain)", coverageDetails:"3-year/36,000-mile bumper-to-bumper expired. 5-year/60,000-mile powertrain warranty active through Feb 2026. Rust perforation 5-year.", claimInstructions:"Take to any Toyota dealership. VIN required. Oil change records must be maintained.", notes:"Current mileage ~48,200. Powertrain warranty still active. Next service due at 50,000 miles.", documents:["Toyota_Warranty_Booklet.pdf","Purchase_Agreement.pdf"] },
-  { id:5, product:"Home Warranty — Annual Plan", brand:"American Home Shield", model:"ShieldPlatinum Plan", serialNum:"AHS-PLAN-2029184", category:"Other", purchaseDate:"Jan 1, 2026", purchasedFrom:"American Home Shield", price:"$1,044/year", warrantyType:"Home Warranty (HVAC, plumbing, electrical, appliances)", provider:"American Home Shield", providerPhone:"1-888-429-8247", providerWebsite:"ahs.com", expiryDate:"Dec 31, 2026", coverageDetails:"ShieldPlatinum covers: all major home systems (HVAC, plumbing, electrical), kitchen appliances, washer/dryer, garage door opener. $100 service call fee per claim.", claimInstructions:"Login to ahs.com or call 1-888-429-8247 to submit a claim. Technician dispatched within 24–48 hours. Keep all receipts.", notes:"Auto-renews annually on Jan 1. Can cancel within 30 days. Covers primary residence at 1842 Oak Ridge Drive.", documents:["AHS_Contract_2026.pdf"] },
-];
+/* Rows come from the `warranties` table. The screen used to open on five
+   hardcoded sample products — the same TV and Camry for every account, gone
+   on refresh — so a new account now starts empty instead. */
+
+// The table stores price as NUMERIC and the UI shows "$1,299"; convert at the
+// boundary rather than changing either side.
+const toPrice = (n: number | null | undefined) => (n === null || n === undefined ? "" : `$${Number(n).toLocaleString()}`);
+const fromPrice = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) ? n : null; };
 
 function getDaysUntilExpiry(dateStr: string): number {
   const d = new Date(dateStr);
@@ -116,7 +119,7 @@ const WARR_CSS = `
 .fpd-warr .kpi-mini-sub{font-size:14px;color:${MUTED};margin-top:5px;display:flex;align-items:center;gap:6px;}
 .fpd-warr .kpi-mini-sub .dt{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 @media (max-width:640px){.fpd-warr .kpi-stack{grid-template-columns:1fr 1fr;}}
-@media (max-width:420px){.fpd-warr .kpi-stack{grid-template-columns:1fr;}}
+@media (max-width:430px){.fpd-warr .kpi-stack{grid-template-columns:1fr;}}
 
 /* filter chips */
 .fpd-warr .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -192,17 +195,49 @@ const WARR_CSS = `
 `;
 
 export function Warranties() {
-  const [warranties, setWarranties] = useState<Warranty[]>(initWarranties);
-  const [expanded, setExpanded] = useState<number|null>(null);
+  const { authUser } = useAuth();
+  const [warranties, setWarranties] = useState<Warranty[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [filterCat, setFilterCat] = useState("all");
   const [form, setForm] = useState({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
   const [wDoc, setWDoc] = useState<string|null>(null);
-  const [editingId, setEditingId] = useState<number|null>(null);
+  const [editingId, setEditingId] = useState<string|null>(null);
 
   const listRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
+
+  const reload = useCallback(async () => {
+    if (!authUser) { setWarranties([]); setLoading(false); return; }
+    const { data, error } = await tables.warranties.list(authUser.id);
+    if (error) { toast.error(`Could not load warranties: ${error.message}`); setLoading(false); return; }
+    setWarranties((data ?? []).map(r => ({
+      id: String(r.id),
+      product: String(r.product ?? ""),
+      brand: String(r.brand ?? ""),
+      model: String(r.model ?? ""),
+      serialNum: String(r.serial_number ?? ""),
+      category: String(r.category ?? CATEGORIES[0]),
+      purchaseDate: String(r.purchase_date ?? ""),
+      purchasedFrom: String(r.purchased_from ?? ""),
+      price: toPrice(r.price as number | null),
+      warrantyType: String(r.warranty_type ?? ""),
+      provider: String(r.provider ?? ""),
+      providerPhone: String(r.provider_phone ?? ""),
+      providerWebsite: String(r.provider_website ?? ""),
+      expiryDate: String(r.expiry_date ?? ""),
+      coverageDetails: String(r.coverage_details ?? ""),
+      claimInstructions: String(r.claim_instructions ?? ""),
+      notes: String(r.notes ?? ""),
+      documents: (r.document_urls as string[] | null) ?? [],
+      photo: String(r.photo_url ?? ""),
+    })));
+    setLoading(false);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
 
   function resetWarrantyForm() {
     setForm({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
@@ -228,18 +263,35 @@ export function Warranties() {
     resetWarrantyForm();
   }
 
-  function saveWarranty() {
+  async function saveWarranty() {
     if (!form.product) { toast.error("Product name required"); return; }
-    if (editingId !== null) {
-      setWarranties(p => p.map(x => x.id === editingId ? {
-        ...x, ...form,
-        documents: wDoc && !x.documents.includes(wDoc) ? [...x.documents, wDoc] : x.documents,
-      } : x));
-      toast.success(`Warranty for "${form.product}" updated`);
-    } else {
-      setWarranties(p => [...p, { ...form, id:Date.now(), documents: wDoc ? [wDoc] : [], photo:form.photo||"" }]);
-      toast.success(`Warranty for "${form.product}" added`);
-    }
+    if (!authUser) { toast.error("Sign in to save warranties."); return; }
+
+    const existing = editingId !== null ? warranties.find(w => w.id === editingId) : undefined;
+    const documents = wDoc
+      ? [...(existing?.documents ?? []).filter(d => d !== wDoc), wDoc]
+      : existing?.documents ?? [];
+
+    const row = {
+      product: form.product, brand: form.brand, model: form.model,
+      serial_number: form.serialNum, category: form.category,
+      purchase_date: form.purchaseDate, purchased_from: form.purchasedFrom,
+      price: fromPrice(form.price),
+      warranty_type: form.warrantyType, provider: form.provider,
+      provider_phone: form.providerPhone, provider_website: form.providerWebsite,
+      expiry_date: form.expiryDate, coverage_details: form.coverageDetails,
+      claim_instructions: form.claimInstructions, notes: form.notes,
+      photo_url: form.photo || null, document_urls: documents,
+    };
+
+    const { error } = editingId !== null
+      ? await tables.warranties.update(editingId, row)
+      : await tables.warranties.add(authUser.id, row);
+
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+
+    await reload();
+    toast.success(`Warranty for "${form.product}" ${editingId !== null ? "updated" : "added"}`);
     resetWarrantyForm();
     setEditingId(null);
     setShowAdd(false);
@@ -326,6 +378,16 @@ export function Warranties() {
 
         {/* ── Warranty list ── */}
         <div className="dlist" ref={listRef}>
+          {loading && (
+            <div className="wr-card" style={{ padding: 24, textAlign: "center", color: MUTED }}>
+              Loading your warranties…
+            </div>
+          )}
+          {!loading && warranties.length === 0 && (
+            <div className="wr-card" style={{ padding: 24, textAlign: "center", color: MUTED }}>
+              No warranties saved yet — add your first product above and it will still be here next time you sign in.
+            </div>
+          )}
           {filtered.map(w => (
             <div key={w.id} className="card" style={{ overflow: "hidden" }}>
               {(w as any).photo && (
@@ -396,7 +458,15 @@ export function Warranties() {
                           <FileText size={12} /> {d}
                         </button>
                       ))}
-                      <ScanButton folder="personal" onUpload={doc => { setWarranties(p => p.map(x => x.id === w.id ? { ...x, documents: [...x.documents, doc.name] } : x)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan Document" />
+                      <ScanButton folder="personal" onUpload={async doc => {
+                        // Persist the attachment: a local-only push would vanish
+                        // on the next load now that rows come from the database.
+                        const next = [...w.documents.filter(d => d !== doc.name), doc.name];
+                        const { error } = await tables.warranties.update(w.id, { document_urls: next });
+                        if (error) { toast.error(`Could not attach "${doc.name}": ${error.message}`); return; }
+                        await reload();
+                        toast.success(`"${doc.name}" added`);
+                      }} size="sm" label="Scan Document" />
                     </div>
                   </div>
 
