@@ -73,7 +73,8 @@ ALTER TABLE public.collectibles
 
 
 -- ============================================================
--- VERIFY — expect 21 rows.
+-- VERIFY — expect 20 rows (1 vehicles + 7 real_estate + 1 digital_assets
+--                        + 1 weapons + 8 weapons_locker + 2 collectibles).
 -- ============================================================
 SELECT table_name, column_name
 FROM information_schema.columns
