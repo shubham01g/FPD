@@ -90,6 +90,12 @@ const WG_DEMO_CLIENTS = [
 ];
 
 function WGClientSubmitDemo() {
+  /* Dev-only, for the same reason as DemoBar: goToSpecialistInbox() below
+     establishes a Concierge session from a PUBLIC route (/documents/submit)
+     without asking for credentials, which would let anyone read client
+     document inboxes. Replaced at build time, so production drops it. */
+  if (!import.meta.env.DEV) return null;
+
   const navigate = useNavigate();
   const [selected, setSelected] = React.useState<string | null>(null);
   const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -242,6 +248,17 @@ const DEMO_TABS: DemoTab[] = [
 ];
 
 function DemoBar() {
+  /* Dev-only. goTo() below establishes an admin or concierge session without
+     asking for credentials, which is a convenience on a developer machine and
+     an authentication bypass on a public site — the switcher is rendered on
+     the landing page, so anyone could walk into the admin portal.
+
+     import.meta.env.DEV is replaced at build time, so in a production bundle
+     this reads `if (true) return null` and the rest is dropped entirely
+     rather than merely hidden. The guard sits above every hook, and because
+     the value is a compile-time constant the hook order stays stable. */
+  if (!import.meta.env.DEV) return null;
+
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -530,6 +547,9 @@ function ConciergeRoute() {
 
 /* ── White Glove client document submission (token-based, no login) ── */
 function DocSubmitRoute() {
+  // The real client flow is token-based and lives elsewhere; this route only
+  // ever hosted the demo client picker, so without it there is nothing here.
+  if (!import.meta.env.DEV) return <Navigate to="/" replace/>;
   return (
     <div className="size-full overflow-y-auto">
       <WGClientSubmitDemo/>
