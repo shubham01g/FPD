@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Camera, FolderOpen, ChevronRight, Download, Mail, CheckCircle, AlertCircle, X,
   Calendar, DollarSign, Building2, FileText, Tag, Folder, Search, Eye, Trash2,
   User, Briefcase, Cpu, Send, Package, ArrowLeft, ReceiptText,
 } from "lucide-react";
 import { toast } from "sonner";
+import { tables } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import { DocumentScanner, type ScannedDocument } from "./DocumentScanner";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, file cabinet, financial records & disaster recovery) ── */
@@ -47,90 +49,16 @@ interface MonthData {
 type Section = "personal" | "business";
 type SectionData = Record<string, MonthData>;
 
-/* ── Mock data (2026 demo ledger) ───────────────────────────────── */
+/* Rows come from the `receipts` table. The screen used to open on a
+   hardcoded 2026 demo ledger, identical for every account. */
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
 
-const BUSINESS_SEED: SectionData = {
-  June: {
-    total: 1245.50,
-    receipts: [
-      { id: "r1", merchant: "Adobe Creative Cloud", amount: 54.99, date: "Jun 28, 2026", category: "Software", ocrVerified: true, confidence: 98 },
-      { id: "r2", merchant: "Delta Airlines", amount: 387.00, date: "Jun 25, 2026", category: "Travel", ocrVerified: true, confidence: 95 },
-      { id: "r3", merchant: "Whole Foods Market", amount: 142.30, date: "Jun 22, 2026", category: "Groceries", ocrVerified: true, confidence: 99 },
-      { id: "r4", merchant: "Shell Gas Station", amount: 68.45, date: "Jun 20, 2026", category: "Fuel", ocrVerified: false, confidence: 72 },
-      { id: "r5", merchant: "The Capital Grille", amount: 225.80, date: "Jun 18, 2026", category: "Dining", ocrVerified: true, confidence: 97 },
-      { id: "r6", merchant: "FedEx Shipping", amount: 34.96, date: "Jun 15, 2026", category: "Shipping", ocrVerified: true, confidence: 96 },
-      { id: "r7", merchant: "Office Depot", amount: 89.50, date: "Jun 10, 2026", category: "Office Supplies", ocrVerified: true, confidence: 94 },
-      { id: "r8", merchant: "Comcast Business", amount: 129.99, date: "Jun 5, 2026", category: "Utilities", ocrVerified: true, confidence: 99 },
-      { id: "r9", merchant: "Uber Eats", amount: 48.71, date: "Jun 3, 2026", category: "Dining", ocrVerified: false, confidence: 68 },
-      { id: "r10", merchant: "Walgreens Pharmacy", amount: 63.80, date: "Jun 1, 2026", category: "Healthcare", ocrVerified: true, confidence: 93 },
-    ],
-  },
-  May: {
-    total: 982.40,
-    receipts: [
-      { id: "m1", merchant: "Marriott Hotels", amount: 312.00, date: "May 27, 2026", category: "Travel", ocrVerified: true, confidence: 97 },
-      { id: "m2", merchant: "Costco Wholesale", amount: 218.75, date: "May 20, 2026", category: "Groceries", ocrVerified: true, confidence: 99 },
-      { id: "m3", merchant: "Zoom Video Comm.", amount: 149.90, date: "May 15, 2026", category: "Software", ocrVerified: true, confidence: 98 },
-      { id: "m4", merchant: "Cheesecake Factory", amount: 156.30, date: "May 10, 2026", category: "Dining", ocrVerified: true, confidence: 95 },
-      { id: "m5", merchant: "Amazon Web Services", amount: 145.45, date: "May 5, 2026", category: "Software", ocrVerified: true, confidence: 97 },
-    ],
-  },
-  April: {
-    total: 1560.20,
-    receipts: [
-      { id: "a1", merchant: "American Airlines", amount: 640.00, date: "Apr 22, 2026", category: "Travel", ocrVerified: true, confidence: 96 },
-      { id: "a2", merchant: "Hilton Garden Inn", amount: 420.50, date: "Apr 18, 2026", category: "Travel", ocrVerified: true, confidence: 98 },
-      { id: "a3", merchant: "Slack Technologies", amount: 87.50, date: "Apr 10, 2026", category: "Software", ocrVerified: true, confidence: 99 },
-      { id: "a4", merchant: "Ruth's Chris Steak", amount: 312.20, date: "Apr 5, 2026", category: "Dining", ocrVerified: true, confidence: 94 },
-      { id: "a5", merchant: "Staples", amount: 100.00, date: "Apr 2, 2026", category: "Office Supplies", ocrVerified: false, confidence: 71 },
-    ],
-  },
-  March: { total: 743.80, receipts: [] },
-  February: { total: 619.25, receipts: [] },
-  January: { total: 891.10, receipts: [] },
-};
 
-const PERSONAL_SEED: SectionData = {
-  June: {
-    total: 874.20,
-    receipts: [
-      { id: "p1", merchant: "Publix Supermarket", amount: 138.45, date: "Jun 27, 2026", category: "Groceries", ocrVerified: true, confidence: 99 },
-      { id: "p2", merchant: "Dr. Sarah Mitchell", amount: 220.00, date: "Jun 24, 2026", category: "Healthcare", ocrVerified: true, confidence: 96 },
-      { id: "p3", merchant: "Netflix", amount: 22.99, date: "Jun 20, 2026", category: "Entertainment", ocrVerified: true, confidence: 99 },
-      { id: "p4", merchant: "BP Gas Station", amount: 71.30, date: "Jun 18, 2026", category: "Fuel", ocrVerified: false, confidence: 74 },
-      { id: "p5", merchant: "Olive Garden", amount: 87.60, date: "Jun 15, 2026", category: "Dining", ocrVerified: true, confidence: 95 },
-      { id: "p6", merchant: "CVS Pharmacy", amount: 43.80, date: "Jun 12, 2026", category: "Personal Care", ocrVerified: true, confidence: 97 },
-      { id: "p7", merchant: "Home Depot", amount: 156.90, date: "Jun 8, 2026", category: "Home & Garden", ocrVerified: true, confidence: 93 },
-      { id: "p8", merchant: "Target", amount: 133.16, date: "Jun 3, 2026", category: "Clothing", ocrVerified: true, confidence: 91 },
-    ],
-  },
-  May: {
-    total: 692.45,
-    receipts: [
-      { id: "pm1", merchant: "Kroger", amount: 198.30, date: "May 25, 2026", category: "Groceries", ocrVerified: true, confidence: 98 },
-      { id: "pm2", merchant: "Planet Fitness", amount: 25.00, date: "May 20, 2026", category: "Personal Care", ocrVerified: true, confidence: 99 },
-      { id: "pm3", merchant: "Regal Cinemas", amount: 54.75, date: "May 15, 2026", category: "Entertainment", ocrVerified: true, confidence: 94 },
-      { id: "pm4", merchant: "Walgreens", amount: 67.40, date: "May 10, 2026", category: "Healthcare", ocrVerified: false, confidence: 79 },
-      { id: "pm5", merchant: "Chili's Grill & Bar", amount: 92.50, date: "May 5, 2026", category: "Dining", ocrVerified: true, confidence: 96 },
-      { id: "pm6", merchant: "Lowe's", amount: 254.50, date: "May 2, 2026", category: "Home & Garden", ocrVerified: true, confidence: 92 },
-    ],
-  },
-  April: {
-    total: 558.90,
-    receipts: [
-      { id: "pa1", merchant: "Whole Foods Market", amount: 167.20, date: "Apr 22, 2026", category: "Groceries", ocrVerified: true, confidence: 99 },
-      { id: "pa2", merchant: "Urgent Care Clinic", amount: 185.00, date: "Apr 15, 2026", category: "Healthcare", ocrVerified: true, confidence: 97 },
-      { id: "pa3", merchant: "TJ Maxx", amount: 206.70, date: "Apr 8, 2026", category: "Clothing", ocrVerified: true, confidence: 90 },
-    ],
-  },
-  March: { total: 521.00, receipts: [] },
-  February: { total: 488.60, receipts: [] },
-  January: { total: 610.30, receipts: [] },
-};
+
+
 
 const CATEGORY_PICKLIST = [
   "Dining", "Groceries", "Travel", "Software", "Healthcare", "Fuel", "Office Supplies", "Entertainment",
@@ -599,8 +527,9 @@ function MonthDetail({
 
 /* ── Main Component ───────────────────────────────────────────────── */
 export function ReceiptsExpenses() {
-  const [business, setBusiness] = useState<SectionData>(BUSINESS_SEED);
-  const [personal, setPersonal] = useState<SectionData>(PERSONAL_SEED);
+  const { authUser } = useAuth();
+  const [business, setBusiness] = useState<SectionData>({});
+  const [personal, setPersonal] = useState<SectionData>({});
   const [section, setSection] = useState<Section>("personal");
   const [view, setView] = useState<"directory" | "month">("directory");
   const [selectedMonth, setSelectedMonth] = useState<string>("June");
@@ -610,6 +539,40 @@ export function ReceiptsExpenses() {
   const [pendingDoc, setPendingDoc] = useState<ScannedDocument | null>(null);
   const currentMonth = MONTHS[new Date().getMonth()];
 
+  /* Rows come from the `receipts` table, which stores them flat with a date.
+     This screen presents a month ledger, so the grouping happens here rather
+     than in the schema. */
+  const reload = useCallback(async () => {
+    if (!authUser) return;
+    const { data, error } = await tables.receipts.list(authUser.id);
+    if (error) { toast.error(`Could not load receipts: ${error.message}`); return; }
+    const empty = () => MONTHS.reduce((acc, m) => { acc[m] = { total: 0, receipts: [] }; return acc; }, {} as SectionData);
+    const next: Record<Section, SectionData> = { personal: empty(), business: empty() };
+    for (const r of data ?? []) {
+      const sect = (String(r.section ?? "personal") as Section);
+      const when = r.receipt_date ? new Date(String(r.receipt_date)) : null;
+      const month = when ? MONTHS[when.getMonth()] : MONTHS[new Date().getMonth()];
+      const amount = Number(r.amount ?? 0);
+      const bucket = next[sect][month] ?? { total: 0, receipts: [] };
+      bucket.receipts.push({
+        id: String(r.id),
+        merchant: String(r.merchant ?? ""),
+        amount,
+        date: when ? when.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+        category: String(r.category ?? ""),
+        ocrVerified: Boolean(r.ocr_verified),
+        confidence: Number(r.ocr_confidence ?? 0),
+        imageUrl: (r.image_url as string | null) ?? undefined,
+      });
+      bucket.total += amount;
+      next[sect][month] = bucket;
+    }
+    setPersonal(next.personal);
+    setBusiness(next.business);
+  }, [authUser]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
   const activeData = section === "personal" ? personal : business;
   const setActiveData = section === "personal" ? setPersonal : setBusiness;
   const yearTotal = Object.values(activeData).reduce((s, m) => s + m.total, 0);
@@ -617,22 +580,33 @@ export function ReceiptsExpenses() {
 
   const saveMonth = selectedMonth || currentMonth;
 
-  const addReceipt = (r: Omit<Receipt, "id">) => {
-    setActiveData(prev => {
-      const existing = prev[saveMonth] ?? { total: 0, receipts: [] };
-      const receipt: Receipt = { ...r, id: `${Date.now()}` };
-      return { ...prev, [saveMonth]: { total: existing.total + r.amount, receipts: [receipt, ...existing.receipts] } };
+  const addReceipt = async (r: Omit<Receipt, "id">) => {
+    if (!authUser) return;
+    // saveMonth is a month name; the column is a DATE, so pin it to the 1st of
+    // that month in the current year unless the scan produced a real date.
+    const parsed = r.date ? new Date(r.date) : null;
+    const iso = parsed && !Number.isNaN(parsed.getTime())
+      ? parsed.toISOString().slice(0, 10)
+      : new Date(new Date().getFullYear(), MONTHS.indexOf(saveMonth), 1).toISOString().slice(0, 10);
+
+    const { error } = await tables.receipts.add(authUser.id, {
+      section,
+      merchant: r.merchant,
+      amount: r.amount,
+      receipt_date: iso,
+      category: r.category || null,
+      ocr_verified: r.ocrVerified,
+      ocr_confidence: r.confidence || null,
+      image_url: r.imageUrl || null,
     });
+    if (error) { toast.error(`Could not save receipt: ${error.message}`); return; }
+    await reload();
   };
 
-  const deleteReceipt = (month: string, id: string) => {
-    setActiveData(prev => {
-      const existing = prev[month];
-      if (!existing) return prev;
-      const target = existing.receipts.find(r => r.id === id);
-      if (!target) return prev;
-      return { ...prev, [month]: { total: existing.total - target.amount, receipts: existing.receipts.filter(r => r.id !== id) } };
-    });
+  const deleteReceipt = async (_month: string, id: string) => {
+    const { error } = await tables.receipts.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
   };
 
   return (
