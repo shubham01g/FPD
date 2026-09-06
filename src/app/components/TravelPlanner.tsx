@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Edit2 } from "lucide-react";
 import { toast } from "sonner";
-import { tables } from "../services/supabase";
+import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroTravelPhoto from "../../imports/travel_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -22,7 +22,9 @@ const NEG     = "#D06B6B";
 
 const TRIP_TYPES = ["Vacation","Family Visit","Business Travel","Medical Travel","Honeymoon","Anniversary Trip","Holiday Travel","Road Trip","Cruise","Backpacking","Mission / Volunteer","Other"];
 
-interface TravelDoc { name:string; type:string; }
+/* `path` is the vault-documents Storage path; older rows saved before
+   attachments were uploaded have only a name. */
+interface TravelDoc { name:string; type:string; path?:string; }
 interface Trip {
   id: string;
   destination: string;
@@ -200,6 +202,7 @@ export function TravelPlanner() {
   const [filterStatus, setFilterStatus] = useState<"all"|"planned"|"completed">("all");
   const emptyForm = { destination:"", country:"", tripType:"Vacation", startDate:"", endDate:"", companions:"", accommodation:"", accommodationPhone:"", confirmationNum:"", transportation:"", budget:"", notes:"", status:"planned" as "planned"|"completed", photo:"" };
   const [form, setForm] = useState(emptyForm);
+  const [tDoc, setTDoc] = useState<string | null>(null);
   const tripListRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
@@ -207,6 +210,7 @@ export function TravelPlanner() {
   function openAddModal() {
     setEditingTrip(null);
     setForm(emptyForm);
+    setTDoc(null);
     setShowAdd(true);
   }
 
@@ -221,12 +225,31 @@ export function TravelPlanner() {
       status: (trip.status === "cancelled" ? "planned" : trip.status) as "planned"|"completed",
       photo: trip.photo ?? "",
     });
+    setTDoc(null);   // attaching is additive; existing documents are kept below
     setShowAdd(true);
   }
 
   function closeModal() {
     setShowAdd(false);
     setEditingTrip(null);
+  }
+
+  /* The inline "Add Document" on an expanded trip used to push a name into
+     React state and stop there, so it vanished on refresh. It now uploads
+     and writes the row, same as the modal's attach field. */
+  async function attachDocToTrip(trip: Trip, file: File) {
+    if (!authUser) { toast.error("Sign in to attach documents."); return; }
+    try {
+      const path = await db.uploadVaultFile(authUser.id, file);
+      const documents = [...trip.documents.filter(d => d.path !== path),
+                         { name: file.name, type: "Document", path }];
+      const { error } = await tables.travelTrips.update(trip.id, { document_urls: documents });
+      if (error) { toast.error(`Could not attach: ${error.message}`); return; }
+      setTrips(p => p.map(t => t.id === trip.id ? { ...t, documents } : t));
+      toast.success(`"${file.name}" added to ${trip.destination}`);
+    } catch (err) {
+      toast.error(`Could not attach "${file.name}": ${(err as Error).message}`);
+    }
   }
 
   async function saveTrip() {
@@ -240,6 +263,12 @@ export function TravelPlanner() {
       confirmation_number: form.confirmationNum, transportation: form.transportation,
       budget: fromMoney(form.budget), notes: form.notes, status: form.status,
       photo_url: form.photo || null,
+      // Attaching adds to whatever the trip already had rather than
+      // replacing it, and re-attaching the same file does not duplicate it.
+      document_urls: tDoc
+        ? [...(editingTrip?.documents ?? []).filter(d => d.path !== tDoc),
+           { name: attachmentDisplayName(tDoc), type: "Document", path: tDoc }]
+        : editingTrip?.documents ?? [],
     };
 
     const { error } = editingTrip
@@ -401,7 +430,7 @@ export function TravelPlanner() {
                             📄 {d.name} <span style={{ color: MUTED, marginLeft: 4 }}>({d.type})</span>
                           </button>
                         ))}
-                        <ScanButton folder="personal" onUpload={doc => { setTrips(p=>p.map(t=>t.id===trip.id?{...t,documents:[...t.documents,{name:doc.name,type:"Document"}]}:t)); toast.success(`"${doc.name}" added to ${trip.destination}`); }} size="sm" label="Add Document"/>
+                        <ScanButton folder="personal" onUpload={doc => { void attachDocToTrip(trip, doc.file); }} size="sm" label="Add Document"/>
                       </div>
                     </div>
                   </div>
@@ -435,7 +464,7 @@ export function TravelPlanner() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
+                <AttachDocumentField value={tDoc} onChange={setTDoc} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={saveTrip}>{editingTrip ? "Save Changes" : "Add Trip"}</button>

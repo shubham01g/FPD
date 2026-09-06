@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroDaycarePhoto from "../../imports/daycare_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
@@ -224,12 +224,14 @@ export function DaycareInfo() {
   const recordsRef = React.useRef<HTMLDivElement>(null);
   const emptyForm = { facilityName:"", childName:"", address:"", phone:"", email:"", directorName:"", teacherName:"", dropoffTime:"", pickupTime:"", days:"Monday – Friday", tuition:"", allergiesOnFile:"None known", emergencyContact:"", emergencyPhone:"", notes:"" };
   const [form, setForm] = useState(emptyForm);
+  const [dDoc, setDDoc] = useState<string | null>(null);
 
   const F = (k: string) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
   function openAddRecord() {
     setEditingRecord(null);
     setForm(emptyForm);
+    setDDoc(null);
     setShowAdd(true);
   }
 
@@ -242,6 +244,7 @@ export function DaycareInfo() {
       allergiesOnFile: rec.allergiesOnFile, emergencyContact: rec.emergencyContact, emergencyPhone: rec.emergencyPhone,
       notes: rec.notes,
     });
+    setDDoc(null);   // attaching is additive; existing documents are kept
     setShowAdd(true);
   }
 
@@ -263,6 +266,11 @@ export function DaycareInfo() {
       days: fromDays(form.days), tuition: fromMoney(form.tuition),
       allergies_on_file: form.allergiesOnFile, emergency_contact: form.emergencyContact,
       emergency_phone: form.emergencyPhone, notes: form.notes,
+      // Attaching adds to whatever the record already had, and
+      // re-attaching the same file does not duplicate it.
+      document_urls: dDoc
+        ? [...(editingRecord?.documents ?? []).filter(d => d !== dDoc), dDoc]
+        : editingRecord?.documents ?? [],
       ...(editingRecord ? {} : {
         medications_on_file: "None",
         enroll_date: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
@@ -423,8 +431,8 @@ export function DaycareInfo() {
                       <>
                         <div className="docrow">
                           {rec.documents.map(d => (
-                            <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
-                              <FileText size={12} /> {d}
+                            <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                              <FileText size={12} /> {attachmentDisplayName(d)}
                             </button>
                           ))}
                         </div>
@@ -453,7 +461,7 @@ export function DaycareInfo() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
+                <AttachDocumentField value={dDoc} onChange={setDDoc} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={saveRecord}>{editingRecord ? "Save Changes" : "Add Daycare"}</button>

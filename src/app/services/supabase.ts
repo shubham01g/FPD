@@ -133,11 +133,15 @@ export interface DBFinalWish {
 export interface DBAllergy {
   id: string; user_id: string; allergen: string;
   severity: "severe"|"moderate"|"mild"; reaction?: string; type?: string; diagnosed?: string;
+  /* Storage paths in vault-documents (migration 017). */
+  document_urls?: string[] | null;
 }
 
 export interface DBMedication {
   id: string; user_id: string; name: string; dose?: string; frequency?: string;
   condition?: string; prescriber?: string; pharmacy?: string; refill_date?: string;
+  /* Storage paths in vault-documents (migration 017). */
+  document_urls?: string[] | null;
 }
 
 export interface DBReminder {

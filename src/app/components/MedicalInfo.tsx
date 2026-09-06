@@ -225,12 +225,18 @@ function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null
   const [form, setForm] = useState(() => editing
     ? { allergen: editing.allergen, severity: editing.severity, reaction: editing.reaction, type: editing.type, diagnosed: editing.diagnosed }
     : { allergen: "", severity: "mild" as Allergy["severity"], reaction: "", type: "food", diagnosed: new Date().getFullYear().toString() });
+  const [aDoc, setADoc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const set = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
   const submit = async () => {
     if (!form.allergen) { toast.error("Allergen name required"); return; }
     setLoading(true);
-    await onSave(form);
+    // Attaching adds to what the record already had; the same file twice
+    // does not duplicate.
+    const documentUrls = aDoc
+      ? [...(editing?.documentUrls ?? []).filter(d => d !== aDoc), aDoc]
+      : editing?.documentUrls ?? [];
+    await onSave({ ...form, documentUrls });
     onClose();
     if (editing) toast.success("Allergy updated");
   };
@@ -249,7 +255,7 @@ function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null
             <FSelect label="TYPE" value={form.type} onChange={set("type")} options={["food", "medication", "environmental"]} />
           </div>
           <FField label="YEAR DIAGNOSED" value={form.diagnosed} onChange={set("diagnosed")} placeholder="2015" />
-          <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (allergy test, prescription)" />
+          <AttachDocumentField value={aDoc} onChange={setADoc} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (allergy test, prescription)" />
         </div>
         <div className="modal-foot">
           <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : editing ? "Save Changes" : "Save Allergy"}</button>
@@ -264,12 +270,16 @@ function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null;
   const [form, setForm] = useState(() => editing
     ? { name: editing.name, dose: editing.dose, frequency: editing.frequency, condition: editing.condition, prescriber: editing.prescriber, pharmacy: editing.pharmacy, refillDate: editing.refillDate }
     : { name: "", dose: "", frequency: "", condition: "", prescriber: "", pharmacy: "", refillDate: "" });
+  const [mDoc, setMDoc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const set = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
   const submit = async () => {
     if (!form.name || !form.dose) { toast.error("Medication name and dose required"); return; }
     setLoading(true);
-    await onSave(form);
+    const documentUrls = mDoc
+      ? [...(editing?.documentUrls ?? []).filter(d => d !== mDoc), mDoc]
+      : editing?.documentUrls ?? [];
+    await onSave({ ...form, documentUrls });
     onClose();
     if (editing) toast.success("Medication updated");
   };
@@ -294,7 +304,7 @@ function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null;
             <FField label="PHARMACY" value={form.pharmacy} onChange={set("pharmacy")} placeholder="e.g. CVS Pharmacy" />
             <FField label="NEXT REFILL DATE" value={form.refillDate} onChange={set("refillDate")} placeholder="e.g. Jul 1, 2026" />
           </div>
-          <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (prescription, pharmacy receipt)" />
+          <AttachDocumentField value={mDoc} onChange={setMDoc} folder="medical" sectionId="medical-info" sectionLabel="Medical Info" label="Attach Document (prescription, pharmacy receipt)" />
         </div>
         <div className="modal-foot">
           <button className="save" onClick={submit} disabled={loading}>{loading ? "Saving..." : editing ? "Save Changes" : "Save Medication"}</button>

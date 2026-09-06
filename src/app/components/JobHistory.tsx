@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroJobPhoto from "../../imports/jobhistory_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -177,6 +177,7 @@ export function JobHistory() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const emptyForm = { employer:"", title:"", type:"Full-time", location:"", startDate:"", endDate:"", current:false, salary:"", supervisor:"", supervisorPhone:"", reasonLeft:"", achievements:"", notes:"" };
   const [form, setForm] = useState(emptyForm);
+  const [jDoc, setJDoc] = useState<string | null>(null);
   const jlistRef = React.useRef<HTMLDivElement>(null);
 
   const F = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) =>
@@ -185,6 +186,7 @@ export function JobHistory() {
   function openAddModal() {
     setEditingJob(null);
     setForm(emptyForm);
+    setJDoc(null);
     setShowAdd(true);
   }
 
@@ -196,6 +198,7 @@ export function JobHistory() {
       salary: job.salary, supervisor: job.supervisor, supervisorPhone: job.supervisorPhone,
       reasonLeft: job.reasonLeft, achievements: job.achievements, notes: job.notes,
     });
+    setJDoc(null);   // attaching is additive; existing documents are kept
     setShowAdd(true);
   }
 
@@ -217,6 +220,11 @@ export function JobHistory() {
       salary: form.salary, supervisor_name: form.supervisor,
       supervisor_phone: form.supervisorPhone, reason_left: form.reasonLeft,
       achievements: form.achievements, notes: form.notes,
+      // Attaching adds to whatever the record already had, and
+      // re-attaching the same file does not duplicate it.
+      document_urls: jDoc
+        ? [...(editingJob?.documents ?? []).filter(d => d !== jDoc), jDoc]
+        : editingJob?.documents ?? [],
     };
 
     const { error } = editingJob
@@ -366,8 +374,8 @@ export function JobHistory() {
                       <div className="docs-lbl">DOCUMENTS ({job.documents.length})</div>
                       <div className="flex flex-wrap gap-2">
                         {job.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
-                            📄 {d}
+                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                            📄 {attachmentDisplayName(d)}
                           </button>
                         ))}
                         <ScanButton folder="legal" onUpload={doc => { setJobs(p => p.map(j => j.id === job.id ? { ...j, documents: [...j.documents, doc.name] } : j)); toast.success(`"${doc.name}" added`); }} size="sm" label="Add Document" />
@@ -405,7 +413,7 @@ export function JobHistory() {
                   <input type="checkbox" id="current" checked={form.current} onChange={e => setForm(p => ({ ...p, current: e.target.checked }))} style={{ width: 16, height: 16 }} />
                   <label htmlFor="current">This is my current position</label>
                 </div>
-                <AttachDocumentField value={null} onChange={doc => { if (doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (offer letter, W-2, contract)" sectionId="job-history" sectionLabel="Job History" />
+                <AttachDocumentField value={jDoc} onChange={setJDoc} folder="personal" label="Attach Document (offer letter, W-2, contract)" sectionId="job-history" sectionLabel="Job History" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={saveJob}>{editingJob ? "Save Changes" : "Add Record"}</button>

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
@@ -280,7 +280,7 @@ export function Utilities() {
                 <Field label="Website" value={u.website || "—"} />
               </div>
               {u.notes && <div className="notemuted">{u.notes}</div>}
-              {(u as any).attachedDoc && <div className="notemuted">📄 {(u as any).attachedDoc}</div>}
+              {(u as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((u as any).attachedDoc)}</div>}
               <div className="dacts">
                 <button className="btn-sec" onClick={() => openEditUtility(u)}><Edit2 size={13} /> Edit</button>
                 <ScanButton folder="utilities" onUpload={doc => { setUtilityList(p => p.map(x => x.id === u.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${u.service}`); }} size="sm" label="Scan Document" />

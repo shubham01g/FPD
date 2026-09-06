@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText, Edit2 } from "lucide-react";
 import { toast } from "sonner";
-import { tables } from "../services/supabase";
+import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroKidsPhoto from "../../imports/kidsactivities_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
@@ -237,12 +237,14 @@ export function KidsActivities() {
     emergencyContact:"", emergencyPhone:"", notes:"", status:"active" as "active"|"inactive"|"seasonal",
   };
   const [form, setForm] = useState(blankForm);
+  const [kDoc, setKDoc] = useState<string | null>(null);
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
   function openAdd() {
     setForm(blankForm);
     setEditingId(null);
+    setKDoc(null);
     setShowAdd(true);
   }
 
@@ -250,12 +252,29 @@ export function KidsActivities() {
     const { id, documents, ...rest } = act;
     setForm(rest);
     setEditingId(act.id);
+    setKDoc(null);   // attaching is additive; existing documents are kept
     setShowAdd(true);
   }
 
   function closeModal() {
     setShowAdd(false);
     setEditingId(null);
+  }
+
+  /* The inline "Add Document" pushed a name into React state and stopped
+     there, so it was gone on refresh. It now uploads and writes the row. */
+  async function attachDocToActivity(act: Activity, file: File) {
+    if (!authUser) { toast.error("Sign in to attach documents."); return; }
+    try {
+      const path = await db.uploadVaultFile(authUser.id, file);
+      const documents = [...act.documents.filter(d => d !== path), path];
+      const { error } = await tables.kidsActivities.update(act.id, { document_urls: documents });
+      if (error) { toast.error(`Could not attach: ${error.message}`); return; }
+      setActivities(p => p.map(a => a.id === act.id ? { ...a, documents } : a));
+      toast.success(`"${file.name}" added`);
+    } catch (err) {
+      toast.error(`Could not attach "${file.name}": ${(err as Error).message}`);
+    }
   }
 
   async function saveActivity() {
@@ -274,6 +293,11 @@ export function KidsActivities() {
       transportation_notes: form.transportationNotes,
       emergency_contact: form.emergencyContact, emergency_phone: form.emergencyPhone,
       notes: form.notes, status: form.status,
+      // Attaching adds to whatever the activity already had, and
+      // re-attaching the same file does not duplicate it.
+      document_urls: kDoc
+        ? [...(activities.find(a => a.id === editingId)?.documents ?? []).filter(d => d !== kDoc), kDoc]
+        : activities.find(a => a.id === editingId)?.documents ?? [],
     };
 
     const { error } = editingId != null
@@ -442,11 +466,11 @@ export function KidsActivities() {
                       <div className="doclbl">DOCUMENTS ({act.documents.length})</div>
                       <div className="docrow">
                         {act.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${d}`)}>
-                            <FileText size={12} /> {d}
+                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                            <FileText size={12} /> {attachmentDisplayName(d)}
                           </button>
                         ))}
-                        <ScanButton folder="personal" onUpload={doc => { setActivities(p=>p.map(a=>a.id===act.id?{...a,documents:[...a.documents,doc.name]}:a)); toast.success(`"${doc.name}" added`); }} size="sm" label="Add Document" />
+                        <ScanButton folder="personal" onUpload={doc => { void attachDocToActivity(act, doc.file); }} size="sm" label="Add Document" />
                       </div>
                     </div>
                   </div>
@@ -502,7 +526,7 @@ export function KidsActivities() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={null} onChange={doc => { if(doc) toast.success(`"${doc}" attached`); }} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities" />
+                <AttachDocumentField value={kDoc} onChange={setKDoc} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={saveActivity}>{editingId != null ? "Save Changes" : "Add Activity"}</button>

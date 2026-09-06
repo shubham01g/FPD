@@ -7,7 +7,7 @@ import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
@@ -617,7 +617,7 @@ export function PersonalAssets() {
                   <Field label="Access Method" value={d.accessMethod} />
                 </div>
                 {d.notes && <div className="noteitalic">{d.notes}</div>}
-                {(d as any).attachedDoc && <div className="notemuted">📄 {(d as any).attachedDoc}</div>}
+                {(d as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((d as any).attachedDoc)}</div>}
                 <div className="dacts">
                   <button className="btn-sec" onClick={() => editDigital(d)}><Edit2 size={12} /> Edit</button>
                   <ScanButton folder="digital" onUpload={doc => { setDigitalList(p => p.map(x => x.id === d.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${d.asset}`); }} size="sm" label="Scan Document" />

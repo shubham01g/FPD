@@ -25,9 +25,11 @@ export interface FinalWish {
 }
 export interface Allergy {
   id: string; allergen: string; severity: "severe"|"moderate"|"mild"; reaction: string; type: string; diagnosed: string;
+  documentUrls?: string[];
 }
 export interface Medication {
   id: string; name: string; dose: string; frequency: string; condition: string; prescriber: string; pharmacy: string; refillDate: string;
+  documentUrls?: string[];
 }
 export interface Reminder {
   id: string; title: string; dueDate: string; frequency: string; category: string; status: "upcoming"|"due_soon"|"overdue"|"completed"; notes: string;
@@ -130,8 +132,8 @@ function rowToContact(row: DBContact, latestIdv?: DBIdVerification): Contact {
 interface DBNotificationRow { id: string; title: string; message: string; type: Notification["type"]; read: boolean; created_at: string; }
 
 const rowToWish = (r: DBFinalWish): FinalWish => ({ id: r.id, category: r.category, item: r.item, recipient: r.recipient ?? "", notes: r.notes ?? "" });
-const rowToAllergy = (r: DBAllergy): Allergy => ({ id: r.id, allergen: r.allergen, severity: r.severity, reaction: r.reaction ?? "", type: r.type ?? "", diagnosed: r.diagnosed ?? "" });
-const rowToMed = (r: DBMedication): Medication => ({ id: r.id, name: r.name, dose: r.dose ?? "", frequency: r.frequency ?? "", condition: r.condition ?? "", prescriber: r.prescriber ?? "", pharmacy: r.pharmacy ?? "", refillDate: r.refill_date ?? "" });
+const rowToAllergy = (r: DBAllergy): Allergy => ({ id: r.id, allergen: r.allergen, severity: r.severity, reaction: r.reaction ?? "", type: r.type ?? "", diagnosed: r.diagnosed ?? "", documentUrls: r.document_urls ?? [] });
+const rowToMed = (r: DBMedication): Medication => ({ id: r.id, name: r.name, dose: r.dose ?? "", frequency: r.frequency ?? "", condition: r.condition ?? "", prescriber: r.prescriber ?? "", pharmacy: r.pharmacy ?? "", refillDate: r.refill_date ?? "", documentUrls: r.document_urls ?? [] });
 const rowToReminder = (r: DBReminder): Reminder => ({ id: r.id, title: r.title, dueDate: r.due_date ?? "", frequency: r.frequency ?? "", category: r.category ?? "", status: r.status, notes: r.notes ?? "" });
 const rowToMemory = (r: DBMemory): Memory => ({
   id: r.id, title: r.title, date: r.memory_date ?? "", type: r.type, description: r.description ?? "", tags: r.tags ?? [],
@@ -439,7 +441,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const addAllergy = useCallback(async (a: Omit<Allergy,"id">) => {
     if (!uid) return;
     const tid = toast.loading("Saving allergy...");
-    const { data, error } = await db.addAllergy({ user_id: uid, allergen: a.allergen, severity: a.severity, reaction: a.reaction, type: a.type, diagnosed: a.diagnosed });
+    const { data, error } = await db.addAllergy({ user_id: uid, allergen: a.allergen, severity: a.severity, reaction: a.reaction, type: a.type, diagnosed: a.diagnosed, document_urls: a.documentUrls ?? [] });
     if (error || !data) { toast.error("Could not save allergy", { id: tid }); return; }
     setAllergies(prev => [rowToAllergy(data), ...prev]);
     toast.success("Allergy record saved", { id: tid });
@@ -453,7 +455,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateAllergy = useCallback(async (id: string, a: Omit<Allergy,"id">) => {
-    const { data, error } = await db.updateAllergy(id, a);
+    const { data, error } = await db.updateAllergy(id, {
+      allergen: a.allergen, severity: a.severity, reaction: a.reaction,
+      type: a.type, diagnosed: a.diagnosed, document_urls: a.documentUrls ?? [],
+    });
     if (error || !data) { toast.error("Could not update allergy"); return; }
     setAllergies(prev => prev.map(x => x.id === id ? rowToAllergy(data) : x));
   }, []);
@@ -461,7 +466,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const addMedication = useCallback(async (m: Omit<Medication,"id">) => {
     if (!uid) return;
     const tid = toast.loading("Saving medication...");
-    const { data, error } = await db.addMedication({ user_id: uid, name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate });
+    const { data, error } = await db.addMedication({ user_id: uid, name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate, document_urls: m.documentUrls ?? [] });
     if (error || !data) { toast.error("Could not save medication", { id: tid }); return; }
     setMeds(prev => [rowToMed(data), ...prev]);
     toast.success("Medication record saved", { id: tid });
@@ -475,7 +480,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateMedication = useCallback(async (id: string, m: Omit<Medication,"id">) => {
-    const { data, error } = await db.updateMedication(id, { name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate });
+    const { data, error } = await db.updateMedication(id, { name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate, document_urls: m.documentUrls ?? [] });
     if (error || !data) { toast.error("Could not update medication"); return; }
     setMeds(prev => prev.map(x => x.id === id ? rowToMed(data) : x));
   }, []);
