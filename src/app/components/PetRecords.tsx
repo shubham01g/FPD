@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import { prepareImage, shrinkNotice, MAX_MB } from "../utils/imageInput";
-import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2 } from "lucide-react";
+import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -212,6 +213,7 @@ export function PetRecords() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [showPetForm, setShowPetForm] = useState(false);
   const listRef = React.useRef<HTMLDivElement>(null);
 
@@ -240,6 +242,17 @@ export function PetRecords() {
     resetPetForm();
     setEditingId(null);
     setShowPetForm(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.petRecords.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removePet(id: string) {
+    const { error } = await tables.petRecords.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Pet record deleted");
   }
 
   function openEditPet(pet: PetRecord) {
@@ -311,6 +324,7 @@ export function PetRecords() {
   return (
     <div className="fpd-pets">
       <style dangerouslySetInnerHTML={{ __html: PETS_CSS }} />
+      {confirmDialog}
       <div className="fpd-pets-grain" />
 
       <div className="wrap">
@@ -383,6 +397,7 @@ export function PetRecords() {
                     </div>
                   </div>
                   <button className="btn-mini" onClick={() => openEditPet(pet)}><Edit2 size={13}/> Edit</button>
+                  <button className="btn-mini" onClick={() => requestDelete({ noun: "pet record", label: pet.name, onConfirm: () => removePet(pet.id) })}><Trash2 size={13}/> Delete</button>
                 </div>
 
                 {/* Emergency Pet Caretakers */}

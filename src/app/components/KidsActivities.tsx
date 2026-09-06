@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText, Edit2 } from "lucide-react";
+import { Star, Plus, X, Clock, MapPin, Phone, ChevronDown, ChevronUp, DollarSign, Car, Users, FileText, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -225,6 +226,7 @@ export function KidsActivities() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [expanded, setExpanded] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [filterChild, setFilterChild] = useState("all");
@@ -246,6 +248,17 @@ export function KidsActivities() {
     setEditingId(null);
     setKDoc(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.kidsActivities.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeActivity(id: string) {
+    const { error } = await tables.kidsActivities.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Activity deleted");
   }
 
   function openEdit(act: Activity) {
@@ -328,6 +341,7 @@ export function KidsActivities() {
   return (
     <div className="fpd-kids">
       <style dangerouslySetInnerHTML={{ __html: KIDS_CSS }} />
+      {confirmDialog}
       <div className="fpd-kids-grain" />
 
       <div className="wrap">
@@ -420,6 +434,11 @@ export function KidsActivities() {
                       onClick={(e) => { e.stopPropagation(); openEdit(act); }}
                       style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 6, display: "flex" }}
                     ><Edit2 size={14} /></button>
+                    <button
+                      title="Delete activity"
+                      onClick={(e) => { e.stopPropagation(); requestDelete({ noun: "activity", label: `${act.childName} — ${act.activityType}`, onConfirm: () => removeActivity(act.id) }); }}
+                      style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 6, display: "flex" }}
+                    ><Trash2 size={14} /></button>
                     {expanded === act.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
                   </div>
                 </div>

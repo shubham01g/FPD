@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText, Edit2 } from "lucide-react";
+import { Baby, Plus, X, Phone, MapPin, Clock, ChevronDown, ChevronUp, CheckCircle, AlertCircle, FileText, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -217,6 +218,7 @@ export function DaycareInfo() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingRecord, setEditingRecord] = useState<DaycareRecord | null>(null);
@@ -233,6 +235,17 @@ export function DaycareInfo() {
     setForm(emptyForm);
     setDDoc(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.daycareRecords.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeRecordById(id: string) {
+    const { error } = await tables.daycareRecords.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Daycare record deleted");
   }
 
   function openEditRecord(rec: DaycareRecord) {
@@ -294,6 +307,7 @@ export function DaycareInfo() {
   return (
     <div className="fpd-daycare">
       <style dangerouslySetInnerHTML={{ __html: DAYCARE_CSS }} />
+      {confirmDialog}
       <div className="fpd-daycare-grain" />
 
       <div className="wrap">
@@ -346,6 +360,9 @@ export function DaycareInfo() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                   <button className="btn-sec" onClick={(e) => { e.stopPropagation(); openEditRecord(rec); }} title="Edit daycare record" style={{ padding: "6px 10px" }}>
                     <Edit2 size={13} />
+                  </button>
+                  <button className="btn-sec" onClick={(e) => { e.stopPropagation(); requestDelete({ noun: "daycare record", label: rec.facilityName, onConfirm: () => removeRecordById(rec.id) }); }} title="Delete daycare record" style={{ padding: "6px 10px" }}>
+                    <Trash2 size={13} />
                   </button>
                   {expanded === rec.id ? <ChevronUp size={16} color={MUTED} /> : <ChevronDown size={16} color={MUTED} />}
                 </div>

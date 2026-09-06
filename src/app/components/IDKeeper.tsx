@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2, Edit2 } from "lucide-react";
+import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -172,6 +173,7 @@ export function IDKeeper() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [showAdd, setShowAdd] = useState(false);
   const [editingID, setEditingID] = useState<IDRecord | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -189,6 +191,17 @@ export function IDKeeper() {
     setEditingID(null);
     setForm(emptyForm);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.idKeeperRecords.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeID(id: string) {
+    const { error } = await tables.idKeeperRecords.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("ID deleted");
   }
 
   function openEditID(rec: IDRecord) {
@@ -261,6 +274,7 @@ export function IDKeeper() {
   return (
     <div className="fpd-idk">
       <style dangerouslySetInnerHTML={{ __html: IDK_CSS }} />
+      {confirmDialog}
       <div className="fpd-idk-grain" />
 
       <div className="wrap">
@@ -349,6 +363,7 @@ export function IDKeeper() {
                     {expiring && !expired && <span className="ibadge" style={{ background: "rgba(217,165,94,0.16)", color: WARN }}>EXPIRING SOON</span>}
                     {r.documentScanned && <span className="ibadge" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B" }}>✓ SCANNED</span>}
                     <button className="eye-btn" onClick={() => openEditID(r)} title="Edit ID"><Edit2 size={14}/></button>
+                    <button className="eye-btn" onClick={() => requestDelete({ noun: "ID", label: r.type, onConfirm: () => removeID(r.id) })} title="Delete ID"><Trash2 size={14}/></button>
                   </div>
                 </div>
 

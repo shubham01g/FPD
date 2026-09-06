@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText, Edit2 } from "lucide-react";
+import { Shield, Plus, X, Calendar, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Phone, Globe, XCircle, FileText, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -239,6 +240,7 @@ export function Warranties() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
 
   function resetWarrantyForm() {
     setForm({ product:"", brand:"", model:"", serialNum:"", category:CATEGORIES[0], purchaseDate:"", purchasedFrom:"", price:"", warrantyType:"", provider:"", providerPhone:"", providerWebsite:"", expiryDate:"", coverageDetails:"", claimInstructions:"", notes:"", photo:"" });
@@ -249,6 +251,17 @@ export function Warranties() {
     resetWarrantyForm();
     setEditingId(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.warranties.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeWarranty(id: string) {
+    const { error } = await tables.warranties.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Warranty deleted");
   }
 
   function openEditWarranty(w: Warranty) {
@@ -313,6 +326,7 @@ export function Warranties() {
   return (
     <div className="fpd-warr">
       <style dangerouslySetInnerHTML={{ __html: WARR_CSS }} />
+      {confirmDialog}
       <div className="fpd-warr-grain" />
 
       <div className="wrap">
@@ -419,6 +433,7 @@ export function Warranties() {
                 <div className="wr-body">
                   <div style={{ display: "flex", justifyContent: "flex-end" }}>
                     <button className="btn-sec" onClick={() => openEditWarranty(w)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" onClick={() => requestDelete({ noun: "warranty", label: w.product, onConfirm: () => removeWarranty(w.id) })}><Trash2 size={12} /> Delete</button>
                   </div>
                   <div className="dgrid">
                     {[["Brand / Make", w.brand], ["Model", w.model], ["Serial / Item #", w.serialNum || "—"], ["Purchase Date", w.purchaseDate], ["Purchased From", w.purchasedFrom], ["Purchase Price", w.price], ["Warranty Provider", w.provider], ["Provider Phone", w.providerPhone || "—"], ["Provider Website", w.providerWebsite || "—"], ["Expiry Date", w.expiryDate]].map(([label, value]) => (

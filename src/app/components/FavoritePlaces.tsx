@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { MapPin, Plus, X, Star, Phone, Globe, Heart, Trash2, Compass, Edit2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -204,6 +205,7 @@ export function FavoritePlaces() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [showAdd, setShowAdd] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [filterCat, setFilterCat] = useState("all");
@@ -291,6 +293,7 @@ export function FavoritePlaces() {
   return (
     <div className="fpd-fav">
       <style dangerouslySetInnerHTML={{ __html: FAV_CSS }} />
+      {confirmDialog}
       <div className="fpd-fav-grain" />
 
       <div className="wrap">
@@ -395,7 +398,7 @@ export function FavoritePlaces() {
                     </div>
                     <div style={{ display: "flex", gap: 2, flexShrink: 0 }}>
                       <button className="pdel" onClick={() => openEdit(place)} title="Edit place"><Edit2 size={14} /></button>
-                      <button className="pdel" onClick={() => removePlace(place.id)} title="Remove place"><Trash2 size={14} /></button>
+                      <button className="pdel" onClick={() => requestDelete({ noun: "place", label: place.name, onConfirm: () => removePlace(place.id) })} title="Remove place"><Trash2 size={14} /></button>
                     </div>
                   </div>
 

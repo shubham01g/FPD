@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Edit2 } from "lucide-react";
+import { Plane, Plus, X, Calendar, Users, DollarSign, ChevronDown, ChevronUp, Globe, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -196,6 +197,7 @@ export function TravelPlanner() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [expanded, setExpanded] = useState<string|null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
@@ -212,6 +214,17 @@ export function TravelPlanner() {
     setForm(emptyForm);
     setTDoc(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.travelTrips.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeTrip(id: string) {
+    const { error } = await tables.travelTrips.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Trip deleted");
   }
 
   function openEditModal(trip: Trip) {
@@ -297,6 +310,7 @@ export function TravelPlanner() {
   return (
     <div className="fpd-travel">
       <style dangerouslySetInnerHTML={{ __html: TRAVEL_CSS }} />
+      {confirmDialog}
       <div className="fpd-travel-grain" />
 
       <div className="wrap">
@@ -388,6 +402,9 @@ export function TravelPlanner() {
                     <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16 }}>
                       <button className="btn-sec" onClick={() => openEditModal(trip)}>
                         <Edit2 size={12} /> Edit Trip
+                      </button>
+                      <button className="btn-sec" onClick={() => requestDelete({ noun: "trip", label: trip.destination, onConfirm: () => removeTrip(trip.id) })}>
+                        <Trash2 size={12} /> Delete
                       </button>
                     </div>
                     <div className="tgrid">

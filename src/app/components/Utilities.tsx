@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Zap, Plus, X, Boxes, Edit2 } from "lucide-react";
+import { Zap, Plus, X, Boxes, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -147,6 +148,7 @@ export function Utilities() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
 
   function resetUtilityForm() {
     setUForm({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
@@ -157,6 +159,17 @@ export function Utilities() {
     resetUtilityForm();
     setEditingId(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.utilities.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeUtility(id: string) {
+    const { error } = await tables.utilities.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Utility deleted");
   }
 
   function openEditUtility(u: UtilityRow) {
@@ -212,6 +225,7 @@ export function Utilities() {
   return (
     <div className="fpd-util">
       <style dangerouslySetInnerHTML={{ __html: UTIL_CSS }} />
+      {confirmDialog}
       <div className="fpd-util-grain" />
 
       <div className="wrap">
@@ -283,6 +297,7 @@ export function Utilities() {
               {(u as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((u as any).attachedDoc)}</div>}
               <div className="dacts">
                 <button className="btn-sec" onClick={() => openEditUtility(u)}><Edit2 size={13} /> Edit</button>
+                <button className="btn-sec" onClick={() => requestDelete({ noun: "utility", label: u.service, onConfirm: () => removeUtility(u.id) })}><Trash2 size={13} /> Delete</button>
                 <ScanButton folder="utilities" onUpload={doc => { setUtilityList(p => p.map(x => x.id === u.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${u.service}`); }} size="sm" label="Scan Document" />
               </div>
             </div>

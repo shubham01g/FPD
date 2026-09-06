@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, ChevronUp, Upload, CheckCircle, Edit2 } from "lucide-react";
+import { Briefcase, Plus, X, MapPin, Calendar, DollarSign, User, ChevronDown, ChevronUp, Upload, CheckCircle, Edit2, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -172,6 +173,7 @@ export function JobHistory() {
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
+  const { requestDelete, confirmDialog } = useConfirmDelete();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
@@ -188,6 +190,17 @@ export function JobHistory() {
     setForm(emptyForm);
     setJDoc(null);
     setShowAdd(true);
+  }
+
+  /* Delete was never built for this screen — the only way to drop a row
+     was to run SQL by hand. tables.jobHistory.remove() already existed;
+     nothing called it. Any uploaded file stays in Storage on purpose:
+     unpicking that safely needs to know nothing else references it. */
+  async function removeJob(id: string) {
+    const { error } = await tables.jobHistory.remove(id);
+    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    await reload();
+    toast.success("Job deleted");
   }
 
   function openEditModal(job: Job) {
@@ -254,6 +267,7 @@ export function JobHistory() {
   return (
     <div className="fpd-job">
       <style dangerouslySetInnerHTML={{ __html: JOB_CSS }} />
+      {confirmDialog}
       <div className="fpd-job-grain" />
 
       <div className="wrap">
@@ -335,6 +349,9 @@ export function JobHistory() {
                   <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16 }}>
                     <button className="btn-sec" onClick={() => openEditModal(job)}>
                       <Edit2 size={12} /> Edit Record
+                    </button>
+                    <button className="btn-sec" onClick={() => requestDelete({ noun: "job", label: `${job.title} at ${job.employer}`, onConfirm: () => removeJob(job.id) })}>
+                      <Trash2 size={12} /> Delete
                     </button>
                   </div>
                   <div className="jgrid">
