@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.webp";
 
@@ -498,7 +499,7 @@ export function PersonalAssets() {
               <div key={v.id} className="card" style={{ overflow: "hidden" }}>
                 {(v as any).photo && (
                   <div className="photo-frame" style={{ height: 200 }}>
-                    <img src={(v as any).photo} alt={`${v.year} ${v.make} ${v.model}`} />
+                    <StoredImage src={(v as any).photo} alt={`${v.year} ${v.make} ${v.model}`} />
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
@@ -542,7 +543,7 @@ export function PersonalAssets() {
               <div key={r.id} className="card" style={{ overflow: "hidden" }}>
                 <div className="photo-frame" style={{ height: r.photo ? 220 : 80 }}>
                   {r.photo ? (
-                    <img src={r.photo} alt={r.address} />
+                    <StoredImage src={r.photo} alt={r.address} />
                   ) : (
                     <div className="photo-empty">
                       <Home size={26} color="rgba(91,110,225,0.3)" />
@@ -639,7 +640,7 @@ export function PersonalAssets() {
               <div key={w.id} className="card" style={{ overflow: "hidden" }}>
                 <div className="photo-frame" style={{ height: w.photo ? 200 : 72 }}>
                   {w.photo ? (
-                    <img src={w.photo} alt={`${w.make} ${w.model}`} />
+                    <StoredImage src={w.photo} alt={`${w.make} ${w.model}`} />
                   ) : (
                     <div className="photo-empty" style={{ flexDirection: "row" }}>
                       <Image size={18} color="rgba(91,110,225,0.25)" />
@@ -689,7 +690,7 @@ export function PersonalAssets() {
               <div key={w.id} className="card" style={{ overflow: "hidden" }}>
                 {(w as any).photo && (
                   <div className="photo-frame" style={{ height: 180 }}>
-                    <img src={(w as any).photo} alt={`${w.make} ${w.model}`} />
+                    <StoredImage src={(w as any).photo} alt={`${w.make} ${w.model}`} />
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
@@ -727,7 +728,7 @@ export function PersonalAssets() {
               <div key={c.id} className="card" style={{ overflow: "hidden" }}>
                 {c.photo && (
                   <div className="photo-frame" style={{ height: 220 }}>
-                    <img src={c.photo} alt={c.name} />
+                    <StoredImage src={c.photo} alt={c.name} />
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>

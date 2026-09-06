@@ -5,6 +5,7 @@ import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroTravelPhoto from "../../imports/travel_hero_photo.webp";
 
@@ -332,7 +333,7 @@ export function TravelPlanner() {
             const sc = statusConfig[trip.status];
             return (
               <div key={trip.id} className="card tcard">
-                {trip.photo && <img src={trip.photo} alt={trip.destination} className="tcover" />}
+                {trip.photo && <StoredImage src={trip.photo} alt={trip.destination} className="tcover" />}
                 <button className="thead" onClick={() => setExpanded(expanded===trip.id ? null : trip.id)}>
                   <div className="flex items-start gap-4">
                     <div className="tico">{trip.status==="planned" ? "✈️" : "🌍"}</div>

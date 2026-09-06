@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
@@ -377,7 +378,7 @@ export function FavoritePlaces() {
             const meta = getMeta(place.category);
             return (
               <div key={place.id} className="card pcard">
-                {place.photo && <img src={place.photo} alt={place.name} className="pphoto" />}
+                {place.photo && <StoredImage src={place.photo} alt={place.name} className="pphoto" />}
                 <div className="pbody">
                   <div className="ptop">
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 12, minWidth: 0 }}>
