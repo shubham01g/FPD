@@ -120,6 +120,7 @@ function rowToContact(row: DBContact, latestIdv?: DBIdVerification): Contact {
     id: row.id, type: row.contact_type, name: row.full_name, relationship: row.relationship,
     email: row.email, phone: row.phone ?? "", verificationStatus: row.verification_status,
     accessLevel: row.access_level, notes: row.notes, avatar: initials(row.full_name),
+    photo: row.photo_url ?? undefined,
     allowedFolderIds: row.allowed_folder_ids ?? [],
     idVerificationStatus: latestIdv?.status ?? null,
     idRejectionReason: latestIdv?.rejection_reason ?? null,
@@ -346,7 +347,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await db.addContact({
       owner_user_id: uid, full_name: c.name, email: c.email, phone: c.phone, relationship: c.relationship,
       contact_type: c.type, verification_status: c.verificationStatus, access_level: c.accessLevel,
-      notes: c.notes, allowed_folder_ids: c.allowedFolderIds ?? [],
+      notes: c.notes, allowed_folder_ids: c.allowedFolderIds ?? [], photo_url: c.photo ?? null,
     });
     if (error || !data) { toast.error("Could not add contact", { id: tid }); return; }
     setContacts(prev => [rowToContact(data), ...prev]);
@@ -366,6 +367,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await db.updateContact(id, {
       full_name: updates.name, email: updates.email, phone: updates.phone, relationship: updates.relationship,
       access_level: updates.accessLevel, notes: updates.notes,
+      // Only sent when the edit actually touched the photo — spreading an
+      // undefined would blank the column on every other kind of save.
+      ...(updates.photo === undefined ? {} : { photo_url: updates.photo ?? null }),
     });
     if (error || !data) { toast.error("Could not save contact", { id: tid }); return; }
     // Merge only the edited fields — rowToContact would also reset idVerificationStatus/
@@ -373,6 +377,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setContacts(c => c.map(x => x.id === id ? {
       ...x, name: data.full_name, email: data.email, phone: data.phone ?? "", relationship: data.relationship,
       accessLevel: data.access_level, notes: data.notes, avatar: initials(data.full_name),
+      photo: data.photo_url ?? undefined,
     } : x));
     toast.success("Contact updated", { id: tid });
   }, []);

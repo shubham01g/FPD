@@ -5,8 +5,11 @@ import { toast } from "sonner";
 import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import { AttachDocumentField } from "./AttachDocumentField";
 import { useDemo, type Memory } from "../context/DemoContext";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../services/supabase";
 import heroFamilyPhoto from "../../imports/familymemories_hero_photo.webp";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
@@ -228,6 +231,7 @@ const FAM_CSS = `
 
 export function FamilyMemories() {
   const { memories, addMemory, updateMemory, removeMemory } = useDemo();
+  const { authUser } = useAuth();   // photo uploads are scoped to the signed-in user's folder
   const [tab, setTab] = useState<Tab>("memories");
   // Every tab below is a filtered slice of the one real `memories` list (see the
   // type-mapping comment at the top of this file) instead of its own mock array.
@@ -241,25 +245,33 @@ export function FamilyMemories() {
   const tabContentRef = React.useRef<HTMLDivElement>(null);
 
   // ── Photo upload / scan staging ─────────────────────────────────────
+  /* Holds Storage paths in the private record-photos bucket, not object
+     URLs — these are what get written to media_url on save. */
   const [pendingPhotos, setPendingPhotos] = useState<string[]>([]);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   async function stagePhotos(files: FileList | null) {
     const images = Array.from(files || []).filter(f => f.type.startsWith("image/"));
     if (!images.length) { toast.error("Please choose image files"); return; }
-    const urls: string[] = [];
+    if (!authUser) { toast.error("Sign in to add photos."); return; }
+    const paths: string[] = [];
     for (const f of images) {
-      try { urls.push((await prepareImage(f)).url); }
+      try {
+        const img = await prepareImage(f);
+        URL.revokeObjectURL(img.url);   // uploaded from the blob, never previewed from this URL
+        paths.push(await db.uploadRecordPhoto(authUser.id, img.blob));
+      }
       catch (err) { toast.error(`${f.name}: ${(err as Error).message}`); }
     }
-    if (!urls.length) return;
-    setPendingPhotos(p => [...p, ...urls]);
+    if (!paths.length) return;
+    setPendingPhotos(p => [...p, ...paths]);
     setShowAdd("memories");
-    toast.success(`${urls.length} photo${urls.length > 1 ? "s" : ""} ready — give this memory a title`);
+    toast.success(`${paths.length} photo${paths.length > 1 ? "s" : ""} ready — give this memory a title`);
   }
 
   function clearPendingPhotos() {
-    pendingPhotos.forEach(URL.revokeObjectURL);
+    // Nothing to revoke any more: these are Storage paths, and the objects
+    // they name stay in the bucket whether or not the memory is saved.
     setPendingPhotos([]);
   }
 
@@ -612,8 +624,15 @@ export function FamilyMemories() {
                   <Upload size={14} /> Upload Photos
                 </button>
                 <ScanButton folder="memories" label="Scan Photo"
-                  onUpload={doc => {
-                    setPendingPhotos(p => [...p, doc.previewUrl]);
+                  onUpload={async doc => {
+                    if (!authUser) { toast.error("Sign in to add scans."); return; }
+                    try {
+                      // The scanner only hands back a preview URL, so the bytes
+                      // are read back out of it to upload the scan itself.
+                      const blob = await (await fetch(doc.previewUrl)).blob();
+                      const path = await db.uploadRecordPhoto(authUser.id, blob);
+                      setPendingPhotos(p => [...p, path]);
+                    } catch (err) { toast.error(`Scan could not be saved: ${(err as Error).message}`); return; }
                     setForm(p => ({ ...p, title: p.title || doc.name.replace(/\.[^.]+$/, "") }));
                     setShowAdd("memories");
                     toast.success("Scan added — give this memory a title");
@@ -636,7 +655,7 @@ export function FamilyMemories() {
                   </div>
                   {m.mediaUrl && (
                     <div className="thumbs" style={{ marginBottom: 12 }}>
-                      <img className="thumb" src={m.mediaUrl} alt=""/>
+                      <StoredImage className="thumb" src={m.mediaUrl} alt=""/>
                     </div>
                   )}
                   <div className="r-title">{m.title}</div>
@@ -888,7 +907,7 @@ export function FamilyMemories() {
               <div key={k.id} className="card" style={{ overflow: "hidden" }}>
                 {k.mediaUrl && (
                   <div className="photo-frame" style={{ height: 180 }}>
-                    <img src={k.mediaUrl} alt={k.title}/>
+                    <StoredImage src={k.mediaUrl} alt={k.title}/>
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
@@ -955,7 +974,7 @@ export function FamilyMemories() {
               <div key={a.id} className="card" style={{ overflow: "hidden" }}>
                 {a.mediaUrl && (
                   <div className="photo-frame" style={{ height: 180 }}>
-                    <img src={a.mediaUrl} alt={a.title}/>
+                    <StoredImage src={a.mediaUrl} alt={a.title}/>
                   </div>
                 )}
                 <div className="pad" style={{ padding: 22 }}>
@@ -1004,8 +1023,8 @@ export function FamilyMemories() {
                       <div className="stagethumbs" style={{ marginBottom: 10 }}>
                         {pendingPhotos.map((src,i)=>(
                           <div key={i} className="stagethumb">
-                            <img src={src} alt=""/>
-                            <button className="stageremove" onClick={()=>{ URL.revokeObjectURL(src); setPendingPhotos(p=>p.filter((_,j)=>j!==i)); }}>
+                            <StoredImage src={src} alt=""/>
+                            <button className="stageremove" onClick={()=>{ setPendingPhotos(p=>p.filter((_,j)=>j!==i)); }}>
                               <X size={10}/>
                             </button>
                           </div>

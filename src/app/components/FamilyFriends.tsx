@@ -7,9 +7,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { prepareImage } from "../utils/imageInput";
-import { tables } from "../services/supabase";
+import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import heroFamilyFriendsPhoto from "../../imports/familyfriends_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -600,6 +601,9 @@ export function FamilyFriends() {
     email: c.email ?? null, address: c.address ?? null, birthday: c.birthday ?? null,
     notes: c.notes ?? null, group_category: c.group ?? "other",
     ...(c.starred === undefined ? {} : { starred: c.starred }),
+    // The add/edit form has a PhotoPicker, but this mapping never carried
+    // its value across, so the column was only ever read and never written.
+    ...(c.photo === undefined ? {} : { photo_url: c.photo || null }),
   });
 
   const addContact = async (c: Contact) => {
@@ -640,17 +644,22 @@ export function FamilyFriends() {
 
   const handlePhotoUpload = async (id: string, file: File | null) => {
     if (!file) return;
-    // Resized here so the eventual Storage upload has a sane file to send.
-    // The result is still a blob: URL, which means nothing in another session,
-    // so this remains a preview only — persisting it needs the Storage work.
-    let url: string;
+    if (!authUser) { toast.error("Sign in to save photos."); return; }
+    // Resized, uploaded to the private record-photos bucket, and the
+    // returned storage path written to the row — so it survives a refresh.
+    let path: string;
     try {
       const img = await prepareImage(file);
-      url = img.url;
+      URL.revokeObjectURL(img.url);
+      path = await db.uploadRecordPhoto(authUser.id, img.blob);
     } catch (err) { toast.error((err as Error).message); return; }
-    setContacts(prev => prev.map(c => c.id === id ? { ...c, photo: url } : c));
-    if (selected?.id === id) setSelected(prev => prev ? { ...prev, photo: url } : prev);
-    toast.success("Photo updated for this session — not yet saved to your vault");
+
+    const { error } = await tables.familyFriends.update(id, { photo_url: path });
+    if (error) { toast.error(`Could not save photo: ${error.message}`); return; }
+
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, photo: path } : c));
+    if (selected?.id === id) setSelected(prev => prev ? { ...prev, photo: path } : prev);
+    toast.success("Photo saved");
   };
 
   return (
@@ -855,7 +864,7 @@ export function FamilyFriends() {
                 <div key={contact.id} className={`card crow ${selected?.id === contact.id ? "sel" : ""}`} onClick={() => setSelected(selected?.id === contact.id ? null : contact)}>
                   <div className="cavatar-wrap">
                     {contact.photo
-                      ? <img src={contact.photo} alt={contact.name} className="cavatar"/>
+                      ? <StoredImage src={contact.photo} alt={contact.name} className="cavatar"/>
                       : <div className="cavatar-fallback" style={{ background:`${contact.color}20`, color:contact.color }}>{contact.initials}</div>
                     }
                     {contact.starred && <Star size={12} fill={WARN} color={WARN} style={{ position:"absolute", bottom:0, right:0 }}/>}
@@ -889,7 +898,7 @@ export function FamilyFriends() {
               <div className="card" style={{ overflow: "hidden", position: "sticky", top: 16 }}>
                 <div className="dphoto" style={{ background:`${selected.color}1C` }}>
                   {selected.photo
-                    ? <img src={selected.photo} alt={selected.name}/>
+                    ? <StoredImage src={selected.photo} alt={selected.name}/>
                     : <div className="dphoto-init" style={{ color: selected.color }}>{selected.initials}</div>
                   }
                   <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={e => handlePhotoUpload(selected.id, e.target.files?.[0] ?? null)}/>

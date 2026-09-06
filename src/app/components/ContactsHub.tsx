@@ -9,6 +9,7 @@ import { useDemo, type Contact } from "../context/DemoContext";
 import { toast } from "sonner";
 import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.webp";
 import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.webp";
 import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.webp";
@@ -543,7 +544,7 @@ function ContactSection({
                 {!isLegacy && (
                   c.photo ? (
                     <div className="priority-badge" style={{ padding: 0, overflow: "hidden" }}>
-                      <img src={c.photo} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <StoredImage src={c.photo} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                   ) : (
                     <div className="priority-badge" style={{ background:`${cfg.color}1E`, color:cfg.color }}>

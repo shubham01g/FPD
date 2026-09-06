@@ -3,9 +3,10 @@ import { useEscapeKey } from "../hooks/useEscapeKey";
 import { prepareImage, shrinkNotice, MAX_MB } from "../utils/imageInput";
 import { PawPrint, Plus, X, ImageIcon, Heart, Stethoscope, Edit2 } from "lucide-react";
 import { toast } from "sonner";
-import { tables } from "../services/supabase";
+import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
+import { StoredImage } from "./StoredImage";
 import heroPetPhoto from "../../imports/petrecords_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
@@ -365,8 +366,8 @@ export function PetRecords() {
               {/* Photos */}
               {pet.photos.length > 0 && (
                 <div className="petphotos">
-                  {pet.photos.map((url,i) => (
-                    <img key={i} className="petphoto" src={url} alt=""/>
+                  {pet.photos.map((path,i) => (
+                    <StoredImage key={i} className="petphoto" src={path} alt=""/>
                   ))}
                 </div>
               )}
@@ -507,25 +508,35 @@ export function PetRecords() {
                   <input ref={petPhotoRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={async e => {
                     const files = Array.from(e.target.files||[]).slice(0, 10 - petPhotos.length);
                     e.target.value = "";
-                    const urls: string[] = [];
+                    if (!authUser) { toast.error("Sign in to add pet photos."); return; }
+                    // Each file goes to the private record-photos bucket now and
+                    // what is collected is its storage path — the previous
+                    // object URLs were dead the moment the tab reloaded.
+                    const paths: string[] = [];
                     for (const f of files) {
-                      // Videos are passed through untouched; only images can be
-                      // resized, and rejecting a clip here would be surprising.
-                      if (!f.type.startsWith("image/")) { urls.push(URL.createObjectURL(f)); continue; }
                       try {
-                        const img = await prepareImage(f);
-                        const note = shrinkNotice(img);
-                        if (note) toast.success(note);
-                        urls.push(img.url);
-                      } catch (err) { toast.error((err as Error).message); }
+                        // Videos are uploaded untouched; only images can be
+                        // resized, and rejecting a clip here would be surprising.
+                        // A long clip may exceed the bucket's upload limit, in
+                        // which case the error below says so plainly.
+                        let blob: Blob = f;
+                        if (f.type.startsWith("image/")) {
+                          const img = await prepareImage(f);
+                          const note = shrinkNotice(img);
+                          if (note) toast.success(note);
+                          URL.revokeObjectURL(img.url);
+                          blob = img.blob;
+                        }
+                        paths.push(await db.uploadRecordPhoto(authUser.id, blob));
+                      } catch (err) { toast.error(`${f.name}: ${(err as Error).message}`); }
                     }
-                    if (urls.length) setPetPhotos(p => [...p, ...urls].slice(0,10));
+                    if (paths.length) setPetPhotos(p => [...p, ...paths].slice(0,10));
                   }}/>
                   {petPhotos.length > 0 && (
                     <div className="pfthumbs">
-                      {petPhotos.map((url,i)=>(
+                      {petPhotos.map((path,i)=>(
                         <div key={i} className="pfthumb">
-                          <img src={url} alt=""/>
+                          <StoredImage src={path} alt=""/>
                           <button className="pfremove" onClick={()=>setPetPhotos(p=>p.filter((_,idx)=>idx!==i))}>×</button>
                         </div>
                       ))}

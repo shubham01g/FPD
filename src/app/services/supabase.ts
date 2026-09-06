@@ -69,6 +69,9 @@ export interface DBContact {
   access_level?: string; access_trigger?: string; notes?: string;
   allowed_folder_ids: string[]; id_document_url?: string; id_type?: string;
   id_verified_at?: string; invite_sent_at?: string; created_at: string;
+  /* Storage path in the private record-photos bucket (migration 016).
+     Not to be confused with id_document_url, which is the scanned ID. */
+  photo_url?: string | null;
 }
 
 export interface DBIdVerification {
@@ -418,6 +421,40 @@ export const db = {
     const { error } = await supabase.storage.from("vault-documents").upload(path, file);
     if (error) throw error;
     return path;
+  },
+
+  /* Record photos (migration 016). Everything picked through PhotoPicker
+     lands here: places, trips, warranties, pets, contacts, assets, IDs.
+
+     The bucket is private, so what goes into the database is the storage
+     PATH, never a URL — see signRecordPhotos for reading it back. The
+     caller passes the already-shrunk WebP blob from utils/imageInput,
+     which is why there is no File and no name to preserve. */
+  async uploadRecordPhoto(userId: string, blob: Blob) {
+    const ext = blob.type === "image/webp" ? "webp" : (blob.type.split("/")[1] || "bin");
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("record-photos")
+      .upload(path, blob, { contentType: blob.type || "image/webp" });
+    if (error) throw error;
+    return path;
+  },
+
+  /* Batch-sign record photo paths. A grid of 30 cards is one request
+     rather than 30, which is the whole reason this takes an array.
+     Returns a path -> URL map; paths that fail to sign are simply absent
+     so the caller renders its placeholder instead of a broken image. */
+  async signRecordPhotos(paths: string[], expiresInSeconds = 3600) {
+    if (!paths.length) return {} as Record<string, string>;
+    const { data, error } = await supabase.storage
+      .from("record-photos")
+      .createSignedUrls(paths, expiresInSeconds);
+    if (error) throw error;
+    const map: Record<string, string> = {};
+    for (const row of data ?? []) {
+      if (row.signedUrl && row.path) map[row.path] = row.signedUrl;
+    }
+    return map;
   },
 
   // Realtime subscriptions

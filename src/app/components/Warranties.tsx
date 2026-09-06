@@ -5,6 +5,7 @@ import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import { AttachDocumentField } from "./AttachDocumentField";
 import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
 
@@ -392,7 +393,7 @@ export function Warranties() {
             <div key={w.id} className="card" style={{ overflow: "hidden" }}>
               {(w as any).photo && (
                 <div className="photo-frame">
-                  <img src={(w as any).photo} alt={w.product} />
+                  <StoredImage src={(w as any).photo} alt={w.product} />
                 </div>
               )}
               <button className="wr-head" onClick={() => setExpanded(expanded === w.id ? null : w.id)}>
