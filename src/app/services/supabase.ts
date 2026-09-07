@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { reportReachable, reportUnreachable, setProbeTarget } from "./netStatus";
 
 // createClient() throws synchronously if either value is empty, which — since
 // this module is imported from almost everywhere (adminApi, every context
@@ -30,9 +31,48 @@ export const isSupabaseConfigured =
   Boolean(import.meta.env.VITE_SUPABASE_URL) &&
   Boolean(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
+/**
+ * Is this request a user edit, as opposed to a read or a session chore?
+ *
+ * Only edits earn the "that didn't save" notice — telling someone their data
+ * was lost when all that failed was a background token refresh would be a lie,
+ * and a scary one in a vault app.
+ */
+function isUserWrite(input: RequestInfo | URL, init?: RequestInit): boolean {
+  const method = (init?.method ?? "GET").toUpperCase();
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") return false;
+  const url =
+    typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  // Sign-in and token refresh are POSTs too; the session layer reports those.
+  return !url.includes("/auth/v1/");
+}
+
+/**
+ * Every Supabase request — database, storage and auth alike — is routed through
+ * here so connectivity is observed in exactly one place rather than at the ~90
+ * call sites below. Handing it to createClient means methods added later are
+ * covered automatically, with nothing for the next person to remember.
+ *
+ * It deliberately changes no behaviour: the response, and any error, are passed
+ * straight through to the caller's existing handling.
+ */
+async function trackedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  try {
+    const response = await fetch(input, init);
+    // A 4xx/5xx still proves the round trip happened. Only a *rejected* fetch
+    // means we never reached the server.
+    reportReachable();
+    return response;
+  } catch (err) {
+    reportUnreachable(isUserWrite(input, init));
+    throw err;
+  }
+}
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: true, autoRefreshToken: true },
   realtime: { params: { eventsPerSecond: 10 } },
+  global: { fetch: trackedFetch },
 });
 
 // ── Type helpers ────────────────────────────────────────────
@@ -553,3 +593,9 @@ export const tables = {
   receipts:           ownerTable("receipts"),
   financialRecords:   ownerTable("financial_records"),
 };
+
+/* The connectivity probe knocks on the real backend rather than our own origin
+   — see setProbeTarget. Guarded by isSupabaseConfigured so a checkout with no
+   project connected falls back to the same-origin probe instead of reporting a
+   missing env var as "you are offline". */
+setProbeTarget(isSupabaseConfigured ? `${SUPABASE_URL}/rest/v1/` : null);

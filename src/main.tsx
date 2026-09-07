@@ -5,10 +5,14 @@
   import { toast } from "sonner";
   import { initGlowCursor } from "./app/glowCursor";
   import { initInstallPrompt, onUpdateReady, registerServiceWorker } from "./app/pwa";
+  import { initNetStatus } from "./app/services/netStatus";
 
   initGlowCursor();
   // Before render: `beforeinstallprompt` can fire earlier than React mounts.
   initInstallPrompt();
+  // Connectivity is watched from startup so the shell can be honest about it
+  // before any screen has tried (and failed) to load.
+  initNetStatus();
 
   // A new build takes over on its own (the worker calls skipWaiting), so this
   // announces the swap rather than gating it — someone mid-form can finish

@@ -11,6 +11,8 @@ import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { VaultClone } from "./VaultClone";
 import { InstallApp } from "./InstallApp";
+import { OfflineBanner } from "./OfflineBanner";
+import { useOnline } from "../hooks/useNetStatus";
 import { useDemo } from "../context/DemoContext";
 
 export type PageId =
@@ -131,6 +133,7 @@ const HILITE   = "#5BA7D6";
 const ACCENT   = "#5B6EE1";
 const ACCENT2  = "#7E6BD8";
 const SUCCESS  = "#48BB78";
+const WARN     = "#F6AD55";
 
 const PLAN_LABEL: Record<string, string> = {
   starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
@@ -195,6 +198,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   const drawerRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const { unreadCount, user, notifications, markAllRead, markNotifRead } = useDemo();
+  const online = useOnline();
 
   const isActive = (id: PageId) => currentPage === id;
   /* Navigate + auto-close the drawer on mobile */
@@ -448,9 +452,11 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             <div className="hidden md:block" style={{ color: MUTED, fontSize: 15, whiteSpace: "nowrap" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(72,187,120,0.1)", border: "1px solid rgba(72,187,120,0.25)" }}>
-              <div style={{ width: 5, height: 5, borderRadius: "50%", background: SUCCESS, boxShadow: `0 0 6px ${SUCCESS}` }}/>
-              <span style={{ color: "#D99A6B", fontSize: 14.5, fontWeight: 600 }}>Vault Active</span>
+            {/* Honest status. This pill used to read "Vault Active" in green
+                even with the network down and nothing able to save. */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: online ? "rgba(72,187,120,0.1)" : "rgba(246,173,85,0.12)", border: `1px solid ${online ? "rgba(72,187,120,0.25)" : "rgba(246,173,85,0.28)"}` }}>
+              <div style={{ width: 5, height: 5, borderRadius: "50%", background: online ? SUCCESS : WARN, boxShadow: `0 0 6px ${online ? SUCCESS : WARN}` }}/>
+              <span style={{ color: online ? "#D99A6B" : "#F3D9B8", fontSize: 14.5, fontWeight: 600 }}>{online ? "Vault Active" : "Offline"}</span>
             </div>
 
             <InstallApp />
@@ -517,6 +523,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
             </button>
           </div>
         </header>
+        <OfflineBanner />
 
         {/* Page */}
         <main className="fpd-main flex-1 overflow-y-auto fpd-scroll relative" style={{ background: BG }}>
