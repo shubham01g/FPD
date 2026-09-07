@@ -166,7 +166,7 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
   const go = (id: string) => { setOpen(false); onNavigate(id); };
   return (
     <nav className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
-      style={{ background: scrolled ? "rgba(7,10,18,0.92)" : "transparent", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: scrolled ? "blur(18px)" : "none" }}>
+      style={{ background: scrolled ? "rgba(7,10,18,0.88)" : "linear-gradient(180deg, rgba(7,10,18,0.68) 0%, rgba(7,10,18,0.44) 60%, rgba(7,10,18,0.14) 100%)", borderBottom: scrolled ? "1px solid rgba(91,110,225,0.14)" : "1px solid transparent", backdropFilter: "blur(18px)" }}>
       <div className="max-w-7xl mx-auto flex items-center px-6 py-3.5">
         <button onClick={() => go("home")} className="flex items-center mr-1.5">
           <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 40, width: 61, flexShrink: 0, borderRadius: 7, objectFit: "contain" }} />
@@ -174,12 +174,12 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
         <div className="hidden xl:flex flex-1 items-center justify-between mr-3">
           {NAV_LINKS.map(([l, id]) => (
             <button key={l} onClick={() => go(id)} className={`fpd-shine px-1 py-2 rounded-lg transition-colors hover:text-white ${page === id ? "fpd-underline-on" : ""}`}
-              style={{ color: page === id ? "#FFFFFF" : "#6B7595", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
+              style={{ color: page === id ? "#FFFFFF" : "#B0BCD6", fontSize: 16, fontWeight: 600, whiteSpace: "nowrap" }}>{l}</button>
           ))}
         </div>
         <div className="xl:hidden flex-1" />
         <div className="flex items-center gap-1">
-          <button onClick={() => go("white-glove")} className={`fpd-shine hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors ${page === "white-glove" ? "fpd-underline-on" : ""}`} style={{ color: "#A98CC7", whiteSpace: "nowrap", fontSize: 15 }}>
+          <button onClick={() => go("white-glove")} className={`fpd-shine hidden lg:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors ${page === "white-glove" ? "fpd-underline-on" : ""}`} style={{ color: "#C4AEDC", whiteSpace: "nowrap", fontSize: 15 }}>
             White Glove
           </button>
           <button onClick={() => go("help")} className={`fpd-shine hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white ${page === "help" ? "fpd-underline-on" : ""}`} style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
@@ -1113,8 +1113,8 @@ function Help() {
     { q: "Who can access my vault?", a: "Only you and the contacts you specifically designate. Legacy Contacts must pass government-ID verification before any access is granted. You control exactly what each contact can see and when." },
     { q: "What happens to my data if I cancel?", a: "Your data is retained for 90 days after cancellation so you can export everything. After 90 days it is permanently and irreversibly deleted per our privacy policy." },
     { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. If you exceed your plan limit, overage is billed at $0.50/GB on Starter or $0.40/GB on all other plans." },
-    { q: "What happens when I pass away?", a: "Your designated executor or Legacy Contact initiates the release process. They submit a death certificate, complete identity verification, and our compliance team reviews the request within 24–48 hours before granting access." },
-    { q: "Is Final Pass Down available on mobile?", a: "Yes. Final Pass Down installs straight from your browser as a Progressive Web App (PWA) — no app store download required — and runs full-screen like any other app on iPhone, Android, Windows and Mac. On Android and desktop, use the Install app button in the header; on iPhone, tap Share and then Add to Home Screen." },
+    { q: "What happens after you pass away?", a: "Your designated Legacy Contact initiates the release process. They submit an end of life certification, complete identity verification, and our compliance team reviews the request within 24–48 hours before granting access." },
+    { q: "Is Final Pass Down available on mobile?", a: "Yes. Final Pass Down is a Progressive Web App (PWA) that works on any device without an app store download." },
     { q: "Can I update my documents anytime?", a: "Yes. You can add, replace, or delete any document at any time. Your contacts only ever receive the most current version of your vault when access is triggered." },
     { q: "How do I verify my legacy contacts?", a: "You invite them via email. They click a secure link, create a limited account, and upload a government-issued photo ID. Our team verifies within 1–2 business days." },
     { q: "What is the difference between affiliate and partnership?", a: "Affiliates earn a commission per referred user for 12 months (capped per referral). Partners — typically businesses like law firms or financial advisors — earn recurring lifetime commissions on every account they refer, with no time cap." },
@@ -1166,10 +1166,10 @@ function CTA({ onStart }: { onStart: () => void }) {
             Start Your Legacy Today
           </h2>
           <p style={{ color: SOFT, fontSize: 21.5, maxWidth: 520, lineHeight: 1.7, marginBottom: 30 }}>
-            Join 50,000+ people who have secured their digital legacy. Takes less than 10 minutes to start — free to begin, no card required.
+            Secure your digital legacy. Takes less than 10 minutes to start.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
-            <PrimaryBtn onClick={onStart} large>Create Your Vault <ArrowRight size={18} /></PrimaryBtn>
+            <PrimaryBtn onClick={onStart} large>Join Now <ArrowRight size={18} /></PrimaryBtn>
             <a href="mailto:hello@finalpassdown.com"><GhostBtn large><Mail size={16} /> Talk to Us</GhostBtn></a>
           </div>
         </div>
