@@ -15,7 +15,9 @@ users.get("/", async (c) => {
     .from("users")
     .select(
       "id, email, full_name, phone, avatar_url, plan, plan_status, is_admin, email_verified, created_at, " +
-      "contacts(count), storage_usage(used_bytes, billing_period)",
+      // contacts references users twice (owner_user_id and id_verified_by),
+      // so the embed must name the owner FK or PostgREST refuses to guess.
+      "contacts!owner_user_id(count), storage_usage(used_bytes, billing_period)",
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
