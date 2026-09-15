@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useDemo } from "../context/DemoContext";
 import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
 import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
 
@@ -196,25 +197,61 @@ function useCountdown(expiresAt: number | null) {
   return { h, m, s, remaining, pct: Math.max(0, Math.min(100, pct)) };
 }
 
-/* ── initial file categories ─────────────────────────────────────── */
-const INIT_CATEGORIES: FileCategory[] = [
-  { id:"docs",     label:"Legal Documents",   icon:"⚖️",  sizeGB:2.1,  count:47,  selected:true },
-  { id:"medical",  label:"Medical Records",   icon:"🏥",  sizeGB:3.8,  count:112, selected:true },
-  { id:"finance",  label:"Financial Records", icon:"💰",  sizeGB:1.2,  count:88,  selected:true },
-  { id:"assets",   label:"Personal Assets",   icon:"🏠",  sizeGB:4.4,  count:63,  selected:true },
-  { id:"media",    label:"Family Memories",   icon:"📷",  sizeGB:38.6, count:924, selected:true },
-  { id:"diary",    label:"Digital Diary",     icon:"📖",  sizeGB:1.8,  count:203, selected:false },
-  { id:"contacts", label:"Contacts & Wishes", icon:"❤️",  sizeGB:0.3,  count:29,  selected:true },
-  { id:"passwords",label:"Password Manager",  icon:"🔐",  sizeGB:0.1,  count:156, selected:false },
-];
+/* File categories, built from the account's own documents.
+ * The archive picker used to open on a fixed inventory (924 photos, 112
+ * medical records, 52.3 GB) that every user saw whether or not they had
+ * uploaded anything. It now reflects what this vault actually holds. */
+const CATEGORY_META: Record<string, { label: string; icon: string }> = {
+  legal:     { label: "Legal Documents",        icon: "⚖️" },
+  financial: { label: "Financial Records",      icon: "💰" },
+  medical:   { label: "Medical Records",        icon: "🏥" },
+  taxes:     { label: "Tax Records",            icon: "📋" },
+  property:  { label: "Property & Real Estate", icon: "🏠" },
+  vehicles:  { label: "Vehicles",               icon: "🚗" },
+  utilities: { label: "Utilities & Services",   icon: "⚡" },
+  insurance: { label: "Insurance Policies",     icon: "🛡️" },
+  pets:      { label: "Pet Records",            icon: "🐾" },
+  personal:  { label: "Personal Letters",       icon: "💌" },
+  photos:    { label: "Photo Albums",           icon: "📷" },
+  videos:    { label: "Videos & Recordings",    icon: "🎬" },
+  digital:   { label: "Digital Assets",         icon: "💻" },
+  business:  { label: "Business Records",       icon: "📊" },
+  crypto:    { label: "Crypto & NFTs",          icon: "₿" },
+  education: { label: "Education & Awards",     icon: "🎓" },
+  military:  { label: "Military Records",       icon: "🎖️" },
+  other:     { label: "Other Documents",        icon: "📁" },
+};
+
+function categoriesFromDocs(docs: { category: string; size: number; sizeUnit: "MB" | "GB" }[]): FileCategory[] {
+  const totals = new Map<string, { gb: number; count: number }>();
+  for (const doc of docs) {
+    const key = CATEGORY_META[doc.category] ? doc.category : "other";
+    const entry = totals.get(key) ?? { gb: 0, count: 0 };
+    entry.gb += doc.sizeUnit === "GB" ? doc.size : doc.size / 1024;
+    entry.count += 1;
+    totals.set(key, entry);
+  }
+  return [...totals.entries()]
+    .map(([id, { gb, count }]) => ({
+      id,
+      label: CATEGORY_META[id].label,
+      icon: CATEGORY_META[id].icon,
+      sizeGB: Math.round(gb * 100) / 100,
+      count,
+      selected: true,
+    }))
+    .sort((a, b) => b.sizeGB - a.sizeGB);
+}
 
 /* ── inline purchase modal ─────────────────────────────────────────── */
 function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:()=>void }) {
   const [billing, setBilling] = useState<"monthly"|"annual">("annual");
   const [step, setStep] = useState<"select"|"pay"|"done"|"bypass">("select");
-  const [cardNum, setCardNum]   = useState("4242424242424242");
-  const [cardName, setCardName] = useState("James Doe");
-  const [expiry, setExpiry]     = useState("12/28");
+  // Payment fields start blank — this form used to open pre-filled with a
+  // Stripe test card and a sample cardholder name.
+  const [cardNum, setCardNum]   = useState("");
+  const [cardName, setCardName] = useState("");
+  const [expiry, setExpiry]     = useState("");
   const [cvv, setCvv]           = useState("424");
   const [loading, setLoading]   = useState(false);
 
@@ -376,7 +413,21 @@ export function DisasterRecovery() {
   const countdown = useCountdown(session?.expiresAt ?? null);
   const [showPurchase, setShowPurchase] = useState(false);
 
-  const [categories, setCategories] = useState<FileCategory[]>(INIT_CATEGORIES);
+  const { docs, user } = useDemo();
+  const [categories, setCategories] = useState<FileCategory[]>([]);
+
+  // Re-derive when documents load, preserving the user's tick choices.
+  useEffect(() => {
+    setCategories(prev => {
+      const chosen = new Map(prev.map(c => [c.id, c.selected]));
+      return categoriesFromDocs(docs).map(c => ({ ...c, selected: chosen.get(c.id) ?? c.selected }));
+    });
+  }, [docs]);
+
+  const vaultUsedGb = Math.round(categories.reduce((sum, c) => sum + c.sizeGB, 0) * 100) / 100;
+  const vaultPct = user.storageLimit > 0
+    ? Math.min(100, Math.round((vaultUsedGb / user.storageLimit) * 1000) / 10)
+    : 0;
   const [exportPhase, setExportPhase] = useState<ExportPhase>("idle");
   const [progress, setProgress] = useState(0);
   const [downloadLink, setDownloadLink] = useState("");
@@ -740,6 +791,12 @@ export function DisasterRecovery() {
               </div>
 
               <div className="flex flex-col gap-2">
+                {categories.length === 0 && (
+                  <div style={{ padding: "22px 4px", color: MUTED, fontSize: 15, lineHeight: 1.6 }}>
+                    Nothing to archive yet. Categories appear here as you upload documents
+                    to your File Cabinet.
+                  </div>
+                )}
                 {categories.map(cat => (
                   <label key={cat.id} className={`catrow ${cat.selected ? "on" : ""}`}>
                     <input type="checkbox" checked={cat.selected} onChange={() => toggleCat(cat.id)}
@@ -905,21 +962,22 @@ export function DisasterRecovery() {
               <HardDrive size={14} color={ACCENT} />
               <span style={{ fontSize:13, fontWeight:700, color:TEXT }}>Vault Storage Overview</span>
             </div>
-            <span style={{ fontSize:12, color:MUTED, ...MONO }}>52.3 GB / 250 GB used</span>
+            <span style={{ fontSize:12, color:MUTED, ...MONO }}>
+              {vaultUsedGb} GB / {user.storageLimit} GB used
+            </span>
           </div>
           <div style={{ height:8, borderRadius:4, background:"rgba(91,110,225,0.15)", overflow:"hidden" }}>
-            <div style={{ height:"100%", borderRadius:4, background:`linear-gradient(90deg,${ACCENT},${ACCENT2})`, width:"20.9%" }} />
+            <div style={{ height:"100%", borderRadius:4, background:`linear-gradient(90deg,${ACCENT},${ACCENT2})`, width:`${vaultPct}%` }} />
           </div>
           <div className="flex items-center gap-4 mt-3 flex-wrap">
-            {[
-              { label:"Media", pct:"73.8%", color:ACCENT2 },
-              { label:"Medical", pct:"7.3%",  color:POS },
-              { label:"Assets",  pct:"8.4%",  color:ACCENT },
-              { label:"Other",   pct:"10.5%", color:MUTED },
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-1.5">
-                <div style={{ width:8, height:8, borderRadius:"50%", background:item.color }} />
-                <span style={{ fontSize:11, color:MUTED }}>{item.label} {item.pct}</span>
+            {categories.length === 0 ? (
+              <span style={{ fontSize:11, color:MUTED }}>No documents stored yet.</span>
+            ) : categories.slice(0, 4).map(cat => (
+              <div key={cat.id} className="flex items-center gap-1.5">
+                <div style={{ width:8, height:8, borderRadius:"50%", background:ACCENT2 }} />
+                <span style={{ fontSize:11, color:MUTED }}>
+                  {cat.label} {vaultUsedGb > 0 ? `${Math.round((cat.sizeGB / vaultUsedGb) * 1000) / 10}%` : "0%"}
+                </span>
               </div>
             ))}
           </div>

@@ -4,8 +4,9 @@ import {
   CheckCircle, X, Lock, Unlock, Activity, ChevronDown, ChevronRight, Zap, Search, Key
 } from "lucide-react";
 import { toast } from "sonner";
-import { ADMIN_USERS } from "./UserDetailModal";
 import { adminApi, AdminApiError } from "../../services/adminApi";
+import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAuth } from "../../context/AuthContext";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -41,17 +42,20 @@ interface AuditEntry {
 
 type ModalStep = "acknowledge" | "mfa" | "complete";
 
-const INITIAL_USERS: UserBypass[] = ADMIN_USERS.slice(0, 6).map(u => ({
-  userId: u.id, userName: u.name, email: u.email, plan: u.plan,
-  status: "none", activatedAt: null, expiresAt: null, activatedBy: null, reason: null,
-}));
+/* The bypass roster is every real account from GET /admin/users. Live bypass
+   state lives in disaster_recovery_state and is only mutated through the
+   service-role backend, so a freshly-loaded row always starts at "none" and
+   flips locally once a grant/revoke call succeeds. */
+interface DBUserRow {
+  id: string; email: string; full_name: string; plan: string;
+}
 
-const INITIAL_AUDIT: AuditEntry[] = [
-  { id:"DR-0041", ts: Date.now()-3*3600_000,   admin:"admin@fpd.com", action:"Bypass granted",  target:`${ADMIN_USERS[6]?.id} (${ADMIN_USERS[6]?.name})`, severity:"critical" },
-  { id:"DR-0040", ts: Date.now()-26*3600_000,  admin:"admin@fpd.com", action:"Bypass expired",  target:`${ADMIN_USERS[6]?.id} (${ADMIN_USERS[6]?.name})`, severity:"warning"  },
-  { id:"DR-0039", ts: Date.now()-52*3600_000,  admin:"admin@fpd.com", action:"Bypass revoked",  target:`${ADMIN_USERS[7]?.id} (${ADMIN_USERS[7]?.name})`, severity:"warning"  },
-  { id:"DR-0038", ts: Date.now()-72*3600_000,  admin:"admin@fpd.com", action:"Bypass granted",  target:`${ADMIN_USERS[7]?.id} (${ADMIN_USERS[7]?.name})`, severity:"critical" },
-];
+function rowToBypass(u: DBUserRow): UserBypass {
+  return {
+    userId: u.id, userName: u.full_name, email: u.email, plan: u.plan,
+    status: "none", activatedAt: null, expiresAt: null, activatedBy: null, reason: null,
+  };
+}
 
 const REASON_CODES = [
   { id:"natural_disaster",  label:"Natural Disaster / Evacuation" },
@@ -332,8 +336,29 @@ function GrantModal({
    MAIN ADMIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 export function DisasterRecoveryAdmin() {
-  const [users, setUsers] = useState<UserBypass[]>(INITIAL_USERS);
-  const [audit, setAudit] = useState<AuditEntry[]>(INITIAL_AUDIT);
+  // Audit entries must name whoever is actually signed in, not a placeholder.
+  const { authUser } = useAuth();
+  const actingAdmin = authUser?.email ?? "unknown admin";
+
+  const { data: usersData, loading: usersLoading, error: usersError } = useAdminFetch(
+    () => adminApi.get<{ users: DBUserRow[] }>("/users?pageSize=200"),
+    [],
+  );
+
+  const [users, setUsers] = useState<UserBypass[]>([]);
+  // The audit trail starts empty because no bypass-history table exists yet;
+  // it accumulates this session's own grants and revokes only.
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
+
+  useEffect(() => {
+    if (!usersData?.users) return;
+    // Re-seed from the server, but keep any bypass this session already granted
+    // so a background refetch cannot blank out an open window.
+    setUsers(prev => {
+      const byId = new Map(prev.map(u => [u.userId, u]));
+      return usersData.users.map(row => byId.get(row.id) ?? rowToBypass(row));
+    });
+  }, [usersData]);
   const [grantTarget, setGrantTarget] = useState<UserBypass | null>(null);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -357,13 +382,13 @@ export function DisasterRecoveryAdmin() {
 
     setUsers(us => us.map(u =>
       u.userId === userId
-        ? { ...u, status:"active", activatedAt:now, expiresAt, activatedBy:"admin@fpd.com", reason }
+        ? { ...u, status:"active", activatedAt:now, expiresAt, activatedBy:actingAdmin, reason }
         : u
     ));
 
     setAudit(a => [{
       id: `DR-${Math.floor(Math.random()*9000)+1000}`,
-      ts: now, admin:"admin@fpd.com", action:"Bypass granted",
+      ts: now, admin:actingAdmin, action:"Bypass granted",
       target:`${targetUser?.userId} (${targetUser?.userName})`, severity:"critical"
     }, ...a]);
 
@@ -390,7 +415,7 @@ export function DisasterRecoveryAdmin() {
 
     setAudit(a => [{
       id: `DR-${Math.floor(Math.random()*9000)+1000}`,
-      ts: Date.now(), admin:"admin@fpd.com", action:"Bypass revoked",
+      ts: Date.now(), admin:actingAdmin, action:"Bypass revoked",
       target:`${targetUser?.userId} (${targetUser?.userName})`, severity:"warning"
     }, ...a]);
 
@@ -478,6 +503,12 @@ export function DisasterRecoveryAdmin() {
               BYPASS AUDIT LOG
             </div>
             <div className="space-y-1">
+              {audit.length === 0 && (
+                <div style={{ padding:"18px 0", color:"#8A9AB8", fontSize:14.5 }}>
+                  No bypass activity this session. Grants and revokes are not yet persisted to
+                  a history table, so this log starts empty each time the console is opened.
+                </div>
+              )}
               {audit.map(entry => (
                 <div key={entry.id} className="flex items-center gap-3 py-2.5" style={{ borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
                   <div style={{ width:7, height:7, borderRadius:"50%", flexShrink:0,
@@ -518,6 +549,18 @@ export function DisasterRecoveryAdmin() {
             fontSize:11, color:"#8A9AB8", fontWeight:600, ...MONO }}>
             <span>USER</span><span>PLAN</span><span>STATUS</span><span>BYPASS WINDOW</span><span>ACTIONS</span>
           </div>
+
+          {usersLoading && (
+            <div style={{ padding:"32px 20px", textAlign:"center", color:"#8A9AB8", fontSize:15 }}>Loading accounts…</div>
+          )}
+          {usersError && (
+            <div style={{ padding:"32px 20px", textAlign:"center", color:"#FC8181", fontSize:15 }}>{usersError}</div>
+          )}
+          {!usersLoading && !usersError && filtered.length === 0 && (
+            <div style={{ padding:"32px 20px", textAlign:"center", color:"#8A9AB8", fontSize:15 }}>
+              {users.length === 0 ? "No accounts yet." : "No accounts match this search."}
+            </div>
+          )}
 
           {filtered.map((user, i) => {
             const isExpanded = expandedUser === user.userId;

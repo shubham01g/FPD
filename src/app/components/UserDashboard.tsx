@@ -4,7 +4,7 @@ import {
   ArrowRight, Bell, Plus, Check
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
-import { STORAGE_BREAKDOWN } from "../utils/storageBreakdown";
+import { deriveStorageBreakdown } from "../utils/storageBreakdown";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
@@ -25,14 +25,8 @@ const LINE_SOFT   = "rgba(255,255,255,0.045)";
 const LINE_SOFT_2 = "rgba(255,255,255,0.13)";
 
 /* Calm, cool storage palette — applied dashboard-side only, so the shared
-   STORAGE_BREAKDOWN (and the Usage & Billing page) keep their own category
-   colours untouched. */
+   breakdown (and the Usage & Billing page) keep their own category colours. */
 const STORAGE_RAMP = ["#5BA7D6", "#6F9E94", "#7E6BD8", "#5BA7D6", "#6FAE8B", "#97A2C6"];
-
-const storageHistory = [
-  { month: "Jan", used: 4.2 }, { month: "Feb", used: 6.8 }, { month: "Mar", used: 9.1 },
-  { month: "Apr", used: 11.5 }, { month: "May", used: 14.3 }, { month: "Jun", used: 16.9 },
-];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -140,6 +134,7 @@ const DASH_CSS = `
 .fpd-dash .uf-d{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
 .fpd-dash .uf-d.used{background:${ACCENT2};}
 .fpd-dash .uf-d.free{background:transparent;border:1.5px solid ${FAINT};}
+.fpd-dash .stor-empty{margin-top:16px;padding:14px 6px;border-top:1px solid ${LINE_SOFT};color:${FAINT};font-size:14px;line-height:1.6;}
 .fpd-dash .leg{width:100%;}
 .fpd-dash .leg-row{display:flex;align-items:center;gap:11px;padding:10px 6px;border-top:1px solid ${LINE_SOFT};font-size:14px;border-radius:9px;transition:background .15s;}
 .fpd-dash .leg-row:first-child{border-top:none;}
@@ -147,12 +142,6 @@ const DASH_CSS = `
 .fpd-dash .leg-row .nm{color:${SOFT};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fpd-dash .leg-row .gb{color:${TEXT};font-variant-numeric:tabular-nums;}
 .fpd-dash .leg-row .pc{color:${FAINT};width:48px;text-align:right;font-variant-numeric:tabular-nums;}
-.fpd-dash .trend{margin-top:18px;padding-top:18px;border-top:1px solid ${LINE_SOFT};}
-.fpd-dash .trend-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.fpd-dash .trend-head .t{font-size:12.5px;color:${FAINT};font-weight:600;}
-.fpd-dash .trend-head .v{font-size:12.5px;color:${MINT};font-weight:600;}
-.fpd-dash .months{display:flex;justify-content:space-between;margin-top:8px;}
-.fpd-dash .months span{font-size:11px;color:${FAINT};}
 
 /* ── Recent documents + notifications (shared evrow pattern, same
    colour-coded-card language LifeCalendar uses for its event rows) ── */
@@ -190,11 +179,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const guardianContacts = contacts.filter(c => c.type === "guardian");
   const legacyVerified = legacyContacts.filter(c => c.verificationStatus === "verified").length;
 
-  /* ── Usage breakdown, re-coloured with the monochrome ramp for the dashboard ── */
-  const breakdownTotalGb = STORAGE_BREAKDOWN.reduce((a, c) => a + c.gb, 0) || 1;
-  const breakdown = STORAGE_BREAKDOWN
+  /* ── Usage breakdown, from this account's own documents, re-coloured with
+     the monochrome ramp for the dashboard. Empty until the first upload. ── */
+  const rawBreakdown = deriveStorageBreakdown(docs);
+  const breakdownTotalGb = rawBreakdown.reduce((a, c) => a + c.gb, 0) || 1;
+  const breakdown = rawBreakdown
     .map(c => ({ ...c, pct: (c.gb / breakdownTotalGb) * 100 }))
-    .sort((a, b) => b.gb - a.gb)
     .map((c, i) => ({ ...c, color: STORAGE_RAMP[i] ?? c.color }));
 
   /* ── The six estate essentials — still drive the header's readiness
@@ -229,17 +219,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   ];
 
   /* ── 6-month trend area chart ── */
-  const vals = storageHistory.map(d => d.used);
-  const CW = 300, CH = 88, cpt = 8, cpb = 8, innerH = CH - cpt - cpb;
-  const maxV = Math.max(18, Math.ceil(Math.max(...vals) / 6) * 6);
-  const cx = (i: number) => (i / (vals.length - 1)) * CW;
-  const cy = (v: number) => cpt + (1 - v / maxV) * innerH;
-  let linePath = "";
-  vals.forEach((v, i) => { linePath += `${i ? "L" : "M"} ${cx(i).toFixed(1)} ${cy(v).toFixed(1)} `; });
-  const areaPath = `M ${cx(0).toFixed(1)} ${CH - cpb} ${linePath}L ${CW} ${CH - cpb} Z`;
-  const gridYs = [0.33, 0.67, 1].map(f => cpt + (1 - f) * innerH);
-  const trendDelta = (vals[vals.length - 1] - vals[0]).toFixed(1);
-  const lastX = cx(vals.length - 1), lastY = cy(vals[vals.length - 1]);
 
   const todayLong = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
@@ -334,6 +313,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
               <div className="uf-i"><span className="uf-d used" />Used <b>{used} GB</b></div>
               <div className="uf-i"><span className="uf-d free" />Free <b>{freeGb.toFixed(1)} GB</b></div>
             </div>
+            {breakdown.length === 0 && (
+              <div className="stor-empty">
+                Nothing stored yet. Documents you upload to the File Cabinet are
+                counted here and broken down by folder.
+              </div>
+            )}
             <div className="leg">
               {breakdown.map(seg => (
                 <div key={seg.key} className="leg-row">
@@ -343,30 +328,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                   <span className="pc">{((seg.gb / used) * 100).toFixed(1)}%</span>
                 </div>
               ))}
-            </div>
-            <div className="trend">
-              <div className="trend-head">
-                <span className="t">Usage · last 6 months</span>
-                <span className="v">+{trendDelta} GB</span>
-              </div>
-              <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{ width: "100%", height: 96, display: "block" }}>
-                <defs>
-                  <linearGradient id="fpdArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(91,110,225,0.32)" />
-                    <stop offset="100%" stopColor="rgba(91,110,225,0)" />
-                  </linearGradient>
-                </defs>
-                {gridYs.map((y, i) => (
-                  <line key={i} x1="0" y1={y.toFixed(1)} x2={CW} y2={y.toFixed(1)} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                ))}
-                <path d={areaPath} fill="url(#fpdArea)" />
-                <path d={linePath.trim()} fill="none" stroke={ACCENT2} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-                <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="7" fill="rgba(91,110,225,0.25)" />
-                <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="3.6" fill={ACCENT2} />
-              </svg>
-              <div className="months">
-                {storageHistory.map(d => <span key={d.month}>{d.month}</span>)}
-              </div>
             </div>
           </div>
 

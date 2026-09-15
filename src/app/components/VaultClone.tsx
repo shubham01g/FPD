@@ -23,19 +23,49 @@ interface VaultCloneProps {
   mode: "clone" | "export" | "template";
 }
 
-// Everything included in the full account download
-const ALL_CONTENTS = [
-  { icon:<FileText size={13}/>,    color:"#6E90C9", label:"All Documents",         count:"14 files", desc:"All 18 folder categories" },
-  { icon:<Heart size={13}/>,       color:"#FC8181", label:"Final Wishes",          count:"5 records",  desc:"Wills, bequests, instructions" },
-  { icon:<Stethoscope size={13}/>, color:"#D99A6B", label:"Medical Info",          count:"8 records",  desc:"Allergies, medications, directives" },
-  { icon:<Wallet size={13}/>,      color:"#F6AD55", label:"Financial Records",     count:"12 records", desc:"Insurance, investments, real estate" },
-  { icon:<Car size={13}/>,         color:"#6FAE8B",   label:"Personal Assets",       count:"6 records",  desc:"Vehicles, utilities, digital assets" },
-  { icon:<Camera size={13}/>,      color:"#6E90C9", label:"Memories & Media",      count:"24 items",   desc:"Photos, videos, written memories" },
-  { icon:<BookOpen size={13}/>,    color:"#ED8936", label:"Digital Diary",         count:"12 entries", desc:"Audio, video, and text entries" },
-  { icon:<Key size={13}/>,         color:"#D68FA8", label:"Password Manager",      count:"18 entries", desc:"All saved credentials" },
-  { icon:<Users size={13}/>,       color:"#68D391", label:"Contacts & Designations",count:"6 contacts",desc:"Legacy, guardian, emergency contacts" },
-  { icon:<PawPrint size={13}/>,    color:"#F6AD55", label:"Pet Records",           count:"5 records",  desc:"Vet records, instructions" },
-  { icon:<Lock size={13}/>,        color:"#FC8181", label:"Secret Vault",          count:"3 items",    desc:"Most sensitive items (opt-in)" },
+/* Everything included in the full account download. The counts used to be
+   fixed strings ("14 files", "24 items") shown to every account; they are now
+   counted from what this vault actually holds. */
+interface CloneSection {
+  icon: React.ReactNode;
+  color: string;
+  label: string;
+  count: number;
+  unit: string;
+  desc: string;
+}
+
+function buildContents(d: {
+  docs: unknown[]; wishes: unknown[]; allergies: unknown[]; medications: unknown[];
+  memories: unknown[]; contacts: unknown[];
+}): CloneSection[] {
+  return [
+    { icon:<FileText size={13}/>,    color:"#6E90C9", label:"All Documents",  count:d.docs.length,     unit:"files",    desc:"All 18 folder categories" },
+    { icon:<Heart size={13}/>,       color:"#FC8181", label:"Final Wishes",   count:d.wishes.length,   unit:"records",  desc:"Wills, bequests, instructions" },
+    { icon:<Stethoscope size={13}/>, color:"#D99A6B", label:"Medical Info",   count:d.allergies.length + d.medications.length, unit:"records", desc:"Allergies, medications, directives" },
+    { icon:<Camera size={13}/>,      color:"#6E90C9", label:"Memories & Media", count:d.memories.length, unit:"items",  desc:"Photos, videos, written memories" },
+    { icon:<Users size={13}/>,       color:"#68D391", label:"Contacts & Designations", count:d.contacts.length, unit:"contacts", desc:"Legacy, guardian, emergency contacts" },
+  ];
+}
+
+/* Sections the export covers whose rows live in their own tables and are not
+   loaded here — listed without a count rather than with an invented one. */
+interface UncountedSection {
+  icon: React.ReactNode;
+  color: string;
+  label: string;
+  desc: string;
+  count?: undefined;
+  unit?: undefined;
+}
+
+const OTHER_SECTIONS: UncountedSection[] = [
+  { icon:<Wallet size={13}/>,   color:"#F6AD55", label:"Financial Records", desc:"Insurance, investments, real estate" },
+  { icon:<Car size={13}/>,      color:"#6FAE8B", label:"Personal Assets",   desc:"Vehicles, utilities, digital assets" },
+  { icon:<BookOpen size={13}/>, color:"#ED8936", label:"Digital Diary",     desc:"Audio, video, and text entries" },
+  { icon:<Key size={13}/>,      color:"#D68FA8", label:"Password Manager",  desc:"All saved credentials" },
+  { icon:<PawPrint size={13}/>, color:"#F6AD55", label:"Pet Records",       desc:"Vet records, instructions" },
+  { icon:<Lock size={13}/>,     color:"#FC8181", label:"Secret Vault",      desc:"Most sensitive items (opt-in)" },
 ];
 
 /* All styling scoped under .fpd-vclone so nothing else in the app is affected. */
@@ -119,7 +149,8 @@ const VCLONE_CSS = `
 `;
 
 export function VaultClone({ onClose, mode }: VaultCloneProps) {
-  const { continuationFeePaid } = useDemo();
+  const { continuationFeePaid, docs, wishes, allergies, medications, memories, contacts } = useDemo();
+  const contents = buildContents({ docs, wishes, allergies, medications, memories, contacts });
   const [step, setStep] = useState<"overview"|"confirm"|"downloading"|"done">("overview");
   const [includeSecretVault, setIncludeSecretVault] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -144,10 +175,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
     }, 180);
   };
 
-  const totalItems = ALL_CONTENTS.reduce((s, c) => {
-    const n = parseInt(c.count.replace(/\D/g,""));
-    return s + (isNaN(n) ? 0 : n);
-  }, 0);
+  const totalItems = contents.reduce((sum, c) => sum + c.count, 0);
 
   return (
     <div className="fpd-vclone fpd-fade-in-up">
@@ -187,9 +215,9 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
 
               <div className="panel panel-info">
                 <div className="panel-info-lbl">WHAT GETS UNLOCKED</div>
-                <p>Once both conditions are met, legacy contacts can click this button to download a complete, encrypted package of <strong style={{ color: TEXT }}>everything</strong> in this account — {totalItems}+ items across all 30+ life categories.</p>
+                <p>Once both conditions are met, legacy contacts can click this button to download a complete, encrypted package of <strong style={{ color: TEXT }}>everything</strong> in this account{totalItems > 0 ? ` — ${totalItems}+ items across all 30+ life categories` : ", across all 30+ life categories"}.</p>
                 <div className="preview-grid">
-                  {ALL_CONTENTS.slice(0,8).map(item => (
+                  {[...contents, ...OTHER_SECTIONS].slice(0,8).map(item => (
                     <div key={item.label} className="preview-chip">
                       <span style={{ color:item.color }}>{item.icon}</span>
                       <span>{item.label}</span>
@@ -216,14 +244,18 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div>
                 <div className="contents-lbl">COMPLETE ACCOUNT CONTENTS</div>
                 <div>
-                  {ALL_CONTENTS.filter(c => c.label !== "Secret Vault" || includeSecretVault).map(item => (
+                  {([...contents, ...OTHER_SECTIONS] as (CloneSection | UncountedSection)[])
+                    .filter(c => c.label !== "Secret Vault" || includeSecretVault)
+                    .map(item => (
                     <div key={item.label} className="content-row">
                       <span style={{ color:item.color, flexShrink:0 }}>{item.icon}</span>
                       <div className="flex-1" style={{ minWidth: 0 }}>
                         <span className="content-label">{item.label}</span>
                         <span className="content-desc">{item.desc}</span>
                       </div>
-                      <span className="content-count" style={{ color: item.color }}>{item.count}</span>
+                      <span className="content-count" style={{ color: item.color }}>
+                          {item.count === undefined ? "Included" : `${item.count} ${item.unit}`}
+                        </span>
                     </div>
                   ))}
                 </div>

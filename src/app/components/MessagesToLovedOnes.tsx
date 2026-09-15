@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useDemo } from "../context/DemoContext";
 import heroMessagesPhoto from "../../imports/messages_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
@@ -78,14 +79,10 @@ const fmtTriggerDate = (isoStr?: string) => {
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-const RECIPIENTS = [
-  { name: "Sarah Johnson", relationship: "Spouse" },
-  { name: "Michael Doe",   relationship: "Son" },
-  { name: "Emily Doe",     relationship: "Daughter" },
-  { name: "Tyler Doe",     relationship: "Grandson" },
-  { name: "Lily Doe",      relationship: "Granddaughter" },
-  { name: "Robert Doe",    relationship: "Brother" },
-];
+/* Recipients are the account's own contacts. This list used to be a fixed
+   family (Sarah Johnson, Michael/Emily/Tyler/Lily/Robert Doe) offered to
+   every user regardless of who they had actually added. */
+interface Recipient { name: string; relationship: string }
 
 /* Rows come from the `messages_to_loved_ones` table — the screen used to open
    on sample letters identical for every account and lost on refresh. */
@@ -236,6 +233,7 @@ const MSG_CSS = `
 .fpd-msg .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
 .fpd-msg .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
 .fpd-msg .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
+.fpd-msg .field-hint{display:block;margin-top:6px;font-size:12.5px;color:${MUTED};line-height:1.5;}
 .fpd-msg .field input,.fpd-msg .field select,.fpd-msg .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-msg .field input::placeholder,.fpd-msg .field textarea::placeholder{color:${FAINT};}
 .fpd-msg .field input:focus,.fpd-msg .field select:focus,.fpd-msg .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
@@ -401,6 +399,18 @@ function RecorderPanel({ medium, onCapture }: { medium: Medium; onCapture: (dur:
 function ComposeModal({
   editing, onClose, onSave,
 }: { editing: Message | null; onClose: () => void; onSave: (m: Message) => void }) {
+  const { contacts } = useDemo();
+  /* Contacts can repeat across types (a guardian who is also a legacy
+     contact), so collapse by name for the picker. */
+  const recipients: Recipient[] = useMemo(() => {
+    const byName = new Map<string, Recipient>();
+    for (const c of contacts) {
+      if (!c.name?.trim()) continue;
+      if (!byName.has(c.name)) byName.set(c.name, { name: c.name, relationship: c.relationship ?? "" });
+    }
+    return [...byName.values()].sort((x, y) => x.name.localeCompare(y.name));
+  }, [contacts]);
+
   const [form, setForm] = useState<Partial<Message>>(
     editing ?? { medium: "letter", trigger: "on_passing", status: "draft", body: "", title: "" }
   );
@@ -424,7 +434,7 @@ function ComposeModal({
       return toast.error("Pick the delivery date.");
     }
 
-    const rec = RECIPIENTS.find(r => r.name === form.recipient);
+    const rec = recipients.find(r => r.name === form.recipient);
     onSave({
       id: editing?.id ?? `m${Date.now()}`,
       title: form.title!.trim(),
@@ -483,9 +493,18 @@ function ComposeModal({
             <div className="field">
               <label>Recipient *</label>
               <select value={form.recipient ?? ""} onChange={e => setF("recipient", e.target.value)}>
-                <option value="">Select a person…</option>
-                {RECIPIENTS.map(r => <option key={r.name} value={r.name}>{r.name} — {r.relationship}</option>)}
+                <option value="">{recipients.length ? "Select a person…" : "No contacts yet"}</option>
+                {recipients.map(r => (
+                  <option key={r.name} value={r.name}>
+                    {r.relationship ? `${r.name} — ${r.relationship}` : r.name}
+                  </option>
+                ))}
               </select>
+              {recipients.length === 0 && (
+                <span className="field-hint">
+                  Add someone under Legacy, Guardian or Emergency Contacts first — they appear here.
+                </span>
+              )}
             </div>
             <div className="field">
               <label>Delivery Trigger</label>

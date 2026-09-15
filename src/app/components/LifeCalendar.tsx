@@ -19,16 +19,19 @@
  * measured, not guessed — so neither side ever shows a stretched grid or a
  * dead gap. The same pairing exists for the Agenda view's week list + rail.
  */
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, ChevronRight, ArrowRight, LayoutGrid, List, Info,
   CalendarDays, CalendarClock, AlertTriangle,
   CreditCard, Bell, Cake, ShieldCheck, IdCard, Plane, Pill, Star, Pin,
 } from "lucide-react";
 import {
-  eventsForMonth, upcomingEvents, monthlyBillingTotal, iso, daysInMonth,
-  SOURCE_META, type CalendarEvent, type EventSource,
+  buildRules, eventsForMonth, upcomingEvents, monthlyBillingTotal, iso, daysInMonth,
+  SOURCE_META, type CalendarEvent, type EventSource, type Rule,
 } from "../services/calendarEvents";
+import { useDemo } from "../context/DemoContext";
+import { useAuth } from "../context/AuthContext";
+import { tables } from "../services/supabase";
 import heroCalendarPhoto from "../../imports/calendar_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard) ── */
@@ -376,7 +379,43 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
   const [view, setView] = useState<"month" | "agenda">("month");
   const [active, setActive] = useState<Set<EventSource>>(new Set(ALL_SOURCES));
 
-  const monthEvents = useMemo(() => eventsForMonth(year, month), [year, month]);
+  /* Every event is derived from the signed-in user's own rows. Reminders,
+     occasions and medications are already in DemoContext; the other three
+     sections are fetched here because no shared context holds them. */
+  const { authUser } = useAuth();
+  const { reminders, occasions, medications } = useDemo();
+  const [extra, setExtra] = useState<{ subscriptions: any[]; warranties: any[]; ids: any[]; trips: any[] }>(
+    { subscriptions: [], warranties: [], ids: [], trips: [] },
+  );
+  const [loadingSources, setLoadingSources] = useState(true);
+
+  useEffect(() => {
+    if (!authUser) { setLoadingSources(false); return; }
+    let cancelled = false;
+    (async () => {
+      const [subs, wars, ids, trips] = await Promise.all([
+        tables.subscriptionTracker.list(authUser.id),
+        tables.warranties.list(authUser.id),
+        tables.idKeeperRecords.list(authUser.id),
+        tables.travelTrips.list(authUser.id),
+      ]);
+      if (cancelled) return;
+      setExtra({
+        subscriptions: subs.data ?? [], warranties: wars.data ?? [],
+        ids: ids.data ?? [], trips: trips.data ?? [],
+      });
+      setLoadingSources(false);
+    })();
+    return () => { cancelled = true; };
+  }, [authUser]);
+
+  const rules: Rule[] = useMemo(() => buildRules({
+    subscriptions: extra.subscriptions, warranties: extra.warranties,
+    ids: extra.ids, trips: extra.trips,
+    reminders, occasions, medications,
+  }), [extra, reminders, occasions, medications]);
+
+  const monthEvents = useMemo(() => eventsForMonth(year, month, rules), [year, month, rules]);
   const visible = useMemo(() => monthEvents.filter(e => active.has(e.source)), [monthEvents, active]);
 
   /** date -> events, for painting chips on the grid */
@@ -390,8 +429,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
     return map;
   }, [visible]);
 
-  const upcoming = useMemo(() => upcomingEvents(6).filter(e => active.has(e.source)), [active]);
-  const billingTotal = useMemo(() => monthlyBillingTotal(year, month), [year, month]);
+  const upcoming = useMemo(() => upcomingEvents(rules, 6).filter(e => active.has(e.source)), [active, rules]);
+  const billingTotal = useMemo(() => monthlyBillingTotal(year, month, rules), [year, month, rules]);
   const selectedEvents = byDate.get(selected) ?? [];
   const nextEvent = upcoming[0];
 
@@ -453,7 +492,14 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
     e => e.date < todayIso && (e.source === "warranty" || e.source === "document")
   ).length;
   const billingCount = monthEvents.filter(e => e.source === "billing").length;
-  const upcomingTotal = upcomingEvents(999).length;
+  const upcomingTotal = upcomingEvents(rules, 999).length;
+  /* Distinguish "you have nothing yet" from "your filters hide everything" —
+     a brand-new account has no rows at all and must not be told to adjust
+     filters it never touched. */
+  const hasAnySource = rules.length > 0;
+  const emptyBody = hasAnySource
+    ? "Nothing ahead matches your active filters. Turn a few back on above."
+    : "This calendar fills itself from the rest of your vault — add a subscription, reminder, warranty, ID or trip and its dates appear here automatically.";
 
   const todayLong = today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase();
 
@@ -677,8 +723,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                 ) : (
                   <div className="empty">
                     <div className="ei"><CalendarDays size={20} /></div>
-                    <div className="et">Nothing scheduled</div>
-                    <div className="ed">This day is clear, and nothing upcoming matches your active filters. Turn a few back on above.</div>
+                    <div className="et">{hasAnySource ? "Nothing scheduled" : "Your calendar is empty"}</div>
+                    <div className="ed">{emptyBody}</div>
                   </div>
                 )}
               </div>
@@ -690,8 +736,8 @@ export function LifeCalendar({ onNavigate }: { onNavigate?: (page: string) => vo
                 {upcoming.length === 0 ? (
                   <div className="empty">
                     <div className="ei"><CalendarClock size={20} /></div>
-                    <div className="et">No upcoming events</div>
-                    <div className="ed">Nothing ahead matches your active filters. Turn a few back on above.</div>
+                    <div className="et">{hasAnySource ? "No upcoming events" : "Nothing scheduled yet"}</div>
+                    <div className="ed">{emptyBody}</div>
                   </div>
                 ) : (
                   <div className="evlist compact">

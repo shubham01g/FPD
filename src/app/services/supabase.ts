@@ -288,8 +288,15 @@ export const db = {
   async getAffiliate(userId: string) {
     return supabase.from("affiliates").select("*").eq("user_id", userId).single<DBAffiliate>();
   },
+  /* Joins the referred member so the affiliate screen can label each row.
+     If RLS hides that user, PostgREST returns null for the join rather than
+     failing — the caller renders a neutral label in that case. */
   async listAffiliateReferrals(affiliateId: string) {
-    return supabase.from("affiliate_referrals").select("*").eq("affiliate_id", affiliateId);
+    return supabase
+      .from("affiliate_referrals")
+      .select("*, referred:referred_user_id(full_name, email)")
+      .eq("affiliate_id", affiliateId)
+      .order("referred_at", { ascending: false });
   },
 
   // Admin settings

@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
-import { STORAGE_BREAKDOWN, STORAGE_USED_GB, STORAGE_LIMIT_GB } from "../utils/storageBreakdown";
+import { deriveStorageBreakdown } from "../utils/storageBreakdown";
+import { useDemo } from "../context/DemoContext";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.webp";
@@ -20,20 +21,12 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-const usageByMonth = [
-  { month: "Jan", used: 4.2, limit: 25 }, { month: "Feb", used: 6.8, limit: 25 },
-  { month: "Mar", used: 9.1, limit: 25 }, { month: "Apr", used: 11.5, limit: 25 },
-  { month: "May", used: 14.3, limit: 25 }, { month: "Jun", used: 16.9, limit: 25 },
-];
-
-/* Shared with the Dashboard breakdown so the two views always agree. */
-const usageByCategory = STORAGE_BREAKDOWN.map(c => ({ category: c.label, gb: c.gb, color: c.color }));
+/* No per-month usage history exists: storage_usage is never written by the
+   app or the Edge functions, so there is nothing to chart over time. The
+   category split and the live total are derived from the user's own
+   vault_documents rows instead — see utils/storageBreakdown.ts. */
 
 interface DBPlan { id: string; name: string; price_monthly: number; storage_gb: number; overage_rate: number; }
-
-// "current" is hardcoded to Legacy Archive — there's no logged-in-user session
-// wired up on this screen yet, so it can't look up the real subscriber's plan.
-const CURRENT_PLAN_ID = "family_archive";
 
 const FALLBACK_PLANS = [
   { id: "starter",        name: "Starter",       storage: 1,    price: 1.99,   overage: 0.50 },
@@ -43,11 +36,6 @@ const FALLBACK_PLANS = [
   { id: "legacy_vault",   name: "Legacy Vault",  storage: 1024, price: 129.99, overage: 0.40 },
 ];
 
-const alertHistory = [
-  { date: "Jun 10, 2026", type: "80%", message: "Storage at 80% — usage warning sent", color: WARN },
-  { date: "May 28, 2026", type: "Reset", message: "Monthly billing cycle reset — storage cleared to 0", color: "#D99A6B" },
-  { date: "Apr 29, 2026", type: "90%", message: "Storage at 90% — upgrade recommended", color: NEG },
-];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -211,10 +199,12 @@ const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
   const [step, setStep] = useState<"select" | "pay" | "done">("select");
-  const [cardNum, setCardNum] = useState("4242424242424242");
-  const [cardName, setCardName] = useState("James Doe");
-  const [expiry, setExpiry] = useState("12/28");
-  const [cvv, setCvv] = useState("424");
+  // Payment fields start blank — this form used to open pre-filled with a
+  // Stripe test card, a sample cardholder name, expiry and CVV.
+  const [cardNum, setCardNum] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handlePay = async () => {
@@ -333,6 +323,7 @@ export function StorageUsage() {
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
   const [showDRModal, setShowDRModal] = useState(false);
   const { authUser } = useAuth();
+  const { user, docs, notifications } = useDemo();
   const [drActive, setDrActive] = useState(false);
   const [capEnabled, setCapEnabled] = useState(true);
   const [capAmount, setCapAmount] = useState<number>(25);
@@ -363,13 +354,22 @@ export function StorageUsage() {
   const plans = (plansData?.plans?.length
     ? plansData.plans.map(p => ({ id: p.id, name: p.name, storage: p.storage_gb, price: Number(p.price_monthly), overage: Number(p.overage_rate) }))
     : FALLBACK_PLANS
-  ).map(p => ({ ...p, current: p.id === CURRENT_PLAN_ID }));
-  const used = STORAGE_USED_GB;
-  const total = STORAGE_LIMIT_GB;
-  const percent = Math.round((used / total) * 100);
-  const overageRate = 0.40; // $0.40/GB on Legacy Archive (Starter is $0.50/GB)
-  const projectedEOM = 21.4;
-  const projectedOverage = Math.max(0, projectedEOM - total);
+  ).map(p => ({ ...p, current: p.id === user.plan }));
+
+  /* Real figures for the signed-in account. `user` comes from DemoContext,
+     which sums vault_documents.file_size_bytes and reads the plan's limit —
+     the same numbers the Dashboard shows, so the two can't disagree. */
+  const used = user.storageUsed;
+  const total = user.storageLimit || 1;
+  const percent = Math.min(100, Math.round((used / total) * 100));
+  const usageByCategory = deriveStorageBreakdown(docs)
+    .map(c => ({ category: c.label, gb: c.gb, color: c.color }));
+  const storageAlerts = notifications.filter(n =>
+    /storage|usage|overage|limit/i.test(`${n.title} ${n.message}`));
+  const overageRate = plans.find(p => p.id === user.plan)?.overage ?? 0;
+  // Overage is charged on what is actually stored; there is no usage history
+  // to extrapolate an end-of-month projection from.
+  const projectedOverage = Math.max(0, used - total);
   const projectedOverageCost = projectedOverage * overageRate;
   const capPercent = capAmount > 0 ? Math.min(100, Math.round((projectedOverageCost / capAmount) * 100)) : 0;
   const capColor = capPercent >= 100 ? "#E53E3E" : capPercent >= 80 ? NEG : capPercent >= 50 ? WARN : POS;
@@ -392,9 +392,9 @@ export function StorageUsage() {
 
   const kpis = [
     { label: "Storage Used", value: `${used} GB`, sub: `of ${total} GB`, icon: <HardDrive size={14}/>, dot: getBarColor(percent) },
-    { label: "Usage %", value: `${percent}%`, sub: "Current billing cycle", icon: <Percent size={14}/>, dot: getBarColor(percent) },
-    { label: "Projected EOM", value: `${projectedEOM} GB`, sub: "End-of-month estimate", icon: <TrendingUp size={14}/>, dot: projectedEOM > total ? NEG : POS },
-    { label: "Est. Overage", value: projectedOverage > 0 ? `$${(projectedOverage * overageRate).toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "No overage projected", icon: <Gauge size={14}/>, dot: projectedOverage > 0 ? NEG : POS },
+    { label: "Usage %", value: `${percent}%`, sub: "Of your plan's limit", icon: <Percent size={14}/>, dot: getBarColor(percent) },
+    { label: "Documents", value: docs.length, sub: docs.length === 1 ? "File stored" : "Files stored", icon: <TrendingUp size={14}/>, dot: ACCENT },
+    { label: "Overage", value: projectedOverage > 0 ? `$${projectedOverageCost.toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "Within your plan", icon: <Gauge size={14}/>, dot: projectedOverage > 0 ? NEG : POS },
   ];
 
   return (
@@ -489,34 +489,34 @@ export function StorageUsage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Usage by month — pure CSS bar chart */}
+          {/* Current usage — a month-by-month history would need a
+              storage_usage row written per billing period, and nothing
+              writes one, so this shows the live figure instead. */}
           <div className="card pad">
-            <h3 className="sec-title"><span className="tick"/>6-Month Usage History</h3>
-            <div className="chart-wrap">
-              <div className="chart-limit" style={{ bottom: Math.round((total/total)*120) }}>
-                <span>{total} GB limit</span>
-              </div>
-              {usageByMonth.map((d, i) => {
-                const barH = Math.round((d.used / total) * 120);
-                const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? NEG : d.used >= total * 0.8 ? WARN : ACCENT;
-                return (
-                  <div key={i} className="chart-col">
-                    <span className="chart-val">{d.used}GB</span>
-                    <div className="chart-bar-wrap">
-                      <div className="chart-bar" style={{ height: barH, background: barColor, opacity: i === usageByMonth.length-1 ? 1 : 0.88 }}/>
-                    </div>
-                    <span className="chart-val">{d.month}</span>
-                  </div>
-                );
-              })}
+            <h3 className="sec-title"><span className="tick"/>Current Usage</h3>
+            <div className="live-fig">
+              <span className="live-big">{used} GB</span>
+              <span className="live-of">of {total} GB · {percent}%</span>
             </div>
-            <p className="chart-foot">Unused monthly GB expire at billing cycle reset. No carry-forward.</p>
+            <div className="cat-track" style={{ height: 10 }}>
+              <div className="cat-fill" style={{ width: `${percent}%`, background: getBarColor(percent) }} />
+            </div>
+            <p className="chart-foot">
+              {docs.length === 0
+                ? "Nothing stored yet. Documents you upload to the File Cabinet count against this limit."
+                : `${docs.length} file${docs.length === 1 ? "" : "s"} stored. Unused GB expire at billing cycle reset — no carry-forward.`}
+            </p>
           </div>
 
           {/* Usage by category */}
           <div className="card pad">
             <h3 className="sec-title"><span className="tick"/>Usage by Category</h3>
             <div>
+              {usageByCategory.length === 0 && (
+                <p className="chart-foot" style={{ marginTop: 0 }}>
+                  No documents yet — categories appear here as you fill your File Cabinet folders.
+                </p>
+              )}
               {usageByCategory.map(cat => (
                 <div key={cat.category} className="cat-row">
                   <div className="cat-hd">
@@ -667,13 +667,21 @@ export function StorageUsage() {
         <div className="card pad">
           <h3 className="sec-title"><span className="tick"/>Notification History</h3>
           <div>
-            {alertHistory.map((alert, i) => (
-              <div key={i} className="alert-row">
-                <div className="alert-tag" style={{ background: `${alert.color}20`, color: alert.color }}>{alert.type}</div>
-                <div style={{ color: TEXT, fontSize: 16, flex: 1 }}>{alert.message}</div>
-                <div style={{ color: MUTED, fontSize: 15, flexShrink: 0 }}>{alert.date}</div>
-              </div>
-            ))}
+            {storageAlerts.length === 0 ? (
+              <p className="chart-foot" style={{ marginTop: 0 }}>
+                No storage alerts yet. You'll be notified here when your vault passes
+                80%, 90% and 95% of your plan's limit.
+              </p>
+            ) : storageAlerts.map(alert => {
+              const color = alert.type === "error" ? NEG : alert.type === "warning" ? WARN : POS;
+              return (
+                <div key={alert.id} className="alert-row">
+                  <div className="alert-tag" style={{ background: `${color}20`, color }}>{alert.title}</div>
+                  <div style={{ color: TEXT, fontSize: 16, flex: 1 }}>{alert.message}</div>
+                  <div style={{ color: MUTED, fontSize: 15, flexShrink: 0 }}>{alert.time}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

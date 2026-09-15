@@ -1,5 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "lucide-react";
+import { db } from "../services/supabase";
+import { useAuth } from "../context/AuthContext";
 import heroAffiliatePhoto from "../../imports/affiliateprogram_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -11,20 +13,18 @@ const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
 const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
+const NEG     = "#D06B6B";
 
-const referrals = [
-  { name: "Amanda Chen", email: "a.chen@email.com", joined: "Jun 8, 2026", plan: "Premium", status: "active", commission: 4.99, monthsLeft: 9, withinCap: true },
-  { name: "Robert Kim", email: "r.kim@email.com", joined: "May 22, 2026", plan: "Essential", status: "active", commission: 2.00, monthsLeft: 10, withinCap: true },
-  { name: "Patricia Wells", email: "p.wells@email.com", joined: "Apr 10, 2026", plan: "Legacy Pro", status: "active", commission: 9.99, monthsLeft: 11, withinCap: true },
-  { name: "David Martinez", email: "d.martinez@email.com", joined: "Mar 1, 2026", plan: "Premium", status: "active", commission: 4.99, monthsLeft: 3, withinCap: true },
-  { name: "Karen Scott", email: "k.scott@email.com", joined: "Feb 14, 2025", plan: "Premium", status: "expired", commission: 0, monthsLeft: 0, withinCap: false },
-  { name: "James Thompson", email: "j.thompson@email.com", joined: "Jan 20, 2025", plan: "Essential", status: "expired", commission: 0, monthsLeft: 0, withinCap: false },
-];
-
-const monthlyEarnings = [
-  { month: "Jan", earned: 28.50 }, { month: "Feb", earned: 42.00 }, { month: "Mar", earned: 65.00 },
-  { month: "Apr", earned: 97.50 }, { month: "May", earned: 143.00 }, { month: "Jun", earned: 189.50 },
-];
+/* Referral rows for the signed-in affiliate, from affiliate_referrals. */
+interface ReferralRow {
+  id: string;
+  plan: string;
+  monthly_commission: number | string;
+  months_remaining: number;
+  status: "active" | "expired" | "cancelled";
+  referred_at: string;
+  referred: { full_name: string; email: string } | null;
+}
 
 const tiers = [
   { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#6FAE8B" },
@@ -122,6 +122,11 @@ const AFF_CSS = `
 .fpd-aff .status-pill{padding:4px 10px;border-radius:99px;font-size:14px;font-family:var(--font-mono);}
 
 /* cap notice */
+.fpd-aff .tempty{padding:26px 20px;color:${MUTED};font-size:15px;line-height:1.6;text-align:center;}
+.fpd-aff .earn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;}
+.fpd-aff .earn-cell{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(91,110,225,0.14);}
+.fpd-aff .earn-big{font-family:var(--font-display);font-size:27px;color:${TEXT};font-variant-numeric:tabular-nums;}
+.fpd-aff .earn-lbl{color:${MUTED};font-size:14px;}
 .fpd-aff .notice{display:flex;gap:12px;padding:16px 20px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);}
 .fpd-aff .notice p{color:${MUTED};font-size:16px;line-height:1.7;}
 `;
@@ -129,16 +134,55 @@ const AFF_CSS = `
 export function AffiliateProgram() {
   const [copied, setCopied] = useState(false);
   const referralsRef = useRef<HTMLDivElement>(null);
-  const affiliateCode = "FPD-JD-2024-XKTZ";
-  const affiliateLink = `https://finalpassdown.com/r/${affiliateCode}`;
+  const { authUser } = useAuth();
+
+  /* Everything below is this account's own affiliate row and its referrals.
+     A member who has never joined the programme has no affiliates row, which
+     is the enrolment state — not an error. */
+  const [affiliate, setAffiliate] = useState<{
+    referral_code: string; referral_url?: string; commission_rate: number;
+    total_earned: number; pending_payout: number;
+  } | null>(null);
+  const [referrals, setReferrals] = useState<ReferralRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authUser) { setLoading(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data: aff, error } = await db.getAffiliate(authUser.id);
+      if (cancelled) return;
+      // .single() 404s with PGRST116 when the member isn't enrolled yet.
+      if (error && (error as { code?: string }).code !== "PGRST116") {
+        setLoadError(error.message);
+        setLoading(false);
+        return;
+      }
+      if (!aff) { setLoading(false); return; }
+      setAffiliate(aff);
+      const { data: rows } = await db.listAffiliateReferrals(aff.id);
+      if (cancelled) return;
+      setReferrals((rows ?? []) as unknown as ReferralRow[]);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [authUser]);
+
+  const affiliateCode = affiliate?.referral_code ?? "";
+  const affiliateLink = affiliate
+    ? affiliate.referral_url || `https://finalpassdown.com/r/${affiliateCode}`
+    : "";
   const activeReferrals = referrals.filter(r => r.status === "active").length;
   const currentTier = activeReferrals < 5 ? null : activeReferrals < 25 ? tiers[0] : activeReferrals < 75 ? tiers[1] : tiers[2];
   const nextTier = currentTier?.tier === 1 ? tiers[1] : currentTier?.tier === 2 ? tiers[2] : null;
-  const currentRate = currentTier?.rate ?? 20;
-  const totalEarned = 565.50;
-  const pendingPayout = 189.50;
+  const currentRate = affiliate ? Math.round(Number(affiliate.commission_rate) * 100) : (currentTier?.rate ?? 20);
+  const totalEarned = Number(affiliate?.total_earned ?? 0);
+  const pendingPayout = Number(affiliate?.pending_payout ?? 0);
 
   const handleCopy = () => {
+    if (!affiliateLink) return;
+    navigator.clipboard?.writeText(affiliateLink).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -147,7 +191,7 @@ export function AffiliateProgram() {
     { label: "Active Referrals", value: String(activeReferrals), sub: "Earning commission", icon: <TrendingUp size={14}/>, dot: POS },
     { label: "Total Referrals", value: String(referrals.length), sub: "All time", icon: <TrendingUp size={14}/>, dot: ACCENT2 },
     { label: "Total Earned", value: `$${totalEarned.toFixed(2)}`, sub: "All time", icon: <DollarSign size={14}/>, dot: WARN },
-    { label: "Pending Payout", value: `$${pendingPayout.toFixed(2)}`, sub: "Next payout: Jul 1", icon: <DollarSign size={14}/>, dot: ACCENT2 },
+    { label: "Pending Payout", value: `$${pendingPayout.toFixed(2)}`, sub: "Paid at the next cycle", icon: <DollarSign size={14}/>, dot: ACCENT2 },
   ];
 
   return (
@@ -255,28 +299,24 @@ export function AffiliateProgram() {
           </div>
         </div>
 
-        {/* ── Earnings chart ── */}
+        {/* ── Earnings summary. A month-by-month chart would need a
+            commission ledger; affiliates only stores running totals. ── */}
         <div className="card pad">
-          <h3 className="sec-title"><span className="tick"/>Monthly Earnings</h3>
-          {(() => {
-            const maxEarned = Math.max(...monthlyEarnings.map(d => d.earned));
-            return (
-              <div className="echart">
-                {monthlyEarnings.map((d, i) => {
-                  const h = Math.round((d.earned / maxEarned) * 120);
-                  return (
-                    <div key={i} className="echart-col">
-                      <span className="echart-val">${d.earned.toFixed(0)}</span>
-                      <div className="echart-bar-wrap">
-                        <div className="echart-bar" style={{ height: h, opacity: i === monthlyEarnings.length-1 ? 1 : 0.55 }}/>
-                      </div>
-                      <span className="echart-val">{d.month}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
+          <h3 className="sec-title"><span className="tick"/>Earnings</h3>
+          <div className="earn-grid">
+            <div className="earn-cell">
+              <span className="earn-big">${totalEarned.toFixed(2)}</span>
+              <span className="earn-lbl">Earned all time</span>
+            </div>
+            <div className="earn-cell">
+              <span className="earn-big">${pendingPayout.toFixed(2)}</span>
+              <span className="earn-lbl">Pending payout</span>
+            </div>
+            <div className="earn-cell">
+              <span className="earn-big">{currentRate}%</span>
+              <span className="earn-lbl">Your commission rate</span>
+            </div>
+          </div>
         </div>
 
         {/* ── Referral table ── */}
@@ -288,27 +328,42 @@ export function AffiliateProgram() {
             <div className="trow head">
               {["User", "Plan", "Joined", "Commission/Mo", "Status"].map(h => <span key={h}>{h.toUpperCase()}</span>)}
             </div>
-            {referrals.map((ref, i) => (
-              <div key={i} className="trow body">
+            {loading && <div className="tempty">Loading your referrals…</div>}
+            {!loading && loadError && <div className="tempty" style={{ color: NEG }}>{loadError}</div>}
+            {!loading && !loadError && referrals.length === 0 && (
+              <div className="tempty">
+                {affiliate
+                  ? "No referrals yet. Share your link above — anyone who joins with it appears here."
+                  : "You're not enrolled in the affiliate programme yet, so there's nothing to show."}
+              </div>
+            )}
+            {referrals.map(ref => {
+              const withinCap = ref.status === "active" && ref.months_remaining > 0;
+              const commission = Number(ref.monthly_commission);
+              return (
+              <div key={ref.id} className="trow body">
                 <div>
-                  <div style={{ color: TEXT, fontSize: 16 }}>{ref.name}</div>
-                  <div style={{ color: MUTED, fontSize: 14 }}>{ref.email}</div>
+                  <div style={{ color: TEXT, fontSize: 16 }}>{ref.referred?.full_name ?? "Referred member"}</div>
+                  <div style={{ color: MUTED, fontSize: 14 }}>{ref.referred?.email ?? "—"}</div>
                 </div>
                 <div style={{ color: TEXT, fontSize: 16 }}>{ref.plan}</div>
-                <div style={{ color: MUTED, fontSize: 15 }}>{ref.joined}</div>
-                <div style={{ color: ref.withinCap ? WARN : MUTED, fontFamily: "var(--font-mono)", fontSize: 16 }}>
-                  {ref.withinCap ? `$${ref.commission.toFixed(2)}` : "—"}
-                  {ref.withinCap && ref.monthsLeft <= 3 && (
-                    <span style={{ color: WARN, fontSize: 12.5, marginLeft: 4 }}>{ref.monthsLeft}mo left</span>
+                <div style={{ color: MUTED, fontSize: 15 }}>
+                  {new Date(ref.referred_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </div>
+                <div style={{ color: withinCap ? WARN : MUTED, fontFamily: "var(--font-mono)", fontSize: 16 }}>
+                  {withinCap ? `$${commission.toFixed(2)}` : "—"}
+                  {withinCap && ref.months_remaining <= 3 && (
+                    <span style={{ color: WARN, fontSize: 12.5, marginLeft: 4 }}>{ref.months_remaining}mo left</span>
                   )}
                 </div>
                 <div>
                   <span className="status-pill" style={{ background: ref.status === "active" ? "rgba(95,190,145,0.16)" : "rgba(140,151,180,0.14)", color: ref.status === "active" ? "#D99A6B" : MUTED }}>
-                    {ref.status === "active" ? "ACTIVE" : "CAP REACHED"}
+                    {ref.status === "active" ? "ACTIVE" : ref.status === "expired" ? "CAP REACHED" : "CANCELLED"}
                   </span>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

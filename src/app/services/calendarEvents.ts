@@ -1,14 +1,13 @@
 /**
  * calendarEvents — the aggregation layer behind the unified Calendar.
  *
- * The Calendar does not own any data. Every entry comes from a section that
- * already exists in the app (subscriptions, reminders, occasions, warranties,
- * IDs, travel, medical, concierge). This module normalises those into one
- * CalendarEvent shape and expands the recurring ones across a date range.
+ * The Calendar owns no data. Every entry is built from a row the signed-in
+ * user created in a section that already exists (subscriptions, reminders,
+ * occasions, warranties, IDs, travel, medical). This module normalises those
+ * rows into one CalendarEvent shape and expands recurring ones across a range.
  *
- * Sources are declared here rather than imported from each component because
- * those components hold their data in local useState. When the API lands,
- * replace the SOURCE_* arrays with fetches — the expansion logic is unchanged.
+ * Callers pass their rows in — nothing is declared here — so a brand-new
+ * account opens an empty calendar rather than someone else's bills.
  */
 
 export type EventSource =
@@ -45,59 +44,17 @@ export const SOURCE_META: Record<EventSource, { label: string; color: string; ic
   custom:    { label: "Personal",            color: "#6FAE8B", icon: "📌" },
 };
 
-/* ── Seed data, mirroring what each section already shows ───────────── */
+/* ── Recurring rule ──────────────────────────────────────────────────
+ * A source row becomes a Rule; expansion below turns rules into dated
+ * CalendarEvents for a given month. */
 
-type Seed = Omit<CalendarEvent, "id" | "date"> & { day: number; month?: number; year?: number };
-
-/** Recurring monthly — only `day` matters; expanded into every month in range. */
-const SOURCE_BILLING: Seed[] = [
-  { day: 1,  title: "Netflix",                amount: 22.99,  source: "billing", recurrence: "monthly", detail: "Visa •••• 8821 · auto-pay on",       linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs" },
-  { day: 28, title: "Spotify Premium",        amount: 11.99,  source: "billing", recurrence: "monthly", detail: "Mastercard •••• 4492 · auto-pay on", linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs" },
-  { day: 5,  title: "Adobe Creative Cloud",   amount: 59.99,  source: "billing", recurrence: "monthly", detail: "Amex •••• 3321 · auto-pay on",       linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs" },
-  { day: 3,  title: "SMUD Electric",          amount: 142.00, source: "billing", recurrence: "monthly", detail: "Checking •••• 8821 · auto-pay on",   linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs" },
-  { day: 30, title: "Planet Fitness",         amount: 24.99,  source: "billing", recurrence: "monthly", detail: "Cancel in person only",              linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs" },
-  { day: 15, title: "Final Pass Down — Legacy Archive", amount: 24.99, source: "billing", recurrence: "monthly", detail: "Your FPD plan", linkPage: "storage-usage", linkLabel: "Usage & Billing" },
-];
-
-/** Recurring yearly — `day` + `month` (0-indexed). */
-const SOURCE_OCCASION: Seed[] = [
-  { day: 12, month: 6,  title: "Sarah's Birthday",           source: "occasion", recurrence: "yearly", detail: "Spouse · turning 64",           linkPage: "organize", linkLabel: "Folders & Reminders" },
-  { day: 24, month: 6,  title: "Wedding Anniversary",        source: "occasion", recurrence: "yearly", detail: "38 years — Sarah & James",       linkPage: "organize", linkLabel: "Folders & Reminders" },
-  { day: 8,  month: 7,  title: "Michael's Birthday",         source: "occasion", recurrence: "yearly", detail: "Son",                            linkPage: "organize", linkLabel: "Folders & Reminders" },
-  { day: 19, month: 9,  title: "Emily's Birthday",           source: "occasion", recurrence: "yearly", detail: "Daughter",                       linkPage: "organize", linkLabel: "Folders & Reminders" },
-  { day: 2,  month: 11, title: "Tyler's Birthday",           source: "occasion", recurrence: "yearly", detail: "Grandson",                       linkPage: "organize", linkLabel: "Folders & Reminders" },
-];
-
-/** One-off, dated events. `month` is 0-indexed, `year` defaults to current. */
-const SOURCE_FIXED: Seed[] = [
-  // Reminders
-  { day: 22, month: 6, title: "Review Living Trust with attorney", source: "reminder", recurrence: "none", detail: "Annual review — Linda Torres, Esq.", linkPage: "wills-trusts", linkLabel: "Wills & Trusts", time: "10:00 AM" },
-  { day: 29, month: 6, title: "Update legacy contact permissions", source: "reminder", recurrence: "none", detail: "Robert Doe verification still pending", linkPage: "contacts-legacy", linkLabel: "Legacy Contacts" },
-  { day: 14, month: 7, title: "Quarterly vault review",            source: "reminder", recurrence: "none", detail: "Check every folder is current", linkPage: "file-cabinet", linkLabel: "File Cabinet" },
-  { day: 6,  month: 8, title: "Renew homeowners insurance",        source: "reminder", recurrence: "none", detail: "State Farm — policy HO-4482910", linkPage: "financial-records", linkLabel: "Financial Records" },
-
-  // Warranties
-  { day: 26, month: 6, title: "Samsung Refrigerator warranty ends", source: "warranty", recurrence: "none", detail: "5-year extended · claim before expiry", linkPage: "warranties", linkLabel: "Warranties" },
-  { day: 11, month: 7, title: "Trane HVAC warranty ends",           source: "warranty", recurrence: "none", detail: "10-year parts warranty",              linkPage: "warranties", linkLabel: "Warranties" },
-  { day: 3,  month: 9, title: "MacBook Pro AppleCare ends",         source: "warranty", recurrence: "none", detail: "Extend or let lapse",                 linkPage: "warranties", linkLabel: "Warranties" },
-
-  // Document / ID expiry
-  { day: 30, month: 7,  title: "Passport expires",              source: "document", recurrence: "none", detail: "Renew 6 months early for travel", linkPage: "id-keeper", linkLabel: "ID Keeper" },
-  { day: 17, month: 8,  title: "Driver's license expires",      source: "document", recurrence: "none", detail: "CA DL · renewal notice received",  linkPage: "id-keeper", linkLabel: "ID Keeper" },
-  { day: 9,  month: 10, title: "Vehicle registration — Mustang", source: "document", recurrence: "none", detail: "1967 Ford Mustang · plate 4XYZ123", linkPage: "personal-assets", linkLabel: "Assets & Property" },
-
-  // Travel
-  { day: 24, month: 7, title: "Big Sur trip — departs",  source: "travel", recurrence: "none", detail: "4 nights · Post Ranch Inn", linkPage: "travel-planner", linkLabel: "Travel Planner" },
-  { day: 28, month: 7, title: "Big Sur trip — returns",  source: "travel", recurrence: "none", detail: "Family of 5",               linkPage: "travel-planner", linkLabel: "Travel Planner" },
-
-  // Medical
-  { day: 21, month: 6, title: "Lisinopril refill due",       source: "medical", recurrence: "none", detail: "CVS Pharmacy · Dr. Karen Fields",  linkPage: "medical-info", linkLabel: "Medical Info", time: "Any time" },
-  { day: 15, month: 7, title: "Annual physical — Dr. Fields", source: "medical", recurrence: "none", detail: "Sacramento Medical Group",         linkPage: "medical-info", linkLabel: "Medical Info", time: "8:30 AM" },
-  { day: 2,  month: 8, title: "Cardiology follow-up",         source: "medical", recurrence: "none", detail: "Bring current medication list",     linkPage: "medical-info", linkLabel: "Medical Info", time: "2:15 PM" },
-
-  // Concierge
-  { day: 23, month: 6, title: "White Glove session — document review", source: "concierge", recurrence: "none", detail: "Specialist: Marcus Williams · 60 min", linkPage: "white-glove", linkLabel: "White Glove Service", time: "11:00 AM" },
-];
+export interface Rule extends Omit<CalendarEvent, "id" | "date"> {
+  key: string;
+  day: number;
+  /** 0-indexed month the row's date falls in. */
+  month?: number;
+  year?: number;
+}
 
 /* ── Date helpers ───────────────────────────────────────────────────── */
 
@@ -110,39 +67,192 @@ export const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDa
 const clampDay = (y: number, m: number, day: number) => Math.min(day, daysInMonth(y, m));
 
 /**
- * Expand all seeds into concrete events for [year, month].
- * Monthly seeds appear every month; yearly seeds only in their own month.
+ * Parse a stored date. These columns are TEXT, not DATE, so the value can be
+ * anything the user's screen wrote — tolerate junk and return null.
  */
-export function eventsForMonth(year: number, month: number): CalendarEvent[] {
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  // "YYYY-MM-DD" must not be shifted by the local timezone, so build it by parts.
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
+  if (ymd) {
+    const d = new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/* ── Source rows ─────────────────────────────────────────────────────
+ * Structural shapes matching the columns each owning screen already reads,
+ * so populating the calendar needs no new query. */
+
+export interface SubscriptionRow {
+  id: string; title: string; amount_usd: number | string | null;
+  billing_frequency: string | null; next_billing_date: string | null;
+  payment_type: string | null; last_four_digits: string | null;
+  auto_pay: boolean | null; status: string | null; cancel_instructions: string | null;
+}
+export interface ReminderRow { id: string; title: string; dueDate: string; notes?: string; status?: string }
+export interface OccasionRow { id: string; name: string; date: string; type?: string; recipient?: string; recurring?: boolean }
+export interface WarrantyRow { id: string; product: string; expiry_date: string | null; provider?: string | null; warranty_type?: string | null }
+export interface IdRow { id: string; id_type: string; expiry_date: string | null; holder_name?: string | null; issued_by?: string | null }
+export interface TripRow { id: string; destination: string; start_date: string | null; end_date: string | null; status?: string | null; accommodation?: string | null }
+export interface MedicationRow { id: string; name: string; refillDate: string; pharmacy?: string; prescriber?: string }
+
+export interface CalendarSources {
+  subscriptions?: SubscriptionRow[];
+  reminders?: ReminderRow[];
+  occasions?: OccasionRow[];
+  warranties?: WarrantyRow[];
+  ids?: IdRow[];
+  trips?: TripRow[];
+  medications?: MedicationRow[];
+}
+
+const MONTHLY_FREQUENCIES = new Set(["monthly", "weekly", "biweekly"]);
+
+/**
+ * Turn the user's own rows into calendar rules. A row with no usable date is
+ * skipped rather than guessed at — an undated warranty is not an event.
+ */
+export function buildRules(src: CalendarSources): Rule[] {
+  const rules: Rule[] = [];
+
+  for (const sub of src.subscriptions ?? []) {
+    if (sub.status && sub.status !== "active") continue;
+    const due = parseDate(sub.next_billing_date);
+    if (!due) continue;
+    const freq = (sub.billing_frequency ?? "").toLowerCase();
+    const amount = sub.amount_usd == null ? undefined : Number(sub.amount_usd);
+    const card = sub.last_four_digits
+      ? `${sub.payment_type ?? "Card"} •••• ${sub.last_four_digits}`
+      : sub.payment_type ?? undefined;
+    const detail = [card, sub.auto_pay ? "auto-pay on" : sub.cancel_instructions || undefined]
+      .filter(Boolean).join(" · ") || undefined;
+    rules.push({
+      key: `bill-${sub.id}`, title: sub.title, source: "billing",
+      recurrence: MONTHLY_FREQUENCIES.has(freq) ? "monthly" : freq === "yearly" ? "yearly" : "none",
+      amount: Number.isFinite(amount) ? amount : undefined, detail, allDay: true,
+      linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs",
+      day: due.getDate(), month: due.getMonth(), year: due.getFullYear(),
+    });
+  }
+
+  for (const r of src.reminders ?? []) {
+    if (r.status === "completed") continue;
+    const due = parseDate(r.dueDate);
+    if (!due) continue;
+    rules.push({
+      key: `rem-${r.id}`, title: r.title, source: "reminder", recurrence: "none",
+      detail: r.notes || undefined, linkPage: "organize", linkLabel: "Folders & Reminders",
+      day: due.getDate(), month: due.getMonth(), year: due.getFullYear(),
+    });
+  }
+
+  for (const o of src.occasions ?? []) {
+    const when = parseDate(o.date);
+    if (!when) continue;
+    rules.push({
+      key: `occ-${o.id}`, title: o.name, source: "occasion",
+      recurrence: o.recurring === false ? "none" : "yearly",
+      detail: [o.recipient, o.type].filter(Boolean).join(" · ") || undefined,
+      allDay: true, linkPage: "organize", linkLabel: "Folders & Reminders",
+      day: when.getDate(), month: when.getMonth(), year: when.getFullYear(),
+    });
+  }
+
+  for (const w of src.warranties ?? []) {
+    const end = parseDate(w.expiry_date);
+    if (!end) continue;
+    rules.push({
+      key: `war-${w.id}`, title: `${w.product} warranty ends`, source: "warranty", recurrence: "none",
+      detail: [w.warranty_type, w.provider].filter(Boolean).join(" · ") || undefined,
+      linkPage: "warranties", linkLabel: "Warranties",
+      day: end.getDate(), month: end.getMonth(), year: end.getFullYear(),
+    });
+  }
+
+  for (const d of src.ids ?? []) {
+    const end = parseDate(d.expiry_date);
+    if (!end) continue;
+    rules.push({
+      key: `id-${d.id}`, title: `${d.id_type} expires`, source: "document", recurrence: "none",
+      detail: [d.holder_name, d.issued_by].filter(Boolean).join(" · ") || undefined,
+      linkPage: "id-keeper", linkLabel: "ID Keeper",
+      day: end.getDate(), month: end.getMonth(), year: end.getFullYear(),
+    });
+  }
+
+  for (const t of src.trips ?? []) {
+    if (t.status === "cancelled") continue;
+    const start = parseDate(t.start_date);
+    const end = parseDate(t.end_date);
+    if (start) {
+      rules.push({
+        key: `trip-${t.id}-out`, title: `${t.destination} — departs`, source: "travel", recurrence: "none",
+        detail: t.accommodation || undefined, linkPage: "travel-planner", linkLabel: "Travel Planner",
+        day: start.getDate(), month: start.getMonth(), year: start.getFullYear(),
+      });
+    }
+    if (end) {
+      rules.push({
+        key: `trip-${t.id}-back`, title: `${t.destination} — returns`, source: "travel", recurrence: "none",
+        linkPage: "travel-planner", linkLabel: "Travel Planner",
+        day: end.getDate(), month: end.getMonth(), year: end.getFullYear(),
+      });
+    }
+  }
+
+  for (const m of src.medications ?? []) {
+    const refill = parseDate(m.refillDate);
+    if (!refill) continue;
+    rules.push({
+      key: `med-${m.id}`, title: `${m.name} refill due`, source: "medical", recurrence: "none",
+      detail: [m.pharmacy, m.prescriber].filter(Boolean).join(" · ") || undefined,
+      linkPage: "medical-info", linkLabel: "Medical Info",
+      day: refill.getDate(), month: refill.getMonth(), year: refill.getFullYear(),
+    });
+  }
+
+  return rules;
+}
+
+/**
+ * Expand rules into concrete events for [year, month].
+ * Monthly rules repeat from their first date onward; yearly rules land in
+ * their own month; one-off rules only in their exact month and year.
+ */
+export function eventsForMonth(year: number, month: number, rules: Rule[]): CalendarEvent[] {
   const out: CalendarEvent[] = [];
+  const monthIndex = year * 12 + month;
 
-  SOURCE_BILLING.forEach((s, i) => {
-    const d = clampDay(year, month, s.day);
-    out.push({ ...s, id: `bill-${i}-${year}-${month}`, date: iso(year, month, d), allDay: true });
-  });
+  for (const rule of rules) {
+    if (rule.recurrence === "monthly") {
+      // Never project a subscription backwards before its first billing date.
+      if (rule.year !== undefined && rule.month !== undefined && monthIndex < rule.year * 12 + rule.month) continue;
+    } else if (rule.recurrence === "yearly") {
+      if (rule.month !== month) continue;
+      if (rule.year !== undefined && year < rule.year) continue;
+    } else {
+      if (rule.month !== month) continue;
+      if ((rule.year ?? year) !== year) continue;
+    }
 
-  SOURCE_OCCASION.forEach((s, i) => {
-    if (s.month !== month) return;
-    const d = clampDay(year, month, s.day);
-    out.push({ ...s, id: `occ-${i}-${year}`, date: iso(year, month, d), allDay: true });
-  });
-
-  SOURCE_FIXED.forEach((s, i) => {
-    const y = s.year ?? year;
-    if (s.month !== month || y !== year) return;
-    const d = clampDay(year, month, s.day);
-    out.push({ ...s, id: `fix-${i}`, date: iso(year, month, d) });
-  });
+    const { key, day, month: _ruleMonth, year: _ruleYear, ...rest } = rule;
+    out.push({ ...rest, id: `${key}-${monthIndex}`, date: iso(year, month, clampDay(year, month, day)) });
+  }
 
   return out.sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 }
 
 /** Every event between two dates, walking month by month. */
-export function eventsInRange(from: Date, to: Date): CalendarEvent[] {
+export function eventsInRange(from: Date, to: Date, rules: Rule[]): CalendarEvent[] {
   const out: CalendarEvent[] = [];
   const cursor = new Date(from.getFullYear(), from.getMonth(), 1);
   while (cursor <= to) {
-    out.push(...eventsForMonth(cursor.getFullYear(), cursor.getMonth()));
+    out.push(...eventsForMonth(cursor.getFullYear(), cursor.getMonth(), rules));
     cursor.setMonth(cursor.getMonth() + 1);
   }
   const fromIso = iso(from.getFullYear(), from.getMonth(), from.getDate());
@@ -153,15 +263,15 @@ export function eventsInRange(from: Date, to: Date): CalendarEvent[] {
 }
 
 /** Next N events from today forward — powers the "Upcoming" rail. */
-export function upcomingEvents(count = 8, from = new Date()): CalendarEvent[] {
+export function upcomingEvents(rules: Rule[], count = 8, from = new Date()): CalendarEvent[] {
   const to = new Date(from);
   to.setMonth(to.getMonth() + 6);
-  return eventsInRange(from, to).slice(0, count);
+  return eventsInRange(from, to, rules).slice(0, count);
 }
 
 /** Total auto-pay dollars scheduled in a given month. */
-export function monthlyBillingTotal(year: number, month: number): number {
-  return eventsForMonth(year, month)
+export function monthlyBillingTotal(year: number, month: number, rules: Rule[]): number {
+  return eventsForMonth(year, month, rules)
     .filter(e => e.source === "billing")
     .reduce((sum, e) => sum + (e.amount ?? 0), 0);
 }
