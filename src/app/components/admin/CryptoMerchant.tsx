@@ -32,13 +32,13 @@ const INITIAL_PROCESSORS: Processor[] = [
     name:"Coinbase Commerce",
     logo:"🔵",
     color:"#0052FF",
-    status:"connected",
+    status:"available",
     website:"commerce.coinbase.com",
     description:"Institutional-grade crypto payments from Coinbase. Accept 10+ cryptocurrencies and settle to USD daily.",
     features:["BTC, ETH, USDC, LTC, DAI, and more","Auto-converts to USD","Fraud protection","PCI-DSS compliant","Webhook support","Global coverage"],
     settlementOptions:["USD (daily)","USDC","Hold as crypto"],
     fees:"1% per transaction",
-    config:{ apiKey:"coinbase_api_key_fpd_live_xxxxxxxx", webhookSecret:"whsec_coinbase_xxxx", settlementCurrency:"USD" },
+    config:{ apiKey:"", webhookSecret:"", settlementCurrency:"" },
     showKeys: false,
   },
   {
@@ -46,13 +46,13 @@ const INITIAL_PROCESSORS: Processor[] = [
     name:"BitPay",
     logo:"🟢",
     color:"#00C89C",
-    status:"connected",
+    status:"available",
     website:"bitpay.com",
     description:"World's largest Bitcoin payment processor. Accept BTC, ETH, XRP, and stablecoins with next-day USD settlement.",
     features:["Bitcoin & Ethereum native","XRP support","Next-day USD settlement","Refund management","Invoice API","Business dashboards"],
     settlementOptions:["USD (next business day)","EUR","GBP","Hold as BTC"],
     fees:"1% per transaction",
-    config:{ apiToken:"bitpay_api_token_fpd_xxxxxxxx", merchantId:"FPD_MERCHANT_ID", notificationURL:"https://api.finalpassdown.com/webhooks/bitpay" },
+    config:{ apiToken:"", merchantId:"", notificationURL:"" },
     showKeys: false,
   },
   {
@@ -80,7 +80,7 @@ const INITIAL_PROCESSORS: Processor[] = [
     features:["USDC native","On-ramp / off-ramp","Same Stripe dashboard","Existing customer support","Instant settlement","Web3 wallet connect"],
     settlementOptions:["USD (Stripe balance)","USDC"],
     fees:"1.5% per transaction",
-    config:{ stripePublishableKey:"pk_live_...", enableCrypto:"true" },
+    config:{ stripePublishableKey:"", enableCrypto:"" },
     showKeys: false,
   },
   {
@@ -113,16 +113,23 @@ const INITIAL_PROCESSORS: Processor[] = [
   },
 ];
 
-/* ── Mock transactions ────────────────────────────────────────────── */
-const MOCK_TXS = [
-  { id:"CTXN-001", user:"James Doe",      type:"Continuation Fee", coin:"BTC",  amount:"0.002948 BTC", usd:199.00, processor:"Coinbase Commerce", date:"Jun 18, 2026", status:"confirmed", hash:"bc1q...x8f2" },
-  { id:"CTXN-002", user:"Patricia Wells", type:"Premium Plan",     coin:"ETH",  amount:"0.060610 ETH", usd:199.00, processor:"Coinbase Commerce", date:"Jun 17, 2026", status:"confirmed", hash:"0x71c...976f" },
-  { id:"CTXN-003", user:"Marcus Johnson", type:"Essential Plan",   coin:"USDC", amount:"9.99 USDC",    usd:9.99,   processor:"BitPay",            date:"Jun 16, 2026", status:"confirmed", hash:"0x4a8...bb21" },
-  { id:"CTXN-004", user:"Sarah Chen",     type:"Legacy Pro Plan",  coin:"BTC",  amount:"0.000741 BTC", usd:49.99,  processor:"Coinbase Commerce", date:"Jun 15, 2026", status:"confirmed", hash:"bc1q...3k9m" },
-  { id:"CTXN-005", user:"Robert Kim",     type:"Continuation Fee", coin:"SOL",  amount:"1.118 SOL",    usd:199.00, processor:"Coinbase Commerce", date:"Jun 14, 2026", status:"confirmed", hash:"7Ecd...tV4x" },
-  { id:"CTXN-006", user:"Amanda Torres",  type:"Essential Plan",   coin:"USDT", amount:"9.99 USDT",    usd:9.99,   processor:"BitPay",            date:"Jun 13, 2026", status:"confirmed", hash:"TQn9...KLSE" },
-  { id:"CTXN-007", user:"Unknown user",   type:"Premium Plan",     coin:"ETH",  amount:"0.060610 ETH", usd:199.00, processor:"Coinbase Commerce", date:"Jun 12, 2026", status:"pending",   hash:"0x9ff...821a" },
-];
+/* ── Transactions ─────────────────────────────────────────────────── */
+/* crypto_transactions exists in the schema, but no processor is integrated
+   and no admin route reads the table — so there is nothing real to list. */
+interface CryptoTx {
+  id: string; user: string; type: string; coin: string; amount: string;
+  usd: number; processor: string; date: string; status: "confirmed" | "pending"; hash: string;
+}
+const TXS: CryptoTx[] = [];
+
+function EmptyPanel({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="p-8 rounded-2xl text-center" style={CARD}>
+      <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:6 }}>{title}</div>
+      <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.6, maxWidth:520, margin:"0 auto" }}>{body}</div>
+    </div>
+  );
+}
 
 const COIN_COLORS: Record<string,string> = { BTC:"#F7931A", ETH:"#627EEA", USDC:"#2775CA", USDT:"#26A17B", SOL:"#9945FF", BNB:"#F3BA2F", XRP:"#00A3E0" };
 const COIN_LOGOS: Record<string,string>  = { BTC:"₿", ETH:"Ξ", USDC:"$", USDT:"₮", SOL:"◎", BNB:"B", XRP:"✕" };
@@ -134,14 +141,12 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
   const statusColor = { connected:"#48BB78", available:"#8A9AB8", pending:"#F6AD55" }[proc.status];
   const statusBg    = { connected:"rgba(72,187,120,0.1)", available:"rgba(107,114,128,0.1)", pending:"rgba(246,173,85,0.1)" }[proc.status];
 
+  /* Nothing server-side stores or verifies processor credentials yet
+     (crypto_processor_configs exists but no backend route writes it), so
+     "connecting" here would only flip local state and claim a success that
+     never happened. Say so instead. */
   function connect() {
-    const hasRequired = Object.values(localConfig).every(v => v.trim() !== "");
-    if (!hasRequired && proc.status !== "connected") {
-      toast.error("Please fill in all credential fields before connecting");
-      return;
-    }
-    onUpdate(proc.id, { status: proc.status === "connected" ? "available" : "connected", config: localConfig });
-    toast.success(proc.status === "connected" ? `${proc.name} disconnected` : `${proc.name} connected successfully`);
+    toast.error(`${proc.name} can't be connected yet — processor credentials aren't stored on the server.`);
   }
 
   return (
@@ -237,7 +242,7 @@ function ProcessorCard({ proc, onUpdate }: { proc: Processor; onUpdate: (id: str
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => { onUpdate(proc.id, { config: localConfig }); toast.success("Settings saved"); }}
+            <button onClick={connect}
               className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Credentials
@@ -264,8 +269,8 @@ export function CryptoMerchant() {
   }
 
   const connected = processors.filter(p => p.status === "connected");
-  const totalCryptoRevenue = MOCK_TXS.filter(t=>t.status==="confirmed").reduce((s,t)=>s+t.usd, 0);
-  const pendingTxs = MOCK_TXS.filter(t=>t.status==="pending").length;
+  const totalCryptoRevenue = TXS.filter(t=>t.status==="confirmed").reduce((s,t)=>s+t.usd, 0);
+  const pendingTxs = TXS.filter(t=>t.status==="pending").length;
 
   const TABS: { id: Tab; label: string }[] = [
     { id:"processors",   label:"💳 Payment Processors" },
@@ -293,8 +298,8 @@ export function CryptoMerchant() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label:"Connected Processors", value:connected.length,                            color:"#D99A6B" },
-          { label:"Crypto Revenue (Jun)",  value:`$${totalCryptoRevenue.toLocaleString()}`,  color:"#F7931A" },
-          { label:"Total Crypto TXNs",     value:MOCK_TXS.filter(t=>t.status==="confirmed").length, color:"#6E90C9" },
+          { label:"Crypto Revenue",        value:`$${totalCryptoRevenue.toLocaleString()}`,  color:"#F7931A" },
+          { label:"Total Crypto TXNs",     value:TXS.filter(t=>t.status==="confirmed").length, color:"#6E90C9" },
           { label:"Pending Confirmations", value:pendingTxs,                                 color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
@@ -315,7 +320,7 @@ export function CryptoMerchant() {
             </span>
           ))}
         </div>
-        <span style={{ color:"#8A9AB8", fontSize:14 }}>via connected processors</span>
+        <span style={{ color:"#8A9AB8", fontSize:14 }}>once a processor is connected</span>
       </div>
 
       {/* Tabs */}
@@ -346,15 +351,19 @@ export function CryptoMerchant() {
       )}
 
       {/* ── Transactions tab ── */}
-      {tab === "transactions" && (
+      {tab === "transactions" && TXS.length === 0 && (
+        <EmptyPanel title="No crypto transactions"
+          body="No crypto payment processor is integrated yet, so no crypto payments have been taken. Transactions will appear here once a processor is connected and its webhooks record payments."/>
+      )}
+      {tab === "transactions" && TXS.length > 0 && (
         <div className="space-y-4">
           {/* Volume by coin */}
           <div className="p-5 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:14 }}>Volume by Cryptocurrency</div>
             <div className="space-y-2.5">
               {(["BTC","ETH","USDC","USDT","SOL"] as const).map(coin => {
-                const vol = MOCK_TXS.filter(t=>t.coin===coin&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0);
-                const max = Math.max(...(["BTC","ETH","USDC","USDT","SOL"] as const).map(c=>MOCK_TXS.filter(t=>t.coin===c&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0)), 1);
+                const vol = TXS.filter(t=>t.coin===coin&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0);
+                const max = Math.max(...(["BTC","ETH","USDC","USDT","SOL"] as const).map(c=>TXS.filter(t=>t.coin===c&&t.status==="confirmed").reduce((s,t)=>s+t.usd,0)), 1);
                 if (!vol) return null;
                 return (
                   <div key={coin}>
@@ -385,7 +394,7 @@ export function CryptoMerchant() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_TXS.map((tx, i) => (
+                {TXS.map((tx, i) => (
                   <tr key={tx.id} style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderBottom:"1px solid rgba(91,110,225,0.06)" }}>
                     <td className="px-4 py-3 whitespace-nowrap" style={{ color:"#6E90C9", fontSize:12.5, ...MONO }}>{tx.id}</td>
                     <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, fontWeight:500, whiteSpace:"nowrap" }}>{tx.user}</td>
@@ -425,43 +434,8 @@ export function CryptoMerchant() {
             </p>
           </div>
 
-          {[
-            { coin:"BTC", emoji:"₿", color:"#F7931A", address:"bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", balance:"0.0412 BTC", usd:"$2,777", custody:"Coinbase Commerce" },
-            { coin:"ETH", emoji:"Ξ", color:"#627EEA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"0.8241 ETH", usd:"$2,707", custody:"Coinbase Commerce" },
-            { coin:"USDC",emoji:"$", color:"#2775CA", address:"0x71C7656EC7ab88b098defB751B7401B5f6d8976F", balance:"1,284.00 USDC", usd:"$1,284", custody:"BitPay" },
-          ].map(w => (
-            <div key={w.coin} className="p-5 rounded-2xl" style={CARD}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center rounded-full font-bold"
-                    style={{ width:44, height:44, background:`${w.color}15`, color:w.color, fontSize:25 }}>
-                    {w.emoji}
-                  </div>
-                  <div>
-                    <div style={{ color:"#E8EDF5", fontSize:19, fontWeight:600 }}>{w.coin} Merchant Wallet</div>
-                    <div style={{ color:"#8A9AB8", fontSize:14, marginTop:2 }}>Custodied by {w.custody}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div style={{ color:w.color, fontSize:22.5, fontWeight:700, fontFamily:"var(--font-display)" }}>{w.balance}</div>
-                  <div style={{ color:"#8A9AB8", fontSize:15 }}>{w.usd} USD</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-2xl"
-                style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.1)" }}>
-                <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flexShrink:0 }}>ADDRESS:</span>
-                <code style={{ color:"#8A9AB8", fontSize:14, flex:1 }} className="truncate">{w.address}</code>
-                <button onClick={() => { copyToClipboard(w.address); toast.success(`${w.coin} address copied`); }}
-                  style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={13}/></button>
-              </div>
-            </div>
-          ))}
-
-          <button onClick={() => toast.success("Manual wallet setup — contact integrations@finalpassdown.com")}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
-            <Plus size={14}/> Add Self-Custody Wallet Address
-          </button>
+          <EmptyPanel title="No merchant wallets"
+            body="Wallets and balances come from a connected processor's account. None is connected, so there are no addresses or balances to show."/>
         </div>
       )}
 
@@ -501,7 +475,7 @@ export function CryptoMerchant() {
               <ToggleRight size={28} color="#FFFFFF"/>
             </div>
 
-            <button onClick={() => toast.success("Crypto payment settings saved")}
+            <button onClick={() => toast.error("Not saved — crypto payment settings have no server-side storage yet.")}
               className="w-full py-3 rounded-2xl font-bold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
               Save Settings
@@ -517,21 +491,9 @@ export function CryptoMerchant() {
             <p style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7, marginBottom:12 }}>
               To unlock higher transaction limits and lower fees, complete business verification with each processor. Required for: transactions over $10,000/day, international payments, and institutional settlement.
             </p>
-            {[
-              { name:"Coinbase Commerce",  status:"Verified ✓",      color:"#D99A6B" },
-              { name:"BitPay",             status:"Verified ✓",      color:"#D99A6B" },
-              { name:"NOWPayments",        status:"Not started",     color:"#8A9AB8" },
-            ].map(v => (
-              <div key={v.name} className="flex items-center justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
-                <span style={{ color:"#E8EDF5", fontSize:16 }}>{v.name}</span>
-                <span style={{ color:v.color, fontSize:15, fontWeight:600 }}>{v.status}</span>
-              </div>
-            ))}
-            <button onClick={() => toast.success("Business verification — complete at nowpayments.io/merchant")}
-              className="flex items-center gap-1.5 mt-3 text-sm px-4 py-2 rounded-2xl font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
-              <ExternalLink size={12}/> Complete NOWPayments Verification
-            </button>
+            <p style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7 }}>
+              Verification happens in each processor's own dashboard. Its status isn't tracked here.
+            </p>
           </div>
         </div>
       )}

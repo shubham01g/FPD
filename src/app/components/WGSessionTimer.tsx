@@ -37,37 +37,12 @@ export interface SessionBillingRecord {
   status: "pending" | "charged" | "failed";
 }
 
-// Shared billing history across sessions (demo in-memory)
-export const billingHistory: SessionBillingRecord[] = [
-  {
-    id:"BIL-001", clientId:"WG-001", clientName:"Dorothy Henderson",
-    specialistName:"Marcus Williams", sessionType:"phone",
-    startedAt:"Jun 20, 2026 · 11:00 AM", endedAt:"Jun 20, 2026 · 11:58 AM",
-    durationMinutes:58, blocksCharged:2, amountCharged:50.00,
-    cardLast4:"4821", status:"charged",
-  },
-  {
-    id:"BIL-002", clientId:"WG-001", clientName:"Dorothy Henderson",
-    specialistName:"Marcus Williams", sessionType:"phone",
-    startedAt:"Jun 15, 2026 · 10:00 AM", endedAt:"Jun 15, 2026 · 10:42 AM",
-    durationMinutes:42, blocksCharged:2, amountCharged:50.00,
-    cardLast4:"4821", status:"charged",
-  },
-  {
-    id:"BIL-003", clientId:"WG-002", clientName:"Walter & Edna Briggs",
-    specialistName:"Patricia Chen", sessionType:"video",
-    startedAt:"Jun 18, 2026 · 3:00 PM", endedAt:"Jun 18, 2026 · 3:35 PM",
-    durationMinutes:35, blocksCharged:2, amountCharged:50.00,
-    cardLast4:"9284", status:"charged",
-  },
-];
+// Session billing history — in-memory only (wg_session_billing isn't wired
+// yet), so it starts empty and resets on refresh.
+export const billingHistory: SessionBillingRecord[] = [];
 
-// Card on file data (demo)
-export const cardsOnFile: Record<string, { last4:string; brand:string; expiry:string; name:string }> = {
-  "WG-001": { last4:"4821", brand:"Visa",       expiry:"08/28", name:"Dorothy Henderson" },
-  "WG-002": { last4:"9284", brand:"Mastercard", expiry:"12/27", name:"Walter Briggs" },
-  "WG-003": { last4:"",     brand:"",           expiry:"",      name:"" }, // no card yet
-};
+// Cards on file — in-memory only (wg_payment_methods isn't wired yet).
+export const cardsOnFile: Record<string, { last4:string; brand:string; expiry:string; name:string }> = {};
 
 function calcBlocks(minutes: number): number {
   if (minutes <= 0) return 0;

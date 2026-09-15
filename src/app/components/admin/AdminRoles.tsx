@@ -8,6 +8,7 @@ import {
   Handshake, Code, Loader2, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../../context/AuthContext";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 
@@ -407,6 +408,7 @@ function AdminCard({
 
 /* ── Main component ──────────────────────────────────────────────── */
 export function AdminRoles() {
+  const { authUser } = useAuth();
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ accounts: DBAdminAccount[] }>("/admin-accounts"),
     [],
@@ -750,7 +752,7 @@ export function AdminRoles() {
                       <div style={{ color:"#8A9AB8", fontSize:14, marginBottom:12 }}>Subject: <strong>You've been invited to the Final Pass Down Admin Portal</strong></div>
                       <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:8 }}>Hi {createdAdmin.name.split(" ")[0]},</div>
                       <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7, marginBottom:14 }}>
-                        <strong style={{ color:"#E8EDF5" }}>Alex Johnson</strong> has invited you to join the Final Pass Down admin team as{" "}
+                        <strong style={{ color:"#E8EDF5" }}>{authUser?.email ?? "An administrator"}</strong> has invited you to join the Final Pass Down admin team as{" "}
                         <strong>{ROLE_PRESETS[createdAdmin.role].label}</strong>.<br/><br/>
                         Click below to set your password and access the Command Center. This link expires in <strong>72 hours</strong> and is single-use.
                       </div>

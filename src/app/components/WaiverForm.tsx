@@ -29,44 +29,8 @@ export interface WaiverRecord {
   specialistScope: string[];
 }
 
-export let waiverStore: WaiverRecord[] = [
-  {
-    id: "WAV-001",
-    userId: "WG-001",
-    userName: "Dorothy Henderson",
-    userEmail: "d.henderson@email.com",
-    sentAt: "Jun 15, 2026 · 10:42 AM",
-    sentBy: "admin@finalpassdown.com",
-    status: "signed",
-    signedAt: "Jun 15, 2026 · 2:18 PM",
-    signedName: "Dorothy M. Henderson",
-    ipAddress: "72.14.192.xxx",
-    specialistName: "Marcus Williams",
-    specialistScope: ["document_upload", "legacy_contacts", "final_wishes", "vault_organization", "medical_info", "financial_records"],
-  },
-  {
-    id: "WAV-002",
-    userId: "WG-002",
-    userName: "Walter & Edna Briggs",
-    userEmail: "w.briggs@email.com",
-    sentAt: "Jun 18, 2026 · 9:15 AM",
-    sentBy: "admin@finalpassdown.com",
-    status: "pending",
-    specialistName: "Patricia Chen",
-    specialistScope: ["document_upload", "legacy_contacts", "final_wishes", "vault_organization"],
-  },
-  {
-    id: "WAV-003",
-    userId: "WG-003",
-    userName: "Margaret Thompson",
-    userEmail: "m.thompson@email.com",
-    sentAt: "Jun 22, 2026 · 3:00 PM",
-    sentBy: "admin@finalpassdown.com",
-    status: "pending",
-    specialistName: "James Rivera",
-    specialistScope: ["document_upload", "legacy_contacts", "final_wishes", "vault_organization", "medical_info"],
-  },
-];
+// Starts empty — wg_waivers isn't wired yet, so waivers are in-memory only.
+export let waiverStore: WaiverRecord[] = [];
 
 const SCOPE_LABELS: Record<string, string> = {
   document_upload: "Upload and organize documents in all vault folders",

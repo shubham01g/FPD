@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
+import { getAllClients } from "../../services/wgClientStore";
 import {
   conciergeEmployees, inviteEmployee, updateEmployee, revokeEmployee,
   type ConciergeEmployee, type StaffRole, ROLE_LABELS, ROLE_COLORS,
@@ -14,28 +15,27 @@ const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rg
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
-const AVAILABLE_CLIENTS = [
-  { id:"WG-001", name:"Dorothy Henderson" },
-  { id:"WG-002", name:"Walter & Edna Briggs" },
-  { id:"WG-003", name:"Margaret Thompson" },
-];
+/* Assignable clients are the White Glove clients that actually exist in the
+   shared store — read at render time, never a hard-coded list. */
+const availableClients = () => getAllClients().map(c => ({ id:c.id, name:c.name }));
 
 const statusColor: Record<string, string> = { active:"#48BB78", invited:"#F6AD55", suspended:"#FC8181" };
 const statusBg:    Record<string, string> = { active:"rgba(72,187,120,0.1)", invited:"rgba(246,173,85,0.1)", suspended:"rgba(252,129,129,0.1)" };
 
 /* ── Invite modal ─────────────────────────────────────────────────── */
 function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:ConciergeEmployee)=>void }) {
-  const [form, setForm] = useState({ name:"", email:"", phone:"", role:"junior_concierge" as StaffRole, assignedClientIds:[] as string[], password:"Concierge2026!" });
+  const [form, setForm] = useState({ name:"", email:"", phone:"", role:"junior_concierge" as StaffRole, assignedClientIds:[] as string[], password:"" });
   const [sending, setSending] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
   function send() {
     if (!form.name.trim() || !form.email.trim()) { toast.error("Name and email are required"); return; }
+    if (form.password.length < 8) { toast.error("Set a temporary password of at least 8 characters"); return; }
     setSending(true);
     setTimeout(() => {
       const emp = inviteEmployee({ ...form, status:"invited", invitedAt: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) });
       onInvited(emp);
-      toast.success(`Concierge invite sent to ${form.email}`);
+      toast.success(`${form.name} added — email isn't set up, so share their portal link and password yourself.`);
       setSending(false);
       onClose();
     }, 900);
@@ -98,7 +98,10 @@ function InviteModal({ onClose, onInvited }: { onClose:()=>void; onInvited:(e:Co
               ASSIGN CLIENTS ({form.assignedClientIds.length} selected)
             </label>
             <div className="space-y-2">
-              {AVAILABLE_CLIENTS.map(c => {
+              {availableClients().length === 0 && (
+                <div style={{ color:"#8A9AB8", fontSize:14 }}>No White Glove clients yet. Add clients first, then assign them here.</div>
+              )}
+              {availableClients().map(c => {
                 const isAssigned = form.assignedClientIds.includes(c.id);
                 return (
                   <button key={c.id} onClick={() => setForm(p => ({
@@ -197,7 +200,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
         {emp.assignedClientIds.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {emp.assignedClientIds.map(id => {
-              const c = AVAILABLE_CLIENTS.find(x => x.id === id);
+              const c = availableClients().find(x => x.id === id);
               return c ? (
                 <span key={id} className="px-2 py-0.5 rounded-full text-xs"
                   style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", border:"1px solid rgba(91,167,214,0.2)" }}>
@@ -215,7 +218,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
           <div className="pt-4">
             <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:8 }}>ASSIGN / REMOVE CLIENTS</div>
             <div className="space-y-2">
-              {AVAILABLE_CLIENTS.map(c => {
+              {availableClients().map(c => {
                 const isAssigned = emp.assignedClientIds.includes(c.id);
                 return (
                   <button key={c.id} onClick={() => {
@@ -264,7 +267,7 @@ function EmployeeCard({ emp, onUpdate }: { emp: ConciergeEmployee; onUpdate:()=>
               style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               <Key size={11}/> Copy Full Credentials
             </button>
-            <button onClick={() => toast.success(`Invite email resent to ${emp.email}`)}
+            <button onClick={() => { copyToClipboard(portalLink); toast.info(`Email isn't set up — portal link copied to send to ${emp.email}.`); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(91,110,225,0.06)", color:"#6E90C9" }}>
               <Send size={11}/> Resend Invite
@@ -340,6 +343,11 @@ export function ConciergeStaffAdmin() {
 
       {/* Staff list */}
       <div className="space-y-3">
+        {staff.length === 0 && (
+          <div className="p-8 rounded-2xl text-center" style={{ ...CARD, color:"#8A9AB8", fontSize:15 }}>
+            No concierge staff yet. Use <strong style={{ color:"#E8EDF5" }}>Invite Employee</strong> to add one.
+          </div>
+        )}
         {staff.map(emp => <EmployeeCard key={emp.id} emp={emp} onUpdate={refresh}/>)}
       </div>
 

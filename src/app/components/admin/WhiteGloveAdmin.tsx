@@ -10,17 +10,20 @@ import { WaiverManager } from "../WaiverForm";
 import { ConciergeStaffAdmin } from "./ConciergeStaffAdmin";
 import { WGCardOnFile } from "../WGCardOnFile";
 import { WGBillingHistory } from "../WGSessionTimer";
+import { conciergeEmployees, ROLE_LABELS, ROLE_COLORS } from "../../services/conciergeStaff";
 import { subscribeToClients, addClient as storeAddClient, updateClient as storeUpdateClient, type WGClient as StoreWGClient } from "../../services/wgClientStore";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
-const SPECIALISTS = [
-  { id:"marcus", name:"Marcus Williams", title:"Senior Legacy Specialist", clients:12, rating:4.9, avatar:"MW", color:"#6E90C9" },
-  { id:"patricia", name:"Patricia Chen",  title:"Legacy Onboarding Specialist", clients:9,  rating:4.8, avatar:"PC", color:"#6FAE8B" },
-  { id:"james",   name:"James Rivera",   title:"Estate Documentation Specialist", clients:7, rating:5.0, avatar:"JR", color:"#D99A6B" },
-];
+/* Specialists are the concierge staff the admin has actually invited — there
+   is no separate hard-coded roster. */
+function getSpecialists() {
+  return conciergeEmployees
+    .filter(e => e.status !== "suspended")
+    .map(e => ({ id:e.id, name:e.name, title:ROLE_LABELS[e.role], avatar:e.avatar, color:ROLE_COLORS[e.role] }));
+}
 
 type SessionStatus = "scheduled" | "completed" | "cancelled" | "pending";
 type ClientStatus  = "active" | "intake" | "completed" | "paused";
@@ -38,41 +41,7 @@ interface WGClient {
   nextSession?: string;
 }
 
-const initClients: WGClient[] = [
-  {
-    id:"WG-001", name:"Dorothy Henderson", email:"d.henderson@email.com", phone:"(916) 555-0291", age:82,
-    plan:"Premium", subscriptionWaived:true, specialist:"marcus", status:"active",
-    reason:"Daughter contacted us — client is not comfortable with technology and needs full setup assistance.",
-    intakeDate:"Jun 15, 2026", completionPct:65, nextSession:"Jun 28, 2026 · 2:00 PM",
-    notes:"Very receptive. Has important documents (will, insurance, photos) ready to be uploaded. Prefers phone calls.",
-    sessions:[
-      { id:"S-001", date:"Jun 15, 2026", time:"10:00 AM", type:"phone", specialist:"Marcus Williams", notes:"Initial intake call. Confirmed documents to gather. Explained vault structure.", status:"completed", duration:"42 min" },
-      { id:"S-002", date:"Jun 20, 2026", time:"11:00 AM", type:"phone", specialist:"Marcus Williams", notes:"Uploaded will, insurance policy, and bank information. Set up 2 legacy contacts.", status:"completed", duration:"58 min" },
-      { id:"S-003", date:"Jun 28, 2026", time:"2:00 PM",  type:"video", specialist:"Marcus Williams", notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-  {
-    id:"WG-002", name:"Walter & Edna Briggs", email:"w.briggs@email.com", phone:"(404) 555-0841", age:76,
-    plan:"Legacy Pro", subscriptionWaived:false, specialist:"patricia", status:"active",
-    reason:"Referred by their estate attorney. Both need help navigating the digital platform.",
-    intakeDate:"Jun 18, 2026", completionPct:30, nextSession:"Jun 27, 2026 · 3:30 PM",
-    notes:"Two users sharing one specialist. Both are involved in sessions together.",
-    sessions:[
-      { id:"S-004", date:"Jun 18, 2026", time:"3:00 PM", type:"video", specialist:"Patricia Chen", notes:"Intro session. Showed dashboard and explained legacy contacts.", status:"completed", duration:"35 min" },
-      { id:"S-005", date:"Jun 27, 2026", time:"3:30 PM", type:"video", specialist:"Patricia Chen", notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-  {
-    id:"WG-003", name:"Margaret Thompson", email:"m.thompson@email.com", phone:"(213) 555-0192", age:71,
-    plan:"Essential", subscriptionWaived:true, specialist:"james", status:"intake",
-    reason:"Lives alone. Children live out of state. Wants vault set up before upcoming medical procedure.",
-    intakeDate:"Jun 22, 2026", completionPct:5, nextSession:"Jun 26, 2026 · 1:00 PM",
-    notes:"Urgent timeline. Prioritize will, medical directives, and emergency contacts first.",
-    sessions:[
-      { id:"S-006", date:"Jun 26, 2026", time:"1:00 PM", type:"phone", specialist:"James Rivera", notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-];
+
 
 /* ── Session log row ─────────────────────────────────────────────── */
 function SessionRow({ session }: { session: WGSession }) {
@@ -100,7 +69,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
   const [expanded, setExpanded] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
   const [noteText, setNoteText] = useState("");
-  const specialist = SPECIALISTS.find(s => s.id === client.specialist);
+  const specialist = getSpecialists().find(s => s.id === client.specialist);
   const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#5B6EE1", paused:"#8A9AB8" }[client.status];
 
   return (
@@ -158,7 +127,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
               {[
                 { label:"Setup Fee", value:"$99", color:"#6FAE8B", sub:"one-time" },
                 { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`$${sessionCost} billed` },
-                { label:"Total Billed", value:`$${totalCost}`, color:"#D99A6B", sub:"to date" },
+                { label:"Est. Total", value:`$${totalCost}`, color:"#D99A6B", sub:"setup + sessions" },
               ].map(s => (
                 <div key={s.label} className="px-3 py-2 rounded-2xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
                   <div style={{ color:s.color, fontSize:17.5, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
@@ -192,7 +161,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
           <div>
             <div className="flex items-center justify-between mb-3">
               <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
-              <button onClick={() => toast.success("Schedule session — opens calendar (demo)")}
+              <button onClick={() => toast.info("Session scheduling isn't built yet.")}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
                 <Plus size={10}/> Schedule Session
@@ -241,7 +210,7 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
-            <button onClick={() => toast.success(`Sending check-in email to ${client.name}`)}
+            <button onClick={() => { window.location.href = `mailto:${client.email}`; }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold flex-1"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Send size={11}/> Send Check-in
@@ -270,10 +239,10 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
 /* ── Main component ──────────────────────────────────────────────── */
 export function WhiteGloveAdmin() {
   const [mainTab, setMainTab] = useState<"clients"|"waivers"|"staff"|"billing">("clients");
-  const [clients, setClients] = useState<WGClient[]>(initClients);
+  const [clients, setClients] = useState<WGClient[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<ClientStatus | "all">("all");
-  const [newClient, setNewClient] = useState({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"marcus", subscriptionWaived:true, reason:"", notes:"" });
+  const [newClient, setNewClient] = useState({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"", subscriptionWaived:true, reason:"", notes:"" });
   const [adding, setAdding] = useState(false);
 
   // Sync from shared store
@@ -296,7 +265,7 @@ export function WhiteGloveAdmin() {
         subscriptionWaived: newClient.subscriptionWaived,
       });
       toast.success(`${newClient.name} added to White Glove program — visible in specialist portal instantly`);
-      setNewClient({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"marcus", subscriptionWaived:true, reason:"", notes:"" });
+      setNewClient({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"", subscriptionWaived:true, reason:"", notes:"" });
       setAdding(false); setShowAdd(false);
     }, 600);
   }
@@ -305,9 +274,17 @@ export function WhiteGloveAdmin() {
   const activeCount = clients.filter(c => c.status === "active" || c.status === "intake").length;
   const completedCount = clients.filter(c => c.status === "completed").length;
   const avgCompletion = Math.round(clients.reduce((s,c)=>s+c.completionPct,0)/Math.max(clients.length,1));
+  const specialists = getSpecialists();
 
   return (
     <div className="p-6 space-y-6">
+
+      {/* The White Glove tables (wg_clients, wg_sessions, wg_waivers,
+          concierge_employees, …) exist but no backend route reads or writes
+          them yet — be upfront that nothing here persists. */}
+      <div className="px-4 py-3 rounded-2xl" style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.25)", color:"#F6AD55", fontSize:15, lineHeight:1.6 }}>
+        White Glove isn't connected to the database yet. Clients, staff, waivers and billing added here are kept only until you refresh the page.
+      </div>
 
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -383,7 +360,7 @@ export function WhiteGloveAdmin() {
           { label:"Active Clients",     value:activeCount,     color:"#6FAE8B" },
           { label:"Completed",          value:completedCount,  color:"#D99A6B" },
           { label:"Avg. Completion",    value:`${avgCompletion}%`, color:"#6E90C9" },
-          { label:"Specialists",        value:SPECIALISTS.length, color:"#F6AD55" },
+          { label:"Specialists",        value:specialists.length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:s.color }}>{s.value}</div>
@@ -395,8 +372,11 @@ export function WhiteGloveAdmin() {
       {/* Specialist roster */}
       <div className="p-5 rounded-2xl" style={CARD}>
         <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:14 }}>Specialist Roster</div>
+        {specialists.length === 0 && (
+          <div style={{ color:"#8A9AB8", fontSize:15 }}>No specialists yet. Invite concierge staff in the Concierge Staff tab.</div>
+        )}
         <div className="grid md:grid-cols-3 gap-4">
-          {SPECIALISTS.map(s => (
+          {specialists.map(s => (
             <div key={s.id} className="flex items-center gap-3 p-4 rounded-2xl"
               style={{ background:`${s.color}08`, border:`1px solid ${s.color}25` }}>
               <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
@@ -407,8 +387,9 @@ export function WhiteGloveAdmin() {
                 <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:600 }}>{s.name}</div>
                 <div style={{ color:"#8A9AB8", fontSize:14 }}>{s.title}</div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span style={{ color:s.color, fontSize:14, fontWeight:700 }}>{s.clients} clients</span>
-                  <span style={{ color:"#F6AD55", fontSize:14 }}>★ {s.rating}</span>
+                  <span style={{ color:s.color, fontSize:14, fontWeight:700 }}>
+                    {clients.filter(c => c.specialist === s.id).length} clients
+                  </span>
                 </div>
               </div>
             </div>
@@ -468,7 +449,7 @@ export function WhiteGloveAdmin() {
               <div>
                 <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {SPECIALISTS.map(s => (
+                  {specialists.map(s => (
                     <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
                       className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
                       style={{ background:newClient.specialist===s.id?`${s.color}12`:"rgba(91,110,225,0.04)",
@@ -483,7 +464,7 @@ export function WhiteGloveAdmin() {
               <div>
                 <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>PLAN</label>
                 <select value={newClient.plan} onChange={e => setNewClient(p => ({ ...p, plan:e.target.value }))} style={INPUT}>
-                  {["starter","essential","premium","legacy_pro","enterprise"].map(p => (
+                  {["starter","foundation","family_archive","legacy_pro","legacy_vault"].map(p => (
                     <option key={p} value={p}>{p.replace("_"," ").replace(/\b\w/g, l=>l.toUpperCase())}</option>
                   ))}
                 </select>

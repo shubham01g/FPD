@@ -34,45 +34,10 @@ export interface WGClient {
   sessions: WGSession[];
 }
 
-/* ── Seed data (shared) ──────────────────────────────────────────── */
-let _clients: WGClient[] = [
-  {
-    id: "WG-001", name: "Dorothy Henderson", email: "d.henderson@email.com",
-    phone: "(916) 555-0291", age: 82, plan: "Premium", specialist: "marcus",
-    subscriptionWaived: true, reason: "82 years old, not tech-savvy. Daughter set up account.",
-    status: "active", intakeDate: "Jun 15, 2026", completionPct: 65,
-    nextSession: "Jun 28, 2026 · 2:00 PM",
-    notes: "Very receptive. Prefers phone calls. Has will + insurance ready.",
-    sessions: [
-      { id:"S-001", date:"Jun 15, 2026", time:"10:00 AM", type:"phone",  notes:"Intake call. Explained vault structure.", status:"completed", duration:"42 min" },
-      { id:"S-002", date:"Jun 20, 2026", time:"11:00 AM", type:"phone",  notes:"Uploaded will + insurance policy. Added 2 legacy contacts.", status:"completed", duration:"58 min" },
-      { id:"S-003", date:"Jun 28, 2026", time:"2:00 PM",  type:"video",  notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-  {
-    id: "WG-002", name: "Walter & Edna Briggs", email: "w.briggs@email.com",
-    phone: "(404) 555-0841", age: 76, plan: "Legacy Pro", specialist: "patricia",
-    subscriptionWaived: false, reason: "Referred by estate attorney. Both need help navigating the platform.",
-    status: "active", intakeDate: "Jun 18, 2026", completionPct: 30,
-    nextSession: "Jun 27, 2026 · 3:30 PM",
-    notes: "Two users, both attend sessions. Video preferred.",
-    sessions: [
-      { id:"S-004", date:"Jun 18, 2026", time:"3:00 PM", type:"video", notes:"Intro session. Showed dashboard and explained legacy contacts.", status:"completed", duration:"35 min" },
-      { id:"S-005", date:"Jun 27, 2026", time:"3:30 PM", type:"video", notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-  {
-    id: "WG-003", name: "Margaret Thompson", email: "m.thompson@email.com",
-    phone: "(213) 555-0192", age: 71, plan: "Essential", specialist: "james",
-    subscriptionWaived: true, reason: "Lives alone. Upcoming medical procedure — urgent timeline.",
-    status: "intake", intakeDate: "Jun 22, 2026", completionPct: 5,
-    nextSession: "Jun 26, 2026 · 1:00 PM",
-    notes: "Prioritize: will, medical directives, emergency contacts.",
-    sessions: [
-      { id:"S-006", date:"Jun 26, 2026", time:"1:00 PM", type:"phone", notes:"", status:"scheduled", duration:"—" },
-    ],
-  },
-];
+/* ── Client list (shared) ────────────────────────────────────────── */
+/* Starts empty. wg_clients exists in the schema but no admin route reads or
+   writes it yet, so clients added here are in-memory and lost on refresh. */
+let _clients: WGClient[] = [];
 
 /* ── Pub/sub ─────────────────────────────────────────────────────── */
 type Listener = (clients: WGClient[]) => void;

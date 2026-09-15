@@ -120,11 +120,13 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
         </div>
 
         <div className="relative space-y-4">
+          {/* Capabilities, not metrics — this screen renders before sign-in, so it
+              cannot (and must not) show platform numbers. */}
           {[
-            { icon:"👥", label:"51,490 active users" },
-            { icon:"💰", label:"$112,340 monthly recurring revenue" },
-            { icon:"🔐", label:"3 ID verifications pending" },
-            { icon:"📧", label:"16 email templates managed" },
+            { icon:"👥", label:"User & plan management" },
+            { icon:"💰", label:"Revenue, payouts & continuation fees" },
+            { icon:"🔐", label:"Legacy contact ID verification" },
+            { icon:"📧", label:"Email templates & notifications" },
           ].map(item => (
             <div key={item.label} className="flex items-center gap-3 px-4 py-3 rounded-xl"
               style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.15)" }}>

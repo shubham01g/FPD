@@ -492,6 +492,11 @@ export function PartnerOnboardingAdmin() {
                   </tr>
                 </thead>
                 <tbody>
+                  {sales.length === 0 && (
+                    <tr><td colSpan={8} className="px-4 py-10 text-center" style={{ color:"#8A9AB8", fontSize:15 }}>
+                      No white-label sales yet. Applications from the public onboarding wizard appear here, but they aren't stored in the database yet, so they're lost on refresh.
+                    </td></tr>
+                  )}
                   {sales.filter(s => !search || s.org.toLowerCase().includes(search.toLowerCase())).map((s, i) => {
                     const pkg = packages.find(p => p.id === s.packageId);
                     const statusColor = ({ active:"#48BB78", pending:"#F6AD55", suspended:"#FC8181", cancelled:"#8A9AB8" } as Record<string,string>)[s.status] ?? "#8A9AB8";
@@ -573,6 +578,9 @@ export function PartnerOnboardingAdmin() {
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
                 WL partners can also bring their own processor — configure a per-package override in the package editor.
               </p>
+              <p style={{ color:"#F6AD55", fontSize:14, marginTop:6 }}>
+                Processor settings aren't stored on the server yet. Changes made here last only until you refresh the page.
+              </p>
             </div>
 
             {processors.map(proc => (
@@ -640,7 +648,7 @@ export function PartnerOnboardingAdmin() {
               <div style={{ color:"#8A9AB8", fontSize:15, marginBottom:12 }}>
                 Contact integrations@finalpassdown.com to add a processor or integrate a WL partner's existing payment system.
               </div>
-              <button onClick={() => toast.success("Request sent to integrations team")}
+              <button onClick={() => { copyToClipboard("integrations@finalpassdown.com"); toast.success("integrations@finalpassdown.com copied"); }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={13}/> Request Custom Integration
@@ -682,7 +690,10 @@ export function PartnerOnboardingAdmin() {
               <div className="flex gap-3">
                 <button onClick={() => {
                   if (!sendEmail) { toast.error("Email required"); return; }
-                  toast.success(`Invite sent to ${sendEmail}`);
+                  // No email provider is integrated, so nothing can actually be
+                  // sent — hand the admin the link to send themselves.
+                  doCopy(sendPkgId);
+                  toast.info(`Email isn't set up yet — the onboarding link is copied so you can send it to ${sendEmail} yourself.`);
                   setSendEmail(""); setShowSend(false);
                 }} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
                   style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>

@@ -7,7 +7,8 @@
  *
  * Sales and payment processor config have no backing table yet (there's no
  * wl_sales table, and crypto_processor_configs isn't wired to an endpoint) —
- * those two stay on the in-memory demo store below until that's built.
+ * those two live in memory below, start EMPTY / unconfigured, and are lost on
+ * refresh. Nothing here is seeded: an admin must never see invented partners.
  */
 import { publicApi } from "./publicApi";
 import { adminApi } from "./adminApi";
@@ -124,21 +125,17 @@ function packageToDB(p: Partial<WLPackage>): Record<string, unknown> {
  * existing "instant cross-component sync" behavior after a write. */
 let _packages: WLPackage[] = [];
 
-/* ── Demo seed data (sales + processors only — see file header) ──────── */
+/* ── In-memory stores (sales + processors only — see file header) ────── */
 
-let _sales: WLSale[] = [
-  { id:"WL-001", org:"Greenfield Law Offices",     contact:"Rebecca Hayes",  email:"r.hayes@greenfieldlaw.com",  packageId:"agency",       status:"active",    users:18,   mrr:2999,  totalPaid:12496,  startDate:"Jun 1, 2026",  subdomain:"greenfield.finalpassdown.com",  processor:"stripe", lastPayout:"Jun 1, 2026" },
-  { id:"WL-002", org:"Summit Financial Group",      contact:"Marcus Torres",  email:"m.torres@summitfg.com",      packageId:"legacy_vault",   status:"pending",   users:0,    mrr:0,     totalPaid:5000,   startDate:"Jun 10, 2026", subdomain:"summit.finalpassdown.com",      processor:"stripe", lastPayout:"—" },
-  { id:"WL-003", org:"Pacific Coast Senior Care",   contact:"Linda Kim",      email:"l.kim@pcsenior.com",         packageId:"institutional",status:"active",    users:2841, mrr:15000, totalPaid:185000, startDate:"Mar 15, 2026", subdomain:"pcsenior.finalpassdown.com",    processor:"stripe", lastPayout:"Jun 1, 2026" },
-  { id:"WL-004", org:"Heritage Trust & Estate",     contact:"David Park",     email:"d.park@heritagetrust.com",   packageId:"agency",       status:"active",    users:142,  mrr:2999,  totalPaid:8497,   startDate:"Apr 2, 2026",  subdomain:"heritagetrust.finalpassdown.com",processor:"paypal", lastPayout:"Jun 1, 2026" },
-  { id:"WL-005", org:"Bright Future Financial",     contact:"Amy Chen",       email:"a.chen@bff.com",             packageId:"legacy_vault",   status:"suspended", users:488,  mrr:0,     totalPaid:22493,  startDate:"Jan 10, 2026", subdomain:"bff.finalpassdown.com",         processor:"stripe", lastPayout:"May 1, 2026" },
-];
+let _sales: WLSale[] = [];
 
+/* Processor catalog only: which processors the UI offers. None is enabled
+   and no credentials are filled in, because nothing has been configured. */
 let _processors: PaymentProcessor[] = [
-  { id:"stripe",   name:"Stripe",              enabled:true,  logo:"💳", isDefault:true,  config:{ publishableKey:"pk_live_...", webhookSecret:"whsec_..." } },
-  { id:"paypal",   name:"PayPal",              enabled:true,  logo:"🅿️", isDefault:false, config:{ clientId:"AV...", webhookId:"..." } },
-  { id:"coinbase", name:"Coinbase Commerce",   enabled:true,  logo:"🔵", isDefault:false, config:{ apiKey:"", webhookSecret:"" } },
-  { id:"bitpay",   name:"BitPay",             enabled:true,  logo:"🟢", isDefault:false, config:{ apiToken:"", merchantId:"" } },
+  { id:"stripe",   name:"Stripe",              enabled:false, logo:"💳", isDefault:false, config:{ publishableKey:"", webhookSecret:"" } },
+  { id:"paypal",   name:"PayPal",              enabled:false, logo:"🅿️", isDefault:false, config:{ clientId:"", webhookId:"" } },
+  { id:"coinbase", name:"Coinbase Commerce",   enabled:false, logo:"🔵", isDefault:false, config:{ apiKey:"", webhookSecret:"" } },
+  { id:"bitpay",   name:"BitPay",             enabled:false, logo:"🟢", isDefault:false, config:{ apiToken:"", merchantId:"" } },
   { id:"nowpay",   name:"NOWPayments",        enabled:false, logo:"🟡", isDefault:false, config:{ apiKey:"", ipnSecret:"" } },
   { id:"square",   name:"Square",             enabled:false, logo:"■",  isDefault:false, config:{ appId:"", accessToken:"" } },
   { id:"braintree",name:"Braintree",          enabled:false, logo:"🌿", isDefault:false, config:{ merchantId:"", publicKey:"", privateKey:"" } },

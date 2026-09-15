@@ -35,64 +35,11 @@ export const ROLE_COLORS: Record<StaffRole, string> = {
   lead_concierge:   "#F7931A",
 };
 
-/* ── Seed data ──────────────────────────────────────────────────── */
-export let conciergeEmployees: ConciergeEmployee[] = [
-  {
-    id: "EMP-001",
-    name: "Marcus Williams",
-    email: "marcus.williams@finalpassdown.com",
-    phone: "(916) 555-0291",
-    role: "senior_concierge",
-    status: "active",
-    assignedClientIds: ["WG-001"],
-    invitedAt: "Jun 10, 2026",
-    lastLogin: "Jun 26, 2026 · 9:14 AM",
-    inviteToken: "TOKEN_MARCUS_001",
-    password: "Concierge2026!",
-    avatar: "MW",
-  },
-  {
-    id: "EMP-002",
-    name: "Patricia Chen",
-    email: "patricia.chen@finalpassdown.com",
-    phone: "(415) 555-0841",
-    role: "senior_concierge",
-    status: "active",
-    assignedClientIds: ["WG-002"],
-    invitedAt: "Jun 12, 2026",
-    lastLogin: "Jun 25, 2026 · 3:42 PM",
-    inviteToken: "TOKEN_PATRICIA_002",
-    password: "Concierge2026!",
-    avatar: "PC",
-  },
-  {
-    id: "EMP-003",
-    name: "James Rivera",
-    email: "james.rivera@finalpassdown.com",
-    phone: "(213) 555-0182",
-    role: "junior_concierge",
-    status: "active",
-    assignedClientIds: ["WG-003"],
-    invitedAt: "Jun 18, 2026",
-    lastLogin: "Jun 24, 2026 · 11:05 AM",
-    inviteToken: "TOKEN_JAMES_003",
-    password: "Concierge2026!",
-    avatar: "JR",
-  },
-  {
-    id: "EMP-004",
-    name: "Destiny Monroe",
-    email: "d.monroe@finalpassdown.com",
-    phone: "(404) 555-0491",
-    role: "junior_concierge",
-    status: "invited",
-    assignedClientIds: [],
-    invitedAt: "Jun 25, 2026",
-    inviteToken: "TOKEN_DESTINY_004",
-    password: "Welcome2026!",
-    avatar: "DM",
-  },
-];
+/* ── Staff list ─────────────────────────────────────────────────── */
+/* Starts empty — no seeded employees or shared demo passwords. The
+   concierge_employees table isn't wired yet, so staff invited here are
+   in-memory only and lost on refresh. */
+export let conciergeEmployees: ConciergeEmployee[] = [];
 
 /* ── Auth ────────────────────────────────────────────────────────── */
 export function authenticateConcierge(

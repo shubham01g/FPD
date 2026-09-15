@@ -91,15 +91,6 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
             <p style={{ color:"#6B7FA8", fontSize:17.5 }}>Sign in with the credentials provided by your Final Pass Down administrator.</p>
           </div>
 
-          {/* Demo hint */}
-          <div className="mb-5 px-4 py-3 rounded-xl" style={{ background:"rgba(247,147,26,0.08)", border:"1px solid rgba(247,147,26,0.2)" }}>
-            <p style={{ color:"#F7931A", fontSize:14, ...MONO }}>DEMO STAFF CREDENTIALS</p>
-            <p style={{ color:"#B8C8E0", fontSize:15, marginTop:3 }}>marcus.williams@finalpassdown.com</p>
-            <p style={{ color:"#B8C8E0", fontSize:15 }}>patricia.chen@finalpassdown.com</p>
-            <p style={{ color:"#B8C8E0", fontSize:15 }}>james.rivera@finalpassdown.com</p>
-            <p style={{ color:"#6B7FA8", fontSize:14, marginTop:3 }}>All passwords: Concierge2026!</p>
-          </div>
-
           {error && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5"
               style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
