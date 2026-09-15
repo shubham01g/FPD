@@ -25,7 +25,11 @@ import { wlEntitlements, drState } from "./routes/entitlements.ts";
 import publicRoutes from "./routes/public.ts";
 
 const app = new Hono();
-const BASE = "/make-server-b5ad85e0";
+// Supabase hands the function the full path INCLUDING the function's own name,
+// so a request to /functions/v1/server/make-server-b5ad85e0/health arrives here
+// as /server/make-server-b5ad85e0/health. The prefix must match the deployed
+// function name ("server") or every route 404s.
+const BASE = "/server/make-server-b5ad85e0";
 
 // Enable logger
 app.use("*", logger(console.log));

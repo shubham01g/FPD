@@ -1,0 +1,10 @@
+project_id = "CompleteDigitalLegacyPlatform"
+
+# Admin + public backend (Hono). Its entry file is index.tsx, not the CLI's
+# default index.ts, so the entrypoint has to be named explicitly.
+[functions.server]
+entrypoint = "./functions/server/index.tsx"
+# The gateway's JWT check is off because /public/* is called without a user
+# session. /admin/* stays protected: requireAdmin validates the bearer token
+# and users.is_admin on every request.
+verify_jwt = false
