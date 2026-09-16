@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi, AdminApiError } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { useAuth } from "../../context/AuthContext";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
@@ -343,6 +343,7 @@ export function DisasterRecoveryAdmin() {
   const { data: usersData, loading: usersLoading, error: usersError } = useAdminFetch(
     () => adminApi.get<{ users: DBUserRow[] }>("/users?pageSize=200"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const [users, setUsers] = useState<UserBypass[]>([]);

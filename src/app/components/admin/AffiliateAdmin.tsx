@@ -3,7 +3,7 @@ import { Users, Search, Eye, Edit, CheckCircle, XCircle, Loader2, AlertCircle } 
 import { toast } from "sonner";
 import { UserAvatar } from "./UserAvatar";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 interface AffiliateRow {
   id: string;
@@ -29,6 +29,7 @@ export function AffiliateAdmin() {
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ affiliates: AffiliateRow[] }>("/affiliates"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const affiliates = data?.affiliates ?? [];

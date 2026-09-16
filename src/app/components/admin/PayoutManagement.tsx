@@ -3,7 +3,7 @@ import { DollarSign, CheckCircle, Clock, Download, Search, TrendingUp, Users, Ha
 import { toast } from "sonner";
 import { UserAvatar } from "./UserAvatar";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 type PayoutType = "all" | "affiliate" | "partnership";
 type PayoutStatus = "all" | "pending" | "processing" | "paid" | "failed" | "cancelled";
@@ -46,6 +46,7 @@ export function PayoutManagement() {
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ payouts: PayoutRow[] }>("/payouts"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const payouts = data?.payouts ?? [];

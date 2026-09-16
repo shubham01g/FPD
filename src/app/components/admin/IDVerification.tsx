@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Shield, CheckCircle, XCircle, Clock, Eye, ZoomIn, User, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 interface VerificationContact {
   id: string;
@@ -46,6 +46,7 @@ export function IDVerification() {
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ verifications: VerificationRecord[] }>("/verification?status=all"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const all = data?.verifications ?? [];

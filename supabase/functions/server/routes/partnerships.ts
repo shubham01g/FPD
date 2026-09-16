@@ -18,6 +18,40 @@ partnerships.get("/", async (c) => {
   return c.json({ partners: data });
 });
 
+// POST /admin/partnerships — invite a prospective referral partner. There is
+// no email delivery wired up anywhere in this backend yet, so this creates a
+// real 'invited' partner record and hands back a real onboarding link for the
+// admin to send themselves — it does not claim to have emailed anyone.
+partnerships.post("/", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { organizationName, organizationType, contactEmail, note } = body;
+
+  if (!organizationName?.trim() || !contactEmail?.trim()) {
+    return c.json({ error: "Organization name and contact email are required" }, 400);
+  }
+
+  const db = adminClient();
+  const slug = organizationName.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 12) || "PARTNER";
+  const partnerCode = `${slug}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+  const { data, error } = await db
+    .from("partners")
+    .insert({
+      organization_name: organizationName,
+      organization_type: organizationType || "other",
+      contact_name: organizationName,
+      contact_email: contactEmail,
+      partner_code: partnerCode,
+      status: "invited",
+      invite_note: note || null,
+    })
+    .select()
+    .maybeSingle();
+
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ partner: data }, 201);
+});
+
 // GET /admin/partnerships/:id/accounts
 partnerships.get("/:id/accounts", async (c) => {
   const id = c.req.param("id");

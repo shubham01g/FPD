@@ -9,16 +9,13 @@ import { IDVerification } from "./IDVerification";
 import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Shield, UserPlus, X,
   ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw
 } from "lucide-react";
-
-// How often screens showing live user activity re-poll the backend.
-const LIVE_POLL_MS = 15_000;
 
 // Ticks its own 1s clock so it can show "updated Ns ago" without re-rendering
 // the rest of MasterAdmin every second.
@@ -31,7 +28,7 @@ function LiveUpdatedBadge({ updatedAt, loading }: { updatedAt: number | null; lo
   const secondsAgo = updatedAt ? Math.max(0, Math.round((Date.now() - updatedAt) / 1000)) : null;
   const label = loading ? "Refreshing…" : secondsAgo === null ? "" : secondsAgo < 1 ? "Updated just now" : `Updated ${secondsAgo}s ago`;
   return (
-    <div className="flex items-center gap-1.5 px-2" title={`Auto-refreshes every ${LIVE_POLL_MS / 1000}s`}>
+    <div className="flex items-center gap-1.5 px-2" title={`Auto-refreshes every ${ADMIN_LIVE_POLL_MS / 1000}s`}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#6FAE8B", display: "inline-block" }} className={loading ? undefined : "animate-pulse"} />
       <span style={{ color: "#8A9AB8", fontSize: 12.5 }}>{label}</span>
     </div>
@@ -192,19 +189,7 @@ const WAIVE_REASONS = [
   { id:"other",        label:"Other (see notes)" },
 ];
 
-interface OnboardedUser {
-  id: string; name: string; email: string; phone: string;
-  plan: string; subscriptionWaived: boolean; waiveReason: string;
-  whiteGlove: boolean; sendWelcome: boolean; notes: string;
-  onboardedAt: string; onboardedBy: string; status: string;
-}
-
-/* Accounts onboarded by hand during this console session. There is no
-   "manually onboarded" flag on the users table, so this cannot be reloaded
-   from the backend and starts empty on every visit. */
-let _onboardedUsers: OnboardedUser[] = [];
-
-function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: (u: OnboardedUser) => void }) {
+function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const { authUser } = useAuth();
   const [step, setStep] = useState<"info"|"plan"|"review">("info");
   const [form, setForm] = useState({
@@ -216,23 +201,24 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
 
   const selectedPlan = PLANS.find(p => p.id === form.plan)!;
 
-  function submit() {
+  async function submit() {
     if (!form.name.trim() || !form.email.trim()) { toast.error("Name and email are required"); return; }
     setSaving(true);
-    setTimeout(() => {
-      const newUser: OnboardedUser = {
-        ...form,
-        id: `MAN-${String(Date.now()).slice(-3)}`,
-        onboardedAt: new Date().toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" }),
+    try {
+      await adminApi.post("/users", {
+        name: form.name, email: form.email, phone: form.phone || undefined, plan: form.plan,
+        subscriptionWaived: form.subscriptionWaived, waiveReason: form.waiveReason, whiteGlove: form.whiteGlove,
+        notes: form.notes || undefined, sendWelcome: form.sendWelcome,
         onboardedBy: authUser?.email ?? "unknown admin",
-        status: "active",
-      };
-      _onboardedUsers = [newUser, ..._onboardedUsers];
-      onCreated(newUser);
-      setSaving(false);
-      toast.success(`${form.name} onboarded${form.subscriptionWaived ? " · Subscription waived" : ""}${form.whiteGlove ? " · White Glove assigned" : ""}`);
+      });
+      onCreated();
+      toast.success(`${form.name} onboarded${form.subscriptionWaived ? " · Subscription waived" : ""}${form.whiteGlove ? " · White Glove assigned" : ""}${form.sendWelcome ? " · Invite emailed" : ""}`);
       onClose();
-    }, 900);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create the account");
+    } finally {
+      setSaving(false);
+    }
   }
 
   const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
@@ -870,6 +856,7 @@ interface DBUserRow {
   plan: string; plan_status: "active" | "paused" | "cancelled" | "past_due";
   is_admin: boolean; email_verified: boolean; created_at: string;
   contact_count: number; used_bytes: number;
+  subscription_waived: boolean; waive_reason: string | null; white_glove: boolean; admin_notes: string | null; onboarded_by: string | null;
 }
 
 export function MasterAdmin() {
@@ -877,37 +864,41 @@ export function MasterAdmin() {
   const [userSearch, setUserSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
-  const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
 
   const { data: usersData, loading: usersLoading, error: usersError, updatedAt: usersUpdatedAt, refetch: refetchUsers } = useAdminFetch(
     () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?search=${encodeURIComponent(userSearch)}&pageSize=50`),
     [userSearch],
-    LIVE_POLL_MS,
+    ADMIN_LIVE_POLL_MS,
   );
   const filteredUsers = usersData?.users ?? [];
+  // Real accounts an admin created by hand, rather than a self-signup —
+  // derived from onboarded_by, not a session-only shadow list.
+  const manuallyOnboarded = filteredUsers.filter(u => u.onboarded_by);
 
   const { data: revenueTrendData } = useAdminFetch(
     () => adminApi.get<{ trend: { month: string; mrr: number; overage: number; affiliates: number }[] }>("/analytics/revenue-trend"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
   const { data: overviewData } = useAdminFetch(
     () => adminApi.get<{ totalUsers: number; usersByPlan: Record<string, number>; mrr: number; totalRevenue: number; revenueByType: Record<string, number> }>("/analytics/overview"),
     [],
-    LIVE_POLL_MS,
+    ADMIN_LIVE_POLL_MS,
   );
   const { data: verificationData } = useAdminFetch(
     () => adminApi.get<{ verifications: PendingVerification[] }>("/verification?status=pending"),
     [],
-    LIVE_POLL_MS,
+    ADMIN_LIVE_POLL_MS,
   );
   const { data: auditData, loading: auditLoading, error: auditError } = useAdminFetch(
     () => adminApi.get<{ logs: AuditLogRow[]; total: number }>("/audit?pageSize=100"),
     [],
-    LIVE_POLL_MS,
+    ADMIN_LIVE_POLL_MS,
   );
   const { data: storageData } = useAdminFetch(
     () => adminApi.get<{ perPlan: { plan: string; planName: string; avgUsedGb: number; limitGb: number }[]; totals: { totalStorageGb: number; totalOverageGb: number; avgPerUserGb: number; overageRatePerGb: number | null } }>("/analytics/storage"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const pendingVerifCount = verificationData?.verifications.length ?? 0;
@@ -963,22 +954,22 @@ export function MasterAdmin() {
       </div>
 
       {/* Manually onboarded users strip */}
-      {manualUsers.length > 0 && (
+      {manuallyOnboarded.length > 0 && (
         <div className="flex items-center gap-3 px-5 py-3.5 flex-wrap" style={GLASS}>
           <div className="flex items-center gap-2 flex-shrink-0">
             <UserPlus size={14} color="#FFFFFF"/>
             <span style={{ color:"#B8C8E0", fontSize:15, fontWeight:600, whiteSpace:"nowrap" }}>Manually Onboarded</span>
           </div>
           <div className="flex flex-wrap gap-2 flex-1">
-            {manualUsers.slice(0,4).map(u => (
+            {manuallyOnboarded.slice(0,4).map(u => (
               <span key={u.id} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs"
                 style={{ background:`rgba(91,110,225,0.1)`, color:"#AEB9F5", fontWeight:500 }}>
-                {u.whiteGlove && <Star size={9} color="#FFFFFF"/>}
-                {u.name}
-                {u.subscriptionWaived && <Gift size={9} color="#FFFFFF"/>}
+                {u.white_glove && <Star size={9} color="#FFFFFF"/>}
+                {u.full_name}
+                {u.subscription_waived && <Gift size={9} color="#FFFFFF"/>}
               </span>
             ))}
-            {manualUsers.length > 4 && <span style={{ color:"#8A9AB8", fontSize:14.5 }}>+{manualUsers.length-4} more</span>}
+            {manuallyOnboarded.length > 4 && <span style={{ color:"#8A9AB8", fontSize:14.5 }}>+{manuallyOnboarded.length-4} more</span>}
           </div>
           <button onClick={() => setTab("users")} style={{ color:"#6FAE8B", fontSize:14, fontWeight:600, flexShrink:0 }}>View all →</button>
         </div>
@@ -1500,7 +1491,7 @@ export function MasterAdmin() {
       {tab === "disaster_recovery" && <DisasterRecoveryAdmin/>}
 
       {/* Manually Onboarded Users — shown in Users tab */}
-      {tab === "users" && manualUsers.length > 0 && (
+      {tab === "users" && manuallyOnboarded.length > 0 && (
         <div className="rounded-2xl overflow-hidden" style={{ border:"2px solid rgba(91,110,225,0.2)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b"
             style={{ background:"rgba(91,110,225,0.05)", borderColor:"rgba(91,110,225,0.12)" }}>
@@ -1508,7 +1499,7 @@ export function MasterAdmin() {
               <UserPlus size={15} color="#FFFFFF"/>
               <span style={{ fontFamily:"var(--font-display)", fontSize:17.5, color:"#E8EDF5" }}>Manually Onboarded Accounts</span>
               <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", fontFamily:"var(--font-mono)" }}>{manualUsers.length}</span>
+                style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", fontFamily:"var(--font-mono)" }}>{manuallyOnboarded.length}</span>
             </div>
             <button onClick={() => setShowOnboard(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
@@ -1516,25 +1507,25 @@ export function MasterAdmin() {
               <UserPlus size={11}/> Onboard Another
             </button>
           </div>
-          {manualUsers.map((u, i) => {
+          {manuallyOnboarded.map((u, i) => {
             const plan = PLANS.find(p => p.id === u.plan) ?? PLANS[2];
             return (
               <div key={u.id} className="flex items-center gap-4 px-5 py-4 border-b"
                 style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>
-                <span style={{ color:"#6E90C9", fontSize:12.5, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id}</span>
+                <span style={{ color:"#6E90C9", fontSize:12.5, fontFamily:"var(--font-mono)", minWidth:70 }}>{u.id.slice(0,8)}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span style={{ color:"#E8EDF5", fontSize:16, fontWeight:500 }}>{u.name}</span>
-                    {u.whiteGlove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
+                    <span style={{ color:"#E8EDF5", fontSize:16, fontWeight:500 }}>{u.full_name}</span>
+                    {u.white_glove && <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-mono)" }}>⭐ WHITE GLOVE</span>}
                   </div>
-                  <div style={{ color:"#8A9AB8", fontSize:14 }}>{u.email} · {u.onboardedAt}</div>
+                  <div style={{ color:"#8A9AB8", fontSize:14 }}>{u.email} · {new Date(u.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})} · by {u.onboarded_by}</div>
                 </div>
                 <div className="text-center">
                   <div style={{ color:plan.color, fontSize:15, fontWeight:700 }}>{plan.name}</div>
                   <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{plan.storage}</div>
                 </div>
                 <div className="text-center">
-                  {u.subscriptionWaived ? (
+                  {u.subscription_waived ? (
                     <div>
                       <div style={{ color:"#D99A6B", fontSize:15, fontWeight:700 }}>$0.00/mo</div>
                       <div style={{ color:"#D99A6B", fontSize:11, fontFamily:"var(--font-mono)" }}>WAIVED</div>
@@ -1546,15 +1537,15 @@ export function MasterAdmin() {
                     </div>
                   )}
                 </div>
-                {u.subscriptionWaived && (
+                {u.subscription_waived && (
                   <span className="px-2 py-1 rounded-xl text-xs font-bold"
                     style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
-                    {WAIVE_REASONS.find(r=>r.id===u.waiveReason)?.label ?? "Waived"}
+                    {WAIVE_REASONS.find(r=>r.id===u.waive_reason)?.label ?? "Waived"}
                   </span>
                 )}
                 <span className="px-2 py-0.5 rounded text-xs font-bold"
                   style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", fontFamily:"var(--font-mono)" }}>
-                  ACTIVE
+                  {u.plan_status.toUpperCase()}
                 </span>
               </div>
             );
@@ -1565,7 +1556,7 @@ export function MasterAdmin() {
       {showOnboard && (
         <OnboardUserModal
           onClose={() => setShowOnboard(false)}
-          onCreated={u => setManualUsers(prev => [u, ...prev])}
+          onCreated={refetchUsers}
         />
       )}
     </div>

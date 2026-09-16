@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { Handshake, Building, Search, Eye, Edit, CheckCircle, XCircle, Send, X, Copy, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 interface PartnerRow {
   id: string;
@@ -15,8 +15,9 @@ interface PartnerRow {
   total_accounts: number;
   monthly_recurring: number;
   total_earned: number;
-  status: "active" | "inactive" | "suspended";
+  status: "active" | "inactive" | "suspended" | "invited";
   joined_at: string;
+  partner_code?: string;
 }
 
 // No revenue-history table exists yet (partners only stores a current snapshot),
@@ -32,12 +33,13 @@ const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 
-function SendInviteModal({ onClose }: { onClose: () => void }) {
+function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [email, setEmail] = useState("");
   const [orgName, setOrgName] = useState("");
   const [orgType, setOrgType] = useState("law_firm");
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
+  const [created, setCreated] = useState<{ partner_code: string } | null>(null);
 
   const orgTypes = [
     { id:"law_firm", label:"Law Firm" }, { id:"financial", label:"Financial Advisor" },
@@ -46,17 +48,24 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
     { id:"bank", label:"Bank / Credit Union" }, { id:"other", label:"Other" },
   ];
 
-  const onboardingLink = `https://finalpassdown.com/partner/onboard?token=${Date.now().toString(36).toUpperCase()}&ref=admin`;
+  const onboardingLink = created ? `https://finalpassdown.com/partner/onboard?ref=${created.partner_code}` : null;
 
-  const send = () => {
+  const send = async () => {
     if (!email.trim()) { toast.error("Email address is required"); return; }
     if (!orgName.trim()) { toast.error("Organization name is required"); return; }
     setSending(true);
-    setTimeout(() => {
+    try {
+      const res = await adminApi.post<{ partner: { partner_code: string } }>("/partnerships", {
+        organizationName: orgName, organizationType: orgType, contactEmail: email, note: note || undefined,
+      });
+      setCreated(res.partner);
+      onCreated();
+      toast.success(`${orgName} added as a pending partner`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create the partner");
+    } finally {
       setSending(false);
-      toast.success(`White Label onboarding invite sent to ${email}`);
-      onClose();
-    }, 1000);
+    }
   };
 
   return (
@@ -64,12 +73,30 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-lg rounded-2xl p-7" style={GLASS}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>Send Onboarding Invite</h3>
-            <p style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>Client receives a unique link to start their white label partner application.</p>
+            <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>{created ? "Partner Added" : "Add a Pending Partner"}</h3>
+            <p style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>
+              {created
+                ? "No email was sent — this app has no email delivery set up yet. Copy the link below and send it to them yourself."
+                : "Creates a pending partner record with a real onboarding link. There is no email sending configured, so nothing is emailed automatically."}
+            </p>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
         </div>
 
+        {created ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
+              <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flexShrink:0 }}>ONBOARDING LINK:</span>
+              <span style={{ color:"#6E90C9", fontSize:12.5, flex:1 }} className="truncate">{onboardingLink}</span>
+              <button onClick={() => { copyToClipboard(onboardingLink!); toast.success("Link copied!"); }}
+                style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={12}/></button>
+            </div>
+            <button onClick={onClose} className="w-full py-3 rounded-2xl font-semibold text-sm"
+              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
+              Done
+            </button>
+          </div>
+        ) : (
         <div className="space-y-4">
           <div>
             <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ORGANIZATION TYPE</label>
@@ -104,23 +131,16 @@ function SendInviteModal({ onClose }: { onClose: () => void }) {
               style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none" }}/>
           </div>
 
-          {/* Preview link */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
-            <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flexShrink:0 }}>INVITE LINK:</span>
-            <span style={{ color:"#6E90C9", fontSize:12.5, flex:1 }} className="truncate">{onboardingLink}</span>
-            <button onClick={() => { copyToClipboard(onboardingLink); toast.success("Link copied!"); }}
-              style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={12}/></button>
-          </div>
-
           <div className="flex gap-3 pt-2">
             <button onClick={send} disabled={sending}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
               style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", opacity:sending?0.7:1 }}>
-              <Send size={14}/>{sending ? "Sending…" : "Send Invite Email"}
+              <Send size={14}/>{sending ? "Creating…" : "Add Partner"}
             </button>
             <button onClick={onClose} className="px-5 py-3 rounded-2xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
@@ -134,6 +154,7 @@ export function PartnershipAdmin() {
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ partners: PartnerRow[] }>("/partnerships"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const partners = data?.partners ?? [];
@@ -179,7 +200,7 @@ export function PartnershipAdmin() {
           </button>
         </div>
       </div>
-      {showInvite && <SendInviteModal onClose={() => setShowInvite(false)}/>}
+      {showInvite && <SendInviteModal onClose={() => setShowInvite(false)} onCreated={refetch}/>}
 
       {error && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(252,129,129,0.1)", border: "1px solid rgba(252,129,129,0.25)" }}>

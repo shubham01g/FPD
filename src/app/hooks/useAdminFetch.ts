@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
+// Shared polling cadence for admin screens that should reflect new signups
+// and activity without a manual reload.
+export const ADMIN_LIVE_POLL_MS = 15_000;
+
 interface AdminFetchState<T> {
   data: T | null;
   loading: boolean;

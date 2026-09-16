@@ -3,7 +3,7 @@ import { Shield, Settings, CheckCircle, Clock, DollarSign, Search, Save, AlertTr
 import { toast } from "sonner";
 import { UserAvatar } from "./UserAvatar";
 import { adminApi } from "../../services/adminApi";
-import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -48,6 +48,7 @@ export function ContinuationFeeAdmin() {
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ fees: FeeRow[] }>("/subscriptions?status=paid"),
     [],
+    ADMIN_LIVE_POLL_MS,
   );
 
   const fees = data?.fees ?? [];

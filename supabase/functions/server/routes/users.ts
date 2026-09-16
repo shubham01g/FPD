@@ -15,6 +15,7 @@ users.get("/", async (c) => {
     .from("users")
     .select(
       "id, email, full_name, phone, avatar_url, plan, plan_status, is_admin, email_verified, created_at, " +
+      "subscription_waived, waive_reason, white_glove, admin_notes, onboarded_by, " +
       // contacts references users twice (owner_user_id and id_verified_by),
       // so the embed must name the owner FK or PostgREST refuses to guess.
       "contacts!owner_user_id(count), storage_usage(used_bytes, billing_period)",
@@ -43,6 +44,57 @@ users.get("/", async (c) => {
   });
 
   return c.json({ users: shaped, total: count, page, pageSize });
+});
+
+// POST /admin/users — manually onboard a real account (e.g. phone signup,
+// white-glove intake). Creates a real Supabase Auth user, not just a row —
+// the previous frontend flow faked this with a setTimeout and created nothing.
+users.post("/", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { name, email, phone, plan, subscriptionWaived, waiveReason, whiteGlove, notes, sendWelcome, onboardedBy } = body;
+
+  if (!name?.trim() || !email?.trim()) {
+    return c.json({ error: "Name and email are required" }, 400);
+  }
+
+  const db = adminClient();
+
+  const { data: existing } = await db.from("users").select("id").eq("email", email).maybeSingle();
+  if (existing) return c.json({ error: "A user with this email already exists" }, 409);
+
+  // sendWelcome: email them a real magic-link invite. Otherwise create the
+  // account with a random password only an admin-initiated reset can recover
+  // (there's no other flow yet to hand a caller-created password to the user).
+  const { data: created, error: authError } = sendWelcome
+    ? await db.auth.admin.inviteUserByEmail(email, { data: { full_name: name } })
+    : await db.auth.admin.createUser({
+        email, email_confirm: true, password: crypto.randomUUID(),
+        user_metadata: { full_name: name },
+      });
+
+  if (authError || !created?.user) {
+    return c.json({ error: authError?.message ?? "Failed to create the account" }, 500);
+  }
+
+  // The signup trigger creates the public.users row from auth metadata;
+  // fill in the fields it doesn't know about.
+  const { data: profile, error: profileError } = await db
+    .from("users")
+    .update({
+      phone: phone || null,
+      plan: plan || "foundation",
+      subscription_waived: !!subscriptionWaived,
+      waive_reason: subscriptionWaived ? (waiveReason || null) : null,
+      white_glove: !!whiteGlove,
+      admin_notes: notes || null,
+      onboarded_by: onboardedBy || null,
+    })
+    .eq("id", created.user.id)
+    .select()
+    .maybeSingle();
+
+  if (profileError) return c.json({ error: profileError.message }, 500);
+  return c.json({ user: profile }, 201);
 });
 
 // GET /admin/users/:id — profile + storage + recent payments + contacts +
