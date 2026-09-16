@@ -14,8 +14,29 @@ import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Shield, UserPlus, X,
-  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert
+  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw
 } from "lucide-react";
+
+// How often screens showing live user activity re-poll the backend.
+const LIVE_POLL_MS = 15_000;
+
+// Ticks its own 1s clock so it can show "updated Ns ago" without re-rendering
+// the rest of MasterAdmin every second.
+function LiveUpdatedBadge({ updatedAt, loading }: { updatedAt: number | null; loading: boolean }) {
+  const [, setNow] = useState(Date.now());
+  React.useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const secondsAgo = updatedAt ? Math.max(0, Math.round((Date.now() - updatedAt) / 1000)) : null;
+  const label = loading ? "Refreshing…" : secondsAgo === null ? "" : secondsAgo < 1 ? "Updated just now" : `Updated ${secondsAgo}s ago`;
+  return (
+    <div className="flex items-center gap-1.5 px-2" title={`Auto-refreshes every ${LIVE_POLL_MS / 1000}s`}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#6FAE8B", display: "inline-block" }} className={loading ? undefined : "animate-pulse"} />
+      <span style={{ color: "#8A9AB8", fontSize: 12.5 }}>{label}</span>
+    </div>
+  );
+}
 import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 
@@ -858,9 +879,10 @@ export function MasterAdmin() {
   const [showOnboard, setShowOnboard] = useState(false);
   const [manualUsers, setManualUsers] = useState<OnboardedUser[]>(_onboardedUsers);
 
-  const { data: usersData, loading: usersLoading, error: usersError } = useAdminFetch(
+  const { data: usersData, loading: usersLoading, error: usersError, updatedAt: usersUpdatedAt, refetch: refetchUsers } = useAdminFetch(
     () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?search=${encodeURIComponent(userSearch)}&pageSize=50`),
     [userSearch],
+    LIVE_POLL_MS,
   );
   const filteredUsers = usersData?.users ?? [];
 
@@ -871,14 +893,17 @@ export function MasterAdmin() {
   const { data: overviewData } = useAdminFetch(
     () => adminApi.get<{ totalUsers: number; usersByPlan: Record<string, number>; mrr: number; totalRevenue: number; revenueByType: Record<string, number> }>("/analytics/overview"),
     [],
+    LIVE_POLL_MS,
   );
   const { data: verificationData } = useAdminFetch(
     () => adminApi.get<{ verifications: PendingVerification[] }>("/verification?status=pending"),
     [],
+    LIVE_POLL_MS,
   );
   const { data: auditData, loading: auditLoading, error: auditError } = useAdminFetch(
     () => adminApi.get<{ logs: AuditLogRow[]; total: number }>("/audit?pageSize=100"),
     [],
+    LIVE_POLL_MS,
   );
   const { data: storageData } = useAdminFetch(
     () => adminApi.get<{ perPlan: { plan: string; planName: string; avgUsedGb: number; limitGb: number }[]; totals: { totalStorageGb: number; totalOverageGb: number; avgPerUserGb: number; overageRatePerGb: number | null } }>("/analytics/storage"),
@@ -1253,10 +1278,15 @@ export function MasterAdmin() {
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={GLASS}>
               <Filter size={13} color="#8A9AB8"/><span style={{color:"#8A9AB8"}}>Filter</span>
             </button>
+            <button onClick={refetchUsers} disabled={usersLoading} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={GLASS} title="Refresh now">
+              <RefreshCw size={13} color="#8A9AB8" className={usersLoading ? "animate-spin" : undefined}/>
+              <span style={{color:"#8A9AB8"}}>Refresh</span>
+            </button>
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={{...GLASS}}>
               <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
             </button>
           </div>
+          <LiveUpdatedBadge updatedAt={usersUpdatedAt} loading={usersLoading} />
           {usersError && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
               <span style={{ color:"#FC8181", fontSize:16 }}>{usersError}</span>

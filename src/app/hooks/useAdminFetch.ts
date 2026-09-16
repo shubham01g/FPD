@@ -4,6 +4,8 @@ interface AdminFetchState<T> {
   data: T | null;
   loading: boolean;
   error: string | null;
+  /** Timestamp (ms) of the last successful load, so callers can show "updated Xs ago". */
+  updatedAt: number | null;
   refetch: () => void;
 }
 
@@ -11,11 +13,17 @@ interface AdminFetchState<T> {
  * Runs `fetcher` on mount and whenever `deps` change, exposing
  * loading/error/data so admin screens don't each hand-roll it.
  * `deps` should list every value the fetcher closes over (filters, ids, ...).
+ *
+ * Pass `intervalMs` to also re-poll on a timer, so screens showing live
+ * activity (new signups, verification queue, audit log) pick it up without
+ * a manual reload. Polling pauses while the tab is backgrounded and resumes
+ * (with an immediate refresh) when it's foregrounded again.
  */
-export function useAdminFetch<T>(fetcher: () => Promise<T>, deps: unknown[]): AdminFetchState<T> {
+export function useAdminFetch<T>(fetcher: () => Promise<T>, deps: unknown[], intervalMs?: number): AdminFetchState<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [tick, setTick] = useState(0);
 
   const load = useCallback(() => {
@@ -23,7 +31,7 @@ export function useAdminFetch<T>(fetcher: () => Promise<T>, deps: unknown[]): Ad
     setLoading(true);
     setError(null);
     fetcher()
-      .then((result) => { if (!cancelled) setData(result); })
+      .then((result) => { if (!cancelled) { setData(result); setUpdatedAt(Date.now()); } })
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : "Something went wrong loading this data."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -32,5 +40,14 @@ export function useAdminFetch<T>(fetcher: () => Promise<T>, deps: unknown[]): Ad
 
   useEffect(() => load(), [load, tick]);
 
-  return { data, loading, error, refetch: () => setTick((t) => t + 1) };
+  useEffect(() => {
+    if (!intervalMs) return;
+    const id = setInterval(() => { if (!document.hidden) setTick((t) => t + 1); }, intervalMs);
+    const onVisible = () => { if (!document.hidden) setTick((t) => t + 1); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVisible); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intervalMs]);
+
+  return { data, loading, error, updatedAt, refetch: () => setTick((t) => t + 1) };
 }
