@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Download, Share, SquarePlus, X } from "lucide-react";
-import { canPrompt, isIOS, isStandalone, promptInstall, subscribeInstall } from "../pwa";
+import { usePwaInstall } from "../hooks/usePwaInstall";
 
 /**
  * "Install app" control — adds Final Pass Down to the home screen (mobile) or
@@ -24,29 +24,10 @@ function wasDismissed(): boolean {
 }
 
 export function InstallApp() {
-  const [available, setAvailable] = useState(canPrompt());
-  const [standalone, setStandalone] = useState(isStandalone());
+  const { available, standalone, ios, install } = usePwaInstall();
   const [dismissed, setDismissed] = useState(wasDismissed());
   const [iosHelp, setIosHelp] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);
-  const ios = isIOS();
-
-  useEffect(
-    () =>
-      subscribeInstall(() => {
-        setAvailable(canPrompt());
-        setStandalone(isStandalone());
-      }),
-    []
-  );
-
-  // Installing on desktop can leave the tab open; keep the button honest.
-  useEffect(() => {
-    const mq = window.matchMedia("(display-mode: standalone)");
-    const onChange = () => setStandalone(isStandalone());
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
 
   useEffect(() => {
     if (!iosHelp) return;
@@ -74,8 +55,7 @@ export function InstallApp() {
       setIosHelp((o) => !o);
       return;
     }
-    const accepted = await promptInstall();
-    if (accepted) setStandalone(true);
+    await install();
   };
 
   return (

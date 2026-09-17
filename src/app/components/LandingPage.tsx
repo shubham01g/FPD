@@ -10,9 +10,10 @@ import {
   Star, Building2, Scale, Landmark, TrendingUp,
   Stethoscope, Wallet, Car, Folder, Globe, Zap, Eye, FileText,
   Bell, Calendar, Award, PawPrint, Video, DollarSign, HardDrive,
-  BarChart3, Layers, ShieldAlert, BookOpen,
+  BarChart3, Layers, ShieldAlert, BookOpen, Download, Share, SquarePlus,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
+import { usePwaInstall } from "../hooks/usePwaInstall";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -222,6 +223,92 @@ const LANDING_CSS = `
 }
 `;
 
+/* ── DOWNLOAD APP ─────────────────────────────────────────────────
+   Homepage CTA to install the PWA. Chrome/Edge (desktop or Android) get
+   the browser's native install dialog via `install()`; iOS gets the same
+   manual "Add to Home Screen" steps as the app-shell's InstallApp button;
+   any other browser that hasn't offered installability yet (or never will,
+   like desktop Safari/Firefox) gets a generic pointer instead of a dead
+   button. Hidden once already running standalone. */
+function DownloadAppButton({ large }: { large?: boolean }) {
+  const { available, standalone, ios, install } = usePwaInstall();
+  const [help, setHelp] = useState<"ios" | "generic" | null>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!help) return;
+    const onClick = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) setHelp(null);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [help]);
+
+  if (standalone) return null;
+
+  const onClick = async () => {
+    if (ios) {
+      setHelp((h) => (h ? null : "ios"));
+      return;
+    }
+    if (available) {
+      await install();
+      return;
+    }
+    setHelp((h) => (h ? null : "generic"));
+  };
+
+  return (
+    <div className="relative" ref={popRef}>
+      <GhostBtn onClick={onClick} large={large}>
+        <Download size={large ? 18 : 16} /> Download App
+      </GhostBtn>
+      {help && (
+        <div
+          className="absolute text-left rounded-xl"
+          style={{
+            top: "calc(100% + 10px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "min(300px, calc(100vw - 32px))",
+            zIndex: 60,
+            background: "#0D1421",
+            border: "1px solid rgba(91,110,225,0.18)",
+            boxShadow: "0 24px 60px rgba(0,0,0,0.55)",
+            padding: 16,
+          }}
+        >
+          <div className="flex items-start justify-between gap-2" style={{ marginBottom: 10 }}>
+            <div style={{ color: TEXT, fontSize: 15, fontWeight: 600 }}>
+              {help === "ios" ? "Add to Home Screen" : "Install the App"}
+            </div>
+            <button onClick={() => setHelp(null)} style={{ color: MUTED }} title="Close">
+              <X size={14} />
+            </button>
+          </div>
+          {help === "ios" ? (
+            <>
+              <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.6, marginBottom: 10 }}>
+                iOS installs apps by hand — Safari has no install button to press for you.
+              </p>
+              <div className="flex items-center gap-2" style={{ color: SOFT, fontSize: 14, marginBottom: 6 }}>
+                <Share size={14} color="#6FAE8B" /> Tap Share in the browser bar
+              </div>
+              <div className="flex items-center gap-2" style={{ color: SOFT, fontSize: 14 }}>
+                <SquarePlus size={14} color="#6FAE8B" /> Choose “Add to Home Screen”
+              </div>
+            </>
+          ) : (
+            <p style={{ color: MUTED, fontSize: 14, lineHeight: 1.6 }}>
+              Look for the install icon in your browser’s address bar, or open the browser menu and choose “Install app” / “Add to Home Screen.” Safari and Firefox on desktop don’t support installing yet — try Chrome or Edge.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── HERO ─────────────────────────────────────────────────────── */
 function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   return (
@@ -243,6 +330,7 @@ function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: s
           <div className="fpd-seq flex flex-wrap items-center justify-center gap-3 sm:gap-3.5 mb-6 sm:mb-16" style={seq(4)}>
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
             <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <DownloadAppButton large />
           </div>
         </div>
       </div>

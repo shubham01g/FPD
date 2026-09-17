@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Shared polling cadence for admin screens that should reflect new signups
 // and activity without a manual reload.
@@ -29,13 +29,17 @@ export function useAdminFetch<T>(fetcher: () => Promise<T>, deps: unknown[], int
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [tick, setTick] = useState(0);
+  // Once data has landed once, later refreshes (polling, filter changes,
+  // manual refetch) happen silently instead of blanking the screen with a
+  // spinner — only the very first load shows "loading".
+  const hasLoadedRef = useRef(false);
 
   const load = useCallback(() => {
     let cancelled = false;
-    setLoading(true);
+    if (!hasLoadedRef.current) setLoading(true);
     setError(null);
     fetcher()
-      .then((result) => { if (!cancelled) { setData(result); setUpdatedAt(Date.now()); } })
+      .then((result) => { if (!cancelled) { hasLoadedRef.current = true; setData(result); setUpdatedAt(Date.now()); } })
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : "Something went wrong loading this data."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
