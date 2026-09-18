@@ -11,6 +11,31 @@ interface UserSignupProps {
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+const COUNTRIES = [
+  "United States", "Canada", "United Kingdom", "Australia", "Ireland",
+  "Germany", "France", "Spain", "Mexico", "India", "Other",
+];
+const REFERRAL_SOURCES = [
+  { id: "search",   label: "Search engine" },
+  { id: "social",   label: "Social media" },
+  { id: "friend",   label: "Friend or family" },
+  { id: "advisor",  label: "Financial / legal advisor" },
+  { id: "ad",       label: "Online ad" },
+  { id: "other",    label: "Other" },
+];
+
+function detectDeviceType(): "mobile" | "tablet" | "desktop" {
+  const ua = navigator.userAgent;
+  if (/iPad|Android(?!.*Mobile)|Tablet/i.test(ua)) return "tablet";
+  if (/Mobi|Android|iPhone|iPod/i.test(ua)) return "mobile";
+  return "desktop";
+}
+
+const fieldStyle: React.CSSProperties = {
+  background: "rgba(91,167,214,0.06)", border: "1px solid rgba(91,167,214,0.25)",
+  color: "#E8EDF5", fontSize: 17.5, outline: "none",
+};
+
 export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,6 +45,13 @@ export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupPr
   const [error, setError] = useState("");
   const [confirmEmailSent, setConfirmEmailSent] = useState(false);
 
+  // Optional demographics — used only for aggregate admin analytics, never
+  // required to create an account.
+  const [gender, setGender] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [country, setCountry] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -27,7 +59,13 @@ export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupPr
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setLoading(true);
 
-    const { data, error: signUpError } = await signUpWithPassword(email, password, fullName);
+    const { data, error: signUpError } = await signUpWithPassword(email, password, fullName, {
+      gender: gender || undefined,
+      birthdate: birthdate || undefined,
+      country: country || undefined,
+      deviceType: detectDeviceType(),
+      referralSource: referralSource || undefined,
+    });
     setLoading(false);
     if (signUpError) { setError(signUpError.message); return; }
 
@@ -115,6 +153,39 @@ export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupPr
                     <button type="button" onClick={()=>setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color:"#6B7FA8" }}>
                       {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
                     </button>
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <div style={{ color:"#4A5A7A", fontSize:13, ...MONO, marginBottom:10 }}>OPTIONAL — HELPS US IMPROVE THE PRODUCT</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>GENDER</label>
+                      <select value={gender} onChange={e=>setGender(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                        <option value="">Prefer not to say</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="nonbinary">Non-binary</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>DATE OF BIRTH</label>
+                      <input type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} max={new Date().toISOString().slice(0,10)}
+                        className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}/>
+                    </div>
+                    <div>
+                      <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>COUNTRY</label>
+                      <select value={country} onChange={e=>setCountry(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                        <option value="">Select...</option>
+                        {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>HOW DID YOU HEAR ABOUT US?</label>
+                      <select value={referralSource} onChange={e=>setReferralSource(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                        <option value="">Select...</option>
+                        {REFERRAL_SOURCES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-sm mt-2"

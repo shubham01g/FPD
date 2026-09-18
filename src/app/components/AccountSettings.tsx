@@ -250,6 +250,13 @@ export function AccountSettings() {
   const [avatar, setAvatar] = useState<string | null>(null); // data URL for photo
   const [saving, setSaving] = useState(false);
 
+  // Demographics — feed the admin Analytics tab; optional and editable here
+  // so accounts created before this field existed can still fill it in.
+  const [gender, setGender] = useState(user.gender);
+  const [birthdate, setBirthdate] = useState(user.birthdate);
+  const [country, setCountry] = useState(user.country);
+  const [referralSource, setReferralSource] = useState(user.referralSource);
+
   // Security / 2FA state
   const [twoFAEnabled, setTwoFAEnabled]       = useState(false);
   const [twoFAMethod, setTwoFAMethod]         = useState<TwoFAMethod>("email_otp");
@@ -285,7 +292,10 @@ export function AccountSettings() {
   async function saveProfile() {
     if (!name.trim() || !email.trim()) { toast.error("Name and email are required"); return; }
     setSaving(true);
-    await updateUser({ name: name.trim(), email: email.trim(), phone: phone.trim() });
+    await updateUser({
+      name: name.trim(), email: email.trim(), phone: phone.trim(),
+      gender, birthdate, country, referralSource,
+    });
     setSaving(false);
   }
 
@@ -435,6 +445,47 @@ export function AccountSettings() {
                   </div>
                 </div>
               ))}
+              <button onClick={saveProfile} disabled={saving} className="btn-primary" style={{ width: "fit-content" }}>
+                <Save size={14}/>{saving ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
+
+            {/* Demographics — optional, feeds aggregate admin analytics only */}
+            <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <h3 className="sec-title">About You <span style={{ color:"#4A5A7A", fontWeight:400, fontSize:13 }}>(optional)</span></h3>
+              <div className="grid grid-cols-2 gap-3" style={{ display:"grid" }}>
+                <div className="field">
+                  <label>GENDER</label>
+                  <select value={gender} onChange={e => setGender(e.target.value)}>
+                    <option value="">Prefer not to say</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="nonbinary">Non-binary</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>DATE OF BIRTH</label>
+                  <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} max={new Date().toISOString().slice(0,10)}/>
+                </div>
+                <div className="field">
+                  <label>COUNTRY</label>
+                  <select value={country} onChange={e => setCountry(e.target.value)}>
+                    <option value="">Select...</option>
+                    {["United States","Canada","United Kingdom","Australia","Ireland","Germany","France","Spain","Mexico","India","Other"].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>HOW DID YOU HEAR ABOUT US?</label>
+                  <select value={referralSource} onChange={e => setReferralSource(e.target.value)}>
+                    <option value="">Select...</option>
+                    {[{id:"search",label:"Search engine"},{id:"social",label:"Social media"},{id:"friend",label:"Friend or family"},{id:"advisor",label:"Financial / legal advisor"},{id:"ad",label:"Online ad"},{id:"other",label:"Other"}].map(r => (
+                      <option key={r.id} value={r.id}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <button onClick={saveProfile} disabled={saving} className="btn-primary" style={{ width: "fit-content" }}>
                 <Save size={14}/>{saving ? "Saving…" : "Save Changes"}
               </button>

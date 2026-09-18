@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 import {
-  db, supabase, type DBDocument, type DBContact, type DBIdVerification,
+  db, supabase, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
   type DBFinalWish, type DBAllergy, type DBMedication, type DBReminder, type DBMemory, type DBOccasion,
   type DBFuneralPlan, type DBEmergencyInfo,
 } from "../services/supabase";
@@ -63,6 +63,9 @@ export interface UserProfile {
   name: string; email: string; phone: string;
   plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   storageUsed: number; storageLimit: number; avatar: string;
+  /* Demographics (migration 020) — feed the admin Analytics tab. Blank for
+     any account that hasn't filled them in; editable in Account Settings. */
+  gender: string; birthdate: string; country: string; referralSource: string;
 }
 
 const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
@@ -71,6 +74,7 @@ const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
+  gender: "", birthdate: "", country: "", referralSource: "",
 };
 
 const EMPTY_FUNERAL_PLAN: FuneralPlan = {
@@ -269,6 +273,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           name: userRes.data.full_name, email: userRes.data.email, phone: userRes.data.phone ?? "",
           plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: PLAN_STORAGE_GB[userRes.data.plan],
           avatar: initials(userRes.data.full_name),
+          gender: userRes.data.gender ?? "", birthdate: userRes.data.birthdate ?? "",
+          country: userRes.data.country ?? "", referralSource: userRes.data.referral_source ?? "",
         });
       }
       setDocs((docsRes.data ?? []).map(rowToDoc));
@@ -308,6 +314,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const tid = toast.loading("Saving profile...");
     const { error } = await db.updateUser(uid, {
       full_name: data.name, phone: data.phone, plan: data.plan,
+      gender: (data.gender as DBUser["gender"]) || null,
+      birthdate: data.birthdate || null,
+      country: data.country || null,
+      referral_source: data.referralSource || null,
     });
     if (error) { toast.error("Could not save profile", { id: tid }); return; }
     setUser(u => ({ ...u, ...data, storageLimit: data.plan ? PLAN_STORAGE_GB[data.plan] : u.storageLimit }));

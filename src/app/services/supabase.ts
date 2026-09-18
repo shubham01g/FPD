@@ -90,6 +90,13 @@ export interface DBUser {
      see services/vaultCrypto.ts. */
   vault_salt?: string | null;
   vault_verifier?: string | null;
+  /* Demographics (migration 020). All NULL until signup or Account Settings
+     writes them — pre-existing accounts have no history to backfill. */
+  gender?: "female"|"male"|"nonbinary"|"prefer_not_to_say" | null;
+  birthdate?: string | null;
+  country?: string | null;
+  device_type?: "mobile"|"tablet"|"desktop" | null;
+  referral_source?: string | null;
 }
 
 export interface DBDocument {

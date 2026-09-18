@@ -158,6 +158,31 @@ function Card({ children, className = "" }: { children:React.ReactNode; classNam
   );
 }
 
+/* Renders HorizBar rows for a { value: count } breakdown (gender, country,
+ * device, referral source, age bucket), or the NotCollected empty state if
+ * nobody has answered that field yet. `order` fixes the row order (age
+ * buckets); omit it to sort by count descending (everything else). */
+function DemographicBars({ counts, reported, totalUsers, labelMap, colors, what, howEmpty, order }: {
+  counts: Record<string, number>; reported: number; totalUsers: number;
+  labelMap?: Record<string,string>; colors: string[]; what: string; howEmpty: string; order?: string[];
+}) {
+  if (reported === 0) return <NotCollected what={what} how={howEmpty}/>;
+  const entries = order
+    ? order.filter(k => counts[k]).map(k => [k, counts[k]] as [string, number])
+    : Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  return (
+    <>
+      <div className="space-y-3">
+        {entries.map(([key, cnt], i) => (
+          <HorizBar key={key} label={labelMap?.[key] ?? key} pct={(cnt / reported) * 100}
+            value={`${Math.round((cnt / reported) * 1000) / 10}% · ${cnt}`} color={colors[i % colors.length]}/>
+        ))}
+      </div>
+      <div style={{ color:"#6B7FA8", fontSize:13, marginTop:12 }}>{reported} of {totalUsers} accounts reported</div>
+    </>
+  );
+}
+
 function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; color:string; topLabel?:string }) {
   const h = Math.round((pct / 100) * 120);
   return (
@@ -948,6 +973,18 @@ export function MasterAdmin() {
     [],
     ADMIN_LIVE_POLL_MS,
   );
+  const { data: demographicsData } = useAdminFetch(
+    () => adminApi.get<{
+      totalUsers: number;
+      gender: { counts: Record<string, number>; reported: number };
+      age: { counts: Record<string, number>; reported: number };
+      country: { counts: Record<string, number>; reported: number };
+      device: { counts: Record<string, number>; reported: number };
+      referralSource: { counts: Record<string, number>; reported: number };
+    }>("/analytics/demographics"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
 
   const pendingVerifCount = verificationData?.verifications.length ?? 0;
 
@@ -1089,10 +1126,11 @@ export function MasterAdmin() {
           <div className="px-4 py-3 rounded-2xl flex items-start gap-3" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <AlertTriangle size={15} color="#F6AD55" style={{ flexShrink:0, marginTop:2 }}/>
             <div style={{ color:"#D7C3A6", fontSize:14.5, lineHeight:1.6 }}>
-              Demographic, engagement and satisfaction analytics are not available. The platform
-              does not currently record age, gender, location, device, referral source, session
-              activity or survey responses for any account. The panels below stay in place so the
-              screen is ready the moment that collection is added.
+              Gender, age, country, device and referral source are now collected at signup and in
+              Account Settings (migration 020) — panels below fill in as accounts report them.
+              Engagement and satisfaction analytics are still not available: the platform has no
+              session/event table and no survey feature, so DAU/MAU, feature adoption, retention
+              history and NPS remain unanswerable until those are built.
             </div>
           </div>
 
@@ -1125,11 +1163,15 @@ export function MasterAdmin() {
             )}
           </Card>
 
-          {/* ── Panels with no backing column ── */}
+          {/* ── Gender / Relationship ── */}
           <div className="grid md:grid-cols-2 gap-5">
             <Card>
               <SectionHead title="Gender Distribution"/>
-              <NotCollected what="Gender" how="No gender field exists on the users table and signup never asks for one."/>
+              <DemographicBars
+                counts={demographicsData?.gender.counts ?? {}} reported={demographicsData?.gender.reported ?? 0}
+                totalUsers={demographicsData?.totalUsers ?? 0} colors={PLAN_COLORS}
+                labelMap={{ female:"Female", male:"Male", nonbinary:"Non-binary" }}
+                what="Gender" howEmpty="No account has answered the optional gender field at signup or in Account Settings yet."/>
             </Card>
             <Card>
               <SectionHead title="Relationship Status"/>
@@ -1139,7 +1181,11 @@ export function MasterAdmin() {
 
           <Card>
             <SectionHead title="Age Distribution"/>
-            <NotCollected what="Date of birth" how="Accounts store no birthdate, so users cannot be grouped into age cohorts."/>
+            <DemographicBars
+              counts={demographicsData?.age.counts ?? {}} reported={demographicsData?.age.reported ?? 0}
+              totalUsers={demographicsData?.totalUsers ?? 0} colors={PLAN_COLORS}
+              order={["18-24","25-34","35-44","45-54","55-64","65+"]}
+              what="Date of birth" howEmpty="No account has entered a date of birth at signup or in Account Settings yet."/>
           </Card>
 
           <div className="grid md:grid-cols-2 gap-5">
@@ -1149,18 +1195,29 @@ export function MasterAdmin() {
             </Card>
             <Card>
               <SectionHead title="Country Distribution"/>
-              <NotCollected what="Country" how="Not derived from signup, billing, or request metadata today."/>
+              <DemographicBars
+                counts={demographicsData?.country.counts ?? {}} reported={demographicsData?.country.reported ?? 0}
+                totalUsers={demographicsData?.totalUsers ?? 0} colors={PLAN_COLORS}
+                what="Country" howEmpty="No account has selected a country at signup or in Account Settings yet."/>
             </Card>
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
             <Card>
               <SectionHead title="Device & Platform"/>
-              <NotCollected what="Device and platform" how="Sessions are not instrumented, so no user-agent or PWA-install data is recorded."/>
+              <DemographicBars
+                counts={demographicsData?.device.counts ?? {}} reported={demographicsData?.device.reported ?? 0}
+                totalUsers={demographicsData?.totalUsers ?? 0} colors={PLAN_COLORS}
+                labelMap={{ mobile:"Mobile", tablet:"Tablet", desktop:"Desktop" }}
+                what="Device and platform" howEmpty="Detected automatically at signup going forward; no account has signed up since this was added."/>
             </Card>
             <Card>
               <SectionHead title="Acquisition Sources"/>
-              <NotCollected what="Signup source" how="Referral and campaign attribution is not written at account creation."/>
+              <DemographicBars
+                counts={demographicsData?.referralSource.counts ?? {}} reported={demographicsData?.referralSource.reported ?? 0}
+                totalUsers={demographicsData?.totalUsers ?? 0} colors={PLAN_COLORS}
+                labelMap={{ search:"Search engine", social:"Social media", friend:"Friend or family", advisor:"Financial / legal advisor", ad:"Online ad", other:"Other" }}
+                what="Signup source" howEmpty="No account has answered 'How did you hear about us?' at signup or in Account Settings yet."/>
             </Card>
           </div>
 

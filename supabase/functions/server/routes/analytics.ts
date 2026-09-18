@@ -1,10 +1,11 @@
 // Backs the Command Center overview/analytics tabs in MasterAdmin.tsx.
 // Only computes metrics the schema actually supports (users, plans, payments,
-// storage_usage). MasterAdmin.tsx's demo data also shows gender/age/state
-// breakdowns — there is no column for any of that anywhere in the schema, so
-// those charts have nothing to bind to yet. That's a product decision (add
-// the columns, collect the data some other way, or drop the charts), not a
-// backend wiring gap — flagging it here rather than fabricating fake fields.
+// storage_usage, and — since migration 020 — gender/birthdate/country/
+// device_type/referral_source on public.users). Geography (state/city),
+// engagement (DAU/MAU, feature usage) and satisfaction (NPS) still have no
+// backing column or event table anywhere, so those panels remain
+// "NotCollected" in MasterAdmin.tsx — that's a larger, separate build
+// (session/event tracking, a survey feature), not covered here.
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 
@@ -152,6 +153,69 @@ analytics.get("/storage", async (c) => {
       avgPerUserGb: userCount ? Math.round((totalBytes / userCount / GB) * 10) / 10 : 0,
       overageRatePerGb: setting?.value ? Number(setting.value) : null,
     },
+  });
+});
+
+// GET /admin/analytics/demographics — gender / age / country / device /
+// referral-source breakdowns from public.users (migration 020). Counts only
+// non-null values per field so an account that skipped one question doesn't
+// skew another field's distribution; each panel's own total is returned
+// alongside so the frontend can show "N of totalUsers reported".
+analytics.get("/demographics", async (c) => {
+  const db = adminClient();
+
+  const { data: rows, error } = await db
+    .from("users")
+    .select("gender, birthdate, country, device_type, referral_source");
+
+  if (error) return c.json({ error: error.message }, 500);
+
+  const count = (field: "gender" | "country" | "device_type" | "referral_source") => {
+    const out: Record<string, number> = {};
+    for (const r of rows ?? []) {
+      const v = r[field];
+      if (!v) continue;
+      out[v] = (out[v] ?? 0) + 1;
+    }
+    return out;
+  };
+
+  const AGE_BUCKETS = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"] as const;
+  function ageBucket(birthdate: string): typeof AGE_BUCKETS[number] | null {
+    const dob = new Date(birthdate);
+    if (Number.isNaN(dob.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const monthDiff = now.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
+    if (age < 18) return null;
+    if (age <= 24) return "18-24";
+    if (age <= 34) return "25-34";
+    if (age <= 44) return "35-44";
+    if (age <= 54) return "45-54";
+    if (age <= 64) return "55-64";
+    return "65+";
+  }
+
+  const ageDistribution: Record<string, number> = {};
+  let ageReported = 0;
+  for (const r of rows ?? []) {
+    if (!r.birthdate) continue;
+    const bucket = ageBucket(r.birthdate);
+    if (!bucket) continue;
+    ageDistribution[bucket] = (ageDistribution[bucket] ?? 0) + 1;
+    ageReported++;
+  }
+
+  const totalUsers = (rows ?? []).length;
+
+  return c.json({
+    totalUsers,
+    gender: { counts: count("gender"), reported: (rows ?? []).filter((r) => r.gender).length },
+    age: { counts: ageDistribution, reported: ageReported },
+    country: { counts: count("country"), reported: (rows ?? []).filter((r) => r.country).length },
+    device: { counts: count("device_type"), reported: (rows ?? []).filter((r) => r.device_type).length },
+    referralSource: { counts: count("referral_source"), reported: (rows ?? []).filter((r) => r.referral_source).length },
   });
 });
 

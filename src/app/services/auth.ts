@@ -15,12 +15,29 @@ function notConfigured() {
   };
 }
 
-export async function signUpWithPassword(email: string, password: string, fullName: string) {
+export interface SignUpDemographics {
+  gender?: string;
+  birthdate?: string;
+  country?: string;
+  deviceType?: string;
+  referralSource?: string;
+}
+
+export async function signUpWithPassword(email: string, password: string, fullName: string, demographics?: SignUpDemographics) {
   if (!isSupabaseConfigured) return notConfigured();
   return supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      data: {
+        full_name: fullName,
+        gender: demographics?.gender || undefined,
+        birthdate: demographics?.birthdate || undefined,
+        country: demographics?.country || undefined,
+        device_type: demographics?.deviceType || undefined,
+        referral_source: demographics?.referralSource || undefined,
+      },
+    },
   });
 }
 
