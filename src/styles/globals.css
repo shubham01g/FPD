@@ -1,3 +1,21 @@
+/* ── Autofill override ──
+   Chrome/Edge paint a saved-credential input with their own light "autofill"
+   background, ignoring the element's own background-color entirely — no
+   normal CSS rule can beat it. The only lever browsers expose is this
+   inset box-shadow trick, which paints over their fill with a large enough
+   solid shadow, plus -webkit-text-fill-color since `color` alone is also
+   ignored while autofilled. Applies everywhere (login, signup, admin
+   login, account settings) rather than patching one screen at a time. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #0F1624 inset;
+  box-shadow: 0 0 0px 1000px #0F1624 inset;
+  -webkit-text-fill-color: #E8EDF5;
+  caret-color: #E8EDF5;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* ── Spotlight glow-surface utility ──
    Cursor-tracking spotlight border, driven by --x/--y/--xp/--yp set once
    on :root (see src/app/glowCursor.ts). Add the `glow-surface` class to
