@@ -84,6 +84,20 @@ function shortDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
 }
 
+// PageId values are kebab-case ("file-cabinet") — this is the only place
+// that needs a human label for them, so a formatter beats hand-maintaining
+// a ~30-entry map that would silently go stale as screens are added.
+function prettyPageLabel(pageId: string): string {
+  return pageId.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}m ${secs}s`;
+}
+
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.round(diff / 60000);
@@ -804,13 +818,13 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
               <div className="mt-4 rounded-2xl p-4 space-y-3" style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(91,110,225,0.25)" }}>
                 <div style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)" }}>IN-APP NOTIFICATION</div>
                 <div className="flex items-start gap-3 px-4 py-3 rounded-2xl"
-                  style={{ background:"#fff", border:"1px solid rgba(91,110,225,0.1)" }}>
+                  style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <div className="rounded-full flex-shrink-0"
                     style={{ width:8, height:8, marginTop:5, background:NOTIF_TYPE_COLORS[type], boxShadow:`0 0 8px ${NOTIF_TYPE_COLORS[type]}` }}/>
                   <div>
-                    <div style={{ color:"#E8EDF5", fontSize:16, fontWeight:600 }}>{title || "Notification Title"}</div>
+                    <div style={{ color:"#FFFFFF", fontSize:16, fontWeight:600 }}>{title || "Notification Title"}</div>
                     <div style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>{body || "Message preview…"}</div>
-                    <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:4 }}>just now</div>
+                    <div style={{ color:"#5A6A88", fontSize:12.5, marginTop:4 }}>just now</div>
                   </div>
                 </div>
               </div>
@@ -985,6 +999,15 @@ export function MasterAdmin() {
     [],
     ADMIN_LIVE_POLL_MS,
   );
+  const { data: engagementData } = useAdminFetch(
+    () => adminApi.get<{
+      totalUsers: number; dau: number; mau: number;
+      avgSessionSeconds: number; sessionCount: number;
+      featureAdoption: Record<string, number>;
+    }>("/analytics/engagement"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
 
   const pendingVerifCount = verificationData?.verifications.length ?? 0;
 
@@ -1126,11 +1149,12 @@ export function MasterAdmin() {
           <div className="px-4 py-3 rounded-2xl flex items-start gap-3" style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.2)" }}>
             <AlertTriangle size={15} color="#F6AD55" style={{ flexShrink:0, marginTop:2 }}/>
             <div style={{ color:"#D7C3A6", fontSize:14.5, lineHeight:1.6 }}>
-              Gender, age, country, device and referral source are now collected at signup and in
-              Account Settings (migration 020) — panels below fill in as accounts report them.
-              Engagement and satisfaction analytics are still not available: the platform has no
-              session/event table and no survey feature, so DAU/MAU, feature adoption, retention
-              history and NPS remain unanswerable until those are built.
+              Gender, age, country, device and referral source are collected at signup and in
+              Account Settings (migration 020); page views and session activity are now tracked
+              across every screen (migration 021) — panels below fill in as accounts use the app.
+              Relationship status, geography (state/city), vault completion score, subscription
+              retention history and NPS survey responses are still not available — none of those
+              have a backing column, history table, or (for NPS) a survey feature built yet.
             </div>
           </div>
 
@@ -1222,8 +1246,18 @@ export function MasterAdmin() {
           </div>
 
           <Card>
-            <SectionHead title="Feature Adoption Rate"/>
-            <NotCollected what="Feature usage" how="Nothing records which screens an account has used; per-feature row counts would need a dedicated aggregation job."/>
+            <SectionHead title="Feature Adoption Rate" sub="% of accounts that have visited each screen at least once, last 30 days"/>
+            {!engagementData || Object.keys(engagementData.featureAdoption).length === 0 ? (
+              <NotCollected what="Feature usage" how="No page-view events recorded yet in the last 30 days — instrumentation just shipped (migration 021), so this fills in as accounts use the app."/>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(engagementData.featureAdoption)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([pageId, pct], i) => (
+                    <HorizBar key={pageId} label={prettyPageLabel(pageId)} pct={pct} value={`${pct}%`} color={PLAN_COLORS[i % PLAN_COLORS.length]}/>
+                  ))}
+              </div>
+            )}
           </Card>
 
           <div className="grid md:grid-cols-2 gap-5">
@@ -1232,8 +1266,17 @@ export function MasterAdmin() {
               <NotCollected what="Vault completion" how="No completion score is computed or stored for an account."/>
             </Card>
             <Card>
-              <SectionHead title="Monthly Engagement"/>
-              <NotCollected what="DAU / MAU and session length" how="There is no session or event table, so active-user counts cannot be calculated."/>
+              <SectionHead title="Monthly Engagement" sub="Last 30 days"/>
+              {!engagementData || engagementData.sessionCount === 0 ? (
+                <NotCollected what="DAU / MAU and session length" how="No session activity recorded yet — instrumentation just shipped (migration 021), so this fills in as accounts use the app."/>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <StatChip label="Daily Active Users" value={engagementData.dau} sub="Last 24 hours" color="#6FAE8B"/>
+                  <StatChip label="Monthly Active Users" value={engagementData.mau} sub={`of ${engagementData.totalUsers} accounts`} color="#6E90C9"/>
+                  <StatChip label="Avg Session Length" value={formatDuration(engagementData.avgSessionSeconds)} sub={`${engagementData.sessionCount} sessions`} color="#D99A6B"/>
+                  <StatChip label="Sessions Tracked" value={engagementData.sessionCount} sub="Last 30 days" color="#7E6BD8"/>
+                </div>
+              )}
             </Card>
           </div>
 

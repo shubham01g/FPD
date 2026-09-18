@@ -1,11 +1,11 @@
 // Backs the Command Center overview/analytics tabs in MasterAdmin.tsx.
 // Only computes metrics the schema actually supports (users, plans, payments,
-// storage_usage, and — since migration 020 — gender/birthdate/country/
-// device_type/referral_source on public.users). Geography (state/city),
-// engagement (DAU/MAU, feature usage) and satisfaction (NPS) still have no
-// backing column or event table anywhere, so those panels remain
-// "NotCollected" in MasterAdmin.tsx — that's a larger, separate build
-// (session/event tracking, a survey feature), not covered here.
+// storage_usage; gender/birthdate/country/device_type/referral_source on
+// public.users since migration 020; DAU/MAU/session-length/feature-adoption
+// from public.app_events since migration 021). Geography (state/city) and
+// satisfaction (NPS) still have no backing column or table anywhere, so
+// those panels remain "NotCollected" in MasterAdmin.tsx — NPS needs an
+// actual survey feature built from scratch, not covered here.
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 
@@ -216,6 +216,65 @@ analytics.get("/demographics", async (c) => {
     country: { counts: count("country"), reported: (rows ?? []).filter((r) => r.country).length },
     device: { counts: count("device_type"), reported: (rows ?? []).filter((r) => r.device_type).length },
     referralSource: { counts: count("referral_source"), reported: (rows ?? []).filter((r) => r.referral_source).length },
+  });
+});
+
+// GET /admin/analytics/engagement — DAU/MAU, average session length, and
+// per-screen feature-adoption percentages from public.app_events (migration
+// 021). Windowed to the last 30 days rather than all-time so the numbers
+// track current usage, not a shrinking historical average as the table grows.
+analytics.get("/engagement", async (c) => {
+  const db = adminClient();
+
+  const since30 = new Date();
+  since30.setDate(since30.getDate() - 30);
+  const since1 = new Date();
+  since1.setDate(since1.getDate() - 1);
+
+  const [{ count: totalUsers, error: usersErr }, { data: events, error: eventsErr }] = await Promise.all([
+    db.from("users").select("id", { count: "exact", head: true }),
+    db.from("app_events").select("user_id, session_id, path, created_at").gte("created_at", since30.toISOString()),
+  ]);
+
+  if (usersErr) return c.json({ error: usersErr.message }, 500);
+  if (eventsErr) return c.json({ error: eventsErr.message }, 500);
+
+  const rows = events ?? [];
+  const dau = new Set<string>();
+  const mau = new Set<string>();
+  const featureUsers = new Map<string, Set<string>>();
+  const sessions = new Map<string, { min: number; max: number }>();
+
+  for (const r of rows) {
+    const t = new Date(r.created_at).getTime();
+    mau.add(r.user_id);
+    if (t >= since1.getTime()) dau.add(r.user_id);
+    if (r.path) {
+      if (!featureUsers.has(r.path)) featureUsers.set(r.path, new Set());
+      featureUsers.get(r.path)!.add(r.user_id);
+    }
+    const s = sessions.get(r.session_id);
+    if (!s) sessions.set(r.session_id, { min: t, max: t });
+    else { s.min = Math.min(s.min, t); s.max = Math.max(s.max, t); }
+  }
+
+  const sessionSecondsList = [...sessions.values()].map((s) => (s.max - s.min) / 1000);
+  const avgSessionSeconds = sessionSecondsList.length
+    ? Math.round(sessionSecondsList.reduce((a, b) => a + b, 0) / sessionSecondsList.length)
+    : 0;
+
+  const featureAdoption: Record<string, number> = {};
+  for (const [path, users] of featureUsers) {
+    featureAdoption[path] = totalUsers ? Math.round((users.size / totalUsers) * 1000) / 10 : 0;
+  }
+
+  return c.json({
+    totalUsers,
+    dau: dau.size,
+    mau: mau.size,
+    avgSessionSeconds,
+    sessionCount: sessions.size,
+    featureAdoption,
   });
 });
 

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import { Toaster } from "sonner";
 import { supabase } from "./services/supabase";
+import { trackPageView, trackHeartbeat, HEARTBEAT_INTERVAL_MS } from "./services/engagement";
 import { DemoProvider } from "./context/DemoContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
@@ -360,7 +361,7 @@ function UserSignupRoute() {
 /* ── User portal (gated — redirects to /login without a session) ──── */
 function UserRoute() {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, authUser, loading } = useAuth();
   /* The portal's page is component state rather than a route, so the PWA
      manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
      target in as a query param. Read once, for the initial value only —
@@ -369,6 +370,22 @@ function UserRoute() {
     const p = new URLSearchParams(window.location.search).get("page");
     return (p as PageId) || "dashboard";
   });
+
+  // Product-usage telemetry (migration 021) — every screen funnels through
+  // this one `userPage` state, so this is the single place to log a page
+  // view rather than instrumenting ~30 individual screen components.
+  useEffect(() => {
+    if (!authUser) return;
+    trackPageView(authUser.id, userPage);
+  }, [authUser, userPage]);
+
+  useEffect(() => {
+    if (!authUser) return;
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") trackHeartbeat(authUser.id, userPage);
+    }, HEARTBEAT_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [authUser, userPage]);
 
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace/>;
