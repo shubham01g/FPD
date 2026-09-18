@@ -1,28 +1,72 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Star, Phone, Mail, Calendar, Clock, CheckCircle, Plus,
   X, User, FileText, MessageSquare, ChevronDown, ChevronUp,
   Edit2, Send, AlertCircle, Users, TrendingUp, DollarSign,
-  Shield
+  Shield, Search, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { WaiverManager } from "../WaiverForm";
 import { ConciergeStaffAdmin } from "./ConciergeStaffAdmin";
 import { WGCardOnFile } from "../WGCardOnFile";
 import { WGBillingHistory } from "../WGSessionTimer";
-import { conciergeEmployees, ROLE_LABELS, ROLE_COLORS } from "../../services/conciergeStaff";
-import { subscribeToClients, addClient as storeAddClient, updateClient as storeUpdateClient, type WGClient as StoreWGClient } from "../../services/wgClientStore";
+import { ROLE_LABELS, ROLE_COLORS } from "./ConciergeStaffAdmin";
+import { adminApi } from "../../services/adminApi";
+import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
 
+interface DBEmployee { id: string; name: string; email: string; role: "junior_concierge"|"senior_concierge"|"lead_concierge"; status: "active"|"invited"|"suspended"; }
+
+function avatarFor(name: string) {
+  return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
 /* Specialists are the concierge staff the admin has actually invited — there
    is no separate hard-coded roster. */
-function getSpecialists() {
-  return conciergeEmployees
+function toSpecialists(employees: DBEmployee[]) {
+  return employees
     .filter(e => e.status !== "suspended")
-    .map(e => ({ id:e.id, name:e.name, title:ROLE_LABELS[e.role], avatar:e.avatar, color:ROLE_COLORS[e.role] }));
+    .map(e => ({ id:e.id, name:e.name, title:ROLE_LABELS[e.role], avatar:avatarFor(e.name), color:ROLE_COLORS[e.role] }));
+}
+
+interface DBWGClient {
+  id: string; specialist_id: string | null; status: "intake"|"active"|"completed"|"paused";
+  reason: string | null; notes: string | null; completion_pct: number;
+  intake_date: string; next_session_at: string | null;
+  users: { full_name: string; email: string; phone: string | null; plan: string; subscription_waived: boolean } | null;
+  concierge_employees: { id: string; name: string } | null;
+  wg_sessions: { id: string; specialist_id: string; session_type: "phone"|"video"|"in_person"; status: string; scheduled_at: string; duration_minutes: number | null; notes: string | null }[];
+}
+
+function mapClient(r: DBWGClient): WGClient {
+  return {
+    id: r.id,
+    name: r.users?.full_name ?? "Unknown",
+    email: r.users?.email ?? "",
+    phone: r.users?.phone ?? "",
+    plan: r.users?.plan ?? "",
+    subscriptionWaived: !!r.users?.subscription_waived,
+    specialist: r.specialist_id ?? "",
+    status: r.status,
+    reason: r.reason ?? "",
+    intakeDate: new Date(r.intake_date).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" }),
+    sessions: (r.wg_sessions ?? []).map(s => ({
+      id: s.id,
+      date: new Date(s.scheduled_at).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" }),
+      time: new Date(s.scheduled_at).toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit" }),
+      type: s.session_type,
+      specialist: s.specialist_id,
+      notes: s.notes ?? "",
+      status: (s.status === "no_show" ? "cancelled" : s.status) as SessionStatus,
+      duration: s.duration_minutes ? `${s.duration_minutes} min` : "—",
+    })),
+    notes: r.notes ?? "",
+    completionPct: r.completion_pct ?? 0,
+    nextSession: r.next_session_at ? new Date(r.next_session_at).toLocaleString() : undefined,
+  };
 }
 
 type SessionStatus = "scheduled" | "completed" | "cancelled" | "pending";
@@ -65,11 +109,11 @@ function SessionRow({ session }: { session: WGSession }) {
 }
 
 /* ── Client card ─────────────────────────────────────────────────── */
-function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: string, changes: Partial<WGClient>) => void }) {
+function ClientCard({ client, specialists, onUpdate }: { client: WGClient; specialists: ReturnType<typeof toSpecialists>; onUpdate: (id: string, changes: Partial<WGClient>) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
   const [noteText, setNoteText] = useState("");
-  const specialist = getSpecialists().find(s => s.id === client.specialist);
+  const specialist = specialists.find(s => s.id === client.specialist);
   const statusColor = { active:"#48BB78", intake:"#F6AD55", completed:"#5B6EE1", paused:"#8A9AB8" }[client.status];
 
   return (
@@ -239,52 +283,46 @@ function ClientCard({ client, onUpdate }: { client: WGClient; onUpdate: (id: str
 /* ── Main component ──────────────────────────────────────────────── */
 export function WhiteGloveAdmin() {
   const [mainTab, setMainTab] = useState<"clients"|"waivers"|"staff"|"billing">("clients");
-  const [clients, setClients] = useState<WGClient[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<ClientStatus | "all">("all");
-  const [newClient, setNewClient] = useState({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"", subscriptionWaived:true, reason:"", notes:"" });
-  const [adding, setAdding] = useState(false);
 
-  // Sync from shared store
-  const readStore = useCallback((updated: StoreWGClient[]) => {
-    setClients(updated as WGClient[]);
-  }, []);
-  useEffect(() => subscribeToClients(readStore), [readStore]);
+  const { data: employeesData, refetch: refetchEmployees } = useAdminFetch(
+    () => adminApi.get<{ employees: DBEmployee[] }>("/concierge"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
+  const { data: clientsData, refetch: refetchClients } = useAdminFetch(
+    () => adminApi.get<{ clients: DBWGClient[] }>("/white-glove/clients"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
+  const clients = (clientsData?.clients ?? []).map(mapClient);
+  const specialists = toSpecialists(employeesData?.employees ?? []);
 
-  function updateClient(id: string, changes: Partial<WGClient>) {
-    storeUpdateClient(id, changes);
-  }
+  function refreshAll() { refetchEmployees(); refetchClients(); }
 
-  function addClient() {
-    if (!newClient.name.trim() || !newClient.email.trim()) { toast.error("Name and email required"); return; }
-    setAdding(true);
-    setTimeout(() => {
-      storeAddClient({
-        ...newClient,
-        age: newClient.age ? Number(newClient.age) : undefined,
-        subscriptionWaived: newClient.subscriptionWaived,
-      });
-      toast.success(`${newClient.name} added to White Glove program — visible in specialist portal instantly`);
-      setNewClient({ name:"", email:"", phone:"", age:"", plan:"foundation", specialist:"", subscriptionWaived:true, reason:"", notes:"" });
-      setAdding(false); setShowAdd(false);
-    }, 600);
+  async function updateClient(id: string, changes: Partial<WGClient>) {
+    const patch: Record<string, unknown> = {};
+    if ("status" in changes) patch.status = changes.status;
+    if ("completionPct" in changes) patch.completion_pct = changes.completionPct;
+    if ("notes" in changes) patch.notes = changes.notes;
+    if ("specialist" in changes) patch.specialist_id = changes.specialist || null;
+    if ("nextSession" in changes) patch.next_session_at = changes.nextSession ?? null;
+    try {
+      await adminApi.patch(`/white-glove/clients/${id}`, patch);
+      refetchClients();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update client");
+    }
   }
 
   const filtered = filter === "all" ? clients : clients.filter(c => c.status === filter);
   const activeCount = clients.filter(c => c.status === "active" || c.status === "intake").length;
   const completedCount = clients.filter(c => c.status === "completed").length;
   const avgCompletion = Math.round(clients.reduce((s,c)=>s+c.completionPct,0)/Math.max(clients.length,1));
-  const specialists = getSpecialists();
 
   return (
     <div className="p-6 space-y-6">
-
-      {/* The White Glove tables (wg_clients, wg_sessions, wg_waivers,
-          concierge_employees, …) exist but no backend route reads or writes
-          them yet — be upfront that nothing here persists. */}
-      <div className="px-4 py-3 rounded-2xl" style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.25)", color:"#F6AD55", fontSize:15, lineHeight:1.6 }}>
-        White Glove isn't connected to the database yet. Clients, staff, waivers and billing added here are kept only until you refresh the page.
-      </div>
 
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -415,89 +453,147 @@ export function WhiteGloveAdmin() {
             <div style={{ color:"#8A9AB8", fontSize:17.5 }}>No clients in this category</div>
           </div>
         )}
-        {filtered.map(c => <ClientCard key={c.id} client={c} onUpdate={updateClient}/>)}
+        {filtered.map(c => <ClientCard key={c.id} client={c} specialists={specialists} onUpdate={updateClient}/>)}
       </div>
       </>}
 
       {/* Add client modal */}
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ ...CARD, maxHeight:"90vh", overflowY:"auto" }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10"
-              style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
-              <div className="flex items-center gap-2">
-                <Star size={16} color="#FFFFFF"/>
-                <span style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Add White Glove Client</span>
+        <AddClientModal specialists={specialists} onClose={() => setShowAdd(false)} onAdded={refreshAll}/>
+      )}
+    </div>
+  );
+}
+
+/* ── Add client modal ────────────────────────────────────────────────
+   wg_clients has no name/email/phone columns of its own — it's keyed to an
+   EXISTING users.id — so "adding a client" means searching for and picking
+   a real account, not typing in fresh contact details. */
+interface UserSearchResult { id: string; full_name: string; email: string; plan: string; white_glove: boolean }
+
+function AddClientModal({ specialists, onClose, onAdded }: { specialists: ReturnType<typeof toSpecialists>; onClose: () => void; onAdded: () => void }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<UserSearchResult[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [selected, setSelected] = useState<UserSearchResult | null>(null);
+  const [specialistId, setSpecialistId] = useState("");
+  const [reason, setReason] = useState("");
+  const [subscriptionWaived, setSubscriptionWaived] = useState(true);
+  const [adding, setAdding] = useState(false);
+
+  async function search() {
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const res = await adminApi.get<{ users: UserSearchResult[] }>(`/users?search=${encodeURIComponent(query)}&pageSize=10`);
+      setResults(res.users);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Search failed");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function submit() {
+    if (!selected) { toast.error("Select an existing user first"); return; }
+    if (!reason.trim()) { toast.error("Intake reason is required"); return; }
+    setAdding(true);
+    try {
+      await adminApi.post("/white-glove/clients", {
+        userId: selected.id, specialistId: specialistId || undefined, reason, subscriptionWaived,
+      });
+      toast.success(`${selected.full_name} added to White Glove program`);
+      onAdded();
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add client");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ ...CARD, maxHeight:"90vh", overflowY:"auto" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10" style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
+          <div className="flex items-center gap-2">
+            <Star size={16} color="#FFFFFF"/>
+            <span style={{ fontFamily:"var(--font-display)", fontSize:20, color:"#E8EDF5" }}>Add White Glove Client</span>
+          </div>
+          <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>FIND EXISTING ACCOUNT *</label>
+            <div className="flex gap-2">
+              <div className="flex items-center gap-2 px-3 rounded-2xl flex-1" style={INPUT}>
+                <Search size={13} color="#8A9AB8"/>
+                <input value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && search()}
+                  placeholder="Search by name or email…" style={{ background:"transparent", border:"none", outline:"none", color:"#FFFFFF", fontSize:16, width:"100%" }}/>
               </div>
-              <button onClick={() => setShowAdd(false)} style={{ color:"#8A9AB8" }}><X size={16}/></button>
+              <button onClick={search} disabled={searching} className="px-4 rounded-2xl text-sm font-semibold disabled:opacity-50" style={{ background:"rgba(91,167,214,0.15)", color:"#6FAE8B" }}>
+                {searching ? <Loader2 size={14} className="animate-spin"/> : "Search"}
+              </button>
             </div>
-            <div className="p-6 space-y-4">
-              {[
-                { label:"FULL NAME *",    key:"name",  ph:"Client's full name",     type:"text" },
-                { label:"EMAIL *",        key:"email", ph:"their@email.com",        type:"email" },
-                { label:"PHONE",          key:"phone", ph:"+1 (555) 000-0000",      type:"tel" },
-                { label:"AGE (optional)", key:"age",   ph:"e.g. 78",               type:"number" },
-              ].map(f => (
-                <div key={f.key}>
-                  <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>{f.label}</label>
-                  <input type={f.type} value={(newClient as any)[f.key]} placeholder={f.ph}
-                    onChange={e => setNewClient(p => ({ ...p, [f.key]:e.target.value }))} style={INPUT}/>
-                </div>
+            {results && (
+              <div className="space-y-1.5 mt-2">
+                {results.length === 0 && <div style={{ color:"#8A9AB8", fontSize:14 }}>No matching users.</div>}
+                {results.map(u => (
+                  <button key={u.id} onClick={() => setSelected(u)} disabled={u.white_glove}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-2xl text-left disabled:opacity-40"
+                    style={{ background:selected?.id===u.id?"rgba(91,167,214,0.15)":"rgba(91,167,214,0.04)", border:`1px solid ${selected?.id===u.id?"#5BA7D6":"rgba(91,167,214,0.12)"}` }}>
+                    <div>
+                      <div style={{ color:"#E8EDF5", fontSize:15 }}>{u.full_name}</div>
+                      <div style={{ color:"#8A9AB8", fontSize:13 }}>{u.email} · {u.plan}</div>
+                    </div>
+                    {u.white_glove && <span style={{ color:"#8A9AB8", fontSize:12 }}>Already WG</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {selected && <>
+          <div>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {specialists.length === 0 && <div style={{ color:"#8A9AB8", fontSize:14 }}>No specialists yet — invite one in the Concierge Staff tab.</div>}
+              {specialists.map(s => (
+                <button key={s.id} onClick={() => setSpecialistId(s.id)}
+                  className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
+                  style={{ background:specialistId===s.id?`${s.color}12`:"rgba(91,110,225,0.04)",
+                    border:`1px solid ${specialistId===s.id?s.color:"rgba(91,110,225,0.12)"}`,
+                    color:specialistId===s.id?s.color:"#8A9AB8" }}>
+                  {s.name.split(" ")[0]}
+                </button>
               ))}
-
-              <div>
-                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>ASSIGN SPECIALIST</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {specialists.map(s => (
-                    <button key={s.id} onClick={() => setNewClient(p => ({ ...p, specialist:s.id }))}
-                      className="px-3 py-2 rounded-2xl text-xs font-bold transition-all"
-                      style={{ background:newClient.specialist===s.id?`${s.color}12`:"rgba(91,110,225,0.04)",
-                        border:`1px solid ${newClient.specialist===s.id?s.color:"rgba(91,110,225,0.12)"}`,
-                        color:newClient.specialist===s.id?s.color:"#8A9AB8" }}>
-                      {s.name.split(" ")[0]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>PLAN</label>
-                <select value={newClient.plan} onChange={e => setNewClient(p => ({ ...p, plan:e.target.value }))} style={INPUT}>
-                  {["starter","foundation","family_archive","legacy_pro","legacy_vault"].map(p => (
-                    <option key={p} value={p}>{p.replace("_"," ").replace(/\b\w/g, l=>l.toUpperCase())}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>INTAKE REASON *</label>
-                <textarea value={newClient.reason} onChange={e => setNewClient(p => ({ ...p, reason:e.target.value }))} rows={2}
-                  placeholder="Why does this client need White Glove assistance?" className="w-full resize-none" style={INPUT}/>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-2xl"
-                style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee</span>
-                <button onClick={() => setNewClient(p => ({ ...p, subscriptionWaived:!p.subscriptionWaived }))}
-                  style={{ color:newClient.subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
-                  {newClient.subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}
-                </button>
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={addClient} disabled={adding}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:adding?0.7:1 }}>
-                  <Star size={14}/>{adding ? "Adding…" : "Add to White Glove Program"}
-                </button>
-                <button onClick={() => setShowAdd(false)} className="px-5 py-3 rounded-2xl text-sm"
-                  style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
-              </div>
             </div>
           </div>
+
+          <div>
+            <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>INTAKE REASON *</label>
+            <textarea value={reason} onChange={e => setReason(e.target.value)} rows={2}
+              placeholder="Why does this client need White Glove assistance?" className="w-full resize-none" style={INPUT}/>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
+            <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee</span>
+            <button onClick={() => setSubscriptionWaived(v => !v)} style={{ color:subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
+              {subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}
+            </button>
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={submit} disabled={adding}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
+              style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:adding?0.7:1 }}>
+              <Star size={14}/>{adding ? "Adding…" : "Add to White Glove Program"}
+            </button>
+            <button onClick={onClose} className="px-5 py-3 rounded-2xl text-sm" style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>Cancel</button>
+          </div>
+          </>}
         </div>
-      )}
+      </div>
     </div>
   );
 }

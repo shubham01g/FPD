@@ -17,7 +17,7 @@ export class PublicApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
   // See adminApi.ts's request() for why a missing project URL and a
   // non-JSON 200 (Vite's SPA fallback serving index.html) both need to throw
   // instead of being read as valid empty data.
@@ -25,7 +25,10 @@ async function request<T>(path: string): Promise<T> {
     throw new PublicApiError(0, "No Supabase project connected (VITE_SUPABASE_URL is not set)");
   }
 
-  const res = await fetch(`${FUNCTIONS_BASE}${path}`);
+  const res = await fetch(`${FUNCTIONS_BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  });
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json().catch(() => null) : null;
 
@@ -42,4 +45,5 @@ async function request<T>(path: string): Promise<T> {
 
 export const publicApi = {
   get: <T>(path: string) => request<T>(path),
+  post: <T>(path: string, data?: unknown) => request<T>(path, { method: "POST", body: data ? JSON.stringify(data) : undefined }),
 };

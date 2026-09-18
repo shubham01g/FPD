@@ -21,6 +21,9 @@ import whiteLabel from "./routes/whiteLabel.ts";
 import legacy from "./routes/legacy.ts";
 import enterpriseApi from "./routes/enterpriseApi.ts";
 import adminAccounts from "./routes/adminAccounts.ts";
+import notifications from "./routes/notifications.ts";
+import concierge from "./routes/concierge.ts";
+import whiteGlove from "./routes/whiteGlove.ts";
 import { wlEntitlements, drState } from "./routes/entitlements.ts";
 import publicRoutes from "./routes/public.ts";
 
@@ -75,6 +78,9 @@ whiteLabel.use("*", requireModulePermission("white_label"));
 legacy.use("*", requireModulePermission("legacy_management"));
 enterpriseApi.use("*", requireModulePermission("enterprise_api"));
 adminAccounts.use("*", requireModulePermission("admin_team"));
+notifications.use("*", requireModulePermission("notifications"));
+concierge.use("*", requireModulePermission("white_glove"));
+whiteGlove.use("*", requireModulePermission("white_glove"));
 // Entitlement writes are the only way to unlock a paid add-on, so they sit
 // behind the same module gates as the features they unlock: the WL Studio
 // paywall under white_label, the per-user emergency bypass under users.
@@ -95,6 +101,9 @@ admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);
 admin.route("/enterprise-api", enterpriseApi);
 admin.route("/admin-accounts", adminAccounts);
+admin.route("/notifications", notifications);
+admin.route("/concierge", concierge);
+admin.route("/white-glove", whiteGlove);
 admin.route("/wl-entitlements", wlEntitlements);
 admin.route("/disaster-recovery", drState);
 

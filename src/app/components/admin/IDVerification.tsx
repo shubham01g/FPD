@@ -43,6 +43,27 @@ export function IDVerification() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Separate from `selectedVerif` (which drives the reject-reason modal) —
+  // this drives the record/image detail view opened by "View ID Front/Back"
+  // and "View Full Record".
+  const [viewingVerif, setViewingVerif] = useState<VerificationRecord | null>(null);
+  const [viewingUrls, setViewingUrls] = useState<{ front: string | null; back: string | null } | null>(null);
+  const [viewingLoading, setViewingLoading] = useState(false);
+
+  async function openDetail(verif: VerificationRecord) {
+    setViewingVerif(verif);
+    setViewingUrls(null);
+    setViewingLoading(true);
+    try {
+      const urls = await adminApi.get<{ front: string | null; back: string | null }>(`/verification/${verif.id}/documents`);
+      setViewingUrls(urls);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load ID images");
+    } finally {
+      setViewingLoading(false);
+    }
+  }
+
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ verifications: VerificationRecord[] }>("/verification?status=all"),
     [],
@@ -206,7 +227,7 @@ export function IDVerification() {
                   <div
                     className="flex-1 flex items-center justify-center rounded-2xl border h-28 cursor-pointer transition-all"
                     style={{ borderColor: "rgba(91,110,225,0.3)", background: "rgba(91,110,225,0.04)", borderStyle: "dashed" }}
-                    onClick={() => setSelectedVerif(verif)}
+                    onClick={() => openDetail(verif)}
                   >
                     <div className="text-center">
                       <ZoomIn size={18} color="var(--gold)" style={{ margin: "0 auto 6px" }} />
@@ -217,7 +238,7 @@ export function IDVerification() {
                     <div
                       className="flex-1 flex items-center justify-center rounded-2xl border h-28 cursor-pointer"
                       style={{ borderColor: "rgba(91,110,225,0.3)", background: "rgba(91,110,225,0.04)", borderStyle: "dashed" }}
-                      onClick={() => setSelectedVerif(verif)}
+                      onClick={() => openDetail(verif)}
                     >
                       <div className="text-center">
                         <ZoomIn size={18} color="var(--gold)" style={{ margin: "0 auto 6px" }} />
@@ -245,6 +266,7 @@ export function IDVerification() {
                     <XCircle size={15} /> Reject
                   </button>
                   <button
+                    onClick={() => openDetail(verif)}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
                     style={{ background: "var(--secondary)", color: "var(--muted-foreground)", fontSize: 17.5 }}
                   >
@@ -284,6 +306,80 @@ export function IDVerification() {
             ))}
           </div>
         </>
+      )}
+
+      {/* Record detail / ID image viewer */}
+      {viewingVerif && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-2xl rounded-2xl border p-7 max-h-[90vh] overflow-y-auto" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>
+                  {viewingVerif.contacts?.full_name ?? "Unknown contact"}
+                </h3>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 15, fontFamily: "var(--font-mono)" }}>{viewingVerif.id}</div>
+              </div>
+              <button onClick={() => setViewingVerif(null)} style={{ color: "var(--muted-foreground)" }}>✕</button>
+            </div>
+
+            <div className="grid md:grid-cols-4 gap-4 mb-5">
+              {[
+                ["ID TYPE", viewingVerif.id_type],
+                ["DATE OF BIRTH", viewingVerif.date_of_birth ?? "—"],
+                ["ID EXPIRY", viewingVerif.expiry_date ?? "—"],
+                ["ID NUMBER (MASKED)", viewingVerif.id_number_masked ?? "—"],
+              ].map(([label, value]) => (
+                <div key={label} className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 3 }}>{label}</div>
+                  <div style={{ color: "var(--foreground)", fontSize: 16 }}>{value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid gap-3" style={{ gridTemplateColumns: viewingVerif.document_back_url ? "1fr 1fr" : "1fr" }}>
+              {[["Front", viewingUrls?.front], ...(viewingVerif.document_back_url ? [["Back", viewingUrls?.back]] : [])].map(([label, url]) => (
+                <div key={label} className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+                  <div className="px-3 py-2" style={{ background: "var(--muted)", color: "var(--muted-foreground)", fontSize: 14 }}>{label}</div>
+                  <div className="flex items-center justify-center" style={{ minHeight: 220, background: "rgba(0,0,0,0.2)" }}>
+                    {viewingLoading ? (
+                      <Loader2 size={22} className="animate-spin" color="var(--muted-foreground)" />
+                    ) : url ? (
+                      <img src={url as string} alt={`ID ${label}`} style={{ maxWidth: "100%", maxHeight: 320, objectFit: "contain" }} />
+                    ) : (
+                      <span style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Preview unavailable</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 mt-5">
+              <button
+                onClick={() => handleApprove(viewingVerif.id)}
+                disabled={submitting}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl disabled:opacity-50"
+                style={{ background: "rgba(72,187,120,0.15)", color: "#D99A6B", border: "1px solid rgba(72,187,120,0.3)", fontWeight: 600, fontSize: 17.5 }}
+              >
+                <CheckCircle size={15} /> Approve
+              </button>
+              <button
+                onClick={() => { setSelectedVerif(viewingVerif); setViewingVerif(null); }}
+                disabled={submitting}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl disabled:opacity-50"
+                style={{ background: "rgba(252,129,129,0.12)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.25)", fontWeight: 600, fontSize: 17.5 }}
+              >
+                <XCircle size={15} /> Reject
+              </button>
+              <button
+                onClick={() => setViewingVerif(null)}
+                className="px-5 py-2.5 rounded-2xl"
+                style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 17.5 }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Rejection modal */}

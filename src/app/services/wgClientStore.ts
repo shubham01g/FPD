@@ -1,7 +1,14 @@
 /**
- * Shared White Glove Client Store
- * Single source of truth used by both WhiteGloveAdmin and ConciergePortal.
- * When admin adds or updates a client, the concierge portal reflects it immediately.
+ * White Glove Client Store — ConciergePortal / WGSchedulePage / WGDocumentInbox only.
+ *
+ * WhiteGloveAdmin.tsx no longer uses this: it reads/writes the real `wg_clients`
+ * table via /admin/white-glove/clients (see supabase/functions/server/routes/whiteGlove.ts).
+ * This in-memory store is what's left of the Concierge Portal's own session —
+ * that portal's login (services/conciergeStaff.ts's authenticateConcierge) still
+ * checks a plaintext in-memory password, not the real bcrypt hash the admin-side
+ * invite flow now writes to concierge_employees.password_hash, so the portal
+ * can't actually authenticate a real employee yet. Wiring the portal itself to
+ * the database is unfinished follow-up work.
  */
 
 export type ClientStatus = "intake" | "active" | "completed" | "paused";

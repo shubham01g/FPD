@@ -239,7 +239,7 @@ function OTPModal({ method, contact, onVerify, onClose }: {
 
 /* ── Main component ─────────────────────────────────────────────── */
 export function AccountSettings() {
-  const { user, updateUser } = useDemo();
+  const { user, updateUser, docs } = useDemo();
   const photoRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<SettingsTab>("profile");
 
@@ -637,17 +637,21 @@ export function AccountSettings() {
             {/* Encrypted badge shown on all files */}
             <div className="card pad">
               <div className="eyebrow" style={{ marginBottom: 10 }}>ENCRYPTION STATUS ON ALL YOUR FILES</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {["Last Will & Testament.pdf","Life Insurance — MetLife.pdf","Video Message to Family.mp4","Crypto Wallet Backup.txt","Bank Account Summary.pdf"].map(f => (
-                  <div key={f} className="filetag">
-                    <Lock size={10} color="#FFFFFF"/>
-                    <span>{f}</span>
-                    <span className="fbadge">ENCRYPTED</span>
-                  </div>
-                ))}
-              </div>
+              {docs.length === 0 ? (
+                <div style={{ color: MUTED, fontSize: 14 }}>No files uploaded yet. Everything you add to your vault is encrypted automatically.</div>
+              ) : (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {docs.slice(0, 5).map(d => (
+                    <div key={d.id} className="filetag">
+                      <Lock size={10} color="#FFFFFF"/>
+                      <span>{d.name}</span>
+                      <span className="fbadge">ENCRYPTED</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div style={{ color: MUTED, fontSize: 14, marginTop: 10 }}>
-                All {/* will use actual count in production */} 14 files in your vault are encrypted. This cannot be disabled.
+                All {docs.length} file{docs.length === 1 ? "" : "s"} in your vault are encrypted. This cannot be disabled.
               </div>
             </div>
           </div>

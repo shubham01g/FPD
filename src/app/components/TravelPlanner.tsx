@@ -202,7 +202,7 @@ export function TravelPlanner() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all"|"planned"|"completed">("all");
-  const emptyForm = { destination:"", country:"", tripType:"Vacation", startDate:"", endDate:"", companions:"", accommodation:"", accommodationPhone:"", confirmationNum:"", transportation:"", budget:"", notes:"", status:"planned" as "planned"|"completed", photo:"" };
+  const emptyForm = { destination:"", country:"", tripType:"Vacation", startDate:"", endDate:"", companions:"", accommodation:"", accommodationPhone:"", confirmationNum:"", transportation:"", budget:"", actualCost:"", highlights:"", notes:"", status:"planned" as "planned"|"completed", photo:"" };
   const [form, setForm] = useState(emptyForm);
   const [tDoc, setTDoc] = useState<string | null>(null);
   const tripListRef = React.useRef<HTMLDivElement>(null);
@@ -234,7 +234,7 @@ export function TravelPlanner() {
       startDate: trip.startDate, endDate: trip.endDate, companions: trip.companions,
       accommodation: trip.accommodation, accommodationPhone: trip.accommodationPhone,
       confirmationNum: trip.confirmationNum, transportation: trip.transportation,
-      budget: trip.budget, notes: trip.notes,
+      budget: trip.budget, actualCost: trip.actualCost, highlights: trip.highlights, notes: trip.notes,
       status: (trip.status === "cancelled" ? "planned" : trip.status) as "planned"|"completed",
       photo: trip.photo ?? "",
     });
@@ -274,7 +274,7 @@ export function TravelPlanner() {
       start_date: form.startDate, end_date: form.endDate, companions: form.companions,
       accommodation: form.accommodation, accommodation_phone: form.accommodationPhone,
       confirmation_number: form.confirmationNum, transportation: form.transportation,
-      budget: fromMoney(form.budget), notes: form.notes, status: form.status,
+      budget: fromMoney(form.budget), actual_cost: fromMoney(form.actualCost), highlights: form.highlights, notes: form.notes, status: form.status,
       photo_url: form.photo || null,
       // Attaching adds to whatever the trip already had rather than
       // replacing it, and re-attaching the same file does not duplicate it.
@@ -475,7 +475,7 @@ export function TravelPlanner() {
                   <label>STATUS</label>
                   <select value={form.status} onChange={F("status")}><option value="planned">Planned</option><option value="completed">Completed</option></select>
                 </div>
-                {[["Destination *","destination","e.g. Paris, France"],["Country","country","e.g. France"],["Start Date","startDate","e.g. Jun 15, 2026"],["End Date","endDate","e.g. Jun 25, 2026"],["Travel Companions","companions","e.g. Sarah, Emma (leave blank for solo)"],["Accommodation","accommodation","Hotel name or Airbnb"],["Accommodation Phone","accommodationPhone",""],["Confirmation Number","confirmationNum",""],["Transportation","transportation","e.g. United Airlines UA-100 (SFO→CDG)"],["Budget","budget","e.g. $5,000"],["Notes","notes","Planning notes, reminders, tips"]].map(([label,key,ph])=>(
+                {[["Destination *","destination","e.g. Paris, France"],["Country","country","e.g. France"],["Start Date","startDate","e.g. Jun 15, 2026"],["End Date","endDate","e.g. Jun 25, 2026"],["Travel Companions","companions","e.g. Sarah, Emma (leave blank for solo)"],["Accommodation","accommodation","Hotel name or Airbnb"],["Accommodation Phone","accommodationPhone",""],["Confirmation Number","confirmationNum",""],["Transportation","transportation","e.g. United Airlines UA-100 (SFO→CDG)"],["Budget","budget","e.g. $5,000"],["Actual Cost","actualCost","e.g. $5,200"],["Highlights","highlights","Best moments from the trip"],["Notes","notes","Planning notes, reminders, tips"]].map(([label,key,ph])=>(
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />

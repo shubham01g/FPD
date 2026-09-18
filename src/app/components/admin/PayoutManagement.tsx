@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { UserAvatar } from "./UserAvatar";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
+import { downloadCSV } from "../../utils/exportCsv";
 
 type PayoutType = "all" | "affiliate" | "partnership";
 type PayoutStatus = "all" | "pending" | "processing" | "paid" | "failed" | "cancelled";
@@ -70,6 +71,16 @@ export function PayoutManagement() {
 
   const selectedPending = filtered.filter(p => selected.has(p.id) && p.status === "pending");
 
+  function exportCsv() {
+    const rows = filtered.map(p => ({
+      id: p.id, type: p.payout_type, recipient: p.users?.full_name ?? "", email: p.users?.email ?? "",
+      amount: p.amount, billing_period: p.billing_period, payment_method: p.payment_method,
+      status: p.status, processed_at: p.processed_at ?? "", created_at: p.created_at,
+    }));
+    const count = downloadCSV(`fpd-payouts-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    toast.success(count === 0 ? "No matching payouts — downloaded an empty file" : `Exported ${count} payouts`);
+  }
+
   async function processSelected() {
     setProcessing(true);
     try {
@@ -96,6 +107,7 @@ export function PayoutManagement() {
           <p style={{ color: "var(--muted-foreground)", fontSize: 17.5, marginTop: 4 }}>Manage affiliate and partnership commission payouts. Payouts cycle on the 1st of each month.</p>
         </div>
         <button
+          onClick={exportCsv}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
           style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 17.5 }}
         >

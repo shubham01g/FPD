@@ -31,4 +31,35 @@ pub.get("/wl-packages", async (c) => {
   return c.json({ packages: data });
 });
 
+// POST /public/wl-sales — a prospective partner submits the onboarding
+// wizard. No admin session exists at this point, so this writes through the
+// service-role client directly rather than requireAdmin's /admin/* routes.
+pub.post("/wl-sales", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { org, contact, email, packageId, subdomain, processor } = body;
+
+  if (!org?.trim() || !contact?.trim() || !email?.trim() || !packageId) {
+    return c.json({ error: "'org', 'contact', 'email' and 'packageId' are required" }, 400);
+  }
+
+  const db = adminClient();
+  const { data: pkg } = await db.from("wl_packages").select("setup_fee").eq("id", packageId).maybeSingle();
+  if (!pkg) return c.json({ error: "Unknown package" }, 400);
+
+  const { count } = await db.from("wl_sales").select("id", { count: "exact", head: true });
+  const id = `WL-${String((count ?? 0) + 1).padStart(3, "0")}`;
+
+  const { data, error } = await db
+    .from("wl_sales")
+    .insert({
+      id, org, contact, email, package_id: packageId, subdomain: subdomain || null, processor: processor || null,
+      total_paid: Number(pkg.setup_fee) || 0,
+    })
+    .select()
+    .single();
+
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ sale: data }, 201);
+});
+
 export default pub;

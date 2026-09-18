@@ -1,8 +1,16 @@
 /**
- * Concierge Staff Service
- * Shared in-memory store accessed by both the Master Admin
- * (to manage employees) and the Concierge Portal (to authenticate them).
- * In production, replace with real API calls.
+ * Concierge Staff Service — ConciergePortal login only now.
+ *
+ * The Master Admin side (ConciergeStaffAdmin.tsx) no longer uses this store:
+ * it invites/manages real employees via /admin/concierge (see
+ * supabase/functions/server/routes/concierge.ts), which bcrypt-hashes
+ * passwords server-side and never exposes the hash to the browser.
+ *
+ * This file's `conciergeEmployees` array and `authenticateConcierge()` are
+ * what's left of the Concierge Portal's own login — it still checks a
+ * plaintext in-memory password and has no way to see employees the admin
+ * really invited. The portal itself isn't wired to concierge_employees yet;
+ * that's unfinished follow-up work, not something this pass touched.
  */
 
 export type StaffRole = "junior_concierge" | "senior_concierge" | "lead_concierge";

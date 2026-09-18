@@ -10,6 +10,7 @@ import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
+import { downloadCSV } from "../../utils/exportCsv";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
@@ -518,11 +519,35 @@ function targetCounts(usersByPlan: Record<string, number>, totalUsers: number): 
   };
 }
 
+/* DB row shape returned by GET /admin/notifications — see routes/notifications.ts */
+interface DBCampaign {
+  id: string; title: string; body: string; notification_type: NotifType; target_segment: NotifTarget;
+  sent_at: string; delivered_count: number; opened_count: number;
+  is_scheduled: boolean; scheduled_for: string | null;
+  sender: { email: string; full_name: string } | null;
+}
+
+function mapCampaign(n: DBCampaign): SentNotification {
+  return {
+    id: n.id, title: n.title, body: n.body, type: n.notification_type, target: n.target_segment,
+    sentAt: new Date(n.sent_at).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })
+      + " · " + new Date(n.sent_at).toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit" }),
+    sentBy: n.sender?.email ?? n.sender?.full_name ?? "—",
+    delivered: n.delivered_count, opened: n.opened_count, openRate: 0,
+    scheduled: n.is_scheduled, scheduledFor: n.scheduled_for ?? undefined,
+  };
+}
+
 function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Record<string, number>; totalUsers: number }) {
-  const { authUser } = useAuth();
-  /* No table stores sent notifications, so history covers this session only.
-     Delivery and open rates are not reported back by any provider yet. */
-  const [history, setHistory] = useState<SentNotification[]>([]);
+  /* Delivery and open rates aren't reported back by any provider yet, but a
+     send now actually writes to push_notifications + a `notifications` row
+     per recipient, so it lands in their real Notification tab. */
+  const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useAdminFetch(
+    () => adminApi.get<{ notifications: DBCampaign[] }>("/notifications"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
+  const history = (historyData?.notifications ?? []).map(mapCampaign);
   const [view, setView] = useState<"compose"|"history">("compose");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -542,26 +567,27 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
   const recipientCount = counts[target];
   const recipientLabel = recipientCount === null ? "an untracked number of" : recipientCount.toLocaleString();
 
-  function send() {
+  async function send() {
     if (!title.trim()) { toast.error("Notification title is required"); return; }
     if (!body.trim()) { toast.error("Message body is required"); return; }
     setSending(true);
-    setTimeout(() => {
-      const newNotif: SentNotification = {
-        id: `NTF-${String(Date.now()).slice(-3)}`,
+    try {
+      await adminApi.post("/notifications", {
         title, body, type, target,
-        sentAt: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) + " · " + new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
-        sentBy: authUser?.email ?? "unknown admin",
-        delivered: recipientCount ?? 0,
-        opened: 0, openRate: 0,
         scheduled: scheduleMode, scheduledFor: scheduleMode ? scheduleDate : undefined,
-      };
-      setHistory(prev => [newNotif, ...prev]);
-      setSending(false);
-      toast.success(`🔔 Push notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!`);
+      });
+      // Only the in-app notification actually gets delivered — there's no
+      // email provider wired up yet, regardless of the channel picked above.
+      const emailNote = channel !== "push" ? " (in-app only — email delivery isn't connected yet)" : "";
+      toast.success(`🔔 Push notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!${emailNote}`);
       setTitle(""); setBody(""); setType("marketing"); setTarget("all"); setScheduleMode(false); setScheduleDate("");
       setView("history");
-    }, 1200);
+      refetchHistory();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send notification");
+    } finally {
+      setSending(false);
+    }
   }
 
   const totalDelivered = history.reduce((s,n) => s+n.delivered, 0);
@@ -572,7 +598,7 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label:"Sent This Session",     value:history.length,                  color:"#6E90C9" },
+          { label:"Campaigns Sent",        value:history.length,                  color:"#6E90C9" },
           { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#D99A6B" },
           { label:"Avg Open Rate",         value:"—",                             color:"#6FAE8B" },
           { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
@@ -790,12 +816,11 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
       {/* ── History ── */}
       {view === "history" && (
         <div className="space-y-3">
-          {history.length === 0 && (
+          {!historyLoading && history.length === 0 && (
             <div className="p-8 rounded-2xl text-center" style={CARD}>
               <div style={{ color:"#B8C8E0", fontSize:15.5, fontWeight:600 }}>No notifications sent yet</div>
               <div style={{ color:"#8A9AB8", fontSize:14, marginTop:6, lineHeight:1.6 }}>
-                Sent notifications are not written to a table, so this list only covers the
-                current session and resets when the console is reloaded.
+                Notifications you send from here land in each recipient's Notification tab in real time.
               </div>
             </div>
           )}
@@ -862,14 +887,37 @@ interface DBUserRow {
 export function MasterAdmin() {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
+  const [userPlanFilter, setUserPlanFilter] = useState("");
+  const [userStatusFilter, setUserStatusFilter] = useState("");
+  const [showUserFilters, setShowUserFilters] = useState(false);
+  const [exportingUsers, setExportingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
 
+  const userQueryString = `search=${encodeURIComponent(userSearch)}&plan=${userPlanFilter}&status=${userStatusFilter}`;
   const { data: usersData, loading: usersLoading, error: usersError, updatedAt: usersUpdatedAt, refetch: refetchUsers } = useAdminFetch(
-    () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?search=${encodeURIComponent(userSearch)}&pageSize=50`),
-    [userSearch],
+    () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?${userQueryString}&pageSize=50`),
+    [userSearch, userPlanFilter, userStatusFilter],
     ADMIN_LIVE_POLL_MS,
   );
+
+  async function exportUsersCsv() {
+    setExportingUsers(true);
+    try {
+      const res = await adminApi.get<{ users: DBUserRow[] }>(`/users?${userQueryString}&pageSize=100`);
+      const rows = res.users.map(u => ({
+        id: u.id, name: u.full_name, email: u.email, phone: u.phone ?? "",
+        plan: u.plan, status: u.plan_status, storage_gb: Math.round((u.used_bytes / 1024 ** 3) * 10) / 10,
+        contacts: u.contact_count, white_glove: u.white_glove, is_admin: u.is_admin, created_at: u.created_at,
+      }));
+      const count = downloadCSV(`fpd-users-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+      toast.success(count === 0 ? "No matching users — downloaded an empty file" : `Exported ${count} users`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to export users");
+    } finally {
+      setExportingUsers(false);
+    }
+  }
   const filteredUsers = usersData?.users ?? [];
   // Real accounts an admin created by hand, rather than a self-signup —
   // derived from onboarded_by, not a session-only shadow list.
@@ -1266,15 +1314,38 @@ export function MasterAdmin() {
               <Search size={13} color="#8A9AB8"/>
               <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email, or user ID..." style={{background:"transparent",border:"none",outline:"none",color:"#E8EDF5",fontSize:16,width:"100%"}}/>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={GLASS}>
-              <Filter size={13} color="#8A9AB8"/><span style={{color:"#8A9AB8"}}>Filter</span>
-            </button>
+            <div style={{ position:"relative" }}>
+              <button onClick={()=>setShowUserFilters(v=>!v)} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={{...GLASS, background: (userPlanFilter||userStatusFilter) ? "rgba(91,110,225,0.18)" : GLASS.background}}>
+                <Filter size={13} color="#8A9AB8"/><span style={{color:"#8A9AB8"}}>Filter{(userPlanFilter||userStatusFilter) ? " •" : ""}</span>
+              </button>
+              {showUserFilters && (
+                <div className="p-3 rounded-2xl" style={{ position:"absolute", top:"calc(100% + 6px)", right:0, zIndex:20, minWidth:220, background:"#101728", border:"1px solid rgba(91,110,225,0.25)", boxShadow:"0 10px 30px rgba(0,0,0,0.4)" }}>
+                  <label style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>PLAN</label>
+                  <select value={userPlanFilter} onChange={e=>setUserPlanFilter(e.target.value)} style={{ width:"100%", marginBottom:10, background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", borderRadius:8, padding:"6px 8px", fontSize:15 }}>
+                    <option value="">All Plans</option>
+                    {["starter","foundation","family_archive","legacy_pro","legacy_vault"].map(p=>(
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  <label style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>STATUS</label>
+                  <select value={userStatusFilter} onChange={e=>setUserStatusFilter(e.target.value)} style={{ width:"100%", marginBottom:10, background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", borderRadius:8, padding:"6px 8px", fontSize:15 }}>
+                    <option value="">All Statuses</option>
+                    {["active","paused","cancelled","past_due"].map(s=>(
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  {(userPlanFilter||userStatusFilter) && (
+                    <button onClick={()=>{ setUserPlanFilter(""); setUserStatusFilter(""); }} style={{ color:"#6E90C9", fontSize:14 }}>Clear filters</button>
+                  )}
+                </div>
+              )}
+            </div>
             <button onClick={refetchUsers} disabled={usersLoading} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={GLASS} title="Refresh now">
               <RefreshCw size={13} color="#8A9AB8" className={usersLoading ? "animate-spin" : undefined}/>
               <span style={{color:"#8A9AB8"}}>Refresh</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm" style={{...GLASS}}>
-              <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>Export CSV</span>
+            <button onClick={exportUsersCsv} disabled={exportingUsers} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm disabled:opacity-50" style={{...GLASS}}>
+              <Download size={13} color="#FFFFFF"/><span style={{color:"#6E90C9"}}>{exportingUsers ? "Exporting…" : "Export CSV"}</span>
             </button>
           </div>
           <LiveUpdatedBadge updatedAt={usersUpdatedAt} loading={usersLoading} />

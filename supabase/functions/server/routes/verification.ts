@@ -19,6 +19,35 @@ verification.get("/", async (c) => {
   return c.json({ verifications: data });
 });
 
+// GET /admin/verification/:id/documents — short-lived signed URLs for the
+// scanned ID(s). The `id-verifications` bucket is private with an owner-only
+// RLS policy, so the admin's own browser session can't read another user's
+// object directly; this route signs it with the service-role client instead.
+verification.get("/:id/documents", async (c) => {
+  const id = c.req.param("id");
+  const db = adminClient();
+
+  const { data: record, error } = await db
+    .from("id_verifications")
+    .select("document_url, document_back_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) return c.json({ error: error.message }, 500);
+  if (!record) return c.json({ error: "Verification not found" }, 404);
+
+  const bucket = db.storage.from("id-verifications");
+  const [front, back] = await Promise.all([
+    bucket.createSignedUrl(record.document_url, 300),
+    record.document_back_url ? bucket.createSignedUrl(record.document_back_url, 300) : Promise.resolve(null),
+  ]);
+
+  if (front?.error) return c.json({ error: front.error.message }, 500);
+  if (back?.error) return c.json({ error: back.error.message }, 500);
+
+  return c.json({ front: front?.data?.signedUrl ?? null, back: back?.data?.signedUrl ?? null });
+});
+
 // POST /admin/verification/:id/approve
 verification.post("/:id/approve", async (c) => {
   const id = c.req.param("id");

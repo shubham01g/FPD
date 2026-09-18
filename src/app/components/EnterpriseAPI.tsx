@@ -239,7 +239,6 @@ export function EnterpriseAPI() {
   const [activeEndpoint, setActiveEndpoint] = useState<Endpoint | null>(null);
   const [sdkLang, setSdkLang] = useState("javascript");
   const [testResponse, setTestResponse] = useState<string | null>(null);
-  const [testing, setTesting] = useState(false);
   const [activeTab, setActiveTab] = useState<"endpoints"|"sdk"|"webhooks"|"keys">("endpoints");
   const [expandedGroup, setExpandedGroup] = useState<number | null>(0);
 
@@ -316,13 +315,11 @@ export function EnterpriseAPI() {
     }
   }
 
+  // None of these endpoints are actually implemented — this is documentation
+  // for a planned Enterprise API, not a live backend. Showing the example
+  // response instantly rather than faking a network round-trip.
   const runTest = (ep: Endpoint) => {
-    setTesting(true);
-    setTestResponse(null);
-    setTimeout(() => {
-      setTesting(false);
-      setTestResponse(ep.response);
-    }, 800 + Math.random() * 400);
+    setTestResponse(ep.response);
   };
 
   const mc = (m: string) => (methodColor as any)[m] ?? "#8A9AB8";
@@ -340,8 +337,8 @@ export function EnterpriseAPI() {
           <p style={{ color: "#8A9AB8", fontSize: 17.5 }}>RESTful API · Laravel Sanctum Auth · JSON responses · Rate limited: 1000 req/min</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={{ ...GLASS }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
-          <span style={{ color: "#D99A6B", fontSize: 15, ...MONO }}>API STATUS: OPERATIONAL</span>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8A9AB8" }} />
+          <span style={{ color: "#8A9AB8", fontSize: 15, ...MONO }}>REFERENCE DOCS — NOT YET LIVE</span>
         </div>
       </div>
 
@@ -422,18 +419,18 @@ export function EnterpriseAPI() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button onClick={() => runTest(activeEndpoint)} disabled={testing}
+                  <button onClick={() => runTest(activeEndpoint)}
                     className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-sm font-semibold transition-all"
-                    style={{ background: testing ? "rgba(91,110,225,0.1)" : "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: testing ? "#6E90C9" : "#F0F4FA", boxShadow: testing ? "none" : "0 0 20px rgba(91,110,225,0.3)" }}>
+                    style={{ background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA", boxShadow: "0 0 20px rgba(91,110,225,0.3)" }}>
                     <Play size={14} fill="currentColor" />
-                    {testing ? "Running..." : "Run Live Test"}
+                    Preview Example Response
                   </button>
-                  <span style={{ color: "#8A9AB8", fontSize: 15 }}>Uses sandbox credentials</span>
+                  <span style={{ color: "#8A9AB8", fontSize: 15 }}>Not a live call — this endpoint isn't implemented yet</span>
                 </div>
 
                 {testResponse && (
                   <div>
-                    <div style={{ color: "#D99A6B", fontSize: 14, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>✓ LIVE RESPONSE (200 OK)</div>
+                    <div style={{ color: "#8A9AB8", fontSize: 14, ...MONO, letterSpacing: "0.08em", marginBottom: 8 }}>EXAMPLE RESPONSE (documentation only)</div>
                     <div className="p-4 rounded-2xl overflow-x-auto" style={{ background: "rgba(72,187,120,0.04)", border: "1px solid rgba(72,187,120,0.2)" }}>
                       <pre style={{ color: "#68D391", fontSize: 15, ...MONO, margin: 0, whiteSpace: "pre-wrap" }}>{testResponse}</pre>
                     </div>

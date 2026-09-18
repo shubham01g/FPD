@@ -143,8 +143,8 @@ export function EmailTemplates() {
           <p style={{ color: "#8A9AB8", fontSize: 16, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#48BB78", boxShadow: "0 0 8px #48BB78" }} />
-          <span style={{ color: "#D99A6B", fontSize: 14, ...MONO }}>SENDGRID CONNECTED</span>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8A9AB8" }} />
+          <span style={{ color: "#8A9AB8", fontSize: 14, ...MONO }}>NO EMAIL PROVIDER CONNECTED</span>
         </div>
       </div>
 

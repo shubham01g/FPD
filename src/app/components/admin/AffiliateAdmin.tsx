@@ -19,12 +19,26 @@ interface AffiliateRow {
   users: { email: string; full_name: string } | null;
 }
 
+interface ReferralRow {
+  id: string;
+  referred_at: string;
+  status: string;
+  users: { email: string; full_name: string } | null;
+}
+
 const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3" };
 
 export function AffiliateAdmin() {
   const [search, setSearch] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
+
+  const [detailAff, setDetailAff] = useState<AffiliateRow | null>(null);
+  const [referrals, setReferrals] = useState<ReferralRow[] | null>(null);
+  const [referralsLoading, setReferralsLoading] = useState(false);
+  const [editTier, setEditTier] = useState<1 | 2 | 3>(1);
+  const [editRate, setEditRate] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ affiliates: AffiliateRow[] }>("/affiliates"),
@@ -61,6 +75,42 @@ export function AffiliateAdmin() {
       { tier: "Tier 3 (74+)", affiliates: byTier[3].count, earn: byTier[3].earn },
     ];
   }, [affiliates]);
+
+  async function openDetail(aff: AffiliateRow) {
+    setDetailAff(aff);
+    setEditTier(aff.tier);
+    setEditRate(String(aff.commission_rate));
+    setReferrals(null);
+    setReferralsLoading(true);
+    try {
+      const res = await adminApi.get<{ referrals: ReferralRow[] }>(`/affiliates/${aff.id}/referrals`);
+      setReferrals(res.referrals);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load referrals");
+    } finally {
+      setReferralsLoading(false);
+    }
+  }
+
+  async function saveEdit() {
+    if (!detailAff) return;
+    const rate = Number(editRate);
+    if (!Number.isFinite(rate) || rate < 0 || rate > 1) {
+      toast.error("Commission rate must be a decimal between 0 and 1 (e.g. 0.15 for 15%)");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await adminApi.patch(`/affiliates/${detailAff.id}`, { tier: editTier, commission_rate: rate });
+      toast.success("Affiliate updated");
+      setDetailAff(null);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update affiliate");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function toggleStatus(aff: AffiliateRow) {
     const nextStatus = aff.status === "active" ? "suspended" : "active";
@@ -213,8 +263,8 @@ export function AffiliateAdmin() {
                   {aff.status.toUpperCase()}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button style={{ color: "var(--gold)" }}><Eye size={14} /></button>
-                  <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
+                  <button onClick={() => openDetail(aff)} style={{ color: "var(--gold)" }}><Eye size={14} /></button>
+                  <button onClick={() => openDetail(aff)} style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
                   <button
                     disabled={savingId === aff.id}
                     onClick={() => toggleStatus(aff)}
@@ -227,6 +277,58 @@ export function AffiliateAdmin() {
             ))}
           </div>
         </>
+      )}
+
+      {/* Affiliate detail / edit */}
+      {detailAff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg rounded-2xl border p-7 max-h-[90vh] overflow-y-auto" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>{detailAff.users?.full_name ?? "Unknown"}</h3>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>{detailAff.users?.email ?? "—"} · {detailAff.referral_code}</div>
+              </div>
+              <button onClick={() => setDetailAff(null)} style={{ color: "var(--muted-foreground)" }}>✕</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 14, display: "block", marginBottom: 4 }}>Tier</label>
+                <select value={editTier} onChange={(e) => setEditTier(Number(e.target.value) as 1 | 2 | 3)} className="w-full px-3 py-2 rounded-xl" style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 16 }}>
+                  <option value={1}>Tier 1</option>
+                  <option value={2}>Tier 2</option>
+                  <option value={3}>Tier 3</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 14, display: "block", marginBottom: 4 }}>Commission Rate</label>
+                <input value={editRate} onChange={(e) => setEditRate(e.target.value)} placeholder="0.15" className="w-full px-3 py-2 rounded-xl" style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 16 }} />
+              </div>
+            </div>
+            <button onClick={saveEdit} disabled={savingEdit} className="w-full py-2.5 rounded-2xl font-semibold disabled:opacity-50 mb-6" style={{ background: "rgba(91,110,225,0.18)", color: "#AEB9F5", fontSize: 16 }}>
+              {savingEdit ? "Saving…" : "Save Changes"}
+            </button>
+
+            <h4 style={{ color: "var(--foreground)", fontSize: 17, marginBottom: 10 }}>Referrals</h4>
+            {referralsLoading && <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Loading…</div>}
+            {!referralsLoading && (referrals?.length ?? 0) === 0 && (
+              <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>No referrals yet.</div>
+            )}
+            {!referralsLoading && referrals && referrals.length > 0 && (
+              <div className="space-y-2">
+                {referrals.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div>
+                      <div style={{ color: "var(--foreground)", fontSize: 15 }}>{r.users?.full_name ?? "Referred member"}</div>
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{new Date(r.referred_at).toLocaleDateString()}</div>
+                    </div>
+                    <span style={{ color: "var(--muted-foreground)", fontSize: 13, textTransform: "uppercase" }}>{r.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

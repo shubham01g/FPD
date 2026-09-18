@@ -101,4 +101,29 @@ whiteLabel.patch("/packages/:id", async (c) => {
   return c.json({ package: data });
 });
 
+// GET /admin/white-label/sales
+whiteLabel.get("/sales", async (c) => {
+  const { data, error } = await adminClient().from("wl_sales").select("*").order("created_at", { ascending: false });
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ sales: data });
+});
+
+// PATCH /admin/white-label/sales/:id — status/users/mrr updates as an admin provisions or reviews an account
+whiteLabel.patch("/sales/:id", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json().catch(() => ({}));
+  const allowed = ["status", "users_count", "mrr", "total_paid", "subdomain", "processor", "last_payout_at"] as const;
+  const patch: Record<string, unknown> = {};
+  for (const key of allowed) if (key in body) patch[key] = body[key];
+
+  if (Object.keys(patch).length === 0) {
+    return c.json({ error: "No updatable fields provided" }, 400);
+  }
+
+  const { data, error } = await adminClient().from("wl_sales").update(patch).eq("id", id).select().maybeSingle();
+  if (error) return c.json({ error: error.message }, 500);
+  if (!data) return c.json({ error: "Sale not found" }, 404);
+  return c.json({ sale: data });
+});
+
 export default whiteLabel;

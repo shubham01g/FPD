@@ -52,6 +52,53 @@ partnerships.post("/", async (c) => {
   return c.json({ partner: data }, 201);
 });
 
+function monthKey(iso: string): string {
+  return iso.slice(0, 7); // "YYYY-MM"
+}
+
+// GET /admin/partnerships/mrr-trend — last 6 months of succeeded subscription
+// revenue from users who were referred through ANY partner (partner_accounts),
+// for the Partnership MRR Growth chart. Real, derived from `payments` — there
+// is no separate revenue-history table, but this doesn't need one.
+partnerships.get("/mrr-trend", async (c) => {
+  const db = adminClient();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+  sixMonthsAgo.setDate(1);
+  const since = sixMonthsAgo.toISOString();
+
+  const months: string[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    months.push(monthKey(d.toISOString()));
+  }
+  const byMonth: Record<string, number> = {};
+  for (const m of months) byMonth[m] = 0;
+
+  const { data: accounts, error: accountsErr } = await db.from("partner_accounts").select("user_id");
+  if (accountsErr) return c.json({ error: accountsErr.message }, 500);
+  const referredUserIds = [...new Set((accounts ?? []).map((a) => a.user_id as string))];
+
+  if (referredUserIds.length > 0) {
+    const { data: payments, error: paymentsErr } = await db
+      .from("payments")
+      .select("amount_usd, type, status, created_at, user_id")
+      .eq("status", "succeeded")
+      .in("type", ["subscription", "upgrade"])
+      .in("user_id", referredUserIds)
+      .gte("created_at", since);
+
+    if (paymentsErr) return c.json({ error: paymentsErr.message }, 500);
+    for (const p of payments ?? []) {
+      const m = monthKey(p.created_at);
+      if (m in byMonth) byMonth[m] += Number(p.amount_usd);
+    }
+  }
+
+  return c.json({ trend: months.map((m) => ({ month: m, mrr: Math.round(byMonth[m] * 100) / 100 })) });
+});
+
 // GET /admin/partnerships/:id/accounts
 partnerships.get("/:id/accounts", async (c) => {
   const id = c.req.param("id");

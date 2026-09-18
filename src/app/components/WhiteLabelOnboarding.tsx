@@ -80,7 +80,6 @@ export function WhiteLabelOnboarding() {
     if (!selected) return;
     setPaying(true);
     try {
-      await new Promise(r => setTimeout(r, 1200));
       const sale = await createSale({
         org: org.name, contact: org.contact, email: org.email,
         packageId: selected.id, subdomain: `${org.subdomain}.finalpassdown.com`, processor,

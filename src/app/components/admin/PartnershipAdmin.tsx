@@ -20,12 +20,13 @@ interface PartnerRow {
   partner_code?: string;
 }
 
-// No revenue-history table exists yet (partners only stores a current snapshot),
-// so month-over-month MRR growth still has nothing real to bind to.
-const mrrGrowth = [
-  { month: "Jan", mrr: 2840 }, { month: "Feb", mrr: 3920 }, { month: "Mar", mrr: 5140 },
-  { month: "Apr", mrr: 6870 }, { month: "May", mrr: 8920 }, { month: "Jun", mrr: 10333 },
-];
+interface PartnerAccountRow {
+  id: string;
+  plan: string;
+  commission: number;
+  referred_at: string;
+  users: { email: string; full_name: string } | null;
+}
 
 const tierColors = { 1: "#5BA7D6", 2: "#5B6EE1", 3: "#48BB78" };
 const tierLabels = { 1: "Tier 1 · 20%", 2: "Tier 2 · 25%", 3: "Tier 3 · 30%" };
@@ -151,13 +152,62 @@ export function PartnershipAdmin() {
   const [showInvite, setShowInvite] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
 
+  const [detailPartner, setDetailPartner] = useState<PartnerRow | null>(null);
+  const [accounts, setAccounts] = useState<PartnerAccountRow[] | null>(null);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+  const [editTier, setEditTier] = useState<1 | 2 | 3>(1);
+  const [editRate, setEditRate] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ partners: PartnerRow[] }>("/partnerships"),
     [],
     ADMIN_LIVE_POLL_MS,
   );
+  const { data: trendData } = useAdminFetch(
+    () => adminApi.get<{ trend: { month: string; mrr: number }[] }>("/partnerships/mrr-trend"),
+    [],
+    ADMIN_LIVE_POLL_MS,
+  );
+  const mrrGrowth = trendData?.trend ?? [];
 
   const partners = data?.partners ?? [];
+
+  async function openDetail(partner: PartnerRow) {
+    setDetailPartner(partner);
+    setEditTier(partner.tier);
+    setEditRate(String(partner.commission_rate));
+    setAccounts(null);
+    setAccountsLoading(true);
+    try {
+      const res = await adminApi.get<{ accounts: PartnerAccountRow[] }>(`/partnerships/${partner.id}/accounts`);
+      setAccounts(res.accounts);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load referred accounts");
+    } finally {
+      setAccountsLoading(false);
+    }
+  }
+
+  async function saveEdit() {
+    if (!detailPartner) return;
+    const rate = Number(editRate);
+    if (!Number.isFinite(rate) || rate < 0 || rate > 1) {
+      toast.error("Commission rate must be a decimal between 0 and 1 (e.g. 0.20 for 20%)");
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      await adminApi.patch(`/partnerships/${detailPartner.id}`, { tier: editTier, commission_rate: rate });
+      toast.success("Partner updated");
+      setDetailPartner(null);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update partner");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   const filtered = partners.filter(
     (p) => p.organization_name.toLowerCase().includes(search.toLowerCase()) || p.contact_email.includes(search) || p.id.includes(search)
@@ -233,37 +283,43 @@ export function PartnershipAdmin() {
         ))}
       </div>
 
-      {/* MRR chart — pure CSS, no recharts */}
+      {/* MRR chart — real subscription revenue from partner-referred users
+          (see /admin/partnerships/mrr-trend), pure CSS, no recharts */}
       <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <div className="flex items-center justify-between mb-4">
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)" }}>Partnership MRR Growth</h3>
-          <div style={{ color: "#D99A6B", fontSize: 16 }}>+264% in 6 months</div>
+          {(() => {
+            const first = mrrGrowth[0]?.mrr ?? 0;
+            const last = mrrGrowth[mrrGrowth.length - 1]?.mrr ?? 0;
+            const growth = first > 0 ? Math.round(((last - first) / first) * 100) : null;
+            return <div style={{ color: "#D99A6B", fontSize: 16 }}>{growth === null ? "—" : `${growth >= 0 ? "+" : ""}${growth}% in 6 months`}</div>;
+          })()}
         </div>
-        {(() => {
-          const maxMrr = Math.max(...mrrGrowth.map(d => d.mrr));
-          return (
-            <div style={{ display:"flex", alignItems:"flex-end", gap:10, height:160 }}>
-              {mrrGrowth.map((d, i) => {
-                const barH = Math.round((d.mrr / maxMrr) * 120);
-                const isLast = i === mrrGrowth.length - 1;
-                return (
-                  <div key={d.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                    <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>${(d.mrr/1000).toFixed(1)}k</span>
-                    <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
-                      <div style={{
-                        width:"100%", height:barH,
-                        background: isLast ? "#5BA7D6" : "rgba(91,167,214,0.4)",
-                        borderRadius:"4px 4px 0 0",
-                        transition:"height 0.3s",
-                      }}/>
-                    </div>
-                    <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>{d.month}</span>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
+        {mrrGrowth.every(d => d.mrr === 0) ? (
+          <div style={{ color: "#8A9AB8", fontSize: 15, textAlign: "center", padding: "40px 0" }}>No succeeded subscription payments from partner-referred users in the last 6 months.</div>
+        ) : (
+        <div style={{ display:"flex", alignItems:"flex-end", gap:10, height:160 }}>
+          {mrrGrowth.map((d, i) => {
+            const maxMrr = Math.max(1, ...mrrGrowth.map(x => x.mrr));
+            const barH = Math.round((d.mrr / maxMrr) * 120);
+            const isLast = i === mrrGrowth.length - 1;
+            return (
+              <div key={d.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>${(d.mrr/1000).toFixed(1)}k</span>
+                <div style={{ width:"100%", height:120, display:"flex", alignItems:"flex-end" }}>
+                  <div style={{
+                    width:"100%", height:barH,
+                    background: isLast ? "#5BA7D6" : "rgba(91,167,214,0.4)",
+                    borderRadius:"4px 4px 0 0",
+                    transition:"height 0.3s",
+                  }}/>
+                </div>
+                <span style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>{d.month.slice(5)}</span>
+              </div>
+            );
+          })}
+        </div>
+        )}
       </div>
 
       {/* Search */}
@@ -324,8 +380,8 @@ export function PartnershipAdmin() {
               {partner.status.toUpperCase()}
             </div>
             <div className="flex items-center gap-2">
-              <button style={{ color: "#6FAE8B" }}><Eye size={14} /></button>
-              <button style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
+              <button onClick={() => openDetail(partner)} style={{ color: "#6FAE8B" }}><Eye size={14} /></button>
+              <button onClick={() => openDetail(partner)} style={{ color: "var(--muted-foreground)" }}><Edit size={14} /></button>
               <button
                 disabled={savingId === partner.id}
                 onClick={() => toggleStatus(partner)}
@@ -338,6 +394,58 @@ export function PartnershipAdmin() {
         ))}
       </div>
       </>
+      )}
+
+      {/* Partner detail / edit */}
+      {detailPartner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-lg rounded-2xl border p-7 max-h-[90vh] overflow-y-auto" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>{detailPartner.organization_name}</h3>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>{detailPartner.contact_email} · {detailPartner.organization_type}</div>
+              </div>
+              <button onClick={() => setDetailPartner(null)} style={{ color: "var(--muted-foreground)" }}>✕</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 14, display: "block", marginBottom: 4 }}>Tier</label>
+                <select value={editTier} onChange={(e) => setEditTier(Number(e.target.value) as 1 | 2 | 3)} className="w-full px-3 py-2 rounded-xl" style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 16 }}>
+                  <option value={1}>Tier 1</option>
+                  <option value={2}>Tier 2</option>
+                  <option value={3}>Tier 3</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 14, display: "block", marginBottom: 4 }}>Commission Rate</label>
+                <input value={editRate} onChange={(e) => setEditRate(e.target.value)} placeholder="0.20" className="w-full px-3 py-2 rounded-xl" style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 16 }} />
+              </div>
+            </div>
+            <button onClick={saveEdit} disabled={savingEdit} className="w-full py-2.5 rounded-2xl font-semibold disabled:opacity-50 mb-6" style={{ background: "rgba(91,110,225,0.18)", color: "#AEB9F5", fontSize: 16 }}>
+              {savingEdit ? "Saving…" : "Save Changes"}
+            </button>
+
+            <h4 style={{ color: "var(--foreground)", fontSize: 17, marginBottom: 10 }}>Referred Accounts</h4>
+            {accountsLoading && <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Loading…</div>}
+            {!accountsLoading && (accounts?.length ?? 0) === 0 && (
+              <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>No referred accounts yet.</div>
+            )}
+            {!accountsLoading && accounts && accounts.length > 0 && (
+              <div className="space-y-2">
+                {accounts.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div>
+                      <div style={{ color: "var(--foreground)", fontSize: 15 }}>{a.users?.full_name ?? "Referred member"}</div>
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>{a.plan} · {new Date(a.referred_at).toLocaleDateString()}</div>
+                    </div>
+                    <span style={{ color: "#D99A6B", fontSize: 14, fontFamily: "var(--font-mono)" }}>${Number(a.commission).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

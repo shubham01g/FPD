@@ -5,10 +5,13 @@
  * Supabase edge function backend — see supabase/functions/server/routes/public.ts
  * (GET, unauthenticated) and routes/whiteLabel.ts (POST/PATCH/DELETE, admin-only).
  *
- * Sales and payment processor config have no backing table yet (there's no
- * wl_sales table, and crypto_processor_configs isn't wired to an endpoint) —
- * those two live in memory below, start EMPTY / unconfigured, and are lost on
- * refresh. Nothing here is seeded: an admin must never see invented partners.
+ * Sales are backed by the wl_sales table (migration 019) — public submit via
+ * POST /public/wl-sales, admin list via GET /admin/white-label/sales.
+ *
+ * Payment processor config has no backing table (same as CryptoMerchant.tsx's
+ * processors) — wiring it would mean storing real third-party API credentials
+ * server-side, which needs the user's own accounts with each provider. It
+ * stays in memory below, starts unconfigured, and is lost on refresh.
  */
 import { publicApi } from "./publicApi";
 import { adminApi } from "./adminApi";
@@ -52,6 +55,22 @@ export interface WLSale {
   subdomain:  string;
   processor:  string;
   lastPayout: string;
+}
+
+interface DBSale {
+  id: string; org: string; contact: string; email: string; package_id: string;
+  status: WLSale["status"]; users_count: number; mrr: number; total_paid: number;
+  subdomain: string | null; processor: string | null; last_payout_at: string | null; created_at: string;
+}
+
+function saleFromDB(row: DBSale): WLSale {
+  return {
+    id: row.id, org: row.org, contact: row.contact, email: row.email, packageId: row.package_id,
+    status: row.status, users: row.users_count, mrr: Number(row.mrr), totalPaid: Number(row.total_paid),
+    startDate: new Date(row.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    subdomain: row.subdomain ?? "", processor: row.processor ?? "",
+    lastPayout: row.last_payout_at ? new Date(row.last_payout_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—",
+  };
 }
 
 export interface PaymentProcessor {
@@ -125,9 +144,7 @@ function packageToDB(p: Partial<WLPackage>): Record<string, unknown> {
  * existing "instant cross-component sync" behavior after a write. */
 let _packages: WLPackage[] = [];
 
-/* ── In-memory stores (sales + processors only — see file header) ────── */
-
-let _sales: WLSale[] = [];
+/* ── In-memory store (processors only — see file header) ─────────────── */
 
 /* Processor catalog only: which processors the UI offers. None is enabled
    and no credentials are filled in, because nothing has been configured. */
@@ -191,34 +208,16 @@ export async function deletePackage(id: string): Promise<void> {
 }
 
 export async function getSales(): Promise<WLSale[]> {
-  return [..._sales];
+  const res = await adminApi.get<{ sales: DBSale[] }>("/white-label/sales");
+  return res.sales.map(saleFromDB);
 }
 
 /** Records a new WL application submitted through the public onboarding wizard. Starts "pending" until an admin provisions the instance. */
 export async function createSale(input: {
   org: string; contact: string; email: string; packageId: string; subdomain: string; processor: string;
 }): Promise<WLSale> {
-  const pkg = _packages.find(p => p.id === input.packageId);
-  const setupFee = pkg?.billing.setupFee ?? 0;
-  // No wl_sales table exists yet — this stays in-memory only (see file header).
-  await new Promise(r => setTimeout(r, 400));
-  const sale: WLSale = {
-    id: `WL-${(_sales.length + 1).toString().padStart(3, "0")}`,
-    org: input.org,
-    contact: input.contact,
-    email: input.email,
-    packageId: input.packageId,
-    status: "pending",
-    users: 0,
-    mrr: 0,
-    totalPaid: setupFee,
-    startDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    subdomain: input.subdomain,
-    processor: input.processor,
-    lastPayout: "—",
-  };
-  _sales = [..._sales, sale];
-  return sale;
+  const res = await publicApi.post<{ sale: DBSale }>("/wl-sales", input);
+  return saleFromDB(res.sale);
 }
 
 export async function getProcessors(): Promise<PaymentProcessor[]> {
