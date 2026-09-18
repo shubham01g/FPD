@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type Doc } from "../context/DemoContext";
+import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
 // docSyncStore is a shared bridge used by many other sections (Warranties, TravelPlanner,
 // PetRecords, JobHistory, DaycareInfo, etc. via AttachDocumentField/SyncToFileCabinet) to push
@@ -40,6 +41,12 @@ interface FolderFile {
   type: "pdf" | "image" | "video" | "doc" | "other" | "folder";
   size?: string; modified?: string; count?: number;
   locked?: boolean; starred?: boolean; thumbnail?: string;
+  /* Storage path in vault-documents — only set for real uploads (docsForFolder).
+     Seeded folder placeholders and docSyncStore-bridged files from other
+     sections never got a real path recorded, so they stay undefined; the
+     preview/download handlers below treat that as "nothing to open" rather
+     than faking success. */
+  filePath?: string;
 }
 
 interface Cabinet {
@@ -261,7 +268,7 @@ function docToFolderFile(d: Doc): FolderFile {
     d.type.includes("video") ? "video" :
     d.type.includes("pdf") ? "pdf" :
     d.type.includes("doc") ? "doc" : "other";
-  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded };
+  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded, filePath: d.filePath };
 }
 
 function relativeTime(date?: Date): string {
@@ -485,6 +492,29 @@ export function DigitalFileCabinet() {
       encrypted: true,
     }, f))).finally(() => setUploading(false));
   }, [addDoc]);
+
+  // Preview/Download used to be toast.info/success calls that never touched a
+  // real file. Real uploads carry a vault-documents storage path (filePath);
+  // signing it gets a time-limited URL the browser can open or save.
+  const previewFile = useCallback(async (file: FolderFile) => {
+    if (!file.filePath) { toast.error(`No stored file for "${file.name}" — nothing to preview.`); return; }
+    try {
+      const url = await db.signVaultDocument(file.filePath);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error(`Could not open "${file.name}"`);
+    }
+  }, []);
+
+  const downloadFile = useCallback(async (file: FolderFile) => {
+    if (!file.filePath) { toast.error(`No stored file for "${file.name}" — nothing to download.`); return; }
+    try {
+      const url = await db.signVaultDocumentForDownload(file.filePath, file.name);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error(`Could not download "${file.name}"`);
+    }
+  }, []);
 
   const openFolder = (c: Cabinet) => {
     if ((c as any).locked === true) { toast.info("🔒 Enter your PIN to access the Secret Vault"); return; }
@@ -795,8 +825,8 @@ export function DigitalFileCabinet() {
                   {file.starred && <Star size={13} fill="#D9A55E" color="#D9A55E"/>}
                   {file.locked && <Lock size={13} color={NEG}/>}
                   <div className="facts">
-                    <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? toast.success(`Downloading: ${file.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
-                    <button onClick={e=>{e.stopPropagation(); toast.info(`Previewing: ${file.name}`);}}><Eye size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? void downloadFile(file) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); void previewFile(file);}}><Eye size={13}/></button>
                     <button className="del" onClick={e=>{
                       e.stopPropagation();
                       if ((file as any)._synced) { removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); }
@@ -842,10 +872,10 @@ export function DigitalFileCabinet() {
             ))}
           </div>
           <div className="dbtns">
-            <button className="dbtn ghost" onClick={() => (continuationFeePaid || current?.id === "taxes") ? toast.success(`Downloading: ${selected.name}`) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
+            <button className="dbtn ghost" onClick={() => (continuationFeePaid || current?.id === "taxes") ? void downloadFile(selected) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
               <Download size={13}/> Download
             </button>
-            <button className="dbtn solid" onClick={() => toast.info(`Previewing: ${selected.name}`)}>
+            <button className="dbtn solid" onClick={() => void previewFile(selected)}>
               <Eye size={13}/> Preview
             </button>
           </div>

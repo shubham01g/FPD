@@ -481,6 +481,23 @@ export const db = {
     return path;
   },
 
+  /* Sign one vault-documents path for viewing inline (Preview) — opens in
+     the browser's own PDF/image viewer rather than forcing a save dialog. */
+  async signVaultDocument(path: string, expiresInSeconds = 3600) {
+    const { data, error } = await supabase.storage.from("vault-documents").createSignedUrl(path, expiresInSeconds);
+    if (error) throw error;
+    return data.signedUrl;
+  },
+
+  /* Sign one vault-documents path for a forced download with the original
+     filename — `download` sets Content-Disposition: attachment so the
+     browser saves it instead of trying to render it inline. */
+  async signVaultDocumentForDownload(path: string, filename: string, expiresInSeconds = 3600) {
+    const { data, error } = await supabase.storage.from("vault-documents").createSignedUrl(path, expiresInSeconds, { download: filename });
+    if (error) throw error;
+    return data.signedUrl;
+  },
+
   /* Record photos (migration 016). Everything picked through PhotoPicker
      lands here: places, trips, warranties, pets, contacts, assets, IDs.
 

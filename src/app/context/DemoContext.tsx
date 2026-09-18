@@ -11,6 +11,9 @@ import {
 export interface Doc {
   id: string; name: string; category: string; size: number; sizeUnit: "MB"|"GB";
   uploaded: string; type: string; status: "verified"|"pending"|"rejected"; encrypted: boolean;
+  /* Storage path in the private vault-documents bucket. Needed to actually
+     preview/download the file — see rowToDoc. */
+  filePath: string;
 }
 export interface Contact {
   id: string; type: "legacy"|"guardian"|"emergency"|"pet_emergency";
@@ -117,7 +120,7 @@ function rowToDoc(row: DBDocument): Doc {
     id: row.id, name: row.name, category: row.category,
     size: Number((useGb ? mb / 1024 : mb).toFixed(1)), sizeUnit: useGb ? "GB" : "MB",
     uploaded: formatDate(row.uploaded_at), type: row.file_type,
-    status: row.status, encrypted: row.is_encrypted,
+    status: row.status, encrypted: row.is_encrypted, filePath: row.file_path,
   };
 }
 
@@ -182,7 +185,7 @@ interface DemoCtx {
   funeralPlan: FuneralPlan;
   emergencyInfo: EmergencyInfo;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
-  addDoc: (doc: Omit<Doc,"id"|"uploaded">, file?: File) => Promise<void>;
+  addDoc: (doc: Omit<Doc,"id"|"uploaded"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
   addContact: (c: Omit<Contact,"id">) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
@@ -325,7 +328,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, [uid]);
 
   /* Docs */
-  const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded">, file?: File) => {
+  const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded"|"filePath">, file?: File) => {
     if (!uid) return;
     const tid = toast.loading("Uploading document...");
     try {
