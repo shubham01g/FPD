@@ -2,6 +2,7 @@
 import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
 import fpdFullLogo from "../../../imports/FPD_full_logo.png";
 import { supabase } from "../../services/supabase";
+import { getNativeChallengeState, challengeFactor, verifyChallenge, verifyFactor } from "../../services/twoFactor";
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -19,6 +20,8 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
   const [mfa, setMfa] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  // Non-null only for a phone factor, where the SMS is tied to one challenge.
+  const [mfaChallengeId, setMfaChallengeId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,20 +49,24 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
       return;
     }
 
-    // Supabase MFA: if this account has an enrolled TOTP factor, the session
-    // above only satisfies AAL1 — a real challenge/verify step is required
-    // to reach AAL2 before we let them into the portal.
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal && aal.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel) {
-      const { data: factors } = await supabase.auth.mfa.listFactors();
-      const totpFactor = factors?.totp?.[0];
-      if (!totpFactor) {
-        await supabase.auth.signOut();
-        setLoading(false);
-        setError("MFA is required for this account but no factor is enrolled. Contact a super admin.");
-        return;
-      }
-      setMfaFactorId(totpFactor.id);
+    // Supabase MFA: if this account has an enrolled factor, the session above
+    // only satisfies AAL1 — a real challenge/verify step is required to reach
+    // AAL2 before we let them into the portal. The check itself lives in
+    // services/twoFactor so the admin, user and concierge sign-ins share it.
+    const native = await getNativeChallengeState();
+
+    if (native.status === "orphaned") {
+      await supabase.auth.signOut();
+      setLoading(false);
+      setError("MFA is required for this account but no factor is enrolled. Contact a super admin.");
+      return;
+    }
+
+    if (native.status === "challenge") {
+      // A phone factor sends its SMS when the challenge opens, so that has to
+      // happen before the code box appears.
+      setMfaChallengeId(native.type === "phone" ? await challengeFactor(native.factorId) : null);
+      setMfaFactorId(native.factorId);
       setLoading(false);
       setMfa(true);
       return;
@@ -75,22 +82,16 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
     if (!mfaFactorId) { setError("No MFA factor to verify — please sign in again."); return; }
     setLoading(true);
 
-    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
-    if (challengeError || !challenge) {
+    try {
+      if (mfaChallengeId) await verifyChallenge(mfaFactorId, mfaChallengeId, mfaCode);
+      else await verifyFactor(mfaFactorId, mfaCode);
+    } catch (err) {
       setLoading(false);
-      setError(challengeError?.message ?? "Failed to start MFA challenge.");
+      setError(err instanceof Error ? err.message : "That code isn't right.");
       return;
     }
-
-    const { error: verifyError } = await supabase.auth.mfa.verify({
-      factorId: mfaFactorId, challengeId: challenge.id, code: mfaCode,
-    });
 
     setLoading(false);
-    if (verifyError) {
-      setError(verifyError.message);
-      return;
-    }
     onLogin();
   };
 

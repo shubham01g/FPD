@@ -9,6 +9,7 @@ import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
 import { WLEntitlementProvider } from "./context/WLEntitlementContext";
 import { UserLogin } from "./components/UserLogin";
+import { TwoFactorGate } from "./components/twofa/TwoFactorGate";
 import { UserSignup } from "./components/UserSignup";
 import { signOut } from "./services/auth";
 
@@ -77,10 +78,12 @@ import { CryptoMerchant } from "./components/admin/CryptoMerchant";
 import { AdminRoles } from "./components/admin/AdminRoles";
 import { ConciergeLogin } from "./components/ConciergeLogin";
 import { ConciergePortal } from "./components/ConciergePortal";
-import { conciergeEmployees, getEmployee } from "./services/conciergeStaff";
+import { getMyConciergeProfile, type ConciergeEmployee } from "./services/conciergeStaff";
 import {
   isAdminAuthed, setAdminAuthed, clearAdminAuthed,
-  getConciergeEmployeeId, setConciergeEmployeeId, clearConciergeEmployeeId,
+  // The concierge flag no longer gates anything — kept only to clear stale
+  // values written before that portal moved onto real Supabase auth.
+  clearConciergeEmployeeId,
 } from "./services/authSession";
 
 /* ── Demo wrapper: pick which client to simulate ────────────────── */
@@ -104,11 +107,9 @@ function WGClientSubmitDemo() {
   if (selected) {
     const client = WG_DEMO_CLIENTS.find(c => c.token === selected)!;
     const goToSpecialistInbox = () => {
-      // Demo-only cross-link straight from the public doc-submit page into the
-      // Concierge Portal — establish the session on the fly so it's frictionless.
-      const emp = conciergeEmployees.find(e => e.name === client.specialist);
-      if (emp) setConciergeEmployeeId(emp.id);
-      navigate("/concierge");
+      // The Concierge Portal runs on real Supabase auth now, so there is no
+      // session to fabricate from here — send them to sign in properly.
+      navigate("/concierge/login");
     };
     return (
       <div>
@@ -268,7 +269,8 @@ function DemoBar() {
     // The demo switcher stays frictionless: jumping straight into a gated
     // portal establishes the session on the fly instead of bouncing to login.
     if (tab.path === "/admin") setAdminAuthed();
-    if (tab.path === "/concierge") setConciergeEmployeeId(conciergeEmployees[0].id);
+    // /concierge is real Supabase auth now and cannot be short-circuited; its
+    // route guard bounces to the staff sign-in like any other visitor.
     navigate(tab.path);
     setOpen(false);
   }
@@ -361,7 +363,7 @@ function UserSignupRoute() {
 /* ── User portal (gated — redirects to /login without a session) ──── */
 function UserRoute() {
   const navigate = useNavigate();
-  const { session, authUser, loading } = useAuth();
+  const { session, authUser, loading, twoFactorPending, refreshTwoFactor } = useAuth();
   /* The portal's page is component state rather than a route, so the PWA
      manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
      target in as a query param. Read once, for the initial value only —
@@ -389,6 +391,9 @@ function UserRoute() {
 
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace/>;
+  // A restored session (persistSession) can be valid and still owe a second
+  // factor — the sign-in screen's own challenge never ran for it.
+  if (twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/login")}/>;
 
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
@@ -535,7 +540,7 @@ function ConciergeLoginRoute() {
   return (
     <div className="size-full">
       <ConciergeLogin
-        onLogin={emp => { setConciergeEmployeeId(emp.id); navigate("/concierge"); }}
+        onLogin={() => navigate("/concierge")}
         onBackToSite={() => navigate("/")}
       />
       <DemoBar/>
@@ -546,16 +551,31 @@ function ConciergeLoginRoute() {
 /* ── Concierge staff portal (gated — redirects to /concierge/login without a session) ── */
 function ConciergeRoute() {
   const navigate = useNavigate();
-  const id = getConciergeEmployeeId();
-  const employee = id ? getEmployee(id) : undefined;
+  const { session, loading, twoFactorPending } = useAuth();
+  const [employee, setEmployee] = useState<ConciergeEmployee | null | undefined>(undefined);
 
-  if (!employee) return <Navigate to="/concierge/login" replace/>;
+  // The roster row is the authorization check: a valid Supabase session proves
+  // who you are, not that you are concierge staff. RLS returns nothing for a
+  // customer session, so this is a real gate rather than a UI convenience.
+  useEffect(() => {
+    if (!session) { setEmployee(null); return; }
+    let cancelled = false;
+    getMyConciergeProfile()
+      .then(emp => { if (!cancelled) setEmployee(emp); })
+      .catch(() => { if (!cancelled) setEmployee(null); });
+    return () => { cancelled = true; };
+  }, [session]);
+
+  if (loading || employee === undefined) return null;
+  if (!session) return <Navigate to="/concierge/login" replace/>;
+  if (twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/concierge/login")}/>;
+  if (!employee || employee.status === "suspended") return <Navigate to="/concierge/login" replace/>;
 
   return (
     <div className="size-full">
       <ConciergePortal
         employee={employee}
-        onSignOut={() => { clearConciergeEmployeeId(); navigate("/concierge/login"); }}
+        onSignOut={() => { clearConciergeEmployeeId(); signOut(); navigate("/concierge/login"); }}
       />
       <DemoBar/>
     </div>

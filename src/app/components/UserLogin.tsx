@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
-import { signInWithPassword } from "../services/auth";
+import { signInWithPassword, signOut } from "../services/auth";
+import {
+  type TwoFAMethod,
+  getNativeChallengeState, challengeFactor, verifyChallenge, verifyFactor,
+  getLocalTwoFactorSettings, getTwoFactorState, startEmailCode, checkEmailCode, redeemBackupCode,
+} from "../services/twoFactor";
+import { TwoFactorChallenge } from "./twofa/TwoFactorChallenge";
+import { useAuth } from "../context/AuthContext";
 
 interface UserLoginProps {
   onLogin: () => void;
@@ -11,12 +19,22 @@ interface UserLoginProps {
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
+/** What the account still owes before the session counts as signed in. */
+interface Challenge {
+  method: TwoFAMethod;
+  factorId?: string;
+  challengeId?: string;
+  destination?: string | null;
+}
+
 export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps) {
+  const { refreshTwoFactor } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +43,93 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
     setLoading(true);
 
     const { error: signInError } = await signInWithPassword(email, password);
+    if (signInError) { setLoading(false); setError(signInError.message); return; }
+
+    // The password only got us to aal1. Everything below decides whether this
+    // account owes a second factor before it counts as signed in.
+    try {
+      const native = await getNativeChallengeState();
+
+      if (native.status === "orphaned") {
+        await signOut();
+        setLoading(false);
+        setError("Two-step verification is required on this account but no method is set up. Contact support to reset it.");
+        return;
+      }
+
+      if (native.status === "challenge") {
+        // A phone factor only sends its SMS when the challenge opens, so that
+        // has to happen before the code box appears.
+        const challengeId = native.type === "phone" ? await challengeFactor(native.factorId) : undefined;
+        setLoading(false);
+        setChallenge({
+          method: native.type === "totp" ? "authenticator" : "sms",
+          factorId: native.factorId,
+          challengeId,
+          destination: null,
+        });
+        return;
+      }
+
+      // No native factor outstanding. Email OTP has no aal2 to check, so ask
+      // the server whether this session has cleared its gate.
+      const settings = await getLocalTwoFactorSettings();
+      if (settings.enabled && settings.method === "email_otp"
+          && !(await getTwoFactorState()).gateCleared) {
+        await startEmailCode();
+        setLoading(false);
+        setChallenge({ method: "email_otp", destination: email });
+        return;
+      }
+    } catch (err) {
+      // Never let a failure here fall through to a signed-in dashboard.
+      await signOut();
+      setLoading(false);
+      setError(err instanceof Error ? err.message : "Could not complete sign-in. Try again.");
+      return;
+    }
+
     setLoading(false);
-    if (signInError) { setError(signInError.message); return; }
     onLogin();
+  };
+
+  const verifyChallengeCode = async (code: string) => {
+    if (!challenge) return;
+    if (challenge.method === "email_otp") {
+      await checkEmailCode(code, "login");
+    } else if (challenge.method === "sms") {
+      await verifyChallenge(challenge.factorId!, challenge.challengeId!, code);
+    } else {
+      await verifyFactor(challenge.factorId!, code);
+    }
+    // Clearing an email OTP writes a server-side record rather than changing
+    // the session, so the context has to be told to look again.
+    await refreshTwoFactor();
+    onLogin();
+  };
+
+  const resendChallengeCode = async () => {
+    if (!challenge) return;
+    if (challenge.method === "email_otp") {
+      await startEmailCode();
+    } else if (challenge.method === "sms") {
+      setChallenge({ ...challenge, challengeId: await challengeFactor(challenge.factorId!) });
+    }
+  };
+
+  const useBackupCode = async (code: string) => {
+    await redeemBackupCode(code);
+    // Redeeming tears the factor down, so the account is now unprotected.
+    await refreshTwoFactor();
+    toast.warning("Two-step verification has been turned off. Set it up again from Account Settings.");
+    onLogin();
+  };
+
+  const cancelChallenge = async () => {
+    await signOut();
+    setChallenge(null);
+    setPassword("");
+    setError("");
   };
 
   return (
@@ -53,6 +155,16 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        {challenge ? (
+          <TwoFactorChallenge
+            method={challenge.method}
+            destination={challenge.destination}
+            onVerify={verifyChallengeCode}
+            onResend={challenge.method === "authenticator" ? undefined : resendChallengeCode}
+            onUseBackupCode={useBackupCode}
+            onCancel={cancelChallenge}
+          />
+        ) : (
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden">
             <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height:48, width:73, flexShrink:0, borderRadius:9, objectFit:"contain", display:"block", marginBottom:6 }}/>
@@ -102,6 +214,7 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
             ← Back to finalpassdown.com
           </button>
         </div>
+        )}
       </div>
     </div>
   );

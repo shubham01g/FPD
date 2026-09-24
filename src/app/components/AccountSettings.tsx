@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   User, Mail, Phone, Camera, Lock, Shield, CheckCircle,
   Eye, EyeOff, MessageSquare, Key, Bell, Save, AlertCircle,
@@ -6,6 +6,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
+import { useAuth } from "../context/AuthContext";
+import { isPushSupported, hasActivePushSubscription, subscribeToPush, unsubscribeFromPush } from "../services/push";
+import {
+  type TwoFAMethod, type TwoFactorState,
+  getTwoFactorState, startEmailCode, disableTwoFactor, regenerateBackupCodes,
+} from "../services/twoFactor";
+import { TwoFactorEnrollModal } from "./twofa/TwoFactorEnrollModal";
 import heroAccountPhoto from "../../imports/accountsettings_hero_photo_v2.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
@@ -19,7 +26,6 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-type TwoFAMethod = "sms" | "email_otp" | "authenticator";
 type SettingsTab = "profile" | "security" | "encryption" | "notifications";
 
 const TAB_ICONS: Record<SettingsTab, React.ReactNode> = {
@@ -186,49 +192,64 @@ const ACCT_CSS = `
 .fpd-acct .modal-foot .save:disabled{opacity:.7;cursor:default;}
 `;
 
-/* ── OTP verification modal ─────────────────────────────────────── */
-function OTPModal({ method, contact, onVerify, onClose }: {
-  method: TwoFAMethod; contact: string; onVerify: () => void; onClose: () => void;
+/* ── Turning email OTP off ──────────────────────────────────────────
+   Switching 2FA off has to be at least as hard as getting past it, or a
+   stolen password plus an unchallenged session is enough to remove it. The
+   native methods are covered by requiring an aal2 session server-side; email
+   OTP has no aal2 to require, so it asks for a fresh code instead. */
+function DisableEmailOtpModal({ contact, onDisabled, onClose }: {
+  contact: string; onDisabled: () => void; onClose: () => void;
 }) {
   const [code, setCode] = useState("");
-  const [verifying, setVerifying] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [sending, setSending] = useState(true);
 
-  function verify() {
+  useEffect(() => {
+    startEmailCode()
+      .catch(err => toast.error(err instanceof Error ? err.message : "Could not send a code"))
+      .finally(() => setSending(false));
+  }, []);
+
+  async function confirm() {
     if (code.length < 6) { toast.error("Please enter the 6-digit code"); return; }
-    setVerifying(true);
-    setTimeout(() => {
-      setVerifying(false);
-      onVerify();
-    }, 900);
+    setBusy(true);
+    try {
+      await disableTwoFactor(code);
+      onDisabled();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not turn two-factor off");
+      setCode("");
+    } finally {
+      setBusy(false);
+    }
   }
-
-  const destination = method === "sms" ? `SMS to ${contact}` :
-                      method === "email_otp" ? `email to ${contact}` : "your authenticator app";
 
   return (
     <div className="backdrop">
       <div className="card modal">
         <div className="modal-head">
-          <h3>Verify Your Identity</h3>
+          <h3>Turn off two-factor</h3>
           <button onClick={onClose}><X size={16}/></button>
         </div>
         <div className="modal-body">
           <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>
-            A 6-digit verification code was sent via {destination}. Enter it below to confirm.
+            {sending
+              ? `Sending a confirmation code to ${contact}…`
+              : `Enter the 6-digit code we sent to ${contact} to confirm it's you.`}
           </p>
           <div className="field">
             <label>VERIFICATION CODE</label>
             <input
               value={code} onChange={e => setCode(e.target.value.replace(/\D/g,"").slice(0,6))}
               placeholder="000000" maxLength={6}
+              inputMode="numeric" autoComplete="one-time-code"
               className="code-input"
               autoFocus/>
-            <div className="demo-note">Demo: any 6 digits will work</div>
           </div>
         </div>
         <div className="modal-foot">
-          <button className="save" onClick={verify} disabled={verifying}>
-            {verifying ? "Verifying…" : "Confirm Code"}
+          <button className="save" onClick={confirm} disabled={busy || code.length < 6}>
+            {busy ? "Turning off…" : "Turn off two-factor"}
           </button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
@@ -240,6 +261,7 @@ function OTPModal({ method, contact, onVerify, onClose }: {
 /* ── Main component ─────────────────────────────────────────────── */
 export function AccountSettings() {
   const { user, updateUser, docs } = useDemo();
+  const { authUser } = useAuth();
   const photoRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<SettingsTab>("profile");
 
@@ -257,11 +279,14 @@ export function AccountSettings() {
   const [country, setCountry] = useState(user.country);
   const [referralSource, setReferralSource] = useState(user.referralSource);
 
-  // Security / 2FA state
-  const [twoFAEnabled, setTwoFAEnabled]       = useState(false);
-  const [twoFAMethod, setTwoFAMethod]         = useState<TwoFAMethod>("email_otp");
-  const [showOTPModal, setShowOTPModal]        = useState(false);
-  const [pendingMethod, setPendingMethod]      = useState<TwoFAMethod>("email_otp");
+  // Security / 2FA state — loaded from the server, never assumed. Until the
+  // first fetch lands twoFA is null, which the UI renders as "checking" rather
+  // than as "off" (claiming an account is unprotected when it is would be worse
+  // than a spinner).
+  const [twoFA, setTwoFA]                     = useState<TwoFactorState | null>(null);
+  const [enrollMethod, setEnrollMethod]        = useState<TwoFAMethod | null>(null);
+  const [showDisableOtp, setShowDisableOtp]    = useState(false);
+  const [twoFABusy, setTwoFABusy]              = useState(false);
   const [showCurrentPw, setShowCurrentPw]     = useState(false);
   const [showNewPw, setShowNewPw]             = useState(false);
   const [currentPw, setCurrentPw]             = useState("");
@@ -272,10 +297,56 @@ export function AccountSettings() {
   // Notification state
   const [notifEmail, setNotifEmail]           = useState(true);
   const [notifSMS, setNotifSMS]               = useState(false);
-  const [notifPush, setNotifPush]             = useState(true);
+  const [notifPush, setNotifPush]             = useState(false);
+  const [pushBusy, setPushBusy]               = useState(false);
   const [notifStorageAlerts, setNotifStorage] = useState(true);
   const [notifContactUpdates, setNotifContact]= useState(true);
   const [notifMarketing, setNotifMarketing]   = useState(false);
+
+  // Push Notifications reflects a real browser subscription, not a saved
+  // preference — initialize it from what's actually registered.
+  useEffect(() => {
+    hasActivePushSubscription().then(setNotifPush).catch(() => {});
+  }, []);
+
+  // 2FA lives on the server (account_2fa_settings is read-only to the browser,
+  // and the native factors live in Supabase Auth), so this screen reflects it
+  // rather than holding its own copy.
+  useEffect(() => {
+    let cancelled = false;
+    getTwoFactorState()
+      .then(state => { if (!cancelled) setTwoFA(state); })
+      .catch(() => { /* the Security tab shows an unavailable state */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function togglePush() {
+    if (!authUser?.id || pushBusy) return;
+    setPushBusy(true);
+    try {
+      if (notifPush) {
+        await unsubscribeFromPush(authUser.id);
+        setNotifPush(false);
+        toast.success("Push Notifications disabled");
+        return;
+      }
+      if (!isPushSupported()) {
+        toast.error("Push notifications need the installed app — add Final Pass Down to your home screen or desktop first.");
+        return;
+      }
+      const ok = await subscribeToPush(authUser.id);
+      if (ok) {
+        setNotifPush(true);
+        toast.success("Push Notifications enabled");
+      } else if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+        toast.error("Push notifications are blocked for this site in your browser settings.");
+      } else {
+        toast.error("Couldn't enable push notifications on this device. Try again after installing the app.");
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -299,22 +370,55 @@ export function AccountSettings() {
     setSaving(false);
   }
 
-  function enable2FA(method: TwoFAMethod) {
-    setPendingMethod(method);
-    setShowOTPModal(true);
+  async function refresh2FA() {
+    try {
+      setTwoFA(await getTwoFactorState());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load your security settings");
+    }
   }
 
-  function on2FAVerified() {
-    setShowOTPModal(false);
-    setTwoFAEnabled(true);
-    setTwoFAMethod(pendingMethod);
-    const label = pendingMethod === "sms" ? "SMS" : pendingMethod === "email_otp" ? "Email OTP" : "Authenticator App";
-    toast.success(`2FA enabled via ${label}`);
+  async function disable2FA() {
+    if (!twoFA?.method || twoFABusy) return;
+
+    // Email OTP needs a fresh code; the native methods are gated server-side on
+    // the session already having satisfied the factor this sign-in.
+    if (twoFA.method === "email_otp") { setShowDisableOtp(true); return; }
+
+    setTwoFABusy(true);
+    try {
+      await disableTwoFactor();
+      await refresh2FA();
+      toast.success("Two-factor authentication turned off");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not turn two-factor off");
+    } finally {
+      setTwoFABusy(false);
+    }
   }
 
-  function disable2FA() {
-    setTwoFAEnabled(false);
-    toast.success("Two-factor authentication disabled");
+  async function newBackupCodes() {
+    if (twoFABusy) return;
+    setTwoFABusy(true);
+    try {
+      const { backupCodes } = await regenerateBackupCodes();
+      await refresh2FA();
+      // Shown once, same as at enrollment — put them somewhere the user can act on.
+      const body =
+        "Final Pass Down — two-step verification backup codes\n" +
+        `Generated ${new Date().toLocaleString()}\n\n` + backupCodes.join("\n") + "\n";
+      const url = URL.createObjectURL(new Blob([body], { type: "text/plain" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "final-pass-down-backup-codes.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("New backup codes downloaded — the old ones no longer work");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not generate new codes");
+    } finally {
+      setTwoFABusy(false);
+    }
   }
 
   function changePassword() {
@@ -336,14 +440,23 @@ export function AccountSettings() {
     { id:"notifications", label:"Notifications" },
   ];
 
-  const methodColor = { sms:POS, email_otp:ACCENT, authenticator:ACCENT2 }[twoFAMethod];
+  const twoFAEnabled = twoFA?.enabled ?? false;
+  const twoFAMethod = twoFA?.method ?? null;
+  const METHOD_LABELS: Record<TwoFAMethod, string> = {
+    sms: "SMS", email_otp: "Email OTP", authenticator: "Authenticator App",
+  };
+  const methodLabel = twoFAMethod ? METHOD_LABELS[twoFAMethod] : null;
 
   // ── KPI ledger (pure display, derived from existing state) ──
   const profileFieldsFilled = [name, email, phone].filter(v => v.trim().length > 0).length;
   const notifEnabledCount = [notifEmail, notifSMS, notifPush, notifStorageAlerts, notifContactUpdates, notifMarketing].filter(Boolean).length;
   const kpis = [
     { label:"Profile", value:`${profileFieldsFilled}/3`, sub:"Fields complete", icon:<User size={14}/>, dot: profileFieldsFilled === 3 ? POS : ACCENT2 },
-    { label:"Two-Factor Auth", value: twoFAEnabled ? "Active" : "Off", sub: twoFAEnabled ? (twoFAMethod === "sms" ? "Via SMS" : twoFAMethod === "email_otp" ? "Via Email OTP" : "Via Authenticator") : "Not enabled", icon:<Shield size={14}/>, dot: twoFAEnabled ? POS : WARN },
+    { label:"Two-Factor Auth",
+      value: twoFA === null ? "…" : twoFAEnabled ? "Active" : "Off",
+      sub: twoFA === null ? "Checking" : twoFAEnabled ? `Via ${methodLabel}` : "Not enabled",
+      icon:<Shield size={14}/>,
+      dot: twoFA === null ? ACCENT2 : twoFAEnabled ? POS : WARN },
     { label:"Encryption", value:"AES-256", sub:"Always on", icon:<Lock size={14}/>, dot:POS },
     { label:"Notifications", value:`${notifEnabledCount}/6`, sub:"Channels enabled", icon:<Bell size={14}/>, dot:ACCENT2 },
   ];
@@ -505,12 +618,12 @@ export function AccountSettings() {
               }
               <div>
                 <div className="btitle" style={{ color: twoFAEnabled ? "#D99A6B" : WARN }}>
-                  {twoFAEnabled ? `Two-Factor Authentication Active — ${twoFAMethod === "sms" ? "SMS" : twoFAMethod === "email_otp" ? "Email OTP" : "Authenticator App"}` : "Two-Factor Authentication Not Enabled"}
+                  {twoFAEnabled ? `Two-Factor Authentication Active — ${methodLabel}` : "Two-Factor Authentication Not Enabled"}
                 </div>
                 <p className="btext">
                   {twoFAEnabled
                     ? "Your account is protected with an extra verification step on every login."
-                    : "Add an extra layer of security to your account. Choose SMS or Email OTP — each login will require a verification code."}
+                    : "Add an extra layer of security to your account. Every login will require a verification code as well as your password."}
                 </p>
               </div>
             </div>
@@ -534,8 +647,8 @@ export function AccountSettings() {
                     icon:<Mail size={22}/>,
                     color:"#6E90C9",
                     label:"Email OTP",
-                    desc:"A one-time password is sent to your registered email address on each login.",
-                    tag:"Recommended",
+                    desc:"A one-time password is sent to your registered email address on each login. Only as strong as your email account itself.",
+                    tag:"Simplest to set up",
                   },
                   {
                     id:"authenticator" as TwoFAMethod,
@@ -543,10 +656,15 @@ export function AccountSettings() {
                     color:"#6FAE8B",
                     label:"Authenticator App",
                     desc:"Use Google Authenticator or Authy to generate time-based codes without internet.",
-                    tag:"Most secure",
+                    tag:"Most secure — recommended",
                   },
                 ].map(m => {
                   const isActive = twoFAEnabled && twoFAMethod === m.id;
+                  // One method at a time: another card's "Enable" would have to
+                  // tear this one down first, so say so instead of failing later.
+                  const blocked = twoFAEnabled && !isActive;
+                  const pending = twoFA === null;
+                  const disabled = pending || blocked || twoFABusy;
                   return (
                     <div key={m.id} className={`mcard${isActive ? " active" : ""}`}
                       style={{ borderColor: isActive ? m.color : undefined }}>
@@ -558,25 +676,50 @@ export function AccountSettings() {
                       <div className="mdesc">{m.desc}</div>
                       <div className="mtagline" style={{ color: m.color }}>{m.tag}</div>
                       <button
-                        onClick={() => isActive ? disable2FA() : enable2FA(m.id)}
+                        onClick={() => isActive ? disable2FA() : setEnrollMethod(m.id)}
+                        disabled={disabled}
                         className="mbtn"
                         style={{ background:isActive?`${m.color}18`:m.color,
                           color:isActive?m.color:"#fff",
-                          border:isActive?`1px solid ${m.color}40`:"none" }}>
-                        {isActive ? "Disable" : "Enable"}
+                          border:isActive?`1px solid ${m.color}40`:"none",
+                          opacity: disabled && !isActive ? 0.45 : 1,
+                          cursor: disabled ? "default" : "pointer" }}>
+                        {pending ? "Checking…" : isActive ? (twoFABusy ? "Working…" : "Disable") : blocked ? "Switch off current method first" : "Enable"}
                       </button>
                     </div>
                   );
                 })}
               </div>
 
-              {twoFAEnabled && (
-                <div className="active-note">
-                  <Shield size={13} color="#FFFFFF"/>
-                  <span>
-                    2FA is active via <strong>{twoFAMethod === "sms" ? "SMS to " + user.phone : twoFAMethod === "email_otp" ? "Email to " + user.email : "Authenticator App"}</strong>. Every login requires a verification code.
-                  </span>
-                </div>
+              {twoFAEnabled && twoFA && (
+                <>
+                  <div className="active-note">
+                    <Shield size={13} color="#FFFFFF"/>
+                    <span>
+                      2FA is active via{" "}
+                      <strong>
+                        {twoFA.method === "sms" ? `SMS to ${twoFA.phone ?? "your phone"}`
+                          : twoFA.method === "email_otp" ? `email to ${authUser?.email ?? email}`
+                          : "your authenticator app"}
+                      </strong>. Every login requires a verification code.
+                    </span>
+                  </div>
+
+                  <div className="nrow" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16 }}>
+                    <div>
+                      <div className="nlabel">Backup codes</div>
+                      <div className="nsub">
+                        {twoFA.backupCodesRemaining > 0
+                          ? `${twoFA.backupCodesRemaining} unused ${twoFA.backupCodesRemaining === 1 ? "code" : "codes"} left — your way back in if you lose your device.`
+                          : "No codes left. Generate a new set before you need them."}
+                      </div>
+                    </div>
+                    <button className="btn-sec" onClick={newBackupCodes} disabled={twoFABusy}
+                      style={{ flexShrink: 0 }}>
+                      {twoFABusy ? "Working…" : "Generate new codes"}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
 
@@ -726,9 +869,14 @@ export function AccountSettings() {
                     <div className="nlabel">{n.label}</div>
                     <div className="nsub">{n.sub}</div>
                   </div>
-                  <button onClick={() => { n.set(!n.value); toast.success(`${n.label} ${!n.value?"enabled":"disabled"}`); }}
+                  <button
+                    onClick={() => n.label === "Push Notifications"
+                      ? togglePush()
+                      : (() => { n.set(!n.value); toast.success(`${n.label} ${!n.value?"enabled":"disabled"}`); })()}
+                    disabled={n.label === "Push Notifications" && pushBusy}
                     className="toggle"
-                    style={{ background:n.value?"rgba(91,110,225,0.85)":"rgba(255,255,255,0.06)", borderColor:n.value?ACCENT:"rgba(255,255,255,0.14)" }}>
+                    style={{ background:n.value?"rgba(91,110,225,0.85)":"rgba(255,255,255,0.06)", borderColor:n.value?ACCENT:"rgba(255,255,255,0.14)",
+                      opacity: n.label === "Push Notifications" && pushBusy ? 0.6 : 1 }}>
                     <div className="thumb" style={{ left:n.value?24:4 }}/>
                   </button>
                 </div>
@@ -741,13 +889,27 @@ export function AccountSettings() {
           </div>
         )}
 
-        {/* OTP verification modal */}
-        {showOTPModal && (
-          <OTPModal
-            method={pendingMethod}
-            contact={pendingMethod === "sms" ? user.phone : user.email}
-            onVerify={on2FAVerified}
-            onClose={() => setShowOTPModal(false)}
+        {enrollMethod && (
+          <TwoFactorEnrollModal
+            method={enrollMethod}
+            email={authUser?.email ?? email}
+            onEnrolled={() => {
+              refresh2FA();
+              toast.success("Two-factor authentication is on");
+            }}
+            onClose={() => setEnrollMethod(null)}
+          />
+        )}
+
+        {showDisableOtp && (
+          <DisableEmailOtpModal
+            contact={authUser?.email ?? email}
+            onDisabled={() => {
+              setShowDisableOtp(false);
+              refresh2FA();
+              toast.success("Two-factor authentication turned off");
+            }}
+            onClose={() => setShowDisableOtp(false)}
           />
         )}
       </div>

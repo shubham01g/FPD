@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { type ConciergeEmployee, ROLE_LABELS, ROLE_COLORS } from "../services/conciergeStaff";
+import { TwoFactorSettingsCard } from "./twofa/TwoFactorSettingsCard";
 import { subscribeToClients, createScheduleToken, type WGClient } from "../services/wgClientStore";
 import { ScanButton } from "./DocumentScanner";
 import { WaiverSignPage, waiverStore } from "./WaiverForm";
@@ -638,6 +639,14 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
           {/* ── Clients tab ── */}
           {tab === "clients" && (
             <>
+              {/* Staff sign-in is real Supabase auth now, so a second factor is
+                  finally possible here — and this portal reaches client records. */}
+              <TwoFactorSettingsCard
+                eyebrow="YOUR STAFF ACCOUNT"
+                portalName="Concierge Portal"
+                rationale="This portal opens your clients' records. Protect it with an authenticator app — a password on its own is not enough."
+                downloadName="final-pass-down-concierge-backup-codes.txt"
+              />
               {myClients.length === 0 && (
                 <div className="py-16 text-center rounded-2xl" style={GLASS}>
                   <Star size={40} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>

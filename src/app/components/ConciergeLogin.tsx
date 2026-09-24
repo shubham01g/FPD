@@ -1,7 +1,15 @@
 ﻿import React, { useState } from "react";
 import { Eye, EyeOff, Star, AlertCircle, Shield, Lock } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
-import { authenticateConcierge, type ConciergeEmployee } from "../services/conciergeStaff";
+import { supabase } from "../services/supabase";
+import { signOut } from "../services/auth";
+import { getMyConciergeProfile, touchConciergeLogin, type ConciergeEmployee } from "../services/conciergeStaff";
+import {
+  type TwoFAMethod,
+  getNativeChallengeState, challengeFactor, verifyChallenge, verifyFactor,
+  getLocalTwoFactorSettings, getTwoFactorState, startEmailCode, checkEmailCode, redeemBackupCode,
+} from "../services/twoFactor";
+import { TwoFactorChallenge } from "./twofa/TwoFactorChallenge";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -11,6 +19,14 @@ interface ConciergeLoginProps {
   onBackToSite: () => void;
 }
 
+/** What the staff account still owes before the session counts as signed in. */
+interface Challenge {
+  method: TwoFAMethod;
+  factorId?: string;
+  challengeId?: string;
+  destination?: string | null;
+}
+
 export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,21 +34,107 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  // Kept aside while the second factor is answered, so it is not handed to the
+  // portal until the sign-in is actually complete.
+  const [employee, setEmployee] = useState<ConciergeEmployee | null>(null);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+
+  async function finish(emp: ConciergeEmployee) {
+    await touchConciergeLogin(emp.id).catch(() => {});
+    onLogin(emp);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!email || !password) { setError("Please enter your credentials."); return; }
     setLoading(true);
-    setTimeout(() => {
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
       setLoading(false);
-      const emp = authenticateConcierge(email, password);
-      if (emp) {
-        onLogin(emp);
-      } else {
-        setError("Invalid credentials or access suspended. Contact your administrator.");
+      setError("Invalid credentials. Contact your administrator.");
+      return;
+    }
+
+    try {
+      // Being a valid Supabase user is not enough — this portal is only for
+      // staff on the concierge roster. RLS means a customer session reads null.
+      const emp = await getMyConciergeProfile();
+      if (!emp || emp.status === "suspended") {
+        await signOut();
+        setLoading(false);
+        setError("This account does not have concierge access, or it has been suspended.");
+        return;
       }
-    }, 800);
+      setEmployee(emp);
+
+      const native = await getNativeChallengeState();
+      if (native.status === "orphaned") {
+        await signOut();
+        setLoading(false);
+        setError("Two-step verification is required on this account but no method is set up. Contact your administrator.");
+        return;
+      }
+      if (native.status === "challenge") {
+        const challengeId = native.type === "phone" ? await challengeFactor(native.factorId) : undefined;
+        setLoading(false);
+        setChallenge({
+          method: native.type === "totp" ? "authenticator" : "sms",
+          factorId: native.factorId,
+          challengeId,
+        });
+        return;
+      }
+
+      const settings = await getLocalTwoFactorSettings();
+      if (settings.enabled && settings.method === "email_otp"
+          && !(await getTwoFactorState()).gateCleared) {
+        await startEmailCode();
+        setLoading(false);
+        setChallenge({ method: "email_otp", destination: email });
+        return;
+      }
+
+      setLoading(false);
+      await finish(emp);
+    } catch (err) {
+      await signOut();
+      setLoading(false);
+      setEmployee(null);
+      setError(err instanceof Error ? err.message : "Could not complete sign-in. Try again.");
+    }
   }
+
+  const verifyChallengeCode = async (code: string) => {
+    if (!challenge || !employee) return;
+    if (challenge.method === "email_otp") await checkEmailCode(code, "login");
+    else if (challenge.method === "sms") await verifyChallenge(challenge.factorId!, challenge.challengeId!, code);
+    else await verifyFactor(challenge.factorId!, code);
+    await finish(employee);
+  };
+
+  const resendChallengeCode = async () => {
+    if (!challenge) return;
+    if (challenge.method === "email_otp") await startEmailCode();
+    else if (challenge.method === "sms") {
+      setChallenge({ ...challenge, challengeId: await challengeFactor(challenge.factorId!) });
+    }
+  };
+
+  const useBackupCode = async (code: string) => {
+    if (!employee) return;
+    await redeemBackupCode(code);
+    await finish(employee);
+  };
+
+  const cancelChallenge = async () => {
+    await signOut();
+    setChallenge(null);
+    setEmployee(null);
+    setPassword("");
+    setError("");
+  };
 
   return (
     <div className="min-h-screen flex" style={{ background:"#04080F", fontFamily:"var(--font-body)" }}>
@@ -79,6 +181,16 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
 
       {/* Right panel — login form */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        {challenge ? (
+          <TwoFactorChallenge
+            method={challenge.method}
+            destination={challenge.destination}
+            onVerify={verifyChallengeCode}
+            onResend={challenge.method === "authenticator" ? undefined : resendChallengeCode}
+            onUseBackupCode={useBackupCode}
+            onCancel={cancelChallenge}
+          />
+        ) : (
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="mb-10 lg:hidden">
@@ -140,6 +252,7 @@ export function ConciergeLogin({ onLogin, onBackToSite }: ConciergeLoginProps) {
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

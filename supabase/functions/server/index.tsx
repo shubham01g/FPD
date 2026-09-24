@@ -4,6 +4,7 @@ import { logger } from "npm:hono/logger";
 import * as kv from "./kv_store.tsx";
 
 import { requireAdmin } from "./middleware/adminAuth.ts";
+import { requireUser } from "./middleware/userAuth.ts";
 import { auditLog } from "./middleware/auditLog.ts";
 import { requireModulePermission } from "./middleware/modulePermission.ts";
 
@@ -20,12 +21,14 @@ import emailTemplates from "./routes/emailTemplates.ts";
 import whiteLabel from "./routes/whiteLabel.ts";
 import legacy from "./routes/legacy.ts";
 import enterpriseApi from "./routes/enterpriseApi.ts";
+import cryptoConfig from "./routes/cryptoConfig.ts";
 import adminAccounts from "./routes/adminAccounts.ts";
 import notifications from "./routes/notifications.ts";
 import concierge from "./routes/concierge.ts";
 import whiteGlove from "./routes/whiteGlove.ts";
 import { wlEntitlements, drState } from "./routes/entitlements.ts";
 import publicRoutes from "./routes/public.ts";
+import twoFactor from "./routes/twoFactor.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -77,6 +80,7 @@ emailTemplates.use("*", requireModulePermission("email_templates"));
 whiteLabel.use("*", requireModulePermission("white_label"));
 legacy.use("*", requireModulePermission("legacy_management"));
 enterpriseApi.use("*", requireModulePermission("enterprise_api"));
+cryptoConfig.use("*", requireModulePermission("crypto"));
 adminAccounts.use("*", requireModulePermission("admin_team"));
 notifications.use("*", requireModulePermission("notifications"));
 concierge.use("*", requireModulePermission("white_glove"));
@@ -100,6 +104,7 @@ admin.route("/email-templates", emailTemplates);
 admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);
 admin.route("/enterprise-api", enterpriseApi);
+admin.route("/crypto", cryptoConfig);
 admin.route("/admin-accounts", adminAccounts);
 admin.route("/notifications", notifications);
 admin.route("/concierge", concierge);
@@ -108,6 +113,14 @@ admin.route("/wl-entitlements", wlEntitlements);
 admin.route("/disaster-recovery", drState);
 
 app.route(`${BASE}/admin`, admin);
+
+// Routes a signed-in customer calls about their own account. Same JWT check as
+// /admin/* minus the is_admin requirement, and no module permission matrix —
+// a user is always allowed to manage their own security settings.
+const account = new Hono();
+account.use("*", requireUser);
+account.route("/2fa", twoFactor);
+app.route(`${BASE}/account`, account);
 
 // Public, unauthenticated data for the customer-facing app.
 app.route(`${BASE}/public`, publicRoutes);

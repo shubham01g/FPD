@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { TwoFactorSettingsCard } from "../twofa/TwoFactorSettingsCard";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const INPUT: React.CSSProperties = { background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", borderRadius:10, padding:"8px 12px", fontSize:16, color:"#FFFFFF", outline:"none", width:"100%" };
@@ -510,6 +511,15 @@ export function AdminRoles() {
           <Plus size={14}/> Invite Admin
         </button>
       </div>
+
+      {/* The caller's own second factor. AdminLogin has always challenged for
+          one; until now there was nowhere to enroll it. */}
+      <TwoFactorSettingsCard
+        eyebrow="YOUR ADMIN ACCOUNT"
+        portalName="admin portal"
+        rationale="An admin session can read every account on the platform. Protect it with an authenticator app — a password on its own is not enough."
+        downloadName="final-pass-down-admin-backup-codes.txt"
+      />
 
       {error && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>

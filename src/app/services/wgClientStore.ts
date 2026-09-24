@@ -3,12 +3,12 @@
  *
  * WhiteGloveAdmin.tsx no longer uses this: it reads/writes the real `wg_clients`
  * table via /admin/white-glove/clients (see supabase/functions/server/routes/whiteGlove.ts).
- * This in-memory store is what's left of the Concierge Portal's own session —
- * that portal's login (services/conciergeStaff.ts's authenticateConcierge) still
- * checks a plaintext in-memory password, not the real bcrypt hash the admin-side
- * invite flow now writes to concierge_employees.password_hash, so the portal
- * can't actually authenticate a real employee yet. Wiring the portal itself to
- * the database is unfinished follow-up work.
+ * The portal's *login* is real now: it signs in through Supabase Auth and reads
+ * its own concierge_employees row under RLS (services/conciergeStaff.ts). What
+ * is still in memory here is the portal's client list — wg_clients.specialist_id
+ * exists but has never been fed to this store, so ConciergeEmployee's
+ * assignedClientIds comes back empty. Wiring that up is unfinished follow-up
+ * work, separate from auth.
  */
 
 export type ClientStatus = "intake" | "active" | "completed" | "paused";

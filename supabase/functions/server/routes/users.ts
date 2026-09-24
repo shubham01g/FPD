@@ -137,12 +137,35 @@ users.get("/:id", async (c) => {
   });
 });
 
-// POST /admin/users/:id/reset-mfa — disables 2FA so the user re-enrolls on next login
+// POST /admin/users/:id/reset-mfa — disables 2FA so the user re-enrolls on next login.
+//
+// The enrolled Supabase factors have to go first. account_2fa_settings is only
+// a mirror; the authenticator and SMS factors live in auth.mfa_factors, and
+// while one of those survives the account still requires aal2 at sign-in — so
+// clearing the mirror alone would leave the user locked out with a device they
+// have already told us they lost. Email OTP has no factor, so its gate rows
+// are what get cleared instead.
 users.post("/:id/reset-mfa", async (c) => {
   const id = c.req.param("id");
-  const { error } = await adminClient()
+  const db = adminClient();
+
+  const { data: factorData, error: factorError } = await db.auth.admin.mfa.listFactors({ userId: id });
+  if (factorError) return c.json({ error: factorError.message }, 500);
+
+  for (const factor of factorData?.factors ?? []) {
+    const { error } = await db.auth.admin.mfa.deleteFactor({ id: factor.id, userId: id });
+    if (error) return c.json({ error: `Could not remove the enrolled factor: ${error.message}` }, 500);
+  }
+
+  await db.from("two_factor_sessions").delete().eq("user_id", id);
+
+  const { error } = await db
     .from("account_2fa_settings")
-    .upsert({ user_id: id, enabled: false, method: null, totp_secret: null, backup_codes: null, updated_at: new Date().toISOString() });
+    .upsert({
+      user_id: id, enabled: false, method: null, totp_secret: null,
+      phone: null, phone_verified: false, email_verified: false,
+      backup_codes: null, enabled_at: null, updated_at: new Date().toISOString(),
+    });
 
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ ok: true });
