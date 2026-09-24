@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Copy, CheckCircle, Send, Building, Search, Globe,
   Edit2, Plus, X, Save, DollarSign, Percent, Users,
-  ToggleLeft, ToggleRight, AlertCircle,
+  ToggleLeft, ToggleRight, AlertCircle, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
@@ -275,12 +275,113 @@ function PackageModal({ pkg, onClose, onSave }: {
   );
 }
 
+/* ── Processor card ───────────────────────────────────────────────── */
+/* Credentials are edited locally and sent on Save, not on every keystroke.
+   Secret values arrive masked from the server; sending a masked value back
+   leaves the stored credential untouched, so editing one field is safe. */
+function WLProcessorCard({ proc, onChanged }: { proc: PaymentProcessor; onChanged: () => Promise<void> }) {
+  const [config, setConfig] = useState<Record<string, string>>({ ...proc.config });
+  const [busy, setBusy] = useState<"toggle" | "default" | "save" | null>(null);
+
+  useEffect(() => { setConfig({ ...proc.config }); }, [proc]);
+
+  const dirty = Object.keys(config).some(k => config[k] !== proc.config[k]);
+
+  async function run(kind: "toggle" | "default" | "save", updates: Parameters<typeof updateProcessor>[1], okMsg: string) {
+    setBusy(kind);
+    try {
+      await updateProcessor(proc.id, updates);
+      await onChanged();
+      toast.success(okMsg);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update processor");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className="p-5 rounded-2xl" style={CARD}>
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span style={{ fontSize:35.5 }}>{proc.logo}</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>{proc.name}</span>
+              {proc.isDefault && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>DEFAULT</span>}
+            </div>
+            <div style={{ color:"#8A9AB8", fontSize:14, marginTop:2 }}>
+              {proc.enabled ? "Active" : "Disabled"}
+              {proc.configuredFields.length > 0 && ` · ${proc.configuredFields.length} credential${proc.configuredFields.length === 1 ? "" : "s"} on file`}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {proc.enabled && !proc.isDefault && (
+            <button disabled={busy !== null}
+              onClick={() => run("default", { isDefault:true }, `${proc.name} set as default processor`)}
+              className="text-xs px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5"
+              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", opacity:busy?0.6:1 }}>
+              {busy === "default" && <Loader2 size={11} className="animate-spin"/>} Set Default
+            </button>
+          )}
+          <button disabled={busy !== null}
+            onClick={() => run("toggle", { enabled:!proc.enabled }, `${proc.name} ${proc.enabled ? "disabled" : "enabled"}`)}
+            style={{ color:proc.enabled?"#D99A6B":"#8A9AB8", opacity:busy?0.6:1 }}>
+            {busy === "toggle" ? <Loader2 size={26} className="animate-spin"/> : proc.enabled ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
+          </button>
+        </div>
+      </div>
+
+      {proc.enabled ? (
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.keys(proc.config).map(key => {
+              const secret = /key|secret|token|password/i.test(key);
+              return (
+                <div key={key}>
+                  <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>
+                    {key.replace(/([A-Z])/g, " $1").toUpperCase()}
+                    {proc.configuredFields.includes(key) && <span style={{ color:"#48BB78", marginLeft:5 }}>● SET</span>}
+                  </label>
+                  <input value={config[key] ?? ""}
+                    type={secret ? "password" : "text"}
+                    placeholder={secret ? "••••••••••" : `Enter ${key}`}
+                    style={INPUT}
+                    onChange={e => setConfig(c => ({ ...c, [key]:e.target.value }))}/>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-3 mt-3">
+            <button disabled={busy !== null || !dirty}
+              onClick={() => run("save", { config }, `${proc.name} credentials saved`)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold"
+              style={{ background:dirty?"linear-gradient(135deg,#5B6EE1,#5B6EE1)":"rgba(91,110,225,0.08)", color:dirty?"#F0F4FA":"#8A9AB8", opacity:busy?0.6:1 }}>
+              {busy === "save" ? <Loader2 size={11} className="animate-spin"/> : <Save size={11}/>}
+              {busy === "save" ? "Saving…" : dirty ? "Save Credentials" : "Saved"}
+            </button>
+            <span style={{ color:"#8A9AB8", fontSize:13 }}>
+              Stored encrypted. Leaving a secret field untouched keeps the saved value.
+            </span>
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-3" style={{ color:"#8A9AB8", fontSize:15 }}>
+          Enable to configure credentials
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main ─────────────────────────────────────────────────────────── */
 export function PartnerOnboardingAdmin() {
   const [tab, setTab] = useState<Tab>("packages");
   const [packages, setPackages] = useState<WLPackage[]>([]);
   const [sales, setSales] = useState<WLSale[]>([]);
   const [processors, setProcessors] = useState<PaymentProcessor[]>([]);
+  const [processorError, setProcessorError] = useState<string | null>(null);
   const [editPkg, setEditPkg] = useState<WLPackage | null>(null);
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
@@ -292,7 +393,19 @@ export function PartnerOnboardingAdmin() {
   async function reload() {
     setPackages(await getPackages());
     setSales(await getSales());
-    setProcessors(await getProcessors());
+    await reloadProcessors();
+  }
+
+  /* Processors come from /admin/crypto, which is gated on the separate "crypto"
+     permission module — an admin with WL access but not crypto access gets a
+     403 here. Keep that to this one tab instead of failing the whole screen. */
+  async function reloadProcessors() {
+    try {
+      setProcessors(await getProcessors());
+      setProcessorError(null);
+    } catch (err) {
+      setProcessorError(err instanceof Error ? err.message : "Could not load payment processors.");
+    }
   }
   useEffect(() => { reload(); }, []);
 
@@ -494,7 +607,7 @@ export function PartnerOnboardingAdmin() {
                 <tbody>
                   {sales.length === 0 && (
                     <tr><td colSpan={8} className="px-4 py-10 text-center" style={{ color:"#8A9AB8", fontSize:15 }}>
-                      No white-label sales yet. Applications from the public onboarding wizard appear here, but they aren't stored in the database yet, so they're lost on refresh.
+                      No white-label sales yet. Applications submitted through the public onboarding wizard appear here.
                     </td></tr>
                   )}
                   {sales.filter(s => !search || s.org.toLowerCase().includes(search.toLowerCase())).map((s, i) => {
@@ -578,68 +691,21 @@ export function PartnerOnboardingAdmin() {
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
                 WL partners can also bring their own processor — configure a per-package override in the package editor.
               </p>
-              <p style={{ color:"#F6AD55", fontSize:14, marginTop:6 }}>
-                Processor settings aren't stored on the server yet. Changes made here last only until you refresh the page.
+              <p style={{ color:"#8A9AB8", fontSize:14, marginTop:6 }}>
+                Credentials are stored encrypted and shared with the Crypto Payments screen — a processor enabled here is enabled there too.
               </p>
             </div>
 
-            {processors.map(proc => (
-              <div key={proc.id} className="p-5 rounded-2xl" style={CARD}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span style={{ fontSize:35.5 }}>{proc.logo}</span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5" }}>{proc.name}</span>
-                        {proc.isDefault && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"rgba(91,110,225,0.1)", color:"#6E90C9", ...MONO }}>DEFAULT</span>}
-                      </div>
-                      <div style={{ color:"#8A9AB8", fontSize:14, marginTop:2 }}>
-                        {proc.enabled ? "Active" : "Disabled"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {proc.enabled && !proc.isDefault && (
-                      <button onClick={async () => {
-                        await updateProcessor(proc.id, { isDefault:true });
-                        setProcessors(await getProcessors());
-                        toast.success(`${proc.name} set as default processor`);
-                      }} className="text-xs px-3 py-1.5 rounded-xl font-semibold"
-                        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
-                        Set Default
-                      </button>
-                    )}
-                    <button onClick={async () => {
-                      await updateProcessor(proc.id, { enabled:!proc.enabled });
-                      setProcessors(await getProcessors());
-                      toast.success(`${proc.name} ${proc.enabled ? "disabled" : "enabled"}`);
-                    }} style={{ color:proc.enabled?"#D99A6B":"#8A9AB8" }}>
-                      {proc.enabled ? <ToggleRight size={28}/> : <ToggleLeft size={28}/>}
-                    </button>
-                  </div>
-                </div>
-
-                {proc.enabled ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(proc.config).map(([key, val]) => (
-                      <div key={key}>
-                        <label style={{ color:"#8A9AB8", fontSize:11, ...MONO, display:"block", marginBottom:4 }}>
-                          {key.replace(/([A-Z])/g, " $1").toUpperCase()}
-                        </label>
-                        <input defaultValue={val}
-                          type={key.toLowerCase().includes("key") || key.toLowerCase().includes("secret") ? "password" : "text"}
-                          placeholder={key.toLowerCase().includes("key") || key.toLowerCase().includes("secret") ? "••••••••••" : `Enter ${key}`}
-                          style={INPUT}
-                          onChange={e => updateProcessor(proc.id, { config:{ ...proc.config, [key]:e.target.value } })}/>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-3" style={{ color:"#8A9AB8", fontSize:15 }}>
-                    Enable to configure credentials
-                  </div>
-                )}
+            {processorError && (
+              <div className="flex items-start gap-2 p-4 rounded-2xl"
+                style={{ background:"rgba(252,129,129,0.06)", border:"1px solid rgba(252,129,129,0.25)" }}>
+                <AlertCircle size={14} color="#FC8181" style={{ marginTop:2, flexShrink:0 }}/>
+                <span style={{ color:"#FC8181", fontSize:15, lineHeight:1.6 }}>{processorError}</span>
               </div>
+            )}
+
+            {processors.map(proc => (
+              <WLProcessorCard key={proc.id} proc={proc} onChanged={reloadProcessors}/>
             ))}
 
             <div className="p-5 text-center rounded-2xl"

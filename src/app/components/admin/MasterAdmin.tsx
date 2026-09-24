@@ -578,9 +578,10 @@ function mapCampaign(n: DBCampaign): SentNotification {
 }
 
 function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Record<string, number>; totalUsers: number }) {
-  /* Delivery and open rates aren't reported back by any provider yet, but a
-     send now actually writes to push_notifications + a `notifications` row
-     per recipient, so it lands in their real Notification tab. */
+  /* Open rates aren't reported back by any provider yet. A send writes
+     push_notifications + a `notifications` row per recipient (real in-app
+     delivery) and, when a recipient has push enabled on a device, a real
+     web-push notification too — see routes/notifications.ts. */
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useAdminFetch(
     () => adminApi.get<{ notifications: DBCampaign[] }>("/notifications"),
     [],
@@ -611,14 +612,19 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
     if (!body.trim()) { toast.error("Message body is required"); return; }
     setSending(true);
     try {
-      await adminApi.post("/notifications", {
+      const res = await adminApi.post<{ pushConfigured: boolean; pushSent: number }>("/notifications", {
         title, body, type, target,
         scheduled: scheduleMode, scheduledFor: scheduleMode ? scheduleDate : undefined,
       });
-      // Only the in-app notification actually gets delivered — there's no
-      // email provider wired up yet, regardless of the channel picked above.
-      const emailNote = channel !== "push" ? " (in-app only — email delivery isn't connected yet)" : "";
-      toast.success(`🔔 Push notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!${emailNote}`);
+      // In-app always lands. Real device push only reaches users who've
+      // enabled it on a device (AccountSettings > Notifications) — report
+      // the true count rather than implying every recipient got a push.
+      const pushNote = !res.pushConfigured
+        ? " (in-app only — device push isn't configured on the server yet)"
+        : res.pushSent > 0
+          ? ` — ${res.pushSent} device${res.pushSent === 1 ? "" : "s"} got a real push`
+          : " (no recipients have push notifications enabled yet)";
+      toast.success(`🔔 Notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!${pushNote}`);
       setTitle(""); setBody(""); setType("marketing"); setTarget("all"); setScheduleMode(false); setScheduleDate("");
       setView("history");
       refetchHistory();
@@ -702,31 +708,28 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
               </div>
             </div>
 
-            {/* Delivery channel */}
+            {/* Delivery channel — Email/Both are disabled: no email provider is
+                wired up anywhere in the app, so offering them as clickable
+                options would promise delivery that can't happen. */}
             <div>
               <label style={{ color:"#8A9AB8", fontSize:14, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {([
-                  { id:"push",  label:"Push Only",  icon:"🔔", desc:"In-app + device notification" },
-                  { id:"email", label:"Email Only",  icon:"✉️", desc:"Email to all users in segment" },
-                  { id:"both",  label:"Push & Email",icon:"📡", desc:"Both channels simultaneously" },
+                  { id:"push",  label:"Push", icon:"🔔", desc:"In-app + real device push", disabled:false },
+                  { id:"email", label:"Email", icon:"✉️", desc:"Coming soon — no provider connected", disabled:true },
+                  { id:"both",  label:"Push & Email", icon:"📡", desc:"Coming soon — no provider connected", disabled:true },
                 ] as const).map(ch => (
-                  <button key={ch.id} onClick={() => setChannel(ch.id)}
-                    className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl text-center transition-all"
-                    style={{ background:channel===ch.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.03)", border:`1px solid ${channel===ch.id?"#5B6EE1":"rgba(91,110,225,0.12)"}` }}>
+                  <button key={ch.id} onClick={() => !ch.disabled && setChannel(ch.id)} disabled={ch.disabled}
+                    className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl text-center transition-all relative"
+                    style={{ background:channel===ch.id?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.03)",
+                      border:`1px solid ${channel===ch.id?"#5B6EE1":"rgba(91,110,225,0.12)"}`,
+                      opacity:ch.disabled?0.45:1, cursor:ch.disabled?"not-allowed":"pointer" }}>
                     <span style={{ fontSize:22.5 }}>{ch.icon}</span>
                     <span style={{ fontSize:14, fontWeight:700, color:channel===ch.id?"#6E90C9":"#8A9AB8" }}>{ch.label}</span>
                     <span style={{ fontSize:11, color:"#8A9AB8", lineHeight:1.3 }}>{ch.desc}</span>
                   </button>
                 ))}
               </div>
-              {channel === "both" && (
-                <div className="mt-2 px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5"
-                  style={{ background:"rgba(91,110,225,0.04)", color:"#8A9AB8" }}>
-                  <Bell size={10} color="#FFFFFF"/>
-                  Push & Email will be sent simultaneously. Email recipients must have email notifications enabled.
-                </div>
-              )}
             </div>
 
             {/* Title */}
@@ -780,8 +783,8 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
                   boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:sending?0.7:1 }}>
                 <Bell size={15}/>
                 {sending ? "Sending…" : scheduleMode
-                  ? `Schedule ${channel==="both"?"Push + Email":channel==="email"?"Email":"Push"} to ${recipientLabel} Users`
-                  : `Send ${channel==="both"?"Push + Email":channel==="email"?"Email Only":"Push Only"} → ${recipientLabel} Users`}
+                  ? `Schedule Push to ${recipientLabel} Users`
+                  : `Send Push → ${recipientLabel} Users`}
               </button>
             </div>
           </div>

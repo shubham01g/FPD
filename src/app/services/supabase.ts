@@ -345,6 +345,14 @@ export const db = {
     return supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
   },
 
+  // Push subscriptions (web push / VAPID) — one row per browser/device.
+  async upsertPushSubscription(sub: { user_id: string; endpoint: string; p256dh: string; auth: string; user_agent?: string }) {
+    return supabase.from("push_subscriptions").upsert(sub, { onConflict: "user_id,endpoint" });
+  },
+  async deletePushSubscription(userId: string, endpoint: string) {
+    return supabase.from("push_subscriptions").delete().eq("user_id", userId).eq("endpoint", endpoint);
+  },
+
   // Audit logs
   async logAction(entry: { actor_id?: string; actor_email: string; action: string; target_type?: string; target_id?: string; severity?: string; metadata?: Record<string,unknown> }) {
     return supabase.from("audit_logs").insert({ ...entry, severity: entry.severity ?? "info" });

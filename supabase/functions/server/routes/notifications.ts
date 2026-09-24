@@ -1,8 +1,22 @@
 import { Hono } from "npm:hono";
+import webpush from "npm:web-push@3.6.7";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const notifications = new Hono();
+
+// Real device push. Keys are generated once and held as Edge Function
+// secrets (never in the repo) — set with:
+//   npx supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com --project-ref <ref>
+// Until those are set, PUSH_CONFIGURED is false and sends fall back to
+// in-app-only exactly like before, no error.
+const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY");
+const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY");
+const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:support@finalpassdown.com";
+const PUSH_CONFIGURED = Boolean(VAPID_PUBLIC && VAPID_PRIVATE);
+if (PUSH_CONFIGURED) {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC!, VAPID_PRIVATE!);
+}
 
 // push_notifications.notification_type -> the personal notifications.type
 // CHECK constraint (info/warning/success/error) so a campaign also lands in
@@ -26,9 +40,11 @@ notifications.get("/", async (c) => {
 // POST /admin/notifications { title, body, type, target, scheduled?, scheduledFor? }
 // Resolves the target segment to real user ids and writes three things:
 // the campaign row (push_notifications), a per-recipient delivery receipt
-// (push_notification_receipts), and — the part that was missing entirely —
-// a row in each recipient's own `notifications` table so it actually shows
-// up in their Notification tab.
+// (push_notification_receipts), and a row in each recipient's own
+// `notifications` table so it shows up in their Notification tab. If VAPID
+// secrets are configured it also fans out a real device push to every
+// subscribed browser among those recipients (see PUSH_CONFIGURED above).
+// Email is still unwired — there is no provider integrated anywhere.
 notifications.post("/", async (c) => {
   const admin = c.get("admin") as AdminUser;
   const body = await c.req.json().catch(() => ({}));
@@ -81,7 +97,39 @@ notifications.post("/", async (c) => {
     if (personal.error) return c.json({ error: personal.error.message }, 500);
   }
 
-  return c.json({ notification: campaign }, 201);
+  // Real device push, best-effort: the in-app row above already landed, so a
+  // push failure here must never fail the request. A 404/410 means the
+  // browser dropped the subscription (uninstalled, cleared data, expired) —
+  // that row is deleted so it stops being retried on every future send.
+  let pushSent = 0;
+  if (PUSH_CONFIGURED && userIds.length > 0) {
+    const { data: subs } = await db
+      .from("push_subscriptions")
+      .select("id, endpoint, p256dh, auth")
+      .in("user_id", userIds);
+
+    const payload = JSON.stringify({ title, body: message, type, url: "/" });
+    const stale: string[] = [];
+
+    await Promise.all((subs ?? []).map(async (s: { id: string; endpoint: string; p256dh: string; auth: string }) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+          payload,
+        );
+        pushSent++;
+      } catch (err) {
+        const status = (err as { statusCode?: number }).statusCode;
+        if (status === 404 || status === 410) stale.push(s.id);
+      }
+    }));
+
+    if (stale.length > 0) {
+      await db.from("push_subscriptions").delete().in("id", stale);
+    }
+  }
+
+  return c.json({ notification: campaign, pushConfigured: PUSH_CONFIGURED, pushSent }, 201);
 });
 
 export default notifications;

@@ -8,13 +8,15 @@
  * Sales are backed by the wl_sales table (migration 019) — public submit via
  * POST /public/wl-sales, admin list via GET /admin/white-label/sales.
  *
- * Payment processor config has no backing table (same as CryptoMerchant.tsx's
- * processors) — wiring it would mean storing real third-party API credentials
- * server-side, which needs the user's own accounts with each provider. It
- * stays in memory below, starts unconfigured, and is lost on refresh.
+ * Payment processors are backed by crypto_processor_configs (migration 025)
+ * via /admin/crypto — the same table and endpoints the Crypto Payments screen
+ * uses, so a processor enabled in one screen is enabled in the other. The
+ * catalog below supplies only the display name, logo and credential field
+ * names; every value comes from the server. See services/processorConfig.ts.
  */
 import { publicApi } from "./publicApi";
 import { adminApi } from "./adminApi";
+import { getProcessorConfigs, patchProcessor } from "./processorConfig";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -79,7 +81,10 @@ export interface PaymentProcessor {
   enabled: boolean;
   logo:    string;
   isDefault: boolean;
+  /** Secret fields arrive masked; sending a masked value back leaves it unchanged. */
   config:  Record<string, string>;
+  /** Which fields already have a stored value, so the UI can show what is set. */
+  configuredFields: string[];
 }
 
 /* ── DB row shape (wl_packages table) + mapping ──────────────────────── */
@@ -144,20 +149,22 @@ function packageToDB(p: Partial<WLPackage>): Record<string, unknown> {
  * existing "instant cross-component sync" behavior after a write. */
 let _packages: WLPackage[] = [];
 
-/* ── In-memory store (processors only — see file header) ─────────────── */
+/* ── Processor catalog (display only — see file header) ──────────────── */
 
-/* Processor catalog only: which processors the UI offers. None is enabled
-   and no credentials are filled in, because nothing has been configured. */
-let _processors: PaymentProcessor[] = [
-  { id:"stripe",   name:"Stripe",              enabled:false, logo:"💳", isDefault:false, config:{ publishableKey:"", webhookSecret:"" } },
-  { id:"paypal",   name:"PayPal",              enabled:false, logo:"🅿️", isDefault:false, config:{ clientId:"", webhookId:"" } },
-  { id:"coinbase", name:"Coinbase Commerce",   enabled:false, logo:"🔵", isDefault:false, config:{ apiKey:"", webhookSecret:"" } },
-  { id:"bitpay",   name:"BitPay",             enabled:false, logo:"🟢", isDefault:false, config:{ apiToken:"", merchantId:"" } },
-  { id:"nowpay",   name:"NOWPayments",        enabled:false, logo:"🟡", isDefault:false, config:{ apiKey:"", ipnSecret:"" } },
-  { id:"square",   name:"Square",             enabled:false, logo:"■",  isDefault:false, config:{ appId:"", accessToken:"" } },
-  { id:"braintree",name:"Braintree",          enabled:false, logo:"🌿", isDefault:false, config:{ merchantId:"", publicKey:"", privateKey:"" } },
-  { id:"strike",   name:"Strike (Lightning)", enabled:false, logo:"⚡", isDefault:false, config:{ apiKey:"", webhookUrl:"" } },
-  { id:"custom",   name:"Custom Processor",   enabled:false, logo:"🔧", isDefault:false, config:{ apiEndpoint:"", apiKey:"", webhookUrl:"" } },
+/* Logo and credential field names per processor. Ids must match rows in
+   crypto_processor_configs; enabled/default/credentials all come from there. */
+const PROCESSOR_CATALOG: { id: string; name: string; logo: string; fields: string[] }[] = [
+  { id:"stripe",        name:"Stripe",                  logo:"💳", fields:["publishableKey","webhookSecret"] },
+  { id:"paypal",        name:"PayPal",                  logo:"🅿️", fields:["clientId","webhookId"] },
+  { id:"coinbase",      name:"Coinbase Commerce",       logo:"🔵", fields:["apiKey","webhookSecret"] },
+  { id:"bitpay",        name:"BitPay",                  logo:"🟢", fields:["apiToken","merchantId"] },
+  { id:"nowpayments",   name:"NOWPayments",             logo:"🟡", fields:["apiKey","ipnSecret"] },
+  { id:"square",        name:"Square",                  logo:"■",  fields:["appId","accessToken"] },
+  { id:"braintree",     name:"Braintree",               logo:"🌿", fields:["merchantId","publicKey","privateKey"] },
+  { id:"strike",        name:"Strike (Lightning)",      logo:"⚡", fields:["apiKey","webhookUrl"] },
+  { id:"stripe_crypto", name:"Stripe Crypto Payments",  logo:"🟣", fields:["stripePublishableKey","enableCrypto"] },
+  { id:"cryptodotcom",  name:"Crypto.com Pay",          logo:"🔴", fields:["merchantId","secretKey","payoutAddress"] },
+  { id:"custom",        name:"Custom Processor",        logo:"🔧", fields:["apiEndpoint","apiKey","webhookUrl"] },
 ];
 
 /* ── Listeners (publish-subscribe for cross-component sync) ────────── */
@@ -221,14 +228,28 @@ export async function createSale(input: {
 }
 
 export async function getProcessors(): Promise<PaymentProcessor[]> {
-  return [..._processors];
+  const { processors } = await getProcessorConfigs();
+  const byId = Object.fromEntries(processors.map(p => [p.id, p]));
+  return PROCESSOR_CATALOG.map(meta => {
+    const row = byId[meta.id];
+    const blank = Object.fromEntries(meta.fields.map(f => [f, ""]));
+    return {
+      id: meta.id,
+      name: row?.name ?? meta.name,
+      logo: meta.logo,
+      enabled: row?.enabled ?? false,
+      isDefault: row?.isDefault ?? false,
+      config: { ...blank, ...(row?.config ?? {}) },
+      configuredFields: row?.configuredFields ?? [],
+    };
+  });
 }
 
-export async function updateProcessor(id: string, updates: Partial<PaymentProcessor>): Promise<void> {
-  _processors = _processors.map(p => p.id === id ? { ...p, ...updates } : p);
-  if (updates.isDefault) {
-    _processors = _processors.map(p => p.id !== id ? { ...p, isDefault: false } : p);
-  }
+export async function updateProcessor(
+  id: string,
+  updates: { enabled?: boolean; isDefault?: boolean; config?: Record<string, string> },
+): Promise<void> {
+  await patchProcessor(id, updates);
 }
 
 /** Calculate monthly charge for a WL account given billing model + active users */

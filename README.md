@@ -211,7 +211,9 @@ supabase secrets set APP_URL=https://finalpassdown.com
 supabase secrets set ENTERPRISE_KEY_ENCRYPTION_SECRET=$(openssl rand -hex 32)
 ```
 
-`ENTERPRISE_KEY_ENCRYPTION_SECRET` encrypts Enterprise API partner keys at rest (`supabase/functions/server/lib/keyCrypto.ts`) so an admin can reveal a key's original value again later instead of only seeing it once at creation. Losing this secret makes every previously-issued key unrecoverable (they'd need to be revoked and reissued), so store it in a password manager, not just in Supabase.
+`ENTERPRISE_KEY_ENCRYPTION_SECRET` encrypts two things at rest via `supabase/functions/server/lib/keyCrypto.ts`: Enterprise API partner keys, so an admin can reveal a key's original value again later instead of only seeing it once at creation; and the payment processor credentials entered in the Crypto Payments and WL Onboarding Control screens (`crypto_processor_configs.config_encrypted`). Losing this secret makes every previously-issued API key unrecoverable (they'd need to be revoked and reissued) and every stored processor credential unreadable (they'd need to be re-entered), so store it in a password manager, not just in Supabase.
+
+Note that the per-processor secrets above (`COINBASE_COMMERCE_API_KEY`, `BITPAY_API_TOKEN`, ...) are the credentials the payment webhook functions use. The same credentials entered through the admin UI are stored in the database instead, so the admin screens can show which processors are configured — set whichever the processor integration you deploy actually reads.
 
 ---
 
