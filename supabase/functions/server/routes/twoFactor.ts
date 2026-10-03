@@ -1,7 +1,7 @@
 import { Hono } from "npm:hono";
 import bcrypt from "npm:bcryptjs@2.4.3";
 import { adminClient } from "../lib/supabaseAdmin.ts";
-import { checkVerification, startVerification } from "../lib/twilioVerify.ts";
+import { checkEmailOtp, startEmailOtp } from "../lib/emailOtp.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 
 // Two-step verification for customer accounts. Mounted at /account/2fa behind
@@ -12,13 +12,13 @@ import type { AuthedUser } from "../middleware/userAuth.ts";
 //     client-side by the browser SDK; this file only mirrors the outcome into
 //     account_2fa_settings (the table the admin portal reads) after confirming
 //     with the auth server that the factor really is verified.
-//   email_otp -> Twilio Verify email channel, start/check below. Supabase has
-//     no email factor type, so this one cannot reach aal2; clearing it records
-//     a two_factor_sessions row instead.
+//   email_otp -> 6-digit code emailed via SendGrid (lib/emailOtp.ts), start/check
+//     below. Supabase has no email factor type, so this one cannot reach aal2;
+//     clearing it records a two_factor_sessions row instead.
 //
 // account_2fa_settings is read-only to the browser (see 023_two_factor_auth),
 // so the writes here are the only path that can enable or disable 2FA — and
-// each one happens after Twilio or Supabase has actually approved something.
+// each one happens after a code check or Supabase has actually approved something.
 
 const twoFactor = new Hono();
 
@@ -141,7 +141,7 @@ twoFactor.get("/", async (c) => {
 // code to an inbox they control.
 twoFactor.post("/email/start", async (c) => {
   const user = c.get("user") as AuthedUser;
-  const result = await startVerification(user.email, "email");
+  const result = await startEmailOtp(user);
   if (!result.ok) return c.json({ error: result.error }, (result.status ?? 502) as 400);
   return c.json({ sent: true, destination: user.email });
 });
@@ -153,9 +153,9 @@ twoFactor.post("/email/check", async (c) => {
   const code = typeof body.code === "string" ? body.code.trim() : "";
   const purpose = body.purpose === "enroll" ? "enroll" : "login";
 
-  if (!/^\d{4,10}$/.test(code)) return c.json({ error: "Enter the code from your email." }, 400);
+  if (!/^\d{6}$/.test(code)) return c.json({ error: "Enter the 6-digit code from your email." }, 400);
 
-  const result = await checkVerification(user.email, code);
+  const result = await checkEmailOtp(user.id, code);
   if (!result.ok) return c.json({ error: result.error }, (result.status ?? 400) as 400);
 
   const db = adminClient();
@@ -326,10 +326,10 @@ twoFactor.post("/disable", async (c) => {
     }
   } else {
     const code = typeof body.code === "string" ? body.code.trim() : "";
-    if (!/^\d{4,10}$/.test(code)) {
+    if (!/^\d{6}$/.test(code)) {
       return c.json({ error: "Enter a fresh emailed code to turn off two-factor." }, 400);
     }
-    const result = await checkVerification(user.email, code);
+    const result = await checkEmailOtp(user.id, code);
     if (!result.ok) return c.json({ error: result.error }, (result.status ?? 400) as 400);
   }
 

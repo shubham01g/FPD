@@ -7,7 +7,7 @@
  *   authenticator / sms  Supabase native MFA factors. Enroll and challenge run
  *                        in the browser SDK and put aal2 in the access token,
  *                        so they are enforced by Supabase itself.
- *   email_otp            Twilio Verify email channel via our edge function.
+ *   email_otp            6-digit code emailed via SendGrid by our edge function.
  *                        Supabase has no email factor type, so this one cannot
  *                        reach aal2 — it is enforced by a server-recorded
  *                        two_factor_sessions row plus the guard in UserRoute.
