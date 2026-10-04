@@ -183,12 +183,16 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   const addAdmin = async () => {
     if (!newAdminName.trim() || !newAdminEmail.includes("@")) { toast.error("Enter a name and a valid email"); return; }
     try {
-      const res = await adminApi.post<{ account: { id: string }; inviteToken: string }>("/admin-accounts", {
+      const res = await adminApi.post<{ account: { id: string }; inviteToken: string; emailed?: boolean; emailError?: string }>("/admin-accounts", {
         name: newAdminName.trim(), email: newAdminEmail.trim(), role: newAdminRole,
         permissions: ROLE_PRESETS[newAdminRole].permissions,
       });
-      copyToClipboard(`https://admin.finalpassdown.com/accept?id=${res.account.id}&token=${res.inviteToken}`);
-      toast.success("Admin invited — invite link copied to send to them");
+      if (res.emailed) {
+        toast.success(`Invite emailed to ${newAdminEmail.trim()}`);
+      } else {
+        copyToClipboard(`${window.location.origin}/admin/accept?id=${res.account.id}&token=${res.inviteToken}`);
+        toast.warning(`${res.emailError ?? "The invite email was not sent"} — the invite link was copied for you to send`);
+      }
       setNewName(""); setNewEmail(""); setNewRole("support_agent"); setAddAdmin(false);
       refetchAdmins();
     } catch (err) {
@@ -225,6 +229,24 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     });
     return () => { cancelled = true; };
   }, [activeTab]);
+
+  /* ── Email: whether the server can send, and a real test send ── */
+  const { data: emailStatus } = useAdminFetch(
+    () => adminApi.get<{ configured: boolean; provider: string | null; from: string }>("/settings/email-status"), []);
+  const emailOn = emailStatus?.configured === true;
+  const [testingEmail, setTestingEmail] = useState(false);
+  const sendTestEmail = async () => {
+    setTestingEmail(true);
+    const tid = toast.loading("Sending test email...");
+    try {
+      const res = await adminApi.post<{ sent: boolean; to: string }>("/notifications/test-email");
+      toast.success(`Test email sent to ${res.to}`, { id: tid });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "The test email could not be sent", { id: tid });
+    } finally {
+      setTestingEmail(false);
+    }
+  };
 
   /* ── Security state ── */
   const [enforce2FA,     setEnforce2FA]     = useState(true);
@@ -529,9 +551,9 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
                 <span style={{ flex: 1, fontSize: 13, color: "#E8EDF5", fontWeight: 500 }}>Email Delivery</span>
                 <span style={{ ...MONO, fontSize: 11, color: "#8A9AB8" }}>—</span>
                 <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
-                  style={{ background: "rgba(217,165,94,0.1)", color: "#D9A55E" }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#D9A55E", display: "inline-block" }}/>
-                  Not connected
+                  style={{ background: emailOn ? "rgba(95,190,145,0.1)" : "rgba(217,165,94,0.1)", color: emailOn ? "#5FBE91" : "#D9A55E" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: emailOn ? "#5FBE91" : "#D9A55E", display: "inline-block" }}/>
+                  {emailOn ? "Connected" : "Not connected"}
                 </span>
               </div>
             </div>
@@ -859,7 +881,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       {activeTab === "notifications" && (
         <div className="space-y-5">
           <Section title="Alert Email Address" desc="All admin notifications are sent to this address.">
-            <div className="mb-3" style={{ marginTop: -8 }}><StoredOnly>Alerts are not being sent yet — no email provider is connected. Your choices are saved for when one is.</StoredOnly></div>
+            <div className="mb-3" style={{ marginTop: -8 }}><StoredOnly>Alert emails are not sent yet. Your choices are saved for when alerts are switched on.</StoredOnly></div>
             <input value={notifEmail} onChange={e => setNotifEmail(e.target.value)} style={{ ...INPUT, maxWidth: 360 }}/>
             <button onClick={() => void save("notifications", { email: notifEmail, alerts: notifs }, "Notification email saved")}
               className="mt-3 flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold"
@@ -927,7 +949,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               </div>
               <div>
                 <label style={LABEL}>Password / API Key</label>
-                <div style={{ ...INPUT, color: "#8A9AB8" }}>Not stored — added when a mail provider is connected</div>
+                <div style={{ ...INPUT, color: "#8A9AB8" }}>Not stored here — the mail key is a server secret</div>
               </div>
               <div>
                 <label style={LABEL}>From Email</label>
@@ -948,7 +970,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
                 style={{ background: "linear-gradient(135deg,#9F7AEA,#7C3AED)", color: "#fff", border: "none", cursor: "pointer" }}>
                 <Save size={13}/> Save Configuration
               </button>
-              <button onClick={() => toast.error("Email sending is not connected yet — there is nothing to send a test through")}
+              <button onClick={() => void sendTestEmail()} disabled={testingEmail}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
                 style={{ background: "rgba(159,122,234,0.1)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
                 <RefreshCw size={13}/> Send Test Email
@@ -959,7 +981,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           <Section title="Email Provider Status">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[
-                { label:"Provider",   val:"Not connected" },
+                { label:"Provider",   val: emailOn ? (emailStatus?.provider ?? "Connected") : "Not connected" },
                 { label:"Sent (MTD)", val:"—" },
                 { label:"Delivered",  val:"—" },
                 { label:"Bounced",    val:"—" },
@@ -967,11 +989,13 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               ].map(s => (
                 <div key={s.label} className="p-3 rounded-xl" style={{ background: "rgba(159,122,234,0.04)", border: "1px solid rgba(159,122,234,0.08)" }}>
                   <div style={{ fontSize: 10, ...MONO, color: "#8A9AB8", marginBottom: 3 }}>{s.label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: s.val === "—" ? "#8A9AB8" : "#D9A55E" }}>{s.val}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: s.val === "—" ? "#8A9AB8" : emailOn ? "#5FBE91" : "#D9A55E" }}>{s.val}</div>
                 </div>
               ))}
             </div>
-            <StoredOnly>Not connected. The platform does not send email yet, so there are no delivery figures to show. The details above are saved for when a provider is connected.</StoredOnly>
+            <StoredOnly>{emailOn
+              ? `Email is sent through ${emailStatus?.provider ?? "the mail provider"} from ${emailStatus?.from}. The provider is set up on the server, so the SMTP fields above are saved but not used. Delivery, bounce and open figures are in the provider's own dashboard — "Send Test Email" sends a real message to your address.`
+              : "Not connected. No mail key is set on the server, so the platform cannot send email and there are no delivery figures to show."}</StoredOnly>
           </Section>
         </div>
       )}

@@ -693,17 +693,21 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
   const link = claimLink(token);
   const fullMessage = (url: string) => `${customMsg}\n\n${url}\n\nThis link is unique to you and expires in 30 days.`;
 
-  /* No email provider is connected, so "send" issues a fresh link (the old one
-     stops working), records the recipient, and copies the message for the
-     admin to send from their own mailbox. */
+  /* "Send" issues a fresh link (the old one stops working) and the server
+     emails it to the recipient. If the email can't go out, the message is
+     copied instead so the admin can send it from their own mailbox. */
   async function handleSend() {
     setSending(true);
     try {
-      const res = await adminApi.post<{ claim: { token: string } }>(`/legacy/claims/${claim.dbId}/link`, { email: recipientEmail, message: customMsg });
+      const res = await adminApi.post<{ claim: { token: string }; emailed?: boolean; emailError?: string }>(`/legacy/claims/${claim.dbId}/link`, { email: recipientEmail, message: customMsg });
       setToken(res.claim.token);
-      copyToClipboard(fullMessage(claimLink(res.claim.token)));
       setSent(true);
-      toast.success("New claim link issued — message copied to clipboard");
+      if (res.emailed) {
+        toast.success(`New claim link emailed to ${recipientEmail}`);
+      } else {
+        copyToClipboard(fullMessage(claimLink(res.claim.token)));
+        toast.warning(`${res.emailError ?? "The email was not sent"} — the message and link were copied for you to send`);
+      }
       onChanged();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not issue a new claim link");
@@ -914,11 +918,11 @@ export function LegacyClaims() {
     );
   }, [claims, search, filter]);
 
-  async function act(path: string, body: unknown, done: () => void) {
+  async function act(path: string, body: unknown, done: (res: { emailed?: boolean }) => void) {
     try {
-      await adminApi.post(path, body);
+      const res = await adminApi.post<{ emailed?: boolean }>(path, body);
       setSelected(null);
-      done();
+      done(res);
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "That action could not be completed");
@@ -937,7 +941,9 @@ export function LegacyClaims() {
 
   function handleRequestDocs(id: string) {
     void act(`/legacy/claims/${id}/request-docs`, undefined,
-      () => toast.info("Additional documents requested — the claim link is open again; let the claimant know"));
+      (res) => toast.info(res.emailed
+        ? "Additional documents requested — the claimant has been emailed their link"
+        : "Additional documents requested — the claim link is open again; let the claimant know"));
   }
 
   const pending   = claims.filter(c => c.status === "pending_review").length;

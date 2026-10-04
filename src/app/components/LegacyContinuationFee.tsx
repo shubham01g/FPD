@@ -10,6 +10,7 @@ import { useDemo } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../services/supabase";
 import { billing } from "../services/billing";
+import { usePlatform } from "../services/platform";
 import { CryptoPayment } from "./CryptoPayment";
 import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.webp";
 
@@ -225,6 +226,11 @@ export function LegacyContinuationFee() {
   const [payerType, setPayerType] = useState<"user"|"legacy_contact">("user");
   const [showCoverage, setShowCoverage] = useState(false);
   const { authUser } = useAuth();
+  /* The fee and access window are whatever the admin has set ("$199 Legacy
+     Fee" page) — the same figures checkout charges and activation applies. */
+  const { continuationFee } = usePlatform();
+  const feeLabel = Number.isInteger(continuationFee.amount) ? `$${continuationFee.amount}` : `$${continuationFee.amount.toFixed(2)}`;
+  const feeMonths = continuationFee.months;
 
   /* Real state: the account's paid fee row. "Confirmation of passing verified"
      is the admin's activation of that fee after an approved legacy claim. */
@@ -281,8 +287,8 @@ export function LegacyContinuationFee() {
     setStatus(s => ({
       ...s,
       paid: true, paidDate, paidBy: payerType,
-      activeUntil: "24 months from date of passing",
-      activationPeriod: 24, transactionId: txId,
+      activeUntil: `${feeMonths} months from date of passing`,
+      activationPeriod: feeMonths, transactionId: txId,
       fullyUnlocked: s.deathCertificateVerified, // only unlock if cert already verified
     }));
     setProcessing(false);
@@ -304,9 +310,9 @@ export function LegacyContinuationFee() {
           <div className="hcontent">
             <span className="heyebrow">Legacy Protection</span>
             <h1>The moment your vault <span className="accent">unlocks for them.</span></h1>
-            <p>A one-time $199 fee that guarantees your legacy contacts can download your complete account — every document, video, and record — once your passing is verified.</p>
+            <p>A one-time {feeLabel} fee that guarantees your legacy contacts can download your complete account — every document, video, and record — once your passing is verified.</p>
             <div className="hactions">
-              {!status.paid && <button className="hbtn primary" onClick={() => void startCheckout()}><CreditCard size={15} /> Pay $199 Fee</button>}
+              {!status.paid && <button className="hbtn primary" onClick={() => void startCheckout()}><CreditCard size={15} /> Pay {feeLabel} Fee</button>}
               <button className="hbtn ghost" onClick={() => setShowCoverage(true)}><Download size={15} /> What Gets Unlocked</button>
             </div>
           </div>
@@ -317,7 +323,7 @@ export function LegacyContinuationFee() {
           <div className="eyebrow"><Shield size={12} /> Legacy Protection</div>
           <h1 className="pg-h1">Activate Legacy Access</h1>
           <div className="pg-sub">
-            A one-time fee of <strong>$199</strong> that preserves your legacy contacts' ability to download your
+            A one-time fee of <strong>{feeLabel}</strong> that preserves your legacy contacts' ability to download your
             <strong> complete Final Pass Down account</strong> — every document, video, memory, record, and file you have ever uploaded — after your passing is verified.
           </div>
         </div>
@@ -335,7 +341,7 @@ export function LegacyContinuationFee() {
                   {status.paid ? "✓ Legacy Continuation Fee Paid" : "Legacy Continuation Fee"}
                 </div>
                 <div className="gdesc">
-                  $199 one-time fee. Can be paid by the account owner at any time — even now, years before passing. Or the legacy contact can pay it after the passing occurs.
+                  {feeLabel} one-time fee. Can be paid by the account owner at any time — even now, years before passing. Or the legacy contact can pay it after the passing occurs.
                 </div>
               </div>
             </div>
@@ -423,7 +429,7 @@ export function LegacyContinuationFee() {
             {!status.paid ? (
               <div className="card pad">
                 <div className="price-hero">
-                  <div className="price-val">$199</div>
+                  <div className="price-val">{feeLabel}</div>
                   <div className="price-sub">One-time · Never expires · Non-refundable</div>
                   <div className="price-badge">
                     <Star size={13} fill={POS} color="#FFFFFF"/>
@@ -449,11 +455,11 @@ export function LegacyContinuationFee() {
                 <div className="pay-acts">
                   <button onClick={() => void startCheckout()} className="btn-primary">
                     <CreditCard size={16}/>
-                    Pay $199 with Card (Stripe)
+                    Pay {feeLabel} with Card (Stripe)
                   </button>
                   <button onClick={() => setShowCrypto(true)} className="btn-crypto">
                     <span style={{ fontSize: 20 }}>₿</span>
-                    Pay $199 with Cryptocurrency
+                    Pay {feeLabel} with Cryptocurrency
                   </button>
                   <div className="secure-row">
                     <div className="secure-item">
@@ -493,11 +499,11 @@ export function LegacyContinuationFee() {
           <div className="card pad">
             <h3 className="sec-title" style={{ marginBottom: 14 }}>Common Questions</h3>
             {[
-              { q:"Can my legacy contact pay the fee after I pass?", a:"Yes. Either the account owner or a designated legacy contact can pay the $199 fee — before or after the passing. Both conditions (fee paid + confirmation of passing verified) must be met to unlock downloads." },
+              { q:"Can my legacy contact pay the fee after I pass?", a:"Yes. Either the account owner or a designated legacy contact can pay the " + feeLabel + " fee — before or after the passing. Both conditions (fee paid + confirmation of passing verified) must be met to unlock downloads." },
               { q:"Does paying the fee immediately unlock downloads?", a:"No. Paying the fee alone does not unlock access. A legacy contact must also submit confirmation of passing — accepted documents include death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record. FPD administrators review, verify, and approve before access is granted." },
               { q:"What documents are accepted as confirmation of passing?", a:"Death certificates are the most common, but we also accept obituaries, hospital or hospice notices, coroner reports, funeral home letters, probate filings, or any other credible official record. Verification and admin approval are required, with a follow-up confirmation of death once received — regardless of document type." },
               { q:"What exactly can be downloaded?", a:"Everything — all 18 document folders, final wishes, medical records, financial records, personal assets, memories, digital diary entries, password manager contents, contacts, and all other data in the account." },
-              { q:"How long does the access last?", a:"The continuation period is set by FPD administrators (default 24 months from the verified date of passing). After that period, the account is archived." },
+              { q:"How long does the access last?", a:"The continuation period is set by FPD administrators (currently " + feeMonths + " months from the verified date of passing). After that period, the account is archived." },
               { q:"Is the fee refundable?", a:"No. The Legacy Continuation Fee is non-refundable once processed." },
               { q:"What if I'm still alive when the period ends?", a:"The fee only applies during the post-passing continuation window. Your standard subscription continues normally while you're alive." },
             ].map(item => (
@@ -518,7 +524,7 @@ export function LegacyContinuationFee() {
               <div className="mico"><CreditCard size={20} color="#FFFFFF"/></div>
               <div>
                 <h3>Payment Details</h3>
-                <div className="msub">Legacy Continuation Fee · $199.00</div>
+                <div className="msub">Legacy Continuation Fee · {feeLabel}</div>
               </div>
             </div>
             <div className="modal-body">
@@ -544,13 +550,13 @@ export function LegacyContinuationFee() {
                 </div>
               </div>
               <div className="sumbox">
-                <div className="sumrow"><span>Legacy Continuation Fee</span><span style={{ color:TEXT }}>$199.00</span></div>
+                <div className="sumrow"><span>Legacy Continuation Fee</span><span style={{ color:TEXT }}>{feeLabel}</span></div>
                 <div className="sumrow"><span>Processing Fee</span><span style={{ color:TEXT }}>$0.00</span></div>
-                <div className="sumrow total"><span>Total</span><span>$199.00</span></div>
+                <div className="sumrow total"><span>Total</span><span>{feeLabel}</span></div>
               </div>
               <div style={{ display: "flex", gap: 10 }}>
                 <button onClick={handlePay} disabled={processing} className="save">
-                  {processing ? "Processing Stripe Payment..." : "Pay $199 Now"}
+                  {processing ? "Processing Stripe Payment..." : `Pay ${feeLabel} Now`}
                 </button>
                 <button onClick={() => setShowPayment(false)} className="btn-sec">Cancel</button>
               </div>
@@ -565,16 +571,16 @@ export function LegacyContinuationFee() {
 
       <CryptoPayment
         open={showCrypto}
-        amountUSD={199}
-        label="$199 Legacy Continuation Fee"
+        amountUSD={continuationFee.amount}
+        label={`${feeLabel} Legacy Continuation Fee`}
         onSuccess={() => {
           setShowCrypto(false);
           const txId = `crypto_${Date.now().toString(36).toUpperCase()}`;
           const paidDate = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
           setStatus(s => ({
             ...s, paid:true, paidDate, paidBy:payerType,
-            activeUntil:"24 months from date of passing",
-            activationPeriod:24, transactionId:txId,
+            activeUntil:`${feeMonths} months from date of passing`,
+            activationPeriod:feeMonths, transactionId:txId,
             fullyUnlocked: s.deathCertificateVerified,
           }));
           setContinuationFeePaid(true);

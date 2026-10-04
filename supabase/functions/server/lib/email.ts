@@ -21,6 +21,8 @@ const BRAND = "#5B6EE1";
 const NAVY = "#0B1530";
 
 export const EMAIL_CONFIGURED = Boolean(API_KEY);
+/** The address mail is sent from (shown in System → Settings). */
+export const EMAIL_FROM_ADDRESS = FROM_EMAIL;
 
 export const EMAIL_NOT_CONFIGURED_MESSAGE =
   "Email sending isn't set up on this deployment. Set SENDGRID_API_KEY as an Edge Function secret.";
@@ -102,4 +104,60 @@ export function testEmail(): Omit<EmailMessage, "to"> {
     text: "If you're reading this, SendGrid is configured correctly.",
     html: layout("It works", `<p style="margin:0;line-height:1.6;">If you're reading this, SendGrid is configured correctly.</p>`),
   };
+}
+
+/** Escapes text supplied by people (names, an admin's note) for the HTML part. */
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function button(href: string, label: string): string {
+  return `<p style="margin:0 0 20px;"><a href="${esc(href)}" style="display:inline-block;padding:12px 22px;background:${BRAND};color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;">${label}</a></p>
+      <p style="margin:0 0 20px;color:#6e7781;font-size:13px;word-break:break-all;">Or open this link: ${esc(href)}</p>`;
+}
+
+/** The secure Legacy Claim Portal link, sent to a legacy contact. `note` is
+ *  the admin's own message; `moreDocs` marks a request for further documents. */
+export function claimLinkEmail(o: {
+  claimantName: string; deceasedName: string; claimRef: string; link: string; expires: string;
+  note?: string | null; moreDocs?: boolean;
+}): Omit<EmailMessage, "to"> {
+  const lead = o.moreDocs
+    ? `Our team needs additional documents to continue reviewing your claim (${o.claimRef}) on ${o.deceasedName}'s ${APP_NAME} account.`
+    : `We are sorry for your loss. You were named as a legacy contact on ${o.deceasedName}'s ${APP_NAME} account. Use the secure link below to submit the documents needed to claim access.`;
+  const closing = `This link is unique to you and expires on ${o.expires}. Do not share it.`;
+  return {
+    subject: o.moreDocs ? `More documents needed for claim ${o.claimRef}` : `Your secure claim link — ${APP_NAME}`,
+    category: "legacy_claim",
+    text: `Dear ${o.claimantName},\n\n${lead}\n\n${o.note ? `${o.note}\n\n` : ""}${o.link}\n\n${closing}\nClaim reference: ${o.claimRef}`,
+    html: layout(o.moreDocs ? "More documents needed" : "Legacy access claim", `
+      <p style="margin:0 0 16px;line-height:1.6;">Dear ${esc(o.claimantName)},</p>
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      ${o.note ? `<p style="margin:0 0 20px;padding:14px 16px;background:#f4f5f7;border-radius:8px;line-height:1.6;white-space:pre-wrap;">${esc(o.note)}</p>` : ""}
+      ${button(o.link, o.moreDocs ? "Add documents" : "Open the claim portal")}
+      <p style="margin:0 0 6px;color:#6e7781;font-size:13px;">${esc(closing)}</p>
+      <p style="margin:0;color:#6e7781;font-size:13px;">Claim reference: ${esc(o.claimRef)}</p>`),
+  };
+}
+
+/** Invitation to join the admin portal. */
+export function adminInviteEmail(o: { name: string; roleLabel: string; link: string; invitedBy: string }): Omit<EmailMessage, "to"> {
+  const lead = `${o.invitedBy} has invited you to the ${APP_NAME} admin portal as ${o.roleLabel}.`;
+  const closing = "This invitation expires in 72 hours. If you were not expecting it, you can ignore this email.";
+  return {
+    subject: `You're invited to the ${APP_NAME} admin portal`,
+    category: "admin_invite",
+    text: `Hi ${o.name},\n\n${lead}\n\nAccept the invitation and set your password:\n${o.link}\n\n${closing}`,
+    html: layout("Admin portal invitation", `
+      <p style="margin:0 0 16px;line-height:1.6;">Hi ${esc(o.name)},</p>
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(lead)}</p>
+      ${button(o.link, "Accept invitation")}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${closing}</p>`),
+  };
+}
+
+/** Where links in outgoing mail point: the page the admin sent it from, so a
+ *  link issued on a staging or preview site leads back to that same site. */
+export function linkOrigin(originHeader: string | undefined): string {
+  return originHeader && /^https?:\/\/[^/]+$/.test(originHeader) ? originHeader : SITE_URL;
 }

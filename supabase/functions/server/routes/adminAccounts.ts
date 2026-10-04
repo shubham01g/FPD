@@ -5,12 +5,34 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
+import { EMAIL_CONFIGURED, adminInviteEmail, linkOrigin, sendEmail } from "../lib/email.ts";
 
 const adminAccounts = new Hono();
 
 function randomToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Emails the accept link (the /admin/accept page). Never throws — the invite
+ *  exists either way, and the admin screen still shows the link to copy. */
+async function emailInvite(origin: string | undefined, account: { id: string; name: string; email: string; role: string }, token: string, invitedBy: string): Promise<{ emailed: boolean; emailError?: string }> {
+  if (!EMAIL_CONFIGURED) return { emailed: false, emailError: "Email sending is not set up" };
+  try {
+    await sendEmail({
+      to: account.email,
+      ...adminInviteEmail({
+        name: account.name,
+        roleLabel: account.role.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase()),
+        link: `${linkOrigin(origin)}/admin/accept?id=${account.id}&token=${token}`,
+        invitedBy,
+      }),
+    });
+    return { emailed: true };
+  } catch (err) {
+    console.error("admin invite email failed:", err);
+    return { emailed: false, emailError: "The email could not be sent" };
+  }
 }
 
 function canGrantSuperAdmin(actor: AdminUser): boolean {
@@ -62,7 +84,8 @@ adminAccounts.post("/", async (c) => {
     .single();
 
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ account: data, inviteToken }, 201);
+  const mail = await emailInvite(c.req.header("origin"), data, inviteToken, actor.email);
+  return c.json({ account: data, inviteToken, ...mail }, 201);
 });
 
 // PATCH /admin/admin-accounts/:id — role/permission changes, status changes, notes.
@@ -103,7 +126,8 @@ adminAccounts.post("/:id/resend-invite", async (c) => {
 
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: "Admin account not found" }, 404);
-  return c.json({ account: data, inviteToken });
+  const mail = await emailInvite(c.req.header("origin"), data, inviteToken, (c.get("admin") as AdminUser).email);
+  return c.json({ account: data, inviteToken, ...mail });
 });
 
 export default adminAccounts;

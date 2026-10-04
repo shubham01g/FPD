@@ -21,7 +21,7 @@ interface LegacyContact {
 }
 
 /* What POST /admin/legacy/deceased returns for each claim it opened. */
-interface IssuedClaim { id: string; claim_ref: string; token: string; claimant_name: string; claimant_email: string; }
+interface IssuedClaim { id: string; claim_ref: string; token: string; claimant_name: string; claimant_email: string; emailed?: boolean; }
 
 /** The portal address a claim token opens. */
 export function claimLink(token: string) {
@@ -73,15 +73,19 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
       setIssued(res.claims);
       setStep("done");
       onConfirm(user.id);
-      toast.success(`Account marked as deceased — ${res.claims.length} claim link${res.claims.length !== 1 ? "s" : ""} ready to send`);
+      const emailed = res.claims.filter(c => c.emailed).length;
+      toast.success(emailed === res.claims.length
+        ? `Account marked as deceased — claim link${emailed !== 1 ? "s" : ""} emailed to ${emailed} contact${emailed !== 1 ? "s" : ""}`
+        : `Account marked as deceased — ${emailed} of ${res.claims.length} claim links emailed; copy the rest below`);
     } catch (err) {
       setStep("confirm");
       toast.error(err instanceof Error ? err.message : "Could not mark the account as deceased");
     }
   }
 
-  /* No email provider is connected, so the admin sends each link themselves:
-     this copies the message with that contact's link appended. */
+  /* Each link is emailed by the server. This copies the message with that
+     contact's link appended, for a contact whose email didn't go out or who
+     should also get it another way. */
   function copyMessage(claim: IssuedClaim) {
     copyToClipboard(`${noteToFamily}\n\n${claimLink(claim.token)}\n\nThis link is unique to you and expires in 30 days. Do not share it.`);
     toast.success(`Message and link for ${claim.claimant_name} copied`);
@@ -134,7 +138,7 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
                 <AlertTriangle size={15} color="#FC8181" style={{ flexShrink: 0, marginTop: 1 }} />
                 <div style={{ fontSize: 13, color: "#A3ADC9", lineHeight: 1.6 }}>
                   This action will <strong style={{ color: "#E8EDF5" }}>freeze the account</strong> and generate a unique secure claim link for each legacy contact, with instructions to submit their documents.
-                  The account status will change to <strong style={{ color: "#FC8181" }}>Deceased</strong>. Email sending is not connected yet, so you will copy each message and link and send it yourself.
+                  The account status will change to <strong style={{ color: "#FC8181" }}>Deceased</strong>. Each selected contact is emailed their secure claim link; you can also copy any link afterwards.
                 </div>
               </div>
 
@@ -293,7 +297,7 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
               </div>
               <div style={{ fontSize: 14, color: "#A3ADC9", lineHeight: 1.7, marginBottom: 24 }}>
                 <strong style={{ color: "#E8EDF5" }}>{user.name}'s account</strong> is now marked as deceased.
-                Secure claim links were created for <strong style={{ color: "#E8EDF5" }}>{issued.length}</strong> legacy contact{issued.length !== 1 ? "s" : ""}. Copy each one and send it to the contact.
+                Secure claim links were created for <strong style={{ color: "#E8EDF5" }}>{issued.length}</strong> legacy contact{issued.length !== 1 ? "s" : ""}{issued.every(c => c.emailed) ? " and emailed to each of them." : ". Contacts marked NOT EMAILED need their link copied and sent by hand."}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "left",
                 background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: 16, marginBottom: 8 }}>
@@ -302,6 +306,10 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
                     <CheckCircle size={13} color="#5FBE91" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 13, color: "#E8EDF5" }}>{c.claimant_name}</span>
                     <span style={{ fontSize: 12, color: "#8A9AB8" }}>{c.claimant_email}</span>
+                    <span style={{ fontSize: 9, ...MONO, fontWeight: 700, padding: "2px 7px", borderRadius: 99,
+                      background: c.emailed ? "rgba(95,190,145,0.12)" : "rgba(217,165,94,0.12)", color: c.emailed ? "#5FBE91" : "#D9A55E" }}>
+                      {c.emailed ? "EMAILED" : "NOT EMAILED"}
+                    </span>
                     <button onClick={() => copyMessage(c)}
                       style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", padding: "5px 10px", borderRadius: 8,
                         background: "rgba(91,110,225,0.12)", border: "1px solid rgba(91,110,225,0.25)", cursor: "pointer",

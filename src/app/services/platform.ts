@@ -22,6 +22,8 @@ export interface PlatformState {
   flags: PlatformFlags;
   /** How long an account may stay on Starter (Admin → Subscription Config). */
   starterTrialDays: number;
+  /** The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page. */
+  continuationFee: { amount: number; months: number };
   /** False until the first response lands. */
   ready: boolean;
 }
@@ -52,7 +54,7 @@ export function hiddenPages(flags: PlatformFlags): Set<string> {
 
 export function usePlatform(): PlatformState {
   const { data, loading } = useAdminFetch(
-    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; starterTrialDays?: number }>("/platform"),
+    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; starterTrialDays?: number; continuationFee?: { amount: number; months: number } }>("/platform"),
     [],
   );
   return {
@@ -60,6 +62,7 @@ export function usePlatform(): PlatformState {
     maintenanceMsg: data?.maintenanceMsg ?? "",
     flags: { ...DEFAULT_FLAGS, ...(data?.flags ?? {}) },
     starterTrialDays: data?.starterTrialDays && data.starterTrialDays > 0 ? data.starterTrialDays : STARTER_PLAN_DAYS,
+    continuationFee: data?.continuationFee && data.continuationFee.amount > 0 ? data.continuationFee : { amount: 199, months: 24 },
     ready: !loading,
   };
 }

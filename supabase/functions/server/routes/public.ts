@@ -23,19 +23,93 @@ pub.get("/plans", async (c) => {
 // GET /public/platform — maintenance mode and feature flags from System →
 // Settings, for the customer-facing app to enforce (services/platform.ts).
 pub.get("/platform", async (c) => {
-  const [general, flags, { data: trial }] = await Promise.all([
+  const [general, flags, { data: rows }] = await Promise.all([
     readPlatformSection("general"),
     readPlatformSection("flags"),
-    adminClient().from("admin_settings").select("value").eq("key", "starter_trial_days").maybeSingle(),
+    adminClient().from("admin_settings").select("key, value")
+      .in("key", ["starter_trial_days", "continuation_fee_amount", "continuation_fee_period_months"]),
   ]);
-  const trialDays = parseInt(trial?.value ?? "", 10);
+  const setting = (key: string) => rows?.find((r) => r.key === key)?.value ?? "";
+  const trialDays = parseInt(setting("starter_trial_days"), 10);
+  const feeAmount = Number(setting("continuation_fee_amount"));
+  const feeMonths = parseInt(setting("continuation_fee_period_months"), 10);
   return c.json({
     maintenance: general.maintenance === true,
     maintenanceMsg: typeof general.maintenanceMsg === "string" ? general.maintenanceMsg : "",
     flags,
     // Length of the Starter plan (Admin → Subscription Config); 14 until set.
     starterTrialDays: trialDays > 0 ? trialDays : 14,
+    // The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page,
+    // so the customer page quotes what checkout will actually charge.
+    continuationFee: { amount: feeAmount > 0 ? feeAmount : 199, months: feeMonths > 0 ? feeMonths : 24 },
   });
+});
+
+// ── Admin invitations (the /admin/accept page) ──────────────────────────────
+// An invite is an admin_accounts row in status "invited" with a one-time
+// token (routes/adminAccounts.ts). Accepting it is what makes the person able
+// to sign in to the admin portal: requireAdmin needs users.is_admin and an
+// active admin_accounts row.
+
+async function loadInvite(id: string, token: string) {
+  if (!id || !token) return null;
+  const { data } = await adminClient()
+    .from("admin_accounts")
+    .select("id, name, email, role, status, invite_token, invite_expires_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data || data.status !== "invited" || !data.invite_token || data.invite_token !== token) return null;
+  if (data.invite_expires_at && new Date(data.invite_expires_at) < new Date()) return null;
+  return data;
+}
+
+const INVITE_INVALID = "This invitation link is not valid or has expired. Ask an admin to send a new one.";
+
+// GET /public/admin-invite/:id?token=
+pub.get("/admin-invite/:id", async (c) => {
+  const invite = await loadInvite(c.req.param("id"), c.req.query("token") ?? "");
+  if (!invite) return c.json({ error: INVITE_INVALID }, 404);
+  const { data: existing } = await adminClient().from("users").select("id").eq("email", invite.email).maybeSingle();
+  return c.json({ invite: { name: invite.name, email: invite.email, role: invite.role, hasAccount: Boolean(existing) } });
+});
+
+// POST /public/admin-invite/:id/accept { token, password }
+// A new person gets a sign-in created with the password they choose. Someone
+// who already has an account keeps their own password — the invite only adds
+// admin access, it never resets a password.
+pub.post("/admin-invite/:id/accept", async (c) => {
+  const { token, password } = await c.req.json().catch(() => ({}));
+  const invite = await loadInvite(c.req.param("id"), typeof token === "string" ? token : "");
+  if (!invite) return c.json({ error: INVITE_INVALID }, 404);
+
+  const db = adminClient();
+  let { data: account } = await db.from("users").select("id").eq("email", invite.email).maybeSingle();
+
+  if (!account) {
+    if (typeof password !== "string" || password.length < 12) {
+      return c.json({ error: "Choose a password of at least 12 characters" }, 400);
+    }
+    const { data: created, error: createErr } = await db.auth.admin.createUser({
+      email: invite.email, password, email_confirm: true, user_metadata: { full_name: invite.name },
+    });
+    if (createErr || !created?.user) {
+      return c.json({ error: createErr?.message ?? "Could not create the sign-in for this invitation" }, 500);
+    }
+    // handle_new_user creates the public.users row; make sure it is there.
+    await db.from("users").upsert({ id: created.user.id, email: invite.email, full_name: invite.name }, { onConflict: "id", ignoreDuplicates: true });
+    account = { id: created.user.id };
+  }
+
+  const { error: adminErr } = await db.from("users").update({ is_admin: true }).eq("id", account.id);
+  if (adminErr) return c.json({ error: adminErr.message }, 500);
+
+  const { error: acceptErr } = await db
+    .from("admin_accounts")
+    .update({ status: "active", user_id: account.id, invite_token: null, invite_expires_at: null })
+    .eq("id", invite.id);
+  if (acceptErr) return c.json({ error: acceptErr.message }, 500);
+
+  return c.json({ accepted: true, email: invite.email });
 });
 
 // GET /public/wl-packages — live White Label package tiers for the marketing

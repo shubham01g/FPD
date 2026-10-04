@@ -64,6 +64,7 @@ import { AIAgent } from "./components/AIAgent";
 
 /* Admin portal */
 import { AdminLogin } from "./components/admin/AdminLogin";
+import { AdminInviteAccept } from "./components/admin/AdminInviteAccept";
 import { AdminLayout, type AdminPageId } from "./components/admin/AdminLayout";
 import { MasterAdmin } from "./components/admin/MasterAdmin";
 import { AdminSettings } from "./components/admin/AdminSettings";
@@ -665,6 +666,13 @@ function ConciergeRoute() {
 }
 
 /* ── White Glove client document submission (token-based, no login) ── */
+/* ── Admin invitation — public, opened from the link in an invite email ── */
+function AdminInviteRoute() {
+  const navigate = useNavigate();
+  const params = new URLSearchParams(window.location.search);
+  return <AdminInviteAccept id={params.get("id") ?? ""} token={params.get("token") ?? ""} onSignIn={() => navigate("/admin/login")}/>;
+}
+
 /* ── Legacy Claim Portal — public, opened from the link an admin issues ── */
 function LegacyClaimRoute() {
   const { token } = useParams();
@@ -696,6 +704,7 @@ function AppShell() {
       <Route path="/signup" element={<UserSignupRoute/>}/>
       <Route path="/dashboard" element={<UserRoute/>}/>
       <Route path="/admin/login" element={<AdminLoginRoute/>}/>
+      <Route path="/admin/accept" element={<AdminInviteRoute/>}/>
       <Route path="/admin" element={<AdminRoute/>}/>
       <Route path="/partner" element={<PartnerRoute/>}/>
       <Route path="/partner/onboard" element={<WhiteLabelOnboardRoute/>}/>

@@ -12,6 +12,7 @@ import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
 import { clientIp, ipAllowed } from "../lib/platformSettings.ts";
 import { clearIpAllowlistCache } from "../middleware/ipAllowlist.ts";
+import { EMAIL_CONFIGURED, EMAIL_FROM_ADDRESS } from "../lib/email.ts";
 
 const settings = new Hono();
 
@@ -38,6 +39,11 @@ settings.get("/", async (c) => {
   }
   return c.json({ settings: out });
 });
+
+// GET /admin/settings/email-status — whether the server can send mail, and
+// from which address. Delivery figures live in SendGrid, not here.
+settings.get("/email-status", (c) =>
+  c.json({ configured: EMAIL_CONFIGURED, provider: EMAIL_CONFIGURED ? "SendGrid" : null, from: EMAIL_FROM_ADDRESS }));
 
 // PUT /admin/settings/:section { value }
 settings.put("/:section", async (c) => {

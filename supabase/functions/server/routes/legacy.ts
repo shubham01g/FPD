@@ -9,12 +9,13 @@
 // $199 fee "ready to activate" (see subscriptions.ts), and activation stays a
 // separate admin click.
 //
-// No email provider is integrated anywhere in the backend, so nothing here
-// sends mail. Routes that issue a link return the token and the admin screen
-// shows the link for the admin to send.
+// Routes that issue or re-open a link email it to the claimant (lib/email.ts)
+// and report `emailed` back. The token is still returned, so the admin screen
+// can show the link to copy when mail isn't configured or a send fails.
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
+import { EMAIL_CONFIGURED, claimLinkEmail, linkOrigin, sendEmail } from "../lib/email.ts";
 
 const legacy = new Hono();
 
@@ -37,6 +38,33 @@ function linkExpiry(): string {
 }
 
 type DB = ReturnType<typeof adminClient>;
+
+/** Emails the claimant their portal link. Never throws: a failed send must not
+ *  undo the claim action, so the outcome is returned for the admin to see. */
+async function emailClaimLink(origin: string | undefined, claim: {
+  claim_ref: string; token: string; token_expires_at: string; claimant_name: string; claimant_email: string;
+}, deceasedName: string, note?: string | null, moreDocs = false): Promise<{ emailed: boolean; emailError?: string }> {
+  if (!EMAIL_CONFIGURED) return { emailed: false, emailError: "Email sending is not set up" };
+  if (!claim.claimant_email) return { emailed: false, emailError: "The claimant has no email address" };
+  try {
+    await sendEmail({
+      to: claim.claimant_email,
+      ...claimLinkEmail({
+        claimantName: claim.claimant_name,
+        deceasedName,
+        claimRef: claim.claim_ref,
+        link: `${linkOrigin(origin)}/legacy-claim/${claim.token}`,
+        expires: new Date(claim.token_expires_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+        note,
+        moreDocs,
+      }),
+    });
+    return { emailed: true };
+  } catch (err) {
+    console.error("claim link email failed:", err);
+    return { emailed: false, emailError: "The email could not be sent" };
+  }
+}
 
 async function addEvent(db: DB, claimId: string, event: string, actor: string, type: "system" | "claimant" | "admin" | "warn" = "admin") {
   await db.from("legacy_claim_events").insert({ claim_id: claimId, event, actor, type });
@@ -122,13 +150,16 @@ legacy.post("/deceased", async (c) => {
         claimant_relationship: contact.relationship,
         link_message: message || null,
       })
-      .select("id, claim_ref, token, claimant_name, claimant_email")
+      .select("id, claim_ref, token, token_expires_at, claimant_name, claimant_email")
       .single();
     if (error) return c.json({ error: error.message }, 500);
 
     await addEvent(db, claim.id, `Account holder ${owner.full_name} marked as deceased (date of death ${dateOfDeath})`, admin.email);
-    await addEvent(db, claim.id, `Claim link issued for legacy contact ${contact.full_name}`, admin.email);
-    created.push(claim);
+    const mail = await emailClaimLink(c.req.header("origin"), claim, owner.full_name, message);
+    await addEvent(db, claim.id, mail.emailed
+      ? `Claim link emailed to legacy contact ${contact.full_name} (${claim.claimant_email})`
+      : `Claim link issued for legacy contact ${contact.full_name}`, admin.email);
+    created.push({ ...claim, ...mail });
   }
 
   return c.json({ claims: created }, 201);
@@ -209,14 +240,16 @@ legacy.post("/claims/:id/request-docs", async (c) => {
     .update({ status: "awaiting_docs", token_expires_at: linkExpiry() })
     .eq("id", id)
     .in("status", ["pending_review", "awaiting_docs"])
-    .select("id")
+    .select("id, claim_ref, token, token_expires_at, claimant_name, claimant_email, owner:owner_user_id(full_name)")
     .maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
   if (!updated) return c.json({ error: "Claim not found, or it is not waiting on review" }, 400);
 
-  await addEvent(db, id, `Admin requested additional documentation${message ? ` — ${message}` : ""}`, admin.email);
+  const ownerName = (updated.owner as { full_name?: string } | null)?.full_name ?? "the account holder";
+  const mail = await emailClaimLink(c.req.header("origin"), updated, ownerName, message, true);
+  await addEvent(db, id, `Admin requested additional documentation${message ? ` — ${message}` : ""}${mail.emailed ? " (emailed to the claimant)" : ""}`, admin.email);
   const { data } = await loadClaim(db, id);
-  return c.json({ claim: data });
+  return c.json({ claim: data, ...mail });
 });
 
 // PATCH /admin/legacy/claims/:id/notes { notes }
@@ -265,13 +298,15 @@ legacy.post("/claims/:id/link", async (c) => {
     .from("legacy_claims")
     .update(update)
     .eq("id", id)
-    .select("id, claim_ref, token, token_expires_at, claimant_email")
+    .select("id, claim_ref, token, token_expires_at, claimant_name, claimant_email, link_message, owner:owner_user_id(full_name)")
     .maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: "Claim not found" }, 404);
 
-  await addEvent(db, id, `New claim link issued for ${data.claimant_email}`, admin.email);
-  return c.json({ claim: data });
+  const ownerName = (data.owner as { full_name?: string } | null)?.full_name ?? "the account holder";
+  const mail = await emailClaimLink(c.req.header("origin"), data, ownerName, data.link_message);
+  await addEvent(db, id, mail.emailed ? `New claim link emailed to ${data.claimant_email}` : `New claim link issued for ${data.claimant_email}`, admin.email);
+  return c.json({ claim: data, ...mail });
 });
 
 export default legacy;
