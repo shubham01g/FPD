@@ -71,32 +71,57 @@ admin.use("*", requireAdmin);
 admin.use("*", ipAllowlist);
 admin.use("*", auditLog);
 
-// Each router gets its own module gate before being mounted.
-analytics.use("*", requireModulePermission("analytics"));
-users.use("*", requireModulePermission("users"));
-verification.use("*", requireModulePermission("verification"));
-audit.use("*", requireModulePermission("audit"));
-affiliates.use("*", requireModulePermission("affiliates"));
-partnerships.use("*", requireModulePermission("partners"));
-payouts.use("*", requireModulePermission("payouts"));
-subscriptions.use("*", requireModulePermission("continuation"));
-pricing.use("*", requireModulePermission("subscription"));
-emailTemplates.use("*", requireModulePermission("email_templates"));
-whiteLabel.use("*", requireModulePermission("white_label"));
-legacy.use("*", requireModulePermission("legacy_management"));
-enterpriseApi.use("*", requireModulePermission("enterprise_api"));
-cryptoConfig.use("*", requireModulePermission("crypto"));
-adminAccounts.use("*", requireModulePermission("admin_team"));
+// Each module's gate is registered on this parent router, before the module
+// is mounted. It has to be here and not on the module's own router: those
+// routers already hold their handlers by the time this file runs, and a
+// middleware added after a handler never runs for it — which left every
+// role able to call every admin route.
+admin.use("/analytics", requireModulePermission("analytics"));
+admin.use("/analytics/*", requireModulePermission("analytics"));
+admin.use("/users", requireModulePermission("users"));
+admin.use("/users/*", requireModulePermission("users"));
+admin.use("/verification", requireModulePermission("verification"));
+admin.use("/verification/*", requireModulePermission("verification"));
+admin.use("/audit", requireModulePermission("audit"));
+admin.use("/audit/*", requireModulePermission("audit"));
+admin.use("/affiliates", requireModulePermission("affiliates"));
+admin.use("/affiliates/*", requireModulePermission("affiliates"));
+admin.use("/partnerships", requireModulePermission("partners"));
+admin.use("/partnerships/*", requireModulePermission("partners"));
+admin.use("/payouts", requireModulePermission("payouts"));
+admin.use("/payouts/*", requireModulePermission("payouts"));
+admin.use("/subscriptions", requireModulePermission("continuation"));
+admin.use("/subscriptions/*", requireModulePermission("continuation"));
+admin.use("/pricing", requireModulePermission("subscription"));
+admin.use("/pricing/*", requireModulePermission("subscription"));
+admin.use("/email-templates", requireModulePermission("email_templates"));
+admin.use("/email-templates/*", requireModulePermission("email_templates"));
+admin.use("/white-label", requireModulePermission("white_label"));
+admin.use("/white-label/*", requireModulePermission("white_label"));
+admin.use("/legacy", requireModulePermission("legacy_management"));
+admin.use("/legacy/*", requireModulePermission("legacy_management"));
+admin.use("/enterprise-api", requireModulePermission("enterprise_api"));
+admin.use("/enterprise-api/*", requireModulePermission("enterprise_api"));
+admin.use("/crypto", requireModulePermission("crypto"));
+admin.use("/crypto/*", requireModulePermission("crypto"));
+admin.use("/admin-accounts", requireModulePermission("admin_team"));
+admin.use("/admin-accounts/*", requireModulePermission("admin_team"));
 // Platform settings sit with admin-team management: the same people own both.
-settings.use("*", requireModulePermission("admin_team"));
-notifications.use("*", requireModulePermission("notifications"));
-concierge.use("*", requireModulePermission("white_glove"));
-whiteGlove.use("*", requireModulePermission("white_glove"));
+admin.use("/settings", requireModulePermission("admin_team"));
+admin.use("/settings/*", requireModulePermission("admin_team"));
+admin.use("/notifications", requireModulePermission("notifications"));
+admin.use("/notifications/*", requireModulePermission("notifications"));
+admin.use("/concierge", requireModulePermission("white_glove"));
+admin.use("/concierge/*", requireModulePermission("white_glove"));
+admin.use("/white-glove", requireModulePermission("white_glove"));
+admin.use("/white-glove/*", requireModulePermission("white_glove"));
 // Entitlement writes are the only way to unlock a paid add-on, so they sit
 // behind the same module gates as the features they unlock: the WL Studio
 // paywall under white_label, the per-user emergency bypass under users.
-wlEntitlements.use("*", requireModulePermission("white_label"));
-drState.use("*", requireModulePermission("users"));
+admin.use("/wl-entitlements", requireModulePermission("white_label"));
+admin.use("/wl-entitlements/*", requireModulePermission("white_label"));
+admin.use("/disaster-recovery", requireModulePermission("users"));
+admin.use("/disaster-recovery/*", requireModulePermission("users"));
 
 admin.route("/analytics", analytics);
 admin.route("/users", users);

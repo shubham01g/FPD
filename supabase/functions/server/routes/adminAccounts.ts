@@ -104,6 +104,11 @@ adminAccounts.patch("/:id", async (c) => {
   if (patch.role === "super_admin" && !canGrantSuperAdmin(actor)) {
     return c.json({ error: "Only a super admin can grant the super_admin role" }, 403);
   }
+  // Suspending yourself locks you out of the portal with no way back in.
+  if (patch.status === "suspended") {
+    const { data: target } = await adminClient().from("admin_accounts").select("email").eq("id", id).maybeSingle();
+    if (target?.email === actor.email) return c.json({ error: "You can't suspend your own admin account" }, 400);
+  }
 
   const { data, error } = await adminClient().from("admin_accounts").update(patch).eq("id", id).select().maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
