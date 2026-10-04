@@ -8,7 +8,7 @@ import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { downloadCSV } from "../../utils/exportCsv";
 import type { AdminPageId } from "./AdminLayout";
-import { ROLE_PRESETS, type AdminRole } from "./AdminRoles";
+import { ROLE_PRESETS, toStoredPermissions, type AdminRole } from "./AdminRoles";
 import { copyToClipboard } from "../../utils/clipboard";
 
 /* ─── Shared styles ───────────────────────────────────────────────── */
@@ -185,7 +185,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     try {
       const res = await adminApi.post<{ account: { id: string }; inviteToken: string; emailed?: boolean; emailError?: string }>("/admin-accounts", {
         name: newAdminName.trim(), email: newAdminEmail.trim(), role: newAdminRole,
-        permissions: ROLE_PRESETS[newAdminRole].permissions,
+        permissions: toStoredPermissions(ROLE_PRESETS[newAdminRole].permissions),
       });
       if (res.emailed) {
         toast.success(`Invite emailed to ${newAdminEmail.trim()}`);

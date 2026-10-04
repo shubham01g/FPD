@@ -50,6 +50,19 @@ const MODULE_DEFS: Omit<ModulePermission, "canView"|"canEdit"|"canDelete">[] = [
   { module:"admin_team",    label:"Admin Team & Roles",       icon:<Crown size={13}/> },
 ];
 
+/* Permissions are saved to the database as plain data. An icon is a React
+   element, which does not survive being saved and read back, so it is left
+   out on the way in and put back from MODULE_DEFS on the way out. */
+export function toStoredPermissions(perms: ModulePermission[]) {
+  return perms.map(({ module, label, canView, canEdit, canDelete }) => ({ module, label, canView, canEdit, canDelete }));
+}
+function withIcons(perms: ModulePermission[]): ModulePermission[] {
+  return perms.map(p => {
+    const def = MODULE_DEFS.find(m => m.module === p.module);
+    return { ...p, label: def?.label ?? p.label ?? p.module, icon: def?.icon ?? null };
+  });
+}
+
 function makePermissions(view: boolean, edit: boolean, del: boolean): ModulePermission[] {
   return MODULE_DEFS.map(m => ({ ...m, canView: view, canEdit: edit, canDelete: del }));
 }
@@ -156,7 +169,7 @@ function initials(name: string): string {
 function fromDB(row: DBAdminAccount): AdminAccount {
   return {
     id: row.id, name: row.name, email: row.email, role: row.role, status: row.status,
-    permissions: row.permissions?.length ? row.permissions : ROLE_PRESETS[row.role].permissions,
+    permissions: row.permissions?.length ? withIcons(row.permissions) : (ROLE_PRESETS[row.role] ?? ROLE_PRESETS.custom).permissions,
     createdAt: new Date(row.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     lastLogin: row.last_login_at ? new Date(row.last_login_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : undefined,
     invitedBy: row.invited_by ?? "System",
@@ -425,7 +438,7 @@ export function AdminRoles() {
   const [createdInviteToken, setCreatedInviteToken] = useState<string | null>(null);
   const [inviteEmailed, setInviteEmailed] = useState(false);
   /* The page an invited admin opens to accept (App.tsx /admin/accept). */
-  const inviteLink = `/admin/accept?id=${createdAdmin?.id ?? ""}&token=${createdInviteToken ?? ""}`;
+  const inviteLink = `${window.location.origin}/admin/accept?id=${createdAdmin?.id ?? ""}&token=${createdInviteToken ?? ""}`;
   const [linkCopied, setLinkCopied] = useState(false);
   // No real session lookup wired to this screen yet — nothing in `admins`
   // is flagged "you" until admin auth carries the caller's own account id through.
@@ -435,7 +448,7 @@ export function AdminRoles() {
     const patch: Record<string, unknown> = {};
     if (changes.role !== undefined) patch.role = changes.role;
     if (changes.status !== undefined) patch.status = changes.status;
-    if (changes.permissions !== undefined) patch.permissions = changes.permissions;
+    if (changes.permissions !== undefined) patch.permissions = toStoredPermissions(changes.permissions);
     if (changes.notes !== undefined) patch.notes = changes.notes;
     try {
       await adminApi.patch(`/admin-accounts/${id}`, patch);
@@ -452,7 +465,7 @@ export function AdminRoles() {
     try {
       const res = await adminApi.post<{ account: DBAdminAccount; inviteToken: string; emailed?: boolean; emailError?: string }>("/admin-accounts", {
         name: newAdmin.name, email: newAdmin.email, role: newAdmin.role, notes: newAdmin.notes,
-        permissions: ROLE_PRESETS[newAdmin.role].permissions,
+        permissions: toStoredPermissions(ROLE_PRESETS[newAdmin.role].permissions),
       });
       setCreatedAdmin(fromDB(res.account));
       setCreatedInviteToken(res.inviteToken);
