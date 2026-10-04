@@ -27,4 +27,17 @@ audit.get("/", async (c) => {
   return c.json({ logs: data, total: count, page, pageSize });
 });
 
+// DELETE /admin/audit — wipes every entry. Gated to roles with 'delete' on the
+// audit module. The auditLog middleware runs after this handler, so the clear
+// itself is the first entry in the fresh log.
+audit.delete("/", async (c) => {
+  // PostgREST refuses an unfiltered delete; this filter matches every row.
+  const { error, count } = await adminClient()
+    .from("audit_logs")
+    .delete({ count: "exact" })
+    .not("id", "is", null);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ cleared: count ?? 0 });
+});
+
 export default audit;

@@ -17,7 +17,7 @@ import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Shield, UserPlus, X,
-  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw, Heart
+  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw, Heart, Trash2
 } from "lucide-react";
 
 // Ticks its own 1s clock so it can show "updated Ns ago" without re-rendering
@@ -985,11 +985,25 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     [],
     ADMIN_LIVE_POLL_MS,
   );
-  const { data: auditData, loading: auditLoading, error: auditError } = useAdminFetch(
+  const { data: auditData, loading: auditLoading, error: auditError, refetch: refetchAudit } = useAdminFetch(
     () => adminApi.get<{ logs: AuditLogRow[]; total: number }>("/audit?pageSize=100"),
     [],
     ADMIN_LIVE_POLL_MS,
   );
+  const [clearingAudit, setClearingAudit] = useState(false);
+  async function clearAudit() {
+    if (!window.confirm("Clear the entire audit log? Every entry is permanently deleted for all admins and cannot be recovered. Export first if you need a copy.")) return;
+    setClearingAudit(true);
+    try {
+      const { cleared } = await adminApi.del<{ cleared: number }>("/audit");
+      toast.success(`Audit log cleared (${cleared} entries removed)`);
+      refetchAudit();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not clear the audit log");
+    } finally {
+      setClearingAudit(false);
+    }
+  }
   const { data: storageData } = useAdminFetch(
     () => adminApi.get<{ perPlan: { plan: string; planName: string; avgUsedGb: number; limitGb: number }[]; totals: { totalStorageGb: number; totalOverageGb: number; avgPerUserGb: number; overageRatePerGb: number | null } }>("/analytics/storage"),
     [],
@@ -1623,7 +1637,15 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
         <div className="rounded-2xl overflow-hidden" style={{border:"1px solid rgba(91,110,225,0.14)"}}>
           <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(91,110,225,0.1)"}}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5"}}>System Audit Log</h3>
-            <span style={{color:"#8A9AB8",fontSize:14,...MONO}}>{auditData?.total ?? 0} entries</span>
+            <div className="flex items-center gap-3">
+              <span style={{color:"#8A9AB8",fontSize:14,...MONO}}>{auditData?.total ?? 0} entries</span>
+              <button onClick={() => void clearAudit()} disabled={clearingAudit || logs.length === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                style={{background:"rgba(252,129,129,0.08)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)",
+                  cursor:clearingAudit || logs.length === 0 ? "not-allowed" : "pointer",opacity:clearingAudit || logs.length === 0 ? 0.5 : 1}}>
+                <Trash2 size={12}/> {clearingAudit ? "Clearing…" : "Clear"}
+              </button>
+            </div>
           </div>
           {auditLoading && <div className="px-5 py-8 text-center" style={{color:"#8A9AB8"}}>Loading audit trail…</div>}
           {auditError && <div className="px-5 py-8 text-center" style={{color:"#FC8181"}}>{auditError}</div>}

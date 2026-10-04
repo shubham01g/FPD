@@ -367,9 +367,23 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   }
 
   /* ── Audit log (real, written by the auditLog middleware) ── */
-  const { data: auditData, loading: auditLoading, error: auditError } = useAdminFetch(
+  const { data: auditData, loading: auditLoading, error: auditError, refetch: refetchAudit } = useAdminFetch(
     () => adminApi.get<{ logs: AuditLogRow[] }>("/audit?pageSize=200"), []);
   const auditLogs = auditData?.logs ?? [];
+  const [clearingAudit, setClearingAudit] = useState(false);
+  async function clearAudit() {
+    if (!window.confirm("Clear the entire audit log? Every entry is permanently deleted for all admins and cannot be recovered. Export first if you need a copy.")) return;
+    setClearingAudit(true);
+    try {
+      const { cleared } = await adminApi.del<{ cleared: number }>("/audit");
+      toast.success(`Audit log cleared (${cleared} entries removed)`);
+      refetchAudit();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not clear the audit log");
+    } finally {
+      setClearingAudit(false);
+    }
+  }
   const [auditSearch, setAuditSearch]   = useState("");
   const [auditSev,    setAuditSev]      = useState("all");
   const severities = [...new Set(auditLogs.map(e => e.severity))];
@@ -855,6 +869,12 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-shrink-0"
               style={{ background: "rgba(159,122,234,0.08)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
               <Download size={12}/> Export
+            </button>
+            <button onClick={() => void clearAudit()} disabled={clearingAudit || auditLogs.length === 0}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-shrink-0"
+              style={{ background: "rgba(252,129,129,0.08)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.2)",
+                cursor: clearingAudit || auditLogs.length === 0 ? "not-allowed" : "pointer", opacity: clearingAudit || auditLogs.length === 0 ? 0.5 : 1 }}>
+              <Trash2 size={12}/> {clearingAudit ? "Clearing…" : "Clear"}
             </button>
           </div>
           <div style={{ overflowX: "auto" }}>
