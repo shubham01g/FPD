@@ -1023,9 +1023,9 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     storageData?.totals.avgPerUserGb ?? null,
   );
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; badge?: string }[] = [
+  const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id:"overview",     label:"Overview",        icon:<BarChart3 size={13}/> },
-    { id:"analytics",    label:"Analytics",       icon:<Globe size={13}/>, badge:"New" },
+    { id:"analytics",    label:"Analytics",       icon:<Globe size={13}/> },
     { id:"users",        label:"Users",           icon:<Users size={13}/> },
     { id:"revenue",      label:"Revenue",         icon:<DollarSign size={13}/> },
     { id:"storage",      label:"Storage",         icon:<HardDrive size={13}/> },
@@ -1033,10 +1033,10 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     { id:"payouts",      label:"Payouts",         icon:<TrendingUp size={13}/> },
     { id:"continuation", label:"Continuation Vault", icon:<DollarSign size={13}/> },
     { id:"audit",        label:"Audit Log",       icon:<Shield size={13}/> },
-    { id:"system_health",label:"System Health",   icon:<Activity size={13}/>, badge:"Live" },
-    { id:"disaster_recovery", label:"Disaster Recovery", icon:<ShieldAlert size={13}/>, badge:"DR" },
-    { id:"notifications",label:"Push Notifications",icon:<Bell size={13}/>, badge:"NEW" },
-    { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/>,   badge:"New" },
+    { id:"system_health",label:"System Health",   icon:<Activity size={13}/> },
+    { id:"disaster_recovery", label:"Disaster Recovery", icon:<ShieldAlert size={13}/> },
+    { id:"notifications",label:"Push Notifications",icon:<Bell size={13}/> },
+    { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/> },
     { id:"reports",      label:"Reports & Downloads", icon:<Download size={13}/> },
   ];
 
@@ -1126,9 +1126,6 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm transition-all"
             style={{ background:tab===t.id?"linear-gradient(180deg,#7E6BD8,#5B6EE1)":"transparent", color:tab===t.id?"#fff":"#8A9AB8", fontWeight:tab===t.id?700:500, whiteSpace:"nowrap" }}>
             {t.icon} {t.label}
-            {t.badge && (
-              <span style={{ fontSize:10.5, fontWeight:700, padding:"1px 6px", borderRadius:99, background:tab===t.id?"rgba(255,255,255,0.22)":"rgba(91,110,225,0.2)", color:tab===t.id?"#fff":"#AEB9F5" }}>{t.badge}</span>
-            )}
           </button>
         ))}
       </div>
