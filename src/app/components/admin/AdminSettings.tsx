@@ -216,6 +216,16 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     }
   };
 
+  const reactivateAdmin = async (a: AdminAccountRow) => {
+    try {
+      await adminApi.patch(`/admin-accounts/${a.id}`, { status: "active" });
+      toast.success(`${a.name}'s admin access restored`);
+      refetchAdmins();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not reactivate this admin");
+    }
+  };
+
   /* ── System health: the same real probes as Master Admin → System Health ── */
   const [health, setHealth] = useState<Record<string, { ok: boolean; ms: number }>>({});
   useEffect(() => {
@@ -684,6 +694,13 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
                     <div style={{ fontSize: 10, color: "#8A9AB8", ...MONO }}>LAST LOGIN</div>
                     <div style={{ fontSize: 11, color: "#A3ADC9" }}>{fmtWhen(a.last_login_at)}</div>
                   </div>
+                  {a.status === "suspended" && (
+                    <button onClick={() => void reactivateAdmin(a)}
+                      style={{ color: "#5FBE91", background: "rgba(95,190,145,0.08)", border: "1px solid rgba(95,190,145,0.25)",
+                        borderRadius: 8, padding: "6px 12px", cursor: "pointer", flexShrink: 0, fontSize: 12, fontWeight: 600 }}>
+                      Reactivate
+                    </button>
+                  )}
                   {a.status !== "suspended" && (
                     <button onClick={() => void removeAdmin(a)} title="Remove admin access"
                       style={{ color: "#FC8181", background: "rgba(252,129,129,0.07)", border: "1px solid rgba(252,129,129,0.15)",

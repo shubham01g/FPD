@@ -1436,8 +1436,8 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                   <label style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>STATUS</label>
                   <select value={userStatusFilter} onChange={e=>setUserStatusFilter(e.target.value)} style={{ width:"100%", marginBottom:10, background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", borderRadius:8, padding:"6px 8px", fontSize:15 }}>
                     <option value="">All Statuses</option>
-                    {["active","paused","cancelled","past_due"].map(s=>(
-                      <option key={s} value={s}>{s}</option>
+                    {/* A suspended account is stored as plan_status "paused". */ ([["active","Active"],["paused","Suspended"],["cancelled","Cancelled"],["past_due","Past due"]] as const).map(([s,label])=>(
+                      <option key={s} value={s}>{label}</option>
                     ))}
                   </select>
                   {(userPlanFilter||userStatusFilter) && (
@@ -1486,7 +1486,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                 <span className="px-2 py-0.5 rounded text-xs" style={{background:"rgba(91,110,225,0.1)",color:"#6E90C9",...MONO,fontSize:12.5}}>{user.plan}</span>
                 <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{usedGb} GB</span>
                 <span style={{color:"#E8EDF5",fontSize:15,...MONO}}>{user.contact_count}</span>
-                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:isActive?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:isActive?"#D99A6B":"#FC8181",...MONO,fontSize:11}}>{user.plan_status.toUpperCase()}</span>
+                <span className="px-2 py-0.5 rounded text-xs font-bold" style={{background:isActive?"rgba(72,187,120,0.12)":"rgba(252,129,129,0.12)",color:isActive?"#D99A6B":"#FC8181",...MONO,fontSize:11}}>{user.plan_status === "paused" ? "SUSPENDED" : user.plan_status.replace("_"," ").toUpperCase()}</span>
                 <div className="flex items-center gap-2">
                   <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
                   <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#8A9AB8"}}><Edit size={13}/></button>

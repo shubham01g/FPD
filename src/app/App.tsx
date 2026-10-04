@@ -11,7 +11,7 @@ import { PortalNotice } from "./components/PortalNotice";
 import { usePlatform, hiddenPages } from "./services/platform";
 import { adminApi } from "./services/adminApi";
 import { useAdminFetch } from "./hooks/useAdminFetch";
-import { Wrench, Heart, UserX } from "lucide-react";
+import { Wrench, Heart, UserX, Lock } from "lucide-react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
@@ -426,6 +426,16 @@ function UserRoute() {
     return (
       <PortalNotice icon={<Heart size={30} color="#FC8181"/>} kicker="ACCOUNT FROZEN" title="This account has been frozen"
         body={"Final Pass Down has been notified that this account holder has passed away, so the account can no longer be signed in to.\n\nIf you are a legacy contact, please use the secure claim link sent to you. If this is a mistake, contact Final Pass Down support."}
+        actionLabel="Sign out" onAction={leave}/>
+    );
+  }
+
+  // Suspended by an admin (Master Admin → Users → Suspend Account). The data
+  // is kept; the account simply can't be used until an admin reinstates it.
+  if (user.suspended) {
+    return (
+      <PortalNotice icon={<Lock size={30} color="#D9A55E"/>} kicker="ACCOUNT SUSPENDED" title="This account is suspended"
+        body={"Your Final Pass Down account has been suspended, so it can't be used right now. Nothing in it has been deleted.\n\nIf you think this is a mistake, please contact Final Pass Down support."}
         actionLabel="Sign out" onAction={leave}/>
     );
   }

@@ -76,6 +76,8 @@ export interface UserProfile {
   /* Set once an admin marks the account holder deceased (migration 027);
      the portal is frozen from then on. */
   deceasedAt: string | null;
+  /** Suspended by an admin (Master Admin → Users). Stored as plan_status "paused". */
+  suspended: boolean;
   /* Demographics (migration 020) — feed the admin Analytics tab. Blank for
      any account that hasn't filled them in; editable in Account Settings. */
   gender: string; birthdate: string; country: string; referralSource: string;
@@ -87,7 +89,7 @@ const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
-  starterStartedAt: null, deceasedAt: null,
+  starterStartedAt: null, deceasedAt: null, suspended: false,
   gender: "", birthdate: "", country: "", referralSource: "",
 };
 
@@ -291,6 +293,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           avatar: initials(userRes.data.full_name),
           starterStartedAt: userRes.data.starter_started_at ?? null,
           deceasedAt: userRes.data.deceased_at ?? null,
+        suspended: userRes.data.plan_status === "paused",
           gender: userRes.data.gender ?? "", birthdate: userRes.data.birthdate ?? "",
           country: userRes.data.country ?? "", referralSource: userRes.data.referral_source ?? "",
         });
