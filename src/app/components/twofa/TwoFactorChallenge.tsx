@@ -2,7 +2,7 @@
  * The code screen shown between "password accepted" and "you're in".
  *
  * Deliberately dumb: it collects a code and hands it to the caller. Each login
- * surface owns its own verification (native factor vs Twilio Verify) but they
+ * surface owns its own verification (native factor vs emailed code) but they
  * all show this, so the user, admin and concierge sign-ins cannot drift apart
  * the way they did before 2FA existed.
  *

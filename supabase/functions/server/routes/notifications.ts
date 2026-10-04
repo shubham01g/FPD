@@ -2,6 +2,7 @@ import { Hono } from "npm:hono";
 import webpush from "npm:web-push@3.6.7";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
+import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, sendEmail, testEmail } from "../lib/email.ts";
 
 const notifications = new Hono();
 
@@ -26,6 +27,23 @@ const TYPE_MAP: Record<string, "info" | "warning" | "success" | "error"> = {
 };
 
 // GET /admin/notifications — sent campaign history
+// POST /admin/notifications/test-email { to? }
+// Confirms SendGrid delivery end to end (key, sender domain, inbox placement).
+// Defaults to the calling admin's own address.
+notifications.post("/test-email", async (c) => {
+  const admin = c.get("admin") as AdminUser;
+  if (!EMAIL_CONFIGURED) return c.json({ error: EMAIL_NOT_CONFIGURED_MESSAGE }, 503);
+  const body = await c.req.json().catch(() => ({}));
+  const to = typeof body.to === "string" && body.to.includes("@") ? body.to.trim() : admin.email;
+  try {
+    await sendEmail({ to, ...testEmail() });
+  } catch (err) {
+    console.error("test email failed", err);
+    return c.json({ error: String(err instanceof Error ? err.message : err) }, 502);
+  }
+  return c.json({ sent: true, to });
+});
+
 notifications.get("/", async (c) => {
   const { data, error } = await adminClient()
     .from("push_notifications")
