@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from "react-router";
 import { Toaster } from "sonner";
 import { supabase } from "./services/supabase";
 import { trackPageView, trackHeartbeat, HEARTBEAT_INTERVAL_MS } from "./services/engagement";
-import { DemoProvider } from "./context/DemoContext";
+import { DemoProvider, useDemo } from "./context/DemoContext";
+import { StarterUpgradeWall, StarterCountdownBanner } from "./components/StarterUpgradeWall";
+import { starterDaysLeft } from "./utils/starterPlan";
+import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
+import { PortalNotice } from "./components/PortalNotice";
+import { usePlatform, hiddenPages } from "./services/platform";
+import { adminApi } from "./services/adminApi";
+import { useAdminFetch } from "./hooks/useAdminFetch";
+import { Wrench, Heart, UserX } from "lucide-react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
@@ -58,6 +66,8 @@ import { AIAgent } from "./components/AIAgent";
 import { AdminLogin } from "./components/admin/AdminLogin";
 import { AdminLayout, type AdminPageId } from "./components/admin/AdminLayout";
 import { MasterAdmin } from "./components/admin/MasterAdmin";
+import { AdminSettings } from "./components/admin/AdminSettings";
+import { PaymentProcessors } from "./components/admin/PaymentProcessors";
 import { IDVerification } from "./components/admin/IDVerification";
 import { PayoutManagement } from "./components/admin/PayoutManagement";
 import { SubscriptionConfig } from "./components/admin/SubscriptionConfig";
@@ -349,6 +359,15 @@ function UserLoginRoute() {
 
 function UserSignupRoute() {
   const navigate = useNavigate();
+  // System → Settings → Feature Flags → Public Signup.
+  const platform = usePlatform();
+  if (platform.ready && !platform.flags.publicSignup) {
+    return (
+      <PortalNotice icon={<UserX size={30} color="#D9A55E"/>} kicker="SIGN-UPS CLOSED" title="New accounts are not open right now"
+        body="Final Pass Down is not accepting new sign-ups at the moment. If you already have an account you can still sign in."
+        actionLabel="Go to sign in" onAction={() => navigate("/login")}/>
+    );
+  }
   return (
     <div className="size-full">
       <UserSignup
@@ -364,6 +383,8 @@ function UserSignupRoute() {
 function UserRoute() {
   const navigate = useNavigate();
   const { session, authUser, loading, twoFactorPending, refreshTwoFactor } = useAuth();
+  const { user } = useDemo();
+  const platform = usePlatform();
   /* The portal's page is component state rather than a route, so the PWA
      manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
      target in as a query param. Read once, for the initial value only —
@@ -395,8 +416,39 @@ function UserRoute() {
   // factor — the sign-in screen's own challenge never ran for it.
   if (twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/login")}/>;
 
+  const leave = () => { signOut(); navigate("/"); };
+
+  // An account marked deceased by an admin is frozen: nothing in it can be
+  // opened or changed from its own sign-in. Legacy contacts reach it through
+  // the claim process instead.
+  if (user.deceasedAt) {
+    return (
+      <PortalNotice icon={<Heart size={30} color="#FC8181"/>} kicker="ACCOUNT FROZEN" title="This account has been frozen"
+        body={"Final Pass Down has been notified that this account holder has passed away, so the account can no longer be signed in to.\n\nIf you are a legacy contact, please use the secure claim link sent to you. If this is a mistake, contact Final Pass Down support."}
+        actionLabel="Sign out" onAction={leave}/>
+    );
+  }
+
+  // System → Settings → General → Maintenance Mode.
+  if (platform.maintenance) {
+    return (
+      <PortalNotice icon={<Wrench size={30} color="#D9A55E"/>} kicker="MAINTENANCE" title="We'll be right back"
+        body={platform.maintenanceMsg || "We're performing scheduled maintenance. We'll be back shortly."}
+        actionLabel="Sign out" onAction={leave}/>
+    );
+  }
+
+  // Pages whose feature flag is switched off fall back to the dashboard.
+  const hidden = hiddenPages(platform.flags);
+
+  // Starter is a 14-day introductory plan (migration 026). Once it runs out
+  // the portal is replaced by the upgrade screen until a bigger plan is chosen.
+  const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
+  if (starterDays === 0) return <StarterUpgradeWall onSignOut={() => { signOut(); navigate("/"); }}/>;
+
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
+    if (hidden.has(userPage)) return <UserDashboard onNavigate={nav}/>;
     switch (userPage) {
       case "dashboard":           return <UserDashboard onNavigate={nav}/>;
       case "file-cabinet":        return <DigitalFileCabinet/>;
@@ -433,7 +485,7 @@ function UserRoute() {
       // legacy-verification merged into contacts-legacy
       case "organize":            return <OrganizeHub onNavigate={nav}/>;
       case "calendar":            return <LifeCalendar onNavigate={nav}/>;
-      case "storage-usage":       return <StorageUsage/>;
+      case "storage-usage":       return <StorageUsage onNavigate={nav}/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;
       case "waiver-sign":         return <div className="p-6"><WaiverSignPage onBack={() => nav("dashboard")}/></div>;
@@ -451,9 +503,12 @@ function UserRoute() {
         onGoAdmin={() => navigate("/admin/login")}
         onSignOut={() => { signOut(); navigate("/"); }}
       >
+        {starterDays !== null && userPage !== "storage-usage" && (
+          <StarterCountdownBanner daysLeft={starterDays} onUpgrade={() => setUserPage("storage-usage")}/>
+        )}
         {renderUserPage()}
       </Layout>
-      {userPage !== "fpd-ai" && <AIAgent/>}
+      {userPage !== "fpd-ai" && platform.flags.aiAssistant && <AIAgent/>}
       <DemoBar/>
     </div>
   );
@@ -478,11 +533,31 @@ function AdminRoute() {
   const navigate = useNavigate();
   const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
 
-  if (!isAdminAuthed()) return <Navigate to="/admin/login" replace/>;
+  // System → Settings → Security → Session Timeout: sign an idle admin out.
+  const authed = isAdminAuthed();
+  const { data: settingsData } = useAdminFetch(
+    () => authed
+      ? adminApi.get<{ settings: { security?: { sessionTimeout?: string } } }>("/settings")
+      : Promise.resolve({ settings: {} as { security?: { sessionTimeout?: string } } }),
+    [authed],
+  );
+  const timeoutMinutes = Number(settingsData?.settings.security?.sessionTimeout);
+  useEffect(() => {
+    if (!authed || !Number.isFinite(timeoutMinutes) || timeoutMinutes <= 0) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const expire = () => { supabase.auth.signOut(); clearAdminAuthed(); navigate("/admin/login"); };
+    const reset = () => { clearTimeout(timer); timer = setTimeout(expire, timeoutMinutes * 60_000); };
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"] as const;
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => { clearTimeout(timer); events.forEach(e => window.removeEventListener(e, reset)); };
+  }, [authed, timeoutMinutes, navigate]);
+
+  if (!authed) return <Navigate to="/admin/login" replace/>;
 
   const renderAdminPage = () => {
     switch (adminPage) {
-      case "master-admin":        return <MasterAdmin/>;
+      case "master-admin":        return <MasterAdmin onNavigate={setAdminPage}/>;
       case "admin-affiliate":     return <AffiliateAdmin/>;
       case "admin-partnership":   return <PartnershipAdmin/>;
       case "id-verification":     return <IDVerification/>;
@@ -491,12 +566,14 @@ function AdminRoute() {
       case "enterprise-api":      return <EnterpriseAPI/>;
       case "email-templates":     return <EmailTemplates/>;
       case "white-label":             return <WhiteLabelConfig/>;
-      case "continuation-fee-admin":  return <ContinuationFeeAdmin/>;
+      case "continuation-fee-admin":  return <ContinuationFeeAdmin view="config"/>;
       case "partner-onboarding-admin":  return <PartnerOnboardingAdmin/>;
       case "white-glove-admin":         return <WhiteGloveAdmin/>;
       case "crypto-merchant":           return <CryptoMerchant/>;
       case "admin-roles":               return <AdminRoles/>;
-      default:                          return <MasterAdmin/>;
+      case "admin-settings":            return <AdminSettings onNavigate={setAdminPage}/>;
+      case "payment-processors":        return <PaymentProcessors/>;
+      default:                          return <MasterAdmin onNavigate={setAdminPage}/>;
     }
   };
 
@@ -516,6 +593,9 @@ function AdminRoute() {
 
 /* ── Partner onboarding (public standalone page) ── */
 function PartnerRoute() {
+  // System → Settings → Feature Flags → Partner Portal.
+  const platform = usePlatform();
+  if (platform.ready && !platform.flags.partnerPortal) return <Navigate to="/" replace/>;
   return (
     <div className="size-full overflow-y-auto">
       <PartnerOnboarding />
@@ -526,6 +606,8 @@ function PartnerRoute() {
 
 /* ── White label reseller application (public standalone page — no existing account needed) ── */
 function WhiteLabelOnboardRoute() {
+  const platform = usePlatform();
+  if (platform.ready && !platform.flags.partnerPortal) return <Navigate to="/" replace/>;
   return (
     <div className="size-full overflow-y-auto">
       <WhiteLabelOnboarding />
@@ -583,6 +665,17 @@ function ConciergeRoute() {
 }
 
 /* ── White Glove client document submission (token-based, no login) ── */
+/* ── Legacy Claim Portal — public, opened from the link an admin issues ── */
+function LegacyClaimRoute() {
+  const { token } = useParams();
+  if (!token) return <Navigate to="/" replace/>;
+  return (
+    <div className="size-full overflow-y-auto">
+      <LegacyClaimSubmit token={token}/>
+    </div>
+  );
+}
+
 function DocSubmitRoute() {
   // The real client flow is token-based and lives elsewhere; this route only
   // ever hosted the demo client picker, so without it there is nothing here.
@@ -610,6 +703,7 @@ function AppShell() {
       <Route path="/concierge" element={<ConciergeRoute/>}/>
       <Route path="/documents/submit" element={<DocSubmitRoute/>}/>
       <Route path="/schedule" element={<WGScheduleDemo/>}/>
+      <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
   );

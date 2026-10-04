@@ -84,6 +84,10 @@ export interface DBUser {
   stripe_customer_id?: string; stripe_subscription_id?: string;
   is_admin: boolean; email_verified: boolean; two_fa_enabled: boolean;
   created_at: string;
+  /* When the 14-day Starter clock started (migration 026). */
+  starter_started_at?: string | null;
+  /* Set when an admin marks the account holder deceased (migration 027). */
+  deceased_at?: string | null;
   /* Credential-vault key material (migration 014). Both NULL until the user
      sets a passphrase, which is how the app tells "never set up" from
      "set up, currently locked". Neither can decrypt anything on its own —

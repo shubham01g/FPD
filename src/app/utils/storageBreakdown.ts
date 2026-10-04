@@ -84,3 +84,47 @@ export function deriveStorageBreakdown(docs: SizedDoc[]): StorageCategory[] {
     }))
     .sort((a, b) => b.gb - a.gb);
 }
+
+/** A sized document that also carries when it was uploaded (ISO). */
+export interface DatedDoc extends SizedDoc {
+  uploadedAt: string;
+}
+
+export interface MonthlyUsage {
+  month: string;
+  used: number;
+}
+
+/**
+ * Storage held at the end of each of the last `months` months (the current
+ * month runs to today), built from each document's upload date.
+ *
+ * `storage_usage` has no rows to chart, so the history is reconstructed from
+ * the documents themselves. Known limit: a file deleted since is gone from
+ * every month, so past bars can read lower than they really were.
+ */
+export function deriveMonthlyUsage(docs: DatedDoc[], months = 6, now = new Date()): MonthlyUsage[] {
+  const out: MonthlyUsage[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    const gb = docs.reduce((sum, d) => (new Date(d.uploadedAt) < nextMonthStart ? sum + toGb(d) : sum), 0);
+    out.push({
+      month: monthStart.toLocaleDateString("en-US", { month: "short" }),
+      used: Math.round(gb * 100) / 100,
+    });
+  }
+  return out;
+}
+
+/**
+ * Projected storage at the end of the current month: what is stored now plus
+ * this month's upload pace carried through the days that remain.
+ */
+export function projectEndOfMonth(docs: DatedDoc[], usedGb: number, now = new Date()): number {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const addedThisMonth = docs.reduce((sum, d) => (new Date(d.uploadedAt) >= monthStart ? sum + toGb(d) : sum), 0);
+  const perDay = addedThisMonth / now.getDate();
+  return Math.round((usedGb + perDay * (daysInMonth - now.getDate())) * 100) / 100;
+}

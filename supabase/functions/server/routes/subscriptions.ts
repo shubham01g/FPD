@@ -17,7 +17,24 @@ subscriptions.get("/", async (c) => {
 
   const { data, error } = await q;
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ fees: data });
+
+  // A paid fee is "ready to activate" once a legacy claim on that account has
+  // been approved (Master Admin → Legacy Claims).
+  const { data: approved, error: claimErr } = await adminClient()
+    .from("legacy_claims")
+    .select("owner_user_id, death_cert_override")
+    .eq("status", "approved");
+  if (claimErr) return c.json({ error: claimErr.message }, 500);
+  // owner → whether their approved claim still lacks the death certificate
+  const approvedOwners = new Map((approved ?? []).map((r) => [r.owner_user_id, Boolean(r.death_cert_override)]));
+
+  return c.json({
+    fees: (data ?? []).map((f) => ({
+      ...f,
+      claim_approved: approvedOwners.has(f.user_id),
+      death_cert_override: approvedOwners.get(f.user_id) ?? false,
+    })),
+  });
 });
 
 // POST /admin/subscriptions/:id/activate

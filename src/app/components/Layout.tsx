@@ -14,6 +14,7 @@ import { InstallApp } from "./InstallApp";
 import { OfflineBanner } from "./OfflineBanner";
 import { useOnline } from "../hooks/useNetStatus";
 import { useDemo } from "../context/DemoContext";
+import { usePlatform, hiddenPages } from "../services/platform";
 
 export type PageId =
   | "dashboard"
@@ -207,13 +208,16 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
   const storagePct = Math.min(100, Math.round((user.storageUsed / user.storageLimit) * 100));
 
   /* Filter nav by search query */
+  // Pages whose feature flag is switched off in System → Settings disappear
+  // from the sidebar (App.tsx guards the page itself).
+  const { flags } = usePlatform();
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return navGroups;
+    const hidden = hiddenPages(flags);
     return navGroups
-      .map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q)) }))
+      .map(g => ({ ...g, items: g.items.filter(i => !hidden.has(i.id) && (!q || i.label.toLowerCase().includes(q))) }))
       .filter(g => g.items.length > 0);
-  }, [query]);
+  }, [query, flags]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {

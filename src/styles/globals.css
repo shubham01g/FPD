@@ -129,6 +129,9 @@ select.fpd-field {
   background-position: right 13px center;
 }
 select.fpd-field option { background: #101728; color: #FFFFFF; }
+/* For selects with their own translucent inline background (signup): the
+   option list can't inherit that, so it would otherwise open white. */
+select.fpd-select-dark option { background: #101728; color: #FFFFFF; }
 
 /* ── Thin brand scrollbar — for sidebar, panels, dropdowns ── */
 .fpd-scroll { scrollbar-width: thin; scrollbar-color: rgba(91,110,225,0.4) transparent; }

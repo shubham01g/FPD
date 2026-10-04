@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
+import { billing } from "../services/billing";
 import { useAuth } from "./AuthContext";
 import {
   db, supabase, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
@@ -11,6 +12,9 @@ import {
 export interface Doc {
   id: string; name: string; category: string; size: number; sizeUnit: "MB"|"GB";
   uploaded: string; type: string; status: "verified"|"pending"|"rejected"; encrypted: boolean;
+  /* Raw upload timestamp (ISO). `uploaded` is display text; this is what
+     usage-over-time is derived from — see utils/storageBreakdown.ts. */
+  uploadedAt: string;
   /* Storage path in the private vault-documents bucket. Needed to actually
      preview/download the file — see rowToDoc. */
   filePath: string;
@@ -66,6 +70,12 @@ export interface UserProfile {
   name: string; email: string; phone: string;
   plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   storageUsed: number; storageLimit: number; avatar: string;
+  /* When the 14-day Starter clock started (migration 026); null if the
+     account has never been on Starter. See utils/starterPlan.ts. */
+  starterStartedAt: string | null;
+  /* Set once an admin marks the account holder deceased (migration 027);
+     the portal is frozen from then on. */
+  deceasedAt: string | null;
   /* Demographics (migration 020) — feed the admin Analytics tab. Blank for
      any account that hasn't filled them in; editable in Account Settings. */
   gender: string; birthdate: string; country: string; referralSource: string;
@@ -77,6 +87,7 @@ const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
+  starterStartedAt: null, deceasedAt: null,
   gender: "", birthdate: "", country: "", referralSource: "",
 };
 
@@ -119,7 +130,7 @@ function rowToDoc(row: DBDocument): Doc {
   return {
     id: row.id, name: row.name, category: row.category,
     size: Number((useGb ? mb / 1024 : mb).toFixed(1)), sizeUnit: useGb ? "GB" : "MB",
-    uploaded: formatDate(row.uploaded_at), type: row.file_type,
+    uploaded: formatDate(row.uploaded_at), uploadedAt: row.uploaded_at, type: row.file_type,
     status: row.status, encrypted: row.is_encrypted, filePath: row.file_path,
   };
 }
@@ -185,7 +196,9 @@ interface DemoCtx {
   funeralPlan: FuneralPlan;
   emergencyInfo: EmergencyInfo;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
-  addDoc: (doc: Omit<Doc,"id"|"uploaded"|"filePath">, file?: File) => Promise<void>;
+  /** Switches the account's plan. Resolves true when the change landed. */
+  changePlan: (plan: UserProfile["plan"], planName: string) => Promise<boolean>;
+  addDoc: (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
   addContact: (c: Omit<Contact,"id">) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
@@ -276,6 +289,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           name: userRes.data.full_name, email: userRes.data.email, phone: userRes.data.phone ?? "",
           plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: PLAN_STORAGE_GB[userRes.data.plan],
           avatar: initials(userRes.data.full_name),
+          starterStartedAt: userRes.data.starter_started_at ?? null,
+          deceasedAt: userRes.data.deceased_at ?? null,
           gender: userRes.data.gender ?? "", birthdate: userRes.data.birthdate ?? "",
           country: userRes.data.country ?? "", referralSource: userRes.data.referral_source ?? "",
         });
@@ -327,8 +342,34 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Profile updated", { id: tid });
   }, [uid]);
 
+  /* Separate from updateUser, which rewrites the whole profile. When Stripe
+     is the connected, active processor the browser is sent to Stripe Checkout
+     and the plan only changes once the signed webhook confirms payment. With
+     no processor connected there is nothing to charge through, so the plan
+     column is switched directly. */
+  const changePlan = useCallback(async (plan: UserProfile["plan"], planName: string) => {
+    if (!uid) return false;
+    if ((await billing.status()).checkoutEnabled) {
+      const tid = toast.loading(`Opening secure checkout for ${planName}...`);
+      try {
+        const { url } = await billing.planCheckout(plan);
+        window.location.assign(url);
+        return false; // not changed yet — the webhook does that after payment
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
+        return false;
+      }
+    }
+    const tid = toast.loading(`Switching to ${planName}...`);
+    const { error } = await db.updateUser(uid, { plan: plan as DBUser["plan"] });
+    if (error) { toast.error(`Could not change plan: ${error.message}`, { id: tid }); return false; }
+    setUser(u => ({ ...u, plan, storageLimit: PLAN_STORAGE_GB[plan] }));
+    toast.success(`You're now on ${planName}`, { id: tid });
+    return true;
+  }, [uid]);
+
   /* Docs */
-  const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded"|"filePath">, file?: File) => {
+  const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => {
     if (!uid) return;
     const tid = toast.loading("Uploading document...");
     try {
@@ -609,7 +650,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     <DemoContext.Provider value={{
       user, docs, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       funeralPlan, emergencyInfo,
-      updateUser, addDoc, deleteDoc, addContact, removeContact, updateContact,
+      updateUser, changePlan, addDoc, deleteDoc, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,

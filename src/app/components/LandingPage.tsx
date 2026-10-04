@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useWLPackages } from "../context/WLPackagesContext";
 import type { WLPackage } from "../services/wlPackages";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
+import { usePlatform } from "../services/platform";
 import {
   Shield, Lock, Archive, Users, ArrowRight, CheckCircle2, Heart,
   KeyRound, Camera, Menu, X, Play, ChevronRight, ChevronDown,
@@ -735,6 +736,7 @@ function formatStorage(gb: number): string {
 }
 
 function Pricing({ onStart }: { onStart: () => void }) {
+  const { starterTrialDays } = usePlatform();
   const [annual, setAnnual] = useState(false);
 
   const { data } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
@@ -773,6 +775,9 @@ function Pricing({ onStart }: { onStart: () => void }) {
                 <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
               </div>
               <div style={{ color: MUTED, fontSize: 16, marginBottom: 10 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>
+              {plan.id === "starter" && (
+                <div style={{ color: plan.color, fontSize: 15, marginBottom: 10 }}>Available for your first {starterTrialDays} days, then upgrade to a bigger plan.</div>
+              )}
               <div style={{ ...MONO, color: MUTED, fontSize: 12.5, marginBottom: 22, padding: "4px 10px", background: "rgba(91,110,225,0.06)", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 4, width: "fit-content" }}>
                 <span>Overage:</span>
                 <span style={{ color: plan.color, fontWeight: 700 }}>${plan.overage.toFixed(2)}/GB</span>

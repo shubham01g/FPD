@@ -7,6 +7,7 @@ import { requireAdmin } from "./middleware/adminAuth.ts";
 import { requireUser } from "./middleware/userAuth.ts";
 import { auditLog } from "./middleware/auditLog.ts";
 import { requireModulePermission } from "./middleware/modulePermission.ts";
+import { ipAllowlist } from "./middleware/ipAllowlist.ts";
 
 import analytics from "./routes/analytics.ts";
 import users from "./routes/users.ts";
@@ -29,6 +30,8 @@ import whiteGlove from "./routes/whiteGlove.ts";
 import { wlEntitlements, drState } from "./routes/entitlements.ts";
 import publicRoutes from "./routes/public.ts";
 import twoFactor from "./routes/twoFactor.ts";
+import settings from "./routes/settings.ts";
+import billing from "./routes/billing.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -64,6 +67,8 @@ app.get(`${BASE}/health`, (c) => {
 // API directly as they would from a hidden UI button.
 const admin = new Hono();
 admin.use("*", requireAdmin);
+// System → Settings → Security → IP Allowlist (no-op while the list is empty).
+admin.use("*", ipAllowlist);
 admin.use("*", auditLog);
 
 // Each router gets its own module gate before being mounted.
@@ -82,6 +87,8 @@ legacy.use("*", requireModulePermission("legacy_management"));
 enterpriseApi.use("*", requireModulePermission("enterprise_api"));
 cryptoConfig.use("*", requireModulePermission("crypto"));
 adminAccounts.use("*", requireModulePermission("admin_team"));
+// Platform settings sit with admin-team management: the same people own both.
+settings.use("*", requireModulePermission("admin_team"));
 notifications.use("*", requireModulePermission("notifications"));
 concierge.use("*", requireModulePermission("white_glove"));
 whiteGlove.use("*", requireModulePermission("white_glove"));
@@ -106,6 +113,7 @@ admin.route("/legacy", legacy);
 admin.route("/enterprise-api", enterpriseApi);
 admin.route("/crypto", cryptoConfig);
 admin.route("/admin-accounts", adminAccounts);
+admin.route("/settings", settings);
 admin.route("/notifications", notifications);
 admin.route("/concierge", concierge);
 admin.route("/white-glove", whiteGlove);
@@ -120,6 +128,7 @@ app.route(`${BASE}/admin`, admin);
 const account = new Hono();
 account.use("*", requireUser);
 account.route("/2fa", twoFactor);
+account.route("/billing", billing);
 app.route(`${BASE}/account`, account);
 
 // Public, unauthenticated data for the customer-facing app.

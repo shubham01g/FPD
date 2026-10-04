@@ -25,9 +25,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new PublicApiError(0, "No Supabase project connected (VITE_SUPABASE_URL is not set)");
   }
 
+  // A FormData body must set its own multipart Content-Type (with boundary).
+  const isForm = init?.body instanceof FormData;
   const res = await fetch(`${FUNCTIONS_BASE}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: { ...(isForm ? {} : { "Content-Type": "application/json" }), ...(init?.headers ?? {}) },
   });
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json().catch(() => null) : null;
@@ -46,4 +48,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const publicApi = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, data?: unknown) => request<T>(path, { method: "POST", body: data ? JSON.stringify(data) : undefined }),
+  /** Multipart submission (file uploads). */
+  upload: <T>(path: string, form: FormData) => request<T>(path, { method: "POST", body: form }),
 };

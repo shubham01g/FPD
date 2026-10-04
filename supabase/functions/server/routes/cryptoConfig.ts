@@ -108,6 +108,19 @@ cryptoConfig.get("/", async (c) => {
   return c.json({ processors, settings: settings ?? [] });
 });
 
+// GET /admin/crypto/payments — the latest recorded payments, for the Payment
+// Processors screen's Transactions tab and month-to-date totals.
+cryptoConfig.get("/payments", async (c) => {
+  const { data, error } = await adminClient()
+    .from("payments")
+    .select("id, type, amount_usd, currency, status, description, created_at, users:user_id(full_name, email)")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ payments: data });
+});
+
 // PATCH /admin/crypto/processors/:id — credentials, enabled, default
 //
 // Config merge rules, so a partially filled form can't wipe stored secrets:
@@ -188,6 +201,89 @@ cryptoConfig.patch("/processors/:id", async (c) => {
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: `Unknown processor: ${id}` }, 404);
   return c.json({ processor: await toClient(data as ProcessorRow) });
+});
+
+// POST /admin/crypto/processors/:id/test — a real call to the processor with
+// the stored credentials. Only processors with a cheap read-only endpoint are
+// checked; the rest say so instead of pretending.
+cryptoConfig.post("/processors/:id/test", async (c) => {
+  const id = c.req.param("id");
+  const { data, error } = await adminClient()
+    .from("crypto_processor_configs")
+    .select(PROCESSOR_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) return c.json({ error: error.message }, 500);
+  if (!data) return c.json({ error: `Unknown processor: ${id}` }, 404);
+
+  const config = await readConfig(data as ProcessorRow);
+  const fail = (message: string) => c.json({ ok: false, message });
+
+  try {
+    if (id === "stripe") {
+      if (!config.secretKey) return fail("No secret key saved");
+      const res = await fetch("https://api.stripe.com/v1/balance", { headers: { Authorization: `Bearer ${config.secretKey}` } });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) return fail(body?.error?.message ?? `Stripe rejected the key (status ${res.status})`);
+      return c.json({ ok: true, message: `Stripe accepted the key (${body?.livemode ? "live" : "test"} mode)` });
+    }
+
+    if (id === "paypal") {
+      if (!config.clientId || !config.clientSecret) return fail("Client ID and client secret are both needed");
+      const host = config.mode === "test" ? "api-m.sandbox.paypal.com" : "api-m.paypal.com";
+      const res = await fetch(`https://${host}/v1/oauth2/token`, {
+        method: "POST",
+        headers: { Authorization: `Basic ${btoa(`${config.clientId}:${config.clientSecret}`)}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: "grant_type=client_credentials",
+      });
+      if (!res.ok) return fail(`PayPal rejected the credentials (status ${res.status}) on ${config.mode === "test" ? "sandbox" : "live"}`);
+      return c.json({ ok: true, message: `PayPal accepted the credentials (${config.mode === "test" ? "sandbox" : "live"})` });
+    }
+
+    if (id === "square") {
+      if (!config.accessToken) return fail("No access token saved");
+      const host = config.mode === "test" ? "connect.squareupsandbox.com" : "connect.squareup.com";
+      const res = await fetch(`https://${host}/v2/locations`, { headers: { Authorization: `Bearer ${config.accessToken}` } });
+      if (!res.ok) return fail(`Square rejected the token (status ${res.status})`);
+      return c.json({ ok: true, message: "Square accepted the access token" });
+    }
+  } catch (err) {
+    return fail(err instanceof Error ? err.message : "The processor could not be reached");
+  }
+
+  return fail("No automatic connection check is available for this processor");
+});
+
+// POST /admin/crypto/processors { name, config } — add a processor that is not
+// in the built-in catalog. Its credentials are stored exactly like the others.
+cryptoConfig.post("/processors", async (c) => {
+  const body = await c.req.json().catch(() => ({})) as { name?: string; config?: Record<string, string> };
+  const name = body.name?.trim();
+  if (!name) return c.json({ error: "Processor name is required" }, 400);
+
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  if (!slug) return c.json({ error: "Processor name must contain letters or numbers" }, 400);
+  const id = `custom_${slug}`;
+
+  const config: Record<string, string> = {};
+  for (const [field, value] of Object.entries(body.config ?? {})) {
+    if (field.trim()) config[field.trim()] = String(value ?? "");
+  }
+  const hasCredentials = Object.values(config).some((v) => v !== "");
+  const admin = c.get("admin") as { id: string } | undefined;
+
+  const { data, error } = await adminClient()
+    .from("crypto_processor_configs")
+    .insert({
+      id, name, enabled: hasCredentials, is_default: false,
+      config_encrypted: hasCredentials ? await encryptSecret(JSON.stringify(config)) : null,
+      updated_by: admin?.id, updated_at: new Date().toISOString(),
+    })
+    .select(PROCESSOR_COLUMNS)
+    .maybeSingle();
+
+  if (error) return c.json({ error: error.code === "23505" ? `A processor named "${name}" already exists` : error.message }, error.code === "23505" ? 409 : 500);
+  return c.json({ processor: await toClient(data as ProcessorRow) }, 201);
 });
 
 // POST /admin/crypto/processors/:id/reveal — decrypted credentials.

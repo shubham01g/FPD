@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard, ShieldCheck, Save } from "lucide-react";
+import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard, Shield, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { CryptoPayment } from "./CryptoPayment";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
-import { deriveStorageBreakdown } from "../utils/storageBreakdown";
-import { useDemo } from "../context/DemoContext";
+import { deriveStorageBreakdown, deriveMonthlyUsage, projectEndOfMonth } from "../utils/storageBreakdown";
+import { useSpendingProtection } from "../hooks/useSpendingProtection";
+import { useDemo, type UserProfile } from "../context/DemoContext";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
+import { usePlatform } from "../services/platform";
+import { starterDaysLeft } from "../utils/starterPlan";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
@@ -21,10 +24,9 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-/* No per-month usage history exists: storage_usage is never written by the
-   app or the Edge functions, so there is nothing to chart over time. The
-   category split and the live total are derived from the user's own
-   vault_documents rows instead — see utils/storageBreakdown.ts. */
+/* storage_usage is never written by the app or the Edge functions, so the
+   6-month history, the category split and the live total are all derived
+   from the user's own vault_documents rows — see utils/storageBreakdown.ts. */
 
 interface DBPlan { id: string; name: string; price_monthly: number; storage_gb: number; overage_rate: number; }
 
@@ -142,23 +144,31 @@ const STORAGE_CSS = `
 .fpd-storage .overage-note span{color:${MUTED};font-size:16px;}
 
 /* spending protection cap */
-.fpd-storage .cap-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.fpd-storage .cap-copy{color:${MUTED};font-size:15.5px;line-height:1.6;max-width:560px;}
+.fpd-storage .cap-card{overflow:hidden;transition:border-color .2s,background .2s;}
+.fpd-storage .cap-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 28px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.fpd-storage .cap-title{font-family:var(--font-display);font-size:19px;font-weight:600;color:${TEXT};letter-spacing:-0.01em;}
+.fpd-storage .cap-sub{color:${MUTED};font-size:14.5px;margin-top:2px;}
+.fpd-storage .cap-body{padding:24px 28px;display:flex;flex-direction:column;gap:18px;}
+.fpd-storage .cap-wall{display:flex;align-items:flex-start;gap:16px;padding:18px;border-radius:16px;background:rgba(229,62,62,0.09);border:1px solid rgba(229,62,62,0.35);}
+.fpd-storage .cap-wall-title{color:#F08A8A;font-weight:700;font-size:16.5px;margin-bottom:5px;}
+.fpd-storage .cap-wall-copy{color:${SOFT};font-size:15px;line-height:1.55;margin-bottom:14px;}
+.fpd-storage .cap-wall-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:12px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;}
+.fpd-storage .cap-wall-btn.del{background:#C53030;color:#fff;}
+.fpd-storage .cap-wall-btn.up{background:rgba(91,110,225,0.14);color:#AEB9F5;border:1px solid rgba(91,110,225,0.36);}
+.fpd-storage .cap-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.fpd-storage .cap-meter{height:12px;border-radius:99px;background:#0F1624;overflow:hidden;margin:8px 0 7px;}
+.fpd-storage .cap-meter-fill{height:100%;border-radius:99px;transition:width .3s;}
+.fpd-storage .cap-info{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:14px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.14);color:${MUTED};font-size:14.5px;line-height:1.5;}
 .fpd-storage .toggle{position:relative;width:44px;height:24px;border-radius:99px;flex-shrink:0;border:1px solid;cursor:pointer;transition:background .18s,border-color .18s;padding:0;}
 .fpd-storage .toggle .thumb{position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#0A0F1A;transition:left .18s;}
-.fpd-storage .cap-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:18px;}
-.fpd-storage .cap-field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
-.fpd-storage .cap-field .cap-input-wrap{position:relative;}
-.fpd-storage .cap-field .cap-input-wrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:${MUTED};font-size:16px;}
-.fpd-storage .cap-field input{width:140px;padding:10px 13px 10px 26px;border-radius:14px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-mono);transition:border-color .18s;}
-.fpd-storage .cap-field input:focus{border-color:rgba(91,110,225,0.5);}
-.fpd-storage .cap-field input:disabled{opacity:.45;cursor:not-allowed;}
-.fpd-storage .cap-save{padding:10px 18px;border-radius:14px;font-size:15px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;transition:filter .18s;display:inline-flex;align-items:center;gap:7px;}
+.fpd-storage .cap-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.fpd-storage .cap-input-wrap{position:relative;}
+.fpd-storage .cap-input-wrap span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:${MUTED};font-size:15px;}
+.fpd-storage .cap-input-wrap input{width:104px;padding:8px 10px 8px 24px;border-radius:12px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:15px;outline:none;font-family:var(--font-mono);transition:border-color .18s;}
+.fpd-storage .cap-input-wrap input:focus{border-color:rgba(91,110,225,0.5);}
+.fpd-storage .cap-input-wrap input:disabled{opacity:.45;cursor:not-allowed;}
+.fpd-storage .cap-save{padding:8px 14px;border-radius:12px;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:var(--font-body);background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;transition:filter .18s;display:inline-flex;align-items:center;gap:7px;}
 .fpd-storage .cap-save:hover{filter:brightness(1.08);}
-.fpd-storage .cap-save:disabled{opacity:.5;cursor:not-allowed;}
-.fpd-storage .cap-meter{margin-top:16px;height:8px;border-radius:99px;background:#0F1624;overflow:hidden;}
-.fpd-storage .cap-meter-fill{height:100%;border-radius:99px;transition:width .3s;}
-.fpd-storage .cap-status{margin-top:10px;font-size:14px;color:${MUTED};}
 
 /* alert history */
 .fpd-storage .alert-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#0F1624;}
@@ -248,8 +258,10 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
             </div>
             <div style={{ background: "rgba(217,165,94,0.06)", border: "1px solid rgba(217,165,94,0.2)",
               borderRadius: 12, padding: "14px 16px" }}>
-              {["48-hour emergency bypass window", "100 GB bulk vault export", "AES-256 encrypted archive",
-                "Secure 15-min download link", "Full audit trail"].map(item => (
+              <div style={{ fontSize: 12, fontWeight: 700, color: WARN, marginBottom: 10, ...MONO }}>WHAT'S INCLUDED</div>
+              {["48-hour emergency bypass window on demand", "Bulk export up to 100 GB of your vault",
+                "AES-256 encrypted archive generation", "Secure 15-minute download link",
+                "Full audit trail of all access", "Instant notification when bypass is activated"].map(item => (
                 <div key={item} className="flex items-center gap-2 py-1">
                   <CheckCircle size={12} color={WARN} />
                   <span style={{ fontSize: 13, color: SOFT }}>{item}</span>
@@ -264,10 +276,6 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
           {step === "pay" && (<>
             <div style={{ background: "#0F1624", borderRadius: 10, padding: "11px 14px", fontSize: 13, color: SOFT }}>
               <strong style={{ color: TEXT }}>Disaster Recovery Protection</strong> · {billing === "annual" ? "$47.88/yr ($3.99/mo)" : "$4.99/month"}
-            </div>
-            <div style={{ background: "rgba(91,110,225,0.08)", border: "1px dashed rgba(91,110,225,0.3)",
-              borderRadius: 8, padding: "8px 12px", fontSize: 12, color: ACCENT2 }}>
-              🎮 Pre-filled with Stripe test card — just click Pay
             </div>
             <div className="space-y-3">
               <div className="field">
@@ -318,15 +326,16 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   );
 }
 
-export function StorageUsage() {
+export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const [overageBilling] = useState(true);
   const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
   const [showDRModal, setShowDRModal] = useState(false);
   const { authUser } = useAuth();
-  const { user, docs, notifications } = useDemo();
+  const { user, docs, notifications, changePlan } = useDemo();
+  // System → Settings → Feature Flags → Crypto Payments.
+  const platform = usePlatform();
+  const cryptoEnabled = platform.flags.cryptoPayments;
   const [drActive, setDrActive] = useState(false);
-  const [capEnabled, setCapEnabled] = useState(true);
-  const [capAmount, setCapAmount] = useState<number>(25);
 
   const refreshDr = useCallback(async () => {
     if (!authUser) return;
@@ -336,25 +345,15 @@ export function StorageUsage() {
 
   useEffect(() => { void refreshDr(); }, [refreshDr]);
 
-  // The spend cap is the one piece of state on this page the user genuinely
-  // owns, so it round-trips to storage_spend_caps rather than localStorage —
-  // the limit then applies to billing wherever the account is signed in.
-  useEffect(() => {
-    if (!authUser) return;
-    let cancelled = false;
-    void db.getStorageSpendCap(authUser.id).then(({ data }) => {
-      if (cancelled || !data) return;
-      setCapEnabled(data.cap_enabled);
-      if (data.cap_amount_usd !== null) setCapAmount(Number(data.cap_amount_usd));
-    });
-    return () => { cancelled = true; };
-  }, [authUser]);
   const plansRef = useRef<HTMLDivElement>(null);
   const { data: plansData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
   const plans = (plansData?.plans?.length
     ? plansData.plans.map(p => ({ id: p.id, name: p.name, storage: p.storage_gb, price: Number(p.price_monthly), overage: Number(p.overage_rate) }))
     : FALLBACK_PLANS
-  ).map(p => ({ ...p, current: p.id === user.plan }));
+  ).map(p => ({ ...p, current: p.id === user.plan }))
+    // Starter is the 14-day introductory plan — never something to switch to.
+    .filter(p => p.id !== "starter" || p.current);
+  const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
 
   /* Real figures for the signed-in account. `user` comes from DemoContext,
      which sums vault_documents.file_size_bytes and reads the plan's limit —
@@ -366,17 +365,27 @@ export function StorageUsage() {
     .map(c => ({ category: c.label, gb: c.gb, color: c.color }));
   const storageAlerts = notifications.filter(n =>
     /storage|usage|overage|limit/i.test(`${n.title} ${n.message}`));
-  const overageRate = plans.find(p => p.id === user.plan)?.overage ?? 0;
-  // Overage is charged on what is actually stored; there is no usage history
-  // to extrapolate an end-of-month projection from.
-  const projectedOverage = Math.max(0, used - total);
-  const projectedOverageCost = projectedOverage * overageRate;
-  const capPercent = capAmount > 0 ? Math.min(100, Math.round((projectedOverageCost / capAmount) * 100)) : 0;
-  const capColor = capPercent >= 100 ? "#E53E3E" : capPercent >= 80 ? NEG : capPercent >= 50 ? WARN : POS;
+  const currentPlan = plans.find(p => p.id === user.plan);
+  const overageRate = currentPlan?.overage ?? 0;
+
+  /* The cap is the one piece of state on this page the user genuinely owns.
+     The same hook gates uploads in the File Cabinet, so what this card says
+     and what an upload does can't disagree. */
+  const { check: spCheck, capEnabled, capAmount, setCapEnabled, setCapAmount, save } = useSpendingProtection(overageRate);
+  const capPct = !capEnabled ? 0 : spCheck.capHit ? 100
+    : capAmount > 0 ? Math.min(100, Math.round((spCheck.overageCost / capAmount) * 100)) : 0;
+  const capBarColor = capPct >= 100 ? "#E53E3E" : capPct >= 80 ? NEG : capPct >= 50 ? WARN : POS;
+
+  const usageByMonth = deriveMonthlyUsage(docs);
+  const projectedEOM = projectEndOfMonth(docs, used);
+  const projectedOverage = Math.max(0, projectedEOM - total);
+  const now = new Date();
+  const resetsOn = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   const saveCap = async () => {
     if (!authUser) { toast.error("Sign in to save your spending cap."); return; }
-    const { error } = await db.saveStorageSpendCap(authUser.id, capEnabled, capEnabled ? capAmount : null);
+    const { error } = await save();
     if (error) { toast.error(`Could not save spending cap: ${error.message}`); return; }
     toast.success(capEnabled ? `Spending cap set to $${capAmount.toFixed(2)}/mo` : "Spending cap disabled — overage charges are uncapped");
   };
@@ -392,9 +401,9 @@ export function StorageUsage() {
 
   const kpis = [
     { label: "Storage Used", value: `${used} GB`, sub: `of ${total} GB`, icon: <HardDrive size={14}/>, dot: getBarColor(percent) },
-    { label: "Usage %", value: `${percent}%`, sub: "Of your plan's limit", icon: <Percent size={14}/>, dot: getBarColor(percent) },
-    { label: "Documents", value: docs.length, sub: docs.length === 1 ? "File stored" : "Files stored", icon: <TrendingUp size={14}/>, dot: ACCENT },
-    { label: "Overage", value: projectedOverage > 0 ? `$${projectedOverageCost.toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "Within your plan", icon: <Gauge size={14}/>, dot: projectedOverage > 0 ? NEG : POS },
+    { label: "Usage %", value: `${percent}%`, sub: "Current billing cycle", icon: <Percent size={14}/>, dot: getBarColor(percent) },
+    { label: "Projected EOM", value: `${projectedEOM} GB`, sub: "End-of-month estimate", icon: <TrendingUp size={14}/>, dot: projectedEOM > total ? NEG : POS },
+    { label: "Est. Overage", value: projectedOverage > 0 ? `$${(projectedOverage * overageRate).toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "No overage projected", icon: <Gauge size={14}/>, dot: projectedOverage > 0 ? NEG : POS },
   ];
 
   return (
@@ -443,6 +452,99 @@ export function StorageUsage() {
           </div>
         )}
 
+        {/* ── Spending protection cap ── */}
+        <div className="card cap-card" style={spCheck.capHit ? { borderColor: "rgba(229,62,62,0.4)", background: "#1A1420" } : undefined}>
+          <div className="cap-head">
+            <div className="flex items-center gap-3">
+              <Shield size={18} color={spCheck.capHit ? "#F08A8A" : ACCENT} />
+              <div>
+                <div className="cap-title">Spending Protection Cap</div>
+                <div className="cap-sub">
+                  {capEnabled
+                    ? `Uploads are blocked if overage charges would exceed $${capAmount}/month`
+                    : `No cap set — overage at $${overageRate}/GB bills automatically with no limit`}
+                </div>
+              </div>
+            </div>
+            <div className="cap-controls">
+              <div className="cap-input-wrap">
+                <span>$</span>
+                <input
+                  type="number" min={0} step={1} disabled={!capEnabled} aria-label="Monthly overage cap"
+                  value={capAmount}
+                  onChange={e => setCapAmount(Math.max(0, Number(e.target.value)))}
+                />
+              </div>
+              <button
+                onClick={() => setCapEnabled(!capEnabled)}
+                className="toggle" aria-label="Enable spending cap" aria-pressed={capEnabled}
+                style={{ background: capEnabled ? "rgba(91,110,225,0.85)" : "rgba(255,255,255,0.06)", borderColor: capEnabled ? ACCENT : "rgba(255,255,255,0.14)" }}
+              >
+                <div className="thumb" style={{ left: capEnabled ? 24 : 4 }} />
+              </button>
+              <button className="cap-save" onClick={saveCap}><Save size={14}/> Save Cap</button>
+            </div>
+          </div>
+
+          <div className="cap-body">
+            {/* Cap hit hard wall */}
+            {spCheck.capHit && (
+              <div className="cap-wall">
+                <AlertTriangle size={20} color="#F08A8A" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="cap-wall-title">Uploads Blocked — ${capAmount} Spending Cap Reached</div>
+                  <div className="cap-wall-copy">
+                    Your overage charges have hit the ${capAmount} monthly limit.
+                    No new files can be uploaded until you free up space or upgrade your plan.
+                    This protects you from unexpected charges exceeding ${capAmount} in a single billing month.
+                  </div>
+                  <div className="flex gap-3 flex-wrap">
+                    <button className="cap-wall-btn del" onClick={() => onNavigate?.("file-cabinet")}>
+                      <Trash2 size={13}/> Delete Files to Free Space
+                    </button>
+                    <button className="cap-wall-btn up" onClick={() => plansRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                      <ArrowUp size={13}/> Upgrade Plan
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progress meter */}
+            <div>
+              <div className="cap-line">
+                <span style={{ color: TEXT, fontSize: 15.5, fontWeight: 500 }}>Overage Spend This Month</span>
+                <span style={{ ...MONO, fontSize: 15.5, fontWeight: 700, color: capBarColor }}>
+                  ${spCheck.overageCost.toFixed(2)}{capEnabled ? ` / $${capAmount.toFixed(2)}` : ""}
+                </span>
+              </div>
+              <div className="cap-meter">
+                <div className="cap-meter-fill" style={{ width: `${capPct}%`, background: capBarColor }} />
+              </div>
+              <div className="cap-line">
+                <span style={{ color: MUTED, fontSize: 13.5 }}>
+                  {spCheck.overageGB.toFixed(1)} GB over plan limit × ${overageRate}/GB
+                </span>
+                <span style={{ color: spCheck.capHit ? "#F08A8A" : MUTED, fontSize: 13.5, ...MONO }}>
+                  {spCheck.capHit ? "CAP REACHED — UPLOADS BLOCKED"
+                    : capEnabled ? `$${spCheck.remainingBudget.toFixed(2)} remaining before cap` : "NO CAP SET"}
+                </span>
+              </div>
+            </div>
+
+            {/* Info row */}
+            {!spCheck.capHit && capEnabled && (
+              <div className="cap-info">
+                <CheckCircle size={14} color={POS} style={{ flexShrink: 0 }} />
+                <span>
+                  Uploads allowed — overage spend is within the ${capAmount}/month protection limit.
+                  The system checks this before every upload.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* ── KPI ledger ── */}
         <div className="kpi-stack">
           {kpis.map(k => (
@@ -461,7 +563,7 @@ export function StorageUsage() {
         <div className="card pad">
           <div className="meter-hd">
             <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Current Billing Cycle</h3>
-            <div style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>Resets Jul 1, 2026</div>
+            <div style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>Resets {resetsOn}</div>
           </div>
           <div className="meter-track">
             <div className="meter-fill" style={{ width: `${Math.min(percent, 100)}%`, background: `linear-gradient(90deg, ${getBarColor(40)}, ${getBarColor(percent)})` }}/>
@@ -489,22 +591,35 @@ export function StorageUsage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Current usage — a month-by-month history would need a
-              storage_usage row written per billing period, and nothing
-              writes one, so this shows the live figure instead. */}
+          {/* Usage by month — pure CSS bar chart, scaled so an over-limit month still fits */}
           <div className="card pad">
-            <h3 className="sec-title"><span className="tick"/>Current Usage</h3>
-            <div className="live-fig">
-              <span className="live-big">{used} GB</span>
-              <span className="live-of">of {total} GB · {percent}%</span>
-            </div>
-            <div className="cat-track" style={{ height: 10 }}>
-              <div className="cat-fill" style={{ width: `${percent}%`, background: getBarColor(percent) }} />
-            </div>
+            <h3 className="sec-title"><span className="tick"/>6-Month Usage History</h3>
+            {(() => {
+              const scale = Math.max(total, ...usageByMonth.map(d => d.used));
+              return (
+                <div className="chart-wrap">
+                  <div className="chart-limit" style={{ bottom: Math.round((total / scale) * 120) + 18 }}>
+                    <span>{total} GB limit</span>
+                  </div>
+                  {usageByMonth.map((d, i) => {
+                    const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? NEG : d.used >= total * 0.8 ? WARN : ACCENT;
+                    return (
+                      <div key={i} className="chart-col">
+                        <span className="chart-val">{d.used}GB</span>
+                        <div className="chart-bar-wrap">
+                          <div className="chart-bar" style={{ height: Math.round((d.used / scale) * 120), background: barColor, opacity: i === usageByMonth.length - 1 ? 1 : 0.65 }}/>
+                        </div>
+                        <span className="chart-val">{d.month}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
             <p className="chart-foot">
               {docs.length === 0
                 ? "Nothing stored yet. Documents you upload to the File Cabinet count against this limit."
-                : `${docs.length} file${docs.length === 1 ? "" : "s"} stored. Unused GB expire at billing cycle reset — no carry-forward.`}
+                : "Unused monthly GB expire at billing cycle reset. No carry-forward."}
             </p>
           </div>
 
@@ -539,6 +654,11 @@ export function StorageUsage() {
             {plans.map(plan => (
               <div key={plan.id} className={`plan-card ${plan.current ? "current" : ""}`}>
                 {plan.current && <div className="plan-tag">CURRENT PLAN</div>}
+                {plan.id === "starter" && starterDays !== null && (
+                  <div className="plan-detail" style={{ marginBottom: 6, color: WARN }}>
+                    {starterDays} day{starterDays === 1 ? "" : "s"} left of {platform.starterTrialDays}. Choose a bigger plan before it ends.
+                  </div>
+                )}
                 <div className="plan-name">{plan.name}</div>
                 <div className="flex items-baseline gap-1" style={{ marginBottom: 12 }}>
                   <span className="plan-price">${plan.price}</span>
@@ -549,12 +669,12 @@ export function StorageUsage() {
                 {!plan.current && (
                   <div className="space-y-2">
                     <button
-                      onClick={() => toast.success(plan.storage > total ? `Upgrading to ${plan.name} — $${plan.price}/mo` : `Downgrading to ${plan.name} — $${plan.price}/mo`)}
+                      onClick={() => void changePlan(plan.id as UserProfile["plan"], plan.name)}
                       className={`plan-btn ${plan.storage > total ? "up" : "down"}`}
                     >
                       {plan.storage > total ? "Upgrade" : "Downgrade"} (Card)
                     </button>
-                    {plan.storage > total && (
+                    {plan.storage > total && cryptoEnabled && (
                       <button onClick={() => setCryptoPlan({ name: plan.name, price: plan.price })} className="plan-btn crypto">
                         <span style={{ marginRight:4 }}>₿</span>Pay with Crypto
                       </button>
@@ -567,59 +687,9 @@ export function StorageUsage() {
           <div className="overage-note">
             <ArrowUp size={13} color={NEG} />
             <span>
-              Overage rate: <strong style={{ color: TEXT }}>${overageRate}/GB</strong> above your plan limit (Legacy Archive). Starter plan is $0.50/GB. Billed automatically at end of billing cycle.
+              Overage rate: <strong style={{ color: TEXT }}>${overageRate}/GB</strong> above your plan limit{currentPlan ? ` (${currentPlan.name})` : ""}. Starter plan is $0.50/GB. Billed automatically at end of billing cycle.
             </span>
           </div>
-        </div>
-
-        {/* ── Spending protection cap ── */}
-        <div className="card pad">
-          <div className="cap-row">
-            <div>
-              <h3 className="sec-title" style={{ marginBottom: 8 }}><span className="tick"/>Spending Protection Cap</h3>
-              <p className="cap-copy">Set a maximum monthly overage spend. Once your projected overage charges reach this cap, new uploads pause instead of billing past it — no surprise charges on your card.</p>
-            </div>
-            <button
-              onClick={() => setCapEnabled(!capEnabled)}
-              className="toggle"
-              style={{ background: capEnabled ? "rgba(91,110,225,0.85)" : "rgba(255,255,255,0.06)", borderColor: capEnabled ? ACCENT : "rgba(255,255,255,0.14)" }}
-            >
-              <div className="thumb" style={{ left: capEnabled ? 24 : 4 }} />
-            </button>
-          </div>
-
-          <div className="cap-controls">
-            <div className="cap-field">
-              <label>MONTHLY OVERAGE CAP</label>
-              <div className="cap-input-wrap">
-                <span>$</span>
-                <input
-                  type="number" min={0} step={1} disabled={!capEnabled}
-                  value={capAmount}
-                  onChange={e => setCapAmount(Math.max(0, Number(e.target.value)))}
-                />
-              </div>
-            </div>
-            <button className="cap-save" onClick={saveCap}><Save size={14}/> Save Cap</button>
-          </div>
-
-          {capEnabled ? (
-            <>
-              <div className="cap-meter">
-                <div className="cap-meter-fill" style={{ width: `${capPercent}%`, background: capColor }} />
-              </div>
-              <div className="cap-status">
-                <ShieldCheck size={13} color={capColor} style={{ verticalAlign: -2, marginRight: 6 }}/>
-                ${projectedOverageCost.toFixed(2)} of ${capAmount.toFixed(2)} projected this cycle
-                {capPercent >= 100 ? " — uploads will pause until your next billing cycle or plan upgrade." : "."}
-              </div>
-            </>
-          ) : (
-            <div className="cap-status">
-              <AlertTriangle size={13} color={WARN} style={{ verticalAlign: -2, marginRight: 6 }}/>
-              No cap set — overage charges at ${overageRate}/GB will continue to bill automatically with no limit.
-            </div>
-          )}
         </div>
 
         {/* ── Platform Add-Ons ── */}

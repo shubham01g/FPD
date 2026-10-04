@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Shield, CheckCircle, XCircle, Clock, Eye, ZoomIn, User, Loader2, AlertCircle } from "lucide-react";
+import { Shield, CheckCircle, XCircle, Clock, Eye, ZoomIn, User, Loader2, AlertCircle, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
@@ -29,14 +29,19 @@ interface VerificationRecord {
   contacts: VerificationContact | null;
 }
 
-const REJECTION_REASONS = ["ID image is blurry/unreadable", "ID is expired", "Name does not match records", "Suspected fraudulent document", "Other"];
+type RecordTab = "identity" | "documents" | "account" | "risk" | "timeline";
+const RECORD_TABS: { id: RecordTab; label: string }[] = [
+  { id: "identity",  label: "Identity"  },
+  { id: "documents", label: "Documents" },
+  { id: "account",   label: "Account"   },
+  { id: "risk",      label: "Risk"      },
+  { id: "timeline",  label: "Timeline"  },
+];
 
-function isToday(iso: string | null): boolean {
-  if (!iso) return false;
-  const d = new Date(iso);
-  const now = new Date();
-  return d.toDateString() === now.toDateString();
-}
+const fmtWhen = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
+
+const REJECTION_REASONS = ["ID image is blurry/unreadable", "ID is expired", "Name does not match records", "Suspected fraudulent document", "Other"];
 
 export function IDVerification() {
   const [selectedVerif, setSelectedVerif] = useState<VerificationRecord | null>(null);
@@ -49,9 +54,13 @@ export function IDVerification() {
   const [viewingVerif, setViewingVerif] = useState<VerificationRecord | null>(null);
   const [viewingUrls, setViewingUrls] = useState<{ front: string | null; back: string | null } | null>(null);
   const [viewingLoading, setViewingLoading] = useState(false);
+  const [recordTab, setRecordTab] = useState<RecordTab>("identity");
+  const [search, setSearch] = useState("");
+  const [historyFilter, setHistoryFilter] = useState<"all" | "approved" | "rejected">("all");
 
   async function openDetail(verif: VerificationRecord) {
     setViewingVerif(verif);
+    setRecordTab("identity");
     setViewingUrls(null);
     setViewingLoading(true);
     try {
@@ -71,26 +80,33 @@ export function IDVerification() {
   );
 
   const all = data?.verifications ?? [];
-  const pendingVerifications = useMemo(() => all.filter((v) => v.status === "pending"), [all]);
-  const recentlyProcessed = useMemo(
-    () => all.filter((v) => v.status !== "pending").sort((a, b) => (b.reviewed_at ?? "").localeCompare(a.reviewed_at ?? "")).slice(0, 10),
-    [all],
-  );
+  const matches = (v: VerificationRecord) => {
+    const q = search.trim().toLowerCase();
+    return !q || [v.contacts?.full_name, v.contacts?.email, v.contacts?.owner?.full_name, v.contacts?.owner?.email, v.id, v.id_type]
+      .some((x) => (x ?? "").toLowerCase().includes(q));
+  };
+  const allPending = useMemo(() => all.filter((v) => v.status === "pending"), [all]);
+  const pendingVerifications = allPending.filter(matches);
+  const recentlyProcessed = all
+    .filter((v) => v.status !== "pending" && (historyFilter === "all" || v.status === historyFilter))
+    .filter(matches)
+    .sort((a, b) => (b.reviewed_at ?? "").localeCompare(a.reviewed_at ?? ""))
+    .slice(0, 50);
 
   const stats = useMemo(() => {
-    const approvedToday = all.filter((v) => v.status === "approved" && isToday(v.reviewed_at)).length;
-    const rejectedToday = all.filter((v) => v.status === "rejected" && isToday(v.reviewed_at)).length;
+    const approvedToday = all.filter((v) => v.status === "approved").length;
+    const rejectedToday = all.filter((v) => v.status === "rejected").length;
     const durations = all
       .filter((v) => v.reviewed_at)
       .map((v) => (new Date(v.reviewed_at!).getTime() - new Date(v.submitted_at).getTime()) / 36e5);
     const avgHours = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : null;
     return {
-      pending: pendingVerifications.length,
+      pending: allPending.length,
       approvedToday,
       rejectedToday,
       avgReviewTime: avgHours === null ? "—" : `${avgHours.toFixed(1)}h`,
     };
-  }, [all, pendingVerifications.length]);
+  }, [all, allPending.length]);
 
   async function handleApprove(id: string) {
     setSubmitting(true);
@@ -155,8 +171,8 @@ export function IDVerification() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: "Pending Review", value: stats.pending, color: "#F6AD55", icon: <Clock size={16} /> },
-              { label: "Approved Today", value: stats.approvedToday, color: "#D99A6B", icon: <CheckCircle size={16} /> },
-              { label: "Rejected Today", value: stats.rejectedToday, color: "#FC8181", icon: <XCircle size={16} /> },
+              { label: "Approved", value: stats.approvedToday, color: "#D99A6B", icon: <CheckCircle size={16} /> },
+              { label: "Rejected", value: stats.rejectedToday, color: "#FC8181", icon: <XCircle size={16} /> },
               { label: "Avg Review Time", value: stats.avgReviewTime, color: "#FFFFFF", icon: <Shield size={16} /> },
             ].map((stat) => (
               <div key={stat.label} className="p-5 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
@@ -169,12 +185,21 @@ export function IDVerification() {
             ))}
           </div>
 
+          {/* Search */}
+          <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <Search size={15} color="var(--muted-foreground)" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by contact, account holder, email, or ID type..."
+              style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 16 }} />
+            {search && <button onClick={() => setSearch("")} style={{ color: "var(--muted-foreground)" }}><X size={14} /></button>}
+            <span style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>{pendingVerifications.length} pending</span>
+          </div>
+
           {/* Pending verifications */}
           <div className="space-y-4">
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "var(--foreground)" }}>Pending Verifications</h3>
             {pendingVerifications.length === 0 && (
               <div className="p-6 rounded-2xl border text-center" style={{ background: "var(--card)", borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
-                Nothing waiting on review.
+                {allPending.length === 0 ? "Nothing waiting on review." : "No pending verification matches your search."}
               </div>
             )}
             {pendingVerifications.map((verif) => (
@@ -279,8 +304,17 @@ export function IDVerification() {
 
           {/* Recently processed */}
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
-            <div className="px-5 py-3 border-b" style={{ background: "var(--muted)", borderColor: "var(--border)" }}>
+            <div className="flex items-center justify-between gap-3 flex-wrap px-5 py-3 border-b" style={{ background: "var(--muted)", borderColor: "var(--border)" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "var(--foreground)" }}>Recently Processed</h3>
+              <div className="flex gap-2">
+                {([["all", "All"], ["approved", "Approved"], ["rejected", "Rejected"]] as const).map(([val, label]) => (
+                  <button key={val} onClick={() => setHistoryFilter(val)} className="px-3 py-1 rounded-xl"
+                    style={{ fontSize: 14, fontWeight: 600, background: historyFilter === val ? "rgba(91,110,225,0.18)" : "transparent",
+                      color: historyFilter === val ? "#AEB9F5" : "var(--muted-foreground)", border: "1px solid rgba(91,110,225,0.2)" }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             {recentlyProcessed.length === 0 && (
               <div className="px-5 py-6 text-center" style={{ color: "var(--muted-foreground)" }}>Nothing processed yet.</div>
@@ -288,8 +322,9 @@ export function IDVerification() {
             {recentlyProcessed.map((r, i) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between px-5 py-3 border-b"
+                className="flex items-center justify-between px-5 py-3 border-b cursor-pointer"
                 style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.025)", borderColor: "var(--border)" }}
+                onClick={() => openDetail(r)}
               >
                 <div>
                   <div style={{ color: "var(--foreground)", fontSize: 16 }}>{r.contacts?.full_name ?? "Unknown"}</div>
@@ -322,38 +357,113 @@ export function IDVerification() {
               <button onClick={() => setViewingVerif(null)} style={{ color: "var(--muted-foreground)" }}>✕</button>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-4 mb-5">
-              {[
-                ["ID TYPE", viewingVerif.id_type],
-                ["DATE OF BIRTH", viewingVerif.date_of_birth ?? "—"],
-                ["ID EXPIRY", viewingVerif.expiry_date ?? "—"],
-                ["ID NUMBER (MASKED)", viewingVerif.id_number_masked ?? "—"],
-              ].map(([label, value]) => (
-                <div key={label} className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 3 }}>{label}</div>
-                  <div style={{ color: "var(--foreground)", fontSize: 16 }}>{value}</div>
-                </div>
+            <div className="flex gap-1 mb-5 border-b" style={{ borderColor: "var(--border)" }}>
+              {RECORD_TABS.map((t) => (
+                <button key={t.id} onClick={() => setRecordTab(t.id)} className="px-4 py-2.5"
+                  style={{ fontSize: 15, fontWeight: 600, color: recordTab === t.id ? "#AEB9F5" : "var(--muted-foreground)",
+                    borderBottom: recordTab === t.id ? "2px solid #AEB9F5" : "2px solid transparent" }}>
+                  {t.label}
+                </button>
               ))}
             </div>
 
-            <div className="grid gap-3" style={{ gridTemplateColumns: viewingVerif.document_back_url ? "1fr 1fr" : "1fr" }}>
-              {[["Front", viewingUrls?.front], ...(viewingVerif.document_back_url ? [["Back", viewingUrls?.back]] : [])].map(([label, url]) => (
-                <div key={label} className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
-                  <div className="px-3 py-2" style={{ background: "var(--muted)", color: "var(--muted-foreground)", fontSize: 14 }}>{label}</div>
-                  <div className="flex items-center justify-center" style={{ minHeight: 220, background: "rgba(0,0,0,0.2)" }}>
-                    {viewingLoading ? (
-                      <Loader2 size={22} className="animate-spin" color="var(--muted-foreground)" />
-                    ) : url ? (
-                      <img src={url as string} alt={`ID ${label}`} style={{ maxWidth: "100%", maxHeight: 320, objectFit: "contain" }} />
-                    ) : (
-                      <span style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Preview unavailable</span>
-                    )}
-                  </div>
+            {(() => {
+              const v = viewingVerif;
+              const expired = v.expiry_date ? new Date(v.expiry_date) < new Date() : null;
+              const priorRejections = all.filter((o) => o.contact_id === v.contact_id && o.id !== v.id && o.status === "rejected").length;
+              const grid = (rows: [string, string][]) => (
+                <div className="grid md:grid-cols-2 gap-3">
+                  {rows.map(([label, value]) => (
+                    <div key={label} className="px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginBottom: 3 }}>{label}</div>
+                      <div style={{ color: "var(--foreground)", fontSize: 16 }}>{value}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+
+              if (recordTab === "identity") return grid([
+                ["LEGAL FULL NAME", v.contacts?.full_name ?? "—"],
+                ["EMAIL ADDRESS", v.contacts?.email ?? "—"],
+                ["DATE OF BIRTH", v.date_of_birth ?? "—"],
+                ["DOCUMENT TYPE", v.id_type],
+                ["ID NUMBER (MASKED)", v.id_number_masked ?? "—"],
+                ["EXPIRY DATE", v.expiry_date ?? "—"],
+                ["SUBMITTED", fmtWhen(v.submitted_at)],
+                ["VERIFICATION ID", v.id],
+              ]);
+
+              if (recordTab === "documents") return (
+                <div className="grid gap-3" style={{ gridTemplateColumns: v.document_back_url ? "1fr 1fr" : "1fr" }}>
+                  {[["Front", viewingUrls?.front], ...(v.document_back_url ? [["Back", viewingUrls?.back]] : [])].map(([label, url]) => (
+                    <div key={label} className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+                      <div className="px-3 py-2" style={{ background: "var(--muted)", color: "var(--muted-foreground)", fontSize: 14 }}>{label}</div>
+                      <div className="flex items-center justify-center" style={{ minHeight: 220, background: "rgba(0,0,0,0.2)" }}>
+                        {viewingLoading ? (
+                          <Loader2 size={22} className="animate-spin" color="var(--muted-foreground)" />
+                        ) : url ? (
+                          <img src={url as string} alt={`ID ${label}`} style={{ maxWidth: "100%", maxHeight: 320, objectFit: "contain" }} />
+                        ) : (
+                          <span style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Preview unavailable</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+
+              if (recordTab === "account") return grid([
+                ["ACCOUNT HOLDER", v.contacts?.owner?.full_name ?? "—"],
+                ["ACCOUNT EMAIL", v.contacts?.owner?.email ?? "—"],
+                ["RELATIONSHIP TO CONTACT", v.contacts?.relationship ?? "—"],
+                ["CONTACT TYPE", v.contacts?.contact_type ?? "—"],
+              ]);
+
+              if (recordTab === "risk") return (
+                <div className="space-y-2">
+                  {([
+                    ["Document not expired", expired === null ? null : !expired],
+                    ["No prior rejected submissions for this contact", priorRejections === 0],
+                    ["Back of ID provided", Boolean(v.document_back_url)],
+                  ] as [string, boolean | null][]).map(([label, ok]) => (
+                    <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      {ok === null ? <Clock size={15} color="#8A9AB8" /> : ok ? <CheckCircle size={15} color="#6FAE8B" /> : <XCircle size={15} color="#FC8181" />}
+                      <span style={{ color: "var(--foreground)", fontSize: 16 }}>{label}</span>
+                      {ok === null && <span style={{ color: "var(--muted-foreground)", fontSize: 14 }}>no expiry date on file</span>}
+                    </div>
+                  ))}
+                  <p style={{ color: "var(--muted-foreground)", fontSize: 14, lineHeight: 1.6, paddingTop: 6 }}>
+                    Only checks that can be made from stored data are shown. No risk score, device, IP or image-tampering analysis is collected.
+                  </p>
+                </div>
+              );
+
+              return (
+                <div className="space-y-3">
+                  {([
+                    [fmtWhen(v.submitted_at), "ID submitted for verification", v.contacts?.full_name ?? "Contact"],
+                    ...(v.reviewed_at ? [[fmtWhen(v.reviewed_at), v.status === "approved" ? "Verification approved" : `Verification rejected${v.rejection_reason ? ` — ${v.rejection_reason}` : ""}`, "Admin"]] : []),
+                  ] as [string, string, string][]).map(([when, event, actor]) => (
+                    <div key={when + event} className="flex gap-3">
+                      <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#AEB9F5", marginTop: 7, flexShrink: 0 }} />
+                      <div>
+                        <div style={{ color: "var(--foreground)", fontSize: 16 }}>{event}</div>
+                        <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{when} · {actor}</div>
+                      </div>
+                    </div>
+                  ))}
+                  {v.status === "pending" && (
+                    <div className="flex gap-3">
+                      <Clock size={13} color="#F6AD55" style={{ marginTop: 5 }} />
+                      <div style={{ color: "#F6AD55", fontSize: 16 }}>Awaiting admin decision</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="flex items-center gap-3 mt-5">
+              {viewingVerif.status === "pending" && (<>
               <button
                 onClick={() => handleApprove(viewingVerif.id)}
                 disabled={submitting}
@@ -370,6 +480,7 @@ export function IDVerification() {
               >
                 <XCircle size={15} /> Reject
               </button>
+              </>)}
               <button
                 onClick={() => setViewingVerif(null)}
                 className="px-5 py-2.5 rounded-2xl"

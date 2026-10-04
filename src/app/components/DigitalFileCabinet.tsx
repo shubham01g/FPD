@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type Doc } from "../context/DemoContext";
+import { useSpendingProtection } from "../hooks/useSpendingProtection";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
 // docSyncStore is a shared bridge used by many other sections (Warranties, TravelPlanner,
@@ -456,6 +457,7 @@ const CAB_CSS = `
 
 export function DigitalFileCabinet() {
   const { continuationFeePaid, docs, addDoc, deleteDoc } = useDemo();
+  const { check: spCheck, capAmount } = useSpendingProtection();
   const [current, setCurrent] = useState<Cabinet | null>(null);
   const [view, setView]       = useState<"grid"|"list">("grid");
   const [search, setSearch]   = useState("");
@@ -481,6 +483,16 @@ export function DigitalFileCabinet() {
 
   const doUpload = useCallback((folderId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
+
+    // Spending protection gate — runs before every upload
+    if (!spCheck.allowed) {
+      toast.error(
+        `Upload blocked — $${capAmount} spending protection cap reached. Delete files or upgrade your plan to continue uploading.`,
+        { duration: 6000 }
+      );
+      return;
+    }
+
     setUploading(true);
     Promise.all(Array.from(files).map(f => addDoc({
       name: f.name,
@@ -491,7 +503,7 @@ export function DigitalFileCabinet() {
       status: "verified",
       encrypted: true,
     }, f))).finally(() => setUploading(false));
-  }, [addDoc]);
+  }, [addDoc, spCheck.allowed, capAmount]);
 
   // Preview/Download used to be toast.info/success calls that never touched a
   // real file. Real uploads carry a vault-documents storage path (filePath);

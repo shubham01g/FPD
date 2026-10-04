@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings, Save, AlertTriangle, CheckCircle, DollarSign, HardDrive, Bell, RefreshCw, Loader2, AlertCircle } from "lucide-react";
+import { Settings, Save, AlertTriangle, CheckCircle, DollarSign, HardDrive, Bell, RefreshCw, Loader2, AlertCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
@@ -58,6 +58,10 @@ export function SubscriptionConfig() {
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [thresholds, setThresholds] = useState<AlertThresholds>({ warning: 80, recommended: 90, critical: 95, overage: 100 });
+  /* Starter is the trial plan: how many days an account may stay on it
+     (admin_settings "starter_trial_days", read by the app via /public/platform). */
+  const [trialDays, setTrialDays] = useState(14);
+  const [savedTrialDays, setSavedTrialDays] = useState(14);
 
   const { data, loading, error } = useAdminFetch(
     () => adminApi.get<{ plans: DBPlan[]; thresholds: ThresholdSetting[] }>("/pricing"),
@@ -74,6 +78,9 @@ export function SubscriptionConfig() {
       critical: byKey.storage_alert_95 ? Number(byKey.storage_alert_95) : 95,
       overage: 100, // billing always begins at 100% — no configurable key backs this
     });
+    const days = Number(byKey.starter_trial_days) > 0 ? Number(byKey.starter_trial_days) : 14;
+    setTrialDays(days);
+    setSavedTrialDays(days);
     setDirty(false);
   }, [data]);
 
@@ -103,7 +110,9 @@ export function SubscriptionConfig() {
         adminApi.patch("/pricing/settings/storage_alert_80", { value: String(thresholds.warning) }),
         adminApi.patch("/pricing/settings/storage_alert_90", { value: String(thresholds.recommended) }),
         adminApi.patch("/pricing/settings/storage_alert_95", { value: String(thresholds.critical) }),
+        ...(trialDays !== savedTrialDays ? [adminApi.patch("/pricing/settings/starter_trial_days", { value: String(trialDays) })] : []),
       ]);
+      setSavedTrialDays(trialDays);
       setSaved(true);
       setDirty(false);
       toast.success("Pricing configuration saved");
@@ -176,14 +185,28 @@ export function SubscriptionConfig() {
       <div className="space-y-4">
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>Subscription Plans</h2>
         {plans.map((plan) => (
-          <div key={plan.id} className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div key={plan.id} className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: plan.id === "starter" ? "rgba(72,187,120,0.35)" : "var(--border)" }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-xl w-3 h-3 rounded-full" style={{ background: plan.color }} />
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 21.5, color: "var(--foreground)" }}>{plan.name}</h3>
+              {plan.id === "starter" && (
+                <span className="px-2 py-0.5 rounded" style={{ background: "rgba(72,187,120,0.12)", color: "#5FBE91", border: "1px solid rgba(72,187,120,0.3)", fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em" }}>
+                  TRIAL PLAN
+                </span>
+              )}
               <div className="ml-auto text-sm px-3 py-1 rounded-xl" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)", fontFamily: "var(--font-mono)" }}>
                 ID: {plan.id}
               </div>
             </div>
+            {plan.id === "starter" && (
+              <div className="flex items-start gap-3 px-4 py-3 rounded-2xl border mb-6" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
+                <Clock size={14} color="#5FBE91" style={{ marginTop: 3, flexShrink: 0 }} />
+                <span style={{ color: "var(--muted-foreground)", fontSize: 16, lineHeight: 1.6 }}>
+                  This is the <strong style={{ color: "#5FBE91" }}>trial plan</strong>. Users pay <strong>${plan.price}</strong> for a {trialDays}-day access window.
+                  After the trial ends, the account is <strong>automatically suspended</strong> until the user upgrades to a paid plan. All vault data is preserved during suspension.
+                </span>
+              </div>
+            )}
             <div className="grid md:grid-cols-3 gap-6">
               {/* Monthly price */}
               <div>
@@ -271,12 +294,40 @@ export function SubscriptionConfig() {
                 {plan.maxContacts === 999 && <div style={{ color: "#D99A6B", fontSize: 14, marginTop: 4 }}>Unlimited contacts</div>}
               </div>
 
-              {/* Preview */}
-              <div className="flex items-center justify-center rounded-2xl border" style={{ borderColor: plan.color, background: `${plan.color}08` }}>
-                <div className="text-center">
-                  <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 35.5, fontWeight: 700 }}>${plan.price}/mo</div>
-                  <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>{plan.storage} GB · ${plan.overageRate}/GB overage</div>
+              {/* Trial period (Starter only) */}
+              {plan.id === "starter" && (
+                <div>
+                  <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>TRIAL PERIOD (DAYS)</label>
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
+                    <Clock size={14} color="#5FBE91" />
+                    <input
+                      type="number"
+                      step="1"
+                      min="1"
+                      max="365"
+                      value={trialDays}
+                      onChange={(e) => { setTrialDays(Math.max(1, parseInt(e.target.value) || 1)); setDirty(true); setSaved(false); }}
+                      style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 20, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                    />
+                    <span style={{ color: "var(--muted-foreground)" }}>days</span>
+                  </div>
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>Account suspends automatically after this window</div>
                 </div>
+              )}
+
+              {/* Preview */}
+              <div className="flex items-center justify-center rounded-2xl border" style={{ borderColor: plan.color, background: `${plan.color}08`, minHeight: 84 }}>
+                {plan.id === "starter" ? (
+                  <div className="text-center">
+                    <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 700 }}>${plan.price} / {trialDays} days</div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Trial · suspends after {trialDays}d</div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 35.5, fontWeight: 700 }}>${plan.price}/mo</div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>{plan.storage} GB · ${plan.overageRate}/GB overage</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Shield, CheckCircle, Clock, CreditCard, Star, Info,
   Lock, AlertTriangle, Users, Zap, Download, FileText,
@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../services/supabase";
+import { billing } from "../services/billing";
 import { CryptoPayment } from "./CryptoPayment";
 import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.webp";
 
@@ -221,19 +224,48 @@ export function LegacyContinuationFee() {
   const [name, setName] = useState("");
   const [payerType, setPayerType] = useState<"user"|"legacy_contact">("user");
   const [showCoverage, setShowCoverage] = useState(false);
-  const [simulatingVerif, setSimulatingVerif] = useState(false);
+  const { authUser } = useAuth();
 
-  const simulateAdminVerification = async () => {
-    setSimulatingVerif(true);
-    const tid = toast.loading("Simulating FPD admin verifying confirmation of passing…");
-    await new Promise(r => setTimeout(r, 2000));
-    setStatus(s => ({
-      ...s,
-      deathCertificateVerified: true,
-      fullyUnlocked: s.paid, // unlock only if fee was also paid
-    }));
-    setSimulatingVerif(false);
-    toast.success("✅ Admin verified — Confirmation of Passing confirmed", { id: tid });
+  /* Real state: the account's paid fee row. "Confirmation of passing verified"
+     is the admin's activation of that fee after an approved legacy claim. */
+  useEffect(() => {
+    if (!authUser) return;
+    let cancelled = false;
+    void db.getContinuationFee(authUser.id).then(({ data: fee }) => {
+      if (cancelled || !fee) return;
+      setStatus({
+        paid: true,
+        paidDate: fee.paid_at ? new Date(fee.paid_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : undefined,
+        paidBy: fee.paid_by_type === "legacy_contact" ? "legacy_contact" : "user",
+        activeUntil: fee.expires_at ? new Date(fee.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : `${fee.activation_period_months} months from date of passing`,
+        activationPeriod: fee.activation_period_months,
+        transactionId: fee.stripe_payment_intent_id ?? fee.id,
+        deathCertificateVerified: Boolean(fee.activated_at),
+        fullyUnlocked: Boolean(fee.activated_at),
+      });
+      setContinuationFeePaid(true);
+    });
+    return () => { cancelled = true; };
+  }, [authUser, setContinuationFeePaid]);
+
+  /* Card payment happens on Stripe's hosted page; the fee is marked paid by
+     the signed webhook, not by this screen. */
+  const startCheckout = async () => {
+    if (processing) return;
+    setProcessing(true);
+    const tid = toast.loading("Opening secure checkout...");
+    try {
+      if (!(await billing.status()).checkoutEnabled) {
+        toast.error("Card payments are not connected yet. Please contact Final Pass Down support.", { id: tid });
+        return;
+      }
+      const { url } = await billing.continuationFeeCheckout();
+      window.location.assign(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const formatCard   = (v: string) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
@@ -274,7 +306,7 @@ export function LegacyContinuationFee() {
             <h1>The moment your vault <span className="accent">unlocks for them.</span></h1>
             <p>A one-time $199 fee that guarantees your legacy contacts can download your complete account — every document, video, and record — once your passing is verified.</p>
             <div className="hactions">
-              {!status.paid && <button className="hbtn primary" onClick={() => setShowPayment(true)}><CreditCard size={15} /> Pay $199 Fee</button>}
+              {!status.paid && <button className="hbtn primary" onClick={() => void startCheckout()}><CreditCard size={15} /> Pay $199 Fee</button>}
               <button className="hbtn ghost" onClick={() => setShowCoverage(true)}><Download size={15} /> What Gets Unlocked</button>
             </div>
           </div>
@@ -287,36 +319,6 @@ export function LegacyContinuationFee() {
           <div className="pg-sub">
             A one-time fee of <strong>$199</strong> that preserves your legacy contacts' ability to download your
             <strong> complete Final Pass Down account</strong> — every document, video, memory, record, and file you have ever uploaded — after your passing is verified.
-          </div>
-        </div>
-
-        {/* Demo simulation banner */}
-        <div className="demo-banner">
-          <div>
-            <div className="demo-tag">🎮 DEMO MODE — SIMULATE THE FULL FLOW</div>
-            <div className="demo-text">
-              {!status.paid && !status.deathCertificateVerified && "Step 1: Pay the $199 fee using the payment form below, then Step 2: simulate admin verification."}
-              {status.paid && !status.deathCertificateVerified && "Fee paid ✓ — Now simulate the FPD admin verifying the confirmation of passing to fully unlock."}
-              {status.deathCertificateVerified && !status.paid && "Passing verified ✓ — Now pay the $199 fee to complete both conditions and unlock the vault."}
-              {status.fullyUnlocked && "🎉 Both conditions met — vault is fully unlocked! Scroll down to see the Legacy Vault Clone."}
-            </div>
-          </div>
-          <div className="demo-acts">
-            {!status.paid && (
-              <button onClick={() => { setShowPayment(true); }} className="btn-ghost">
-                1. Pay Fee →
-              </button>
-            )}
-            {!status.deathCertificateVerified && (
-              <button onClick={simulateAdminVerification} disabled={simulatingVerif} className="btn-ghost">
-                {simulatingVerif ? "Verifying…" : "2. Simulate Admin Verification →"}
-              </button>
-            )}
-            {(status.paid || status.deathCertificateVerified) && (
-              <button onClick={() => { setStatus(initStatus); setContinuationFeePaid(false); }} className="btn-reset">
-                Reset Demo
-              </button>
-            )}
           </div>
         </div>
 
@@ -445,7 +447,7 @@ export function LegacyContinuationFee() {
                 ))}
 
                 <div className="pay-acts">
-                  <button onClick={() => setShowPayment(true)} className="btn-primary">
+                  <button onClick={() => void startCheckout()} className="btn-primary">
                     <CreditCard size={16}/>
                     Pay $199 with Card (Stripe)
                   </button>

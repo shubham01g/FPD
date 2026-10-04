@@ -8,7 +8,7 @@ const pricing = new Hono();
 
 const THRESHOLD_KEYS = [
   "overage_rate_per_gb", "storage_alert_80", "storage_alert_90", "storage_alert_95",
-  "continuation_fee_amount", "continuation_fee_period_months",
+  "continuation_fee_amount", "continuation_fee_period_months", "starter_trial_days",
 ] as const;
 
 // GET /admin/pricing — plans + storage/overage thresholds in one payload

@@ -34,6 +34,8 @@ function detectDeviceType(): "mobile" | "tablet" | "desktop" {
 const fieldStyle: React.CSSProperties = {
   background: "rgba(91,167,214,0.06)", border: "1px solid rgba(91,167,214,0.25)",
   color: "#E8EDF5", fontSize: 17.5, outline: "none",
+  // Native popups (select list, date picker) follow this, not the page theme.
+  colorScheme: "dark",
 };
 
 export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupProps) {
@@ -160,7 +162,7 @@ export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupPr
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>GENDER</label>
-                      <select value={gender} onChange={e=>setGender(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                      <select value={gender} onChange={e=>setGender(e.target.value)} className="w-full px-4 py-3.5 rounded-xl fpd-select-dark" style={fieldStyle}>
                         <option value="">Prefer not to say</option>
                         <option value="female">Female</option>
                         <option value="male">Male</option>
@@ -174,14 +176,14 @@ export function UserSignup({ onSignedUp, onGoLogin, onBackToSite }: UserSignupPr
                     </div>
                     <div>
                       <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>COUNTRY</label>
-                      <select value={country} onChange={e=>setCountry(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                      <select value={country} onChange={e=>setCountry(e.target.value)} className="w-full px-4 py-3.5 rounded-xl fpd-select-dark" style={fieldStyle}>
                         <option value="">Select...</option>
                         {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
                       <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>HOW DID YOU HEAR ABOUT US?</label>
-                      <select value={referralSource} onChange={e=>setReferralSource(e.target.value)} className="w-full px-4 py-3.5 rounded-xl" style={fieldStyle}>
+                      <select value={referralSource} onChange={e=>setReferralSource(e.target.value)} className="w-full px-4 py-3.5 rounded-xl fpd-select-dark" style={fieldStyle}>
                         <option value="">Select...</option>
                         {REFERRAL_SOURCES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
                       </select>

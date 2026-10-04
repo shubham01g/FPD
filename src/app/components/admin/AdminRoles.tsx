@@ -57,7 +57,7 @@ function makePermissions(view: boolean, edit: boolean, del: boolean): ModulePerm
 /* ── Role presets ────────────────────────────────────────────────── */
 export type AdminRole = "super_admin" | "operations_manager" | "support_agent" | "finance_manager" | "wg_manager" | "content_admin" | "custom";
 
-const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; description: string; permissions: ModulePermission[] }> = {
+export const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; description: string; permissions: ModulePermission[] }> = {
   super_admin: {
     label: "Super Admin",
     color: "#6E90C9",

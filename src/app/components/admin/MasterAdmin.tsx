@@ -5,7 +5,9 @@ import { UserDetailModal } from "./UserDetailModal";
 import { UserAvatar } from "./UserAvatar";
 import { SystemHealth } from "./SystemHealth";
 import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
-import { IDVerification } from "./IDVerification";
+import { LegacyClaims } from "./LegacyClaims";
+import { MarkDeceasedModal } from "./MarkDeceasedModal";
+import type { AdminPageId } from "./AdminLayout";
 import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
 import { adminApi } from "../../services/adminApi";
@@ -15,7 +17,7 @@ import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
   AlertTriangle, Bell, BarChart3, UserCheck, Shield, UserPlus, X,
-  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw
+  ToggleLeft, ToggleRight, Star, Send, Gift, Handshake, ShieldAlert, RefreshCw, Heart
 } from "lucide-react";
 
 // Ticks its own 1s clock so it can show "updated Ns ago" without re-rendering
@@ -122,7 +124,7 @@ function NotCollected({ what, how }: { what:string; how:string }) {
   );
 }
 
-type AdminTab = "overview"|"users"|"revenue"|"storage"|"verification"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"system_health"|"disaster_recovery";
+type AdminTab = "overview"|"users"|"revenue"|"storage"|"legacy_claims"|"payouts"|"audit"|"continuation"|"analytics"|"notifications"|"admin_roles"|"reports"|"system_health"|"disaster_recovery";
 
 /* ── Reusable chart sub-components ────────────────────────────────── */
 function HorizBar({ label, pct, value, color, subtext }: { label:string; pct:number; value?:string|number; color:string; subtext?:string }) {
@@ -924,9 +926,11 @@ interface DBUserRow {
   is_admin: boolean; email_verified: boolean; created_at: string;
   contact_count: number; used_bytes: number;
   subscription_waived: boolean; waive_reason: string | null; white_glove: boolean; admin_notes: string | null; onboarded_by: string | null;
+  /* Set by Mark Deceased (migration 027). */
+  deceased_at: string | null;
 }
 
-export function MasterAdmin() {
+export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
   const [userPlanFilter, setUserPlanFilter] = useState("");
@@ -934,6 +938,7 @@ export function MasterAdmin() {
   const [showUserFilters, setShowUserFilters] = useState(false);
   const [exportingUsers, setExportingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [deceasedModal, setDeceasedModal] = useState<DBUserRow | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
 
   const userQueryString = `search=${encodeURIComponent(userSearch)}&plan=${userPlanFilter}&status=${userStatusFilter}`;
@@ -1012,8 +1017,6 @@ export function MasterAdmin() {
     ADMIN_LIVE_POLL_MS,
   );
 
-  const pendingVerifCount = verificationData?.verifications.length ?? 0;
-
   const topMetrics = buildTopMetrics(
     overviewData,
     revenueTrendData?.trend ?? [],
@@ -1026,9 +1029,9 @@ export function MasterAdmin() {
     { id:"users",        label:"Users",           icon:<Users size={13}/> },
     { id:"revenue",      label:"Revenue",         icon:<DollarSign size={13}/> },
     { id:"storage",      label:"Storage",         icon:<HardDrive size={13}/> },
-    { id:"verification", label:"ID Verification", icon:<UserCheck size={13}/>, badge: pendingVerifCount > 0 ? String(pendingVerifCount) : undefined },
+    { id:"legacy_claims", label:"Legacy Claims",  icon:<UserCheck size={13}/> },
     { id:"payouts",      label:"Payouts",         icon:<TrendingUp size={13}/> },
-    { id:"continuation", label:"$199 Fee",        icon:<DollarSign size={13}/> },
+    { id:"continuation", label:"Continuation Vault", icon:<DollarSign size={13}/> },
     { id:"audit",        label:"Audit Log",       icon:<Shield size={13}/> },
     { id:"system_health",label:"System Health",   icon:<Activity size={13}/>, badge:"Live" },
     { id:"disaster_recovery", label:"Disaster Recovery", icon:<ShieldAlert size={13}/>, badge:"DR" },
@@ -1393,11 +1396,11 @@ export function MasterAdmin() {
                       <div style={{color:"#E8EDF5",fontSize:16}}>{v.contacts?.full_name ?? "Unknown contact"}</div>
                       <div style={{color:"#8A9AB8",fontSize:14}}>For: {v.contacts?.owner?.full_name ?? "—"} · {v.id_type} · {shortDate(v.submitted_at)}</div>
                     </div>
-                    <button onClick={()=>setTab("verification")} className="px-3 py-1 rounded-xl text-xs" style={{background:"rgba(91,110,225,0.15)",color:"#AEB9F5",fontWeight:700}}>Review</button>
+                    <button onClick={()=>onNavigate?.("id-verification")} className="px-3 py-1 rounded-xl text-xs" style={{background:"rgba(91,110,225,0.15)",color:"#AEB9F5",fontWeight:700}}>Review</button>
                   </div>
                 ))}
                 {pending.length > 5 && (
-                  <button onClick={()=>setTab("verification")} style={{color:"#6FAE8B",fontSize:14,fontWeight:600}}>
+                  <button onClick={()=>onNavigate?.("id-verification")} style={{color:"#6FAE8B",fontSize:14,fontWeight:600}}>
                     View all {pending.length} →
                   </button>
                 )}
@@ -1487,6 +1490,13 @@ export function MasterAdmin() {
                 <div className="flex items-center gap-2">
                   <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#6E90C9"}}><Eye size={13}/></button>
                   <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#8A9AB8"}}><Edit size={13}/></button>
+                  {user.deceased_at ? (
+                    <span style={{fontSize:11,...MONO,fontWeight:700,padding:"2px 7px",borderRadius:99,background:"rgba(252,129,129,0.12)",color:"#FC8181"}}>DECEASED</span>
+                  ) : (
+                    <button onClick={()=>setDeceasedModal(user)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold" style={{background:"rgba(252,129,129,0.08)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)"}}>
+                      <Heart size={11}/> Deceased
+                    </button>
+                  )}
                 </div>
               </div>
               );
@@ -1497,6 +1507,13 @@ export function MasterAdmin() {
           {/* User detail modal — Overview / Edit Account / Billing / Security */}
           {selectedUserId && (
             <UserDetailModal userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
+          )}
+          {deceasedModal && (
+            <MarkDeceasedModal
+              user={{ id: deceasedModal.id, name: deceasedModal.full_name, email: deceasedModal.email }}
+              onClose={() => setDeceasedModal(null)}
+              onConfirm={() => refetchUsers()}
+            />
           )}
         </div>
       )}
@@ -1595,8 +1612,9 @@ export function MasterAdmin() {
         );
       })()}
 
-      {/* VERIFICATION — the wired IDVerification screen, not a second copy */}
-      {tab === "verification" && <IDVerification/>}
+      {/* LEGACY CLAIMS — the death-claim review queue. ID review itself lives
+          only on the sidebar's ID Verification page. */}
+      {tab === "legacy_claims" && <LegacyClaims/>}
 
       {/* PAYOUTS — the wired PayoutManagement screen */}
       {tab === "payouts" && <PayoutManagement/>}
@@ -1636,7 +1654,7 @@ export function MasterAdmin() {
       })()}
 
       {/* $199 LEGACY CONTINUATION FEE — the wired ContinuationFeeAdmin screen */}
-      {tab === "continuation" && <ContinuationFeeAdmin/>}
+      {tab === "continuation" && <ContinuationFeeAdmin view="payments"/>}
 
       {/* PUSH NOTIFICATIONS TAB */}
       {tab === "notifications" && (

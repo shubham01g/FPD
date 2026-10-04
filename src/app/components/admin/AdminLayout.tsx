@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Crown, Users, Handshake, DollarSign, Settings,
   Code, Mail, Layers, LogOut, Bell, BarChart3,
-  Shield, ChevronRight, UserCheck, PanelLeft, PanelLeftClose
+  Shield, ChevronRight, UserCheck, PanelLeft, PanelLeftClose, CreditCard
 } from "lucide-react";
 import fpdSquareLogo from "../../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../../imports/FPD_full_logo.png";
@@ -14,7 +14,8 @@ export type AdminPageId =
   | "id-verification" | "payout-management" | "subscription-config"
   | "enterprise-api" | "email-templates" | "white-label"
   | "continuation-fee-admin" | "partner-onboarding-admin"
-  | "white-glove-admin" | "crypto-merchant" | "admin-roles";
+  | "white-glove-admin" | "crypto-merchant" | "admin-roles"
+  | "admin-settings" | "payment-processors";
 
 interface AdminNavItem {
   id: AdminPageId;
@@ -56,6 +57,13 @@ const adminGroups: { label: string; items: AdminNavItem[] }[] = [
       { id: "continuation-fee-admin",  label: "$199 Legacy Fee",     icon: <Shield size={16}/> },
       { id: "partner-onboarding-admin",label: "WL Onboarding Control", icon: <Handshake size={16}/> },
       { id: "crypto-merchant",         label: "Crypto Payments",     icon: <span style={{fontSize:15,fontWeight:900,lineHeight:1}}>₿</span> },
+      { id: "payment-processors",      label: "Payment Processors",  icon: <CreditCard size={16}/> },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { id: "admin-settings", label: "Settings", icon: <Settings size={16}/> },
     ],
   },
 ];

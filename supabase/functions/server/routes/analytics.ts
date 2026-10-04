@@ -58,6 +58,23 @@ analytics.get("/overview", async (c) => {
   });
 });
 
+// GET /admin/analytics/payments — the raw payment records (latest 1,000), for
+// the Transaction History export in System → Settings → Backup & Data.
+analytics.get("/payments", async (c) => {
+  const { data, error } = await adminClient()
+    .from("payments")
+    .select("id, user_id, type, amount_usd, status, description, stripe_payment_intent, stripe_invoice_id, paid_at, created_at, users:user_id(email, full_name)")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({
+    payments: (data ?? []).map(({ users, ...p }) => {
+      const u = users as { email?: string; full_name?: string } | null;
+      return { ...p, user_email: u?.email ?? null, user_name: u?.full_name ?? null };
+    }),
+  });
+});
+
 function monthKey(iso: string): string {
   return iso.slice(0, 7); // "YYYY-MM"
 }

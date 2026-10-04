@@ -50,7 +50,7 @@ async function expectOk(res: Response) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
-const SERVICES: ServiceDef[] = [
+export const SERVICES: ServiceDef[] = [
   {
     id:"database", name:"Database (PostgREST)", icon:<Database size={16}/>,
     description:"Reads subscription_plans through the Supabase REST API.",
