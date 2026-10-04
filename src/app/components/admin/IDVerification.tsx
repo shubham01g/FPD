@@ -10,8 +10,26 @@ interface VerificationContact {
   email: string;
   relationship: string;
   contact_type: string;
-  owner: { full_name: string; email: string } | null;
+  phone: string | null;
+  access_level: string | null;
+  invite_sent_at: string | null;
+  owner: { full_name: string; email: string; plan: string | null; created_at: string | null } | null;
 }
+
+/* GET /admin/verification/:id/record */
+interface RecordExtra {
+  otherContacts: { id: string; full_name: string; relationship: string | null; contact_type: string; verification_status: string }[];
+  trail: { id: string; actor_email: string | null; action: string; created_at: string }[];
+  notes: string;
+}
+
+const PLAN_LABEL: Record<string, string> = {
+  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
+  legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
+};
+const pretty = (s: string | null | undefined) => s ? s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "—";
+const fmtDay = (iso: string | null | undefined) =>
+  iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
 
 interface VerificationRecord {
   id: string;
@@ -55,6 +73,9 @@ export function IDVerification() {
   const [viewingUrls, setViewingUrls] = useState<{ front: string | null; back: string | null } | null>(null);
   const [viewingLoading, setViewingLoading] = useState(false);
   const [recordTab, setRecordTab] = useState<RecordTab>("identity");
+  const [recordExtra, setRecordExtra] = useState<RecordExtra | null>(null);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
   const [search, setSearch] = useState("");
   const [historyFilter, setHistoryFilter] = useState<"all" | "approved" | "rejected">("all");
 
@@ -62,7 +83,13 @@ export function IDVerification() {
     setViewingVerif(verif);
     setRecordTab("identity");
     setViewingUrls(null);
+    setRecordExtra(null);
+    setNotesDraft("");
     setViewingLoading(true);
+    // Loaded on its own so a failure here never hides the ID images.
+    adminApi.get<RecordExtra>(`/verification/${verif.id}/record`)
+      .then((extra) => { setRecordExtra(extra); setNotesDraft(extra.notes); })
+      .catch((err) => toast.error(err instanceof Error ? err.message : "Failed to load the full record"));
     try {
       const urls = await adminApi.get<{ front: string | null; back: string | null }>(`/verification/${verif.id}/documents`);
       setViewingUrls(urls);
@@ -119,6 +146,19 @@ export function IDVerification() {
       toast.error(err instanceof Error ? err.message : "Failed to approve verification");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function saveNotes(id: string) {
+    setSavingNotes(true);
+    try {
+      await adminApi.put(`/verification/${id}/notes`, { notes: notesDraft });
+      setRecordExtra((e) => (e ? { ...e, notes: notesDraft } : e));
+      toast.success("Admin notes saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save notes");
+    } finally {
+      setSavingNotes(false);
     }
   }
 
@@ -385,6 +425,7 @@ export function IDVerification() {
               if (recordTab === "identity") return grid([
                 ["LEGAL FULL NAME", v.contacts?.full_name ?? "—"],
                 ["EMAIL ADDRESS", v.contacts?.email ?? "—"],
+                ["PHONE NUMBER", v.contacts?.phone || "—"],
                 ["DATE OF BIRTH", v.date_of_birth ?? "—"],
                 ["DOCUMENT TYPE", v.id_type],
                 ["ID NUMBER (MASKED)", v.id_number_masked ?? "—"],
@@ -412,12 +453,44 @@ export function IDVerification() {
                 </div>
               );
 
-              if (recordTab === "account") return grid([
-                ["ACCOUNT HOLDER", v.contacts?.owner?.full_name ?? "—"],
-                ["ACCOUNT EMAIL", v.contacts?.owner?.email ?? "—"],
-                ["RELATIONSHIP TO CONTACT", v.contacts?.relationship ?? "—"],
-                ["CONTACT TYPE", v.contacts?.contact_type ?? "—"],
-              ]);
+              if (recordTab === "account") return (
+                <div className="space-y-4">
+                  {grid([
+                    ["ACCOUNT HOLDER", v.contacts?.owner?.full_name ?? "—"],
+                    ["ACCOUNT EMAIL", v.contacts?.owner?.email ?? "—"],
+                    ["SUBSCRIPTION PLAN", v.contacts?.owner?.plan ? (PLAN_LABEL[v.contacts.owner.plan] ?? pretty(v.contacts.owner.plan)) : "—"],
+                    ["MEMBER SINCE", fmtDay(v.contacts?.owner?.created_at)],
+                    ["RELATIONSHIP TO CONTACT", v.contacts?.relationship ?? "—"],
+                    ["CONTACT TYPE", pretty(v.contacts?.contact_type)],
+                    ["REQUESTED ACCESS LEVEL", pretty(v.contacts?.access_level)],
+                  ])}
+                  <div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)", marginBottom: 8 }}>OTHER CONTACTS ON THIS ACCOUNT</div>
+                    {!recordExtra ? (
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Loading…</div>
+                    ) : recordExtra.otherContacts.length === 0 ? (
+                      <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>No other contacts on this account.</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {recordExtra.otherContacts.map((o) => (
+                          <div key={o.id} className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <User size={14} color="#8A9AB8" />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ color: "var(--foreground)", fontSize: 16 }}>{o.full_name}</div>
+                              <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{[o.relationship, pretty(o.contact_type)].filter(Boolean).join(" · ")}</div>
+                            </div>
+                            <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 8px", borderRadius: 99,
+                              background: o.verification_status === "verified" ? "rgba(72,187,120,0.12)" : "rgba(255,255,255,0.08)",
+                              color: o.verification_status === "verified" ? "#6FAE8B" : "#8A9AB8" }}>
+                              {o.verification_status.toUpperCase()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
 
               if (recordTab === "risk") return (
                 <div className="space-y-2">
@@ -438,17 +511,38 @@ export function IDVerification() {
                 </div>
               );
 
+              /* Audit trail: the contact's own steps plus every admin action
+                 the audit log recorded against this verification. */
+              const contactName = v.contacts?.full_name ?? "Contact";
+              const rejectedLabel = `Verification rejected${v.rejection_reason ? ` — ${v.rejection_reason}` : ""}`;
+              const trail = recordExtra?.trail ?? [];
+              const events: { at: string; event: string; actor: string }[] = [
+                ...(v.contacts?.invite_sent_at ? [{ at: v.contacts.invite_sent_at, event: "Verification invite sent to contact", actor: v.contacts.owner?.full_name ?? "Account holder" }] : []),
+                ...all.filter((o) => o.contact_id === v.contact_id && o.id !== v.id)
+                  .map((o) => ({ at: o.submitted_at, event: `Earlier ID submission (${o.status})`, actor: contactName })),
+                { at: v.submitted_at, event: "ID submitted for verification", actor: contactName },
+                ...trail.map((t) => ({
+                  at: t.created_at,
+                  event: t.action.endsWith("/approve") ? "Verification approved"
+                    : t.action.endsWith("/reject") ? rejectedLabel
+                    : t.action.endsWith("/notes") ? "Admin notes updated"
+                    : t.action,
+                  actor: t.actor_email ?? "Admin",
+                })),
+                // Reviews made before the audit log covered this screen.
+                ...(v.reviewed_at && !trail.some((t) => /\/(approve|reject)$/.test(t.action))
+                  ? [{ at: v.reviewed_at, event: v.status === "approved" ? "Verification approved" : rejectedLabel, actor: "Admin" }] : []),
+              ].sort((a, b) => a.at.localeCompare(b.at));
+
               return (
                 <div className="space-y-3">
-                  {([
-                    [fmtWhen(v.submitted_at), "ID submitted for verification", v.contacts?.full_name ?? "Contact"],
-                    ...(v.reviewed_at ? [[fmtWhen(v.reviewed_at), v.status === "approved" ? "Verification approved" : `Verification rejected${v.rejection_reason ? ` — ${v.rejection_reason}` : ""}`, "Admin"]] : []),
-                  ] as [string, string, string][]).map(([when, event, actor]) => (
-                    <div key={when + event} className="flex gap-3">
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)" }}>VERIFICATION AUDIT TRAIL</div>
+                  {events.map(({ at, event, actor }, i) => (
+                    <div key={at + event + i} className="flex gap-3">
                       <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#AEB9F5", marginTop: 7, flexShrink: 0 }} />
                       <div>
                         <div style={{ color: "var(--foreground)", fontSize: 16 }}>{event}</div>
-                        <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{when} · {actor}</div>
+                        <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{fmtWhen(at)} · {actor}</div>
                       </div>
                     </div>
                   ))}
@@ -461,6 +555,29 @@ export function IDVerification() {
                 </div>
               );
             })()}
+
+            {/* Internal reviewer notes — never shown to the contact or the account holder */}
+            <div className="mt-5">
+              <div style={{ color: "var(--muted-foreground)", fontSize: 14, fontFamily: "var(--font-mono)", marginBottom: 6 }}>ADMIN NOTES</div>
+              <textarea
+                value={notesDraft}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                disabled={!recordExtra}
+                rows={2}
+                placeholder="Add internal notes about this verification..."
+                style={{ width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid var(--border)", borderRadius: 12, padding: "10px 12px", color: "var(--foreground)", fontSize: 16, outline: "none", resize: "vertical" }}
+              />
+              {recordExtra && notesDraft !== recordExtra.notes && (
+                <button
+                  onClick={() => void saveNotes(viewingVerif.id)}
+                  disabled={savingNotes}
+                  className="mt-2 px-4 py-2 rounded-xl disabled:opacity-50"
+                  style={{ background: "rgba(91,110,225,0.18)", color: "#AEB9F5", border: "1px solid rgba(91,110,225,0.35)", fontWeight: 600, fontSize: 15 }}
+                >
+                  {savingNotes ? "Saving…" : "Save Notes"}
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-3 mt-5">
               {viewingVerif.status === "pending" && (<>
