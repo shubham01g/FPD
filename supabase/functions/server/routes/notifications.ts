@@ -2,7 +2,7 @@ import { Hono } from "npm:hono";
 import webpush from "npm:web-push@3.6.7";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
-import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, sendEmail, testEmail } from "../lib/email.ts";
+import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, sendEmail, testEmail } from "../lib/email.ts";
 
 const notifications = new Hono();
 
@@ -13,7 +13,7 @@ const notifications = new Hono();
 // in-app-only exactly like before, no error.
 const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY");
 const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY");
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:support@finalpassdown.com";
+const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || `mailto:${MAILBOX.support}`;
 const PUSH_CONFIGURED = Boolean(VAPID_PUBLIC && VAPID_PRIVATE);
 if (PUSH_CONFIGURED) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC!, VAPID_PRIVATE!);

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { adminApi } from "../services/adminApi";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 export interface WhiteLabelConfig {
   enabled: boolean;
@@ -52,7 +53,7 @@ export const defaultConfig: WhiteLabelConfig = {
   accentColor: "#5B6EE1",
   logoText: "FPD",
   domain: "app.finalpassdown.com",
-  supportEmail: "support@finalpassdown.com",
+  supportEmail: FPD_EMAIL.support,
   senderName: "Final Pass Down",
   features: {
     vault: true, finalWishes: true, medicalInfo: true, financialRecords: true,

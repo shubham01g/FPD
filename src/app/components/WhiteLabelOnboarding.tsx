@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { toast } from "sonner";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -111,7 +112,7 @@ export function WhiteLabelOnboarding() {
           <div className="p-5 rounded-2xl mb-6" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:6 }}>APPLICATION REFERENCE</div>
             <div style={{ ...MONO, fontSize:25, color:"#6E90C9", fontWeight:700, marginBottom:4 }}>{applicationId}</div>
-            <div style={{ color:"#4A5A7A", fontSize:14 }}>Save this reference for any follow-up with our team</div>
+            <div style={{ color:"#4A5A7A", fontSize:14 }}>Save this reference for any follow-up with our team at {FPD_EMAIL.sales}</div>
           </div>
           <button onClick={() => navigate("/")} className="w-full py-4 rounded-2xl font-bold text-base"
             style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 32px rgba(91,110,225,0.35)" }}>

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { toast } from "sonner";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -117,7 +118,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
           </div>
           <h2 style={{ ...DISPLAY, fontSize:40.5, color:"#E8EDF5", marginBottom:8 }}>Welcome to the Partner Program!</h2>
           <p style={{ color:"#8A9AB8", fontSize:19, lineHeight:1.9, marginBottom:8 }}>
-            Your $599 one-time setup fee has been processed. Our team will activate your partner account within <strong>1 business day</strong>.
+            Your $599 one-time setup fee has been processed. Our team will activate your partner account within <strong>1 business day</strong>. Questions? Email <strong>{FPD_EMAIL.partnerships}</strong>.
           </p>
           <p style={{ color:"#8A9AB8", fontSize:17.5, lineHeight:1.8, marginBottom:32 }}>
             You start at <strong style={{ color:"#6FAE8B" }}>Tier 1 (20% commission)</strong>. As you grow to 51+ accounts you automatically advance to Tier 2 (25%), and 101+ unlocks Tier 3 (30%).

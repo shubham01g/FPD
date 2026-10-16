@@ -13,6 +13,7 @@ import { StoredImage } from "./StoredImage";
 import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.webp";
 import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.webp";
 import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -173,7 +174,8 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
     const accessDesc = isGuardian
       ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned`
       : form.accessLevel;
-    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:"pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
+    // Legacy/Guardian start un-invited; the server marks them sent once the email goes out.
+    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:(isLegacy || isGuardian) ? "not_sent" : "pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
     onClose();
   };
 
@@ -274,7 +276,11 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
         </div>
         <div className="modal-foot">
           <button onClick={submit} disabled={loading} className="save" style={{ opacity: loading ? 0.7 : 1 }}>
-            {loading ? (editing ? "Saving…" : "Sending Invite…") : (editing ? "Save Changes" : "Send Verification Invite")}
+            {editing
+              ? (loading ? "Saving…" : "Save Changes")
+              : (isLegacy || isGuardian)
+                ? (loading ? "Sending Invite…" : "Add & Email Invite")
+                : (loading ? "Adding…" : "Add Contact")}
           </button>
           <button onClick={onClose} className="btn-sec">Cancel</button>
         </div>
@@ -379,7 +385,8 @@ function BulkImportModal({ defaultType, onClose, onImport }: {
       name: r.name, email: r.email, phone: r.phone, relationship: "",
       type: defaultType,
       accessLevel: defaultType === "guardian" ? "View Only — folders not yet assigned" : "",
-      notes: "", verificationStatus: "pending",
+      // Imports are not emailed, so they start un-invited and show a Send button.
+      notes: "", verificationStatus: "not_sent",
       avatar: r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?",
     }));
     await onImport(contacts);
@@ -584,6 +591,12 @@ function ContactSection({
                     </div>
                   )}
 
+                  {isGuardian && c.email && (
+                    <button onClick={()=>onSendInvite?.(c.id)} className="btn-sec" style={{ marginTop: 10 }}>
+                      <Mail size={10}/> {c.verificationStatus === "not_sent" ? "Send Invite" : "Resend Invite"}
+                    </button>
+                  )}
+
                   {isLegacy && (
                     <div style={{ marginTop: 6, fontSize: 15, color: MUTED }}>
                       {i === 0
@@ -605,7 +618,7 @@ function ContactSection({
                           <span style={{ color:MUTED, fontSize:14 }}>
                             {vs2==="not_sent" && "ID verification invite not yet sent"}
                             {vs2==="pending" && "Invite sent — awaiting ID submission"}
-                            {vs2==="id_submitted" && "ID submitted — pending compliance review (1–2 days)"}
+                            {vs2==="id_submitted" && `ID submitted — pending compliance review (1–2 days). Questions: ${FPD_EMAIL.verify}`}
                             {vs2==="verified" && "Government ID verified by compliance team ✓"}
                             {vs2==="rejected" && (c.idRejectionReason ? `Rejected: ${c.idRejectionReason}` : "ID rejected — please resubmit")}
                           </span>
@@ -925,7 +938,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             defaultType={importingType}
             onClose={() => setImportingType(null)}
             onImport={async contacts => {
-              for (const c of contacts) await addContact(c);
+              for (const c of contacts) await addContact(c, { invite: false });
               setImportingType(null);
               toast.success(`${contacts.length} contact${contacts.length===1?"":"s"} imported`);
             }}

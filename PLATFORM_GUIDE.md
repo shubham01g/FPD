@@ -1316,7 +1316,7 @@ WL partners can use different processors than FPD's default:
 
 2. **Partner's own processor:** The partner already has a Stripe or PayPal merchant account. FPD routes the WL platform's billing through the partner's account. FPD invoices the partner separately for the monthly platform fee ($2,999/$7,499/$15,000).
 
-3. **Custom deal:** FPD negotiates directly with the partner's payment processor of choice (common for institutional-level deals). Contact integrations@finalpassdown.com.
+3. **Custom deal:** FPD negotiates directly with the partner's payment processor of choice (common for institutional-level deals). Contact partnerships@finalpassdown.com.
 
 ---
 

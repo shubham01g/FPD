@@ -3,6 +3,7 @@ import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "l
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import heroAffiliatePhoto from "../../imports/affiliateprogram_hero_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -370,7 +371,7 @@ export function AffiliateProgram() {
         {/* ── Cap notice ── */}
         <div className="notice">
           <Info size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 2 }} />
-          <p><strong style={{ color: TEXT }}>12-Month Commission Cap:</strong> Affiliate commissions are earned for 12 months from each user's join date. After 12 months, that referral no longer generates commission. There is no cap on the number of referrals you can make.</p>
+          <p><strong style={{ color: TEXT }}>12-Month Commission Cap:</strong> Affiliate commissions are earned for 12 months from each user's join date. After 12 months, that referral no longer generates commission. There is no cap on the number of referrals you can make. Questions about your link or a payout? Email <strong style={{ color: TEXT }}>{FPD_EMAIL.affiliates}</strong>.</p>
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { usePwaInstall } from "../hooks/usePwaInstall";
+import { FPD_EMAIL, FPD_EMAIL_DIRECTORY } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette ─────────────────────────────────── */
 const BG = "#070A12";
@@ -1221,7 +1222,16 @@ function Help() {
       <div className="max-w-3xl mx-auto">
         <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
-            <a href="mailto:support@finalpassdown.com"><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
+            <a href={`mailto:${FPD_EMAIL.contact}`}><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 mt-8 text-left">
+            {FPD_EMAIL_DIRECTORY.map(d => (
+              <div key={d.email}>
+                <div style={{ color: FAINT, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", ...MONO }}>{d.label}</div>
+                <a href={`mailto:${d.email}`} className="transition-colors hover:text-white" style={{ color: TEXT, fontSize: 17.5, wordBreak: "break-all" }}>{d.email}</a>
+                <div style={{ color: MUTED, fontSize: 14 }}>{d.note}</div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -1263,7 +1273,7 @@ function CTA({ onStart }: { onStart: () => void }) {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3.5">
             <PrimaryBtn onClick={onStart} large>Join Now <ArrowRight size={18} /></PrimaryBtn>
-            <a href="mailto:hello@finalpassdown.com"><GhostBtn large><Mail size={16} /> Talk to Us</GhostBtn></a>
+            <a href={`mailto:${FPD_EMAIL.sales}`}><GhostBtn large><Mail size={16} /> Talk to Us</GhostBtn></a>
           </div>
         </div>
       </div>

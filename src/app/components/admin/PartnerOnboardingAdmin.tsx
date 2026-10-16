@@ -11,6 +11,7 @@ import {
   getSales, getProcessors, updateProcessor, calcMonthlyCharge,
 } from "../../services/wlPackages";
 import type { WLPackage, WLSale, PaymentProcessor, BillingModel } from "../../services/wlPackages";
+import { FPD_EMAIL } from "../../utils/fpdEmails";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -712,9 +713,9 @@ export function PartnerOnboardingAdmin() {
               style={{ border:"2px dashed rgba(91,110,225,0.2)", borderRadius:22 }}>
               <div style={{ color:"#8A9AB8", fontSize:16, fontWeight:500, marginBottom:4 }}>Need a custom processor deal?</div>
               <div style={{ color:"#8A9AB8", fontSize:15, marginBottom:12 }}>
-                Contact integrations@finalpassdown.com to add a processor or integrate a WL partner's existing payment system.
+                Contact {FPD_EMAIL.partnerships} to add a processor or integrate a WL partner's existing payment system.
               </div>
-              <button onClick={() => { copyToClipboard("integrations@finalpassdown.com"); toast.success("integrations@finalpassdown.com copied"); }}
+              <button onClick={() => { copyToClipboard(FPD_EMAIL.partnerships); toast.success(`${FPD_EMAIL.partnerships} copied`); }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={13}/> Request Custom Integration

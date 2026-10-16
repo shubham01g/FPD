@@ -9,6 +9,7 @@ import {
   Clock, User, Star, FileText, Lock, Eye
 } from "lucide-react";
 import { toast } from "sonner";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -110,7 +111,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
           I understand and consent that all Specialist actions within my account are logged in
           a tamper-evident audit trail. Session activity, document uploads, and configuration
           changes are permanently recorded with timestamps. I may request a full audit report
-          at any time by contacting support@finalpassdown.com.
+          at any time by contacting {FPD_EMAIL.support}.
         </p>
       </div>
 
@@ -151,7 +152,7 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
         <div style={{ color:"#FFFFFF", fontSize:17.5, fontWeight:700, marginBottom:8 }}>8. REVOCATION</div>
         <p>
           I may revoke this authorization at any time by calling FPD at 1-800-FPD-HELP or
-          emailing support@finalpassdown.com. Revocation does not undo actions already completed
+          emailing {FPD_EMAIL.support}. Revocation does not undo actions already completed
           prior to revocation. Upon revocation, the Specialist's access to my account is
           immediately terminated.
         </p>
@@ -493,7 +494,7 @@ export function WaiverManager() {
         userName: sendForm.name,
         userEmail: sendForm.email,
         sentAt: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) + " · " + new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
-        sentBy: "admin@finalpassdown.com",
+        sentBy: FPD_EMAIL.admin,
         status: "pending",
         specialistName: sendForm.specialist,
         specialistScope: sendForm.scope,

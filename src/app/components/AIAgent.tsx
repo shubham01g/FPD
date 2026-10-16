@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import heroQAPhoto from "../../imports/ai_hero_qa.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";
@@ -250,7 +251,7 @@ function getResponse(query: string): string {
   if (q.match(/^(hi|hello|hey|howdy|good morning|good afternoon|start|help me|help\b|what can you|what do you)/)) return KB["default"];
 
   // Fallback — still helpful
-  return `I'm not sure I have a specific answer for "${query}", but I'm trained on every FPD feature.\n\nTry asking me about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nOr contact support at **support@finalpassdown.com** for account-specific help.`;
+  return `I'm not sure I have a specific answer for "${query}", but I'm trained on every FPD feature.\n\nTry asking me about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nOr contact support at **${FPD_EMAIL.support}** for account-specific help.`;
 }
 
 /* ── Suggestion chips ───────────────────────────────────────────── */
@@ -699,7 +700,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
                 <div className="ft">
                   <b>This assistant knows the whole platform.</b> It only explains features and points you to the
                   right section — it never touches your data. For account-specific help, contact{" "}
-                  <b>support@finalpassdown.com</b>.
+                  <b>{FPD_EMAIL.support}</b>.
                 </div>
               </div>
             </div>

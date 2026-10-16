@@ -24,6 +24,16 @@ export const EMAIL_CONFIGURED = Boolean(API_KEY);
 /** The address mail is sent from (shown in System → Settings). */
 export const EMAIL_FROM_ADDRESS = FROM_EMAIL;
 
+/** The team mailboxes. Mail still goes out from FROM_EMAIL; these are where a
+ *  reply lands, so each kind of email answers to the team that handles it.
+ *  The app keeps the same list in src/app/utils/fpdEmails.ts. */
+export const MAILBOX = {
+  support: "support@finalpassdown.com",
+  verify: "verify@finalpassdown.com",
+  claims: "claims@finalpassdown.com",
+  admin: "admin@finalpassdown.com",
+} as const;
+
 export const EMAIL_NOT_CONFIGURED_MESSAGE =
   "Email sending isn't set up on this deployment. Set SENDGRID_API_KEY as an Edge Function secret.";
 
@@ -34,6 +44,8 @@ export interface EmailMessage {
   text: string;
   /** SendGrid category, for filtering in the Activity feed. */
   category?: string;
+  /** Where a reply goes. Defaults to support. */
+  replyTo?: string;
 }
 
 /** Sends one email. Throws on any non-2xx (SendGrid answers 202 on success). */
@@ -49,6 +61,7 @@ export async function sendEmail(msg: EmailMessage): Promise<void> {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: msg.to }] }],
       from: { email: FROM_EMAIL, name: FROM_NAME },
+      reply_to: { email: msg.replyTo ?? MAILBOX.support, name: FROM_NAME },
       subject: msg.subject,
       // SendGrid requires text/plain before text/html.
       content: [
@@ -69,13 +82,13 @@ export async function sendEmail(msg: EmailMessage): Promise<void> {
   }
 }
 
-function layout(title: string, bodyHtml: string): string {
+function layout(title: string, bodyHtml: string, contact: string = MAILBOX.support): string {
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;"><tr><td align="center">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;border:1px solid #e3e5e8;">
 <tr><td style="background:${NAVY};padding:24px 36px;border-radius:12px 12px 0 0;border-bottom:3px solid ${BRAND};"><span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:0.3px;">${APP_NAME}</span></td></tr>
 <tr><td style="padding:32px 36px;color:#1f2328;"><h1 style="margin:0 0 16px;font-size:22px;">${title}</h1>${bodyHtml}</td></tr>
-<tr><td style="padding:20px 36px;border-top:1px solid #e3e5e8;color:#6e7781;font-size:12px;">&copy; ${new Date().getFullYear()} ${APP_NAME} &middot; ${SITE_URL.replace("https://", "")}</td></tr>
+<tr><td style="padding:20px 36px;border-top:1px solid #e3e5e8;color:#6e7781;font-size:12px;">Questions? Reply to this email or write to <a href="mailto:${contact}" style="color:#6e7781;">${contact}</a>.<br>&copy; ${new Date().getFullYear()} ${APP_NAME} &middot; ${SITE_URL.replace("https://", "")}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -84,6 +97,7 @@ export function otpEmail(code: string, minutes: number): Omit<EmailMessage, "to"
   return {
     subject: `${code} is your ${APP_NAME} verification code`,
     category: "otp",
+    replyTo: MAILBOX.verify,
     text:
       `${lead}\n\n${code}\n\nThis code expires in ${minutes} minutes and can only be used once.\n` +
       `If you didn't try to sign in, someone may know your password. Change it right away.`,
@@ -93,7 +107,7 @@ export function otpEmail(code: string, minutes: number): Omit<EmailMessage, "to"
         <span style="font-size:32px;font-weight:700;letter-spacing:10px;color:${BRAND};font-family:monospace;">${code}</span>
       </div>
       <p style="margin:0 0 12px;color:#6e7781;font-size:13px;">This code expires in ${minutes} minutes and can only be used once.</p>
-      <p style="margin:0;color:#6e7781;font-size:13px;">If you didn't try to sign in, someone may know your password. Change it right away.</p>`),
+      <p style="margin:0;color:#6e7781;font-size:13px;">If you didn't try to sign in, someone may know your password. Change it right away.</p>`, MAILBOX.verify),
   };
 }
 
@@ -129,14 +143,15 @@ export function claimLinkEmail(o: {
   return {
     subject: o.moreDocs ? `More documents needed for claim ${o.claimRef}` : `Your secure claim link — ${APP_NAME}`,
     category: "legacy_claim",
-    text: `Dear ${o.claimantName},\n\n${lead}\n\n${o.note ? `${o.note}\n\n` : ""}${o.link}\n\n${closing}\nClaim reference: ${o.claimRef}`,
+    replyTo: MAILBOX.claims,
+    text: `Dear ${o.claimantName},\n\n${lead}\n\n${o.note ? `${o.note}\n\n` : ""}${o.link}\n\n${closing}\nClaim reference: ${o.claimRef}\n\nQuestions? Reply to this email or write to ${MAILBOX.claims}.`,
     html: layout(o.moreDocs ? "More documents needed" : "Legacy access claim", `
       <p style="margin:0 0 16px;line-height:1.6;">Dear ${esc(o.claimantName)},</p>
       <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
       ${o.note ? `<p style="margin:0 0 20px;padding:14px 16px;background:#f4f5f7;border-radius:8px;line-height:1.6;white-space:pre-wrap;">${esc(o.note)}</p>` : ""}
       ${button(o.link, o.moreDocs ? "Add documents" : "Open the claim portal")}
       <p style="margin:0 0 6px;color:#6e7781;font-size:13px;">${esc(closing)}</p>
-      <p style="margin:0;color:#6e7781;font-size:13px;">Claim reference: ${esc(o.claimRef)}</p>`),
+      <p style="margin:0;color:#6e7781;font-size:13px;">Claim reference: ${esc(o.claimRef)}</p>`, MAILBOX.claims),
   };
 }
 
@@ -147,12 +162,42 @@ export function adminInviteEmail(o: { name: string; roleLabel: string; link: str
   return {
     subject: `You're invited to the ${APP_NAME} admin portal`,
     category: "admin_invite",
+    replyTo: MAILBOX.admin,
     text: `Hi ${o.name},\n\n${lead}\n\nAccept the invitation and set your password:\n${o.link}\n\n${closing}`,
     html: layout("Admin portal invitation", `
       <p style="margin:0 0 16px;line-height:1.6;">Hi ${esc(o.name)},</p>
       <p style="margin:0 0 20px;line-height:1.6;">${esc(lead)}</p>
       ${button(o.link, "Accept invitation")}
-      <p style="margin:0;color:#6e7781;font-size:13px;">${closing}</p>`),
+      <p style="margin:0;color:#6e7781;font-size:13px;">${closing}</p>`, MAILBOX.admin),
+  };
+}
+
+/** Tells someone they were named a Legacy or Guardian Contact. There is no
+ *  contact sign-in, so this explains the role rather than asking for a click. */
+export function contactInviteEmail(o: {
+  contactName: string; ownerName: string; type: "legacy" | "guardian"; link: string;
+}): Omit<EmailMessage, "to"> {
+  const role = o.type === "legacy" ? "Legacy Contact" : "Guardian Contact";
+  const lead = `${o.ownerName} has named you as their ${role} on ${APP_NAME}.`;
+  const meaning = o.type === "legacy"
+    ? `A Legacy Contact is the person trusted to receive access to their vault after their passing. Nothing is shared with you today.`
+    : `A Guardian Contact is someone trusted with view-only access to the folders they choose to share, such as medical or household records.`;
+  const next = o.type === "legacy"
+    ? `You don't need to do anything right now. ${o.ownerName} may ask you for a government-issued photo ID so our team can verify your identity ahead of time. If the time comes, we will email you a secure link to claim access.`
+    : `You don't need to do anything right now. ${o.ownerName} can tell you more about what they have shared with you.`;
+  const closing = `If you don't know ${o.ownerName}, you can ignore this email.`;
+  return {
+    subject: `${o.ownerName} named you as their ${role} — ${APP_NAME}`,
+    category: "contact_invite",
+    replyTo: MAILBOX.verify,
+    text: `Hi ${o.contactName},\n\n${lead}\n\n${meaning}\n\n${next}\n\nAbout ${APP_NAME}: ${o.link}\n\n${closing}\nQuestions? Reply to this email or write to ${MAILBOX.verify}.`,
+    html: layout(`You've been named a ${role}`, `
+      <p style="margin:0 0 16px;line-height:1.6;">Hi ${esc(o.contactName)},</p>
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(meaning)}</p>
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(next)}</p>
+      ${button(o.link, `About ${APP_NAME}`)}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`, MAILBOX.verify),
   };
 }
 

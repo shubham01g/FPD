@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Handshake, TrendingUp, DollarSign, Users, CheckCircle, Copy, Link, Star, Info, Building } from "lucide-react";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 const partnerReferrals = [
   { name: "Greenfield Law Offices", type: "Estate Attorney", accounts: 18, joined: "Jan 15, 2025", revenue: 449.82, status: "active", recurring: true },
@@ -190,7 +191,7 @@ export function PartnershipProgram() {
       <div className="flex gap-3 px-5 py-4 rounded-2xl border" style={{ background: "rgba(91,110,225,0.05)", borderColor: "rgba(91,110,225,0.2)" }}>
         <Info size={15} color="var(--gold)" style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ color: "var(--muted-foreground)", fontSize: 16, lineHeight: 1.7 }}>
-          <strong style={{ color: "var(--foreground)" }}>Lifetime Recurring Commissions:</strong> Partnership commissions are paid every billing cycle for the lifetime of each referred account — no 12-month cap. As you grow your total account count, your tier upgrades automatically and applies to all existing accounts.
+          <strong style={{ color: "var(--foreground)" }}>Lifetime Recurring Commissions:</strong> Partnership commissions are paid every billing cycle for the lifetime of each referred account — no 12-month cap. As you grow your total account count, your tier upgrades automatically and applies to all existing accounts. Questions about your partnership? Email <strong style={{ color: "var(--foreground)" }}>{FPD_EMAIL.partnerships}</strong>.
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -50,7 +51,7 @@ const FAQS = [
   { q:"What documents do I need to prepare?", a:"Your specialist will give you a simple checklist on your first call. Common items include: your will (if you have one), insurance policies, bank account info, and a list of family contacts. If you don't have some of these, we'll help you figure out what to do." },
   { q:"Can my family member set this up for me?", a:"Absolutely. We can coordinate with a family member or trusted person who calls on your behalf. They can be present on all sessions if you prefer." },
   { q:"Is my information private and secure?", a:"Yes. Everything is encrypted with military-grade AES-256 encryption. Your specialist only assists with uploading — they cannot access your vault after sessions end. All activity is logged." },
-  { q:"What if I need help after setup is complete?", a:"White Glove clients have priority support access. Call or email us anytime and a real person will answer within 2 business hours." },
+  { q:"What if I need help after setup is complete?", a:"White Glove clients have priority support access. Email " + FPD_EMAIL.support + " anytime and a real person will answer within 2 business hours." },
 ];
 
 function FaqItem({ faq }: { faq: { q: string; a: string } }) {

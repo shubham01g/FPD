@@ -12,6 +12,7 @@ import { useAdminFetch } from "../hooks/useAdminFetch";
 import { usePlatform } from "../services/platform";
 import { starterDaysLeft } from "../utils/starterPlan";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -314,7 +315,7 @@ function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: TEXT, marginBottom: 4 }}>Add-On Activated!</div>
                 <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6 }}>
                   Disaster Recovery Protection is now active on your account.<br />
-                  Contact support to request an emergency bypass when needed.
+                  Contact {FPD_EMAIL.support} to request an emergency bypass when needed.
                 </p>
               </div>
               <button onClick={onClose} className="modal-btn-primary" style={{ width: "auto", padding: "11px 28px" }}>Done</button>

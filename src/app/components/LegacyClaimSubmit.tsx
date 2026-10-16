@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { publicApi } from "../services/publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* The Legacy Claim Portal — the page a legacy contact reaches from the link an
    admin issues in Master Admin → Users → Deceased. No login: the token in the
@@ -214,7 +215,7 @@ export function LegacyClaimSubmit({ token }: { token: string }) {
     return <PortalNotice icon={<Loader2 size={28} color="#AEB9F5" className="animate-spin" />} title="Opening your secure claim link" body="One moment…" />;
   }
   if (error || !data) {
-    return <PortalNotice icon={<AlertTriangle size={28} color="#D9A55E" />} title="This link can't be opened" body={error ?? "Please contact Final Pass Down for a new claim link."} />;
+    return <PortalNotice icon={<AlertTriangle size={28} color="#D9A55E" />} title="This link can't be opened" body={error ?? `Please email ${FPD_EMAIL.claims} for a new claim link.`} />;
   }
   if (!data.claim.open) {
     const approved = data.claim.status === "approved";
@@ -816,6 +817,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
             <p style={{ fontSize: 15, color: "#A3ADC9", lineHeight: 1.7, marginBottom: 28, maxWidth: 420, margin: "0 auto 28px" }}>
               Your documents have been received and are now in the FPD admin review queue.
               The FPD team will contact you at <strong style={{ color: "#E8EDF5" }}>{email}</strong> within 2–3 business days.
+              Questions in the meantime? Email <strong style={{ color: "#E8EDF5" }}>{FPD_EMAIL.claims}</strong>.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32,

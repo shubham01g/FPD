@@ -10,6 +10,7 @@ import {
 } from "../services/twoFactor";
 import { TwoFactorChallenge } from "./twofa/TwoFactorChallenge";
 import { useAuth } from "../context/AuthContext";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 interface UserLoginProps {
   onLogin: () => void;
@@ -53,7 +54,7 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
       if (native.status === "orphaned") {
         await signOut();
         setLoading(false);
-        setError("Two-step verification is required on this account but no method is set up. Contact support to reset it.");
+        setError(`Two-step verification is required on this account but no method is set up. Email ${FPD_EMAIL.techSupport} to reset it.`);
         return;
       }
 

@@ -202,7 +202,7 @@ interface DemoCtx {
   changePlan: (plan: UserProfile["plan"], planName: string) => Promise<boolean>;
   addDoc: (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
-  addContact: (c: Omit<Contact,"id">) => Promise<void>;
+  addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
   updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<void>;
   sendVerificationInvite: (id: string) => Promise<void>;
@@ -400,7 +400,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /* Contacts */
-  const addContact = useCallback(async (c: Omit<Contact,"id">) => {
+  const addContact = useCallback(async (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => {
     if (!uid) return;
     const tid = toast.loading("Adding contact...");
     const { data, error } = await db.addContact({
@@ -410,7 +410,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
     if (error || !data) { toast.error("Could not add contact", { id: tid }); return; }
     setContacts(prev => [rowToContact(data), ...prev]);
-    toast.success(`Verification invite sent to ${c.email}`, { id: tid });
+    // Only Legacy and Guardian Contacts are emailed, and never on a bulk
+    // import — that would mail a whole address book in one click.
+    const invitable = c.type === "legacy" || c.type === "guardian";
+    if (!invitable || opts?.invite === false || !c.email) { toast.success("Contact added", { id: tid }); return; }
+    const sent = await db.sendContactInvite(data.id);
+    if (sent.error) toast.error(`Contact added, but the invite email was not sent: ${sent.error}`, { id: tid });
+    else {
+      setContacts(prev => prev.map(x => x.id === data.id ? { ...x, verificationStatus: sent.verificationStatus ?? x.verificationStatus } : x));
+      toast.success(`Invite emailed to ${c.email}`, { id: tid });
+    }
   }, [uid]);
 
   const removeContact = useCallback(async (id: string) => {
@@ -443,10 +452,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const sendVerificationInvite = useCallback(async (id: string) => {
     const tid = toast.loading("Sending verification invite...");
-    const { error } = await db.sendContactInvite(id);
-    if (error) { toast.error("Could not send invite", { id: tid }); return; }
-    setContacts(c => c.map(x => x.id === id ? { ...x, verificationStatus: "pending" } : x));
-    toast.success("Verification invite sent", { id: tid });
+    const { error, verificationStatus } = await db.sendContactInvite(id);
+    if (error) { toast.error(`Invite not sent: ${error}`, { id: tid }); return; }
+    setContacts(c => c.map(x => x.id === id ? { ...x, verificationStatus: verificationStatus ?? x.verificationStatus } : x));
+    toast.success("Invite email sent", { id: tid });
   }, []);
 
   const submitIdVerification = useCallback(async (contactId: string, file: File, idType: string) => {

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { copyToClipboard } from "../../utils/clipboard";
+import { FPD_EMAIL } from "../../utils/fpdEmails";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
@@ -250,7 +251,7 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
                     <strong style={{ color: "#E8EDF5" }}>Subject:</strong> Legacy Access — {user.name}'s Final Pass Down Account
                   </div>
                   <div style={{ fontSize: 12, color: "#A3ADC9", marginBottom: 8 }}>
-                    <strong style={{ color: "#E8EDF5" }}>From:</strong> no-reply@finalpassdown.com
+                    <strong style={{ color: "#E8EDF5" }}>Reply-To:</strong> {FPD_EMAIL.claims}
                   </div>
                   <div style={{ borderTop: "1px solid rgba(91,110,225,0.1)", paddingTop: 12, fontSize: 13,
                     color: "#B8C8E0", lineHeight: 1.7 }}>

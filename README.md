@@ -1342,10 +1342,15 @@ Everything in this section lives under `supabase/functions/server/`, one Deno/Ho
 | Purpose | Contact |
 |---|---|
 | General support | support@finalpassdown.com |
-| White Glove service | whiteglove@finalpassdown.com |
-| Partner program | partners@finalpassdown.com |
-| White label & enterprise | enterprise@finalpassdown.com |
-| Crypto & payment integrations | integrations@finalpassdown.com |
+| General enquiries | contact@finalpassdown.com |
+| Company & product information | info@finalpassdown.com |
+| Technical support | techsupport@finalpassdown.com |
+| Sales, White Glove, white label & enterprise | sales@finalpassdown.com |
+| Partner program & custom payment integrations | partnerships@finalpassdown.com |
+| Affiliate program | affiliates@finalpassdown.com |
+| Legacy access claims | claims@finalpassdown.com |
+| ID verification | verify@finalpassdown.com |
+| Admin portal & staff access | admin@finalpassdown.com |
 | Platform | finalpassdown.com |
 | Partner portal | finalpassdown.com/partner |
 | Concierge staff | finalpassdown.com/concierge |

@@ -13,6 +13,7 @@ import { billing } from "../services/billing";
 import { usePlatform } from "../services/platform";
 import { CryptoPayment } from "./CryptoPayment";
 import heroLegacyAccessPhoto from "../../imports/legacyaccess_hero_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -262,7 +263,7 @@ export function LegacyContinuationFee() {
     const tid = toast.loading("Opening secure checkout...");
     try {
       if (!(await billing.status()).checkoutEnabled) {
-        toast.error("Card payments are not connected yet. Please contact Final Pass Down support.", { id: tid });
+        toast.error(`Card payments are not connected yet. Please contact ${FPD_EMAIL.support}.`, { id: tid });
         return;
       }
       const { url } = await billing.continuationFeeCheckout();

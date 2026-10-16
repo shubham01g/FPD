@@ -263,8 +263,22 @@ export const db = {
   async updateGuardianFolderAccess(contactId: string, folderIds: string[]) {
     return supabase.from("contacts").update({ allowed_folder_ids: folderIds }).eq("id", contactId);
   },
-  async sendContactInvite(id: string) {
-    return supabase.from("contacts").update({ verification_status: "pending", invite_sent_at: new Date().toISOString() }).eq("id", id);
+  /* Emails the contact through the edge function (routes/contacts.ts), which
+     also stamps invite_sent_at. Resolves to an error message, or null on success. */
+  async sendContactInvite(id: string): Promise<{ error: string | null; verificationStatus?: DBContact["verification_status"] }> {
+    if (!isSupabaseConfigured) return { error: "No Supabase project connected" };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${DIRECT_URL}/functions/v1/server/make-server-b5ad85e0/account/contacts/${id}/invite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) return { error: body?.error ? String(body.error) : `Request failed with status ${res.status}` };
+      return { error: null, verificationStatus: body?.verificationStatus };
+    } catch {
+      return { error: "Could not reach the server" };
+    }
   },
 
   // ID verification

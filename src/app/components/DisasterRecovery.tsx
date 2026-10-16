@@ -11,6 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useDemo } from "../context/DemoContext";
 import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
 import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
+import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -601,7 +602,7 @@ export function DisasterRecovery() {
                 lifts normal download restrictions on your vault. It requires Master Admin
                 authorization, MFA verification, and a documented reason. The window lasts
                 exactly 48 hours and cannot be extended. All bypass activity is logged and
-                audited. Contact <strong style={{ color:TEXT }}>support@finalpassdown.com</strong> to request access.
+                audited. Contact <strong style={{ color:TEXT }}>{FPD_EMAIL.support}</strong> to request access.
               </p>
             </div>
           )}
