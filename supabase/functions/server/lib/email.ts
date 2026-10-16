@@ -12,7 +12,7 @@
 const SENDGRID_SEND_URL = "https://api.sendgrid.com/v3/mail/send";
 const API_KEY = Deno.env.get("SENDGRID_API_KEY");
 
-export const APP_NAME = "Final Passdown";
+export const APP_NAME = "Final Pass Down";
 export const SITE_URL = "https://finalpassdown.com";
 const FROM_EMAIL = Deno.env.get("EMAIL_FROM") || "noreply@finalpassdown.com";
 const FROM_NAME = Deno.env.get("EMAIL_FROM_NAME") || APP_NAME;
