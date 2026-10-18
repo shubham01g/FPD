@@ -1256,31 +1256,6 @@ function Help() {
   );
 }
 
-/* ── CTA ──────────────────────────────────────────────────────── */
-function CTA({ onStart }: { onStart: () => void }) {
-  return (
-    <section className="relative py-16 sm:py-28 px-6">
-      <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden text-center px-6 py-12 sm:py-20" style={{ border: "1px solid rgba(91,110,225,0.24)" }}>
-        <MediaBackdrop src="/media/cta.mp4" tone="blue" overlay={0.6} />
-        <div className="relative flex flex-col items-center">
-          <img src={fpdFullLogo} alt="Final Pass Down — My Life, My Wishes, My Way" style={{ height: 76, width: 115, flexShrink: 0, borderRadius: 14, objectFit: "contain", marginBottom: 20, boxShadow: "0 0 60px rgba(91,110,225,0.3)" }} />
-          <Kicker>Start today</Kicker>
-          <h2 style={{ ...DISPLAY, fontSize: "clamp(2.8rem,6.3vw,4.8rem)", fontWeight: 800, color: TEXT, margin: "18px 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em", maxWidth: 680 }}>
-            Start Your Legacy Today
-          </h2>
-          <p style={{ color: SOFT, fontSize: 21.5, maxWidth: 520, lineHeight: 1.7, marginBottom: 30 }}>
-            Secure your digital legacy. Takes less than 10 minutes to start.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3.5">
-            <PrimaryBtn onClick={onStart} large>Join Now <ArrowRight size={18} /></PrimaryBtn>
-            <a href={`mailto:${FPD_EMAIL.sales}`}><GhostBtn large><Mail size={16} /> Talk to Us</GhostBtn></a>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ── FOOTER ───────────────────────────────────────────────────── */
 const FOOTER_COLS: [string, string[]][] = [
   ["Platform", ["Dashboard", "Document Vault", "Final Wishes", "Medical Info", "Financial Records", "Personal Assets", "Family & Memories", "Contacts Hub"]],
@@ -1378,7 +1353,6 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
       <main>
         <div key={page} className="fpd-stagger">
           {pageContent}
-          <CTA onStart={onGetStarted} />
         </div>
       </main>
       <Footer onStart={onGetStarted} onNavigate={navigate} onAdminLogin={onAdminLogin} onPartnerPortal={onPartnerPortal} onConciergeLogin={onConciergeLogin} />
