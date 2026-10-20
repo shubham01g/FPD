@@ -476,6 +476,7 @@ function UserRoute() {
       case "warranties":          return <Warranties/>;
       case "medical-info":        return <MedicalInfo/>;
       case "financial-records":   return <FinancialRecords/>;
+      case "insurance-policies":  return <FinancialRecords key="insurance" insuranceOnly/>;
       case "receipts-expenses":   return <ReceiptsExpenses/>;
       case "personal-assets":     return <PersonalAssets/>;
       case "utilities":           return <Utilities/>;

@@ -5,7 +5,7 @@ import {
   Wallet, Car, Camera, Folder, TrendingUp, Copy,
   FolderOpen, Star, Shield, Settings, AlertCircle, MessageCircle,
   Briefcase, Plane, MapPin, Baby, Search, PanelLeftClose, PanelLeft,
-  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert, Calendar, ReceiptText
+  ShieldCheck, ChevronRight, X, Menu, Activity, PawPrint, Gem, Zap, ShieldAlert, Calendar, ReceiptText, Umbrella
 } from "lucide-react";
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
@@ -20,7 +20,7 @@ export type PageId =
   | "dashboard"
   | "file-cabinet"
   | "legacy-vault" | "storage-usage"
-  | "final-wishes" | "wills-trusts" | "medical-info" | "financial-records" | "receipts-expenses"
+  | "final-wishes" | "wills-trusts" | "medical-info" | "financial-records" | "insurance-policies" | "receipts-expenses"
   | "personal-assets" | "family-memories" | "organize" | "calendar"
   | "family-friends"
   | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
@@ -66,6 +66,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "medical-info",      label: "Medical Info",       icon: <Stethoscope size={16}/> },
       { id: "financial-records", label: "Financial Records",  icon: <Wallet size={16}/> },
+      { id: "insurance-policies", label: "Insurance Policies", icon: <Umbrella size={16}/> },
       { id: "receipts-expenses", label: "Receipts & Expenses", icon: <ReceiptText size={16}/> },
       { id: "personal-assets",   label: "Assets & Property",  icon: <Car size={16}/> },
       { id: "utilities",         label: "Utilities",          icon: <Zap size={16}/> },

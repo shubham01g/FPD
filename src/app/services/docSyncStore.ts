@@ -61,8 +61,11 @@ export function removeSyncedDoc(id: string): void {
 /* ── Which File Cabinet folders each section can sync to ─────────── */
 // Folder IDs must exactly match the `id` fields in DigitalFileCabinet.tsx cabinets array
 export const SECTION_FOLDER_MAP: Record<string, { folderId: string; folderLabel: string }[]> = {
-  "financial-records": [
+  "insurance-policies": [
     { folderId:"insurance", folderLabel:"Insurance Policies" },
+    { folderId:"financial", folderLabel:"Financial Records" },
+  ],
+  "financial-records": [
     { folderId:"financial", folderLabel:"Financial Records" },
     { folderId:"property",  folderLabel:"Property & Real Estate" },
     { folderId:"taxes",     folderLabel:"Tax Records" },

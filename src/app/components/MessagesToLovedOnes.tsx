@@ -417,6 +417,13 @@ function ComposeModal({
 
   const setF = <K extends keyof Message>(k: K, v: Message[K]) => setForm(p => ({ ...p, [k]: v }));
 
+  /* Not everyone a letter is for is a saved contact (a grandchild not yet
+     old enough to be one), so the picker also takes a typed name. An
+     existing message whose recipient isn't in the list opens typed. */
+  const [customRecipient, setCustomRecipient] = useState(
+    () => !!editing?.recipient && !contacts.some(c => c.name === editing.recipient)
+  );
+
   /* Escape closes the dialog — expected of any modal, and without it the
      overlay traps clicks for anyone who opens it by accident. */
   useEffect(() => {
@@ -427,19 +434,19 @@ function ComposeModal({
 
   const submit = () => {
     if (!form.title?.trim()) return toast.error("Give the message a title.");
-    if (!form.recipient) return toast.error("Choose who this message is for.");
+    if (!form.recipient?.trim()) return toast.error(customRecipient ? "Type the recipient's name." : "Choose who this message is for.");
     if (form.medium === "letter" && !form.body?.trim()) return toast.error("Write something before saving.");
     if (form.medium !== "letter" && !form.duration && !editing) return toast.error("Record the message before saving.");
     if ((form.trigger === "on_date" || form.trigger === "birthday" || form.trigger === "anniversary") && !form.triggerDate) {
       return toast.error("Pick the delivery date.");
     }
 
-    const rec = recipients.find(r => r.name === form.recipient);
+    const rec = customRecipient ? undefined : recipients.find(r => r.name === form.recipient);
     onSave({
       id: editing?.id ?? `m${Date.now()}`,
       title: form.title!.trim(),
-      recipient: form.recipient!,
-      relationship: rec?.relationship ?? "",
+      recipient: form.recipient!.trim(),
+      relationship: customRecipient ? (form.relationship ?? "").trim() : rec?.relationship ?? "",
       medium: form.medium as Medium,
       trigger: form.trigger as Trigger,
       triggerDate: form.triggerDate,
@@ -484,7 +491,7 @@ function ComposeModal({
 
           <div className="field">
             <label>Title *</label>
-            <input value={form.title ?? ""}
+            <input value={form.title ?? ""} spellCheck
               onChange={e => setF("title", e.target.value)}
               placeholder="e.g. To my daughter on her wedding day" />
           </div>
@@ -492,17 +499,37 @@ function ComposeModal({
           <div className="field-row">
             <div className="field">
               <label>Recipient *</label>
-              <select value={form.recipient ?? ""} onChange={e => setF("recipient", e.target.value)}>
+              <select value={customRecipient ? "__other__" : form.recipient ?? ""}
+                onChange={e => {
+                  if (e.target.value === "__other__") {
+                    setCustomRecipient(true);
+                    setF("recipient", "");
+                    setF("relationship", "");
+                  } else {
+                    setCustomRecipient(false);
+                    setF("recipient", e.target.value);
+                  }
+                }}>
                 <option value="">{recipients.length ? "Select a person…" : "No contacts yet"}</option>
                 {recipients.map(r => (
                   <option key={r.name} value={r.name}>
                     {r.relationship ? `${r.name} — ${r.relationship}` : r.name}
                   </option>
                 ))}
+                <option value="__other__">Someone else — type a name</option>
               </select>
-              {recipients.length === 0 && (
+              {customRecipient ? (
+                <>
+                  <input style={{ marginTop: 8 }} value={form.recipient ?? ""} autoFocus
+                    onChange={e => setF("recipient", e.target.value)}
+                    placeholder="Recipient's name" />
+                  <input style={{ marginTop: 8 }} value={form.relationship ?? ""}
+                    onChange={e => setF("relationship", e.target.value)}
+                    placeholder="Relationship (optional), e.g. Granddaughter" />
+                </>
+              ) : recipients.length === 0 && (
                 <span className="field-hint">
-                  Add someone under Legacy, Guardian or Emergency Contacts first — they appear here.
+                  Pick "Someone else" to type a name, or add them under Legacy, Guardian or Emergency Contacts.
                 </span>
               )}
             </div>
@@ -527,7 +554,7 @@ function ComposeModal({
           {form.medium === "letter" ? (
             <div className="field">
               <label>Message *</label>
-              <textarea style={{ minHeight: 160 }} value={form.body ?? ""}
+              <textarea style={{ minHeight: 160 }} value={form.body ?? ""} spellCheck
                 onChange={e => setF("body", e.target.value)}
                 placeholder="Write what you'd want them to read…" />
               <div className="word-count">{(form.body ?? "").trim().split(/\s+/).filter(Boolean).length} words</div>
@@ -549,7 +576,7 @@ function ComposeModal({
                   onCapture={(d, _blob, url) => { setF("duration", d); setF("mediaUrl", url); }}
                 />
               )}
-              <textarea style={{ marginTop: 10, minHeight: 70 }} value={form.body ?? ""}
+              <textarea style={{ marginTop: 10, minHeight: 70 }} value={form.body ?? ""} spellCheck
                 onChange={e => setF("body", e.target.value)}
                 placeholder="Optional description — what this recording covers" />
             </div>

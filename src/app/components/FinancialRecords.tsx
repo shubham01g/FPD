@@ -230,9 +230,13 @@ function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, on
   );
 }
 
-/* Generic upsert: replaces `original` in-place when editing, otherwise appends. */
-export function FinancialRecords() {
-  const [tab, setTab] = useState<Tab>("insurance");
+/* Generic upsert: replaces `original` in-place when editing, otherwise appends.
+   Insurance has its own sidebar page (Life Records → Insurance Policies), so the
+   same component renders twice: `insuranceOnly` shows just the insurance
+   section, and the Financial Records page drops its Insurance tab. Both read
+   the one `financial_records` table, so existing policies carry over. */
+export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: boolean } = {}) {
+  const [tab, setTab] = useState<Tab>(insuranceOnly ? "insurance" : "personal");
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
   const [editingItem, setEditingItem] = useState<{ tab: Tab; original: any } | null>(null);
   const { authUser } = useAuth();
@@ -315,8 +319,14 @@ export function FinancialRecords() {
     return Object.fromEntries(fields.map(f => [f.key, String((editingItem.original as any)[f.key] ?? "")]));
   }
 
-  const kpis = [
+  const activePolicies = policies.filter(p => String(p.status ?? "").toLowerCase() === "active").length;
+  const kpis = insuranceOnly ? [
     { label: "Insurance Policies", value: String(policies.length), sub: "On file", icon: <Shield size={14} />, dot: ACCENT2 },
+    { label: "Active Policies", value: String(activePolicies), sub: "Currently in force", icon: <CheckCircle size={14} />, dot: POS },
+    { label: "Beneficiaries Named", value: String(policies.filter(p => p.beneficiary).length), sub: "Policies with a beneficiary", icon: <User size={14} />, dot: ACCENT2 },
+    { label: "Documents Attached", value: String(policies.filter(p => p.attachedDoc).length), sub: "Policy copies on file", icon: <FileText size={14} />, dot: WARN },
+  ] : [
+    { label: "Retirement Accounts", value: String(retirement.length), sub: "401(k), IRA & pension", icon: <DollarSign size={14} />, dot: WARN },
     { label: "Personal Accounts", value: String(personalList.length), sub: personalList.length === 1 ? "Bank account" : "Bank accounts", icon: <User size={14} />, dot: ACCENT2 },
     { label: "Investment Accounts", value: String(investments.length), sub: "Brokerage & retirement", icon: <TrendingUp size={14} />, dot: POS },
     { label: "Tax Years Filed", value: String(taxList.length), sub: "Years on record", icon: <Receipt size={14} />, dot: ACCENT2 },
@@ -333,13 +343,25 @@ export function FinancialRecords() {
           <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroFinancialPhoto})` }} />
           <div className="scrim" />
           <div className="hcontent">
-            <span className="heyebrow">One Ledger, Every Account</span>
-            <h1>Insurance, banking, and investments — <span className="accent">organized in one place.</span></h1>
-            <p>Policies, personal bank accounts, portfolios, retirement accounts, taxes, and business records — all where your legacy contacts can find them.</p>
+            {insuranceOnly ? (<>
+              <span className="heyebrow">Every Policy, One Place</span>
+              <h1>Life, health, home, and auto — <span className="accent">every policy accounted for.</span></h1>
+              <p>Carriers, policy numbers, coverage, and beneficiaries — all where your legacy contacts can find them when it matters.</p>
+            </>) : (<>
+              <span className="heyebrow">One Ledger, Every Account</span>
+              <h1>Banking, investments, and taxes — <span className="accent">organized in one place.</span></h1>
+              <p>Personal bank accounts, portfolios, retirement accounts, taxes, and business records — all where your legacy contacts can find them.</p>
+            </>)}
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setTab("insurance")}>
-                <Shield size={15}/> View Insurance
-              </button>
+              {insuranceOnly ? (
+                <button className="hbtn primary" onClick={() => setShowAdd("insurance")}>
+                  <Plus size={15}/> Add Policy
+                </button>
+              ) : (
+                <button className="hbtn primary" onClick={() => setTab("personal")}>
+                  <User size={15}/> View Accounts
+                </button>
+              )}
               <button className="hbtn ghost" onClick={() => contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                 <TrendingUp size={15}/> View All Records
               </button>
@@ -350,9 +372,15 @@ export function FinancialRecords() {
         {/* ── Header ── */}
         <div className="pg-head">
           <div style={{ minWidth: 0 }}>
-            <div className="eyebrow"><DollarSign size={12} /> Financial Records</div>
-            <h1 className="pg-h1">Financial Records</h1>
-            <div className="pg-sub">Insurance policies, personal bank accounts, investments, retirement accounts, taxes, and business information.</div>
+            {insuranceOnly ? (<>
+              <div className="eyebrow"><Shield size={12} /> Insurance Policies</div>
+              <h1 className="pg-h1">Insurance Policies</h1>
+              <div className="pg-sub">Life, health, home, auto, and umbrella policies — carriers, coverage, premiums, and beneficiaries.</div>
+            </>) : (<>
+              <div className="eyebrow"><DollarSign size={12} /> Financial Records</div>
+              <h1 className="pg-h1">Financial Records</h1>
+              <div className="pg-sub">Personal bank accounts, investments, retirement accounts, taxes, and business information.</div>
+            </>)}
           </div>
         </div>
 
@@ -371,13 +399,13 @@ export function FinancialRecords() {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="seg">
-          {tabConfig.map(t => (
+        {!insuranceOnly && <div className="seg">
+          {tabConfig.filter(t => t.id !== "insurance").map(t => (
             <button key={t.id} className={tab === t.id ? "on" : ""} onClick={() => setTab(t.id)}>
               {t.icon} {t.label}
             </button>
           ))}
-        </div>
+        </div>}
 
         <div ref={contentRef}>
         {/* ── Insurance ── */}

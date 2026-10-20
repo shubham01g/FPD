@@ -217,6 +217,7 @@ export function PersonalAssets() {
       id: String(r.id), type: String(r.weapon_type ?? ""), make: String(r.make ?? ""), model: String(r.model ?? ""),
       caliber: String(r.caliber ?? ""), serial: String(r.serial_number ?? ""), registration: String(r.permit_number ?? ""),
       storage: String(r.storage_location ?? ""), transfer: String(r.transfer_to ?? ""), photo: String(r.photo_url ?? ""),
+      marks: String(r.identifying_marks ?? ""), value: toMoney(r.current_value),
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -224,6 +225,7 @@ export function PersonalAssets() {
       id: String(r.id), type: String(r.item_type ?? ""), make: String(r.make ?? ""), model: String(r.model ?? ""),
       blade: String(r.blade ?? ""), handle: String(r.handle ?? ""), storage: String(r.location ?? ""),
       transfer: String(r.transfer_to ?? ""), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      value: toMoney(r.current_value),
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -232,6 +234,7 @@ export function PersonalAssets() {
       condition: String(r.condition ?? ""), estimatedValue: toMoney(r.current_value),
       purchaseDate: String(r.acquired_date ?? ""), purchasedFrom: String(r.acquired_from ?? ""),
       intendedFor: String(r.intended_for ?? ""), serialNum: String(r.serial_number ?? ""),
+      location: String(r.storage_location ?? ""),
       notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
@@ -250,11 +253,11 @@ export function PersonalAssets() {
   const [rDoc, setRDoc] = useState<string|null>(null);
   const [dForm, setDForm] = useState({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
   const [dDoc, setDDoc] = useState<string|null>(null);
-  const [wForm, setWForm] = useState({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", storage:"", transfer:"", photo:"" });
+  const [wForm, setWForm] = useState({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", marks:"", value:"", storage:"", transfer:"", photo:"" });
   const [wDoc, setWDoc] = useState<string|null>(null);
-  const [cForm, setCForm] = useState({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
+  const [cForm, setCForm] = useState({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", location:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
   const [cDoc, setCDoc] = useState<string|null>(null);
-  const [wlForm, setWlForm] = useState({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
+  const [wlForm, setWlForm] = useState({ type:"Knife", make:"", model:"", blade:"", handle:"", value:"", storage:"", transfer:"", notes:"", photo:"" });
   const [wlDoc, setWlDoc] = useState<string|null>(null);
 
   async function uploadPhoto(file: File) {
@@ -337,6 +340,7 @@ export function PersonalAssets() {
     const row = {
       weapon_type: wForm.type, make: wForm.make, model: wForm.model || null, caliber: wForm.caliber || null,
       serial_number: wForm.serial || null, permit_number: wForm.registration || null,
+      identifying_marks: wForm.marks || null, current_value: fromMoney(wForm.value),
       storage_location: wForm.storage || null, transfer_to: wForm.transfer || null,
       photo_url: wForm.photo || null, document_urls: wDoc ? [wDoc] : [],
     };
@@ -346,7 +350,7 @@ export function PersonalAssets() {
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
     toast.success(`${wForm.make} ${wForm.model} ${editingId !== null ? "updated" : "added"}`);
-    setWForm({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", storage:"", transfer:"", photo:"" });
+    setWForm({ type:"Handgun", make:"", model:"", caliber:"", serial:"", registration:"", marks:"", value:"", storage:"", transfer:"", photo:"" });
     setWDoc(null); setEditingId(null); setShowAdd(null);
   }
 
@@ -357,7 +361,8 @@ export function PersonalAssets() {
       item_name: cForm.name, category: cForm.category || null, condition: cForm.condition || null,
       current_value: fromMoney(cForm.estimatedValue), acquired_date: cForm.purchaseDate || null,
       acquired_from: cForm.purchasedFrom || null, intended_for: cForm.intendedFor || null,
-      serial_number: cForm.serialNum || null, notes: cForm.notes || null, photo_url: cForm.photo || null,
+      serial_number: cForm.serialNum || null, storage_location: cForm.location || null,
+      notes: cForm.notes || null, photo_url: cForm.photo || null,
       document_urls: cDoc ? [cDoc] : [],
     };
     const { error } = editingId !== null
@@ -366,7 +371,7 @@ export function PersonalAssets() {
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
     toast.success(`${cForm.name} ${editingId !== null ? "updated" : "added"}`);
-    setCForm({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
+    setCForm({ name:"", category:"Sports Cards", condition:"", estimatedValue:"", purchaseDate:"", purchasedFrom:"", location:"", intendedFor:"", serialNum:"", notes:"", photo:"" });
     setCDoc(null); setEditingId(null); setShowAdd(null);
   }
 
@@ -378,6 +383,7 @@ export function PersonalAssets() {
     const row = {
       item_type: wlForm.type, make: wlForm.make, model: wlForm.model || null,
       blade: wlForm.blade || null, handle: wlForm.handle || null, location: wlForm.storage || null,
+      current_value: fromMoney(wlForm.value),
       transfer_to: wlForm.transfer || null, notes: wlForm.notes || null, photo_url: wlForm.photo || null,
       document_urls: wlDoc ? [wlDoc] : [],
     };
@@ -387,7 +393,7 @@ export function PersonalAssets() {
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
     toast.success(`${wlForm.make} ${wlForm.model} ${editingId !== null ? "updated" : "added"}`);
-    setWlForm({ type:"Knife", make:"", model:"", blade:"", handle:"", storage:"", transfer:"", notes:"", photo:"" });
+    setWlForm({ type:"Knife", make:"", model:"", blade:"", handle:"", value:"", storage:"", transfer:"", notes:"", photo:"" });
     setWlDoc(null); setEditingId(null); setShowAdd(null);
   }
 
@@ -408,17 +414,17 @@ export function PersonalAssets() {
     setShowAdd("digital");
   }
   function editWeapon(w: any) {
-    setWForm({ type:w.type, make:w.make, model:w.model, caliber:w.caliber, serial:w.serial, registration:w.registration, storage:w.storage, transfer:w.transfer, photo:w.photo || "" });
+    setWForm({ type:w.type, make:w.make, model:w.model, caliber:w.caliber, serial:w.serial, registration:w.registration, marks:w.marks, value:w.value, storage:w.storage, transfer:w.transfer, photo:w.photo || "" });
     setEditingId(w.id);
     setShowAdd("weapons");
   }
   function editWeaponsLocker(w: any) {
-    setWlForm({ type:w.type, make:w.make, model:w.model, blade:w.blade, handle:w.handle, storage:w.storage, transfer:w.transfer, notes:w.notes, photo:w.photo || "" });
+    setWlForm({ type:w.type, make:w.make, model:w.model, blade:w.blade, handle:w.handle, value:w.value, storage:w.storage, transfer:w.transfer, notes:w.notes, photo:w.photo || "" });
     setEditingId(w.id);
     setShowAdd("weapons_locker");
   }
   function editCollectible(c: any) {
-    setCForm({ name:c.name, category:c.category, condition:c.condition, estimatedValue:c.estimatedValue, purchaseDate:c.purchaseDate, purchasedFrom:c.purchasedFrom, intendedFor:c.intendedFor, serialNum:c.serialNum, notes:c.notes, photo:c.photo || "" });
+    setCForm({ name:c.name, category:c.category, condition:c.condition, estimatedValue:c.estimatedValue, purchaseDate:c.purchaseDate, purchasedFrom:c.purchasedFrom, location:c.location, intendedFor:c.intendedFor, serialNum:c.serialNum, notes:c.notes, photo:c.photo || "" });
     setEditingId(c.id);
     setShowAdd("collectibles");
   }
@@ -632,7 +638,7 @@ export function PersonalAssets() {
           <div className="dlist">
             <div className="toolbar">
               <div className="banner warn">
-                <span>All firearms must be transferred according to California DOJ regulations. Consult an attorney before transfer.</span>
+                <span>Firearm ownership and transfer must comply with all applicable federal, state and local laws, which vary by location. Consult an attorney before transferring any firearm.</span>
               </div>
               <button className="btn-primary" onClick={() => setShowAdd("weapons")}><Plus size={14} /> Add Firearm</button>
             </div>
@@ -661,10 +667,17 @@ export function PersonalAssets() {
                       <span className="dbadge type">{w.type}</span>
                       <span className="dsub">{w.caliber}</span>
                     </div>
+                    {w.value && (
+                      <div className="dvalue">
+                        <div className="dvnum">{w.value}</div>
+                        <div className="dvlbl">Est. Value</div>
+                      </div>
+                    )}
                   </div>
                   <div className="dgrid two">
                     <Field label="Serial Number" value={w.serial} />
                     <Field label="Registration" value={w.registration} />
+                    <Field label="Identifying Marks" value={w.marks || "—"} />
                     <Field label="Storage Location" value={w.storage} />
                     <Field label="Transfer Instructions" value={w.transfer} />
                   </div>
@@ -702,6 +715,12 @@ export function PersonalAssets() {
                         <span className="dbadge type">{w.type}</span>
                       </div>
                     </div>
+                    {w.value && (
+                      <div className="dvalue">
+                        <div className="dvnum">{w.value}</div>
+                        <div className="dvlbl">Est. Value</div>
+                      </div>
+                    )}
                   </div>
                   <div className="dgrid two">
                     {[["Blade / Edge", w.blade], ["Handle / Grip", w.handle], ["Storage Location", w.storage], ["Transfer Instructions", w.transfer]].map(([label, value]) => (
@@ -743,7 +762,7 @@ export function PersonalAssets() {
                     </div>
                   </div>
                   <div className="dgrid two">
-                    {[["Condition", c.condition || "—"], ["Purchased From", c.purchasedFrom || "—"], ["Purchase Date", c.purchaseDate || "—"], ["Serial / Cert #", c.serialNum || "—"], ["Intended For", c.intendedFor || "—"]].map(([label, value]) => (
+                    {[["Condition", c.condition || "—"], ["Purchased From", c.purchasedFrom || "—"], ["Purchase Date", c.purchaseDate || "—"], ["Location of Item", c.location || "—"], ["Serial / Cert #", c.serialNum || "—"], ["Intended For", c.intendedFor || "—"]].map(([label, value]) => (
                       <Field key={label as string} label={label as string} value={value as string} />
                     ))}
                   </div>
@@ -832,7 +851,7 @@ export function PersonalAssets() {
                     {["Handgun", "Rifle", "Shotgun", "Other"].map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
-                {([["Make", "make", "e.g. Glock, Ruger"], ["Model", "model", "e.g. 19 Gen 5"], ["Caliber", "caliber", "e.g. 9mm, .22 LR"], ["Serial Number", "serial", ""], ["Registration", "registration", "e.g. CA DOJ Registered"], ["Storage Location", "storage", "Where it is stored"], ["Transfer Instructions", "transfer", "Who receives it per your will"]] as [string, string, string][]).map(([label, key, ph]) => (
+                {([["Make", "make", "e.g. Glock, Ruger"], ["Model", "model", "e.g. 19 Gen 5"], ["Caliber", "caliber", "e.g. 9mm, .22 LR"], ["Serial Number", "serial", ""], ["Identifying Marks", "marks", "e.g. Engraving, custom grips, scratches"], ["Estimated Value", "value", "e.g. $650"], ["Registration", "registration", "e.g. State registration / permit #"], ["Storage Location", "storage", "Where it is stored"], ["Transfer Instructions", "transfer", "Who receives it per your will"]] as [string, string, string][]).map(([label, key, ph]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(wForm as any)[key]} onChange={e => setWForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
@@ -904,7 +923,7 @@ export function PersonalAssets() {
                     {WEAPON_LOCKER_TYPES.map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
-                {([["Make / Brand", "make", "e.g. Buck Knives, Cold Steel"], ["Model Name", "model", "e.g. 110 Folding Hunter"], ["Blade / Edge Description", "blade", "e.g. 3.75 inch clip point, stainless"], ["Handle / Grip", "handle", "e.g. Wood, G10, bone"], ["Storage Location", "storage", "Where it is kept"], ["Transfer Instructions", "transfer", "Who receives it per your will"], ["Notes", "notes", "Provenance, history, appraisal"]] as [string, string, string][]).map(([label, key, ph]) => (
+                {([["Make / Brand", "make", "e.g. Buck Knives, Cold Steel"], ["Model Name", "model", "e.g. 110 Folding Hunter"], ["Blade / Edge Description", "blade", "e.g. 3.75 inch clip point, stainless"], ["Handle / Grip", "handle", "e.g. Wood, G10, bone"], ["Estimated Value", "value", "e.g. $250"], ["Storage Location", "storage", "Where it is kept"], ["Transfer Instructions", "transfer", "Who receives it per your will"], ["Notes", "notes", "Provenance, history, appraisal"]] as [string, string, string][]).map(([label, key, ph]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(wlForm as any)[key]} onChange={e => setWlForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
@@ -936,7 +955,7 @@ export function PersonalAssets() {
                     {COLLECTIBLE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-                {([["Item Name *", "name", "e.g. 1952 Topps Mickey Mantle Rookie Card"], ["Condition", "condition", "e.g. VG+, Mint, PSA 7"], ["Estimated Value", "estimatedValue", "e.g. $38,000"], ["Purchase Date", "purchaseDate", "e.g. Mar 2009"], ["Purchased From", "purchasedFrom", "e.g. Heritage Auctions"], ["Serial / Certificate #", "serialNum", "e.g. PSA grading number"], ["Intended For", "intendedFor", "Who gets this item — or sell/donate"], ["Notes", "notes", "Provenance, storage, authentication details"]] as [string, string, string][]).map(([label, key, ph]) => (
+                {([["Item Name *", "name", "e.g. 1952 Topps Mickey Mantle Rookie Card"], ["Condition", "condition", "e.g. VG+, Mint, PSA 7"], ["Estimated Value", "estimatedValue", "e.g. $38,000"], ["Purchase Date", "purchaseDate", "e.g. Mar 2009"], ["Purchased From", "purchasedFrom", "e.g. Heritage Auctions"], ["Location of Item", "location", "e.g. Home safe, bank safe deposit box #214"], ["Serial / Certificate #", "serialNum", "e.g. PSA grading number"], ["Intended For", "intendedFor", "Who gets this item — or sell/donate"], ["Notes", "notes", "Provenance, authentication details"]] as [string, string, string][]).map(([label, key, ph]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(cForm as any)[key]} onChange={e => setCForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
