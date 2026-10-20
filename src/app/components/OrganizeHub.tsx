@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, House, ShieldCheck, Mail, Image as ImageIcon, Lock, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
+import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
 import heroFoldersPhoto from "../../imports/folders_hero_photo.webp";
@@ -22,16 +22,11 @@ type Tab = "folders"|"reminders"|"occasions";
    the Calendar, File Cabinet and Legacy Vault. */
 const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 
-const folders = [
-  { id:1, name:"Legal Documents",  files:8,   size:"12.4 MB", color:ACCENT2,   desc:"Wills, trusts, power of attorney",   icon:Scale,       updated:"2 days ago" },
-  { id:2, name:"Financial Records",files:15,  size:"24.8 MB", color:ACCENT,    desc:"Bank statements, tax returns",       icon:Landmark,    updated:"5 days ago" },
-  { id:3, name:"Medical Records",  files:6,   size:"8.1 MB",  color:"#7E6BD8", desc:"Test results, prescriptions",        icon:HeartPulse,  updated:"1 week ago" },
-  { id:4, name:"Property Records", files:4,   size:"5.2 MB",  color:"#6F9E94", desc:"Deeds, mortgage statements",         icon:House,       updated:"3 weeks ago" },
-  { id:5, name:"Insurance Policies",files:5,  size:"7.9 MB",  color:"#6FAE8B", desc:"Life, home, auto policies",          icon:ShieldCheck, updated:"2 weeks ago" },
-  { id:6, name:"Personal Letters", files:12,  size:"3.4 MB",  color:"#97A2C6", desc:"Letters to family",                  icon:Mail,        updated:"4 days ago" },
-  { id:7, name:"Photo Archive",    files:847, size:"4.2 GB",  color:"#A98CC7", desc:"Scanned family photos",              icon:ImageIcon,   updated:"Yesterday" },
-  { id:8, name:"Secret Vault", files:3,   size:"0.8 MB",  color:NEG, desc:"Encrypted — seed phrases, combinations", icon:Lock, locked:true, updated:"1 month ago" },
-];
+/* Folder sizes, from the documents actually filed in each folder. */
+function formatSize(mb: number) {
+  if (mb <= 0) return "0 MB";
+  return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
+}
 
 const remCatIcon: Record<string, any> = { Legal:Scale, Financial:Landmark, Medical:HeartPulse, Legacy:Heart, Vehicles:Car, Pets:PawPrint };
 
@@ -286,23 +281,32 @@ function AddFolderModal({ onClose, onAdd, form, setForm }: { onClose:()=>void; o
 }
 
 export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
-  const { reminders, occasions, addReminder, completeReminder, removeReminder, addOccasion } = useDemo();
+  const {
+    reminders, occasions, addReminder, completeReminder, removeReminder, addOccasion,
+    docs, folders, addFolder: createFolder, setPendingFolderId,
+  } = useDemo();
   const [tab, setTab] = useState<Tab>("folders");
   const [showAddRem, setShowAddRem] = useState(false);
   const [showAddOcc, setShowAddOcc] = useState(false);
   const [showAddFolder, setShowAddFolder] = useState(false);
-  const [folderList, setFolderList] = useState(folders);
+  // The same custom folders the File Cabinet shows — top level only; their
+  // sub-folders are opened from inside the cabinet.
+  const folderList = folders.filter(f => !f.parentId && !f.parentCategory);
   const [newFolder, setNewFolder] = useState({ name:"", desc:"" });
   const fgridRef = React.useRef<HTMLDivElement>(null);
   const rlistRef = React.useRef<HTMLDivElement>(null);
 
-  function addFolder() {
+  async function addFolder() {
     if (!newFolder.name.trim()) { toast.error("Folder name required"); return; }
-    const color = RAMP[folderList.length % RAMP.length];
-    setFolderList(prev => [...prev, { id: Date.now(), name: newFolder.name, files: 0, size: "0 MB", color, desc: newFolder.desc }]);
-    toast.success(`"${newFolder.name}" folder created`);
+    const made = await createFolder({ name: newFolder.name, description: newFolder.desc, color: RAMP[folders.length % RAMP.length] });
+    if (!made) return;
     setNewFolder({ name:"", desc:"" });
     setShowAddFolder(false);
+  }
+
+  function openFolder(id: string) {
+    setPendingFolderId(id);
+    onNavigate?.("file-cabinet");
   }
 
   const tabs = [
@@ -322,7 +326,7 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
           <div style={{ minWidth:0 }}>
             <div className="eyebrow"><Folder size={12}/> Personal Organization</div>
             <h1 className="pg-h1">Folders &amp; Reminders</h1>
-            <div className="pg-sub">Personal folders, recurring reminders, and important family occasions — fully interactive in demo mode.</div>
+            <div className="pg-sub">Personal folders, recurring reminders, and important family occasions — all saved to your account.</div>
           </div>
           <div className="seg">
             {tabs.map(t=>(
@@ -352,24 +356,39 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
               <button className="btn-primary" onClick={()=>setShowAddFolder(true)}><Plus size={14}/> Create New Folder</button>
             </div>
             <div className="fgrid" ref={fgridRef}>
+              {folderList.length === 0 && (
+                <div className="fcard" style={{ cursor:"default" }}>
+                  <div className="fbody">
+                    <div className="ftop">
+                      <div className="fico" style={{ background:"rgba(91,110,225,0.14)", color:ACCENT }}><Folder size={20}/></div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div className="ftitle">No custom folders yet</div>
+                        <div className="fmeta">Your built-in folders live in the File Cabinet</div>
+                      </div>
+                    </div>
+                    <div className="fdesc">Create one to group related documents — each folder can hold several sub-folders, one per set of documents.</div>
+                  </div>
+                </div>
+              )}
               {folderList.map(f=>{
-                const Icon = (f as any).icon || Folder;
-                const locked = (f as any).locked;
+                const filed = docs.filter(d => d.folderId === f.id);
+                const mb = filed.reduce((sum, d) => sum + (d.sizeUnit === "GB" ? d.size * 1024 : d.size), 0);
+                const subs = folders.filter(x => x.parentId === f.id).length;
+                const latest = filed.reduce<string | null>((m, d) => (!m || d.uploadedAt > m ? d.uploadedAt : m), null);
                 return (
-                  <button key={f.id} className={`fcard${locked ? " locked" : ""}`} onClick={()=>toast.success(`Opened: ${f.name}`)}>
+                  <button key={f.id} className="fcard" onClick={()=>openFolder(f.id)}>
                     <div className="bar" style={{ background:`linear-gradient(90deg,${f.color},${f.color}66)` }}/>
                     <div className="fbody">
                       <div className="ftop">
-                        <div className="fico" style={{ background:`linear-gradient(150deg, ${f.color}52, ${f.color}17)`, color:f.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><Icon size={20}/></div>
+                        <div className="fico" style={{ background:`linear-gradient(150deg, ${f.color}52, ${f.color}17)`, color:f.color, boxShadow:"inset 0 1px 0 rgba(255,255,255,0.05)" }}><Folder size={20}/></div>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div className="ftitle">{f.name}</div>
-                          <div className="fmeta">{f.files} files · {f.size}</div>
+                          <div className="fmeta">{filed.length} file{filed.length===1?"":"s"} · {formatSize(mb)}{subs ? ` · ${subs} sub-folder${subs===1?"":"s"}` : ""}</div>
                         </div>
-                        {locked && <span className="flocked"><Lock size={10}/> LOCKED</span>}
                       </div>
-                      <div className="fdesc">{f.desc}</div>
+                      <div className="fdesc">{f.description || "Your own folder"}</div>
                       <div className="ffoot">
-                        <span className="fupdated"><Clock size={11}/> Updated {(f as any).updated}</span>
+                        <span className="fupdated"><Clock size={11}/> {latest ? `Updated ${new Date(latest).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}` : "No files yet"}</span>
                         <span className="fopen">Open <ArrowRight size={13}/></span>
                       </div>
                     </div>

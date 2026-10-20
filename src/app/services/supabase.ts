@@ -112,6 +112,16 @@ export interface DBDocument {
   uploaded_at: string;
 }
 
+/* User-created folders (migration 033). A top-level custom folder has neither
+   parent; a sub-folder sits under either another custom folder (parent_id) or
+   one of the built-in cabinet folders (parent_category, e.g. "legal"). */
+export interface DBVaultFolder extends OwnerScopedRow {
+  id: string; user_id: string; name: string; description?: string | null;
+  parent_id?: string | null; parent_category?: string | null;
+  color?: string | null; icon?: string | null; locked: boolean;
+  created_at: string;
+}
+
 export interface DBContact {
   id: string; owner_user_id: string; full_name: string; email: string;
   phone?: string; relationship: string;
@@ -628,7 +638,7 @@ export const tables = {
   passwordVault:      ownerTable("password_vault"),
   diaryEntries:       ownerTable("diary_entries"),
   subscriptionTracker: ownerTable("subscription_tracker"),
-  vaultFolders:       ownerTable("vault_folders"),
+  vaultFolders:       ownerTable<DBVaultFolder>("vault_folders"),
   contactGroups:      ownerTable("contact_groups", "owner_user_id"),
   familyFriends:      ownerTable("family_friends", "owner_user_id"),
 

@@ -1,12 +1,12 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import {
   Folder, FolderOpen, FileText, Image, Film, Archive,
   Upload, Plus, ChevronRight, Search, Grid, List,
   Download, Eye, Trash2, X, ArrowLeft, Lock, Star,
-  Shield, Clock,
+  Shield, Clock, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo, type Doc } from "../context/DemoContext";
+import { useDemo, type Doc, type VaultFolder } from "../context/DemoContext";
 import { useSpendingProtection } from "../hooks/useSpendingProtection";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
@@ -48,12 +48,74 @@ interface FolderFile {
      preview/download handlers below treat that as "nothing to open" rather
      than faking success. */
   filePath?: string;
+  /* Sub-folder (set of documents) the file is filed under, if any. */
+  subCategory?: string;
 }
 
 interface Cabinet {
   id: string; label: string; color: string; emoji: string;
   description: string; acceptedTypes: string; files: FolderFile[];
   subFolders?: string[];
+  /* A user-created folder (vault_folders row) rather than a built-in one. */
+  custom?: boolean;
+}
+
+/* Custom folders take anything the built-in folders do. */
+const CUSTOM_ACCEPT = "application/pdf,.pdf,.doc,.docx,image/*,video/*";
+
+function folderToCabinet(f: VaultFolder): Cabinet {
+  return {
+    id: f.id, label: f.name, color: f.color, emoji: "📁",
+    description: f.description || "Your own folder — group related documents into sub-folders.",
+    acceptedTypes: CUSTOM_ACCEPT, files: [], subFolders: [], custom: true,
+  };
+}
+
+/* Create / rename dialog for folders and sub-folders. */
+type FolderDialog =
+  | { mode: "folder" }
+  | { mode: "sub"; parent: Cabinet }
+  | { mode: "rename"; folder: VaultFolder };
+
+function FolderModal({ dialog, onClose, onSave }: {
+  dialog: FolderDialog; onClose: () => void;
+  onSave: (name: string, desc: string) => Promise<void>;
+}) {
+  const [name, setName] = useState(dialog.mode === "rename" ? dialog.folder.name : "");
+  const [desc, setDesc] = useState("");
+  const [saving, setSaving] = useState(false);
+  const title = dialog.mode === "folder" ? "New Custom Folder"
+    : dialog.mode === "sub" ? `New Sub-folder in ${dialog.parent.label}` : "Rename Folder";
+  const submit = async () => {
+    if (!name.trim()) { toast.error("Folder name required"); return; }
+    setSaving(true);
+    try { await onSave(name, desc); } finally { setSaving(false); }
+  };
+  return (
+    <div className="backdrop" onClick={onClose}>
+      <div className="card modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-head"><h3>{title}</h3><button onClick={onClose}><X size={15}/></button></div>
+        <div className="field">
+          <label>{dialog.mode === "sub" ? "SUB-FOLDER NAME *" : "FOLDER NAME *"}</label>
+          <input autoFocus value={name} onChange={e => setName(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") void submit(); }}
+            placeholder={dialog.mode === "sub" ? "e.g. Appraisals" : "e.g. Estate Sale"}/>
+        </div>
+        {dialog.mode === "folder" && (
+          <div className="field">
+            <label>DESCRIPTION (optional)</label>
+            <input value={desc} onChange={e => setDesc(e.target.value)} placeholder="What this folder is for"/>
+          </div>
+        )}
+        <div className="modal-acts">
+          <button className="save" onClick={() => void submit()} disabled={saving}>
+            {saving ? "Saving..." : dialog.mode === "rename" ? "Save" : "Create"}
+          </button>
+          <button className="cancel" onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* Folder taxonomy only. Every `files` array is intentionally empty: the
@@ -74,7 +136,7 @@ const cabinets: Cabinet[] = [
     id:"financial", label:"Financial Records", color:"#D99A6B", emoji:"💰",
     description:"Tax returns, bank statements, investment reports",
     acceptedTypes:"application/pdf,.pdf,.xlsx,.csv",
-    subFolders:["Tax Returns","Bank Statements","Investment Reports","Insurance Policies","Loan Documents"],
+    subFolders:["Tax Returns","Bank Statements","Investment Reports","Loan Documents"],
     files:[],
   },
   {
@@ -269,7 +331,7 @@ function docToFolderFile(d: Doc): FolderFile {
     d.type.includes("video") ? "video" :
     d.type.includes("pdf") ? "pdf" :
     d.type.includes("doc") ? "doc" : "other";
-  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded, filePath: d.filePath };
+  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded, filePath: d.filePath, subCategory: d.subCategory };
 }
 
 function relativeTime(date?: Date): string {
@@ -375,6 +437,29 @@ const CAB_CSS = `
 .fpd-cab .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:99px;font-size:15.5px;font-weight:500;color:${SOFT};background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-family:var(--font-body);transition:border-color .16s,background .16s;}
 .fpd-cab .chip:hover{border-color:rgba(91,110,225,0.32);background:rgba(91,110,225,0.06);}
 .fpd-cab .chip.dash{border-style:dashed;color:${MUTED};}
+.fpd-cab .chip.on{border-color:rgba(91,110,225,0.55);background:rgba(91,110,225,0.14);color:${TEXT};}
+.fpd-cab .chip .ccount{font-family:var(--font-mono);font-size:12px;color:${MUTED};}
+.fpd-cab .chip.danger:hover{border-color:rgba(208,107,107,0.45);background:rgba(208,107,107,0.08);color:#F0A9A9;}
+.fpd-cab .btn-ghost{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:99px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:border-color .18s,color .18s;}
+.fpd-cab .btn-ghost:hover{border-color:rgba(91,110,225,0.4);color:${TEXT};}
+.fpd-cab .btn-ghost.danger:hover{border-color:rgba(208,107,107,0.45);color:#F0A9A9;}
+
+/* folder dialog — same look as the Folders & Reminders modals */
+.fpd-cab .backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,14,0.75);backdrop-filter:blur(8px);}
+.fpd-cab .modal{width:100%;max-width:380px;padding:24px;}
+.fpd-cab .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px;}
+.fpd-cab .modal-head h3{font-family:var(--font-display);font-size:20px;color:${TEXT};font-weight:600;margin:0;}
+.fpd-cab .modal-head button{background:none;border:none;color:${MUTED};cursor:pointer;display:flex;}
+.fpd-cab .field{margin-bottom:12px;}
+.fpd-cab .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600;color:${MUTED};}
+.fpd-cab .field input{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
+.fpd-cab .field input::placeholder{color:${FAINT};}
+.fpd-cab .field input:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-cab .modal-acts{display:flex;gap:10px;margin-top:6px;}
+.fpd-cab .modal-acts .save{flex:1;padding:11px;border-radius:18px;font-size:16px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
+.fpd-cab .modal-acts .save:hover{filter:brightness(1.08);}
+.fpd-cab .modal-acts .save:disabled{opacity:.6;cursor:default;}
+.fpd-cab .modal-acts .cancel{padding:11px 16px;border-radius:18px;font-size:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};cursor:pointer;font-family:var(--font-body);}
 
 /* ── Flat folder card grid (matches the reference layout: icon swatch,
    title, "N files · size" meta, description, then a divider footer with
@@ -456,9 +541,22 @@ const CAB_CSS = `
 `;
 
 export function DigitalFileCabinet() {
-  const { continuationFeePaid, docs, addDoc, deleteDoc } = useDemo();
+  const {
+    continuationFeePaid, docs, addDoc, deleteDoc,
+    folders, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId,
+  } = useDemo();
   const { check: spCheck, capAmount } = useSpendingProtection();
-  const [current, setCurrent] = useState<Cabinet | null>(null);
+  // Built-in folders first, then the account's own top-level folders.
+  const allCabinets = useMemo(() => [
+    ...themedCabinets,
+    ...folders.filter(f => !f.parentId && !f.parentCategory).map(folderToCabinet),
+  ], [folders]);
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [currentSub, setCurrentSub] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<FolderDialog | null>(null);
+  // Derived, so a rename shows straight away and a deleted folder closes itself.
+  const current = allCabinets.find(c => c.id === currentId) ?? null;
+  const setCurrent = (c: Cabinet | null) => { setCurrentId(c?.id ?? null); setCurrentSub(null); };
   const [view, setView]       = useState<"grid"|"list">("grid");
   const [search, setSearch]   = useState("");
   const [dragging, setDragging] = useState(false);
@@ -471,14 +569,23 @@ export function DigitalFileCabinet() {
 
   useEffect(() => subscribeToSyncedDocs(setSyncedDocs), []);
 
+  // Folders & Reminders hands over a folder to open.
+  useEffect(() => {
+    if (pendingFolderId && allCabinets.some(c => c.id === pendingFolderId)) {
+      setCurrentId(pendingFolderId); setCurrentSub(null); setSearch(""); setSelected(null);
+      setPendingFolderId(null);
+    }
+  }, [pendingFolderId, allCabinets, setPendingFolderId]);
+
   const matchesSearch = useCallback((c: Cabinet) =>
     c.label.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase()),
   [search]);
 
   // Real uploads are stored in vault_documents (via DemoContext.docs/addDoc), keyed by the
-  // static folder id as `category` — that's how "current files" for a folder are filtered below.
+  // static folder id as `category` — or, for a custom folder, by its row id as `folder_id`
+  // (category "custom"). That's how "current files" for a folder are filtered below.
   const docsForFolder = useCallback((folderId: string) =>
-    docs.filter(d => d.category === folderId).map(docToFolderFile),
+    docs.filter(d => d.folderId ? d.folderId === folderId : d.category === folderId).map(docToFolderFile),
   [docs]);
 
   const doUpload = useCallback((folderId: string, files: FileList | null) => {
@@ -493,17 +600,21 @@ export function DigitalFileCabinet() {
       return;
     }
 
+    const isCustom = folders.some(x => x.id === folderId);
     setUploading(true);
     Promise.all(Array.from(files).map(f => addDoc({
       name: f.name,
-      category: folderId,
+      category: isCustom ? "custom" : folderId,
+      folderId: isCustom ? folderId : undefined,
+      // Uploading with a sub-folder open files the document into that set.
+      subCategory: currentSub ?? undefined,
       size: Number((f.size/1024/1024).toFixed(1)),
       sizeUnit: "MB",
       type: f.type.startsWith("image") ? "image" : f.type.startsWith("video") ? "video" : f.type.includes("pdf") ? "pdf" : "other",
       status: "verified",
       encrypted: true,
     }, f))).finally(() => setUploading(false));
-  }, [addDoc, spCheck.allowed, capAmount]);
+  }, [addDoc, spCheck.allowed, capAmount, folders, currentSub]);
 
   // Preview/Download used to be toast.info/success calls that never touched a
   // real file. Real uploads carry a vault-documents storage path (filePath);
@@ -531,6 +642,47 @@ export function DigitalFileCabinet() {
   const openFolder = (c: Cabinet) => {
     if ((c as any).locked === true) { toast.info("🔒 Enter your PIN to access the Secret Vault"); return; }
     setCurrent(c); setSearch(""); setSelected(null);
+  };
+
+  // Sub-folders of the open folder: the built-in ones plus any the user made.
+  const subFolderRows = current
+    ? folders.filter(f => current.custom ? f.parentId === current.id : f.parentCategory === current.id)
+    : [];
+  const subFolders: { name: string; row?: VaultFolder }[] = current?.subFolders
+    ? [...current.subFolders.map(name => ({ name })), ...subFolderRows.map(row => ({ name: row.name, row }))]
+    : [];
+  const selectedSubRow = subFolderRows.find(r => r.name === currentSub);
+
+  const saveDialog = async (name: string, desc: string) => {
+    if (!dialog) return;
+    if (dialog.mode === "rename") {
+      const wasSub = currentSub === dialog.folder.name;
+      await renameFolder(dialog.folder.id, name);
+      if (wasSub) setCurrentSub(name.trim());
+      setDialog(null);
+      return;
+    }
+    if (dialog.mode === "sub") {
+      const parent = dialog.parent;
+      if (parent.subFolders?.some(n => n.toLowerCase() === name.trim().toLowerCase())) {
+        toast.error(`"${name.trim()}" already exists in ${parent.label}`); return;
+      }
+      const made = await addFolder({
+        name, color: parent.color,
+        parentId: parent.custom ? parent.id : null,
+        parentCategory: parent.custom ? null : parent.id,
+      });
+      if (made) { setCurrentSub(made.name); setDialog(null); }
+      return;
+    }
+    const made = await addFolder({ name, description: desc, color: RAMP[folders.length % RAMP.length] });
+    if (made) { setDialog(null); setCurrentId(made.id); setCurrentSub(null); setSearch(""); setSelected(null); }
+  };
+
+  const removeFolder = async (f: VaultFolder) => {
+    const isSub = !!(f.parentId || f.parentCategory);
+    if (!window.confirm(`Delete "${f.name}"${isSub ? "" : " and its sub-folders"}?`)) return;
+    if (await deleteFolder(f.id) && currentSub === f.name) setCurrentSub(null);
   };
 
   const folderCount = (folder: Cabinet) =>
@@ -567,13 +719,15 @@ export function DigitalFileCabinet() {
     : [];
 
   const currentFiles = current ? [...current.files, ...docsForFolder(current.id), ...syncedForCurrent] : [];
-  const filteredFiles = currentFiles.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredFiles = currentFiles.filter(f =>
+    f.name.toLowerCase().includes(search.toLowerCase()) && (!currentSub || f.subCategory === currentSub));
+  const subCount = (name: string) => currentFiles.filter(f => f.subCategory === name).length;
 
-  const totalFiles = themedCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0) + syncedDocs.length;
+  const totalFiles = allCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0) + syncedDocs.length;
   const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
 
   const kpis = [
-    { label: "Folders", value: String(themedCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={16}/>, dot: ACCENT2, tone: "sky" },
+    { label: "Folders", value: String(allCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={16}/>, dot: ACCENT2, tone: "sky" },
     { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={16}/>, dot: ACCENT, tone: "violet" },
     { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={16}/>, dot: NEG, tone: "critical" },
     { label: "Encryption", value: "AES-256", icon: <Shield size={16}/>, sub: "Client-side, zero-knowledge", dot: POS, tone: "good" },
@@ -628,11 +782,20 @@ export function DigitalFileCabinet() {
               </div>
               <h1 className="pg-h1">{current ? current.label : "Digital File Cabinet"}</h1>
               <div className="pg-sub">
-                {current ? current.description : `${themedCabinets.length} folders · ${totalFiles}+ files, all encrypted client-side before they leave your device.`}
+                {current ? current.description : `${allCabinets.length} folders · ${totalFiles}+ files, all encrypted client-side before they leave your device.`}
               </div>
             </div>
           </div>
           <div className="head-r">
+            {current?.custom && (() => {
+              const row = folders.find(f => f.id === current.id);
+              return row && (
+                <>
+                  <button className="btn-ghost" onClick={() => setDialog({ mode: "rename", folder: row })} title="Rename folder"><Pencil size={13}/> Rename</button>
+                  <button className="btn-ghost danger" onClick={() => void removeFolder(row)} title="Delete folder"><Trash2 size={13}/></button>
+                </>
+              );
+            })()}
             <div className="seg">
               <button className={view==="grid" ? "on" : ""} onClick={() => setView("grid")} title="Grid view"><Grid size={13}/></button>
               <button className={view==="list" ? "on" : ""} onClick={() => setView("list")} title="List view"><List size={13}/></button>
@@ -685,14 +848,29 @@ export function DigitalFileCabinet() {
         {/* ── Sub-folders strip (inside a folder) ── */}
         {current?.subFolders && (
           <div className="chiprow">
-            {current.subFolders.map(sf => (
-              <button key={sf} className="chip" onClick={() => toast.info(`Opening sub-folder: ${sf}`)}>
-                <Folder size={13} color={current.color} fill={`${current.color}22`}/> {sf}
+            <button className={`chip ${currentSub === null ? "on" : ""}`} onClick={() => { setCurrentSub(null); setSelected(null); }}>
+              <FolderOpen size={13} color={current.color}/> All <span className="ccount">{currentFiles.length}</span>
+            </button>
+            {subFolders.map(sf => (
+              <button key={sf.row?.id ?? sf.name} className={`chip ${currentSub === sf.name ? "on" : ""}`}
+                onClick={() => { setCurrentSub(currentSub === sf.name ? null : sf.name); setSelected(null); }}>
+                <Folder size={13} color={current.color} fill={`${current.color}22`}/> {sf.name}
+                <span className="ccount">{subCount(sf.name)}</span>
               </button>
             ))}
-            <button className="chip dash" onClick={() => toast.info("Create new sub-folder")}>
+            <button className="chip dash" onClick={() => setDialog({ mode: "sub", parent: current })}>
               <Plus size={13}/> New Sub-folder
             </button>
+            {selectedSubRow && (
+              <>
+                <button className="chip" onClick={() => setDialog({ mode: "rename", folder: selectedSubRow })} title="Rename sub-folder">
+                  <Pencil size={13}/> Rename
+                </button>
+                <button className="chip danger" onClick={() => void removeFolder(selectedSubRow)} title="Delete sub-folder">
+                  <Trash2 size={13}/> Delete
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -717,7 +895,7 @@ export function DigitalFileCabinet() {
 
         {/* ── FOLDER GRID (root only) — flat card grid, one per category ── */}
         {!current && (() => {
-          const visible = themedCabinets.filter(matchesSearch);
+          const visible = allCabinets.filter(matchesSearch);
           if (search && visible.length === 0) {
             return (
               <div className="card pad empty">
@@ -758,7 +936,7 @@ export function DigitalFileCabinet() {
                   </button>
                 );
               })}
-              <button className="newtile" onClick={() => toast.info("Enter a folder name to create a custom folder")}>
+              <button className="newtile" onClick={() => setDialog({ mode: "folder" })}>
                 <Plus size={20}/> <span style={{ fontSize:15 }}>New Custom Folder</span>
               </button>
             </div>
@@ -779,7 +957,7 @@ export function DigitalFileCabinet() {
                   </button>
                 );
               })}
-              <button className="newtile" style={{ minHeight:56, flexDirection:"row" }} onClick={() => toast.info("Enter a folder name to create a custom folder")}>
+              <button className="newtile" style={{ minHeight:56, flexDirection:"row" }} onClick={() => setDialog({ mode: "folder" })}>
                 <Plus size={16}/> <span style={{ fontSize:16 }}>New Custom Folder</span>
               </button>
             </div>
@@ -861,6 +1039,8 @@ export function DigitalFileCabinet() {
           )
         )}
       </div>
+
+      {dialog && <FolderModal dialog={dialog} onClose={() => setDialog(null)} onSave={saveDialog}/>}
 
       {/* File detail panel */}
       {selected && (

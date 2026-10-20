@@ -3,9 +3,9 @@ import { toast } from "sonner";
 import { billing } from "../services/billing";
 import { useAuth } from "./AuthContext";
 import {
-  db, supabase, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
+  db, supabase, tables, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
   type DBFinalWish, type DBAllergy, type DBMedication, type DBReminder, type DBMemory, type DBOccasion,
-  type DBFuneralPlan, type DBEmergencyInfo,
+  type DBFuneralPlan, type DBEmergencyInfo, type DBVaultFolder,
 } from "../services/supabase";
 
 /* ─── Types ─────────────────────────────────────────────────────── */
@@ -18,6 +18,16 @@ export interface Doc {
   /* Storage path in the private vault-documents bucket. Needed to actually
      preview/download the file — see rowToDoc. */
   filePath: string;
+  /* Which sub-folder (set of documents) inside its folder, by name. */
+  subCategory?: string;
+  /* Set when the doc lives in a user-created folder (category "custom"). */
+  folderId?: string;
+}
+/* A user-created folder or sub-folder — see DBVaultFolder. */
+export interface VaultFolder {
+  id: string; name: string; description: string;
+  parentId: string | null; parentCategory: string | null;
+  color: string; createdAt: string;
 }
 export interface Contact {
   id: string; type: "legacy"|"guardian"|"emergency"|"pet_emergency";
@@ -143,6 +153,15 @@ function rowToDoc(row: DBDocument): Doc {
     size: Number((useGb ? mb / 1024 : mb).toFixed(1)), sizeUnit: useGb ? "GB" : "MB",
     uploaded: formatDate(row.uploaded_at), uploadedAt: row.uploaded_at, type: row.file_type,
     status: row.status, encrypted: row.is_encrypted, filePath: row.file_path,
+    subCategory: row.sub_category ?? undefined, folderId: row.folder_id ?? undefined,
+  };
+}
+
+function rowToFolder(row: DBVaultFolder): VaultFolder {
+  return {
+    id: row.id, name: row.name, description: row.description ?? "",
+    parentId: row.parent_id ?? null, parentCategory: row.parent_category ?? null,
+    color: row.color ?? "#5B6EE1", createdAt: row.created_at,
   };
 }
 
@@ -202,6 +221,7 @@ interface DemoCtx {
   deathVerifiedDoc: string | null;
   submitDeathRecord: (docName: string) => void;
   docs: Doc[];
+  folders: VaultFolder[];
   contacts: Contact[];
   wishes: FinalWish[];
   allergies: Allergy[];
@@ -217,6 +237,14 @@ interface DemoCtx {
   changePlan: (plan: UserProfile["plan"], planName: string) => Promise<boolean>;
   addDoc: (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
+  addFolder: (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => Promise<VaultFolder | null>;
+  renameFolder: (id: string, name: string) => Promise<void>;
+  /** Refuses (resolves false) while any document is still filed in the folder or its sub-folders. */
+  deleteFolder: (id: string) => Promise<boolean>;
+  /* One-shot handoff so another page (Folders & Reminders) can open the File
+     Cabinet straight onto a folder. The cabinet consumes and clears it. */
+  pendingFolderId: string | null;
+  setPendingFolderId: (id: string | null) => void;
   addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => Promise<void>;
   removeContact: (id: string) => Promise<void>;
   updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<void>;
@@ -254,6 +282,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const [user, setUser] = useState<UserProfile>(EMPTY_USER);
   const [docs, setDocs] = useState<Doc[]>([]);
+  const [folders, setFolders] = useState<VaultFolder[]>([]);
+  const [pendingFolderId, setPendingFolderId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [wishes, setWishes] = useState<FinalWish[]>([]);
   const [allergies, setAllergies] = useState<Allergy[]>([]);
@@ -270,7 +300,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   /* Load everything for the signed-in user, and keep notifications live. */
   useEffect(() => {
     if (!uid) {
-      setUser(EMPTY_USER); setDocs([]); setContacts([]); setWishes([]); setAllergies([]);
+      setUser(EMPTY_USER); setDocs([]); setFolders([]); setContacts([]); setWishes([]); setAllergies([]);
       setMeds([]); setReminders([]); setMemories([]); setOccasions([]); setNotifs([]);
       setFuneralPlan(EMPTY_FUNERAL_PLAN); setEmergencyInfo(EMPTY_EMERGENCY_INFO);
       return;
@@ -281,7 +311,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const [
         userRes, docsRes, contactsRes, idvRes, wishesRes, allergiesRes,
         medsRes, remindersRes, memoriesRes, occasionsRes, notifsRes,
-        feeRes, funeralPlanRes, emergencyInfoRes,
+        feeRes, funeralPlanRes, emergencyInfoRes, foldersRes,
       ] = await Promise.all([
         db.getUser(uid),
         db.listDocuments(uid),
@@ -297,6 +327,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         db.getContinuationFee(uid),
         db.getFuneralPlan(uid),
         db.getEmergencyInfo(uid),
+        tables.vaultFolders.list(uid),
       ]);
       if (cancelled) return;
 
@@ -314,6 +345,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         });
       }
       setDocs((docsRes.data ?? []).map(rowToDoc));
+      // Oldest first so folders keep the order they were created in.
+      setFolders((foldersRes.data ?? []).map(rowToFolder).reverse());
       // idvRes is ordered submitted_at desc, so the first match per contact_id is the latest.
       const latestIdvByContact = new Map<string, DBIdVerification>();
       for (const v of idvRes.data ?? []) if (!latestIdvByContact.has(v.contact_id)) latestIdvByContact.set(v.contact_id, v);
@@ -395,6 +428,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const fileSizeBytes = file ? file.size : Math.round(doc.size * (doc.sizeUnit === "GB" ? 1024 ** 3 : 1024 ** 2));
       const { data, error } = await db.uploadDocument({
         user_id: uid, name: doc.name, category: doc.category, file_path: filePath,
+        sub_category: doc.subCategory, folder_id: doc.folderId,
         file_size_bytes: fileSizeBytes, file_type: doc.type, is_encrypted: doc.encrypted,
         status: doc.status === "rejected" ? "pending" : doc.status, starred: false, locked: false, tags: [], metadata: {},
       });
@@ -413,6 +447,68 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setDocs(d => d.filter(x => x.id !== id));
     toast.success("Document permanently deleted", { id: tid });
   }, []);
+
+  /* Folders */
+  const addFolder = useCallback(async (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => {
+    if (!uid) return null;
+    const name = f.name.trim();
+    const { data, error } = await tables.vaultFolders.add(uid, {
+      name, description: f.description?.trim() || null,
+      parent_id: f.parentId ?? null, parent_category: f.parentCategory ?? null,
+      ...(f.color ? { color: f.color } : {}),
+    });
+    if (error || !data) {
+      // 23505 = the unique (place, name) index from migration 033.
+      toast.error(error?.code === "23505" ? `A folder named "${name}" already exists here` : "Could not create folder");
+      return null;
+    }
+    const folder = rowToFolder(data);
+    setFolders(prev => [...prev, folder]);
+    toast.success(`"${name}" created`);
+    return folder;
+  }, [uid]);
+
+  const renameFolder = useCallback(async (id: string, name: string) => {
+    const old = folders.find(x => x.id === id);
+    const trimmed = name.trim();
+    if (!old || !trimmed || trimmed === old.name) return;
+    const { data, error } = await tables.vaultFolders.update(id, { name: trimmed });
+    if (error || !data) {
+      toast.error(error?.code === "23505" ? `A folder named "${trimmed}" already exists here` : "Could not rename folder");
+      return;
+    }
+    setFolders(prev => prev.map(x => x.id === id ? rowToFolder(data) : x));
+    // Docs in a sub-folder reference it by name, so carry them over.
+    if (old.parentId || old.parentCategory) {
+      const moved = docs.filter(d => d.subCategory === old.name &&
+        (old.parentId ? d.folderId === old.parentId : d.category === old.parentCategory && !d.folderId));
+      if (moved.length) {
+        const { error: docErr } = await supabase.from("vault_documents")
+          .update({ sub_category: trimmed }).in("id", moved.map(d => d.id));
+        if (docErr) { toast.error("Folder renamed, but its documents could not be moved"); return; }
+        const ids = new Set(moved.map(d => d.id));
+        setDocs(prev => prev.map(d => ids.has(d.id) ? { ...d, subCategory: trimmed } : d));
+      }
+    }
+    toast.success(`Renamed to "${trimmed}"`);
+  }, [folders, docs]);
+
+  const deleteFolder = useCallback(async (id: string) => {
+    const f = folders.find(x => x.id === id);
+    if (!f) return false;
+    const childIds = new Set(folders.filter(x => x.parentId === id).map(x => x.id));
+    const inUse = docs.some(d =>
+      d.folderId === id || (d.folderId && childIds.has(d.folderId)) ||
+      (f.parentId && d.folderId === f.parentId && d.subCategory === f.name) ||
+      (f.parentCategory && !d.folderId && d.category === f.parentCategory && d.subCategory === f.name));
+    if (inUse) { toast.error(`"${f.name}" still has documents — move or delete them first`); return false; }
+    const { error } = await tables.vaultFolders.remove(id);
+    if (error) { toast.error("Could not delete folder"); return false; }
+    // parent_id cascades in the database; mirror that here.
+    setFolders(prev => prev.filter(x => x.id !== id && x.parentId !== id));
+    toast.success(`"${f.name}" deleted`);
+    return true;
+  }, [folders, docs]);
 
   /* Contacts */
   const addContact = useCallback(async (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => {
@@ -682,9 +778,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <DemoContext.Provider value={{
-      user, docs, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
+      user, docs, folders, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       funeralPlan, emergencyInfo,
-      updateUser, changePlan, addDoc, deleteDoc, addContact, removeContact, updateContact,
+      updateUser, changePlan, addDoc, deleteDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,

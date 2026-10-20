@@ -51,8 +51,8 @@ function computeVerifStatus(c: Contact): VerifStatus {
 type ContactType = "legacy"|"guardian"|"emergency"|"pet_emergency";
 
 const typeConfig = {
-  legacy:       { label:"Legacy Contact",        color:"#6FAE8B", icon:<Shield size={13}/>,       desc:"Receives full vault access upon verified passing." },
-  guardian:     { label:"Guardian Contact",      color:"#D99A6B",     icon:<Users size={13}/>,        desc:"View-only access to assigned folders right now — no death required." },
+  legacy:       { label:"Legacy Contact",        color:"#6FAE8B", icon:<Shield size={13}/>,       desc:"Receives full access to your vault only after your passing or incapacitation and the proper documentation is verified." },
+  guardian:     { label:"Guardian Contact",      color:"#D99A6B",     icon:<Users size={13}/>,        desc:"View-only access to the folders you personally assign them — never able to download files." },
   emergency:    { label:"Emergency Contact",     color:WARN,    icon:<AlertCircle size={13}/>,  desc:"Notified by first responders in an emergency." },
   pet_emergency:{ label:"Pet Emergency Contact", color:"#6E90C9",  icon:<PawPrint size={13}/>,     desc:"Cares for your pets in an emergency or upon passing." },
 };
@@ -101,6 +101,12 @@ const FOLDER_CATALOG = [
 /* ── Folder selector ─────────────────────────────────────────────── */
 function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(ids:string[])=>void }) {
   const toggle = (id:string) => onChange(selected.includes(id) ? selected.filter(x=>x!==id) : [...selected,id]);
+  // The user's own top-level File Cabinet folders can be assigned too (by row id).
+  const { folders } = useDemo();
+  const catalog = [
+    ...FOLDER_CATALOG,
+    ...folders.filter(f => !f.parentId && !f.parentCategory).map(f => ({ id:f.id, label:f.name, emoji:"📁", color:f.color })),
+  ];
   return (
     <div className="space-y-3">
       <div className="view-only-note">
@@ -108,14 +114,14 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
         <span>VIEW ONLY — Guardian contacts cannot download files</span>
       </div>
       <div className="flex items-center justify-between">
-        <span style={{ color: MUTED, fontSize: 14, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{FOLDER_CATALOG.length})</span>
+        <span style={{ color: MUTED, fontSize: 14, fontFamily: "var(--font-mono)" }}>ASSIGN FOLDERS ({selected.length}/{catalog.length})</span>
         <div className="flex gap-2">
-          <button onClick={()=>onChange(FOLDER_CATALOG.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
+          <button onClick={()=>onChange(catalog.map(f=>f.id))} style={{ color: "#6FAE8B", fontSize: 12.5, fontFamily: "var(--font-mono)", fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>All</button>
           <button onClick={()=>onChange([])} style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
         </div>
       </div>
       <div className="folder-grid">
-        {FOLDER_CATALOG.map(f=>{
+        {catalog.map(f=>{
           const active = selected.includes(f.id);
           return (
             <button key={f.id} onClick={()=>toggle(f.id)} className="folder-chip"
@@ -642,7 +648,7 @@ function ContactSection({
                           )}
                           {vs2 === "verified" && (
                             <div className="flex items-center gap-1.5" style={{ fontSize: 15, color: "#D99A6B" }}>
-                              <UserCheck size={11}/> Vault access activates upon verified passing
+                              <UserCheck size={11}/> Vault access activates only after passing/incapacitation is verified
                             </div>
                           )}
                           {(vs2 === "not_sent" || vs2 === "pending" || vs2 === "rejected") && (
@@ -808,8 +814,8 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
 
   const cfg = typeConfig[activeType];
   const access: Record<ContactType, { label:string; color:string }> = {
-    legacy:        { label:"Full vault download — after verified passing", color:"#6FAE8B" },
-    guardian:      { label:"View-only assigned folders — never downloads", color:"#D99A6B" },
+    legacy:        { label:"Full vault access — only after passing/incapacitation is verified", color:"#6FAE8B" },
+    guardian:      { label:"View-only · folders you assign · never downloads", color:"#D99A6B" },
     emergency:     { label:"Informational only — no vault access", color:WARN },
     pet_emergency: { label:"Informational only — pet care details", color:"#6E90C9" },
   };

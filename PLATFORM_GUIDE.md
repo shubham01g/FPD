@@ -256,9 +256,9 @@ An organizational tool for managing custom folder structures and time-based remi
 
 ### The Four Contact Types
 
-**Legacy Contact** — The person who receives vault access after the account holder passes away. This is the primary contact type. They must: (1) be designated by the user, (2) verify their government ID with FPD, (3) wait for admin activation after death verification. They cannot access anything until all three steps are complete.
+**Legacy Contact** — The person who receives full vault access only after the account holder's passing or incapacitation and the proper documentation is verified. This is the primary contact type. They must: (1) be designated by the user, (2) verify their government ID with FPD, (3) wait for admin activation after death verification. They cannot access anything until all three steps are complete.
 
-**Guardian Contact** — A trusted person who can access assigned folders **right now**, while the user is alive. Designed for: a spouse who manages finances, a power of attorney attorney, an adult child helping an elderly parent. Guardian access is immediate — no death required.
+**Guardian Contact** — A trusted person who can access assigned folders **right now**, while the user is alive. Designed for: a spouse who manages finances, a power of attorney attorney, an adult child helping an elderly parent. Guardians get view-only access to the folders the user personally assigns them — they are never able to download files.
 
 **Emergency Contact** — Purely informational. This person's contact info is stored so first responders or family can call them in an emergency. They receive no vault access.
 
