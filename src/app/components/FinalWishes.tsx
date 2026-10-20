@@ -271,6 +271,23 @@ export function FinalWishes() {
   const [editingPlan, setEditingPlan] = useState(false);
   React.useEffect(() => { if (!editingPlan) setPlanDraft(funeralPlan); }, [funeralPlan, editingPlan]);
 
+  // Comma-separated list inputs keep the raw text while typing; rebuilding it
+  // from the parsed array would swallow every trailing space and comma.
+  type ListKey = "music" | "readings" | "pallbearers";
+  const listTextOf = (p: FuneralPlan) => ({ music: p.music.join(", "), readings: p.readings.join(", "), pallbearers: p.pallbearers.join(", ") });
+  const [listText, setListText] = useState(() => listTextOf(funeralPlan));
+  React.useEffect(() => { if (!editingPlan) setListText(listTextOf(funeralPlan)); }, [funeralPlan, editingPlan]);
+  const listInput = (key: ListKey, label: string, placeholder: string) => (
+    <div className="field">
+      <label>{label} (comma-separated)</label>
+      <input value={listText[key]} placeholder={placeholder} onChange={e => {
+        const v = e.target.value;
+        setListText(t => ({ ...t, [key]: v }));
+        setPlanDraft(p => ({ ...p, [key]: v.split(",").map(s => s.trim()).filter(Boolean) }));
+      }} />
+    </div>
+  );
+
   // Every funeral card edits the same planDraft, so one Edit / Save covers them all.
   const planActs = (
     <div className="acts-row">
@@ -463,8 +480,8 @@ export function FinalWishes() {
                 <h3 className="sec-title"><span className="tick" />Service Preferences</h3>
                 {editingPlan ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div className="field"><label>MUSIC (comma-separated)</label><input value={planDraft.music.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, music: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="Amazing Grace, How Great Thou Art" /></div>
-                    <div className="field"><label>READINGS (comma-separated)</label><input value={planDraft.readings.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, readings: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="Psalm 23, John 14:1-6" /></div>
+                    {listInput("music", "MUSIC", "Amazing Grace, How Great Thou Art")}
+                    {listInput("readings", "READINGS", "Psalm 23, John 14:1-6")}
                     <div className="field"><label>FLOWERS</label><input value={planDraft.flowers} onChange={e => setPlanDraft(p => ({ ...p, flowers: e.target.value }))} placeholder="e.g. White lilies and blue hydrangeas" /></div>
                     <div className="field"><label>RECEPTION</label><input value={planDraft.reception} onChange={e => setPlanDraft(p => ({ ...p, reception: e.target.value }))} placeholder="e.g. Family home — catered" /></div>
                     <div className="field"><label>SPECIAL REQUESTS FOR / DURING MY SERVICE</label><textarea style={{ minHeight: 70 }} value={planDraft.specialRequests} onChange={e => setPlanDraft(p => ({ ...p, specialRequests: e.target.value }))} placeholder="Any special requests for or during the service" /></div>
@@ -550,7 +567,7 @@ export function FinalWishes() {
                 {editingPlan ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {SERVICE_FIELDS.slice(0, 3).map(planInput)}
-                    <div className="field"><label>MY PREFERRED PALLBEARERS (comma-separated)</label><input value={planDraft.pallbearers.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, pallbearers: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="John Smith, Michael Lee, David Brown" /></div>
+                    {listInput("pallbearers", "MY PREFERRED PALLBEARERS", "John Smith, Michael Lee, David Brown")}
                     {SERVICE_FIELDS.slice(3).map(planInput)}
                   </div>
                 ) : (
