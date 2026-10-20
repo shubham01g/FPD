@@ -93,7 +93,7 @@ interface ClaimRow {
 }
 
 const DOC_SLOTS: { type: DocType; label: string }[] = [
-  { type: "death_certificate", label: "Death Certificate" },
+  { type: "death_certificate", label: "End-of-Life / Incapacitation Documents" },
   { type: "claimant_id",       label: "Claimant Government ID" },
   { type: "will",              label: "Last Will & Testament" },
   { type: "power_of_attorney", label: "Power of Attorney" },
@@ -361,7 +361,7 @@ function ClaimModal({ claim, onClose, onApprove, onReject, onRequestDocs, onChan
               { label: "DATE OF DEATH", val: claim.deceasedDOD },
               { label: "DOCS RECEIVED", val: `${submittedCount} / ${totalDocs}`, color: submittedCount < 2 ? "#F6AD55" : undefined },
               { label: "CLAIMANT ID",   val: claim.claimantIdVerified ? "Pre-Verified ✓" : "Not Verified", color: claim.claimantIdVerified ? "#48BB78" : "#FC8181" },
-              { label: "DEATH CERT",    val: claim.deathCertOverride ? "Override Active ⚠" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "Received ✓" : "Not Received", color: claim.deathCertOverride ? "#D9A55E" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "#48BB78" : "#FC8181" },
+              { label: "END-OF-LIFE DOCS", val: claim.deathCertOverride ? "Override Active ⚠" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "Received ✓" : "Not Received", color: claim.deathCertOverride ? "#D9A55E" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "#48BB78" : "#FC8181" },
             ].map(f => (
               <div key={f.label} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "7px 14px" }}>
                 <div style={{ fontSize: 9, color: "rgba(255,255,255,0.38)", ...MONO, marginBottom: 3 }}>{f.label}</div>
@@ -1111,7 +1111,7 @@ export function LegacyClaims() {
                     color: submittedDocs < 2 ? "#D9A55E" : undefined },
                   { label: "ID VERIFIED",    val: claim.claimantIdVerified ? "Yes ✓" : "No ✗",
                     color: claim.claimantIdVerified ? "#5FBE91" : "#FC8181" },
-                  { label: "DEATH CERT",
+                  { label: "END-OF-LIFE DOCS",
                     val: claim.deathCertOverride ? "Override ⚠" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "Received ✓" : "Missing ✗",
                     color: claim.deathCertOverride ? "#D9A55E" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "#5FBE91" : "#FC8181" },
                 ].map(f => (

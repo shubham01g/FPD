@@ -53,6 +53,12 @@ export interface Occasion {
 export interface FuneralPlan {
   serviceType: string; location: string; preferredDate: string; budget: string; prearranged: boolean;
   music: string[]; readings: string[]; flowers: string; reception: string; obituaryDraft: string; specialRequests: string;
+  /* Personal questions (migration 032) */
+  disposition: "" | "burial" | "cremation"; religiousBeliefs: string; proposedBurialSite: string;
+  prearrangedBurialSite: string; ashesWishes: string; burialCoveredByInsurance: boolean | null;
+  attireForMe: string; itemsToTake: string; attireForAttendees: string; pallbearers: string[];
+  finalPrayerOrSpeech: string; celebrationLocation: string; finalWords: string;
+  gravestoneInscription: string; lifeRegrets: string;
 }
 export interface EmergencyInfo {
   bloodType: string; height: string; weight: string; primaryLanguage: string; codeStatus: string;
@@ -96,6 +102,9 @@ const EMPTY_USER: UserProfile = {
 const EMPTY_FUNERAL_PLAN: FuneralPlan = {
   serviceType: "", location: "", preferredDate: "", budget: "", prearranged: false,
   music: [], readings: [], flowers: "", reception: "", obituaryDraft: "", specialRequests: "",
+  disposition: "", religiousBeliefs: "", proposedBurialSite: "", prearrangedBurialSite: "", ashesWishes: "",
+  burialCoveredByInsurance: null, attireForMe: "", itemsToTake: "", attireForAttendees: "", pallbearers: [],
+  finalPrayerOrSpeech: "", celebrationLocation: "", finalWords: "", gravestoneInscription: "", lifeRegrets: "",
 };
 
 const EMPTY_EMERGENCY_INFO: EmergencyInfo = {
@@ -167,6 +176,12 @@ const rowToFuneralPlan = (r: DBFuneralPlan): FuneralPlan => ({
   budget: r.budget != null ? String(r.budget) : "", prearranged: r.prearranged,
   music: r.music ?? [], readings: r.readings ?? [], flowers: r.flowers ?? "", reception: r.reception ?? "",
   obituaryDraft: r.obituary_draft ?? "", specialRequests: r.special_requests ?? "",
+  disposition: r.disposition ?? "", religiousBeliefs: r.religious_beliefs ?? "", proposedBurialSite: r.proposed_burial_site ?? "",
+  prearrangedBurialSite: r.prearranged_burial_site ?? "", ashesWishes: r.ashes_wishes ?? "",
+  burialCoveredByInsurance: r.burial_covered_by_insurance ?? null, attireForMe: r.attire_for_me ?? "",
+  itemsToTake: r.items_to_take ?? "", attireForAttendees: r.attire_for_attendees ?? "", pallbearers: r.pallbearers ?? [],
+  finalPrayerOrSpeech: r.final_prayer_or_speech ?? "", celebrationLocation: r.celebration_location ?? "",
+  finalWords: r.final_words ?? "", gravestoneInscription: r.gravestone_inscription ?? "", lifeRegrets: r.life_regrets ?? "",
 });
 const rowToEmergencyInfo = (r: DBEmergencyInfo): EmergencyInfo => ({
   bloodType: r.blood_type ?? "", height: r.height ?? "", weight: r.weight ?? "", primaryLanguage: r.primary_language ?? "",
@@ -621,6 +636,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       budget: data.budget ? Number(data.budget) : null, prearranged: data.prearranged,
       music: data.music, readings: data.readings, flowers: data.flowers, reception: data.reception,
       obituary_draft: data.obituaryDraft, special_requests: data.specialRequests,
+      disposition: data.disposition || null, religious_beliefs: data.religiousBeliefs,
+      proposed_burial_site: data.proposedBurialSite, prearranged_burial_site: data.prearrangedBurialSite,
+      ashes_wishes: data.ashesWishes, burial_covered_by_insurance: data.burialCoveredByInsurance,
+      attire_for_me: data.attireForMe, items_to_take: data.itemsToTake, attire_for_attendees: data.attireForAttendees,
+      pallbearers: data.pallbearers, final_prayer_or_speech: data.finalPrayerOrSpeech,
+      celebration_location: data.celebrationLocation, final_words: data.finalWords,
+      gravestone_inscription: data.gravestoneInscription, life_regrets: data.lifeRegrets,
     });
     if (error || !row) { toast.error("Could not save funeral plan", { id: tid }); return; }
     setFuneralPlan(rowToFuneralPlan(row));

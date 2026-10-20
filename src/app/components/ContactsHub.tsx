@@ -59,7 +59,7 @@ const typeConfig = {
 
 /* ── Verification methods a user can configure per Legacy Contact ─── */
 const VERIFICATION_METHODS = [
-  { id:"death_cert",     label:"Death Certificate",               icon:"📜", required:true,  desc:"Official government-issued death certificate — always required." },
+  { id:"death_cert",     label:"End-of-Life / Incapacitation Documents", icon:"📜", required:true,  desc:"Official certified end-of-life or incapacitation documents — coroner's report, police report, death certificate, or medical documents. Always required." },
   { id:"security_word",  label:"Preset Security Word",            icon:"🔑", required:false, desc:"A secret word agreed upon privately between you and your legacy contact." },
   { id:"security_qa",    label:"Security Question & Answer",      icon:"❓", required:false, desc:"A personal question only you and your contact would know the answer to." },
   { id:"govt_id",        label:"Government-Issued Photo ID",      icon:"🪪", required:false, desc:"Driver's license or passport to confirm your contact's identity." },

@@ -332,7 +332,7 @@ pub.post("/legacy-claim/:token", async (c) => {
   const has = (type: string) => onFile.has(type) || files.some((f) => f.type === type);
   if (!has("claimant_id")) return c.json({ error: "Your government ID is required" }, 400);
   if (!has("death_certificate") && !override) {
-    return c.json({ error: "Upload the death certificate, or confirm you do not have it yet" }, 400);
+    return c.json({ error: "Upload the end-of-life / incapacitation documents, or confirm you do not have them yet" }, 400);
   }
 
   const db = adminClient();

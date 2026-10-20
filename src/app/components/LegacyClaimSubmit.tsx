@@ -248,7 +248,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
 
   /* Document slots */
   const [docs, setDocs] = useState<DocSlot[]>([
-    { key: "death_certificate", label: "Death Certificate",      required: true,  icon: <FileText size={15} />,       accepted: ".pdf,.jpg,.jpeg,.png",       hint: "Official certified copy — PDF or clear photo",                file: null },
+    { key: "death_certificate", label: "End-of-Life / Incapacitation Documents", required: true, icon: <FileText size={15} />, accepted: ".pdf,.jpg,.jpeg,.png", hint: "Coroner's report, police report, death certificate, or medical documents — official certified copy, PDF or clear photo", file: null },
     { key: "claimant_id",       label: "Your Government ID",     required: true,  icon: <UserCheck size={15} />,      accepted: ".pdf,.jpg,.jpeg,.png",       hint: "Passport, driver's license, or state ID",                     file: null },
     { key: "will",              label: "Last Will & Testament",  required: false, icon: <FileCheck size={15} />,      accepted: ".pdf,.jpg,.jpeg,.png",       hint: "Notarized copy preferred",                                    file: null },
     { key: "power_of_attorney", label: "Power of Attorney",      required: false, icon: <FilePlus size={15} />,       accepted: ".pdf,.jpg,.jpeg,.png",       hint: "If applicable to your role",                                  file: null },
@@ -383,7 +383,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
               <div style={{ fontSize: 10, color: "#8A9AB8", ...MONO, marginBottom: 14 }}>DOCUMENTS YOU'LL NEED</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { icon: <FileText size={14} />,       label: "Death Certificate",           req: true,  note: "Official certified copy from the county or state"              },
+                  { icon: <FileText size={14} />,       label: "End-of-Life / Incapacitation Documents", req: true, note: "Official certified coroner's report, police report, death certificate, or medical documents" },
                   { icon: <UserCheck size={14} />,      label: "Your Government ID",          req: true,  note: "Passport, driver's license, or state-issued ID"                },
                   { icon: <FileCheck size={14} />,      label: "Last Will & Testament",       req: false, note: "Notarized copy if you have one"                                },
                   { icon: <FilePlus size={14} />,       label: "Power of Attorney",           req: false, note: "If applicable to your role"                                    },
@@ -619,11 +619,11 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
                               </div>
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: deathCertOverride ? "#D9A55E" : "#E8EDF5", marginBottom: 3 }}>
-                                  I don't have the death certificate yet
+                                  I don't have these documents yet
                                 </div>
                                 <div style={{ fontSize: 12, color: "#A3ADC9", lineHeight: 1.6 }}>
-                                  Death certificates can take weeks to arrive. Check this box to submit your claim now —
-                                  FPD may grant temporary access at admin discretion. <strong style={{ color: "#D9A55E" }}>You must send the official certificate once received.</strong>
+                                  Official certificates and reports can take weeks to arrive. Check this box to submit your claim now —
+                                  FPD may grant temporary access at admin discretion. <strong style={{ color: "#D9A55E" }}>You must send the official documents once received.</strong>
                                   Failure to submit within 30 days may result in access suspension.
                                 </div>
                               </div>
@@ -649,7 +649,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
                 borderRadius: 12, background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.2)" }}>
                 <AlertTriangle size={14} color="#D9A55E" style={{ flexShrink: 0 }} />
                 <span style={{ fontSize: 13, color: "#D9A55E" }}>
-                  Please upload your Government ID and either the Death Certificate or check the override option.
+                  Please upload your Government ID and either the end-of-life / incapacitation documents or check the override option.
                 </span>
               </div>
             )}
@@ -659,8 +659,8 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
                 borderRadius: 12, background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.25)" }}>
                 <AlertTriangle size={14} color="#D9A55E" style={{ flexShrink: 0, marginTop: 1 }} />
                 <span style={{ fontSize: 13, color: "#D9A55E", lineHeight: 1.5 }}>
-                  <strong>Override selected.</strong> Your claim will be submitted without the death certificate.
-                  Admin will review and may grant temporary access. You must send the official death certificate within 30 days.
+                  <strong>Override selected.</strong> Your claim will be submitted without end-of-life / incapacitation documents.
+                  Admin will review and may grant temporary access. You must send the official documents within 30 days.
                 </span>
               </div>
             )}

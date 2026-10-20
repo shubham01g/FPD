@@ -211,6 +211,12 @@ export interface DBFuneralPlan {
   user_id: string; service_type?: string; location?: string; preferred_date?: string; budget?: number | null;
   prearranged: boolean; music: string[]; readings: string[]; flowers?: string; reception?: string;
   obituary_draft?: string; special_requests?: string;
+  /* Personal questions (migration 032) */
+  disposition?: "burial" | "cremation" | null; religious_beliefs?: string; proposed_burial_site?: string;
+  prearranged_burial_site?: string; ashes_wishes?: string; burial_covered_by_insurance?: boolean | null;
+  attire_for_me?: string; items_to_take?: string; attire_for_attendees?: string; pallbearers?: string[];
+  final_prayer_or_speech?: string; celebration_location?: string; final_words?: string;
+  gravestone_inscription?: string; life_regrets?: string;
 }
 
 export interface DBEmergencyInfo {

@@ -23,6 +23,36 @@ type Tab = "wishes" | "funeral";
 
 const WISH_CATEGORIES = ["Personal Property", "Sentimental Items", "Financial", "Digital", "Charitable", "Other"];
 
+/* Free-text personal questions on the funeral plan (migration 032). Burial /
+   cremation, ashes, life-insurance and pallbearers need their own controls
+   and are rendered separately. */
+type PlanTextKey =
+  | "religiousBeliefs" | "proposedBurialSite" | "prearrangedBurialSite" | "ashesWishes" | "gravestoneInscription"
+  | "attireForMe" | "itemsToTake" | "attireForAttendees" | "finalPrayerOrSpeech" | "celebrationLocation"
+  | "finalWords" | "lifeRegrets";
+type PlanTextField = { key: PlanTextKey; label: string; placeholder: string; long?: boolean };
+
+const BURIAL_FIELDS: PlanTextField[] = [
+  { key: "religiousBeliefs",      label: "My Religious Beliefs",                   placeholder: "e.g. Catholic, Baptist, Jewish, non-religious" },
+  { key: "proposedBurialSite",    label: "My Proposed Burial Site",                placeholder: "Cemetery or place you would like to rest" },
+  { key: "prearrangedBurialSite", label: "Pre-arranged Burial Site I Already Have", placeholder: "Cemetery, plot / section number" },
+];
+const GRAVESTONE_FIELD: PlanTextField =
+  { key: "gravestoneInscription", label: "What I Would Like My Gravestone to Say", placeholder: "Inscription or epitaph", long: true };
+const ASHES_FIELD: PlanTextField =
+  { key: "ashesWishes", label: "My Ashes — Spread Where, or Given to Whom", placeholder: "e.g. Spread at Lake Tahoe, or given to my daughter Sarah", long: true };
+const SERVICE_FIELDS: PlanTextField[] = [
+  { key: "attireForMe",         label: "Attire I Would Like to Be Laid to Rest In",       placeholder: "e.g. My navy suit and grandfather's watch" },
+  { key: "itemsToTake",         label: "Small Items I Would Like to Take With Me",         placeholder: "e.g. Family photo, rosary, a letter from my children", long: true },
+  { key: "attireForAttendees",  label: "Preferred Attire for Family & Friends Attending",  placeholder: "e.g. Bright colors — no black, please" },
+  { key: "finalPrayerOrSpeech", label: "My Preferred Final Prayer or Speech",              placeholder: "The prayer, poem or speech you would like read", long: true },
+  { key: "celebrationLocation", label: "My Preferred Celebration of Life Location",        placeholder: "e.g. Our family farm, or the community hall" },
+];
+const WORDS_FIELDS: PlanTextField[] = [
+  { key: "finalWords",  label: "My Final Words to Family & Friends in Attendance", placeholder: "What you would like said to everyone gathered", long: true },
+  { key: "lifeRegrets", label: "The Things I Regretted in Life",                   placeholder: "Anything you want your loved ones to know", long: true },
+];
+
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
@@ -124,6 +154,10 @@ const WISHES_CSS = `
 .fpd-wishes .tag{padding:4px 10px;border-radius:7px;font-size:14.5px;font-weight:500;}
 .fpd-wishes .tag.music{background:rgba(91,110,225,0.12);color:#6FAE8B;}
 .fpd-wishes .tag.read{background:rgba(126,107,216,0.14);color:#A98CC7;}
+.fpd-wishes .tag.pall{background:rgba(91,167,214,0.12);color:#7FBCE0;}
+.fpd-wishes .tile .tv.long{white-space:pre-wrap;}
+.fpd-wishes .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fpd-wishes .card-head .sec-title{margin-bottom:0;}
 
 /* obituary */
 .fpd-wishes .obit{padding:16px 18px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${SOFT};font-size:17px;line-height:1.85;white-space:pre-wrap;}
@@ -236,6 +270,32 @@ export function FinalWishes() {
   const [planDraft, setPlanDraft] = useState<FuneralPlan>(funeralPlan);
   const [editingPlan, setEditingPlan] = useState(false);
   React.useEffect(() => { if (!editingPlan) setPlanDraft(funeralPlan); }, [funeralPlan, editingPlan]);
+
+  // Every funeral card edits the same planDraft, so one Edit / Save covers them all.
+  const planActs = (
+    <div className="acts-row">
+      <button className="btn-pos" onClick={async () => { await saveFuneralPlan(planDraft); setEditingPlan(false); }}>
+        <Check size={13} /> Save Changes
+      </button>
+      <button className="btn-sec" onClick={() => { setPlanDraft(funeralPlan); setEditingPlan(false); }}>Cancel</button>
+    </div>
+  );
+  const editPlanBtn = !editingPlan && <button className="btn-ghost" onClick={() => setEditingPlan(true)}><Edit2 size={13} /> Edit Plan</button>;
+  const planInput = (f: PlanTextField) => (
+    <div key={f.key} className="field">
+      <label>{f.label.toUpperCase()}</label>
+      {f.long
+        ? <textarea style={{ minHeight: 70 }} value={planDraft[f.key]} onChange={e => setPlanDraft(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder} />
+        : <input value={planDraft[f.key]} onChange={e => setPlanDraft(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder} />}
+    </div>
+  );
+  const planTile = (label: string, value: string, long?: boolean) => (
+    <div key={label} className="tile">
+      <div className="tk">{label}</div>
+      <div className={long ? "tv long" : "tv"}>{value || "Not set"}</div>
+    </div>
+  );
+  const showAshes = (p: FuneralPlan) => p.disposition === "cremation" || !!p.ashesWishes;
 
   const wlistRef = React.useRef<HTMLDivElement>(null);
   const funeralGridRef = React.useRef<HTMLDivElement>(null);
@@ -372,7 +432,7 @@ export function FinalWishes() {
                 {editingPlan ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     <div className="field"><label>SERVICE TYPE</label><input value={planDraft.serviceType} onChange={e => setPlanDraft(p => ({ ...p, serviceType: e.target.value }))} placeholder="e.g. Memorial Service" /></div>
-                    <div className="field"><label>LOCATION / FUNERAL HOME</label><input value={planDraft.location} onChange={e => setPlanDraft(p => ({ ...p, location: e.target.value }))} placeholder="Funeral home name and address" /></div>
+                    <div className="field"><label>PREFERRED SERVICE LOCATION / FUNERAL HOME</label><input value={planDraft.location} onChange={e => setPlanDraft(p => ({ ...p, location: e.target.value }))} placeholder="Funeral home name and address" /></div>
                     <div className="field"><label>PREFERRED TIMING</label><input value={planDraft.preferredDate} onChange={e => setPlanDraft(p => ({ ...p, preferredDate: e.target.value }))} placeholder="e.g. Within 10 days of passing" /></div>
                     <div className="field"><label>ESTIMATED BUDGET ($)</label><input type="number" value={planDraft.budget} onChange={e => setPlanDraft(p => ({ ...p, budget: e.target.value }))} placeholder="10000" /></div>
                     <div className="field">
@@ -386,7 +446,7 @@ export function FinalWishes() {
                 ) : (
                   [
                     { label: "Service Type", value: funeralPlan.serviceType || "Not set" },
-                    { label: "Location / Funeral Home", value: funeralPlan.location || "Not set" },
+                    { label: "Preferred Service Location / Funeral Home", value: funeralPlan.location || "Not set" },
                     { label: "Preferred Timing", value: funeralPlan.preferredDate || "Not set" },
                     { label: "Estimated Budget", value: funeralPlan.budget ? `$${Number(funeralPlan.budget).toLocaleString()}` : "Not set" },
                     { label: "Prearranged", value: funeralPlan.prearranged ? "Yes" : "Not prearranged" },
@@ -407,13 +467,8 @@ export function FinalWishes() {
                     <div className="field"><label>READINGS (comma-separated)</label><input value={planDraft.readings.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, readings: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="Psalm 23, John 14:1-6" /></div>
                     <div className="field"><label>FLOWERS</label><input value={planDraft.flowers} onChange={e => setPlanDraft(p => ({ ...p, flowers: e.target.value }))} placeholder="e.g. White lilies and blue hydrangeas" /></div>
                     <div className="field"><label>RECEPTION</label><input value={planDraft.reception} onChange={e => setPlanDraft(p => ({ ...p, reception: e.target.value }))} placeholder="e.g. Family home — catered" /></div>
-                    <div className="field"><label>SPECIAL REQUESTS</label><textarea style={{ minHeight: 70 }} value={planDraft.specialRequests} onChange={e => setPlanDraft(p => ({ ...p, specialRequests: e.target.value }))} placeholder="Any special requests for the service" /></div>
-                    <div className="acts-row">
-                      <button className="btn-pos" onClick={async () => { await saveFuneralPlan(planDraft); setEditingPlan(false); }}>
-                        <Check size={13} /> Save Changes
-                      </button>
-                      <button className="btn-sec" onClick={() => { setPlanDraft(funeralPlan); setEditingPlan(false); }}>Cancel</button>
-                    </div>
+                    <div className="field"><label>SPECIAL REQUESTS FOR / DURING MY SERVICE</label><textarea style={{ minHeight: 70 }} value={planDraft.specialRequests} onChange={e => setPlanDraft(p => ({ ...p, specialRequests: e.target.value }))} placeholder="Any special requests for or during the service" /></div>
+                    {planActs}
                   </div>
                 ) : (
                   <>
@@ -438,12 +493,94 @@ export function FinalWishes() {
                       <div className="tv">{funeralPlan.reception || "Not set"}</div>
                     </div>
                     <div className="tile">
-                      <div className="tk">Special Requests</div>
+                      <div className="tk">Special Requests For / During My Service</div>
                       <div className="tv">{funeralPlan.specialRequests || "Not set"}</div>
                     </div>
                   </>
                 )}
               </div>
+            </div>
+
+            <div className="fgrid">
+              <div className="card pad">
+                <div className="card-head">
+                  <h3 className="sec-title"><span className="tick" />Burial &amp; Final Resting Place</h3>
+                  {editPlanBtn}
+                </div>
+                {editingPlan ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div className="field">
+                      <label>I PREFER A BURIAL OR CREMATION</label>
+                      <select value={planDraft.disposition} onChange={e => setPlanDraft(p => ({ ...p, disposition: e.target.value as FuneralPlan["disposition"] }))}>
+                        <option value="">Not decided</option>
+                        <option value="burial">Burial</option>
+                        <option value="cremation">Cremation</option>
+                      </select>
+                    </div>
+                    {BURIAL_FIELDS.map(planInput)}
+                    {showAshes(planDraft) && planInput(ASHES_FIELD)}
+                    <div className="field">
+                      <label>BURIAL EXPENSES INCLUDED WITH MY LIFE INSURANCE</label>
+                      <select
+                        value={planDraft.burialCoveredByInsurance == null ? "" : planDraft.burialCoveredByInsurance ? "yes" : "no"}
+                        onChange={e => setPlanDraft(p => ({ ...p, burialCoveredByInsurance: e.target.value === "" ? null : e.target.value === "yes" }))}>
+                        <option value="">Not answered</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </div>
+                    {planInput(GRAVESTONE_FIELD)}
+                  </div>
+                ) : (
+                  <>
+                    {planTile("Burial or Cremation", funeralPlan.disposition === "burial" ? "Burial" : funeralPlan.disposition === "cremation" ? "Cremation" : "")}
+                    {BURIAL_FIELDS.map(f => planTile(f.label, funeralPlan[f.key]))}
+                    {showAshes(funeralPlan) && planTile(ASHES_FIELD.label, funeralPlan.ashesWishes, true)}
+                    {planTile("Burial Expenses Included With Life Insurance", funeralPlan.burialCoveredByInsurance == null ? "" : funeralPlan.burialCoveredByInsurance ? "Yes" : "No")}
+                    {planTile(GRAVESTONE_FIELD.label, funeralPlan.gravestoneInscription, true)}
+                  </>
+                )}
+              </div>
+
+              <div className="card pad">
+                <div className="card-head">
+                  <h3 className="sec-title"><span className="tick" />My Service Wishes</h3>
+                  {editPlanBtn}
+                </div>
+                {editingPlan ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {SERVICE_FIELDS.slice(0, 3).map(planInput)}
+                    <div className="field"><label>MY PREFERRED PALLBEARERS (comma-separated)</label><input value={planDraft.pallbearers.join(", ")} onChange={e => setPlanDraft(p => ({ ...p, pallbearers: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))} placeholder="John Smith, Michael Lee, David Brown" /></div>
+                    {SERVICE_FIELDS.slice(3).map(planInput)}
+                  </div>
+                ) : (
+                  <>
+                    {SERVICE_FIELDS.slice(0, 3).map(f => planTile(f.label, funeralPlan[f.key], f.long))}
+                    <div className="tile">
+                      <div className="tk">My Preferred Pallbearers</div>
+                      <div className="tags">
+                        {funeralPlan.pallbearers.length ? funeralPlan.pallbearers.map(n => <span key={n} className="tag pall">{n}</span>) : <span style={{ color: FAINT, fontSize: 15 }}>Not set</span>}
+                      </div>
+                    </div>
+                    {SERVICE_FIELDS.slice(3).map(f => planTile(f.label, funeralPlan[f.key], f.long))}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="card pad">
+              <div className="card-head">
+                <h3 className="sec-title"><span className="tick" />My Final Words</h3>
+                {editPlanBtn}
+              </div>
+              {editingPlan ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {WORDS_FIELDS.map(planInput)}
+                  {planActs}
+                </div>
+              ) : (
+                WORDS_FIELDS.map(f => planTile(f.label, funeralPlan[f.key], true))
+              )}
             </div>
 
             <div className="card pad" ref={obitRef}>
