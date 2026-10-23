@@ -5,6 +5,10 @@ import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { encryptField, decryptField } from "../services/vaultCrypto";
 import {
+  type Frequency, type DueInput, WEEKDAYS, CYCLE_DAYS, CYCLE_MONTHS, AMOUNT_LABEL,
+  anchorFor, nextDue, dueSentence, dueInputFrom, fmtDue, ordinal, parseIso,
+} from "../services/billingCycle";
+import {
   CreditCard, Plus, X, Search, Trash2, Edit2, Upload,
   Globe, Phone, AlertTriangle, CheckCircle, Calendar,
   DollarSign, Lock, Eye, EyeOff, RefreshCw
@@ -23,7 +27,6 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-type Frequency = "Weekly"|"Biweekly"|"Monthly"|"Quarterly"|"Yearly";
 type PaymentType = "Checking Account"|"Savings Account"|"American Express"|"Mastercard"|"Visa"|"Discover"|"PayPal"|"Apple Pay"|"Google Pay";
 
 interface Subscription {
@@ -31,9 +34,20 @@ interface Subscription {
   phone?: string; website?: string; username?: string; password?: string;
   billingAccountNumber?: string; paymentType: PaymentType; lastFour?: string;
   category: string; status: "active"|"paused"|"cancelled";
-  nextBilling?: string; cancelInstructions?: string; notes?: string;
+  /** Cycle anchor (yyyy-mm-dd) and the day of the month it's due — see services/billingCycle.ts */
+  nextBilling?: string; dueDay?: number;
+  cancelInstructions?: string; notes?: string;
   autoPay: boolean; cancellationUrl?: string;
 }
+
+/** The day of the month to store for this cycle; Weekly/Biweekly have none. */
+const dueDayFor = (freq: Frequency, due: DueInput) =>
+  freq === "Monthly" ? due.dueDay : CYCLE_MONTHS[freq] ? parseIso(due.firstDue)?.getDate() : undefined;
+
+const nextLabel = (s: Subscription) => {
+  const d = nextDue(s.nextBilling, s.frequency, s.dueDay);
+  return d ? fmtDue(d) : "—";
+};
 
 const categories = ["All","Streaming","Software","News","Health & Fitness","Finance","Shopping","Insurance","Utilities","Other"];
 
@@ -190,6 +204,8 @@ const SUB_CSS = `
 .fpd-sub .field input,.fpd-sub .field select,.fpd-sub .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-sub .field input::placeholder,.fpd-sub .field textarea::placeholder{color:${FAINT};}
 .fpd-sub .field input:focus,.fpd-sub .field select:focus,.fpd-sub .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-sub .due-preview{margin-top:-4px;color:${SOFT};font-size:14.5px;display:flex;align-items:center;gap:7px;}
+.fpd-sub .due-preview b{color:${TEXT};font-weight:600;}
 .fpd-sub .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .fpd-sub .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-sub .modal-foot .save{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
@@ -198,21 +214,58 @@ const SUB_CSS = `
 @media (max-width:640px){.fpd-sub .field-grid{grid-template-columns:1fr;}}
 `;
 
-function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | null; onClose:()=>void; onSave:(s:Subscription)=>void }) {
+function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | null; onClose:()=>void; onSave:(s:Subscription)=>Promise<boolean> }) {
   useEscapeKey(true, onClose);
   const [form, setForm] = useState<Partial<Subscription>>(editing ?? { frequency:"Monthly", paymentType:"Visa", status:"active", autoPay:true, category:"Other" });
+  const [due, setDue] = useState<DueInput>(() => editing ? dueInputFrom(editing.nextBilling, editing.dueDay) : {});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const freq = (form.frequency ?? "Monthly") as Frequency;
+  /* An untouched schedule keeps its stored anchor, so re-saving a Biweekly
+     bill can't hop it onto the off week. */
+  const [initialDue] = useState(due);
+  const unchanged = !!editing && freq === editing.frequency && due === initialDue;
+  const anchor = unchanged ? editing!.nextBilling ?? null : anchorFor(freq, due);
+  const dueDay = unchanged ? editing!.dueDay : dueDayFor(freq, due);
+  const sentence = dueSentence(freq, anchor, dueDay);
+  const next = nextDue(anchor, freq, dueDay);
+
+  /* The parent saves and toasts; the modal only closes once the row landed. */
   const submit = async () => {
     if (!form.title || !form.amount) { toast.error("Title and amount are required"); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    onSave({ ...form, id: editing?.id ?? `sub-${Date.now()}`, amount: Number(form.amount) } as Subscription);
-    toast.success(editing ? `"${form.title}" updated` : `"${form.title}" added to Auto Pay & Subscriptions`);
-    onClose();
+    const ok = await onSave({
+      ...form, id: editing?.id ?? "", amount: Number(form.amount),
+      nextBilling: anchor ?? undefined, dueDay,
+    } as Subscription);
+    setLoading(false);
+    if (ok) onClose();
   };
+
+  const dueField = CYCLE_DAYS[freq] ? (
+    <div className="field">
+      <label>DUE ON</label>
+      <select value={due.weekday ?? ""} onChange={e => setDue(p => ({ ...p, weekday: e.target.value === "" ? undefined : Number(e.target.value) }))}>
+        <option value="">Choose a day…</option>
+        {WEEKDAYS.map((w, i) => <option key={w} value={i}>{freq === "Biweekly" ? `Every other ${w}` : `Every ${w}`}</option>)}
+      </select>
+    </div>
+  ) : freq === "Monthly" ? (
+    <div className="field">
+      <label>DUE ON DAY</label>
+      <select value={due.dueDay ?? ""} onChange={e => setDue(p => ({ ...p, dueDay: e.target.value === "" ? undefined : Number(e.target.value) }))}>
+        <option value="">Choose a day…</option>
+        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={d}>{ordinal(d)} of the month</option>)}
+      </select>
+    </div>
+  ) : (
+    <div className="field">
+      <label>FIRST DUE DATE</label>
+      <input type="date" value={due.firstDue ?? ""} onChange={e => setDue(p => ({ ...p, firstDue: e.target.value || undefined }))} />
+    </div>
+  );
 
   const inp = (key: string, label: string, ph: string, type = "text") => (
     <div className="field">
@@ -243,16 +296,21 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
             {sel("category","CATEGORY",categories.filter(c=>c!=="All"))}
           </div>
           <div className="field-grid">
-            {inp("amount","MONTHLY AMOUNT ($) *","0.00","number")}
+            {inp("amount",`${AMOUNT_LABEL[freq]} *`,"0.00","number")}
             {sel("frequency","BILLING FREQUENCY",["Weekly","Biweekly","Monthly","Quarterly","Yearly"])}
           </div>
           <div className="field-grid">
+            {dueField}
+            {inp("billingAccountNumber","BILLING ACCOUNT NUMBER","e.g. ACC-8821")}
+          </div>
+          {sentence && next && (
+            <div className="due-preview">
+              <Calendar size={13} color={ACCENT2} /> <span><b>{sentence}</b> · next: {fmtDue(next)}</span>
+            </div>
+          )}
+          <div className="field-grid">
             {inp("phone","PHONE NUMBER","1-800-000-0000","tel")}
             {inp("website","WEBSITE / LOGIN URL","https://example.com","url")}
-          </div>
-          <div className="field-grid">
-            {inp("billingAccountNumber","BILLING ACCOUNT NUMBER","e.g. ACC-8821")}
-            {inp("nextBilling","NEXT BILLING DATE","e.g. Jul 1, 2026")}
           </div>
           {/* Payment */}
           <div className="payment-box">
@@ -282,7 +340,10 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
             <label>CANCELLATION INSTRUCTIONS</label>
             <textarea style={{ resize:"vertical" }} value={form.cancelInstructions??""} onChange={e => setForm(p=>({...p,cancelInstructions:e.target.value}))} placeholder="Step-by-step instructions to cancel this subscription..." rows={2} />
           </div>
-          {inp("notes","ADDITIONAL NOTES","Account details, login quirks, etc.")}
+          <div className="field">
+            <label>ADDITIONAL NOTES</label>
+            <textarea style={{ resize:"vertical" }} value={form.notes??""} onChange={e => setForm(p=>({...p,notes:e.target.value}))} placeholder="Account details, login quirks, etc." rows={2} spellCheck />
+          </div>
           <label className="check-row">
             <input type="checkbox" checked={form.autoPay??true} onChange={e => setForm(p=>({...p,autoPay:e.target.checked}))} />
             Auto-Pay Enabled
@@ -362,7 +423,9 @@ export function SubscriptionManager() {
       category: String(r.category ?? "Other"),
       status: (String(r.status ?? "active") as "active"|"paused"|"cancelled"),
       nextBilling: (r.next_billing_date as string | null) ?? undefined,
+      dueDay: r.due_day == null ? undefined : Number(r.due_day),
       cancelInstructions: (r.cancel_instructions as string | null) ?? undefined,
+      notes: (r.notes as string | null) ?? undefined,
       autoPay: Boolean(r.auto_pay),
     })));
     setSubs(rows);
@@ -370,8 +433,8 @@ export function SubscriptionManager() {
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const saveSub = async (sub: Subscription) => {
-    if (!authUser) return;
+  const saveSub = async (sub: Subscription): Promise<boolean> => {
+    if (!authUser) return false;
     const row = {
       title: sub.title,
       amount_usd: sub.amount,
@@ -385,17 +448,20 @@ export function SubscriptionManager() {
       payment_type: sub.paymentType,
       last_four_digits: sub.lastFour || null,
       next_billing_date: sub.nextBilling || null,
+      due_day: sub.dueDay ?? null,
       cancel_instructions: sub.cancelInstructions || null,
+      notes: sub.notes || null,
       auto_pay: sub.autoPay,
       status: sub.status,
     };
     const { error } = editingSub
       ? await tables.subscriptionTracker.update(sub.id, row)
       : await tables.subscriptionTracker.add(authUser.id, row);
-    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    if (error) { toast.error(`Could not save: ${error.message}`); return false; }
     await reload();
     setSelected(null);
     toast.success(editingSub ? `${sub.title} updated` : `${sub.title} added`);
+    return true;
   };
 
   const deleteSub = async (id: string) => {
@@ -501,7 +567,7 @@ export function SubscriptionManager() {
                     <span className="pbadge" style={{ background:statusColor[sub.status].bg, color:statusColor[sub.status].color }}>{sub.status.toUpperCase()}</span>
                     {sub.autoPay && <span className="autotag">AUTO-PAY</span>}
                   </div>
-                  <div className="psub">{sub.paymentType}{sub.lastFour ? ` ···· ${sub.lastFour}` : ""} · Next: {sub.nextBilling || "—"}</div>
+                  <div className="psub">{sub.paymentType}{sub.lastFour ? ` ···· ${sub.lastFour}` : ""} · Next: {nextLabel(sub)}</div>
                 </div>
                 <div className="pamt">
                   <div className="val">${sub.amount.toFixed(2)}</div>
@@ -532,7 +598,8 @@ export function SubscriptionManager() {
                     { label:"Phone", value:selected.phone },
                     { label:"Website", value:selected.website },
                     { label:"Username", value:selected.username },
-                    { label:"Next Billing", value:selected.nextBilling },
+                    { label:"Due", value:dueSentence(selected.frequency, selected.nextBilling, selected.dueDay) },
+                    { label:"Next Payment", value:selected.nextBilling ? nextLabel(selected) : undefined },
                   ].filter(r => r.value).map(row => (
                     <div key={row.label} className="tile-row">
                       <div className="tk">{row.label.toUpperCase()}</div>
@@ -577,7 +644,7 @@ export function SubscriptionManager() {
         <AddSubModal
           editing={editingSub}
           onClose={closeSubModal}
-          onSave={s => void saveSub(s)}
+          onSave={saveSub}
         />
       )}
     </div>

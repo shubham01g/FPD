@@ -14,7 +14,7 @@ export type EventSource =
   | "billing" | "reminder" | "occasion" | "warranty"
   | "document" | "travel" | "medical" | "concierge" | "custom";
 
-export type Recurrence = "none" | "monthly" | "yearly";
+export type Recurrence = "none" | "weekly" | "biweekly" | "monthly" | "quarterly" | "yearly";
 
 export interface CalendarEvent {
   id: string;
@@ -54,6 +54,8 @@ export interface Rule extends Omit<CalendarEvent, "id" | "date"> {
   /** 0-indexed month the row's date falls in. */
   month?: number;
   year?: number;
+  /** Day of the first occurrence when `day` is a due day that may differ (Auto Pay). */
+  anchorDay?: number;
 }
 
 /* ── Date helpers ───────────────────────────────────────────────────── */
@@ -90,7 +92,7 @@ function parseDate(value: string | null | undefined): Date | null {
 
 export interface SubscriptionRow {
   id: string; title: string; amount_usd: number | string | null;
-  billing_frequency: string | null; next_billing_date: string | null;
+  billing_frequency: string | null; next_billing_date: string | null; due_day?: number | null;
   payment_type: string | null; last_four_digits: string | null;
   auto_pay: boolean | null; status: string | null; cancel_instructions: string | null;
 }
@@ -111,7 +113,11 @@ export interface CalendarSources {
   medications?: MedicationRow[];
 }
 
-const MONTHLY_FREQUENCIES = new Set(["monthly", "weekly", "biweekly"]);
+/** Auto Pay cycle → how its bill repeats on the calendar. */
+const BILLING_RECURRENCE: Record<string, Recurrence> = {
+  weekly: "weekly", biweekly: "biweekly", monthly: "monthly", quarterly: "quarterly", yearly: "yearly",
+};
+const WEEK_STEP: Partial<Record<Recurrence, number>> = { weekly: 7, biweekly: 14 };
 
 /**
  * Turn the user's own rows into calendar rules. A row with no usable date is
@@ -131,12 +137,14 @@ export function buildRules(src: CalendarSources): Rule[] {
       : sub.payment_type ?? undefined;
     const detail = [card, sub.auto_pay ? "auto-pay on" : sub.cancel_instructions || undefined]
       .filter(Boolean).join(" · ") || undefined;
+    const recurrence = BILLING_RECURRENCE[freq] ?? "none";
     rules.push({
-      key: `bill-${sub.id}`, title: sub.title, source: "billing",
-      recurrence: MONTHLY_FREQUENCIES.has(freq) ? "monthly" : freq === "yearly" ? "yearly" : "none",
+      key: `bill-${sub.id}`, title: sub.title, source: "billing", recurrence,
       amount: Number.isFinite(amount) ? amount : undefined, detail, allDay: true,
       linkPage: "subscription-manager", linkLabel: "Auto Pay & Subs",
-      day: due.getDate(), month: due.getMonth(), year: due.getFullYear(),
+      // due_day keeps "the 31st" through short months; weekly cycles step from the anchor itself
+      day: (!WEEK_STEP[recurrence] && sub.due_day) || due.getDate(),
+      anchorDay: due.getDate(), month: due.getMonth(), year: due.getFullYear(),
     });
   }
 
@@ -221,7 +229,8 @@ export function buildRules(src: CalendarSources): Rule[] {
 
 /**
  * Expand rules into concrete events for [year, month].
- * Monthly rules repeat from their first date onward; yearly rules land in
+ * Weekly/biweekly rules step 7/14 days from their first date; monthly and
+ * quarterly rules repeat every 1/3 months from it; yearly rules land in
  * their own month; one-off rules only in their exact month and year.
  */
 export function eventsForMonth(year: number, month: number, rules: Rule[]): CalendarEvent[] {
@@ -229,9 +238,27 @@ export function eventsForMonth(year: number, month: number, rules: Rule[]): Cale
   const monthIndex = year * 12 + month;
 
   for (const rule of rules) {
-    if (rule.recurrence === "monthly") {
+    const { key, day, month: _ruleMonth, year: _ruleYear, anchorDay, ...rest } = rule;
+    const startIndex = rule.year !== undefined && rule.month !== undefined ? rule.year * 12 + rule.month : undefined;
+
+    const step = WEEK_STEP[rule.recurrence];
+    if (step) {
+      if (startIndex === undefined) continue;
       // Never project a subscription backwards before its first billing date.
-      if (rule.year !== undefined && rule.month !== undefined && monthIndex < rule.year * 12 + rule.month) continue;
+      const first = new Date(rule.year!, rule.month!, anchorDay ?? day);
+      const gap = Math.round((Date.UTC(year, month, 1) - Date.UTC(first.getFullYear(), first.getMonth(), first.getDate())) / 864e5);
+      const d = gap <= 0 ? first : new Date(first.getFullYear(), first.getMonth(), first.getDate() + Math.ceil(gap / step) * step);
+      for (; d.getFullYear() === year && d.getMonth() === month; d.setDate(d.getDate() + step)) {
+        const date = iso(year, month, d.getDate());
+        out.push({ ...rest, id: `${key}-${date}`, date });
+      }
+      continue;
+    }
+
+    if (rule.recurrence === "monthly" || rule.recurrence === "quarterly") {
+      // Never project a subscription backwards before its first billing date.
+      if (startIndex !== undefined && monthIndex < startIndex) continue;
+      if (rule.recurrence === "quarterly" && (monthIndex - (startIndex ?? monthIndex)) % 3 !== 0) continue;
     } else if (rule.recurrence === "yearly") {
       if (rule.month !== month) continue;
       if (rule.year !== undefined && year < rule.year) continue;
@@ -240,7 +267,6 @@ export function eventsForMonth(year: number, month: number, rules: Rule[]): Cale
       if ((rule.year ?? year) !== year) continue;
     }
 
-    const { key, day, month: _ruleMonth, year: _ruleYear, ...rest } = rule;
     out.push({ ...rest, id: `${key}-${monthIndex}`, date: iso(year, month, clampDay(year, month, day)) });
   }
 
