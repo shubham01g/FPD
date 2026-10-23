@@ -151,10 +151,42 @@ const PASSETS_CSS = `
 .fpd-passets .modal-foot{display:flex;align-items:center;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,0.08);}
 .fpd-passets .modal-foot .save{flex:1;padding:12px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-passets .modal-foot .save:hover{filter:brightness(1.08);}
+.fpd-passets .fsec{margin-top:6px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#AEB9F5;font-family:var(--font-mono);}
+.fpd-passets .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fpd-passets .svc-row{display:grid;grid-template-columns:160px 1fr auto;gap:8px;align-items:center;}
+.fpd-passets .svc-row .rm{background:none;border:none;color:${MUTED};cursor:pointer;padding:6px;}
+.fpd-passets .svc-row .rm:hover{color:${NEG};}
+.fpd-passets .svc-add{align-self:flex-start;}
+.fpd-passets .subhead{margin:16px 0 8px;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${MUTED};font-family:var(--font-mono);}
+.fpd-passets .svc-log{border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
+.fpd-passets .svc-log .item{display:flex;gap:14px;padding:11px 14px;font-size:15px;color:${SOFT};}
+.fpd-passets .svc-log .item + .item{border-top:1px solid rgba(255,255,255,0.08);}
+.fpd-passets .svc-log .when{flex-shrink:0;min-width:96px;color:${TEXT};font-weight:600;}
+@media (max-width:560px){.fpd-passets .frow,.fpd-passets .svc-row{grid-template-columns:1fr;} .fpd-passets .svc-row .rm{justify-self:end;}}
 `;
 
 /* NUMERIC columns <-> the "$45,000" strings the UI shows. Converting at
    this boundary keeps both the schema and the screens as they are. */
+/* Repair / service log on a vehicle, stored as a JSONB array, newest first. */
+interface ServiceEntry { date: string; details: string }
+
+/* DATE columns come back as "2026-01-05"; show them the way people write them.
+   Parsed as local time so the day doesn't slip in US time zones. */
+const showDate = (iso: string) => {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : iso;
+};
+
+const EMPTY_VEHICLE = { year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", warrantyProvider:"", warrantyStart:"", warrantyEnd:"", service:[] as ServiceEntry[], notes:"", photo:"" };
+const EMPTY_PROPERTY = {
+  type:"", address:"", city:"", value:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"",
+  purchasePrice:"", purchaseDate:"", lender:"", mortgage:"", mortgagePayment:"", accountNumber:"",
+  contactName:"", contactPhone:"", contactEmail:"",
+  renterName:"", renterPhone:"", renterEmail:"", rent:"", leaseStart:"", leaseEnd:"", deposit:"",
+  mgmtCompany:"", mgmtContact:"", careInstructions:"", notes:"", photo:"",
+};
+
 const toMoney = (n: unknown) => (n === null || n === undefined || n === "" ? "" : "$" + Number(n).toLocaleString());
 const fromMoney = (v: string) => {
   const raw = String(v ?? "").trim();
@@ -195,6 +227,8 @@ export function PersonalAssets() {
       title: String(r.title_holder ?? ""), lien: String(r.loan_lender ?? "None"),
       insurance: String(r.insurance_provider ?? ""), registration: String(r.registration_expiry ?? ""),
       value: toMoney(r.current_value), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      warrantyProvider: String(r.warranty_provider ?? ""), warrantyStart: String(r.warranty_start ?? ""),
+      warrantyEnd: String(r.warranty_end ?? ""), service: (Array.isArray(r.service_history) ? r.service_history : []) as ServiceEntry[],
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -204,6 +238,13 @@ export function PersonalAssets() {
       mortgagePayment: toMoney(r.mortgage_payment), titleHolder: String(r.title_holder ?? ""),
       deed: String(r.deed_location ?? ""), yearBuilt: String(r.year_built ?? ""), sqft: String(r.sqft ?? ""),
       bedBath: String(r.bed_bath ?? ""), lotSize: String(r.lot_size ?? ""), notes: String(r.notes ?? ""),
+      purchasePrice: toMoney(r.purchase_price), purchaseDate: String(r.purchase_date ?? ""),
+      lender: String(r.mortgage_lender ?? ""), accountNumber: String(r.account_number ?? ""),
+      contactName: String(r.contact_name ?? ""), contactPhone: String(r.contact_phone ?? ""), contactEmail: String(r.contact_email ?? ""),
+      renterName: String(r.renter_name ?? ""), renterPhone: String(r.renter_phone ?? ""), renterEmail: String(r.renter_email ?? ""),
+      rent: toMoney(r.monthly_rent), leaseStart: String(r.lease_start ?? ""), leaseEnd: String(r.lease_end ?? ""),
+      deposit: toMoney(r.security_deposit), mgmtCompany: String(r.management_company ?? ""),
+      mgmtContact: String(r.management_contact ?? ""), careInstructions: String(r.special_care_instructions ?? ""),
       photo: String(r.photo_url ?? ""), attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -247,9 +288,9 @@ export function PersonalAssets() {
   const tabContentRef = React.useRef<HTMLDivElement>(null);
   const [pendingPhotoTarget, setPendingPhotoTarget] = useState<{type:"realestate"|"weapon"; id:number}|null>(null);
 
-  const [vForm, setVForm] = useState({ year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", notes:"", photo:"" });
+  const [vForm, setVForm] = useState(EMPTY_VEHICLE);
   const [vDoc, setVDoc] = useState<string|null>(null);
-  const [rForm, setRForm] = useState({ type:"", address:"", city:"", value:"", mortgage:"", mortgagePayment:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"", notes:"", photo:"" });
+  const [rForm, setRForm] = useState(EMPTY_PROPERTY);
   const [rDoc, setRDoc] = useState<string|null>(null);
   const [dForm, setDForm] = useState({ category:"Cryptocurrency", platform:"", asset:"", holdings:"", value:"", accessMethod:"", notes:"" });
   const [dDoc, setDDoc] = useState<string|null>(null);
@@ -281,10 +322,20 @@ export function PersonalAssets() {
     const row = {
       property_name: rForm.address, property_type: rForm.type || null, address: rForm.address,
       city: rForm.city || null, current_value: fromMoney(rForm.value),
+      // Lender name and balance are separate columns. The form used to send
+      // the lender's name to the numeric mortgage_balance, which stored 0.
+      mortgage_lender: rForm.lender || null,
       mortgage_balance: fromMoney(rForm.mortgage), mortgage_payment: fromMoney(rForm.mortgagePayment),
       title_holder: rForm.titleHolder || null, deed_location: rForm.deed || null,
       year_built: rForm.yearBuilt || null, sqft: rForm.sqft || null, bed_bath: rForm.bedBath || null,
       lot_size: rForm.lotSize || null, notes: rForm.notes || null, photo_url: rForm.photo || null,
+      purchase_price: fromMoney(rForm.purchasePrice), purchase_date: rForm.purchaseDate || null,
+      account_number: rForm.accountNumber || null,
+      contact_name: rForm.contactName || null, contact_phone: rForm.contactPhone || null, contact_email: rForm.contactEmail || null,
+      renter_name: rForm.renterName || null, renter_phone: rForm.renterPhone || null, renter_email: rForm.renterEmail || null,
+      monthly_rent: fromMoney(rForm.rent), lease_start: rForm.leaseStart || null, lease_end: rForm.leaseEnd || null,
+      security_deposit: fromMoney(rForm.deposit), management_company: rForm.mgmtCompany || null,
+      management_contact: rForm.mgmtContact || null, special_care_instructions: rForm.careInstructions || null,
       document_urls: rDoc ? [rDoc] : [],
     };
     const { error } = editingId !== null
@@ -293,7 +344,7 @@ export function PersonalAssets() {
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
     toast.success(`${rForm.address} ${editingId !== null ? "updated" : "added"}`);
-    setRForm({ type:"", address:"", city:"", value:"", mortgage:"", mortgagePayment:"", titleHolder:"", deed:"", yearBuilt:"", sqft:"", bedBath:"", lotSize:"", notes:"", photo:"" });
+    setRForm(EMPTY_PROPERTY);
     setRDoc(null); setEditingId(null); setShowAdd(null);
   }
 
@@ -305,6 +356,13 @@ export function PersonalAssets() {
       vin: vForm.vin || null, license_plate: vForm.plate || null, title_holder: vForm.title || null,
       loan_lender: vForm.lien || null, insurance_provider: vForm.insurance || null,
       registration_expiry: vForm.registration || null, current_value: fromMoney(vForm.value),
+      warranty_provider: vForm.warrantyProvider || null,
+      warranty_start: vForm.warrantyStart || null, warranty_end: vForm.warrantyEnd || null,
+      // Half-filled rows are dropped; newest repair first.
+      service_history: vForm.service
+        .filter(e => e.date || e.details.trim())
+        .map(e => ({ date: e.date, details: e.details.trim() }))
+        .sort((a, b) => b.date.localeCompare(a.date)),
       notes: vForm.notes || null, photo_url: vForm.photo || null,
       document_urls: vDoc ? [vDoc] : [],
     };
@@ -314,7 +372,7 @@ export function PersonalAssets() {
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
     toast.success(`${vForm.year} ${vForm.make} ${vForm.model} ${editingId !== null ? "updated" : "added"}`);
-    setVForm({ year:"", make:"", model:"", color:"", vin:"", plate:"", title:"", lien:"", insurance:"", registration:"", value:"", notes:"", photo:"" });
+    setVForm(EMPTY_VEHICLE);
     setVDoc(null); setEditingId(null); setShowAdd(null);
   }
   async function addDigital() {
@@ -398,12 +456,12 @@ export function PersonalAssets() {
   }
 
   function editVehicle(v: any) {
-    setVForm({ year:String(v.year), make:v.make, model:v.model, color:v.color, vin:v.vin, plate:v.plate, title:v.title, lien:v.lien, insurance:v.insurance, registration:v.registration, value:v.value, notes:v.notes, photo:(v as any).photo || "" });
+    setVForm({ year:String(v.year), make:v.make, model:v.model, color:v.color, vin:v.vin, plate:v.plate, title:v.title, lien:v.lien, insurance:v.insurance, registration:v.registration, value:v.value, warrantyProvider:v.warrantyProvider, warrantyStart:v.warrantyStart, warrantyEnd:v.warrantyEnd, service:v.service.map((e: ServiceEntry) => ({ ...e })), notes:v.notes, photo:(v as any).photo || "" });
     setEditingId(v.id);
     setShowAdd("vehicles");
   }
   function editRealEstate(r: any) {
-    setRForm({ type:r.type, address:r.address, city:r.city, value:r.value, mortgage:r.mortgage, mortgagePayment:r.mortgagePayment, titleHolder:r.titleHolder, deed:r.deed, yearBuilt:r.yearBuilt, sqft:r.sqft, bedBath:r.bedBath, lotSize:r.lotSize, notes:r.notes, photo:r.photo });
+    setRForm(Object.fromEntries(Object.keys(EMPTY_PROPERTY).map(k => [k, r[k] ?? ""])) as typeof EMPTY_PROPERTY);
     setEditingId(r.id);
     setShowAdd("realestate");
   }
@@ -528,7 +586,25 @@ export function PersonalAssets() {
                     <Field label="Lien / Loan" value={v.lien} />
                     <Field label="Insurance" value={v.insurance} />
                     <Field label="Registration Exp." value={v.registration} />
+                    <Field label="Warranty" value={
+                      v.warrantyStart || v.warrantyEnd
+                        ? `${v.warrantyProvider ? v.warrantyProvider + " · " : ""}${showDate(v.warrantyStart) || "?"} – ${showDate(v.warrantyEnd) || "?"}`
+                        : v.warrantyProvider || "—"
+                    } />
                   </div>
+                  {v.service.length > 0 && (
+                    <>
+                      <div className="subhead">Repair &amp; Service History</div>
+                      <div className="svc-log">
+                        {v.service.map((e: ServiceEntry, i: number) => (
+                          <div className="item" key={i}>
+                            <span className="when">{showDate(e.date) || "No date"}</span>
+                            <span>{e.details || "—"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                   {v.notes && <div className="notewarn">{v.notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editVehicle(v)}><Edit2 size={12} /> Edit</button>
@@ -578,8 +654,12 @@ export function PersonalAssets() {
                     </div>
                   </div>
                   <div className="dgrid">
-                    <Field label="Mortgage / Lender" value={r.mortgage} />
+                    <Field label="Mortgage Lender" value={r.lender || "—"} />
+                    <Field label="Mortgage Balance" value={r.mortgage || "—"} />
                     <Field label="Monthly Payment" value={r.mortgagePayment} />
+                    <Field label="Purchase Price" value={r.purchasePrice || "—"} />
+                    <Field label="Purchase Date" value={r.purchaseDate || "—"} />
+                    <Field label="Account #" value={r.accountNumber || "—"} />
                     <Field label="Title Holder" value={r.titleHolder} />
                     <Field label="Deed Recording" value={r.deed} />
                     <Field label="Year Built" value={r.yearBuilt} />
@@ -587,6 +667,28 @@ export function PersonalAssets() {
                     <Field label="Bed / Bath" value={r.bedBath} />
                     <Field label="Lot Size" value={r.lotSize} />
                   </div>
+                  {/* Contact, tenant and management blocks only appear once
+                      something is filled in, so an owner-occupied home
+                      isn't padded with empty rental tiles. */}
+                  {([
+                    ["Property Contact", [["Contact Person", r.contactName], ["Phone", r.contactPhone], ["Email", r.contactEmail]]],
+                    ["Renter / Tenant", [["Renter", r.renterName], ["Phone", r.renterPhone], ["Email", r.renterEmail], ["Monthly Rent", r.rent],
+                      ["Lease Term", r.leaseStart || r.leaseEnd ? `${showDate(r.leaseStart) || "?"} – ${showDate(r.leaseEnd) || "?"}` : ""], ["Security Deposit", r.deposit]]],
+                    ["Property Management", [["Company", r.mgmtCompany], ["Contact", r.mgmtContact]]],
+                  ] as [string, [string, string][]][]).map(([heading, rows]) => {
+                    const filled = rows.filter(([, value]) => value);
+                    return filled.length > 0 && (
+                      <React.Fragment key={heading}>
+                        <div className="subhead">{heading}</div>
+                        <div className={`dgrid${filled.length % 3 === 0 ? "" : " two"}`}>
+                          {filled.map(([label, value]) => <Field key={label} label={label} value={value} />)}
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                  {r.careInstructions && (
+                    <div className="noteinfo"><strong>Special care: </strong>{r.careInstructions}</div>
+                  )}
                   {r.notes && <div className="notewarn">{r.notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editRealEstate(r)}><Edit2 size={12} /> Edit</button>
@@ -788,12 +890,51 @@ export function PersonalAssets() {
               </div>
               <div className="modal-body">
                 <PhotoPicker value={vForm.photo} onChange={url => setVForm(p => ({ ...p, photo: url }))} label="Vehicle Photo" aspectRatio="16/9" />
-                {([["Year", "year", "2024"], ["Make", "make", "e.g. Toyota"], ["Model", "model", "e.g. Camry"], ["Color", "color", "e.g. Silver"], ["VIN", "vin", "Vehicle ID number"], ["License Plate", "plate", "e.g. 7ABC123 CA"], ["Title Holder", "title", "Name on title"], ["Lien / Loan", "lien", "e.g. None or lender name"], ["Insurance", "insurance", "Provider — Policy #"], ["Registration Exp.", "registration", "e.g. Dec 2027"], ["Estimated Value", "value", "e.g. $28,000"], ["Notes", "notes", "Any special instructions"]] as [string, string, string][]).map(([label, key, ph]) => (
+                {([["Year", "year", "2024"], ["Make", "make", "e.g. Toyota"], ["Model", "model", "e.g. Camry"], ["Color", "color", "e.g. Silver"], ["VIN", "vin", "Vehicle ID number"], ["License Plate", "plate", "e.g. 7ABC123 CA"], ["Title Holder", "title", "Name on title"], ["Lien / Loan", "lien", "e.g. None or lender name"], ["Insurance", "insurance", "Provider — Policy #"], ["Registration Exp.", "registration", "e.g. Dec 2027"], ["Estimated Value", "value", "e.g. $28,000"]] as [string, string, string][]).map(([label, key, ph]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(vForm as any)[key]} onChange={e => setVForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
                   </div>
                 ))}
+
+                <div className="fsec">Warranty</div>
+                <div className="field">
+                  <label>Warranty Provider</label>
+                  <input value={vForm.warrantyProvider} onChange={e => setVForm(p => ({ ...p, warrantyProvider: e.target.value }))} placeholder="e.g. Toyota Factory, CarShield" />
+                </div>
+                <div className="frow">
+                  <div className="field">
+                    <label>Warranty Start</label>
+                    <input type="date" value={vForm.warrantyStart} onChange={e => setVForm(p => ({ ...p, warrantyStart: e.target.value }))} />
+                  </div>
+                  <div className="field">
+                    <label>Warranty End</label>
+                    <input type="date" value={vForm.warrantyEnd} onChange={e => setVForm(p => ({ ...p, warrantyEnd: e.target.value }))} />
+                  </div>
+                </div>
+
+                <div className="fsec">Repair &amp; Service History</div>
+                {vForm.service.map((entry, i) => (
+                  <div className="svc-row field" key={i}>
+                    <input type="date" value={entry.date} aria-label="Service date"
+                      onChange={e => setVForm(p => ({ ...p, service: p.service.map((x, j) => j === i ? { ...x, date: e.target.value } : x) }))} />
+                    <input value={entry.details} spellCheck placeholder="e.g. Oil change, new brakes, Joe's Auto"
+                      onChange={e => setVForm(p => ({ ...p, service: p.service.map((x, j) => j === i ? { ...x, details: e.target.value } : x) }))} />
+                    <button type="button" className="rm" aria-label="Remove service record"
+                      onClick={() => setVForm(p => ({ ...p, service: p.service.filter((_, j) => j !== i) }))}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="btn-sec svc-add"
+                  onClick={() => setVForm(p => ({ ...p, service: [...p.service, { date: "", details: "" }] }))}>
+                  <Plus size={13} /> Add Service Record
+                </button>
+
+                <div className="field" style={{ marginTop: 6 }}>
+                  <label>Notes</label>
+                  <input value={vForm.notes} onChange={e => setVForm(p => ({ ...p, notes: e.target.value }))} placeholder="Any special instructions" />
+                </div>
                 <AttachDocumentField value={vDoc} onChange={setVDoc} folder="vehicles" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (title, registration, insurance)" />
               </div>
               <div className="modal-foot">
@@ -878,25 +1019,65 @@ export function PersonalAssets() {
               <div className="modal-body">
                 <PhotoPicker value={rForm.photo} onChange={url => setRForm(p => ({ ...p, photo: url }))} label="Property Photo" aspectRatio="16/9" />
                 {([
-                  ["Property Type", "type", "e.g. Primary Residence, Rental, Vacation Home"],
-                  ["Street Address *", "address", "e.g. 123 Main Street"],
-                  ["City, State, ZIP", "city", "e.g. Sacramento, CA 95825"],
-                  ["Estimated Value", "value", "e.g. $450,000"],
-                  ["Mortgage / Lender", "mortgage", "e.g. Wells Fargo or None"],
-                  ["Monthly Payment", "mortgagePayment", "e.g. $1,800/month"],
-                  ["Title Holder", "titleHolder", "Name(s) on title"],
-                  ["Deed Recording", "deed", "e.g. Recorded — Sacramento County"],
-                  ["Year Built", "yearBuilt", "e.g. 2002"],
-                  ["Square Footage", "sqft", "e.g. 1,850 sq ft"],
-                  ["Bed / Bath", "bedBath", "e.g. 3 bed / 2 bath"],
-                  ["Lot Size", "lotSize", "e.g. 0.15 acres"],
-                  ["Notes", "notes", "Special instructions, key locations, etc."],
-                ] as [string, string, string][]).map(([label, key, ph]) => (
-                  <div className="field" key={key}>
-                    <label>{label}</label>
-                    <input value={(rForm as any)[key]} onChange={e => setRForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
-                  </div>
+                  [null, [
+                    ["Property Type", "type", "e.g. Primary Residence, Rental, Vacation Home"],
+                    ["Street Address *", "address", "e.g. 123 Main Street"],
+                    ["City, State, ZIP", "city", "e.g. Sacramento, CA 95825"],
+                    ["Estimated Value", "value", "e.g. $450,000"],
+                    ["Title Holder", "titleHolder", "Name(s) on title"],
+                    ["Deed Recording", "deed", "e.g. Recorded — Sacramento County"],
+                    ["Year Built", "yearBuilt", "e.g. 2002"],
+                    ["Square Footage", "sqft", "e.g. 1,850 sq ft"],
+                    ["Bed / Bath", "bedBath", "e.g. 3 bed / 2 bath"],
+                    ["Lot Size", "lotSize", "e.g. 0.15 acres"],
+                  ]],
+                  ["Purchase & Mortgage", [
+                    ["Purchase Price", "purchasePrice", "e.g. $385,000"],
+                    ["Purchase Date", "purchaseDate", "e.g. Jun 2015"],
+                    ["Mortgage Lender", "lender", "e.g. Wells Fargo or None"],
+                    ["Mortgage Balance", "mortgage", "e.g. $210,000"],
+                    ["Monthly Payment", "mortgagePayment", "e.g. $1,800"],
+                    ["Account #", "accountNumber", "Mortgage or property account number"],
+                  ]],
+                  ["Property Contact", [
+                    ["Contact Person", "contactName", "e.g. HOA manager, caretaker, agent"],
+                    ["Contact Phone", "contactPhone", "e.g. (916) 555-0142"],
+                    ["Contact Email", "contactEmail", "e.g. hoa@example.com"],
+                  ]],
+                  ["Renter / Tenant", [
+                    ["Renter Name", "renterName", "Leave blank if not rented"],
+                    ["Renter Phone", "renterPhone", "e.g. (916) 555-0199"],
+                    ["Renter Email", "renterEmail", ""],
+                    ["Monthly Rent", "rent", "e.g. $2,400"],
+                    ["Lease Start", "leaseStart", "", "date"],
+                    ["Lease End", "leaseEnd", "", "date"],
+                    ["Security Deposit", "deposit", "e.g. $2,400"],
+                  ]],
+                  ["Property Management", [
+                    ["Management Company", "mgmtCompany", "e.g. Sacramento Property Partners"],
+                    ["Management Contact", "mgmtContact", "Name, phone, email"],
+                  ]],
+                ] as [string | null, [string, string, string, string?][]][]).map(([heading, fields]) => (
+                  <React.Fragment key={heading ?? "property"}>
+                    {heading && <div className="fsec">{heading}</div>}
+                    {fields.map(([label, key, ph, type]) => (
+                      <div className="field" key={key}>
+                        <label>{label}</label>
+                        <input type={type ?? "text"} value={(rForm as any)[key]} onChange={e => setRForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
+                      </div>
+                    ))}
+                  </React.Fragment>
                 ))}
+                <div className="fsec">Special Care Instructions</div>
+                <div className="field">
+                  <textarea rows={4} spellCheck value={rForm.careInstructions}
+                    onChange={e => setRForm(p => ({ ...p, careInstructions: e.target.value }))}
+                    placeholder="e.g. Winterize pipes by Nov 1, pool service every Tuesday, spare key with neighbor at #14, alarm company number" />
+                </div>
+                <div className="field">
+                  <label>Notes</label>
+                  <input value={rForm.notes} onChange={e => setRForm(p => ({ ...p, notes: e.target.value }))} placeholder="Anything else" />
+                </div>
                 <AttachDocumentField value={rDoc} onChange={setRDoc} folder="property" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (deed, mortgage statement, title)" />
               </div>
               <div className="modal-foot">
