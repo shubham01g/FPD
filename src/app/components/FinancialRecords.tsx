@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
+import { DEDUCTIBLE_YEAR_KEY } from "./ReceiptsExpenses";
 import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
@@ -145,6 +146,14 @@ const FIN_CSS = `
 .fpd-fin .field input,.fpd-fin .field select,.fpd-fin .field textarea{width:100%;padding:11px 13px;border-radius:18px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:16px;outline:none;font-family:var(--font-body);transition:border-color .18s,box-shadow .18s;}
 .fpd-fin .field input::placeholder,.fpd-fin .field textarea::placeholder{color:${FAINT};}
 .fpd-fin .field input:focus,.fpd-fin .field select:focus,.fpd-fin .field textarea:focus{border-color:rgba(91,110,225,0.5);box-shadow:0 0 0 3px rgba(91,110,225,0.12);}
+.fpd-fin .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.fpd-fin .fgrid > *{grid-column:1/-1;min-width:0;}
+.fpd-fin .fgrid > .third{grid-column:auto;}
+.fpd-fin .fhead{font-size:12.5px;font-weight:700;color:${SOFT};letter-spacing:0.08em;text-transform:uppercase;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
+@media (max-width:430px){.fpd-fin .fgrid > .third{grid-column:1/-1;}}
+.fpd-fin .dedrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;}
+.fpd-fin .linkbtn{background:none;border:none;padding:0;color:#AEB9F5;font-weight:600;font-size:15px;cursor:pointer;font-family:var(--font-body);display:inline-flex;align-items:center;gap:5px;}
+.fpd-fin .linkbtn:hover{color:#fff;}
 .fpd-fin .upload-row{display:flex;gap:8px;}
 .fpd-fin .upload-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:16px;border:1px dashed rgba(91,110,225,0.32);background:rgba(91,110,225,0.04);color:#6FAE8B;font-size:16px;cursor:pointer;font-family:var(--font-body);}
 .fpd-fin .upload-ok{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:16px;background:rgba(95,190,145,0.08);border:1px solid rgba(95,190,145,0.25);}
@@ -155,10 +164,46 @@ const FIN_CSS = `
 .fpd-fin .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
+type FieldDef = { label: string; key: string; placeholder?: string; type?: string; heading?: string; third?: boolean };
+
+/* Contact person + mailing address, shared by every tab except Insurance
+   (which has its own Agent). Lives in `details` JSONB like the rest. */
+const contactFields: FieldDef[] = [
+  { label: "Contact Person", key: "contactName", placeholder: "e.g. branch manager, advisor, HR rep", heading: "Contact" },
+  { label: "Phone", key: "contactPhone", type: "tel", placeholder: "(555) 555-1234" },
+  { label: "Email", key: "contactEmail", type: "email" },
+  { label: "Address", key: "address" },
+  { label: "City", key: "city", third: true },
+  { label: "State", key: "state", third: true },
+  { label: "ZIP", key: "zip", third: true },
+];
+const pickContact = (f: Record<string, string>) =>
+  Object.fromEntries(contactFields.map(c => [c.key, f[c.key] || ""]));
+
+const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+
+/* One tile row for the contact block; renders nothing on records saved before it existed. */
+function ContactTiles({ r }: { r: Record<string, any> }) {
+  const cityLine = [r.city, [r.state, r.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  const address = [r.address, cityLine].filter(Boolean).join(", ");
+  const tiles = [
+    { k: "Contact Person", v: r.contactName },
+    { k: "Phone", v: r.contactPhone && <a href={`tel:${r.contactPhone}`} style={{ color: "inherit" }}>{r.contactPhone}</a> },
+    { k: "Email", v: r.contactEmail && <a href={`mailto:${r.contactEmail}`} style={{ color: "inherit" }}>{r.contactEmail}</a> },
+    { k: "Address", v: address },
+  ].filter(t => t.v);
+  if (!tiles.length) return null;
+  return (
+    <div className="rgrid" style={{ marginTop: 12 }}>
+      {tiles.map(t => <div key={t.k} className="tile"><div className="tk">{t.k}</div><div className="tv">{t.v}</div></div>)}
+    </div>
+  );
+}
+
 function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, onAdd }: {
   title: string;
   submitLabel?: string;
-  fields: { label: string; key: string; placeholder?: string; type?: string }[];
+  fields: FieldDef[];
   initial?: Record<string, string>;
   initialDoc?: string | null;
   onClose: () => void;
@@ -184,12 +229,17 @@ function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, on
           <button onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-body">
+          <div className="fgrid">
           {fields.map(f => (
-            <div key={f.key} className="field">
-              <label>{f.label}</label>
-              <input type={f.type || "text"} value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder || ""} />
-            </div>
+            <React.Fragment key={f.key}>
+              {f.heading && <div className="fhead">{f.heading}</div>}
+              <div className={`field${f.third ? " third" : ""}`}>
+                <label>{f.label}</label>
+                <input type={f.type || "text"} value={form[f.key] ?? ""} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder || ""} />
+              </div>
+            </React.Fragment>
           ))}
+          </div>
 
           {/* Document upload — attach the actual file right here */}
           <div className="field">
@@ -235,7 +285,7 @@ function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, on
    same component renders twice: `insuranceOnly` shows just the insurance
    section, and the Financial Records page drops its Insurance tab. Both read
    the one `financial_records` table, so existing policies carry over. */
-export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: boolean } = {}) {
+export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insuranceOnly?: boolean; onNavigate?: (page: string) => void } = {}) {
   const [tab, setTab] = useState<Tab>(insuranceOnly ? "insurance" : "personal");
   const [showAdd, setShowAdd] = useState<Tab | null>(null);
   const [editingItem, setEditingItem] = useState<{ tab: Tab; original: any } | null>(null);
@@ -246,6 +296,8 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
   const [retirement, setRetirement]   = useState<any[]>([]);
   const [taxList, setTaxList]         = useState<any[]>([]);
   const [bizList, setBizList]         = useState<any[]>([]);
+  // Receipts marked tax-deductible, totalled per tax year for the Taxes tab.
+  const [deductibleByYear, setDeductibleByYear] = useState<Record<string, { total: number; count: number }>>({});
 
   /* Rows come from `financial_records`. The six tabs collect genuinely
      different fields, so each record's own shape is kept in the table's
@@ -267,7 +319,28 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
     setRetirement(bySection.retirement);
     setTaxList(bySection.taxes);
     setBizList(bySection.business);
-  }, [authUser]);
+
+    if (insuranceOnly) return;
+    const { data: receipts } = await tables.receipts.list(authUser.id);
+    const byYear: Record<string, { total: number; count: number }> = {};
+    for (const r of receipts ?? []) {
+      if (!r.tax_deductible || r.tax_year == null) continue;
+      const y = (byYear[String(r.tax_year)] ??= { total: 0, count: 0 });
+      y.total += Number(r.amount ?? 0);
+      y.count += 1;
+    }
+    setDeductibleByYear(byYear);
+  }, [authUser, insuranceOnly]);
+
+  const openDeductible = (year?: string) => {
+    if (year) { try { sessionStorage.setItem(DEDUCTIBLE_YEAR_KEY, year); } catch { /* storage blocked: Receipts opens on its directory */ } }
+    onNavigate?.("receipts-expenses");
+  };
+  const deductibleSummary = (year: string) => {
+    const d = deductibleByYear[year];
+    if (!d) return "None marked";
+    return <>{usd(d.total)} · {d.count} receipt{d.count === 1 ? "" : "s"}{onNavigate && <> · <button className="linkbtn" onClick={() => openDeductible(year)}>View</button></>}</>;
+  };
 
   useEffect(() => { void reload(); }, [reload]);
 
@@ -283,7 +356,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
       account_number_masked: record.accountNum || null,
       amount: record.coverage || record.balance || record.value || record.revenue || record.refund || null,
       beneficiary: record.beneficiary || null,
-      contact: record.agent || record.accountant || record.contact || null,
+      contact: record.agent || record.accountant || record.contact || record.contactName || null,
       status: record.status || "active",
       notes: record.notes || null,
       details,
@@ -306,12 +379,12 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
     setEditingItem(null);
   }
 
-  const insuranceFields = [{ label: "Type", key: "type", placeholder: "e.g. Life Insurance" }, { label: "Carrier", key: "carrier", placeholder: "e.g. MetLife" }, { label: "Policy Number", key: "policyNum" }, { label: "Coverage Amount", key: "coverage", placeholder: "e.g. $500,000" }, { label: "Premium", key: "premium", placeholder: "e.g. $182/month" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Agent", key: "agent" }, { label: "Status", key: "status", placeholder: "active" }];
-  const personalFields = [{ label: "Account Name", key: "accountName", placeholder: "e.g. Primary Checking" }, { label: "Bank", key: "bank", placeholder: "e.g. Wells Fargo" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Checking, Savings" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $8,000" }, { label: "Beneficiary", key: "beneficiary", placeholder: "e.g. Payable on Death (POD) name" }, { label: "Notes", key: "notes" }];
-  const portfolioFields = [{ label: "Institution", key: "institution", placeholder: "e.g. Fidelity Investments" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Brokerage, Roth IRA" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $50,000" }, { label: "Holdings", key: "holdings", placeholder: "e.g. S&P 500 Index" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Contact", key: "contact" }];
-  const retirementFields = [{ label: "Account Type", key: "type", placeholder: "e.g. 401(k), IRA, Pension" }, { label: "Employer (if 401k)", key: "employer", placeholder: "Optional" }, { label: "Institution", key: "institution" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $120,000" }, { label: "Contributions", key: "contributions", placeholder: "e.g. $500/month" }, { label: "Vesting", key: "vested", placeholder: "e.g. 100%" }, { label: "Beneficiary", key: "beneficiary" }];
-  const taxFields = [{ label: "Tax Year", key: "year", placeholder: "e.g. 2026" }, { label: "Filed Date", key: "filedDate", placeholder: "e.g. Apr 15, 2027" }, { label: "Filed With", key: "filedWith", placeholder: "e.g. TurboTax, H&R Block" }, { label: "Result", key: "refund", placeholder: "e.g. $1,200 refund or $800 owed" }, { label: "Accountant", key: "accountant", placeholder: "Name or Self-prepared" }, { label: "Document Location", key: "documents", placeholder: "e.g. 2026_1040.pdf in Legacy Vault" }];
-  const businessFields = [{ label: "Business Name", key: "businessName" }, { label: "Entity Type", key: "type", placeholder: "e.g. LLC, S-Corp, Sole Proprietor" }, { label: "EIN", key: "ein", placeholder: "XX-XXXXXXX" }, { label: "Bank", key: "bank" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Annual Revenue", key: "revenue", placeholder: "e.g. ~$60,000/year" }, { label: "Accountant", key: "accountant" }, { label: "Notes / Transfer Instructions", key: "notes" }];
+  const insuranceFields: FieldDef[] = [{ label: "Type", key: "type", placeholder: "e.g. Life Insurance" }, { label: "Carrier", key: "carrier", placeholder: "e.g. MetLife" }, { label: "Policy Number", key: "policyNum" }, { label: "Coverage Amount", key: "coverage", placeholder: "e.g. $500,000" }, { label: "Premium", key: "premium", placeholder: "e.g. $182/month" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Agent", key: "agent" }, { label: "Status", key: "status", placeholder: "active" }];
+  const personalFields: FieldDef[] = [{ label: "Account Name", key: "accountName", placeholder: "e.g. Primary Checking" }, { label: "Bank", key: "bank", placeholder: "e.g. Wells Fargo" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Checking, Savings" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $8,000" }, { label: "Beneficiary", key: "beneficiary", placeholder: "e.g. Payable on Death (POD) name" }, { label: "Notes", key: "notes" }, ...contactFields];
+  const portfolioFields: FieldDef[] = [{ label: "Institution", key: "institution", placeholder: "e.g. Fidelity Investments" }, { label: "Account Type", key: "accountType", placeholder: "e.g. Brokerage, Roth IRA" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Estimated Value", key: "value", placeholder: "e.g. $50,000" }, { label: "Holdings", key: "holdings", placeholder: "e.g. S&P 500 Index" }, { label: "Beneficiary", key: "beneficiary" }, { label: "Contact", key: "contact" }, ...contactFields];
+  const retirementFields: FieldDef[] = [{ label: "Account Type", key: "type", placeholder: "e.g. 401(k), IRA, Pension" }, { label: "Employer (if 401k)", key: "employer", placeholder: "Optional" }, { label: "Institution", key: "institution" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Balance", key: "balance", placeholder: "e.g. $120,000" }, { label: "Contributions", key: "contributions", placeholder: "e.g. $500/month" }, { label: "Vesting", key: "vested", placeholder: "e.g. 100%" }, { label: "Beneficiary", key: "beneficiary" }, ...contactFields];
+  const taxFields: FieldDef[] = [{ label: "Tax Year", key: "year", placeholder: "e.g. 2026" }, { label: "Filed Date", key: "filedDate", placeholder: "e.g. Apr 15, 2027" }, { label: "Filed With", key: "filedWith", placeholder: "e.g. TurboTax, H&R Block" }, { label: "Result", key: "refund", placeholder: "e.g. $1,200 refund or $800 owed" }, { label: "Accountant", key: "accountant", placeholder: "Name or Self-prepared" }, { label: "Accountant Phone", key: "accountantPhone", type: "tel" }, { label: "Document Location", key: "documents", placeholder: "e.g. 2026_1040.pdf in Legacy Vault" }, ...contactFields];
+  const businessFields: FieldDef[] = [{ label: "Business Name", key: "businessName" }, { label: "Entity Type", key: "type", placeholder: "e.g. LLC, S-Corp, Sole Proprietor" }, { label: "EIN", key: "ein", placeholder: "XX-XXXXXXX" }, { label: "Bank", key: "bank" }, { label: "Account Number (last 4)", key: "accountNum", placeholder: "XXXX-1234" }, { label: "Annual Revenue", key: "revenue", placeholder: "e.g. ~$60,000/year" }, { label: "Accountant", key: "accountant" }, { label: "Accountant Phone", key: "accountantPhone", type: "tel" }, { label: "Notes / Transfer Instructions", key: "notes" }, ...contactFields];
 
   /* Builds the AddModal's `initial` field values from the record being edited (undefined in add mode). */
   function editInitial(t: Tab, fields: { key: string }[]): Record<string, string> | undefined {
@@ -467,6 +540,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
                     <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{acct.beneficiary}</div></div>
                     <div className="tile"><div className="tk">Notes</div><div className="tv">{acct.notes}</div></div>
                   </div>
+                  <ContactTiles r={acct} />
                   {(acct as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(acct as any).attachedDoc}</div>}
                 </div>
               ))}
@@ -499,6 +573,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
                     <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{p.beneficiary}</div></div>
                     <div className="tile"><div className="tk">Contact / Login</div><div className="tv">{p.contact}</div></div>
                   </div>
+                  <ContactTiles r={p} />
                   {(p as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(p as any).attachedDoc}</div>}
                 </div>
               ))}
@@ -532,6 +607,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
                     <div className="tile"><div className="tk">Vested</div><div className="tv">{r.vested}</div></div>
                     <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{r.beneficiary}</div></div>
                   </div>
+                  <ContactTiles r={r} />
                   {(r as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(r as any).attachedDoc}</div>}
                 </div>
               ))}
@@ -543,13 +619,28 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
         {tab === "taxes" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="toolbar"><button className="btn-primary" onClick={() => setShowAdd("taxes")}><Plus size={14} /> Add Tax Year</button></div>
+            <div className="card pad">
+              <div className="rtitle"><Receipt size={18} /> Tax-Deductible Receipts</div>
+              <div className="rsub" style={{ lineHeight: 1.6, marginBottom: Object.keys(deductibleByYear).length ? 6 : 0 }}>
+                Receipts marked <b>Tax deductible</b> in Receipts &amp; Expenses are totalled here by tax year, so whoever prepares the return can find them in one place.
+                {onNavigate && !Object.keys(deductibleByYear).length && <> <button className="linkbtn" onClick={() => openDeductible()}>Open Receipts &amp; Expenses</button></>}
+              </div>
+              {Object.entries(deductibleByYear).sort(([a], [b]) => Number(b) - Number(a)).map(([year, d]) => (
+                <div key={year} className="dedrow">
+                  <span style={{ color: TEXT, fontWeight: 600, fontSize: 16 }}>Tax Year {year}</span>
+                  <span style={{ color: MUTED, fontSize: 15 }}>{d.count} receipt{d.count === 1 ? "" : "s"}</span>
+                  <span style={{ color: TEXT, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17 }}>{usd(d.total)}</span>
+                  {onNavigate && <button className="linkbtn" onClick={() => openDeductible(year)}>View receipts</button>}
+                </div>
+              ))}
+            </div>
             <div className="rlist">
               {taxList.map(t => (
-                <div key={t.year} className="card pad">
+                <div key={t.id} className="card pad">
                   <div className="rtop">
                     <div className="rtitle" style={{ fontSize: 22.5 }}>Tax Year {t.year}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div className="bigval" style={{ fontSize: 19, color: t.refund.includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
+                      <div className="bigval" style={{ fontSize: 19, color: String(t.refund ?? "").includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
                       <button className="redit" onClick={() => openEdit("taxes", t)}><Edit2 size={14} /></button>
                     </div>
                   </div>
@@ -557,8 +648,13 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
                     <div className="tile"><div className="tk">Filed Date</div><div className="tv">{t.filedDate}</div></div>
                     <div className="tile"><div className="tk">Filed With</div><div className="tv">{t.filedWith}</div></div>
                     <div className="tile"><div className="tk">Tax Preparer</div><div className="tv">{t.accountant}</div></div>
+                    <div className="tile"><div className="tk">Preparer Phone</div><div className="tv">{t.accountantPhone && <a href={`tel:${t.accountantPhone}`} style={{ color: "inherit" }}>{t.accountantPhone}</a>}</div></div>
                     <div className="tile"><div className="tk">Documents</div><div className="tv">{t.documents}</div></div>
+                    <div className="tile"><div className="tk">Deductible Receipts</div><div className="tv">
+                      {deductibleSummary(String(t.year ?? "").trim())}
+                    </div></div>
                   </div>
+                  <ContactTiles r={t} />
                   {(t as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(t as any).attachedDoc}</div>}
                 </div>
               ))}
@@ -588,7 +684,9 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
                     <div className="tile"><div className="tk">Account Number</div><div className="tv">{b.accountNum}</div></div>
                     <div className="tile"><div className="tk">Annual Revenue</div><div className="tv">{b.revenue}</div></div>
                     <div className="tile"><div className="tk">Accountant</div><div className="tv">{b.accountant}</div></div>
+                    <div className="tile"><div className="tk">Accountant Phone</div><div className="tv">{b.accountantPhone && <a href={`tel:${b.accountantPhone}`} style={{ color: "inherit" }}>{b.accountantPhone}</a>}</div></div>
                   </div>
+                  <ContactTiles r={b} />
                   <div className="notewarn"><b>Succession Note:</b> {b.notes}</div>
                   {(b as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(b as any).attachedDoc}</div>}
                 </div>
@@ -620,7 +718,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
             <AddModal title={isEdit ? "Edit Personal Account" : "Add Personal Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={personalFields} initial={editInitial("personal", personalFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", attachedDoc: doc };
+                const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", ...pickContact(f), attachedDoc: doc };
                 void persist("personal", orig, record);
                 toast.success(isEdit ? `${record.accountName} updated` : `${record.accountName} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
@@ -635,7 +733,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
             <AddModal title={isEdit ? "Edit Investment Account" : "Add Investment Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={portfolioFields} initial={editInitial("portfolios", portfolioFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", attachedDoc: doc };
+                const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", ...pickContact(f), attachedDoc: doc };
                 void persist("portfolios", orig, record);
                 toast.success(isEdit ? `${record.institution} updated` : `Investment account added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
@@ -650,7 +748,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
             <AddModal title={isEdit ? "Edit Retirement Account" : "Add Retirement Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={retirementFields} initial={editInitial("retirement", retirementFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", attachedDoc: doc };
+                const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", ...pickContact(f), attachedDoc: doc };
                 void persist("retirement", orig, record);
                 toast.success(isEdit ? `${record.type || "Retirement account"} updated` : `Retirement account added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
@@ -665,7 +763,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
             <AddModal title={isEdit ? "Edit Tax Year" : "Add Tax Year"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={taxFields} initial={editInitial("taxes", taxFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
-                const record = { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", documents: doc || f.documents || "" };
+                const record = { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", accountantPhone: f.accountantPhone || "", documents: f.documents || doc || "", ...pickContact(f), attachedDoc: doc };
                 void persist("taxes", orig, record);
                 toast.success(isEdit ? `Tax year ${record.year} updated` : `Tax year ${record.year} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();
@@ -680,7 +778,7 @@ export function FinancialRecords({ insuranceOnly = false }: { insuranceOnly?: bo
             <AddModal title={isEdit ? "Edit Business" : "Add Business"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={businessFields} initial={editInitial("business", businessFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
               onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", notes: f.notes || "", attachedDoc: doc };
+                const record = { id: orig?.id ?? Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", accountantPhone: f.accountantPhone || "", notes: f.notes || "", ...pickContact(f), attachedDoc: doc };
                 void persist("business", orig, record);
                 toast.success(isEdit ? `${record.businessName} updated` : `${record.businessName || "Business"} added${doc ? ` with document "${doc}"` : ""}`);
                 closeModal();

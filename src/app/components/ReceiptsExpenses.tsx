@@ -32,14 +32,20 @@ const catColor = (cat: string) => CATEGORY_COLORS[cat] ?? CAT_OTHER;
 /* ── Types ───────────────────────────────────────────────────────── */
 interface Receipt {
   id: string;
+  section: Section;
   merchant: string;
   amount: number;
-  date: string;
+  date: string;      // display, e.g. "Mar 3, 2026"
+  isoDate: string;   // YYYY-MM-DD; picks the year and month folder
   category: string;
   ocrVerified: boolean;
   confidence: number;
   imageUrl?: string;
+  taxYear: number | null;
+  taxDeductible: boolean;
 }
+
+type NewReceipt = Omit<Receipt, "id" | "section" | "date">;
 
 interface MonthData {
   total: number;
@@ -66,6 +72,16 @@ const CATEGORY_PICKLIST = [
 ];
 
 const fmt = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+
+/* Dates are handled as YYYY-MM-DD strings: `new Date("2026-03-01")` is UTC
+   midnight, which lands in February for anyone west of Greenwich. */
+const yearOf = (iso: string) => Number(iso.slice(0, 4));
+const monthOf = (iso: string) => MONTHS[Number(iso.slice(5, 7)) - 1];
+const isValidTaxYear = (s: string) => /^\d{4}$/.test(s) && Number(s) >= 1900 && Number(s) <= 2100;
+
+/* Financial Records > Tax Records "View receipts" drops the year here and
+   navigates; this screen reads it once on mount and opens the deductible view. */
+export const DEDUCTIBLE_YEAR_KEY = "fpd:receipts-deductible-year";
 
 /* ── CSS — scoped under .fpd-re so nothing else in the app is affected ── */
 const GRAIN =
@@ -139,6 +155,11 @@ const RE_CSS = `
 .fpd-re .ocrpill{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-family:var(--font-mono);padding:2px 8px;border-radius:99px;font-weight:700;}
 .fpd-re .ocrpill.ok{background:rgba(95,190,145,0.14);color:${POS};}
 .fpd-re .ocrpill.review{background:rgba(217,165,94,0.14);color:${WARN};}
+.fpd-re .ocrpill.ded{background:rgba(91,110,225,0.16);color:${ACCENT2};}
+.fpd-re .toprow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+.fpd-re .toprow .seg{flex:1;min-width:240px;}
+.fpd-re .yearsel{padding:0 14px;min-height:44px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);color:${TEXT};font-size:14.5px;font-weight:600;font-family:var(--font-body);outline:none;cursor:pointer;}
+.fpd-re .tax-box{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.07);}
 
 /* category breakdown */
 .fpd-re .catbar-row{display:flex;flex-direction:column;gap:5px;}
@@ -178,9 +199,42 @@ const RE_CSS = `
 @media (max-width:640px){.fpd-re .pg-head{flex-direction:column;align-items:flex-start;}.fpd-re .mdtotal{margin-left:0;}}
 `;
 
+/* ── Tax deductible + tax year — shared by the scan review and the detail view ── */
+function TaxFields({ deductible, taxYear, onDeductible, onTaxYear }: {
+  deductible: boolean; taxYear: string; onDeductible: (v: boolean) => void; onTaxYear: (v: string) => void;
+}) {
+  return (
+    <div className="tax-box">
+      <button type="button" className={`opt-row${deductible ? " on" : ""}`} onClick={() => onDeductible(!deductible)}>
+        <div className="opt-check">{deductible && <CheckCircle size={11} color="#fff" />}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: TEXT, fontSize: 13.5, fontWeight: 600, marginBottom: 2 }}>Tax deductible</div>
+          <div style={{ color: MUTED, fontSize: 12 }}>Counted in this tax year's total under Financial Records → Tax Records</div>
+        </div>
+      </button>
+      <div className="field">
+        <label>TAX YEAR</label>
+        <input value={taxYear} onChange={e => onTaxYear(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" placeholder="e.g. 2026" />
+      </div>
+    </div>
+  );
+}
+
 /* ── Receipt Detail Modal ─────────────────────────────────────────── */
-function ReceiptDetailModal({ receipt, onClose, onDelete }: { receipt: Receipt; onClose: () => void; onDelete: () => void }) {
+function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
+  receipt: Receipt; onClose: () => void; onDelete: () => void;
+  onSaveTax: (patch: { tax_year: number | null; tax_deductible: boolean }) => void;
+}) {
   const color = catColor(receipt.category);
+  const initialTaxYear = String(receipt.taxYear ?? (yearOf(receipt.isoDate) || ""));
+  const [deductible, setDeductible] = useState(receipt.taxDeductible);
+  const [taxYear, setTaxYear] = useState(initialTaxYear);
+  const taxDirty = deductible !== receipt.taxDeductible || taxYear !== initialTaxYear;
+  const saveTax = () => {
+    if (taxYear && !isValidTaxYear(taxYear)) { toast.error("Enter a 4-digit tax year"); return; }
+    if (deductible && !taxYear) { toast.error("Enter the tax year this receipt counts toward"); return; }
+    onSaveTax({ tax_year: taxYear ? Number(taxYear) : null, tax_deductible: deductible });
+  };
   const details = [
     { label: "Merchant", value: receipt.merchant, icon: <Building2 size={14} /> },
     { label: "Amount", value: fmt(receipt.amount), icon: <DollarSign size={14} /> },
@@ -227,6 +281,12 @@ function ReceiptDetailModal({ receipt, onClose, onDelete }: { receipt: Receipt; 
               )}
             </div>
           ))}
+          <TaxFields deductible={deductible} taxYear={taxYear} onDeductible={setDeductible} onTaxYear={setTaxYear} />
+          {taxDirty && (
+            <button className="btn-ghost" style={{ justifyContent: "center" }} onClick={saveTax}>
+              <CheckCircle size={14} /> Save Tax Details
+            </button>
+          )}
         </div>
 
         <div className="modal-foot" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -249,7 +309,7 @@ function ReceiptDetailModal({ receipt, onClose, onDelete }: { receipt: Receipt; 
 }
 
 /* ── Email CPA Modal ───────────────────────────────────────────────── */
-function EmailCPAModal({ month, total, onClose }: { month: string; total: number; onClose: () => void }) {
+function EmailCPAModal({ month, year, total, onClose }: { month: string; year: number; total: number; onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [includeCSV, setIncludeCSV] = useState(true);
   const [includeImages, setIncludeImages] = useState(true);
@@ -270,7 +330,7 @@ function EmailCPAModal({ month, total, onClose }: { month: string; total: number
             <span className="modal-head-title"><Mail size={16} /> Email to CPA</span>
             <button className="modal-close" onClick={onClose}><X size={15} /></button>
           </div>
-          <div className="modal-head-sub">{month} 2026 · {fmt(total)} total · Encrypted secure delivery</div>
+          <div className="modal-head-sub">{month} {year} · {fmt(total)} total · Encrypted secure delivery</div>
         </div>
 
         {!sent ? (
@@ -318,7 +378,7 @@ function EmailCPAModal({ month, total, onClose }: { month: string; total: number
               <CheckCircle size={30} color={POS} />
             </div>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: TEXT, marginBottom: 8 }}>Package Sent!</h3>
-            <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>{month} 2026 receipt package delivered securely to<br /><strong style={{ color: ACCENT2 }}>{email}</strong></p>
+            <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>{month} {year} receipt package delivered securely to<br /><strong style={{ color: ACCENT2 }}>{email}</strong></p>
             <p style={{ color: FAINT, fontSize: 12, marginTop: 8 }}>Download link valid for 48 hours.</p>
             <button className="btn-ghost" style={{ marginTop: 20 }} onClick={onClose}>Done</button>
           </div>
@@ -329,12 +389,23 @@ function EmailCPAModal({ month, total, onClose }: { month: string; total: number
 }
 
 /* ── OCR Review Modal — confirms fields against the scanned image ──── */
-function OCRReviewModal({ doc, month, onSave, onClose }: { doc: ScannedDocument; month: string; onSave: (r: Omit<Receipt, "id">) => void; onClose: () => void }) {
+function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave: (r: NewReceipt) => void; onClose: () => void }) {
+  const today = new Date();
   const [merchant, setMerchant] = useState(doc.name || "New Receipt");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`);
   const [category, setCategory] = useState(CATEGORY_PICKLIST[0]);
+  const [deductible, setDeductible] = useState(false);
+  // Follows the receipt date until the user types a different year.
+  const [taxYear, setTaxYear] = useState(String(today.getFullYear()));
+  const [taxYearTouched, setTaxYearTouched] = useState(false);
   const [saving, setSaving] = useState(false);
+  const folder = /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${monthOf(date)} ${yearOf(date)}` : "this month's";
+
+  const changeDate = (v: string) => {
+    setDate(v);
+    if (!taxYearTouched && /^\d{4}/.test(v)) setTaxYear(v.slice(0, 4));
+  };
 
   const confidence = [
     { label: "MERCHANT", pct: 91 },
@@ -345,10 +416,13 @@ function OCRReviewModal({ doc, month, onSave, onClose }: { doc: ScannedDocument;
   const handleSave = () => {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { toast.error("Enter the receipt total"); return; }
+    if (taxYear && !isValidTaxYear(taxYear)) { toast.error("Enter a 4-digit tax year"); return; }
+    if (deductible && !taxYear) { toast.error("Enter the tax year this receipt counts toward"); return; }
     setSaving(true);
     setTimeout(() => {
-      onSave({ merchant, amount: amt, date, category, ocrVerified: true, confidence: 95, imageUrl: doc.previewUrl });
-      toast.success(`Receipt saved to ${month} 2026 folder`);
+      onSave({ merchant, amount: amt, isoDate: date, category, ocrVerified: true, confidence: 95, imageUrl: doc.previewUrl,
+        taxYear: taxYear ? Number(taxYear) : null, taxDeductible: deductible });
+      toast.success(`Receipt saved to ${folder} folder`);
       onClose();
     }, 600);
   };
@@ -393,7 +467,7 @@ function OCRReviewModal({ doc, month, onSave, onClose }: { doc: ScannedDocument;
 
           <div className="field">
             <label>DATE</label>
-            <input value={date} onChange={e => setDate(e.target.value)} type="date" />
+            <input value={date} onChange={e => changeDate(e.target.value)} type="date" />
           </div>
 
           <div className="field">
@@ -402,14 +476,86 @@ function OCRReviewModal({ doc, month, onSave, onClose }: { doc: ScannedDocument;
               {CATEGORY_PICKLIST.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
+
+          <TaxFields deductible={deductible} taxYear={taxYear} onDeductible={setDeductible}
+            onTaxYear={v => { setTaxYear(v); setTaxYearTouched(true); }} />
         </div>
 
         <div className="modal-foot">
           <button className="btn-primary" disabled={saving} onClick={handleSave}>
-            {saving ? "Saving…" : <><CheckCircle size={15} /> Save to {month} 2026 Folder</>}
+            {saving ? "Saving…" : <><CheckCircle size={15} /> Save to {folder} Folder</>}
           </button>
-          <p className="foot-note">Receipt will be encrypted and stored under Receipts &gt; 2026 &gt; {month}</p>
+          <p className="foot-note">Receipt will be stored under Receipts &gt; {/^\d{4}-\d{2}-\d{2}$/.test(date) ? <>{yearOf(date)} &gt; {monthOf(date)}</> : "the receipt date"}</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── One receipt in a list ────────────────────────────────────────── */
+function ReceiptRow({ r, onOpen, showSection = false }: { r: Receipt; onOpen: (r: Receipt) => void; showSection?: boolean }) {
+  const color = catColor(r.category);
+  return (
+    <button className="receipt-row" onClick={() => onOpen(r)}>
+      <div className="receipt-ico" style={{ background: `${color}1E`, border: `1.5px solid ${color}44` }}>
+        <FileText size={18} color={color} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
+          <span style={{ color: TEXT, fontWeight: 600, fontSize: 14.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.merchant}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 15.5, fontWeight: 700, color: TEXT, flexShrink: 0 }}>{fmt(r.amount)}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ color: MUTED, fontSize: 12 }}>{r.date}</span>
+          <span className="cdot" style={{ background: color }} />
+          <span style={{ color: MUTED, fontSize: 12 }}>{r.category}</span>
+          {showSection && <span style={{ color: MUTED, fontSize: 12 }}>· {r.section === "personal" ? "Personal" : "Business"}</span>}
+          {r.ocrVerified
+            ? <span className="ocrpill ok"><CheckCircle size={9} /> VERIFIED</span>
+            : <span className="ocrpill review"><AlertCircle size={9} /> REVIEW</span>}
+          {r.taxDeductible && <span className="ocrpill ded"><Tag size={9} /> DEDUCTIBLE{r.taxYear ? ` · ${r.taxYear}` : ""}</span>}
+        </div>
+      </div>
+      <ChevronRight size={14} color={FAINT} />
+    </button>
+  );
+}
+
+/* ── Tax-deductible receipts for one tax year (personal + business) ── */
+function DeductibleView({ year, years, receipts, onYear, onBack, onOpenReceipt }: {
+  year: number; years: number[]; receipts: Receipt[];
+  onYear: (y: number) => void; onBack: () => void; onOpenReceipt: (r: Receipt) => void;
+}) {
+  const total = receipts.reduce((s, r) => s + r.amount, 0);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="mdhead">
+          <button className="btn-ghost" onClick={onBack}><ArrowLeft size={14} /> Back</button>
+          <div>
+            <div className="mdtitle">Tax-Deductible Receipts</div>
+            <div className="mdsub">{receipts.length} receipt{receipts.length === 1 ? "" : "s"} · personal and business</div>
+          </div>
+          <div className="mdtotal">{fmt(total)}</div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ color: MUTED, fontSize: 13.5 }}>Tax year</span>
+          <select className="yearsel" value={year} onChange={e => onYear(Number(e.target.value))}>
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
+        <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+          This total also appears under Financial Records → Tax Records. Open any receipt to change its tax year or remove the deductible mark.
+        </p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {receipts.length === 0 && (
+          <div className="card pad" style={{ textAlign: "center", color: MUTED }}>
+            <FileText size={28} color={FAINT} style={{ margin: "0 auto 8px" }} />
+            <p style={{ fontSize: 14 }}>No receipts marked tax deductible for {year}</p>
+          </div>
+        )}
+        {receipts.map(r => <ReceiptRow key={r.id} r={r} onOpen={onOpenReceipt} showSection />)}
       </div>
     </div>
   );
@@ -417,9 +563,9 @@ function OCRReviewModal({ doc, month, onSave, onClose }: { doc: ScannedDocument;
 
 /* ── Month Detail View ─────────────────────────────────────────────── */
 function MonthDetail({
-  month, section, sectionData, onBack, onEmailCPA, onOpenReceipt,
+  month, year, section, sectionData, onBack, onEmailCPA, onOpenReceipt,
 }: {
-  month: string; section: Section; sectionData: SectionData;
+  month: string; year: number; section: Section; sectionData: SectionData;
   onBack: () => void; onEmailCPA: () => void; onOpenReceipt: (r: Receipt) => void;
 }) {
   const data = sectionData[month] ?? { total: 0, receipts: [] };
@@ -439,7 +585,7 @@ function MonthDetail({
           <button className="btn-ghost" onClick={onBack}><ArrowLeft size={14} /> Back</button>
           <div>
             <div className="mdtitle" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {month} 2026
+              {month} {year}
               <span className="ocrpill" style={{ background: section === "personal" ? "rgba(95,190,145,0.14)" : "rgba(91,110,225,0.16)", color: section === "personal" ? POS : ACCENT2 }}>
                 {section === "personal" ? <User size={9} /> : <Briefcase size={9} />} {section.toUpperCase()}
               </span>
@@ -450,7 +596,7 @@ function MonthDetail({
         </div>
 
         <div className="mdacts">
-          <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => toast.success(`Downloading ${month} 2026 receipt package…`)}>
+          <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => toast.success(`Downloading ${month} ${year} receipt package…`)}>
             <Download size={14} /> Download Package
           </button>
           <button className="btn-primary" style={{ flex: 1, padding: "10px 16px" }} onClick={onEmailCPA}>
@@ -471,31 +617,7 @@ function MonthDetail({
             <p style={{ fontSize: 14 }}>No receipts found</p>
           </div>
         )}
-        {filtered.map(r => {
-          const color = catColor(r.category);
-          return (
-            <button key={r.id} className="receipt-row" onClick={() => onOpenReceipt(r)}>
-              <div className="receipt-ico" style={{ background: `${color}1E`, border: `1.5px solid ${color}44` }}>
-                <FileText size={18} color={color} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
-                  <span style={{ color: TEXT, fontWeight: 600, fontSize: 14.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.merchant}</span>
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: 15.5, fontWeight: 700, color: TEXT, flexShrink: 0 }}>{fmt(r.amount)}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ color: MUTED, fontSize: 12 }}>{r.date}</span>
-                  <span className="cdot" style={{ background: color }} />
-                  <span style={{ color: MUTED, fontSize: 12 }}>{r.category}</span>
-                  {r.ocrVerified
-                    ? <span className="ocrpill ok"><CheckCircle size={9} /> VERIFIED</span>
-                    : <span className="ocrpill review"><AlertCircle size={9} /> REVIEW</span>}
-                </div>
-              </div>
-              <ChevronRight size={14} color={FAINT} />
-            </button>
-          );
-        })}
+        {filtered.map(r => <ReceiptRow key={r.id} r={r} onOpen={onOpenReceipt} />)}
 
         {byCategory.length > 0 && (
           <div className="card pad" style={{ marginTop: 6 }}>
@@ -528,66 +650,82 @@ function MonthDetail({
 /* ── Main Component ───────────────────────────────────────────────── */
 export function ReceiptsExpenses() {
   const { authUser } = useAuth();
-  const [business, setBusiness] = useState<SectionData>({});
-  const [personal, setPersonal] = useState<SectionData>({});
+  const currentYear = new Date().getFullYear();
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [section, setSection] = useState<Section>("personal");
-  const [view, setView] = useState<"directory" | "month">("directory");
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [view, setView] = useState<"directory" | "month" | "deductible">("directory");
   const [selectedMonth, setSelectedMonth] = useState<string>("June");
+  const [dedYear, setDedYear] = useState(currentYear);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [showEmail, setShowEmail] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [pendingDoc, setPendingDoc] = useState<ScannedDocument | null>(null);
   const currentMonth = MONTHS[new Date().getMonth()];
 
-  /* Rows come from the `receipts` table, which stores them flat with a date.
-     This screen presents a month ledger, so the grouping happens here rather
-     than in the schema. */
+  /* Arriving from Financial Records > Tax Records "View receipts". */
+  useEffect(() => {
+    try {
+      const y = Number(sessionStorage.getItem(DEDUCTIBLE_YEAR_KEY));
+      sessionStorage.removeItem(DEDUCTIBLE_YEAR_KEY);
+      if (y) { setDedYear(y); setView("deductible"); }
+    } catch { /* storage blocked: open on the directory */ }
+  }, []);
+
+  /* Rows come from the `receipts` table, flat with a date. The month ledger
+     for the chosen year is derived below rather than stored. */
   const reload = useCallback(async () => {
     if (!authUser) return;
     const { data, error } = await tables.receipts.list(authUser.id);
     if (error) { toast.error(`Could not load receipts: ${error.message}`); return; }
-    const empty = () => MONTHS.reduce((acc, m) => { acc[m] = { total: 0, receipts: [] }; return acc; }, {} as SectionData);
-    const next: Record<Section, SectionData> = { personal: empty(), business: empty() };
-    for (const r of data ?? []) {
-      const sect = (String(r.section ?? "personal") as Section);
-      const when = r.receipt_date ? new Date(String(r.receipt_date)) : null;
-      const month = when ? MONTHS[when.getMonth()] : MONTHS[new Date().getMonth()];
-      const amount = Number(r.amount ?? 0);
-      const bucket = next[sect][month] ?? { total: 0, receipts: [] };
-      bucket.receipts.push({
+    setReceipts((data ?? []).map(r => {
+      const iso = String(r.receipt_date ?? r.created_at ?? "").slice(0, 10);
+      const [y, m, d] = iso.split("-").map(Number);
+      return {
         id: String(r.id),
+        section: String(r.section ?? "personal") as Section,
         merchant: String(r.merchant ?? ""),
-        amount,
-        date: when ? when.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+        amount: Number(r.amount ?? 0),
+        date: y ? new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+        isoDate: iso,
         category: String(r.category ?? ""),
         ocrVerified: Boolean(r.ocr_verified),
         confidence: Number(r.ocr_confidence ?? 0),
         imageUrl: (r.image_url as string | null) ?? undefined,
-      });
-      bucket.total += amount;
-      next[sect][month] = bucket;
-    }
-    setPersonal(next.personal);
-    setBusiness(next.business);
+        taxYear: r.tax_year == null ? null : Number(r.tax_year),
+        taxDeductible: Boolean(r.tax_deductible),
+      };
+    }));
   }, [authUser]);
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const activeData = section === "personal" ? personal : business;
-  const setActiveData = section === "personal" ? setPersonal : setBusiness;
+  const sectionReceipts = receipts.filter(r => r.section === section);
+  const yearOptions = Array.from(new Set([currentYear, selectedYear, ...sectionReceipts.map(r => yearOf(r.isoDate))]))
+    .filter(Number.isFinite).sort((a, b) => b - a);
+
+  const activeData: SectionData = MONTHS.reduce((acc, m) => { acc[m] = { total: 0, receipts: [] }; return acc; }, {} as SectionData);
+  for (const r of sectionReceipts) {
+    if (yearOf(r.isoDate) !== selectedYear) continue;
+    const bucket = activeData[monthOf(r.isoDate)];
+    if (!bucket) continue;
+    bucket.receipts.push(r);
+    bucket.total += r.amount;
+  }
   const yearTotal = Object.values(activeData).reduce((s, m) => s + m.total, 0);
   const monthsWithData = Object.entries(activeData).sort((a, b) => MONTHS.indexOf(b[0]) - MONTHS.indexOf(a[0]));
+  const monthsTracked = monthsWithData.filter(([, m]) => m.receipts.length > 0).length;
 
-  const saveMonth = selectedMonth || currentMonth;
+  const deductible = receipts.filter(r => r.taxDeductible);
+  const dedYears = Array.from(new Set([dedYear, ...deductible.map(r => r.taxYear).filter((y): y is number => y != null)])).sort((a, b) => b - a);
+  const dedList = deductible.filter(r => r.taxYear === dedYear);
 
-  const addReceipt = async (r: Omit<Receipt, "id">) => {
+  const addReceipt = async (r: NewReceipt) => {
     if (!authUser) return;
-    // saveMonth is a month name; the column is a DATE, so pin it to the 1st of
-    // that month in the current year unless the scan produced a real date.
-    const parsed = r.date ? new Date(r.date) : null;
-    const iso = parsed && !Number.isNaN(parsed.getTime())
-      ? parsed.toISOString().slice(0, 10)
-      : new Date(new Date().getFullYear(), MONTHS.indexOf(saveMonth), 1).toISOString().slice(0, 10);
+    // Fall back to the 1st of the open month folder if the date is missing.
+    const iso = /^\d{4}-\d{2}-\d{2}$/.test(r.isoDate)
+      ? r.isoDate
+      : `${selectedYear}-${String(MONTHS.indexOf(selectedMonth || currentMonth) + 1).padStart(2, "0")}-01`;
 
     const { error } = await tables.receipts.add(authUser.id, {
       section,
@@ -598,16 +736,28 @@ export function ReceiptsExpenses() {
       ocr_verified: r.ocrVerified,
       ocr_confidence: r.confidence || null,
       image_url: r.imageUrl || null,
+      tax_year: r.taxYear,
+      tax_deductible: r.taxDeductible,
     });
     if (error) { toast.error(`Could not save receipt: ${error.message}`); return; }
     await reload();
   };
 
-  const deleteReceipt = async (_month: string, id: string) => {
+  const updateTax = async (id: string, patch: { tax_year: number | null; tax_deductible: boolean }) => {
+    const { error } = await tables.receipts.update(id, patch);
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    toast.success("Tax details saved");
+    setSelectedReceipt(null);
+    await reload();
+  };
+
+  const deleteReceipt = async (id: string) => {
     const { error } = await tables.receipts.remove(id);
     if (error) { toast.error(`Could not delete: ${error.message}`); return; }
     await reload();
   };
+
+  const accent = section === "personal" ? POS : ACCENT2;
 
   return (
     <div className="fpd-re">
@@ -624,15 +774,31 @@ export function ReceiptsExpenses() {
           <div className="ocrbadge"><Cpu size={13} /> OCR ACTIVE</div>
         </div>
 
-        <div className="seg">
-          {(["personal", "business"] as Section[]).map(s => (
-            <button key={s} className={`${section === s ? "on " + s : ""}`} onClick={() => { setSection(s); setView("directory"); }}>
-              {s === "personal" ? <User size={14} /> : <Briefcase size={14} />} {s === "personal" ? "Personal" : "Business"}
-            </button>
-          ))}
+        <div className="toprow">
+          <div className="seg">
+            {(["personal", "business"] as Section[]).map(s => (
+              <button key={s} className={`${section === s ? "on " + s : ""}`} onClick={() => { setSection(s); setView("directory"); }}>
+                {s === "personal" ? <User size={14} /> : <Briefcase size={14} />} {s === "personal" ? "Personal" : "Business"}
+              </button>
+            ))}
+          </div>
+          {view !== "deductible" && (
+            <select className="yearsel" aria-label="Year" value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setView("directory"); }}>
+              {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          )}
         </div>
 
-        {view === "directory" ? (
+        {view === "deductible" ? (
+          <DeductibleView
+            year={dedYear}
+            years={dedYears}
+            receipts={dedList}
+            onYear={setDedYear}
+            onBack={() => setView("directory")}
+            onOpenReceipt={setSelectedReceipt}
+          />
+        ) : view === "directory" ? (
           <>
             <button className="btn-primary" onClick={() => setShowScanner(true)}>
               <Camera size={17} /> Scan / Upload {section === "personal" ? "Personal" : "Business"} Receipt
@@ -640,25 +806,30 @@ export function ReceiptsExpenses() {
 
             <div className="yearcard">
               <div>
-                <div className="lbl">{section.toUpperCase()} · 2026 YTD</div>
+                <div className="lbl">{section.toUpperCase()} · {selectedYear}{selectedYear === currentYear ? " YTD" : ""}</div>
                 <div className="val">{fmt(yearTotal)}</div>
-                <div className="sub">{monthsWithData.length} months tracked</div>
+                <div className="sub">{monthsTracked} month{monthsTracked === 1 ? "" : "s"} tracked</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div className="lbl">AVG / MONTH</div>
-                <div className="avg" style={{ color: section === "personal" ? POS : ACCENT2 }}>{fmt(yearTotal / monthsWithData.length)}</div>
+                <div className="avg" style={{ color: accent }}>{fmt(monthsTracked ? yearTotal / monthsTracked : 0)}</div>
               </div>
             </div>
 
+            <button className="btn-ghost" style={{ alignSelf: "flex-start" }}
+              onClick={() => { setDedYear(dedYears.includes(selectedYear) ? selectedYear : dedYears[0] ?? currentYear); setView("deductible"); }}>
+              <Tag size={14} /> Tax-Deductible Receipts{deductible.length ? ` (${deductible.length})` : ""}
+            </button>
+
             <div className="crumb">
-              <Folder size={13} color={section === "personal" ? POS : ACCENT2} />
-              <span style={{ color: section === "personal" ? POS : ACCENT2, fontWeight: 600 }}>{section === "personal" ? "Personal" : "Business"} Receipts</span>
-              <ChevronRight size={12} /> <span>2026</span>
+              <Folder size={13} color={accent} />
+              <span style={{ color: accent, fontWeight: 600 }}>{section === "personal" ? "Personal" : "Business"} Receipts</span>
+              <ChevronRight size={12} /> <span>{selectedYear}</span>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {monthsWithData.map(([month, data]) => {
-                const isCurrent = month === currentMonth;
+                const isCurrent = month === currentMonth && selectedYear === currentYear;
                 const hasReceipts = data.receipts.length > 0;
                 return (
                   <button key={month} className={`month-row${isCurrent ? " current" : ""}${!hasReceipts ? " empty" : ""}`}
@@ -681,6 +852,7 @@ export function ReceiptsExpenses() {
         ) : (
           <MonthDetail
             month={selectedMonth}
+            year={selectedYear}
             section={section}
             sectionData={activeData}
             onBack={() => setView("directory")}
@@ -700,7 +872,6 @@ export function ReceiptsExpenses() {
       {pendingDoc && (
         <OCRReviewModal
           doc={pendingDoc}
-          month={saveMonth}
           onClose={() => setPendingDoc(null)}
           onSave={r => addReceipt(r)}
         />
@@ -708,14 +879,16 @@ export function ReceiptsExpenses() {
 
       {selectedReceipt && (
         <ReceiptDetailModal
+          key={selectedReceipt.id}
           receipt={selectedReceipt}
           onClose={() => setSelectedReceipt(null)}
-          onDelete={() => deleteReceipt(selectedMonth, selectedReceipt.id)}
+          onDelete={() => deleteReceipt(selectedReceipt.id)}
+          onSaveTax={patch => updateTax(selectedReceipt.id, patch)}
         />
       )}
 
       {showEmail && (
-        <EmailCPAModal month={selectedMonth} total={activeData[selectedMonth]?.total ?? 0} onClose={() => setShowEmail(false)} />
+        <EmailCPAModal month={selectedMonth} year={selectedYear} total={activeData[selectedMonth]?.total ?? 0} onClose={() => setShowEmail(false)} />
       )}
     </div>
   );

@@ -475,7 +475,7 @@ function UserRoute() {
       case "kids-activities":     return <KidsActivities/>;
       case "warranties":          return <Warranties/>;
       case "medical-info":        return <MedicalInfo/>;
-      case "financial-records":   return <FinancialRecords/>;
+      case "financial-records":   return <FinancialRecords onNavigate={nav}/>;
       case "insurance-policies":  return <FinancialRecords key="insurance" insuranceOnly/>;
       case "receipts-expenses":   return <ReceiptsExpenses/>;
       case "personal-assets":     return <PersonalAssets/>;
