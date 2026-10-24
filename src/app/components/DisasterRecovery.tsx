@@ -12,6 +12,9 @@ import { useDemo } from "../context/DemoContext";
 import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
 import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { useProducts } from "../utils/planCatalog";
+import { notifyBillingChanged, type Interval } from "../services/billing";
+import { CheckoutConsentModal } from "./billing/CheckoutConsentModal";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -244,177 +247,27 @@ function categoriesFromDocs(docs: { category: string; size: number; sizeUnit: "M
     .sort((a, b) => b.sizeGB - a.sizeGB);
 }
 
-/* ── inline purchase modal ─────────────────────────────────────────── */
-function DRPurchaseModal({ onClose, onSuccess }: { onClose:()=>void; onSuccess:()=>void }) {
-  const [billing, setBilling] = useState<"monthly"|"annual">("annual");
-  const [step, setStep] = useState<"select"|"pay"|"done"|"bypass">("select");
-  // Payment fields start blank — this form used to open pre-filled with a
-  // Stripe test card and a sample cardholder name.
-  const [cardNum, setCardNum]   = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiry, setExpiry]     = useState("");
-  const [cvv, setCvv]           = useState("424");
-  const [loading, setLoading]   = useState(false);
-
-  // The add-on becomes active when the processor's webhook records the payment
-  // against disaster_recovery_state. The client cannot set that flag — it has
-  // SELECT on the row and nothing more — so all this does is re-read once the
-  // simulated charge settles.
-  const handlePay = async () => {
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setLoading(false);
-    onSuccess();
-    setStep("done");
-  };
-
-  return (
-    <div className="backdrop">
-      <div className="modal">
-        <div className="modal-head">
-          <div className="flex items-center gap-3">
-            <ShieldAlert size={20} color="#fff"/>
-            <div>
-              <div className="modal-head-title">Disaster Recovery Protection</div>
-              <div className="modal-head-sub">Platform Add-On</div>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background:"rgba(255,255,255,0.15)", border:"none",
-            borderRadius:8, padding:6, cursor:"pointer", color:"#fff" }}><X size={16}/></button>
-        </div>
-
-        <div className="demo-banner" style={{ borderRadius:0, border:"none", borderBottom:"1px dashed rgba(91,110,225,0.25)" }}>
-          <div className="demo-text" style={{ padding:"2px 0" }}>
-            {step==="select" && "Choose a billing period, then continue to the pre-filled payment form."}
-            {step==="pay"    && "Card is pre-filled with Stripe test credentials. Click Pay to complete instantly."}
-            {step==="done"   && "Add-on purchased. A Master Admin opens the emergency window on request."}
-            {step==="bypass" && "Bypass activated — close to see your Emergency Recovery Dashboard unlock."}
-          </div>
-        </div>
-
-        <div className="modal-body">
-          {step === "select" && (<>
-            <div className="row2">
-              {(["monthly","annual"] as const).map(b => (
-                <button key={b} onClick={() => setBilling(b)} style={{
-                  padding:"14px 12px", borderRadius:12, cursor:"pointer", textAlign:"center",
-                  border:`2px solid ${billing===b ? ACCENT : "rgba(255,255,255,0.1)"}`,
-                  background: billing===b ? "rgba(91,110,225,0.1)" : "#0F1624" }}>
-                  <div style={{ fontSize:11, color:MUTED, ...MONO, marginBottom:4 }}>{b.toUpperCase()}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:billing===b ? ACCENT2 : TEXT }}>
-                    ${b==="annual"?"3.99":"4.99"}<span style={{ fontSize:12, fontWeight:400, color:MUTED }}>/mo</span>
-                  </div>
-                  {b==="annual" && <div style={{ fontSize:11, color:POS, marginTop:3 }}>Save 20% · $47.88/yr</div>}
-                </button>
-              ))}
-            </div>
-            <div style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.2)",
-              borderRadius:12, padding:"14px 16px" }}>
-              {["48-hour emergency bypass window","100 GB bulk vault export","AES-256 encrypted archive",
-                "Secure 15-min download link","Full audit trail"].map(item => (
-                <div key={item} className="flex items-center gap-2 py-1">
-                  <CheckCircle size={12} color={ACCENT2}/>
-                  <span style={{ fontSize:13, color:SOFT }}>{item}</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setStep("pay")} className="btn-primary" style={{ width:"100%", justifyContent:"center" }}>
-              Continue to Payment →
-            </button>
-          </>)}
-
-          {step === "pay" && (<>
-            <div style={{ background:"#0F1624", borderRadius:10, padding:"11px 14px", fontSize:13, color:SOFT }}>
-              <strong style={{ color:TEXT }}>Disaster Recovery Protection</strong> · {billing==="annual" ? "$47.88/yr ($3.99/mo)" : "$4.99/month"}
-            </div>
-            <div style={{ background:"rgba(91,110,225,0.08)", border:"1px dashed rgba(91,110,225,0.3)",
-              borderRadius:8, padding:"8px 12px", fontSize:12, color:ACCENT2 }}>
-              🎮 Pre-filled with Stripe test card — just click Pay
-            </div>
-            <div className="space-y-3">
-              <div className="field">
-                <label>CARD NUMBER</label>
-                <div style={{ position:"relative" }}>
-                  <input value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g,"").slice(0,16))}
-                    style={{ paddingLeft:36, ...MONO }}/>
-                  <CreditCard size={14} color={ACCENT2} style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)" }}/>
-                </div>
-              </div>
-              <div className="field">
-                <label>CARDHOLDER NAME</label>
-                <input value={cardName} onChange={e => setCardName(e.target.value)}/>
-              </div>
-              <div className="row2">
-                <div className="field">
-                  <label>EXPIRY</label>
-                  <input value={expiry} onChange={e => setExpiry(e.target.value)} maxLength={5} style={MONO}/>
-                </div>
-                <div className="field">
-                  <label>CVV</label>
-                  <input value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g,"").slice(0,4))}
-                    type="password" style={MONO}/>
-                </div>
-              </div>
-            </div>
-            <div style={{ fontSize:11, color:MUTED, textAlign:"center" }}>🔒 Secured by Stripe · PCI DSS Level 1</div>
-            <div className="flex gap-3">
-              <button onClick={() => setStep("select")} className="btn-sec" style={{ flex:1, justifyContent:"center" }}>Back</button>
-              <button onClick={handlePay} disabled={loading} className="btn-primary" style={{ flex:2, justifyContent:"center" }}>
-                {loading ? "Processing…" : `Pay $${billing==="annual"?"47.88":"4.99"} →`}
-              </button>
-            </div>
-          </>)}
-
-          {step === "done" && (
-            <div className="flex flex-col items-center gap-5 py-2">
-              <div style={{ width:60, height:60, borderRadius:"50%",
-                background:"rgba(95,190,145,0.12)", border:`2px solid rgba(95,190,145,0.3)`,
-                display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <CheckCircle size={26} color={POS}/>
-              </div>
-              <div style={{ textAlign:"center" }}>
-                <div style={{ fontFamily:"var(--font-display)", fontSize:18, color:TEXT, marginBottom:4 }}>
-                  Add-On Purchased! ✓
-                </div>
-                <p style={{ fontSize:13, color:MUTED, lineHeight:1.6 }}>
-                  Disaster Recovery Protection is being activated on your account.<br/>
-                  A Master Admin opens the emergency window when you request it.
-                </p>
-              </div>
-
-              <div style={{ width:"100%", background:"rgba(91,110,225,0.07)",
-                border:"1px dashed rgba(91,110,225,0.4)", borderRadius:12, padding:"16px" }}>
-                <div style={{ fontSize:11, ...MONO, color:"#6FAE8B", fontWeight:700, marginBottom:6 }}>
-                  NEXT — REQUEST YOUR EMERGENCY WINDOW
-                </div>
-                <p style={{ fontSize:12, color:SOFT, lineHeight:1.6 }}>
-                  Contact FPD support to open your 48-hour window. A Master Admin authenticates
-                  via MFA and enters a reason code, and this page unlocks on its own once the
-                  grant is recorded — it is never something your browser can switch on.
-                </p>
-              </div>
-
-              <button onClick={onClose} style={{ fontSize:13, color:MUTED, background:"transparent",
-                border:"none", cursor:"pointer", textDecoration:"underline" }}>
-                Close
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ═══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 export function DisasterRecovery() {
   const { session, bypassState, addonActive, refresh: refreshBypass } = useBypassState();
   const countdown = useCountdown(session?.expiresAt ?? null);
-  const [showPurchase, setShowPurchase] = useState(false);
+  // Disaster Recovery is bought through Stripe Checkout (monthly or yearly);
+  // the webhook turns it on. Needs a paid plan.
+  const [purchaseInterval, setPurchaseInterval] = useState<Interval | null>(null);
+  const [chosenInterval, setChosenInterval] = useState<Interval>("year");
+  const products = useProducts();
+  const drMonth = (products.dr_addon_month?.amountCents ?? 499) / 100;
+  const drYear = (products.dr_addon_year?.amountCents ?? 4788) / 100;
 
   const { docs, user } = useDemo();
+  const canBuy = user.plan !== "starter" && user.planStatus !== "cancelled";
+  useEffect(() => {
+    const on = () => void refreshBypass();
+    window.addEventListener("fpd:billing-changed", on);
+    return () => window.removeEventListener("fpd:billing-changed", on);
+  }, [refreshBypass]);
   const [categories, setCategories] = useState<FileCategory[]>([]);
 
   // Re-derive when documents load, preserving the user's tick choices.
@@ -505,15 +358,14 @@ export function DisasterRecovery() {
 
         <div className="demo-banner">
           <div>
-            <div className="demo-tag">🎮 DEMO MODE — FULL FLOW GUIDE</div>
+            <div className="demo-tag">HOW IT WORKS</div>
             <div className="demo-text">
-              <strong>Step 1:</strong> Click <em>"Add Disaster Recovery"</em> below to purchase the add-on (pre-filled Stripe test card).<br/>
+              <strong>Step 1:</strong> Add Disaster Recovery below (paid by card through Stripe's secure checkout).<br/>
               <strong>Step 2:</strong> A Master Admin grants the 48-hour window from Admin → Disaster Recovery.<br/>
               <strong>Step 3:</strong> This page unlocks on its own — select file categories and generate a bulk archive.
             </div>
           </div>
           <div className="demo-acts">
-            <button onClick={() => setShowPurchase(true)} className="btn-ghost">1. Add Add-On →</button>
             <button onClick={() => {
               void refreshBypass();
               toast.info("Checked for an active bypass — a Master Admin grants the window from the admin console.");
@@ -543,10 +395,12 @@ export function DisasterRecovery() {
 
           <div className="pricegrid">
             {[
-              { label:"MONTHLY", price:"$4.99", sub:"/month", note:null, highlight:false },
-              { label:"ANNUAL", price:"$3.99", sub:"/month", note:"Save 20% · $47.88/yr", highlight:true },
-            ].map(opt => (
-              <div key={opt.label} className={`pricecard ${opt.highlight ? "hi" : ""}`}>
+              { iv: "month" as Interval, label:"MONTHLY", price:`$${drMonth.toFixed(2)}`, sub:"/month", note:null },
+              { iv: "year" as Interval, label:"YEARLY", price:`$${(drYear / 12).toFixed(2)}`, sub:"/month", note:`Billed $${drYear.toFixed(2)}/yr` },
+            ].map(opt => ({ ...opt, highlight: chosenInterval === opt.iv })).map(opt => (
+              <div key={opt.label} className={`pricecard ${opt.highlight ? "hi" : ""}`} role="button" tabIndex={0}
+                aria-pressed={opt.highlight} style={{ cursor: "pointer" }}
+                onClick={() => setChosenInterval(opt.iv)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") setChosenInterval(opt.iv); }}>
                 <div style={{ fontSize:10, ...MONO, color:MUTED, marginBottom:6 }}>{opt.label}</div>
                 <div style={{ fontSize:26, fontWeight:800, color: opt.highlight ? ACCENT2 : TEXT }}>
                   {opt.price}
@@ -557,10 +411,12 @@ export function DisasterRecovery() {
             ))}
           </div>
 
-          {!addonActive ? (
-            <button onClick={() => setShowPurchase(true)} className="btn-primary">
+          {!addonActive && !canBuy ? (
+            <p style={{ color:MUTED, fontSize:14 }}>Disaster Recovery is available with a paid plan. Choose one in Usage &amp; Billing.</p>
+          ) : !addonActive ? (
+            <button onClick={() => setPurchaseInterval(chosenInterval)} className="btn-primary">
               <ShieldAlert size={18}/>
-              Add Disaster Recovery — $4.99/mo
+              Add Disaster Recovery: {chosenInterval === "year" ? `$${drYear.toFixed(2)}/yr` : `$${drMonth.toFixed(2)}/mo`}
               <ArrowRight size={16}/>
             </button>
           ) : (
@@ -649,11 +505,9 @@ export function DisasterRecovery() {
           </div>
         </div>
       </div>
-      {showPurchase && (
-        <DRPurchaseModal
-          onClose={() => setShowPurchase(false)}
-          onSuccess={() => { void refreshBypass(); }}
-        />
+      {purchaseInterval && (
+        <CheckoutConsentModal purchase={{ kind: "dr_addon", interval: purchaseInterval }} page="disaster-recovery"
+          onClose={() => { setPurchaseInterval(null); notifyBillingChanged(); }}/>
       )}
     </div>);
   }
