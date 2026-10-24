@@ -1,142 +1,348 @@
-// Card checkout for the signed-in account (mounted under /account, behind
-// requireUser): plan upgrades and the $199 Legacy Continuation Fee, through
-// Stripe Checkout. Stripe hosts the card form; the result comes back through
-// the signed webhook in routes/public.ts, which is the only place a plan or
-// fee is actually marked paid.
+// Billing for the signed-in account (mounted at /account/billing, behind
+// requireUser). Stripe hosts every card form: checkout routes return a URL to
+// send the browser to, and the signed webhook (routes/stripeWebhook.ts) is the
+// only place a purchase actually takes effect.
 //
-// Checkout is available only when Stripe is the connected, active processor
-// under Developer → Payment Processors (lib/stripe.ts). No Stripe price IDs
-// are needed: amounts are built from subscription_plans / admin_settings at
-// the moment of checkout, so admin price changes apply immediately.
+// Prices come from the synced catalog (lib/billing/catalog.ts), never from
+// the request. BILLING_PAUSED stops new purchases and plan changes but not
+// cancelling or the portal.
 import { Hono } from "npm:hono";
+import type { Context } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
-import { loadStripeConfig, stripeRequest } from "../lib/stripe.ts";
-import { billingPaused } from "../lib/billingConfig.ts";
+import { isLivemode, stripe, stripeMode } from "../lib/stripe.ts";
+import { billingPaused, consentRequired, returnOrigin, taxEnabled } from "../lib/billingConfig.ts";
+import { CatalogError, planPrice, productPrice, type Interval } from "../lib/billing/catalog.ts";
+import { findCustomer, getOrCreateCustomer } from "../lib/billing/customers.ts";
+import { CONSENT_VERSION, consentText, type ConsentPurpose } from "../lib/billing/consent.ts";
+import { portalConfigurationId } from "../lib/billing/setup.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 
-const billing = new Hono();
+type Env = { Variables: { user: AuthedUser } };
+const billing = new Hono<Env>();
 
-/** Where Stripe sends the browser back to. Only the page's own origin is
- *  accepted, so a forged request can't turn checkout into an open redirect. */
-function returnOrigin(c: { req: { header: (name: string) => string | undefined } }): string | null {
-  const origin = c.req.header("origin");
-  return origin && /^https?:\/\/[^/]+$/.test(origin) ? origin : null;
+const ACCESS = ["active", "trialing", "past_due"];
+const PAGE = /^[a-z][a-z-]{0,40}$/;
+
+function interval(value: unknown): Interval {
+  return value === "year" ? "year" : "month";
 }
 
-// GET /account/billing/status — lets the app decide between real checkout
-// and the no-payment plan switch it falls back to when Stripe isn't connected.
-billing.get("/status", async (c) => {
-  const config = await loadStripeConfig();
-  return c.json({ checkoutEnabled: Boolean(config) && !billingPaused(), testMode: config?.testMode ?? false });
+function errorResponse(c: Context, err: unknown) {
+  if (err instanceof CatalogError) return c.json({ error: err.message }, err.status);
+  console.error("billing:", err);
+  return c.json({ error: err instanceof Error ? err.message : "Billing request failed" }, 502);
+}
+
+/** Shared refusals for anything that starts a new charge. */
+function purchaseBlocked(c: Context): Response | null {
+  if (!stripeMode()) return c.json({ error: "Card payments are being set up. Please try again shortly." }, 503);
+  if (billingPaused()) return c.json({ error: "Billing is being updated. Please try again in a few minutes." }, 503);
+  return null;
+}
+
+async function loadAccount(userId: string) {
+  const { data } = await adminClient().from("users")
+    .select("id, email, full_name, plan, plan_status, deceased_at, overage_blocked")
+    .eq("id", userId).maybeSingle();
+  return data;
+}
+
+async function accessRow(userId: string, line: "plan" | "dr_addon") {
+  const { data } = await adminClient().from("subscriptions").select("*")
+    .eq("user_id", userId).eq("product_line", line).in("status", ACCESS)
+    .order("updated_at", { ascending: false }).limit(1);
+  return data?.[0] ?? null;
+}
+
+/** Checks the consent the browser sent against the current wording. */
+function checkConsent(c: Context, sent: unknown, expected: string): Response | null {
+  const body = (sent ?? {}) as { text?: string; version?: string };
+  const agreed = body.text === expected && body.version === CONSENT_VERSION;
+  if (!agreed && consentRequired()) {
+    return c.json({ error: "Please read and tick the renewal terms to continue.", consentText: expected, consentVersion: CONSENT_VERSION }, 400);
+  }
+  return null;
+}
+
+async function recordConsent(c: Context, row: {
+  userId: string; purpose: ConsentPurpose; planId?: string | null; productSlug?: string | null;
+  interval?: Interval | null; amountCents: number; text: string; sessionId: string;
+}) {
+  const { error } = await adminClient().from("billing_consents").insert({
+    user_id: row.userId, purpose: row.purpose, plan_id: row.planId ?? null, product_slug: row.productSlug ?? null,
+    interval: row.interval ?? null, amount_cents: row.amountCents, consent_text: row.text, consent_version: CONSENT_VERSION,
+    checkout_session_id: row.sessionId, livemode: isLivemode(),
+    ip: c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    user_agent: c.req.header("user-agent")?.slice(0, 400) ?? null,
+  });
+  if (error) console.error("billing_consents insert failed:", error.message);
+}
+
+/** Checkout session fields every purchase shares. */
+function sessionBase(origin: string, page: string, customer: string, userId: string) {
+  const tax = taxEnabled();
+  return {
+    customer,
+    client_reference_id: userId,
+    // Charge in USD only: Adaptive Pricing would switch the currency and then
+    // Stripe refuses every USD overage line on later invoices (pitfall 4.1).
+    adaptive_pricing: { enabled: false },
+    payment_method_types: ["card", "link"],
+    allow_promotion_codes: false,
+    success_url: `${origin}/dashboard?page=${page}&payment=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/dashboard?page=${page}&payment=cancelled`,
+    ...(tax ? { automatic_tax: { enabled: true }, customer_update: { address: "auto", name: "auto" }, billing_address_collection: "required" } : {}),
+  };
+}
+
+// GET /account/billing/status — whether checkout can start right now.
+billing.get("/status", (c) => {
+  return c.json({ checkoutEnabled: Boolean(stripeMode()) && !billingPaused(), testMode: stripeMode() === "test" });
 });
 
-// POST /account/billing/checkout/plan { planId, interval }
-billing.post("/checkout/plan", async (c) => {
-  const user = c.get("user") as AuthedUser;
-  const { planId, interval } = await c.req.json().catch(() => ({}));
-  const config = await loadStripeConfig();
-  if (!config) return c.json({ error: "Card checkout is not connected yet" }, 503);
-  const origin = returnOrigin(c);
-  if (!origin) return c.json({ error: "Missing request origin" }, 400);
-  // Starter is the 14-day introductory plan — it is never bought.
-  if (!planId || planId === "starter") return c.json({ error: "Choose a plan to upgrade to" }, 400);
+// GET /account/billing/consent-text?purpose=plan&planId=foundation&interval=year
+//                                 ?purpose=dr_addon&interval=month
+//                                 ?purpose=wg_card_on_file
+billing.get("/consent-text", async (c) => {
+  const purpose = c.req.query("purpose");
+  const iv = interval(c.req.query("interval"));
+  try {
+    if (purpose === "plan") {
+      const { plan, amountCents } = await planPrice(c.req.query("planId") ?? "", iv);
+      return c.json({ text: consentText({ purpose, name: `the ${plan.name} plan`, amountCents, interval: iv }), version: CONSENT_VERSION, amountCents });
+    }
+    if (purpose === "dr_addon") {
+      const { product, amountCents } = await productPrice(iv === "year" ? "dr_addon_year" : "dr_addon_month");
+      return c.json({ text: consentText({ purpose, name: product.name, amountCents, interval: iv }), version: CONSENT_VERSION, amountCents });
+    }
+    if (purpose === "wg_card_on_file") {
+      const [{ product, amountCents }, block] = await Promise.all([productPrice("wg_setup"), productPrice("wg_session_block")]);
+      return c.json({ text: consentText({ purpose, name: product.name, amountCents, blockCents: block.amountCents }), version: CONSENT_VERSION, amountCents });
+    }
+    return c.json({ error: "Unknown purpose" }, 400);
+  } catch (err) {
+    return errorResponse(c, err);
+  }
+});
 
+// GET /account/billing/summary — everything the Usage & Billing page shows.
+billing.get("/summary", async (c) => {
+  const user = c.get("user");
   const db = adminClient();
-  const [{ data: plan }, { data: account }] = await Promise.all([
-    db.from("subscription_plans").select("id, name, price_monthly, price_annual, is_active").eq("id", planId).maybeSingle(),
-    db.from("users").select("stripe_customer_id, deceased_at").eq("id", user.id).maybeSingle(),
+  const livemode = isLivemode();
+  const [account, { data: subs }, { data: period }, { data: cap }, { data: card }, { data: fee }, { data: plans }] = await Promise.all([
+    loadAccount(user.id),
+    db.from("subscriptions").select("id, product_line, plan_id, product_slug, status, interval, current_period_end, cancel_at_period_end, cancel_at, pending_plan_id, pending_interval, pending_change_at, comp_reason")
+      .eq("user_id", user.id).order("updated_at", { ascending: false }).limit(20),
+    db.from("usage_periods").select("period_start, period_end, included_bytes, unit_bytes, current_bytes, peak_bytes, billable_units, billable_cents, rate_cents, overage_allowed")
+      .eq("user_id", user.id).eq("status", "open").maybeSingle(),
+    db.from("storage_spend_caps").select("cap_amount_usd").eq("user_id", user.id).maybeSingle(),
+    db.from("wg_payment_methods").select("card_brand, card_last4, livemode").eq("user_id", user.id).maybeSingle(),
+    db.from("legacy_continuation_fees").select("id, paid_at, activated_at, expires_at").eq("user_id", user.id).eq("status", "paid").limit(1),
+    db.from("subscription_plans").select("id, name, price_monthly, storage_gb, overage_rate"),
   ]);
-  if (!plan || !plan.is_active) return c.json({ error: "That plan is not available" }, 400);
-  if (account?.deceased_at) return c.json({ error: "This account is frozen" }, 403);
+  if (!account) return c.json({ error: "Account not found" }, 404);
 
-  const yearly = interval === "year";
-  const amount = Math.round(Number(yearly ? plan.price_annual : plan.price_monthly) * 100);
-  const metadata = { user_id: user.id, plan_id: plan.id, kind: "plan" };
+  const plan = plans?.find((p) => p.id === account.plan);
+  const live = (subs ?? []).filter((s) => ACCESS.includes(s.status));
+  const capCents = cap?.cap_amount_usd != null ? Math.round(Number(cap.cap_amount_usd) * 100) : Math.round(Number(plan?.price_monthly ?? 0) * 100);
+
+  return c.json({
+    plan: account.plan,
+    planName: plan?.name ?? account.plan,
+    planStatus: account.plan_status,
+    storageGb: plan?.storage_gb ?? null,
+    overageRateCents: Math.round(Number(plan?.overage_rate ?? 0) * 100),
+    planSubscription: live.find((s) => s.product_line === "plan") ?? null,
+    drSubscription: live.find((s) => s.product_line === "dr_addon") ?? null,
+    subscriptions: subs ?? [],
+    usage: period ?? null,
+    capCents,
+    capIsDefault: cap?.cap_amount_usd == null,
+    overageBlocked: account.overage_blocked,
+    wgCard: card && card.livemode === livemode && card.card_last4 ? { brand: card.card_brand, last4: card.card_last4 } : null,
+    continuationFee: fee?.[0] ?? null,
+    hasCustomer: stripeMode() ? Boolean(await findCustomer(user.id)) : false,
+    checkoutEnabled: Boolean(stripeMode()) && !billingPaused(),
+    billingPaused: billingPaused(),
+    consentRequired: consentRequired(),
+    livemode,
+  });
+});
+
+// POST /account/billing/checkout/plan { planId, interval, consent: { text, version }, page? }
+billing.post("/checkout/plan", async (c) => {
+  const blocked = purchaseBlocked(c);
+  if (blocked) return blocked;
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const iv = interval(body.interval);
+  const origin = returnOrigin(c);
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+  const page = PAGE.test(body.page ?? "") ? body.page : "storage-usage";
+
+  const account = await loadAccount(user.id);
+  if (!account) return c.json({ error: "Account not found" }, 404);
+  if (account.deceased_at) return c.json({ error: "This account is frozen" }, 403);
+  if (await accessRow(user.id, "plan")) {
+    return c.json({ error: "You already have a plan. Change it from Usage & Billing instead." }, 409);
+  }
 
   try {
-    const session = await stripeRequest<{ url: string }>(config.secretKey, "POST", "/checkout/sessions", {
+    const { plan, priceId, amountCents } = await planPrice(String(body.planId ?? ""), iv);
+    const text = consentText({ purpose: "plan", name: `the ${plan.name} plan`, amountCents, interval: iv });
+    const consentProblem = checkConsent(c, body.consent, text);
+    if (consentProblem) return consentProblem;
+
+    const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
+    const metadata = { userId: user.id, planId: plan.id, interval: iv, purchaseType: "plan" };
+    const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
+      ...sessionBase(origin, page, customer, user.id),
       mode: "subscription",
-      client_reference_id: user.id,
-      ...(account?.stripe_customer_id ? { customer: account.stripe_customer_id } : { customer_email: user.email }),
-      line_items: [{
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: amount,
-          recurring: { interval: yearly ? "year" : "month" },
-          product_data: { name: `Final Pass Down — ${plan.name}` },
-        },
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
       metadata,
       subscription_data: { metadata },
-      success_url: `${origin}/dashboard?payment=success`,
-      cancel_url: `${origin}/dashboard?page=storage-usage`,
     });
+    await recordConsent(c, { userId: user.id, purpose: "plan", planId: plan.id, interval: iv, amountCents, text, sessionId: session.id });
     return c.json({ url: session.url });
   } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : "Could not start checkout" }, 502);
+    return errorResponse(c, err);
   }
 });
 
-// POST /account/billing/checkout/continuation-fee
-// The account owner pays the one-time Legacy Continuation Fee.
-billing.post("/checkout/continuation-fee", async (c) => {
-  const user = c.get("user") as AuthedUser;
-  const config = await loadStripeConfig();
-  if (!config) return c.json({ error: "Card checkout is not connected yet" }, 503);
+// POST /account/billing/checkout/addon { product: "dr_addon", interval, consent, page? }
+billing.post("/checkout/addon", async (c) => {
+  const blocked = purchaseBlocked(c);
+  if (blocked) return blocked;
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  if (body.product !== "dr_addon") return c.json({ error: "Unknown add-on" }, 400);
+  const iv = interval(body.interval);
   const origin = returnOrigin(c);
-  if (!origin) return c.json({ error: "Missing request origin" }, 400);
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+  const page = PAGE.test(body.page ?? "") ? body.page : "disaster-recovery";
+
+  const account = await loadAccount(user.id);
+  if (!account) return c.json({ error: "Account not found" }, 404);
+  if (account.deceased_at) return c.json({ error: "This account is frozen" }, 403);
+  // A paid or comped plan (or one from before billing) — not Starter, not cancelled.
+  if (account.plan === "starter" || account.plan_status === "cancelled") {
+    return c.json({ error: "Disaster Recovery needs a paid plan. Choose a plan first." }, 409);
+  }
+  const { data: dr } = await adminClient().from("disaster_recovery_state").select("addon_active").eq("user_id", user.id).maybeSingle();
+  if (dr?.addon_active || await accessRow(user.id, "dr_addon")) {
+    return c.json({ error: "Disaster Recovery is already active on this account." }, 409);
+  }
+
+  try {
+    const { product, priceId, amountCents } = await productPrice(iv === "year" ? "dr_addon_year" : "dr_addon_month");
+    const text = consentText({ purpose: "dr_addon", name: product.name, amountCents, interval: iv });
+    const consentProblem = checkConsent(c, body.consent, text);
+    if (consentProblem) return consentProblem;
+
+    const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
+    const metadata = { userId: user.id, productSlug: product.slug, interval: iv, purchaseType: "dr_addon" };
+    const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
+      ...sessionBase(origin, page, customer, user.id),
+      mode: "subscription",
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata,
+      subscription_data: { metadata },
+    });
+    await recordConsent(c, { userId: user.id, purpose: "dr_addon", productSlug: product.slug, interval: iv, amountCents, text, sessionId: session.id });
+    return c.json({ url: session.url });
+  } catch (err) {
+    return errorResponse(c, err);
+  }
+});
+
+// POST /account/billing/checkout/one-time { product: "continuation_fee" | "wg_setup", consent?, page? }
+async function oneTimeCheckout(c: Context<Env>, product: string, body: Record<string, unknown>) {
+  const blocked = purchaseBlocked(c);
+  if (blocked) return blocked;
+  const user = c.get("user");
+  if (product !== "continuation_fee" && product !== "wg_setup") return c.json({ error: "Unknown product" }, 400);
+  const origin = returnOrigin(c);
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+  const fallbackPage = product === "continuation_fee" ? "legacy-continuation" : "white-glove";
+  const page = PAGE.test(String(body.page ?? "")) ? String(body.page) : fallbackPage;
 
   const db = adminClient();
-  const [{ data: setting }, { data: paid }, { data: account }] = await Promise.all([
-    db.from("admin_settings").select("value").eq("key", "continuation_fee_amount").maybeSingle(),
-    db.from("legacy_continuation_fees").select("id").eq("user_id", user.id).eq("status", "paid").limit(1),
-    db.from("users").select("stripe_customer_id").eq("id", user.id).maybeSingle(),
-  ]);
-  if (paid?.length) return c.json({ error: "The Legacy Continuation Fee is already paid for this account" }, 409);
-
-  const amount = Math.round(Number(setting?.value ?? "199") * 100);
-  const metadata = { user_id: user.id, kind: "continuation_fee" };
+  const account = await loadAccount(user.id);
+  if (!account) return c.json({ error: "Account not found" }, 404);
+  if (account.deceased_at) return c.json({ error: "This account is frozen" }, 403);
 
   try {
-    const session = await stripeRequest<{ url: string }>(config.secretKey, "POST", "/checkout/sessions", {
+    const { product: row, priceId, amountCents } = await productPrice(product);
+    let consent: { text: string } | null = null;
+
+    if (product === "continuation_fee") {
+      const { data: paid } = await db.from("legacy_continuation_fees").select("id").eq("user_id", user.id).eq("status", "paid").limit(1);
+      if (paid?.length) return c.json({ error: "The Legacy Continuation Fee is already paid for this account" }, 409);
+    } else {
+      const { data: card } = await db.from("wg_payment_methods").select("stripe_payment_method, livemode").eq("user_id", user.id).maybeSingle();
+      if (card?.stripe_payment_method && card.livemode === isLivemode()) {
+        return c.json({ error: "White Glove is already set up on this account." }, 409);
+      }
+      const block = await productPrice("wg_session_block");
+      const text = consentText({ purpose: "wg_card_on_file", name: row.name, amountCents, blockCents: block.amountCents });
+      const consentProblem = checkConsent(c, body.consent, text);
+      if (consentProblem) return consentProblem;
+      consent = { text };
+    }
+
+    const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
+    const metadata = { userId: user.id, productSlug: row.slug, purchaseType: product };
+    const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
+      ...sessionBase(origin, page, customer, user.id),
       mode: "payment",
-      client_reference_id: user.id,
-      ...(account?.stripe_customer_id ? { customer: account.stripe_customer_id } : { customer_email: user.email }),
-      line_items: [{
-        quantity: 1,
-        price_data: { currency: "usd", unit_amount: amount, product_data: { name: "Final Pass Down — Legacy Continuation Fee" } },
-      }],
+      line_items: [{ price: priceId, quantity: 1 }],
       metadata,
-      payment_intent_data: { metadata },
-      success_url: `${origin}/dashboard?page=legacy-continuation&payment=success`,
-      cancel_url: `${origin}/dashboard?page=legacy-continuation`,
+      payment_intent_data: {
+        metadata,
+        ...(product === "wg_setup" ? { setup_future_usage: "off_session" } : {}),
+      },
+      invoice_creation: { enabled: true, invoice_data: { metadata } },
     });
+    if (consent) {
+      await recordConsent(c, { userId: user.id, purpose: "wg_card_on_file", productSlug: row.slug, amountCents, text: consent.text, sessionId: session.id });
+    }
     return c.json({ url: session.url });
   } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : "Could not start checkout" }, 502);
+    return errorResponse(c, err);
   }
+}
+
+billing.post("/checkout/one-time", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  return await oneTimeCheckout(c, String(body.product ?? ""), body);
 });
 
-// POST /account/billing/portal — Stripe's hosted page for cards, invoices and cancelling.
+// Kept for the Legacy Continuation Fee page built before the catalog.
+billing.post("/checkout/continuation-fee", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  return await oneTimeCheckout(c, "continuation_fee", body);
+});
+
+// POST /account/billing/portal — Stripe's page for cards, invoices, billing
+// details and cancelling at period end (plan switching is off there).
 billing.post("/portal", async (c) => {
-  const user = c.get("user") as AuthedUser;
-  const config = await loadStripeConfig();
-  if (!config) return c.json({ error: "Card checkout is not connected yet" }, 503);
+  if (!stripeMode()) return c.json({ error: "Card payments are being set up. Please try again shortly." }, 503);
+  const user = c.get("user");
   const origin = returnOrigin(c);
-  if (!origin) return c.json({ error: "Missing request origin" }, 400);
-
-  const { data: account } = await adminClient().from("users").select("stripe_customer_id").eq("id", user.id).maybeSingle();
-  if (!account?.stripe_customer_id) return c.json({ error: "No card payments on this account yet" }, 400);
-
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+  const customer = await findCustomer(user.id);
+  if (!customer) return c.json({ error: "No card payments on this account yet" }, 400);
   try {
-    const session = await stripeRequest<{ url: string }>(config.secretKey, "POST", "/billing_portal/sessions", {
-      customer: account.stripe_customer_id,
+    const configuration = await portalConfigurationId();
+    const session = await stripe<{ url: string }>("POST", "/billing_portal/sessions", {
+      customer,
       return_url: `${origin}/dashboard?page=storage-usage`,
+      ...(configuration ? { configuration } : {}),
     });
     return c.json({ url: session.url });
   } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : "Could not open the billing portal" }, 502);
+    return errorResponse(c, err);
   }
 });
 
