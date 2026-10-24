@@ -33,6 +33,7 @@ import twoFactor from "./routes/twoFactor.ts";
 import settings from "./routes/settings.ts";
 import billing from "./routes/billing.ts";
 import contacts from "./routes/contacts.ts";
+import adminBilling from "./routes/adminBilling.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -98,6 +99,9 @@ admin.use("/subscriptions", requireModulePermission("continuation"));
 admin.use("/subscriptions/*", requireModulePermission("continuation"));
 admin.use("/pricing", requireModulePermission("subscription"));
 admin.use("/pricing/*", requireModulePermission("subscription"));
+// Stripe setup (catalog sync, portal, webhook check) sits with plan pricing.
+admin.use("/billing", requireModulePermission("subscription"));
+admin.use("/billing/*", requireModulePermission("subscription"));
 admin.use("/email-templates", requireModulePermission("email_templates"));
 admin.use("/email-templates/*", requireModulePermission("email_templates"));
 admin.use("/white-label", requireModulePermission("white_label"));
@@ -136,6 +140,7 @@ admin.route("/partnerships", partnerships);
 admin.route("/payouts", payouts);
 admin.route("/subscriptions", subscriptions);
 admin.route("/pricing", pricing);
+admin.route("/billing", adminBilling);
 admin.route("/email-templates", emailTemplates);
 admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);
