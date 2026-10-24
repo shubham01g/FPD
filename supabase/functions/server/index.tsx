@@ -36,6 +36,7 @@ import contacts from "./routes/contacts.ts";
 import adminBilling from "./routes/adminBilling.ts";
 import internal from "./routes/internal.ts";
 import adminUserBilling from "./routes/adminUserBilling.ts";
+import adminBillingTest from "./routes/adminBillingTest.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -145,6 +146,8 @@ admin.route("/partnerships", partnerships);
 admin.route("/payouts", payouts);
 admin.route("/subscriptions", subscriptions);
 admin.route("/pricing", pricing);
+// Test-mode helpers for proving billing (404 with a live key).
+admin.route("/billing/test", adminBillingTest);
 admin.route("/billing", adminBilling);
 admin.route("/user-billing", adminUserBilling);
 admin.route("/email-templates", emailTemplates);
