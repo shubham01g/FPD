@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { billing } from "../services/billing";
+import { BILLING_CHANGED } from "../services/billing";
 import { useAuth } from "./AuthContext";
 import {
   db, supabase, tables, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
@@ -94,18 +94,22 @@ export interface UserProfile {
   deceasedAt: string | null;
   /** Suspended by an admin (Master Admin → Users). Stored as plan_status "paused". */
   suspended: boolean;
+  /** Set by billing: past_due while a failed renewal is retried, cancelled
+   *  once a paid plan has ended (the portal then offers Reactivate). */
+  planStatus: "active" | "paused" | "cancelled" | "past_due";
   /* Demographics (migration 020) — feed the admin Analytics tab. Blank for
      any account that hasn't filled them in; editable in Account Settings. */
   gender: string; birthdate: string; country: string; referralSource: string;
 }
 
+/* Fallback only; the real allowances are read from subscription_plans. */
 const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
   starter: 1, foundation: 50, family_archive: 250, legacy_pro: 500, legacy_vault: 1024,
 };
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
-  starterStartedAt: null, deceasedAt: null, suspended: false,
+  starterStartedAt: null, deceasedAt: null, suspended: false, planStatus: "active",
   gender: "", birthdate: "", country: "", referralSource: "",
 };
 
@@ -233,8 +237,9 @@ interface DemoCtx {
   funeralPlan: FuneralPlan;
   emergencyInfo: EmergencyInfo;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
-  /** Switches the account's plan. Resolves true when the change landed. */
-  changePlan: (plan: UserProfile["plan"], planName: string) => Promise<boolean>;
+  /** Re-reads the account's plan and billing status (after a purchase, a
+   *  plan change or a cancellation). Plans only change through billing. */
+  refreshUser: () => Promise<void>;
   addDoc: (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
   addFolder: (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => Promise<VaultFolder | null>;
@@ -296,6 +301,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [emergencyInfo, setEmergencyInfo] = useState<EmergencyInfo>(EMPTY_EMERGENCY_INFO);
   const [continuationFeePaid, setContinuationFeePaid] = useState(false);
   const [deathVerifiedDoc, setDeathVerifiedDoc] = useState<string | null>(null);
+  /* Storage allowance per plan, from subscription_plans. */
+  const planGb = useRef<Record<string, number>>({ ...PLAN_STORAGE_GB });
 
   /* Load everything for the signed-in user, and keep notifications live. */
   useEffect(() => {
@@ -311,7 +318,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const [
         userRes, docsRes, contactsRes, idvRes, wishesRes, allergiesRes,
         medsRes, remindersRes, memoriesRes, occasionsRes, notifsRes,
-        feeRes, funeralPlanRes, emergencyInfoRes, foldersRes,
+        feeRes, funeralPlanRes, emergencyInfoRes, foldersRes, plansRes,
       ] = await Promise.all([
         db.getUser(uid),
         db.listDocuments(uid),
@@ -328,18 +335,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         db.getFuneralPlan(uid),
         db.getEmergencyInfo(uid),
         tables.vaultFolders.list(uid),
+        supabase.from("subscription_plans").select("id, storage_gb"),
       ]);
       if (cancelled) return;
+      for (const p of (plansRes.data ?? []) as { id: string; storage_gb: number }[]) planGb.current[p.id] = p.storage_gb;
 
       if (userRes.data) {
         const used = (docsRes.data ?? []).reduce((sum, d) => sum + d.file_size_bytes, 0) / (1024 ** 3);
         setUser({
           name: userRes.data.full_name, email: userRes.data.email, phone: userRes.data.phone ?? "",
-          plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: PLAN_STORAGE_GB[userRes.data.plan],
+          plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: planGb.current[userRes.data.plan] ?? PLAN_STORAGE_GB[userRes.data.plan],
           avatar: initials(userRes.data.full_name),
           starterStartedAt: userRes.data.starter_started_at ?? null,
           deceasedAt: userRes.data.deceased_at ?? null,
-        suspended: userRes.data.plan_status === "paused",
+          suspended: userRes.data.plan_status === "paused",
+          planStatus: userRes.data.plan_status,
           gender: userRes.data.gender ?? "", birthdate: userRes.data.birthdate ?? "",
           country: userRes.data.country ?? "", referralSource: userRes.data.referral_source ?? "",
         });
@@ -393,26 +403,24 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Profile updated", { id: tid });
   }, [uid]);
 
-  /* Separate from updateUser, which rewrites the whole profile. The browser
-     is sent to Stripe Checkout and the plan only changes once the signed
-     webhook confirms payment. A plan is never switched from here: the
-     database refuses it (migration 038), and so does this. */
-  const changePlan = useCallback(async (plan: UserProfile["plan"], planName: string) => {
-    if (!uid) return false;
-    if (!(await billing.status()).checkoutEnabled) {
-      toast.error("Card payments are being set up. Please try again shortly.");
-      return false;
-    }
-    const tid = toast.loading(`Opening secure checkout for ${planName}...`);
-    try {
-      const { url } = await billing.planCheckout(plan);
-      window.location.assign(url);
-      return false; // not changed yet — the webhook does that after payment
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
-      return false;
-    }
+  /* Plans change only through billing (Stripe Checkout, plan changes, the
+     webhook), so after any of those the account row is simply re-read. */
+  const refreshUser = useCallback(async () => {
+    if (!uid) return;
+    const { data } = await db.getUser(uid);
+    if (!data) return;
+    setUser(u => ({
+      ...u, plan: data.plan, planStatus: data.plan_status, suspended: data.plan_status === "paused",
+      storageLimit: planGb.current[data.plan] ?? PLAN_STORAGE_GB[data.plan],
+      starterStartedAt: data.starter_started_at ?? null,
+    }));
   }, [uid]);
+
+  useEffect(() => {
+    const on = () => void refreshUser();
+    window.addEventListener(BILLING_CHANGED, on);
+    return () => window.removeEventListener(BILLING_CHANGED, on);
+  }, [refreshUser]);
 
   /* Docs */
   const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => {
@@ -775,7 +783,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     <DemoContext.Provider value={{
       user, docs, folders, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       funeralPlan, emergencyInfo,
-      updateUser, changePlan, addDoc, deleteDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
+      updateUser, refreshUser, addDoc, deleteDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,

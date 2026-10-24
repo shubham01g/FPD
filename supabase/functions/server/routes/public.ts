@@ -13,7 +13,7 @@ const pub = new Hono();
 pub.get("/plans", async (c) => {
   const { data, error } = await adminClient()
     .from("subscription_plans")
-    .select("id, name, price_monthly, price_annual, storage_gb, max_contacts, overage_rate")
+    .select("id, name, price_monthly, price_annual, storage_gb, max_contacts, overage_rate, billable")
     .eq("is_active", true)
     .order("price_monthly", { ascending: true });
 

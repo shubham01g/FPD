@@ -1,18 +1,17 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { HardDrive, AlertTriangle, TrendingUp, Bell, ArrowUp, Percent, Gauge, ShieldAlert, CheckCircle, X, CreditCard, Shield, Trash2, Save } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { HardDrive, AlertTriangle, TrendingUp, ArrowUp, Percent, Gauge, CheckCircle, CreditCard, Shield, Trash2, Save, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { CryptoPayment } from "./CryptoPayment";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { deriveStorageBreakdown, deriveMonthlyUsage, projectEndOfMonth } from "../utils/storageBreakdown";
-import { useSpendingProtection } from "../hooks/useSpendingProtection";
-import { useDemo, type UserProfile } from "../context/DemoContext";
-import { publicApi } from "../services/publicApi";
-import { useAdminFetch } from "../hooks/useAdminFetch";
+import { useDemo } from "../context/DemoContext";
 import { usePlatform } from "../services/platform";
 import { starterDaysLeft } from "../utils/starterPlan";
+import { billing, notifyBillingChanged, type Interval } from "../services/billing";
+import { useBillingSummary } from "../hooks/useBillingSummary";
+import { annualSavingPct, formatPrice, formatStorage, usePlans, useProducts } from "../utils/planCatalog";
+import { CheckoutConsentModal, type Purchase } from "./billing/CheckoutConsentModal";
 import heroStoragePhoto from "../../imports/storageusage_hero_photo.webp";
-import { FPD_EMAIL } from "../utils/fpdEmails";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -25,20 +24,10 @@ const POS     = "#5FBE91";
 const WARN    = "#D9A55E";
 const NEG     = "#D06B6B";
 
-/* storage_usage is never written by the app or the Edge functions, so the
-   6-month history, the category split and the live total are all derived
-   from the user's own vault_documents rows — see utils/storageBreakdown.ts. */
-
-interface DBPlan { id: string; name: string; price_monthly: number; storage_gb: number; overage_rate: number; }
-
-const FALLBACK_PLANS = [
-  { id: "starter",        name: "Starter",       storage: 1,    price: 1.99,   overage: 0.50 },
-  { id: "foundation",     name: "Foundation",    storage: 50,   price: 9.99,   overage: 0.40 },
-  { id: "family_archive", name: "Legacy Archive",storage: 250,  price: 24.99,  overage: 0.40 },
-  { id: "legacy_pro",     name: "Legacy Pro",    storage: 500,  price: 49.99,  overage: 0.40 },
-  { id: "legacy_vault",   name: "Legacy Vault",  storage: 1024, price: 129.99, overage: 0.40 },
-];
-
+/* Billing state comes from the server (/account/billing/summary): the plan
+   subscription, the storage usage period and overage so far, the overage
+   limit, and the add-ons. Charts are derived from the account's documents
+   (utils/storageBreakdown.ts). */
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -198,213 +187,128 @@ const STORAGE_CSS = `
 .fpd-storage .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fpd-storage .modal-btn-primary{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:14.5px;font-family:var(--font-body);background:linear-gradient(135deg,${WARN},#B4842E);color:#1C1608;box-shadow:0 6px 16px -8px rgba(217,165,94,0.6);}
 .fpd-storage .modal-btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+/* subscription panel + billing-period toggle */
+.fpd-storage .sub-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.fpd-storage .sub-name{font-family:var(--font-display);font-size:22px;color:${TEXT};font-weight:600;}
+.fpd-storage .sub-meta{color:${MUTED};font-size:15px;margin-top:4px;}
+.fpd-storage .sub-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.fpd-storage .sub-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:12px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:${SOFT};}
+.fpd-storage .sub-btn.primary{border:none;background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;}
+.fpd-storage .sub-btn:disabled{opacity:.5;cursor:not-allowed;}
+.fpd-storage .sub-note{margin-top:14px;padding:12px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;font-size:15px;line-height:1.5;}
+.fpd-storage .iv-toggle{display:inline-flex;padding:4px;border-radius:99px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
+.fpd-storage .iv-toggle button{padding:7px 16px;border-radius:99px;border:none;cursor:pointer;font-size:14.5px;font-weight:600;background:transparent;color:${MUTED};font-family:var(--font-body);}
+.fpd-storage .iv-toggle button.on{background:${ACCENT};color:#fff;}
 `;
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const GB = 1024 ** 3;
 
-/* ── Disaster Recovery Protection — add-on purchase modal ──────────
-   Mirrors the modal in DisasterRecovery.tsx (same pricing). Both read the
-   add-on flag from disaster_recovery_state, so subscribing from either page
-   stays in sync without either of them being able to set the flag: the row
-   grants the owner SELECT only, and the processor webhook is the writer. */
-function DRAddonModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
-  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
-  const [step, setStep] = useState<"select" | "pay" | "done">("select");
-  // Payment fields start blank — this form used to open pre-filled with a
-  // Stripe test card, a sample cardholder name, expiry and CVV.
-  const [cardNum, setCardNum] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handlePay = async () => {
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setLoading(false);
-    onSuccess();
-    setStep("done");
-  };
-
-  return (
-    <div className="backdrop">
-      <div className="modal">
-        <div className="modal-head">
-          <div className="flex items-center gap-3">
-            <ShieldAlert size={20} color="#1C1608" />
-            <div>
-              <div className="modal-head-title">Disaster Recovery Protection</div>
-              <div className="modal-head-sub">Platform Add-On</div>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: "rgba(28,22,8,0.15)", border: "none",
-            borderRadius: 8, padding: 6, cursor: "pointer", color: "#1C1608" }}><X size={16} /></button>
-        </div>
-
-        <div className="modal-body">
-          {step === "select" && (<>
-            <div className="row2">
-              {(["monthly", "annual"] as const).map(b => (
-                <button key={b} onClick={() => setBilling(b)} style={{
-                  padding: "14px 12px", borderRadius: 12, cursor: "pointer", textAlign: "center",
-                  border: `2px solid ${billing === b ? WARN : "rgba(255,255,255,0.1)"}`,
-                  background: billing === b ? "rgba(217,165,94,0.1)" : "#0F1624" }}>
-                  <div style={{ fontSize: 11, color: MUTED, ...MONO, marginBottom: 4 }}>{b.toUpperCase()}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: billing === b ? WARN : TEXT }}>
-                    ${b === "annual" ? "3.99" : "4.99"}<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span>
-                  </div>
-                  {b === "annual" && <div style={{ fontSize: 11, color: POS, marginTop: 3 }}>Save 20% · $47.88/yr</div>}
-                </button>
-              ))}
-            </div>
-            <div style={{ background: "rgba(217,165,94,0.06)", border: "1px solid rgba(217,165,94,0.2)",
-              borderRadius: 12, padding: "14px 16px" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: WARN, marginBottom: 10, ...MONO }}>WHAT'S INCLUDED</div>
-              {["48-hour emergency bypass window on demand", "Bulk export up to 100 GB of your vault",
-                "AES-256 encrypted archive generation", "Secure 15-minute download link",
-                "Full audit trail of all access", "Instant notification when bypass is activated"].map(item => (
-                <div key={item} className="flex items-center gap-2 py-1">
-                  <CheckCircle size={12} color={WARN} />
-                  <span style={{ fontSize: 13, color: SOFT }}>{item}</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setStep("pay")} className="modal-btn-primary">
-              Continue to Payment — ${billing === "annual" ? "3.99" : "4.99"}/mo →
-            </button>
-          </>)}
-
-          {step === "pay" && (<>
-            <div style={{ background: "#0F1624", borderRadius: 10, padding: "11px 14px", fontSize: 13, color: SOFT }}>
-              <strong style={{ color: TEXT }}>Disaster Recovery Protection</strong> · {billing === "annual" ? "$47.88/yr ($3.99/mo)" : "$4.99/month"}
-            </div>
-            <div className="space-y-3">
-              <div className="field">
-                <label>CARD NUMBER</label>
-                <div style={{ position: "relative" }}>
-                  <input value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g, "").slice(0, 16))}
-                    style={{ paddingLeft: 36, letterSpacing: "0.05em" }} />
-                  <CreditCard size={14} color={WARN} style={{ position: "absolute", left: 12, top: 34, transform: "translateY(-50%)" }} />
-                </div>
-              </div>
-              <div className="field"><label>NAME ON CARD</label><input value={cardName} onChange={e => setCardName(e.target.value)} /></div>
-              <div className="row2">
-                <div className="field"><label>EXPIRY</label><input value={expiry} onChange={e => setExpiry(e.target.value)} maxLength={5} /></div>
-                <div className="field"><label>CVV</label><input value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} type="password" maxLength={4} /></div>
-              </div>
-            </div>
-            <div style={{ fontSize: 11, color: FAINT, textAlign: "center" }}>🔒 Secured by Stripe · PCI DSS Level 1</div>
-            <div className="flex gap-3">
-              <button onClick={() => setStep("select")} style={{ flex: 1, padding: "11px", borderRadius: 10,
-                border: "1.5px solid rgba(255,255,255,0.12)", background: "transparent",
-                cursor: "pointer", color: MUTED, fontWeight: 600, fontSize: 13 }}>Back</button>
-              <button onClick={handlePay} disabled={loading} className="modal-btn-primary" style={{ flex: 2, width: "auto" }}>
-                {loading ? "Processing…" : `Pay $${billing === "annual" ? "47.88" : "4.99"} →`}
-              </button>
-            </div>
-          </>)}
-
-          {step === "done" && (
-            <div className="flex flex-col items-center gap-5 py-2">
-              <div style={{ width: 60, height: 60, borderRadius: "50%",
-                background: "rgba(95,190,145,0.12)", border: "2px solid rgba(95,190,145,0.3)",
-                display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <CheckCircle size={26} color={POS} />
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: TEXT, marginBottom: 4 }}>Add-On Activated!</div>
-                <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6 }}>
-                  Disaster Recovery Protection is now active on your account.<br />
-                  Contact {FPD_EMAIL.support} to request an emergency bypass when needed.
-                </p>
-              </div>
-              <button onClick={onClose} className="modal-btn-primary" style={{ width: "auto", padding: "11px 28px" }}>Done</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+function longDate(iso: string | null | undefined): string {
+  return iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
 }
 
+const usd = (n: number) => `$${n.toFixed(2)}`;
+
 export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => void }) {
-  const [overageBilling] = useState(true);
-  const [cryptoPlan, setCryptoPlan] = useState<{ name: string; price: number } | null>(null);
-  const [showDRModal, setShowDRModal] = useState(false);
-  const { authUser } = useAuth();
-  const { user, docs, notifications, changePlan } = useDemo();
-  // System → Settings → Feature Flags → Crypto Payments.
+  const { user, docs, notifications } = useDemo();
   const platform = usePlatform();
-  const cryptoEnabled = platform.flags.cryptoPayments;
-  const [drActive, setDrActive] = useState(false);
-
-  const refreshDr = useCallback(async () => {
-    if (!authUser) return;
-    const { data } = await db.getDisasterRecoveryState(authUser.id);
-    setDrActive(Boolean(data?.addon_active));
-  }, [authUser]);
-
-  useEffect(() => { void refreshDr(); }, [refreshDr]);
-
+  const plans = usePlans();
+  const products = useProducts();
+  const { summary, refresh } = useBillingSummary();
+  const [interval, setBillingInterval] = useState<Interval>("month");
+  const [purchase, setPurchase] = useState<Purchase | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [capDraft, setCapDraft] = useState<string>("");
   const plansRef = useRef<HTMLDivElement>(null);
-  const { data: plansData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
-  const plans = (plansData?.plans?.length
-    ? plansData.plans.map(p => ({ id: p.id, name: p.name, storage: p.storage_gb, price: Number(p.price_monthly), overage: Number(p.overage_rate) }))
-    : FALLBACK_PLANS
-  ).map(p => ({ ...p, current: p.id === user.plan }))
-    // Starter is the 14-day introductory plan — never something to switch to.
-    .filter(p => p.id !== "starter" || p.current);
+  const { authUser } = useAuth();
+  /* An add-on an admin turned on has no subscription; its flag is in
+     disaster_recovery_state (read-only to the owner). */
+  const [drStateActive, setDrStateActive] = useState(false);
+  useEffect(() => {
+    if (!authUser) return;
+    void db.getDisasterRecoveryState(authUser.id).then(({ data }) => setDrStateActive(Boolean(data?.addon_active)));
+  }, [authUser, summary]);
+
+  const planSub = summary?.planSubscription ?? null;
+  const drSub = summary?.drSubscription ?? null;
+  const comped = Boolean(planSub?.id.startsWith("comp_"));
+  const paidSub = planSub && !comped ? planSub : null;
+  useEffect(() => { if (paidSub?.interval) setBillingInterval(paidSub.interval); }, [paidSub?.interval]);
+  useEffect(() => { if (summary) setCapDraft((summary.capCents / 100).toFixed(2)); }, [summary?.capCents]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
-
-  /* Real figures for the signed-in account. `user` comes from DemoContext,
-     which sums vault_documents.file_size_bytes and reads the plan's limit —
-     the same numbers the Dashboard shows, so the two can't disagree. */
-  const used = user.storageUsed;
-  const total = user.storageLimit || 1;
-  const percent = Math.min(100, Math.round((used / total) * 100));
-  const usageByCategory = deriveStorageBreakdown(docs)
-    .map(c => ({ category: c.label, gb: c.gb, color: c.color }));
-  const storageAlerts = notifications.filter(n =>
-    /storage|usage|overage|limit/i.test(`${n.title} ${n.message}`));
   const currentPlan = plans.find(p => p.id === user.plan);
-  const overageRate = currentPlan?.overage ?? 0;
+  const overageRate = currentPlan?.overageRate ?? 0;
+  const usage = summary?.usage ?? null;
+  const overageAllowed = Boolean(usage?.overage_allowed);
 
-  /* The cap is the one piece of state on this page the user genuinely owns.
-     The same hook gates uploads in the File Cabinet, so what this card says
-     and what an upload does can't disagree. */
-  const { check: spCheck, capEnabled, capAmount, setCapEnabled, setCapAmount, save } = useSpendingProtection(overageRate);
-  const capPct = !capEnabled ? 0 : spCheck.capHit ? 100
-    : capAmount > 0 ? Math.min(100, Math.round((spCheck.overageCost / capAmount) * 100)) : 0;
+  /* Storage figures: the meter (usage period) when it's there, otherwise the
+     sum of the account's documents — the same numbers the Dashboard shows. */
+  const used = usage ? +(usage.current_bytes / GB).toFixed(2) : user.storageUsed;
+  const total = usage ? +(usage.included_bytes / GB).toFixed(2) || user.storageLimit : user.storageLimit || 1;
+  const percent = Math.min(100, Math.round((used / (total || 1)) * 100));
+  const overageSoFar = (usage?.billable_cents ?? 0) / 100;
+  const cap = (summary?.capCents ?? 0) / 100;
+  const capPct = cap > 0 ? Math.min(100, Math.round((overageSoFar / cap) * 100)) : 0;
   const capBarColor = capPct >= 100 ? "#E53E3E" : capPct >= 80 ? NEG : capPct >= 50 ? WARN : POS;
+  const resetsOn = usage?.period_end ? longDate(usage.period_end) : longDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString());
 
+  const usageByCategory = deriveStorageBreakdown(docs).map(c => ({ category: c.label, gb: c.gb, color: c.color }));
   const usageByMonth = deriveMonthlyUsage(docs);
   const projectedEOM = projectEndOfMonth(docs, used);
-  const projectedOverage = Math.max(0, projectedEOM - total);
-  const now = new Date();
-  const resetsOn = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const projectedOverGb = Math.max(0, projectedEOM - total);
+  const storageAlerts = notifications.filter(n => /storage|usage|overage|limit|payment|renew/i.test(`${n.title} ${n.message}`));
 
-  const saveCap = async () => {
-    if (!authUser) { toast.error("Sign in to save your spending cap."); return; }
-    const { error } = await save();
-    if (error) { toast.error(`Could not save spending cap: ${error.message}`); return; }
-    toast.success(capEnabled ? `Spending cap set to $${capAmount.toFixed(2)}/mo` : "Spending cap disabled — overage charges are uncapped");
+  const run = async (key: string, fn: () => Promise<unknown>, ok?: string) => {
+    setBusy(key);
+    try {
+      await fn();
+      if (ok) toast.success(ok);
+      notifyBillingChanged();
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const getBarColor = (pct: number) => {
-    if (pct >= 95) return "#E53E3E";
-    if (pct >= 90) return NEG;
-    if (pct >= 80) return WARN;
-    return ACCENT;
+  const openPortal = () => run("portal", async () => { window.location.assign((await billing.portal()).url); });
+
+  const saveCap = () => {
+    const value = Number(capDraft);
+    if (!Number.isFinite(value) || value < 0) { toast.error("Enter a dollar amount"); return; }
+    void run("cap", () => billing.setOverageCap(value), `Overage limit set to ${usd(value)} a month`);
   };
 
+  const choosePlan = (planId: string, planName: string, priceMonthly: number, priceAnnual: number) => {
+    if (comped) { toast.info("Your plan was provided by Final Pass Down. Contact support to change it."); return; }
+    if (!paidSub) { setPurchase({ kind: "plan", planId, planName, interval }); return; }
+    const cur = plans.find(p => p.id === paidSub.plan_id);
+    const curEq = cur ? (paidSub.interval === "year" ? cur.priceAnnual / 12 : cur.priceMonthly) : 0;
+    const newEq = interval === "year" ? priceAnnual / 12 : priceMonthly;
+    const up = newEq > curEq || (paidSub.plan_id === planId && paidSub.interval === "month" && interval === "year");
+    setPurchase({
+      kind: "change", planId, planName, interval, direction: up ? "up" : "down",
+      priceLabel: interval === "year" ? `${formatPrice(priceAnnual)}/yr` : `${formatPrice(priceMonthly)}/mo`,
+      effectiveAt: paidSub.current_period_end,
+    });
+  };
+
+  const getBarColor = (pct: number) => pct >= 95 ? "#E53E3E" : pct >= 90 ? NEG : pct >= 80 ? WARN : ACCENT;
   const bannerColor = percent >= 95 ? "#E53E3E" : percent >= 90 ? NEG : WARN;
+  const pendingPlan = paidSub?.pending_plan_id ? plans.find(p => p.id === paidSub.pending_plan_id) : null;
+  const drMonthly = products.dr_addon_month?.amountCents ?? 499;
+  const drYearly = products.dr_addon_year?.amountCents ?? 4788;
+  const drAdminGranted = !drSub && drStateActive;
+  const bestSaving = Math.max(0, ...plans.filter(p => p.billable).map(annualSavingPct));
 
   const kpis = [
-    { label: "Storage Used", value: `${used} GB`, sub: `of ${total} GB`, icon: <HardDrive size={14}/>, dot: getBarColor(percent) },
-    { label: "Usage %", value: `${percent}%`, sub: "Current billing cycle", icon: <Percent size={14}/>, dot: getBarColor(percent) },
-    { label: "Projected EOM", value: `${projectedEOM} GB`, sub: "End-of-month estimate", icon: <TrendingUp size={14}/>, dot: projectedEOM > total ? NEG : POS },
-    { label: "Est. Overage", value: projectedOverage > 0 ? `$${(projectedOverage * overageRate).toFixed(2)}` : "$0.00", sub: projectedOverage > 0 ? `${projectedOverage.toFixed(1)} GB @ $${overageRate}/GB` : "No overage projected", icon: <Gauge size={14}/>, dot: projectedOverage > 0 ? NEG : POS },
+    { label: "Storage Used", value: `${used} GB`, sub: `of ${total} GB included`, icon: <HardDrive size={14}/>, dot: getBarColor(percent) },
+    { label: "Usage %", value: `${percent}%`, sub: `Period ends ${resetsOn}`, icon: <Percent size={14}/>, dot: getBarColor(percent) },
+    { label: "Projected", value: `${projectedEOM} GB`, sub: "End-of-month estimate", icon: <TrendingUp size={14}/>, dot: projectedEOM > total ? NEG : POS },
+    { label: "Overage this period", value: usd(overageSoFar), sub: overageAllowed ? `${usage?.billable_units ?? 0} GB over × ${usd(overageRate)}/GB` : projectedOverGb > 0 ? "Uploads stop at your limit" : "None", icon: <Gauge size={14}/>, dot: overageSoFar > 0 ? NEG : POS },
   ];
 
   return (
@@ -413,140 +317,153 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
       <div className="fpd-storage-grain" />
 
       <div className="wrap fpd-fade-in-up">
-        {/* ── Hero banner ── */}
         <div className="hbanner">
           <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(91,167,214,0.2)), url(${heroStoragePhoto})` }} />
           <div className="scrim" />
           <div className="hcontent">
-            <span className="heyebrow">Storage &amp; Billing</span>
+            <span className="heyebrow">Usage &amp; Billing</span>
             <h1>Every gigabyte, <span className="accent">clearly accounted for.</span></h1>
-            <p>Track what you're using across every category, see what's coming, and upgrade before you hit a limit.</p>
+            <p>See what you're using and what you're paying, change your plan, and manage your card and invoices.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => plansRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><TrendingUp size={15} /> View Plans</button>
+              {summary?.hasCustomer && <button className="hbtn ghost" onClick={() => void openPortal()}><CreditCard size={15}/> Manage billing</button>}
             </div>
           </div>
         </div>
 
-        {/* ── Header ── */}
-        <div className="pg-head">
-          <div style={{ minWidth: 0 }}>
-            <div className="eyebrow"><HardDrive size={12} /> STORAGE & BILLING</div>
-            <h1 className="pg-h1">Storage & Usage</h1>
-            <div className="pg-sub">
-              Storage is metered in gigabytes. Unused monthly allowance expires at billing cycle reset. Overage is billed at ${overageRate}/GB.
+        {/* ── Your subscription ── */}
+        <div className="card pad">
+          <h3 className="sec-title"><span className="tick"/>Your Plan</h3>
+          <div className="sub-row">
+            <div>
+              <div className="sub-name">{currentPlan?.name ?? summary?.planName ?? user.plan}</div>
+              <div className="sub-meta">
+                {comped ? "Provided by Final Pass Down. No charge."
+                  : paidSub ? `${paidSub.interval === "year" ? formatPrice(currentPlan?.priceAnnual ?? 0) + "/yr" : formatPrice(currentPlan?.priceMonthly ?? 0) + "/mo"} · ${paidSub.cancel_at_period_end ? `Ends ${longDate(paidSub.current_period_end)}` : `Renews ${longDate(paidSub.current_period_end)}`}`
+                  : user.plan === "starter" ? `Free for ${platform.starterTrialDays} days${starterDays !== null ? ` · ${starterDays} day${starterDays === 1 ? "" : "s"} left` : ""}`
+                  : "No card subscription on this account yet."}
+              </div>
+            </div>
+            <div className="sub-actions">
+              {paidSub && !paidSub.cancel_at_period_end && (
+                <button className="sub-btn" disabled={busy !== null}
+                  onClick={() => { if (window.confirm(`Cancel ${currentPlan?.name ?? "your plan"}? It stays active until ${longDate(paidSub.current_period_end)}, then it won't renew.`)) void run("cancel", () => billing.cancel("plan"), "Your plan won't renew. It stays active until the end of this period."); }}>
+                  {busy === "cancel" ? "Cancelling…" : "Cancel plan"}
+                </button>
+              )}
+              {paidSub?.cancel_at_period_end && (
+                <button className="sub-btn primary" disabled={busy !== null} onClick={() => void run("resume", () => billing.resume("plan"), "Your plan will renew as usual.")}>
+                  {busy === "resume" ? "Resuming…" : "Keep my plan"}
+                </button>
+              )}
+              {summary?.hasCustomer && <button className="sub-btn" disabled={busy !== null} onClick={() => void openPortal()}><CreditCard size={14}/> Cards &amp; invoices</button>}
             </div>
           </div>
+          {pendingPlan && paidSub && (
+            <div className="sub-note" style={{ background: "rgba(91,110,225,0.07)", border: "1px solid rgba(91,110,225,0.22)", color: SOFT }}>
+              <Clock size={15} color={ACCENT}/>
+              <span style={{ flex: 1 }}>Switching to <strong style={{ color: TEXT }}>{pendingPlan.name}</strong> ({paidSub.pending_interval === "year" ? "yearly" : "monthly"}) on {longDate(paidSub.pending_change_at)}.</span>
+              <button className="sub-btn" disabled={busy !== null} onClick={() => void run("keep", () => billing.cancelPendingChange(), `You'll stay on ${currentPlan?.name}.`)}>Keep current plan</button>
+            </div>
+          )}
+          {user.planStatus === "past_due" && (
+            <div className="sub-note" style={{ background: "rgba(208,107,107,0.08)", border: "1px solid rgba(208,107,107,0.3)", color: "#F08A8A" }}>
+              <AlertTriangle size={15}/> Your last payment didn't go through. Update your card in Cards &amp; invoices; we'll retry automatically.
+            </div>
+          )}
+          {summary?.billingPaused && (
+            <div className="sub-note" style={{ background: "rgba(217,165,94,0.08)", border: "1px solid rgba(217,165,94,0.3)", color: WARN }}>
+              <AlertTriangle size={15}/> Billing is being updated. New purchases and plan changes will be back in a few minutes.
+            </div>
+          )}
         </div>
 
-        {/* ── Alert banner ── */}
         {percent >= 80 && (
           <div className="alert-banner" style={{ background: `${bannerColor}14`, borderColor: `${bannerColor}4D` }}>
             <AlertTriangle size={16} color={bannerColor}/>
             <div>
-              <span style={{ color: bannerColor, fontWeight: 600, fontSize: 17.5 }}>{percent}% Storage Used</span>
+              <span style={{ color: bannerColor, fontWeight: 600, fontSize: 17.5 }}>{percent}% of your storage used</span>
               <span style={{ color: MUTED, fontSize: 17.5 }}>
-                {percent >= 95 ? " — Overage billing begins when limit is reached." :
-                 percent >= 90 ? " — We recommend upgrading your plan." :
-                 " — Consider managing your storage."}
+                {!overageAllowed ? " — uploads stop at your plan's limit. Upgrade for more room."
+                  : percent >= 95 ? ` — storage above your plan is billed at ${usd(overageRate)}/GB.`
+                  : " — consider upgrading or tidying up."}
               </span>
             </div>
           </div>
         )}
 
-        {/* ── Spending protection cap ── */}
-        <div className="card cap-card" style={spCheck.capHit ? { borderColor: "rgba(229,62,62,0.4)", background: "#1A1420" } : undefined}>
+        {/* ── Overage limit ── */}
+        <div className="card cap-card" style={capPct >= 100 || summary?.overageBlocked ? { borderColor: "rgba(229,62,62,0.4)", background: "#1A1420" } : undefined}>
           <div className="cap-head">
             <div className="flex items-center gap-3">
-              <Shield size={18} color={spCheck.capHit ? "#F08A8A" : ACCENT} />
+              <Shield size={18} color={capPct >= 100 ? "#F08A8A" : ACCENT} />
               <div>
-                <div className="cap-title">Spending Protection Cap</div>
+                <div className="cap-title">Overage Limit</div>
                 <div className="cap-sub">
-                  {capEnabled
-                    ? `Uploads are blocked if overage charges would exceed $${capAmount}/month`
-                    : `No cap set — overage at $${overageRate}/GB bills automatically with no limit`}
+                  {overageAllowed
+                    ? `Storage above your plan is ${usd(overageRate)}/GB (the peak over the period). Uploads pause before overage would pass ${usd(cap)} a month.`
+                    : user.plan === "starter" ? "Starter includes 1 GB with no overage. Uploads stop at the limit."
+                    : comped ? "Your plan has no overage. Uploads stop at the limit."
+                    : "Overage applies to paid plans."}
                 </div>
               </div>
             </div>
-            <div className="cap-controls">
-              <div className="cap-input-wrap">
-                <span>$</span>
-                <input
-                  type="number" min={0} step={1} disabled={!capEnabled} aria-label="Monthly overage cap"
-                  value={capAmount}
-                  onChange={e => setCapAmount(Math.max(0, Number(e.target.value)))}
-                />
+            {overageAllowed && (
+              <div className="cap-controls">
+                <div className="cap-input-wrap">
+                  <span>$</span>
+                  <input type="number" min={0} step={1} aria-label="Monthly overage limit" value={capDraft} onChange={e => setCapDraft(e.target.value)} />
+                </div>
+                <button className="cap-save" disabled={busy !== null} onClick={saveCap}><Save size={14}/> {busy === "cap" ? "Saving…" : "Save limit"}</button>
               </div>
-              <button
-                onClick={() => setCapEnabled(!capEnabled)}
-                className="toggle" aria-label="Enable spending cap" aria-pressed={capEnabled}
-                style={{ background: capEnabled ? "rgba(91,110,225,0.85)" : "rgba(255,255,255,0.06)", borderColor: capEnabled ? ACCENT : "rgba(255,255,255,0.14)" }}
-              >
-                <div className="thumb" style={{ left: capEnabled ? 24 : 4 }} />
-              </button>
-              <button className="cap-save" onClick={saveCap}><Save size={14}/> Save Cap</button>
-            </div>
+            )}
           </div>
 
           <div className="cap-body">
-            {/* Cap hit hard wall */}
-            {spCheck.capHit && (
+            {summary?.overageBlocked && (
               <div className="cap-wall">
                 <AlertTriangle size={20} color="#F08A8A" style={{ flexShrink: 0, marginTop: 2 }} />
                 <div style={{ flex: 1 }}>
-                  <div className="cap-wall-title">Uploads Blocked — ${capAmount} Spending Cap Reached</div>
-                  <div className="cap-wall-copy">
-                    Your overage charges have hit the ${capAmount} monthly limit.
-                    No new files can be uploaded until you free up space or upgrade your plan.
-                    This protects you from unexpected charges exceeding ${capAmount} in a single billing month.
-                  </div>
+                  <div className="cap-wall-title">Overage payment failed</div>
+                  <div className="cap-wall-copy">We couldn't take your last storage overage payment, so uploads are limited to your plan's {total} GB until it's paid. Everything stored is safe.</div>
+                  <button className="cap-wall-btn up" onClick={() => void openPortal()}><CreditCard size={13}/> Pay or update card</button>
+                </div>
+              </div>
+            )}
+            {overageAllowed && capPct >= 100 && !summary?.overageBlocked && (
+              <div className="cap-wall">
+                <AlertTriangle size={20} color="#F08A8A" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="cap-wall-title">Uploads paused: {usd(cap)} overage limit reached</div>
+                  <div className="cap-wall-copy">Raise your limit to keep uploading (nothing extra is charged for what was already paused), free up space, or move to a bigger plan.</div>
                   <div className="flex gap-3 flex-wrap">
-                    <button className="cap-wall-btn del" onClick={() => onNavigate?.("file-cabinet")}>
-                      <Trash2 size={13}/> Delete Files to Free Space
-                    </button>
-                    <button className="cap-wall-btn up" onClick={() => plansRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
-                      <ArrowUp size={13}/> Upgrade Plan
-                    </button>
+                    <button className="cap-wall-btn up" onClick={() => setCapDraft(String(Math.ceil(cap * 2) || 10))}><ArrowUp size={13}/> Raise my limit</button>
+                    <button className="cap-wall-btn del" onClick={() => onNavigate?.("file-cabinet")}><Trash2 size={13}/> Free up space</button>
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Progress meter */}
-            <div>
-              <div className="cap-line">
-                <span style={{ color: TEXT, fontSize: 15.5, fontWeight: 500 }}>Overage Spend This Month</span>
-                <span style={{ ...MONO, fontSize: 15.5, fontWeight: 700, color: capBarColor }}>
-                  ${spCheck.overageCost.toFixed(2)}{capEnabled ? ` / $${capAmount.toFixed(2)}` : ""}
-                </span>
+            {overageAllowed && (
+              <div>
+                <div className="cap-line">
+                  <span style={{ color: TEXT, fontSize: 15.5, fontWeight: 500 }}>Overage this period</span>
+                  <span style={{ ...MONO, fontSize: 15.5, fontWeight: 700, color: capBarColor }}>{usd(overageSoFar)} / {usd(cap)}</span>
+                </div>
+                <div className="cap-meter"><div className="cap-meter-fill" style={{ width: `${capPct}%`, background: capBarColor }} /></div>
+                <div className="cap-line">
+                  <span style={{ color: MUTED, fontSize: 13.5 }}>
+                    {paidSub?.interval === "year" ? "Billed monthly, separately from your yearly plan." : "Added to your next renewal invoice."}
+                  </span>
+                  <span style={{ color: MUTED, fontSize: 13.5, ...MONO }}>PERIOD ENDS {resetsOn.toUpperCase()}</span>
+                </div>
               </div>
-              <div className="cap-meter">
-                <div className="cap-meter-fill" style={{ width: `${capPct}%`, background: capBarColor }} />
-              </div>
-              <div className="cap-line">
-                <span style={{ color: MUTED, fontSize: 13.5 }}>
-                  {spCheck.overageGB.toFixed(1)} GB over plan limit × ${overageRate}/GB
-                </span>
-                <span style={{ color: spCheck.capHit ? "#F08A8A" : MUTED, fontSize: 13.5, ...MONO }}>
-                  {spCheck.capHit ? "CAP REACHED — UPLOADS BLOCKED"
-                    : capEnabled ? `$${spCheck.remainingBudget.toFixed(2)} remaining before cap` : "NO CAP SET"}
-                </span>
-              </div>
-            </div>
-
-            {/* Info row */}
-            {!spCheck.capHit && capEnabled && (
-              <div className="cap-info">
-                <CheckCircle size={14} color={POS} style={{ flexShrink: 0 }} />
-                <span>
-                  Uploads allowed — overage spend is within the ${capAmount}/month protection limit.
-                  The system checks this before every upload.
-                </span>
-              </div>
+            )}
+            {!overageAllowed && (
+              <div className="cap-info"><CheckCircle size={14} color={POS} style={{ flexShrink: 0 }} /><span>You'll never be charged for overage on this plan.</span></div>
             )}
           </div>
         </div>
 
-        {/* ── KPI ledger ── */}
         <div className="kpi-stack">
           {kpis.map(k => (
             <div key={k.label} className="kpi-mini">
@@ -560,27 +477,24 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
           ))}
         </div>
 
-        {/* ── Storage meter ── */}
         <div className="card pad">
           <div className="meter-hd">
-            <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Current Billing Cycle</h3>
-            <div style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>Resets {resetsOn}</div>
+            <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Current Usage Period</h3>
+            <div style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>Ends {resetsOn}</div>
           </div>
           <div className="meter-track">
             <div className="meter-fill" style={{ width: `${Math.min(percent, 100)}%`, background: `linear-gradient(90deg, ${getBarColor(40)}, ${getBarColor(percent)})` }}/>
             {[80, 90, 95].map(threshold => (
-              <div key={threshold} className="meter-mark" style={{ left: `${threshold}%` }}>
-                <span>{threshold}%</span>
-              </div>
+              <div key={threshold} className="meter-mark" style={{ left: `${threshold}%` }}><span>{threshold}%</span></div>
             ))}
             <div className="meter-label">{used} GB / {total} GB</div>
           </div>
           <div className="thresh-row">
             {[
-              { label: "80% Threshold", pct: 80, msg: "Usage warning email", color: WARN },
-              { label: "90% Threshold", pct: 90, msg: "Upgrade recommended email", color: NEG },
-              { label: "95% Threshold", pct: 95, msg: "Critical alert email", color: "#E53E3E" },
-              { label: "100% Limit", pct: 100, msg: "Overage billing begins", color: "#6FAE8B" },
+              { label: "80% Threshold", pct: 80, msg: "Usage warning", color: WARN },
+              { label: "90% Threshold", pct: 90, msg: "Upgrade recommended", color: NEG },
+              { label: "95% Threshold", pct: 95, msg: "Critical alert", color: "#E53E3E" },
+              { label: "100% Limit", pct: 100, msg: overageAllowed ? `Overage at ${usd(overageRate)}/GB` : "Uploads stop", color: "#6FAE8B" },
             ].map(t => (
               <div key={t.pct} className="thresh">
                 <div className="thresh-pct" style={{ color: t.color }}>{t.pct}%</div>
@@ -592,24 +506,19 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Usage by month — pure CSS bar chart, scaled so an over-limit month still fits */}
           <div className="card pad">
             <h3 className="sec-title"><span className="tick"/>6-Month Usage History</h3>
             {(() => {
               const scale = Math.max(total, ...usageByMonth.map(d => d.used));
               return (
                 <div className="chart-wrap">
-                  <div className="chart-limit" style={{ bottom: Math.round((total / scale) * 120) + 18 }}>
-                    <span>{total} GB limit</span>
-                  </div>
+                  <div className="chart-limit" style={{ bottom: Math.round((total / scale) * 120) + 18 }}><span>{total} GB limit</span></div>
                   {usageByMonth.map((d, i) => {
                     const barColor = d.used >= total * 0.95 ? "#E53E3E" : d.used >= total * 0.9 ? NEG : d.used >= total * 0.8 ? WARN : ACCENT;
                     return (
                       <div key={i} className="chart-col">
                         <span className="chart-val">{d.used}GB</span>
-                        <div className="chart-bar-wrap">
-                          <div className="chart-bar" style={{ height: Math.round((d.used / scale) * 120), background: barColor, opacity: i === usageByMonth.length - 1 ? 1 : 0.65 }}/>
-                        </div>
+                        <div className="chart-bar-wrap"><div className="chart-bar" style={{ height: Math.round((d.used / scale) * 120), background: barColor, opacity: i === usageByMonth.length - 1 ? 1 : 0.65 }}/></div>
                         <span className="chart-val">{d.month}</span>
                       </div>
                     );
@@ -617,132 +526,119 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
                 </div>
               );
             })()}
-            <p className="chart-foot">
-              {docs.length === 0
-                ? "Nothing stored yet. Documents you upload to the File Cabinet count against this limit."
-                : "Unused monthly GB expire at billing cycle reset. No carry-forward."}
-            </p>
+            <p className="chart-foot">{docs.length === 0 ? "Nothing stored yet. Documents you upload to the File Cabinet count against this limit." : "Storage counts what you keep, not what you upload and delete."}</p>
           </div>
 
-          {/* Usage by category */}
           <div className="card pad">
             <h3 className="sec-title"><span className="tick"/>Usage by Category</h3>
             <div>
-              {usageByCategory.length === 0 && (
-                <p className="chart-foot" style={{ marginTop: 0 }}>
-                  No documents yet — categories appear here as you fill your File Cabinet folders.
-                </p>
-              )}
+              {usageByCategory.length === 0 && <p className="chart-foot" style={{ marginTop: 0 }}>No documents yet — categories appear here as you fill your File Cabinet folders.</p>}
               {usageByCategory.map(cat => (
                 <div key={cat.category} className="cat-row">
                   <div className="cat-hd">
                     <span style={{ color: TEXT, fontSize: 16 }}>{cat.category}</span>
                     <span style={{ color: MUTED, fontSize: 15, fontFamily: "var(--font-mono)" }}>{cat.gb} GB</span>
                   </div>
-                  <div className="cat-track">
-                    <div className="cat-fill" style={{ width: `${(cat.gb / used) * 100}%`, background: cat.color }} />
-                  </div>
+                  <div className="cat-track"><div className="cat-fill" style={{ width: `${(cat.gb / (used || 1)) * 100}%`, background: cat.color }} /></div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── Plan comparison + upgrade ── */}
+        {/* ── Plans ── */}
         <div className="card pad" ref={plansRef}>
-          <h3 className="sec-title"><span className="tick"/>Your Plan & Upgrade Options</h3>
+          <div className="sub-row" style={{ marginBottom: 16 }}>
+            <h3 className="sec-title" style={{ marginBottom: 0 }}><span className="tick"/>Plans</h3>
+            <div className="iv-toggle" role="group" aria-label="Billing period">
+              <button className={interval === "month" ? "on" : ""} onClick={() => setBillingInterval("month")}>Monthly</button>
+              <button className={interval === "year" ? "on" : ""} onClick={() => setBillingInterval("year")}>Yearly{bestSaving > 0 ? ` · save ${bestSaving}%` : ""}</button>
+            </div>
+          </div>
           <div className="plan-grid">
-            {plans.map(plan => (
-              <div key={plan.id} className={`plan-card ${plan.current ? "current" : ""}`}>
-                {plan.current && <div className="plan-tag">CURRENT PLAN</div>}
-                {plan.id === "starter" && starterDays !== null && (
-                  <div className="plan-detail" style={{ marginBottom: 6, color: WARN }}>
-                    {starterDays} day{starterDays === 1 ? "" : "s"} left of {platform.starterTrialDays}. Choose a bigger plan before it ends.
+            {plans.filter(p => p.billable || p.id === user.plan).map(plan => {
+              const isCurrent = plan.id === user.plan && (!paidSub || paidSub.interval === interval) && user.planStatus !== "cancelled";
+              const price = interval === "year" ? plan.priceAnnual : plan.priceMonthly;
+              return (
+                <div key={plan.id} className={`plan-card ${isCurrent ? "current" : ""}`}>
+                  {isCurrent && <div className="plan-tag">CURRENT PLAN</div>}
+                  <div className="plan-name">{plan.name}</div>
+                  <div className="flex items-baseline gap-1" style={{ marginBottom: 4 }}>
+                    <span className="plan-price">{plan.billable ? formatPrice(price) : "Free"}</span>
+                    <span className="plan-price-sub">{plan.billable ? `/${interval === "year" ? "yr" : "mo"}` : ` for ${platform.starterTrialDays} days`}</span>
                   </div>
-                )}
-                <div className="plan-name">{plan.name}</div>
-                <div className="flex items-baseline gap-1" style={{ marginBottom: 12 }}>
-                  <span className="plan-price">${plan.price}</span>
-                  <span className="plan-price-sub">/mo</span>
-                </div>
-                <div className="plan-detail" style={{ marginBottom: 4 }}>{plan.storage >= 1024 ? `${plan.storage / 1024} TB` : `${plan.storage} GB`} storage</div>
-                <div className="plan-detail" style={{ marginBottom: 12, fontSize: 14 }}>Overage: ${plan.overage}/GB</div>
-                {!plan.current && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => void changePlan(plan.id as UserProfile["plan"], plan.name)}
-                      className={`plan-btn ${plan.storage > total ? "up" : "down"}`}
-                    >
-                      {plan.storage > total ? "Upgrade" : "Downgrade"} (Card)
+                  <div className="plan-detail" style={{ marginBottom: 8, fontSize: 14, minHeight: 20 }}>
+                    {plan.billable && interval === "year" ? `${formatPrice(+(plan.priceAnnual / 12).toFixed(2))}/mo billed yearly` : ""}
+                  </div>
+                  <div className="plan-detail" style={{ marginBottom: 4 }}>{formatStorage(plan.storageGb)} storage</div>
+                  <div className="plan-detail" style={{ marginBottom: 12, fontSize: 14 }}>{plan.overageRate > 0 ? `Overage: ${usd(plan.overageRate)}/GB` : "No overage"}</div>
+                  {!isCurrent && plan.billable && (
+                    <button disabled={busy !== null || summary?.billingPaused}
+                      onClick={() => choosePlan(plan.id, plan.name, plan.priceMonthly, plan.priceAnnual)}
+                      className={`plan-btn ${!paidSub || plan.storageGb >= (currentPlan?.storageGb ?? 0) ? "up" : "down"}`}>
+                      {!paidSub ? `Choose ${plan.name}` : plan.id === paidSub.plan_id ? `Switch to ${interval === "year" ? "yearly" : "monthly"}` : plan.storageGb > (currentPlan?.storageGb ?? 0) ? "Upgrade" : "Downgrade"}
                     </button>
-                    {plan.storage > total && cryptoEnabled && (
-                      <button onClick={() => setCryptoPlan({ name: plan.name, price: plan.price })} className="plan-btn crypto">
-                        <span style={{ marginRight:4 }}>₿</span>Pay with Crypto
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
           <div className="overage-note">
             <ArrowUp size={13} color={NEG} />
             <span>
-              Overage rate: <strong style={{ color: TEXT }}>${overageRate}/GB</strong> above your plan limit{currentPlan ? ` (${currentPlan.name})` : ""}. Starter plan is $0.50/GB. Billed automatically at end of billing cycle.
+              Upgrades apply right away with a prorated charge; downgrades start when your current period ends. Overage on paid plans is the peak GB above your plan,
+              at <strong style={{ color: TEXT }}>{usd(overageRate || 0.4)}/GB</strong>, never more than your overage limit. Starter has no overage.
             </span>
           </div>
         </div>
 
-        {/* ── Platform Add-Ons ── */}
+        {/* ── Add-ons ── */}
         <div>
           <h3 className="sec-title"><span className="tick"/>Platform Add-Ons</h3>
-          <div className={`addon-card ${drActive ? "on" : ""}`}>
+          <div className={`addon-card ${drSub || drAdminGranted ? "on" : ""}`}>
             <div className="addon-ico">🛡️</div>
             <div style={{ flex: 1, minWidth: 200 }}>
               <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>Disaster Recovery Protection</span>
-                {drActive ? (
-                  <span className="addon-badge" style={{ background: "rgba(217,165,94,0.14)", color: WARN, border: "1px solid rgba(217,165,94,0.3)" }}>⚡ ACTIVE</span>
-                ) : (
-                  <span className="addon-badge" style={{ background: "rgba(163,173,201,0.1)", color: MUTED, border: "1px solid rgba(163,173,201,0.2)" }}>NOT SUBSCRIBED</span>
-                )}
+                {drSub || drAdminGranted
+                  ? <span className="addon-badge" style={{ background: "rgba(217,165,94,0.14)", color: WARN, border: "1px solid rgba(217,165,94,0.3)" }}>⚡ ACTIVE</span>
+                  : <span className="addon-badge" style={{ background: "rgba(163,173,201,0.1)", color: MUTED, border: "1px solid rgba(163,173,201,0.2)" }}>NOT SUBSCRIBED</span>}
               </div>
               <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
-                {drActive
-                  ? "Your account is protected. A Master Admin can activate a 48-hour emergency bypass window giving you bulk-export access to your entire vault."
+                {drSub ? (drSub.cancel_at_period_end ? `Active until ${longDate(drSub.current_period_end)}, then it won't renew.` : `Renews ${longDate(drSub.current_period_end)} (${drSub.interval === "year" ? "yearly" : "monthly"}).`)
+                  : drAdminGranted ? "Turned on for your account by Final Pass Down."
                   : "Emergency bulk-export access for your vault during a crisis — data loss, account compromise, or urgent estate needs. 48-hour admin-activated bypass, 100 GB export limit."}
               </p>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              {drActive ? (
-                <div>
-                  <div style={{ fontSize: 11, color: WARN, ...MONO, marginBottom: 4 }}>SUBSCRIBED</div>
-                  <div className="addon-price" style={{ color: WARN }}>$4.99<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span></div>
-                  <button onClick={() => { toast.info("Cancellation is processed through billing — the add-on stays active until the current period ends."); void refreshDr(); }} className="addon-cancel">
-                    Cancel Add-On
-                  </button>
-                </div>
-              ) : (
+              {drSub ? (
+                drSub.cancel_at_period_end
+                  ? <button className="addon-btn" disabled={busy !== null} onClick={() => void run("dr-resume", () => billing.resume("dr_addon"), "Disaster Recovery will renew as usual.")}>Keep add-on</button>
+                  : <button className="addon-cancel" disabled={busy !== null} onClick={() => { if (window.confirm("Cancel Disaster Recovery Protection? It stays active until the end of the period you've paid for.")) void run("dr-cancel", () => billing.cancel("dr_addon"), "Disaster Recovery won't renew."); }}>Cancel add-on</button>
+              ) : !drAdminGranted && (
                 <div>
                   <div style={{ fontSize: 11, color: MUTED, ...MONO, marginBottom: 4 }}>FROM</div>
-                  <div className="addon-price" style={{ color: TEXT }}>$3.99<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo</span></div>
-                  <div style={{ fontSize: 11, color: MUTED, marginBottom: 10 }}>or $4.99/mo monthly</div>
-                  <button onClick={() => setShowDRModal(true)} className="addon-btn">Add for $4.99/mo</button>
+                  <div className="addon-price" style={{ color: TEXT }}>{usd(drYearly / 1200)}<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo yearly</span></div>
+                  <div style={{ fontSize: 11, color: MUTED, marginBottom: 10 }}>or {usd(drMonthly / 100)}/mo monthly</div>
+                  {user.plan === "starter" || user.planStatus === "cancelled" ? (
+                    <div style={{ fontSize: 12.5, color: MUTED, maxWidth: 180 }}>Available with a paid plan.</div>
+                  ) : (
+                    <div className="flex gap-2 justify-end">
+                      <button className="addon-btn" disabled={busy !== null || summary?.billingPaused} onClick={() => setPurchase({ kind: "dr_addon", interval: "month" })}>Monthly</button>
+                      <button className="addon-btn" disabled={busy !== null || summary?.billingPaused} onClick={() => setPurchase({ kind: "dr_addon", interval: "year" })}>Yearly</button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* ── Alert history ── */}
         <div className="card pad">
           <h3 className="sec-title"><span className="tick"/>Notification History</h3>
           <div>
             {storageAlerts.length === 0 ? (
-              <p className="chart-foot" style={{ marginTop: 0 }}>
-                No storage alerts yet. You'll be notified here when your vault passes
-                80%, 90% and 95% of your plan's limit.
-              </p>
+              <p className="chart-foot" style={{ marginTop: 0 }}>No storage or billing alerts yet.</p>
             ) : storageAlerts.map(alert => {
               const color = alert.type === "error" ? NEG : alert.type === "warning" ? WARN : POS;
               return (
@@ -757,22 +653,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
         </div>
       </div>
 
-      {cryptoPlan && (
-        <CryptoPayment
-          open={true}
-          amountUSD={cryptoPlan.price}
-          label={`${cryptoPlan.name} Plan — $${cryptoPlan.price}/mo`}
-          onSuccess={() => { setCryptoPlan(null); toast.success(`Upgraded to ${cryptoPlan.name} via crypto!`); }}
-          onClose={() => setCryptoPlan(null)}
-        />
-      )}
-
-      {showDRModal && (
-        <DRAddonModal
-          onClose={() => setShowDRModal(false)}
-          onSuccess={() => { setDrActive(true); toast.success("Disaster Recovery Protection is now active"); }}
-        />
-      )}
+      {purchase && <CheckoutConsentModal purchase={purchase} page="storage-usage" onClose={() => setPurchase(null)} onChanged={() => void refresh()}/>}
     </div>
   );
 }
