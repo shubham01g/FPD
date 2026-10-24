@@ -15,6 +15,7 @@ import { CatalogError, planPrice, productPrice, type Interval } from "../lib/bil
 import { findCustomer, getOrCreateCustomer } from "../lib/billing/customers.ts";
 import { CONSENT_VERSION, consentText, type ConsentPurpose } from "../lib/billing/consent.ts";
 import { portalConfigurationId } from "../lib/billing/setup.ts";
+import { cancelPendingChange, changePlan, PlanChangeError, setCancelAtPeriodEnd } from "../lib/billing/planChange.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 
 type Env = { Variables: { user: AuthedUser } };
@@ -322,6 +323,76 @@ billing.post("/checkout/one-time", async (c) => {
 billing.post("/checkout/continuation-fee", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   return await oneTimeCheckout(c, "continuation_fee", body);
+});
+
+function planChangeError(c: Context, err: unknown) {
+  if (err instanceof PlanChangeError) return c.json({ error: err.message }, err.status);
+  return errorResponse(c, err);
+}
+
+// POST /account/billing/change-plan { planId, interval } — upgrades now
+// (prorated), downgrades at the end of the period.
+billing.post("/change-plan", async (c) => {
+  const blocked = purchaseBlocked(c);
+  if (blocked) return blocked;
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const account = await loadAccount(user.id);
+  if (account?.deceased_at) return c.json({ error: "This account is frozen" }, 403);
+  try {
+    return c.json(await changePlan(user.id, String(body.planId ?? ""), interval(body.interval)));
+  } catch (err) {
+    return planChangeError(c, err);
+  }
+});
+
+// POST /account/billing/change-plan/cancel-pending — keep the current plan.
+billing.post("/change-plan/cancel-pending", async (c) => {
+  if (!stripeMode()) return c.json({ error: "Card payments are being set up. Please try again shortly." }, 503);
+  try {
+    await cancelPendingChange(c.get("user").id);
+    return c.json({ ok: true });
+  } catch (err) {
+    return planChangeError(c, err);
+  }
+});
+
+// POST /account/billing/cancel { productLine: "plan" | "dr_addon" } — at the
+// end of the period. Works while billing is paused.
+// POST /account/billing/resume { productLine } — undoes it.
+for (const [path, cancel] of [["/cancel", true], ["/resume", false]] as const) {
+  billing.post(path, async (c) => {
+    if (!stripeMode()) return c.json({ error: "Card payments are being set up. Please try again shortly." }, 503);
+    const body = await c.req.json().catch(() => ({}));
+    const line = body.productLine === "dr_addon" ? "dr_addon" : "plan";
+    try {
+      await setCancelAtPeriodEnd(c.get("user").id, line, cancel);
+      return c.json({ ok: true });
+    } catch (err) {
+      return planChangeError(c, err);
+    }
+  });
+}
+
+// PUT /account/billing/overage-cap { capUsd } — the owner's monthly overage
+// limit. null goes back to the default (the plan's monthly price). Raising
+// it never charges anything already refused.
+billing.put("/overage-cap", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const db = adminClient();
+  if (body.capUsd === null) {
+    await db.from("storage_spend_caps").delete().eq("user_id", user.id);
+  } else {
+    const cap = Number(body.capUsd);
+    if (!Number.isFinite(cap) || cap < 0 || cap > 10000) return c.json({ error: "Enter a limit between $0 and $10,000" }, 400);
+    const { error } = await db.from("storage_spend_caps").upsert({
+      user_id: user.id, cap_enabled: true, cap_amount_usd: Math.round(cap * 100) / 100, updated_at: new Date().toISOString(),
+    });
+    if (error) return c.json({ error: error.message }, 500);
+  }
+  await db.rpc("refresh_storage_usage", { p_user: user.id });
+  return c.json({ ok: true });
 });
 
 // POST /account/billing/portal — Stripe's page for cards, invoices, billing
