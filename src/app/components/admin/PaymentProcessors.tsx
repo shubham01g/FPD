@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
+import { SERVER_FUNCTION } from "../../services/serverBase";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { CARD_PROCESSORS, type CatalogProcessor } from "./processorCatalog";
 import { copyToClipboard } from "../../utils/clipboard";
@@ -52,7 +53,7 @@ const PAYMENT_STATUS_COLOR: Record<string, string> = {
 };
 
 /* The signed endpoint Stripe calls — see routes/public.ts. */
-const STRIPE_WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions/v1/server/make-server-b5ad85e0/public/stripe/webhook`;
+const STRIPE_WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/public/stripe/webhook`;
 
 const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fieldLabel = (key: string) => key.replace(/([A-Z])/g, " $1").toUpperCase();

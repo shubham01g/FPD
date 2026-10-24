@@ -8,9 +8,9 @@
  * middleware checks the bearer token + users.is_admin).
  */
 import { supabase } from "./supabase";
+import { SERVER_BASE } from "./serverBase";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const FUNCTIONS_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/admin` : null;
+const FUNCTIONS_BASE = SERVER_BASE ? `${SERVER_BASE}/admin` : null;
 
 export class AdminApiError extends Error {
   status: number;

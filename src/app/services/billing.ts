@@ -4,9 +4,9 @@
    only when Stripe is the connected, active processor under Developer →
    Payment Processors; `status()` is how screens find that out. */
 import { supabase } from "./supabase";
+import { SERVER_BASE } from "./serverBase";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/account/billing` : null;
+const BASE = SERVER_BASE ? `${SERVER_BASE}/account/billing` : null;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!BASE) throw new Error("No Supabase project connected (VITE_SUPABASE_URL is not set)");

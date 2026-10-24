@@ -5,8 +5,9 @@
  * onboarding) need without an admin session. See adminApi.ts for the
  * admin-authenticated counterpart.
  */
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const FUNCTIONS_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/public` : null;
+import { SERVER_BASE } from "./serverBase";
+
+const FUNCTIONS_BASE = SERVER_BASE ? `${SERVER_BASE}/public` : null;
 
 export class PublicApiError extends Error {
   status: number;

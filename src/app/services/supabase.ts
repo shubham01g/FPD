@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { reportReachable, reportUnreachable, setProbeTarget } from "./netStatus";
+import { SERVER_FUNCTION } from "./serverBase";
 
 // createClient() throws synchronously if either value is empty, which — since
 // this module is imported from almost everywhere (adminApi, every context
@@ -285,7 +286,7 @@ export const db = {
     if (!isSupabaseConfigured) return { error: "No Supabase project connected" };
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${DIRECT_URL}/functions/v1/server/make-server-b5ad85e0/account/contacts/${id}/invite`, {
+      const res = await fetch(`${DIRECT_URL}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/account/contacts/${id}/invite`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
       });
