@@ -79,7 +79,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
 
 export interface DBUser {
   id: string; email: string; full_name: string; phone?: string;
-  plan: "starter"|"essential"|"premium"|"legacy_pro"|"enterprise";
+  plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   plan_status: "active"|"paused"|"cancelled"|"past_due";
   stripe_customer_id?: string; stripe_subscription_id?: string;
   is_admin: boolean; email_verified: boolean; two_fa_enabled: boolean;

@@ -218,12 +218,7 @@ export function LegacyContinuationFee() {
   const { setContinuationFeePaid } = useDemo();
   const [status, setStatus] = useState<ContinuationStatus>(initStatus);
   const [processing, setProcessing] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
-  const [cardNum, setCardNum] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [name, setName] = useState("");
   const [payerType, setPayerType] = useState<"user"|"legacy_contact">("user");
   const [showCoverage, setShowCoverage] = useState(false);
   const { authUser } = useAuth();
@@ -273,29 +268,6 @@ export function LegacyContinuationFee() {
     } finally {
       setProcessing(false);
     }
-  };
-
-  const formatCard   = (v: string) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
-  const formatExpiry = (v: string) => { const d = v.replace(/\D/g,"").slice(0,4); return d.length >= 3 ? `${d.slice(0,2)}/${d.slice(2)}` : d; };
-
-  const handlePay = async () => {
-    if (!cardNum || !expiry || !cvv || !name) { toast.error("Please complete all payment fields"); return; }
-    setProcessing(true);
-    const tid = toast.loading("Processing payment via Stripe...");
-    await new Promise(r => setTimeout(r, 2200));
-    const txId = `txn_${Date.now().toString(36).toUpperCase()}`;
-    const paidDate = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-    setStatus(s => ({
-      ...s,
-      paid: true, paidDate, paidBy: payerType,
-      activeUntil: `${feeMonths} months from date of passing`,
-      activationPeriod: feeMonths, transactionId: txId,
-      fullyUnlocked: s.deathCertificateVerified, // only unlock if cert already verified
-    }));
-    setProcessing(false);
-    setShowPayment(false);
-    setContinuationFeePaid(true);
-    toast.success("Legacy Continuation Fee paid! Fee recorded — access activates after confirmation of passing is verified by FPD admin.", { id: tid });
   };
 
   return (
@@ -516,59 +488,6 @@ export function LegacyContinuationFee() {
           </div>
         </div>
       </div>
-
-      {/* Stripe Payment Modal */}
-      {showPayment && (
-        <div className="backdrop">
-          <div className="card modal">
-            <div className="modal-head">
-              <div className="mico"><CreditCard size={20} color="#FFFFFF"/></div>
-              <div>
-                <h3>Payment Details</h3>
-                <div className="msub">Legacy Continuation Fee · {feeLabel}</div>
-              </div>
-            </div>
-            <div className="modal-body">
-              <div className="field">
-                <label>CARDHOLDER NAME</label>
-                <input value={name} onChange={e=>setName(e.target.value)} placeholder="James Doe" />
-              </div>
-              <div className="field">
-                <label>CARD NUMBER</label>
-                <input value={cardNum} onChange={e=>setCardNum(formatCard(e.target.value))} placeholder="4242 4242 4242 4242" maxLength={19}
-                  style={{ fontFamily: "var(--font-mono)" }} />
-              </div>
-              <div className="row2">
-                <div className="field">
-                  <label>EXPIRY</label>
-                  <input value={expiry} onChange={e=>setExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" maxLength={5}
-                    style={{ fontFamily: "var(--font-mono)" }} />
-                </div>
-                <div className="field">
-                  <label>CVC</label>
-                  <input value={cvv} onChange={e=>setCvv(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="•••"
-                    style={{ fontFamily: "var(--font-mono)" }} />
-                </div>
-              </div>
-              <div className="sumbox">
-                <div className="sumrow"><span>Legacy Continuation Fee</span><span style={{ color:TEXT }}>{feeLabel}</span></div>
-                <div className="sumrow"><span>Processing Fee</span><span style={{ color:TEXT }}>$0.00</span></div>
-                <div className="sumrow total"><span>Total</span><span>{feeLabel}</span></div>
-              </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={handlePay} disabled={processing} className="save">
-                  {processing ? "Processing Stripe Payment..." : `Pay ${feeLabel} Now`}
-                </button>
-                <button onClick={() => setShowPayment(false)} className="btn-sec">Cancel</button>
-              </div>
-              <div className="ssl-row">
-                <Lock size={11}/>
-                <span>256-bit SSL · Stripe PCI-DSS Level 1</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <CryptoPayment
         open={showCrypto}

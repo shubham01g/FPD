@@ -18,7 +18,7 @@ function figmaAssetResolver() {
 
 // Every name src/ reads as `import.meta.env.VITE_<NAME>`. Anything absent from
 // this list is not resolved through the VITEE_ alias below.
-const CLIENT_ENV = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'STRIPE_PUBLISHABLE_KEY']
+const CLIENT_ENV = ['SUPABASE_URL', 'SUPABASE_ANON_KEY']
 
 export default defineConfig(({ mode }) => {
   // Load from the config's own directory, not process.cwd(): running the dev

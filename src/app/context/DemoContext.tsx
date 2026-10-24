@@ -382,41 +382,36 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     if (!uid) return;
     const tid = toast.loading("Saving profile...");
     const { error } = await db.updateUser(uid, {
-      full_name: data.name, phone: data.phone, plan: data.plan,
+      full_name: data.name, phone: data.phone,
       gender: (data.gender as DBUser["gender"]) || null,
       birthdate: data.birthdate || null,
       country: data.country || null,
       referral_source: data.referralSource || null,
     });
     if (error) { toast.error("Could not save profile", { id: tid }); return; }
-    setUser(u => ({ ...u, ...data, storageLimit: data.plan ? PLAN_STORAGE_GB[data.plan] : u.storageLimit }));
+    setUser(u => ({ ...u, ...data, plan: u.plan }));
     toast.success("Profile updated", { id: tid });
   }, [uid]);
 
-  /* Separate from updateUser, which rewrites the whole profile. When Stripe
-     is the connected, active processor the browser is sent to Stripe Checkout
-     and the plan only changes once the signed webhook confirms payment. With
-     no processor connected there is nothing to charge through, so the plan
-     column is switched directly. */
+  /* Separate from updateUser, which rewrites the whole profile. The browser
+     is sent to Stripe Checkout and the plan only changes once the signed
+     webhook confirms payment. A plan is never switched from here: the
+     database refuses it (migration 038), and so does this. */
   const changePlan = useCallback(async (plan: UserProfile["plan"], planName: string) => {
     if (!uid) return false;
-    if ((await billing.status()).checkoutEnabled) {
-      const tid = toast.loading(`Opening secure checkout for ${planName}...`);
-      try {
-        const { url } = await billing.planCheckout(plan);
-        window.location.assign(url);
-        return false; // not changed yet — the webhook does that after payment
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
-        return false;
-      }
+    if (!(await billing.status()).checkoutEnabled) {
+      toast.error("Card payments are being set up. Please try again shortly.");
+      return false;
     }
-    const tid = toast.loading(`Switching to ${planName}...`);
-    const { error } = await db.updateUser(uid, { plan: plan as DBUser["plan"] });
-    if (error) { toast.error(`Could not change plan: ${error.message}`, { id: tid }); return false; }
-    setUser(u => ({ ...u, plan, storageLimit: PLAN_STORAGE_GB[plan] }));
-    toast.success(`You're now on ${planName}`, { id: tid });
-    return true;
+    const tid = toast.loading(`Opening secure checkout for ${planName}...`);
+    try {
+      const { url } = await billing.planCheckout(plan);
+      window.location.assign(url);
+      return false; // not changed yet — the webhook does that after payment
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
+      return false;
+    }
   }, [uid]);
 
   /* Docs */
