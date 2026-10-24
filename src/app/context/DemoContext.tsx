@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { BILLING_CHANGED } from "../services/billing";
+import { BILLING_CHANGED, notifyBillingChanged } from "../services/billing";
+import { quotaReasonFromError, showQuotaRefusal } from "../utils/storageQuota";
 import { useAuth } from "./AuthContext";
 import {
   db, supabase, tables, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
@@ -147,6 +148,11 @@ function timeAgo(iso: string) {
   const days = Math.floor(hrs / 24);
   if (days < 7) return `${days} day${days===1?"":"s"} ago`;
   return formatDate(iso);
+}
+
+/* Bytes a document counts for (from its rounded display size). */
+function docBytes(d: Doc): number {
+  return d.size * (d.sizeUnit === "GB" ? 1024 ** 3 : 1024 ** 2);
 }
 
 function rowToDoc(row: DBDocument): Doc {
@@ -426,8 +432,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const addDoc = useCallback(async (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => {
     if (!uid) return;
     const tid = toast.loading("Uploading document...");
+    let uploadedPath: string | null = null;
     try {
-      const filePath = file ? await db.uploadVaultFile(uid, file) : `${uid}/manual-${Date.now()}-${doc.name}`;
+      if (file) uploadedPath = await db.uploadVaultFile(uid, file);
+      const filePath = uploadedPath ?? `${uid}/manual-${Date.now()}-${doc.name}`;
       const fileSizeBytes = file ? file.size : Math.round(doc.size * (doc.sizeUnit === "GB" ? 1024 ** 3 : 1024 ** 2));
       const { data, error } = await db.uploadDocument({
         user_id: uid, name: doc.name, category: doc.category, file_path: filePath,
@@ -437,19 +445,31 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       });
       if (error || !data) throw error;
       setDocs(d => [rowToDoc(data), ...d]);
+      // The database measured the stored file; count what it recorded.
+      setUser(u => ({ ...u, storageUsed: Number((u.storageUsed + data.file_size_bytes / 1024 ** 3).toFixed(2)) }));
+      notifyBillingChanged();
       toast.success("Document uploaded & encrypted", { id: tid });
-    } catch {
-      toast.error("Could not upload document", { id: tid });
+    } catch (err) {
+      // The row was refused, so don't leave the stored file behind.
+      if (uploadedPath) await db.removeVaultFile(uploadedPath).catch(() => undefined);
+      const reason = quotaReasonFromError(err);
+      if (reason) { toast.dismiss(tid); showQuotaRefusal(reason); }
+      else toast.error("Could not upload document", { id: tid });
     }
   }, [uid]);
 
   const deleteDoc = useCallback(async (id: string) => {
     const tid = toast.loading("Deleting document...");
+    const doc = docs.find(x => x.id === id);
     const { error } = await db.deleteDocument(id);
     if (error) { toast.error("Could not delete document", { id: tid }); return; }
+    // The stored file goes too — storage you've deleted shouldn't count.
+    if (doc?.filePath && !doc.filePath.includes("/manual-")) await db.removeVaultFile(doc.filePath).catch(() => undefined);
     setDocs(d => d.filter(x => x.id !== id));
+    if (doc) setUser(u => ({ ...u, storageUsed: Math.max(0, Number((u.storageUsed - docBytes(doc) / 1024 ** 3).toFixed(2))) }));
+    notifyBillingChanged();
     toast.success("Document permanently deleted", { id: tid });
-  }, []);
+  }, [docs]);
 
   /* Folders */
   const addFolder = useCallback(async (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => {

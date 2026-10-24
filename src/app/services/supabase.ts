@@ -517,6 +517,10 @@ export const db = {
   },
 
   // Storage
+  async removeVaultFile(path: string) {
+    const { error } = await supabase.storage.from("vault-documents").remove([path]);
+    if (error) throw error;
+  },
   async uploadVaultFile(userId: string, file: File) {
     const path = `${userId}/${crypto.randomUUID()}-${file.name}`;
     const { error } = await supabase.storage.from("vault-documents").upload(path, file);
