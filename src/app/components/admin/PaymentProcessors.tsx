@@ -8,6 +8,7 @@ import { adminApi } from "../../services/adminApi";
 import { SERVER_FUNCTION } from "../../services/serverBase";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { CARD_PROCESSORS, type CatalogProcessor } from "./processorCatalog";
+import { StripeBillingPanel } from "./StripeBillingPanel";
 import { copyToClipboard } from "../../utils/clipboard";
 
 /* Developer → Payment Processors. The card-processor counterpart of Crypto
@@ -481,7 +482,9 @@ export function PaymentProcessors() {
           {notice("Plan upgrades and the $199 Legacy Continuation Fee are charged through Stripe when it is connected and set as the active processor. The other processors store credentials only — checkout is not built for them. The volume above counts every recorded payment.")}
           {loading
             ? <div style={{ color: "#8A9AB8", fontSize: 14, textAlign: "center", padding: 32 }}>Loading processors…</div>
-            : processors.map(p => <ProcessorCard key={p.id} p={p} onChanged={refetch} onRequestActive={() => setConfirmSwitch(p.id)}/>)}
+            : processors.map(p => p.id === "stripe"
+              ? <StripeBillingPanel key="stripe"/>
+              : <ProcessorCard key={p.id} p={p} onChanged={refetch} onRequestActive={() => setConfirmSwitch(p.id)}/>)}
         </div>
       )}
 

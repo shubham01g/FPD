@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useWLPackages } from "../context/WLPackagesContext";
 import type { WLPackage } from "../services/wlPackages";
 import { publicApi } from "../services/publicApi";
+import { useProducts } from "../utils/planCatalog";
 import { useAdminFetch } from "../hooks/useAdminFetch";
 import { usePlatform } from "../services/platform";
 import {
@@ -725,11 +726,11 @@ const PLAN_META: Record<string, Pick<Plan, "color" | "popular" | "features">> = 
 /* Same 5 plans, same numbers, kept as a fallback so the pricing page still
  * renders if the backend isn't reachable (no project connected yet, etc). */
 const FALLBACK_PLANS: Plan[] = [
-  { id: "starter", name: "Starter", price: 1.99, priceAnnual: 24.00, storage: "1 GB", contacts: 1, overage: 0.50, ...PLAN_META.starter },
+  { id: "starter", name: "Starter", price: 0, priceAnnual: 0, storage: "1 GB", contacts: 1, overage: 0, ...PLAN_META.starter },
   { id: "foundation", name: "Foundation", price: 9.99, priceAnnual: 95.90, storage: "50 GB", contacts: 3, overage: 0.40, ...PLAN_META.foundation },
   { id: "family_archive", name: "Legacy Archive", price: 24.99, priceAnnual: 239.90, storage: "250 GB", contacts: -1, overage: 0.40, ...PLAN_META.family_archive },
   { id: "legacy_pro", name: "Legacy Pro", price: 49.99, priceAnnual: 479.90, storage: "500 GB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_pro },
-  { id: "legacy_vault", name: "Legacy Vault", price: 129.99, priceAnnual: 1559.90, storage: "1 TB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_vault },
+  { id: "legacy_vault", name: "Legacy Vault", price: 129.99, priceAnnual: 1247.90, storage: "1 TB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_vault },
 ];
 
 function formatStorage(gb: number): string {
@@ -739,6 +740,10 @@ function formatStorage(gb: number): string {
 function Pricing({ onStart }: { onStart: () => void }) {
   const { starterTrialDays } = usePlatform();
   const [annual, setAnnual] = useState(false);
+  // Disaster Recovery add-on prices (cents), from the catalog.
+  const products = useProducts();
+  const drMonth = products.dr_addon_month?.amountCents ?? 499;
+  const drYear = products.dr_addon_year?.amountCents ?? 4788;
 
   const { data } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
   const PLANS: Plan[] = data?.plans?.length
@@ -753,7 +758,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
     <>
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
       kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
-      sub="All plans include metered GB storage. Unused monthly storage expires at billing reset. Overage billed at $0.50/GB (Starter) or $0.40/GB (all other plans)." />
+      sub={`Start free for ${starterTrialDays} days. Paid plans include their storage; anything above it is $0.40/GB (the peak each month), never more than the monthly limit you set.`} />
     <section id="pricing" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-12">
@@ -761,7 +766,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
           <button onClick={() => setAnnual(a => !a)} className="relative rounded-full transition-all" style={{ width: 48, height: 26, background: annual ? PRIMARY : "#0A1628", border: "1px solid rgba(91,110,225,0.3)", boxShadow: annual ? "0 0 20px rgba(91,110,225,0.4)" : "none" }}>
             <div className="absolute top-1 rounded-full transition-all" style={{ width: 18, height: 18, background: "#fff", left: annual ? 26 : 4 }} />
           </button>
-          <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save 20%</span></span>
+          <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save up to 20%</span></span>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch fpd-stagger">
           {PLANS.map(plan => (
@@ -772,17 +777,25 @@ function Pricing({ onStart }: { onStart: () => void }) {
               )}
               <div style={{ ...MONO, color: plan.color, fontSize: 14, letterSpacing: "0.12em", marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
               <div className="flex items-baseline gap-1 mb-2">
-                <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}</span>
-                <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
+                {plan.price === 0 ? (<>
+                  <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>Free</span>
+                  <span style={{ color: MUTED, fontSize: 17.5 }}>/{starterTrialDays} days</span>
+                </>) : (<>
+                  <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}</span>
+                  <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
+                </>)}
               </div>
+              {annual && plan.price > 0 && <div style={{ color: MUTED, fontSize: 14, marginTop: -4, marginBottom: 6 }}>Billed ${plan.priceAnnual.toFixed(2)}/yr</div>}
               <div style={{ color: MUTED, fontSize: 16, marginBottom: 10 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>
               {plan.id === "starter" && (
-                <div style={{ color: plan.color, fontSize: 15, marginBottom: 10 }}>Available for your first {starterTrialDays} days, then upgrade to a bigger plan.</div>
+                <div style={{ color: plan.color, fontSize: 15, marginBottom: 10 }}>Free for your first {starterTrialDays} days, no card needed. Then choose a paid plan.</div>
               )}
               <div style={{ ...MONO, color: MUTED, fontSize: 12.5, marginBottom: 22, padding: "4px 10px", background: "rgba(91,110,225,0.06)", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 4, width: "fit-content" }}>
-                <span>Overage:</span>
-                <span style={{ color: plan.color, fontWeight: 700 }}>${plan.overage.toFixed(2)}/GB</span>
-                <span>above limit</span>
+                {plan.overage > 0 ? (<>
+                  <span>Overage:</span>
+                  <span style={{ color: plan.color, fontWeight: 700 }}>${plan.overage.toFixed(2)}/GB</span>
+                  <span>above limit</span>
+                </>) : <span>No overage · stops at the limit</span>}
               </div>
               <ul className="flex flex-col gap-3 flex-1 mb-7">
                 {plan.features.map(f => (
@@ -841,9 +854,9 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6" style={{ borderTop: "1px solid rgba(217,154,107,0.2)" }}>
             <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
-              <span style={{ ...DISPLAY, fontSize: 36, fontWeight: 800, color: TEXT }}>${annual ? "3.99" : "4.99"}</span>
+              <span style={{ ...DISPLAY, fontSize: 36, fontWeight: 800, color: TEXT }}>${annual ? (drYear / 1200).toFixed(2) : (drMonth / 100).toFixed(2)}</span>
               <span style={{ color: MUTED, fontSize: 16 }}>/mo</span>
-              <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>{annual ? "Billed $47.88/yr · Save 20%" : "Billed monthly · switch to annual to save 20%"}</span>
+              <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 14 }}>{annual ? `Billed $${(drYear / 100).toFixed(2)}/yr` : "Billed monthly · or yearly for less"}</span>
             </div>
             <button onClick={onStart} className="py-3 px-6 rounded-xl font-semibold text-sm fpd-btn-lift flex-shrink-0" style={{ background: "rgba(217,154,107,0.12)", color: "#D99A6B", border: "1px solid rgba(217,154,107,0.35)" }}>
               Add to Your Plan

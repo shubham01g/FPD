@@ -3,12 +3,14 @@ import { Settings, Save, AlertTriangle, CheckCircle, DollarSign, HardDrive, Bell
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { StripeBillingPanel } from "./StripeBillingPanel";
 
 interface PlanConfig {
   id: string;
   name: string;
   price: number;
-  annualDiscount: number;
+  annualPrice: number;
+  billable: boolean;
   storage: number;
   overageRate: number;
   maxContacts: number; // UI sentinel 999 = unlimited; DB stores -1
@@ -23,7 +25,11 @@ interface DBPlan {
   storage_gb: number;
   overage_rate: number;
   max_contacts: number;
+  billable?: boolean;
 }
+
+/* Add-on and one-time prices (billing_products). */
+interface DBProduct { slug: string; name: string; kind: "one_time" | "recurring"; interval: "month" | "year" | null; amount_cents: number; active: boolean; }
 
 interface ThresholdSetting { key: string; value: string; updated_at: string; }
 
@@ -32,12 +38,12 @@ const PLAN_COLORS: Record<string, string> = {
 };
 
 function toPlanConfig(p: DBPlan): PlanConfig {
-  const annualDiscount = p.price_monthly > 0 ? Math.round((1 - Number(p.price_annual) / (Number(p.price_monthly) * 12)) * 100) : 0;
   return {
     id: p.id,
     name: p.name,
     price: Number(p.price_monthly),
-    annualDiscount,
+    annualPrice: Number(p.price_annual),
+    billable: p.billable ?? p.id !== "starter",
     storage: p.storage_gb,
     overageRate: Number(p.overage_rate),
     maxContacts: p.max_contacts === -1 ? 999 : p.max_contacts,
@@ -52,8 +58,15 @@ interface AlertThresholds {
   overage: number;
 }
 
+const annualDiscountPct = (p: PlanConfig) => p.price > 0 ? Math.round((1 - p.annualPrice / (p.price * 12)) * 100) : 0;
+
 export function SubscriptionConfig() {
   const [plans, setPlans] = useState<PlanConfig[]>([]);
+  // What was loaded, so saving only touches plans that changed: each changed
+  // price becomes a new Stripe price at the next catalog sync.
+  const [original, setOriginal] = useState<Record<string, PlanConfig>>({});
+  const [products, setProducts] = useState<DBProduct[]>([]);
+  const [originalProducts, setOriginalProducts] = useState<Record<string, number>>({});
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -63,14 +76,18 @@ export function SubscriptionConfig() {
   const [trialDays, setTrialDays] = useState(14);
   const [savedTrialDays, setSavedTrialDays] = useState(14);
 
-  const { data, loading, error } = useAdminFetch(
-    () => adminApi.get<{ plans: DBPlan[]; thresholds: ThresholdSetting[] }>("/pricing"),
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => adminApi.get<{ plans: DBPlan[]; thresholds: ThresholdSetting[]; products: DBProduct[] }>("/pricing"),
     [],
   );
 
   useEffect(() => {
     if (!data) return;
-    setPlans(data.plans.map(toPlanConfig));
+    const loaded = data.plans.map(toPlanConfig);
+    setPlans(loaded);
+    setOriginal(Object.fromEntries(loaded.map(p => [p.id, p])));
+    setProducts(data.products ?? []);
+    setOriginalProducts(Object.fromEntries((data.products ?? []).map(p => [p.slug, p.amount_cents])));
     const byKey = Object.fromEntries(data.thresholds.map(t => [t.key, t.value]));
     setThresholds({
       warning: byKey.storage_alert_80 ? Number(byKey.storage_alert_80) : 80,
@@ -99,14 +116,21 @@ export function SubscriptionConfig() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const changed = plans.filter(p => {
+        const o = original[p.id];
+        return !o || o.price !== p.price || o.annualPrice !== p.annualPrice || o.storage !== p.storage || o.overageRate !== p.overageRate || o.maxContacts !== p.maxContacts;
+      });
+      const priceChanged = changed.some(p => original[p.id]?.price !== p.price || original[p.id]?.annualPrice !== p.annualPrice)
+        || products.some(p => originalProducts[p.slug] !== p.amount_cents);
       await Promise.all([
-        ...plans.map((p) => adminApi.patch(`/pricing/plans/${p.id}`, {
-          price_monthly: p.price,
-          price_annual: Math.round(p.price * 12 * (1 - p.annualDiscount / 100) * 100) / 100,
+        ...changed.map((p) => adminApi.patch(`/pricing/plans/${p.id}`, {
+          ...(p.billable ? { price_monthly: p.price, price_annual: Math.round(p.annualPrice * 100) / 100 } : {}),
           storage_gb: p.storage,
           overage_rate: p.overageRate,
           max_contacts: p.maxContacts === 999 ? -1 : p.maxContacts,
         })),
+        ...products.filter(p => originalProducts[p.slug] !== p.amount_cents)
+          .map(p => adminApi.patch(`/pricing/products/${p.slug}`, { amount_cents: p.amount_cents })),
         adminApi.patch("/pricing/settings/storage_alert_80", { value: String(thresholds.warning) }),
         adminApi.patch("/pricing/settings/storage_alert_90", { value: String(thresholds.recommended) }),
         adminApi.patch("/pricing/settings/storage_alert_95", { value: String(thresholds.critical) }),
@@ -115,7 +139,12 @@ export function SubscriptionConfig() {
       setSavedTrialDays(trialDays);
       setSaved(true);
       setDirty(false);
-      toast.success("Pricing configuration saved");
+      setOriginal(Object.fromEntries(plans.map(p => [p.id, p])));
+      setOriginalProducts(Object.fromEntries(products.map(p => [p.slug, p.amount_cents])));
+      toast.success(priceChanged
+        ? "Saved. Run Sync catalog in the Stripe panel so checkout charges the new prices."
+        : "Pricing configuration saved");
+      refetch();
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save configuration");
@@ -134,7 +163,7 @@ export function SubscriptionConfig() {
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "var(--foreground)" }}>Subscription Configuration</h1>
           <p style={{ color: "var(--muted-foreground)", fontSize: 17.5, marginTop: 4 }}>
-            Changes here update pricing and thresholds in real time on the frontend. Changes take effect immediately for new subscribers.
+            Prices, storage and thresholds. A changed price reaches checkout after Sync catalog creates it in Stripe; current subscribers keep the price they bought.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -167,13 +196,7 @@ export function SubscriptionConfig() {
         </div>
       )}
 
-      {/* Live preview notice */}
-      <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
-        <RefreshCw size={14} color="#FFFFFF" />
-        <span style={{ color: "var(--muted-foreground)", fontSize: 16 }}>
-          Pricing changes propagate to the public pricing page in real time via API. No deployment required.
-        </span>
-      </div>
+      <StripeBillingPanel onSynced={() => refetch()} />
 
       {loading ? (
         <div className="flex items-center gap-2 py-12 justify-center" style={{ color: "var(--muted-foreground)" }}>
@@ -202,14 +225,14 @@ export function SubscriptionConfig() {
               <div className="flex items-start gap-3 px-4 py-3 rounded-2xl border mb-6" style={{ background: "rgba(72,187,120,0.06)", borderColor: "rgba(72,187,120,0.25)" }}>
                 <Clock size={14} color="#5FBE91" style={{ marginTop: 3, flexShrink: 0 }} />
                 <span style={{ color: "var(--muted-foreground)", fontSize: 16, lineHeight: 1.6 }}>
-                  This is the <strong style={{ color: "#5FBE91" }}>trial plan</strong>. Users pay <strong>${plan.price}</strong> for a {trialDays}-day access window.
-                  After the trial ends, the account is <strong>automatically suspended</strong> until the user upgrades to a paid plan. All vault data is preserved during suspension.
+                  This is the <strong style={{ color: "#5FBE91" }}>free trial plan</strong>. New accounts get it for {trialDays} days with no card and are never billed for it.
+                  After the trial ends the app asks the user to choose a paid plan. All vault data is kept.
                 </span>
               </div>
             )}
             <div className="grid md:grid-cols-3 gap-6">
               {/* Monthly price */}
-              <div>
+              {plan.billable && <div>
                 <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>MONTHLY PRICE ($)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
                   <DollarSign size={14} color="var(--gold)" />
@@ -222,26 +245,28 @@ export function SubscriptionConfig() {
                   />
                 </div>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>
-                  Annual price: ${(plan.price * 12 * (1 - plan.annualDiscount / 100)).toFixed(2)}/yr
+                  {original[plan.id] && original[plan.id].price !== plan.price ? "Changed: needs Sync catalog" : "Billed monthly"}
                 </div>
-              </div>
+              </div>}
 
-              {/* Annual discount */}
-              <div>
-                <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>ANNUAL DISCOUNT (%)</label>
+              {/* Annual price */}
+              {plan.billable && <div>
+                <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>ANNUAL PRICE ($)</label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
+                  <DollarSign size={14} color="var(--gold)" />
                   <input
                     type="number"
-                    step="1"
+                    step="0.01"
                     min="0"
-                    max="50"
-                    value={plan.annualDiscount}
-                    onChange={(e) => updatePlan(plan.id, "annualDiscount", parseInt(e.target.value))}
+                    value={plan.annualPrice}
+                    onChange={(e) => updatePlan(plan.id, "annualPrice", parseFloat(e.target.value))}
                     style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 20, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
                   />
-                  <span style={{ color: "var(--muted-foreground)" }}>%</span>
                 </div>
-              </div>
+                <div style={{ color: "var(--muted-foreground)", fontSize: 14, marginTop: 4 }}>
+                  {annualDiscountPct(plan)}% off twelve monthly payments
+                </div>
+              </div>}
 
               {/* Storage */}
               <div>
@@ -319,8 +344,8 @@ export function SubscriptionConfig() {
               <div className="flex items-center justify-center rounded-2xl border" style={{ borderColor: plan.color, background: `${plan.color}08`, minHeight: 84 }}>
                 {plan.id === "starter" ? (
                   <div className="text-center">
-                    <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 700 }}>${plan.price} / {trialDays} days</div>
-                    <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Trial · suspends after {trialDays}d</div>
+                    <div style={{ color: plan.color, fontFamily: "var(--font-display)", fontSize: 30, fontWeight: 700 }}>Free / {trialDays} days</div>
+                    <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Trial · {plan.storage} GB · no overage</div>
                   </div>
                 ) : (
                   <div className="text-center">
@@ -332,6 +357,33 @@ export function SubscriptionConfig() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Add-ons and one-time products */}
+      <div className="p-6 rounded-2xl border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)", marginBottom: 6 }}>Add-Ons &amp; One-Time Products</h2>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 16, marginBottom: 20 }}>
+          Sold through Stripe Checkout. A changed price needs Sync catalog before checkout uses it.
+        </p>
+        <div className="grid md:grid-cols-3 gap-6">
+          {products.map(p => (
+            <div key={p.slug}>
+              <label style={{ color: "var(--muted-foreground)", fontSize: 15, display: "block", marginBottom: 8 }}>
+                {p.name.toUpperCase()}{p.interval ? ` (${p.interval === "year" ? "YEARLY" : "MONTHLY"})` : p.slug === "wg_session_block" ? " (PER 30 MIN)" : " (ONE-TIME)"}
+              </label>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "var(--border)" }}>
+                <DollarSign size={14} color="var(--gold)" />
+                <input
+                  type="number" step="0.01" min="0.5"
+                  value={p.amount_cents / 100}
+                  onChange={(e) => { const v = Math.round(parseFloat(e.target.value) * 100); setProducts(ps => ps.map(x => x.slug === p.slug ? { ...x, amount_cents: Number.isFinite(v) ? v : x.amount_cents } : x)); setDirty(true); setSaved(false); }}
+                  style={{ background: "transparent", border: "none", outline: "none", color: "var(--foreground)", fontSize: 20, fontFamily: "var(--font-mono)", fontWeight: 700, width: "100%" }}
+                />
+              </div>
+              {originalProducts[p.slug] !== p.amount_cents && <div style={{ color: "#F6AD55", fontSize: 14, marginTop: 4 }}>Changed: needs Sync catalog</div>}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Notification thresholds */}
