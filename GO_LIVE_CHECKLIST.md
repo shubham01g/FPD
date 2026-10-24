@@ -106,17 +106,144 @@ running `server` from `main`. Local dev points at it with
 
 ---
 
+## Build reference
+
+| Piece | Where |
+|---|---|
+| Migrations | `038_billing_security_lockdown`, `039_billing_core`, `040_storage_metering`, `041_affiliate_attribution` (both `database/migrations/` and `supabase/migrations/`; paste `APPLY_PENDING_03x.sql` in order) |
+| Hourly job | `database/cron/billing_rollover.template.sql` |
+| Cutover cleanup | `database/cutover/stripe_test_data_cleanup.sql` |
+| Webhook | `POST …/functions/v1/<function>/make-server-b5ad85e0/public/stripe/webhook` |
+| Status (no secrets) | `GET …/functions/v1/<function>/make-server-b5ad85e0/public/billing/status` |
+| Stripe API version | `2024-06-20`, pinned in `lib/stripe.ts`; every object is re-read, so any webhook endpoint version works |
+| Admin | Subscription Config → Stripe Billing panel (sync, portal, webhook check, health); Users → Billing tab |
+
+`<function>` is `server-billing` in Phases A–B and `server` from Phase D on.
+
+---
+
 ## Phase A: code reaches Supabase in test mode
-_Filled in as the build progresses._
+
+Everything here touches the shared Supabase project, so each step waits for
+the owner's go. Production `server` is not touched: the branch runs as
+`server-billing`.
+
+- [ ] **Real-users check** (read-only, SQL Editor). Shows how many accounts
+      are on a paid plan without paying; this decides grandfathering in Phase D.
+      ```sql
+      select plan, plan_status, subscription_waived, count(*) from public.users group by 1,2,3 order by 1;
+      select enabled, is_default, config_encrypted is not null as has_keys from public.crypto_processor_configs where id = 'stripe';
+      ```
+- [ ] Apply `APPLY_PENDING_038.sql` (security lockdown). Check its verification queries.
+      _Note: from now on the browser can't change its own plan. Production's
+      old front end falls back to "Card payments are being set up" for
+      upgrades; that is intended._
+- [ ] Apply `APPLY_PENDING_039.sql`, then `APPLY_PENDING_040.sql`, then `APPLY_PENDING_041.sql`.
+- [ ] Owner sets the **test** secrets for the project (Supabase → Edge Functions → Secrets):
+      `STRIPE_SECRET_KEY=sk_test_…` (from the Final Pass Down, LLC account's test mode),
+      `APP_URL` (see pitfall 4.12), `CRON_SECRET` (long random),
+      `RENEWAL_CONSENT_REQUIRED=false`, `BILLING_RETURN_ORIGINS=http://localhost:5173`.
+      Secrets are project-wide, but production `server` runs main's code,
+      which doesn't read them.
+- [ ] Deploy: `supabase functions deploy server-billing --project-ref evedkmczpuficbzsvhts`
+      (show `git diff main -- supabase/functions` first).
+- [ ] `GET …/server-billing/…/public/billing/status` shows `stripeConfigured:true, livemode:false`.
+- [ ] Stripe (test mode) → Developers → Webhooks → add endpoint
+      `…/functions/v1/server-billing/make-server-b5ad85e0/public/stripe/webhook` with the 10 events
+      (listed in the admin panel). Owner pastes its signing secret as `STRIPE_WEBHOOK_SECRET`, then redeploy.
+- [ ] Local `.env.local`: `VITE_SERVER_FUNCTION=server-billing`; run the app on localhost.
+- [ ] Admin → Subscription Config → Stripe Billing: **Sync catalog (dry run)** shows
+      13 to create (4 paid plans × monthly/yearly + 5 products), 0 errors; **Apply**.
+- [ ] **Set up customer portal**; **Check webhook** shows OK.
+- [ ] Run `database/cron/billing_rollover.template.sql` with `<FUNCTION>` = `server-billing`.
+- [ ] Stripe test dashboard: Settings → Payments → **Adaptive Pricing off**.
 
 ## Phase B: prove it in test mode
-_Filled in as the build progresses._
 
-## Phase C: live Stripe dashboard (owner)
-_Filled in as the build progresses._
+Cards: `4242 4242 4242 4242` succeeds · `4000 0025 0000 3155` needs 3-D Secure ·
+`4000 0000 0000 0341` attaches then every charge fails · `4000 0000 0000 9995`
+declined · `4000 0000 0000 0259` disputed. Use test clocks for renewals
+(scratch helpers: `stripe.mjs clock:*`, then `/admin/billing/test/link-customer`).
+Small-file overage: `/admin/billing/test/set-meter` (1 MB units, 5 MB included).
 
-## Phase D: cutover window
-_Filled in as the build progresses._
+**Plans**
+- [ ] Starter: new signup is on free Starter; 1 GB hard block; wall after 14 days.
+- [ ] Foundation monthly: consent box required; `billing_consents` row has the session id; plan active.
+- [ ] Advance clock 1 month: renewal invoice correct; usage period rolled.
+- [ ] Legacy Vault yearly at $1,247.90; monthly usage slices; renewal reminder email ~30 days before renewal.
+- [ ] Upgrade Foundation → Legacy Pro: charged prorated now; usage closed at the old rate.
+- [ ] Downgrade Legacy Pro → Foundation: nothing charged; "pending" shown; applies at period end.
+- [ ] Monthly → yearly on the same plan (now); yearly → monthly (at period end).
+- [ ] Cancel at period end, then "Keep my plan"; cancel and let it end → Reactivate wall.
+- [ ] Each plan bought once (monthly or yearly) so every price is exercised.
+
+**Overage**
+- [ ] Monthly plan: overage line on the renewal invoice equals the closure.
+- [ ] Yearly plan: standalone overage invoice from the rollover; below $0.50 it waits.
+- [ ] Cap reached: upload refused with "Raise my limit"; raising it charges nothing extra.
+- [ ] Comped account over its allowance: uploads stop; closure `skipped_reason = comped`.
+- [ ] Deleting a file removes the stored object; the meter goes down (peak stays for the period).
+
+**Failed payments**
+- [ ] Renewal with `…0341`: past_due banner, one email, retries, then deleted → Reactivate, and it **stays** ended (pitfall 4.3).
+- [ ] Declined standalone overage: uploads limited, one email; paying the invoice lifts it.
+- [ ] `…3155` at checkout: active, and **no** failure email (pitfall 4.2).
+
+**Add-ons and one-time products**
+- [ ] Disaster Recovery monthly and yearly: active on both DR pages; cancel at period end; ends when the plan ends.
+- [ ] Legacy Continuation Fee $199: fee row paid; admin activation still works.
+- [ ] White Glove $99: card saved (brand/last4 in admin); a 45-minute session charged = 2 blocks = $50.
+- [ ] White Glove session on a `…0341` saved card: row failed, admin emailed.
+
+**Admin**
+- [ ] Price change (e.g. Foundation $10.99): dry run shows 1 reprice; apply; new checkout charges it; old price archived; existing subscriber unchanged.
+- [ ] Comp a plan, then end the comp → Reactivate.
+- [ ] Refund & end: refund issued, subscription cancelled now, refund row with admin email.
+- [ ] Refund a one-time charge from the Billing tab.
+
+**Referrals and commissions**
+- [ ] Sign up through `/r/CODE`: `affiliate_referrals` row created.
+- [ ] Referred account pays: commission row; 50% dashboard refund reverses half; `…0259` dispute reverses the rest; won dispute restores it.
+
+**Robustness**
+- [ ] Resend a webhook event from the dashboard: `{duplicate:true}`, one effect.
+- [ ] Hand-made subscription in the dashboard (no `userId`): 200, nothing changed.
+- [ ] `BILLING_PAUSED=true`: checkout and plan changes refused (503); cancel and the portal still work.
+- [ ] Cutover script with `ROLLBACK` on the test data: counts match expectations.
+
+## Phase C: live Stripe dashboard (owner, Final Pass Down, LLC account)
+
+1. Business verification complete; payout bank account added (Settings → Payouts); statement descriptor; branding; customer receipt emails on.
+2. Payment methods: cards, Apple Pay, Google Pay, Link.
+3. Stripe Tax registrations, only if the accountant says so.
+4. Billing → Subscriptions and emails: Smart Retries; failed-payment emails; 3-D Secure hosted confirmation link; upcoming renewal events 30 days ahead; card auto-update.
+5. Radar default rules.
+6. **Adaptive Pricing off.**
+7. Webhook endpoint `…/functions/v1/server/make-server-b5ad85e0/public/stripe/webhook`, the 10 events, default API version. Save the signing secret in a password manager.
+8. Live secret key: save it in a password manager (it may be shown only once). **Don't** put it anywhere yet.
+9. Keep the **test** key and test webhook secret too, for rollback.
+10. White Label / enterprise products are invoiced by hand (Stripe Invoicing).
+
+## Phase D: cutover window (about 1 hour, owner's explicit go)
+
+1. Set `BILLING_PAUSED=true`. `/public/billing/status` shows `billingPaused:true`.
+2. Merge `feature/stripe-billing` to `main`; deploy `server` from main; wait for the Vercel production deploy of that commit.
+3. Remove `RENEWAL_CONSENT_REQUIRED` (consent becomes required).
+4. Run `database/cutover/stripe_test_data_cleanup.sql` with `ROLLBACK`, read the counts, then with `COMMIT`.
+5. Owner pastes `sk_live_…` and the live `whsec_…`; `/public/billing/status` shows `livemode:true`.
+6. Admin → Sync catalog: dry run (expect 13 to create, 0 errors), apply; set up the portal; check the webhook.
+7. Re-run the cron template with `<FUNCTION>` = `server`.
+8. Set `admin_settings.storage_enforcement_enabled = 'true'` (uploads start being refused at the limits).
+9. Grandfathering (decided from the Phase A real-users check): comp existing paid-plan accounts (Users → Billing → Comp) or let them see Reactivate.
+10. Remove `BILLING_PAUSED`; status shows `billingPaused:false`.
+11. **Real-card smoke test:** buy Foundation monthly with a real card; check plan active, `stripe_events`, consent row, live customer row, receipt email; then Refund & end and check the refund.
+12. Delete the `server-billing` function and the `VITE_SERVER_FUNCTION` setting.
+13. Watch webhook deliveries (0 failures) and function logs.
+
+**Rollback:** `BILLING_PAUSED=true`; put the test key and test webhook secret back. Customers are stored per mode, so live data is untouched; live subscriptions keep billing in Stripe and their events retry for up to 3 days.
 
 ## Phase E: first 30 days
-_Filled in as the build progresses._
+
+- Daily (Admin → Stripe Billing → Billing health): webhook failures; overage unbilled after 2 hours; declined overage; dispute rate under 0.75%.
+- Around day 30, before the first overage renewals finalize, compare renewal invoices with the closures by hand.
+- Before the first affiliate payout: set up Stripe Connect (or pay by hand) and check `affiliate_commissions` against `affiliates.pending_payout`.
