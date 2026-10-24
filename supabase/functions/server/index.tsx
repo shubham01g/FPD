@@ -34,6 +34,7 @@ import settings from "./routes/settings.ts";
 import billing from "./routes/billing.ts";
 import contacts from "./routes/contacts.ts";
 import adminBilling from "./routes/adminBilling.ts";
+import internal from "./routes/internal.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -168,6 +169,9 @@ api.route("/account", account);
 
 // Public, unauthenticated data for the customer-facing app.
 api.route("/public", publicRoutes);
+
+// Scheduled jobs (pg_cron), authenticated by CRON_SECRET.
+api.route("/internal", internal);
 
 for (const name of FUNCTION_NAMES) app.route(`/${name}/make-server-b5ad85e0`, api);
 
