@@ -35,6 +35,7 @@ import billing from "./routes/billing.ts";
 import contacts from "./routes/contacts.ts";
 import adminBilling from "./routes/adminBilling.ts";
 import internal from "./routes/internal.ts";
+import adminUserBilling from "./routes/adminUserBilling.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -103,6 +104,9 @@ admin.use("/pricing/*", requireModulePermission("subscription"));
 // Stripe setup (catalog sync, portal, webhook check) sits with plan pricing.
 admin.use("/billing", requireModulePermission("subscription"));
 admin.use("/billing/*", requireModulePermission("subscription"));
+// One account's billing (refunds, comps, plan changes) sits with user management.
+admin.use("/user-billing", requireModulePermission("users"));
+admin.use("/user-billing/*", requireModulePermission("users"));
 admin.use("/email-templates", requireModulePermission("email_templates"));
 admin.use("/email-templates/*", requireModulePermission("email_templates"));
 admin.use("/white-label", requireModulePermission("white_label"));
@@ -142,6 +146,7 @@ admin.route("/payouts", payouts);
 admin.route("/subscriptions", subscriptions);
 admin.route("/pricing", pricing);
 admin.route("/billing", adminBilling);
+admin.route("/user-billing", adminUserBilling);
 admin.route("/email-templates", emailTemplates);
 admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);

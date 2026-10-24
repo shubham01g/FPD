@@ -79,4 +79,31 @@ adminBilling.get("/setup/webhook", async (c) => {
   }
 });
 
+// GET /admin/billing/health — the Phase E daily checks: webhook events that
+// failed or never finished, overage not billed after 2 hours, declined
+// overage, and the dispute rate (keep it under 0.75%).
+adminBilling.get("/health", async (c) => {
+  const db = adminClient();
+  const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86_400_000).toISOString();
+  const [events, unbilled, failed, paid, disputed] = await Promise.all([
+    db.from("stripe_events").select("id, type, received_at, attempts, last_error").is("processed_at", null).lt("received_at", tenMinAgo).order("received_at", { ascending: false }).limit(50),
+    db.from("usage_period_closures").select("id, user_id, amount_cents, period_end, created_at").is("billed_at", null).is("skipped_reason", null).gt("amount_cents", 0).lt("created_at", twoHoursAgo).limit(100),
+    db.from("usage_period_closures").select("id, user_id, amount_cents, stripe_invoice_id, payment_failed_at").not("payment_failed_at", "is", null).is("paid_at", null).limit(100),
+    db.from("payments").select("id", { count: "exact", head: true }).gte("created_at", ninetyDaysAgo),
+    db.from("payments").select("id", { count: "exact", head: true }).eq("status", "disputed").gte("created_at", ninetyDaysAgo),
+  ]);
+  const paidCount = paid.count ?? 0;
+  const disputedCount = disputed.count ?? 0;
+  return c.json({
+    failedOrStuckEvents: events.data ?? [],
+    unbilledClosuresOver2h: unbilled.data ?? [],
+    declinedOverage: failed.data ?? [],
+    disputes90d: disputedCount,
+    payments90d: paidCount,
+    disputeRatePct: paidCount ? Math.round((disputedCount / paidCount) * 10000) / 100 : 0,
+  });
+});
+
 export default adminBilling;
