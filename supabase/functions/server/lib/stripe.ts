@@ -164,20 +164,3 @@ export async function verifyStripeSignature(rawBody: string, header: string | un
   const expected = hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${rawBody}`)));
   return signatures.some((sig) => safeEqual(sig, expected));
 }
-
-// ── Transitional ─────────────────────────────────────────────────────────
-// The checkout routes and webhook written before this module still call
-// these; they are replaced in the billing rewrite and then removed.
-export interface StripeConfig { secretKey: string; webhookSecret: string; testMode: boolean }
-
-export async function loadStripeConfig(): Promise<StripeConfig | null> {
-  const secretKey = stripeSecretKey();
-  if (!secretKey || !stripeMode()) return null;
-  return { secretKey, webhookSecret: stripeWebhookSecret() ?? "", testMode: stripeMode() === "test" };
-}
-
-export async function stripeRequest<T = Record<string, unknown>>(
-  _secretKey: string, method: "GET" | "POST" | "DELETE", path: string, params?: Record<string, unknown>,
-): Promise<T> {
-  return await stripe<T>(method, path, params ?? {});
-}
