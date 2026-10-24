@@ -6,6 +6,11 @@ import { trackPageView, trackHeartbeat, HEARTBEAT_INTERVAL_MS } from "./services
 import { DemoProvider, useDemo } from "./context/DemoContext";
 import { StarterUpgradeWall, StarterCountdownBanner, PastDueBanner } from "./components/StarterUpgradeWall";
 import { usePaymentReturn } from "./hooks/usePaymentReturn";
+import { captureReferral } from "./utils/referral";
+
+// An affiliate link (/r/CODE or ?ref=CODE) is remembered before anything
+// renders, so it survives the visitor browsing around before signing up.
+captureReferral();
 import { starterDaysLeft } from "./utils/starterPlan";
 import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
 import { PortalNotice } from "./components/PortalNotice";
@@ -729,6 +734,7 @@ function AppShell() {
       <Route path="/" element={<LandingRoute/>}/>
       <Route path="/login" element={<UserLoginRoute/>}/>
       <Route path="/signup" element={<UserSignupRoute/>}/>
+      <Route path="/r/:code" element={<Navigate to="/" replace/>}/>
       <Route path="/dashboard" element={<UserRoute/>}/>
       <Route path="/admin/login" element={<AdminLoginRoute/>}/>
       <Route path="/admin/accept" element={<AdminInviteRoute/>}/>

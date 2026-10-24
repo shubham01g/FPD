@@ -1,3 +1,4 @@
+import { storedReferral } from "../utils/referral";
 import { AuthError } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "./supabase";
 
@@ -36,6 +37,8 @@ export async function signUpWithPassword(email: string, password: string, fullNa
         country: demographics?.country || undefined,
         device_type: demographics?.deviceType || undefined,
         referral_source: demographics?.referralSource || undefined,
+        // The affiliate whose link brought them here (migration 041).
+        referral_code: storedReferral() ?? undefined,
       },
     },
   });
