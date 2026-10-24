@@ -5,6 +5,7 @@ import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import { readPlatformSection } from "../lib/platformSettings.ts";
 import { loadStripeConfig, stripeRequest, verifyStripeSignature } from "../lib/stripe.ts";
+import { billingStatus } from "../lib/billingConfig.ts";
 
 const pub = new Hono();
 
@@ -19,6 +20,11 @@ pub.get("/plans", async (c) => {
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ plans: data });
 });
+
+// GET /public/billing/status — proves which Stripe mode the backend is in
+// (and whether checkout is paused) without revealing any key. The cutover
+// steps in GO_LIVE_CHECKLIST.md check livemode and billingPaused here.
+pub.get("/billing/status", (c) => c.json(billingStatus()));
 
 // GET /public/platform — maintenance mode and feature flags from System →
 // Settings, for the customer-facing app to enforce (services/platform.ts).

@@ -11,6 +11,7 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import { loadStripeConfig, stripeRequest } from "../lib/stripe.ts";
+import { billingPaused } from "../lib/billingConfig.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 
 const billing = new Hono();
@@ -26,7 +27,7 @@ function returnOrigin(c: { req: { header: (name: string) => string | undefined }
 // and the no-payment plan switch it falls back to when Stripe isn't connected.
 billing.get("/status", async (c) => {
   const config = await loadStripeConfig();
-  return c.json({ checkoutEnabled: Boolean(config), testMode: config?.testMode ?? false });
+  return c.json({ checkoutEnabled: Boolean(config) && !billingPaused(), testMode: config?.testMode ?? false });
 });
 
 // POST /account/billing/checkout/plan { planId, interval }
