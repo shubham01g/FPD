@@ -206,8 +206,8 @@ Small-file overage: `/admin/billing/test/set-meter` (1 MB units, 5 MB included).
 - [x] Referred account pays: commission row; 50% dashboard refund reverses half; `…0259` dispute reverses the rest; won dispute restores it.
 
 **Robustness**
-- [ ] Resend a webhook event from the dashboard: `{duplicate:true}`, one effect.
-- [ ] Hand-made subscription in the dashboard (no `userId`): 200, nothing changed.
+- [x] Resend a webhook event from the dashboard: `{duplicate:true}`, one effect.
+- [x] Hand-made subscription in the dashboard (no `userId`): 200, nothing changed.
 - [x] `BILLING_PAUSED=true`: checkout and plan changes refused (503); cancel and the portal still work.
 - [x] Cutover script with `ROLLBACK` on the test data: counts match expectations.
 
@@ -225,10 +225,13 @@ caught up in `onInvoicePaid`). Test clocks are driven server-side by
 Sandbox settings to mirror in Phase C: Bank, Amazon Pay, Cash App Pay and Klarna are on in
 the sandbox (hosted invoice page); the renewal reminder fired about 3 days ahead (set 30).
 
-Still to do: resending a webhook from the dashboard, and the hand-made dashboard subscription.
-Gaps found: nothing in the app creates an `affiliates` row (no member enrolment, no admin
-"add affiliate"; SHUBHAM1 was inserted by SQL for the test); `affiliates.active_referrals`
-stays 0 after a referral pays; an admin portal whose login expired shows "Missing
+All Phase B items are done (the dashboard resend answered `duplicate`; the hand-made
+subscription changed nothing). `APP_URL` is confirmed as `https://finalpassdown.com`.
+Affiliate enrolment was missing (nothing created an `affiliates` row): members now join on
+the Affiliate Program page (`/account/affiliate/join`, starts `inactive` = PENDING, admin
+alerted) and an admin approves with the tick in Affiliate Admin.
+Gaps left: `affiliates.active_referrals` stays 0 after a referral pays (needs a migration;
+the member page counts correctly); an admin portal whose login expired shows "Missing
 Authorization bearer token" instead of returning to sign-in.
 Display leftovers: a canceled subscription's row in the admin Billing tab still says
 "renews"; the user modal's Overview card shows monthly price and "Next billing: Not
@@ -258,7 +261,10 @@ accounts, yearly at the monthly price).
 6. Admin → Sync catalog: dry run (expect 13 to create, 0 errors), apply; set up the portal; check the webhook.
 7. Re-run the cron template with `<FUNCTION>` = `server`.
 8. Set `admin_settings.storage_enforcement_enabled = 'true'` (uploads start being refused at the limits).
-9. Grandfathering (decided from the Phase A real-users check): comp existing paid-plan accounts (Users → Billing → Comp) or let them see Reactivate.
+9. Grandfathering (owner's decision, Oct 25): comp team and test accounts (Users → Billing → Comp a plan, Foundation); real customers see Reactivate.
+   - Comp, team: `demo@`, `jc@`, `josh@finalpassdown.com`, `thecavittgroup@gmail.com`, `manishagunjal184@gmail.com`.
+   - Comp, test: `claude-smoketest-17544@example.com`, `proxy-check-25893@example.com`, `cewohan662@neowd.com`, `fikij69990@dd2car.com`, `jenid99465@bitproy.com`, `kekobol340@airychen.com`, `shubham@gmail.com` (paused).
+   - Owner to confirm: `agmw.ambassador@gmail.com`, `jeraldcavitt@gmail.com`, `mary@bam.eco`, `ruchabagul12@gmail.com`.
 10. Remove `BILLING_PAUSED`; status shows `billingPaused:false`.
 11. **Real-card smoke test:** buy Foundation monthly with a real card; check plan active, `stripe_events`, consent row, live customer row, receipt email; then Refund & end and check the refund.
 12. Delete the `server-billing` function and the `VITE_SERVER_FUNCTION` setting.

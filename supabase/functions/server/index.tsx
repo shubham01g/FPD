@@ -37,6 +37,7 @@ import adminBilling from "./routes/adminBilling.ts";
 import internal from "./routes/internal.ts";
 import adminUserBilling from "./routes/adminUserBilling.ts";
 import adminBillingTest from "./routes/adminBillingTest.ts";
+import affiliateJoin from "./routes/affiliateJoin.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -173,6 +174,7 @@ account.use("*", requireUser);
 account.route("/2fa", twoFactor);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
+account.route("/affiliate", affiliateJoin);
 api.route("/account", account);
 
 // Public, unauthenticated data for the customer-facing app.

@@ -330,6 +330,23 @@ export const db = {
   async getAffiliate(userId: string) {
     return supabase.from("affiliates").select("*").eq("user_id", userId).single<DBAffiliate>();
   },
+  /* Joins the affiliate programme through the edge function (routes/affiliateJoin.ts):
+     the browser can't write affiliate rows. The new row awaits admin approval. */
+  async joinAffiliateProgram(): Promise<{ affiliate: DBAffiliate | null; error: string | null }> {
+    if (!isSupabaseConfigured) return { affiliate: null, error: "No Supabase project connected" };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${DIRECT_URL}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/account/affiliate/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) return { affiliate: null, error: body?.error ? String(body.error) : `Request failed with status ${res.status}` };
+      return { affiliate: body?.affiliate ?? null, error: null };
+    } catch {
+      return { affiliate: null, error: "Could not reach the server" };
+    }
+  },
   /* Joins the referred member so the affiliate screen can label each row.
      If RLS hides that user, PostgREST returns null for the join rather than
      failing — the caller renders a neutral label in that case. */
