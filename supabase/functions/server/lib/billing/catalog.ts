@@ -103,11 +103,13 @@ export interface SyncResult {
 }
 
 /** A stored id from the other mode (or deleted in the dashboard) counts as missing. */
+/** Is this a price checkout can still use? An archived price counts as
+ *  missing, so the next sync replaces it. */
 async function priceExists(priceId: string | null): Promise<boolean> {
   if (!priceId) return false;
   try {
-    await stripe("GET", `/prices/${priceId}`);
-    return true;
+    const price = await stripe<{ active?: boolean }>("GET", `/prices/${priceId}`);
+    return price.active !== false;
   } catch (err) {
     if (isResourceMissing(err)) return false;
     throw err;
@@ -132,7 +134,11 @@ async function ensureProduct(existing: string | null, key: string, name: string,
   return product.id;
 }
 
-async function createPrice(product: string, amountCents: number, interval: Interval | null, lookupKey: string, metadata: Record<string, string>): Promise<string> {
+// The idempotency key names the price being replaced: a crashed sync that is
+// run again gets the same new price, but changing a price and changing it back
+// within Stripe's 24-hour window still creates a fresh one (keyed on the amount
+// alone, Stripe would hand back the original price, already archived).
+async function createPrice(product: string, amountCents: number, interval: Interval | null, lookupKey: string, metadata: Record<string, string>, replacing: string | null): Promise<string> {
   const price = await stripe<{ id: string }>("POST", "/prices", {
     product,
     currency: "usd",
@@ -141,7 +147,7 @@ async function createPrice(product: string, amountCents: number, interval: Inter
     lookup_key: lookupKey,
     transfer_lookup_key: true,
     metadata,
-  }, { idempotencyKey: `price:${stripeMode()}:${lookupKey}:${amountCents}` });
+  }, { idempotencyKey: `price:${stripeMode()}:${lookupKey}:${amountCents}:${replacing ?? "first"}` });
   return price.id;
 }
 
@@ -185,7 +191,7 @@ export async function syncCatalog(dryRun: boolean): Promise<SyncResult> {
         if (!dryRun && line.action !== "ok") {
           productId = await ensureProduct(productId, `plan:${plan.id}`, `Final Pass Down — ${plan.name}`, { fpd_kind: "plan", plan_id: plan.id });
           line.newPriceId = await createPrice(productId, amountCents, interval, `fpd_plan_${plan.id}_${interval}`,
-            { fpd_kind: "plan", plan_id: plan.id, interval });
+            { fpd_kind: "plan", plan_id: plan.id, interval }, oldPriceId);
           const patch = interval === "year"
             ? { stripe_product_id: productId, stripe_price_id_annual: line.newPriceId, synced_price_annual_cents: amountCents }
             : { stripe_product_id: productId, stripe_price_id_monthly: line.newPriceId, synced_price_monthly_cents: amountCents };
@@ -209,7 +215,8 @@ export async function syncCatalog(dryRun: boolean): Promise<SyncResult> {
         const productId = await ensureProduct(product.stripe_product_id, `product:${product.slug}`, `Final Pass Down — ${product.name}`,
           { fpd_kind: "product", slug: product.slug, product_group: product.product_group });
         line.newPriceId = await createPrice(productId, product.amount_cents, product.interval, `fpd_${product.slug}`,
-          { fpd_kind: "product", slug: product.slug, product_group: product.product_group, ...(product.interval ? { interval: product.interval } : {}) });
+          { fpd_kind: "product", slug: product.slug, product_group: product.product_group, ...(product.interval ? { interval: product.interval } : {}) },
+          product.stripe_price_id);
         const { error } = await db.from("billing_products").update({
           stripe_product_id: productId, stripe_price_id: line.newPriceId, synced_amount_cents: product.amount_cents, updated_at: new Date().toISOString(),
         }).eq("slug", product.slug);

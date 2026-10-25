@@ -92,6 +92,74 @@ testRoutes.post("/link-customer", async (c) => {
   return c.json({ ok: true, testClock: customer.test_clock ?? null });
 });
 
+// POST /clock { userId } — a Stripe test clock at the current time with a new
+// test customer on it, linked to the account, so its next checkout bills on
+// the clock. (The old customer's subscriptions keep working through their rows.)
+testRoutes.post("/clock", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { data: user } = await adminClient().from("users").select("id, email, full_name").eq("id", body.userId).maybeSingle();
+  if (!user) return c.json({ error: "No such account" }, 404);
+  const clock = await stripe<Record<string, any>>("POST", "/test_helpers/test_clocks", {
+    frozen_time: Math.floor(Date.now() / 1000), name: `FPD ${user.email}`.slice(0, 300),
+  });
+  const customer = await stripe<Record<string, any>>("POST", "/customers", {
+    email: user.email, name: user.full_name ?? undefined, test_clock: clock.id, metadata: { userId: user.id },
+  });
+  const { error } = await adminClient().from("billing_customers").upsert({
+    user_id: user.id, livemode: false, stripe_customer_id: customer.id, test_clock_id: clock.id,
+  }, { onConflict: "user_id,livemode" });
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ clockId: clock.id, customerId: customer.id, frozenTime: new Date(clock.frozen_time * 1000).toISOString() });
+});
+
+// POST /clock/advance { clockId, days } — moves the clock forward and waits
+// (up to about 50 s) for Stripe to finish processing it.
+testRoutes.post("/clock/advance", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const days = Number(body.days);
+  if (!/^clock_/.test(String(body.clockId ?? "")) || !Number.isFinite(days) || days <= 0) return c.json({ error: "clockId and a positive days are required" }, 400);
+  const clock = await stripe<Record<string, any>>("GET", `/test_helpers/test_clocks/${body.clockId}`);
+  await stripe("POST", `/test_helpers/test_clocks/${body.clockId}/advance`, { frozen_time: clock.frozen_time + Math.round(days * 86_400) });
+  let now = clock;
+  for (let i = 0; i < 25; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    now = await stripe<Record<string, any>>("GET", `/test_helpers/test_clocks/${body.clockId}`);
+    if (now.status === "ready") break;
+  }
+  return c.json({ status: now.status, frozenTime: new Date(now.frozen_time * 1000).toISOString() });
+});
+
+// POST /set-card { userId, paymentMethod } — attaches a Stripe test card
+// (e.g. "pm_card_chargeCustomerFail": attaches, then every charge fails) and
+// makes it the default on the account's live plan subscription and customer.
+testRoutes.post("/set-card", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const pmToken = String(body.paymentMethod ?? "");
+  if (!/^pm_card_\w+$/.test(pmToken)) return c.json({ error: "paymentMethod must be a Stripe test token like pm_card_chargeCustomerFail" }, 400);
+  const db = adminClient();
+  const { data: sub } = await db.from("subscriptions").select("id, stripe_customer_id")
+    .eq("user_id", body.userId).eq("product_line", "plan").in("status", ["active", "trialing", "past_due"]).not("id", "like", "comp%")
+    .order("updated_at", { ascending: false }).limit(1).maybeSingle();
+  if (!sub) return c.json({ error: "No paid plan subscription" }, 404);
+  const pm = await stripe<Record<string, any>>("POST", `/payment_methods/${pmToken}/attach`, { customer: sub.stripe_customer_id });
+  await stripe("POST", `/customers/${sub.stripe_customer_id}`, { invoice_settings: { default_payment_method: pm.id } });
+  await stripe("POST", `/subscriptions/${sub.id}`, { default_payment_method: pm.id });
+  return c.json({ paymentMethod: pm.id, subscriptionId: sub.id });
+});
+
+// POST /win-dispute { chargeId } — submits Stripe's test evidence
+// "winning_evidence" on the charge's dispute, so it closes as won.
+testRoutes.post("/win-dispute", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const disputes = await stripe<{ data: Record<string, any>[] }>("GET", "/disputes", { charge: String(body.chargeId ?? ""), limit: 1 });
+  const dispute = disputes.data[0];
+  if (!dispute) return c.json({ error: "No dispute on that charge" }, 404);
+  const updated = await stripe<Record<string, any>>("POST", `/disputes/${dispute.id}`, {
+    evidence: { uncategorized_text: "winning_evidence" }, submit: true,
+  });
+  return c.json({ disputeId: updated.id, status: updated.status });
+});
+
 // POST /rollover — the hourly job, on demand.
 testRoutes.post("/rollover", async (c) => c.json(await runRollover()));
 

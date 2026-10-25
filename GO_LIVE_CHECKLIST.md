@@ -128,35 +128,35 @@ Everything here touches the shared Supabase project, so each step waits for
 the owner's go. Production `server` is not touched: the branch runs as
 `server-billing`.
 
-- [ ] **Real-users check** (read-only, SQL Editor). Shows how many accounts
+- [x] **Real-users check** (read-only, SQL Editor). Shows how many accounts
       are on a paid plan without paying; this decides grandfathering in Phase D.
       ```sql
       select plan, plan_status, subscription_waived, count(*) from public.users group by 1,2,3 order by 1;
       select enabled, is_default, config_encrypted is not null as has_keys from public.crypto_processor_configs where id = 'stripe';
       ```
-- [ ] Apply `APPLY_PENDING_038.sql` (security lockdown). Check its verification queries.
+- [x] Apply `APPLY_PENDING_038.sql` (security lockdown). Check its verification queries.
       _Note: from now on the browser can't change its own plan. Production's
       old front end falls back to "Card payments are being set up" for
       upgrades; that is intended._
-- [ ] Apply `APPLY_PENDING_039.sql`, then `APPLY_PENDING_040.sql`, then `APPLY_PENDING_041.sql`.
-- [ ] Owner sets the **test** secrets for the project (Supabase → Edge Functions → Secrets):
+- [x] Apply `APPLY_PENDING_039.sql`, then `APPLY_PENDING_040.sql`, then `APPLY_PENDING_041.sql`.
+- [x] Owner sets the **test** secrets for the project (Supabase → Edge Functions → Secrets):
       `STRIPE_SECRET_KEY=sk_test_…` (from the Final Pass Down, LLC account's test mode),
       `APP_URL` (see pitfall 4.12), `CRON_SECRET` (long random),
       `RENEWAL_CONSENT_REQUIRED=false`, `BILLING_RETURN_ORIGINS=http://localhost:5173`.
       Secrets are project-wide, but production `server` runs main's code,
       which doesn't read them.
-- [ ] Deploy: `supabase functions deploy server-billing --project-ref evedkmczpuficbzsvhts`
+- [x] Deploy: `supabase functions deploy server-billing --project-ref evedkmczpuficbzsvhts`
       (show `git diff main -- supabase/functions` first).
-- [ ] `GET …/server-billing/…/public/billing/status` shows `stripeConfigured:true, livemode:false`.
-- [ ] Stripe (test mode) → Developers → Webhooks → add endpoint
+- [x] `GET …/server-billing/…/public/billing/status` shows `stripeConfigured:true, livemode:false`.
+- [x] Stripe (test mode) → Developers → Webhooks → add endpoint
       `…/functions/v1/server-billing/make-server-b5ad85e0/public/stripe/webhook` with the 10 events
       (listed in the admin panel). Owner pastes its signing secret as `STRIPE_WEBHOOK_SECRET`, then redeploy.
-- [ ] Local `.env.local`: `VITE_SERVER_FUNCTION=server-billing`; run the app on localhost.
-- [ ] Admin → Subscription Config → Stripe Billing: **Sync catalog (dry run)** shows
+- [x] Local `.env.local`: `VITE_SERVER_FUNCTION=server-billing`; run the app on localhost.
+- [x] Admin → Subscription Config → Stripe Billing: **Sync catalog (dry run)** shows
       13 to create (4 paid plans × monthly/yearly + 5 products), 0 errors; **Apply**.
-- [ ] **Set up customer portal**; **Check webhook** shows OK.
-- [ ] Run `database/cron/billing_rollover.template.sql` with `<FUNCTION>` = `server-billing`.
-- [ ] Stripe test dashboard: Settings → Payments → **Adaptive Pricing off**.
+- [x] **Set up customer portal**; **Check webhook** shows OK.
+- [x] Run `database/cron/billing_rollover.template.sql` with `<FUNCTION>` = `server-billing`.
+- [x] Stripe test dashboard: Settings → Payments → **Adaptive Pricing off**.
 
 ## Phase B: prove it in test mode
 
@@ -167,49 +167,73 @@ declined · `4000 0000 0000 0259` disputed. Use test clocks for renewals
 Small-file overage: `/admin/billing/test/set-meter` (1 MB units, 5 MB included).
 
 **Plans**
-- [ ] Starter: new signup is on free Starter; 1 GB hard block; wall after 14 days.
-- [ ] Foundation monthly: consent box required; `billing_consents` row has the session id; plan active.
-- [ ] Advance clock 1 month: renewal invoice correct; usage period rolled.
-- [ ] Legacy Vault yearly at $1,247.90; monthly usage slices; renewal reminder email ~30 days before renewal.
-- [ ] Upgrade Foundation → Legacy Pro: charged prorated now; usage closed at the old rate.
-- [ ] Downgrade Legacy Pro → Foundation: nothing charged; "pending" shown; applies at period end.
-- [ ] Monthly → yearly on the same plan (now); yearly → monthly (at period end).
-- [ ] Cancel at period end, then "Keep my plan"; cancel and let it end → Reactivate wall.
+- [x] Starter: new signup is on free Starter; 1 GB hard block; wall after 14 days.
+- [x] Foundation monthly: consent box required; `billing_consents` row has the session id; plan active.
+- [x] Advance clock 1 month: renewal invoice correct; usage period rolled.
+- [x] Legacy Vault yearly at $1,247.90; monthly usage slices; renewal reminder email ~30 days before renewal.
+- [x] Upgrade Foundation → Legacy Pro: charged prorated now; usage closed at the old rate.
+- [x] Downgrade Legacy Pro → Foundation: nothing charged; "pending" shown; applies at period end.
+- [x] Monthly → yearly on the same plan (now); yearly → monthly (at period end).
+- [x] Cancel at period end, then "Keep my plan"; cancel and let it end → Reactivate wall.
 - [ ] Each plan bought once (monthly or yearly) so every price is exercised.
 
 **Overage**
-- [ ] Monthly plan: overage line on the renewal invoice equals the closure.
-- [ ] Yearly plan: standalone overage invoice from the rollover; below $0.50 it waits.
-- [ ] Cap reached: upload refused with "Raise my limit"; raising it charges nothing extra.
-- [ ] Comped account over its allowance: uploads stop; closure `skipped_reason = comped`.
-- [ ] Deleting a file removes the stored object; the meter goes down (peak stays for the period).
+- [x] Monthly plan: overage line on the renewal invoice equals the closure.
+- [x] Yearly plan: standalone overage invoice from the rollover; below $0.50 it waits.
+- [x] Cap reached: upload refused with "Raise my limit"; raising it charges nothing extra.
+- [x] Comped account over its allowance: uploads stop; closure `skipped_reason = comped`.
+- [x] Deleting a file removes the stored object; the meter goes down (peak stays for the period).
 
 **Failed payments**
-- [ ] Renewal with `…0341`: past_due banner, one email, retries, then deleted → Reactivate, and it **stays** ended (pitfall 4.3).
-- [ ] Declined standalone overage: uploads limited, one email; paying the invoice lifts it.
-- [ ] `…3155` at checkout: active, and **no** failure email (pitfall 4.2).
+- [x] Renewal with `…0341`: past_due banner, one email, retries, then deleted → Reactivate, and it **stays** ended (pitfall 4.3).
+- [x] Declined standalone overage: uploads limited, one email; paying the invoice lifts it.
+- [x] `…3155` at checkout: active, and **no** failure email (pitfall 4.2).
 
 **Add-ons and one-time products**
-- [ ] Disaster Recovery monthly and yearly: active on both DR pages; cancel at period end; ends when the plan ends.
-- [ ] Legacy Continuation Fee $199: fee row paid; admin activation still works.
-- [ ] White Glove $99: card saved (brand/last4 in admin); a 45-minute session charged = 2 blocks = $50.
+- [x] Disaster Recovery monthly and yearly: active on both DR pages; cancel at period end; ends when the plan ends.
+- [x] Legacy Continuation Fee $199: fee row paid; admin activation still works.
+- [x] White Glove $99: card saved (brand/last4 in admin); a 45-minute session charged = 2 blocks = $50.
 - [ ] White Glove session on a `…0341` saved card: row failed, admin emailed.
 
 **Admin**
-- [ ] Price change (e.g. Foundation $10.99): dry run shows 1 reprice; apply; new checkout charges it; old price archived; existing subscriber unchanged.
-- [ ] Comp a plan, then end the comp → Reactivate.
-- [ ] Refund & end: refund issued, subscription cancelled now, refund row with admin email.
-- [ ] Refund a one-time charge from the Billing tab.
+- [x] Price change (e.g. Foundation $10.99): dry run shows 1 reprice; apply; new checkout charges it; old price archived; existing subscriber unchanged.
+- [x] Comp a plan, then end the comp → Reactivate.
+- [x] Refund & end: refund issued, subscription cancelled now, refund row with admin email.
+- [x] Refund a one-time charge from the Billing tab.
 
 **Referrals and commissions**
-- [ ] Sign up through `/r/CODE`: `affiliate_referrals` row created.
-- [ ] Referred account pays: commission row; 50% dashboard refund reverses half; `…0259` dispute reverses the rest; won dispute restores it.
+- [x] Sign up through `/r/CODE`: `affiliate_referrals` row created.
+- [x] Referred account pays: commission row; 50% dashboard refund reverses half; `…0259` dispute reverses the rest; won dispute restores it.
 
 **Robustness**
 - [ ] Resend a webhook event from the dashboard: `{duplicate:true}`, one effect.
 - [ ] Hand-made subscription in the dashboard (no `userId`): 200, nothing changed.
-- [ ] `BILLING_PAUSED=true`: checkout and plan changes refused (503); cancel and the portal still work.
-- [ ] Cutover script with `ROLLBACK` on the test data: counts match expectations.
+- [x] `BILLING_PAUSED=true`: checkout and plan changes refused (503); cancel and the portal still work.
+- [x] Cutover script with `ROLLBACK` on the test data: counts match expectations.
+
+**Phase B run, Oct 25 2026** (sandbox "Final Pass Down, LLC sandbox"). Fixed while testing:
+an upgrade billed overage twice (a seconds-long old-plan usage period, `planChange.ts`);
+yearly → monthly was applied at once with a year's proration credit (now at period end,
+server and `StorageUsage.tsx`); a declined upgrade sent a "payment failed" email although
+the plan was untouched; plan-change payments were described by their credit line;
+`wg_session_billing.charged_at` was never set; changing a price and back within 24 hours
+pointed checkout at the archived original (Stripe idempotency replay, `catalog.ts`); a
+dispute handled before its `invoice.paid` left the commission and payment unreversed (now
+caught up in `onInvoicePaid`). Test clocks are driven server-side by
+`/admin/billing/test/clock`, `/clock/advance`, `/set-card` and `/win-dispute` (test key only).
+
+Sandbox settings to mirror in Phase C: Bank, Amazon Pay, Cash App Pay and Klarna are on in
+the sandbox (hosted invoice page); the renewal reminder fired about 3 days ahead (set 30).
+
+Still to do: resending a webhook from the dashboard, and the hand-made dashboard subscription.
+Gaps found: nothing in the app creates an `affiliates` row (no member enrolment, no admin
+"add affiliate"; SHUBHAM1 was inserted by SQL for the test); `affiliates.active_referrals`
+stays 0 after a referral pays; an admin portal whose login expired shows "Missing
+Authorization bearer token" instead of returning to sign-in.
+Display leftovers: a canceled subscription's row in the admin Billing tab still says
+"renews"; the user modal's Overview card shows monthly price and "Next billing: Not
+tracked" for yearly plans; the Master Admin MRR card counts `users.plan` (unpaid Foundation
+accounts, yearly at the monthly price).
 
 ## Phase C: live Stripe dashboard (owner, Final Pass Down, LLC account)
 

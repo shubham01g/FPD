@@ -259,7 +259,9 @@ async function onInvoicePaid(invoiceId: string) {
   const type = paymentType(inv, row);
 
   if ((inv.amount_paid ?? 0) > 0) {
-    const line = inv.lines?.data?.[0];
+    // Describe the payment by its largest charge: on a prorated plan change the
+    // first line is the credit ("Unused time on …"), not what was bought.
+    const line = ((inv.lines?.data ?? []) as Obj[]).reduce<Obj | undefined>((best, l) => (!best || (l.amount ?? 0) > (best.amount ?? 0) ? l : best), undefined);
     await recordPayment({
       userId, type, amountCents: inv.amount_paid,
       description: line?.description ?? inv.description ?? type,
@@ -278,10 +280,29 @@ async function onInvoicePaid(invoiceId: string) {
   }
 
   if (type === "wg_session") {
-    await db.from("wg_session_billing").update({ status: "charged", stripe_payment_intent: invoicePaymentIntentId(inv), failure_message: null })
+    await db.from("wg_session_billing").update({
+      status: "charged", charged_at: unixToIso(inv.status_transitions?.paid_at) ?? nowIso(),
+      stripe_payment_intent: invoicePaymentIntentId(inv), failure_message: null,
+    })
       .eq("stripe_invoice_id", inv.id);
   }
   if (type === "subscription" || type === "upgrade") await recordCommission(inv, userId);
+
+  // Events can arrive out of order: if the charge was disputed before this
+  // invoice.paid was handled, the dispute found no payment or commission to
+  // mark. Catch up now (both steps are idempotent).
+  const chargeId = invoiceChargeId(inv);
+  if (chargeId && (inv.amount_paid ?? 0) > 0) {
+    const charge = await stripe<Obj>("GET", `/charges/${chargeId}`);
+    if (charge.disputed) {
+      const disputes = await stripe<{ data: Obj[] }>("GET", "/disputes", { charge: chargeId, limit: 1 });
+      const dispute = disputes.data[0];
+      if (dispute && !["won", "warning_closed"].includes(dispute.status)) {
+        await db.from("payments").update({ status: "disputed" }).eq("stripe_charge_id", chargeId).eq("status", "succeeded");
+        await reverseForDispute({ invoiceId: inv.id, chargeId, disputeId: dispute.id });
+      }
+    }
+  }
 }
 
 async function onInvoicePaymentFailed(invoiceId: string) {
@@ -300,6 +321,9 @@ async function onInvoicePaymentFailed(invoiceId: string) {
     // re-read so it can't revive a cancelled plan (pitfall 4.3).
     const sub = await retrieveSubscription(subId);
     if (sub.status === "canceled" || sub.status === "incomplete_expired") return;
+    // A declined upgrade (pending_if_incomplete) leaves the current plan paid
+    // and untouched; the app already told the customer on screen.
+    if (inv.billing_reason === "subscription_update" && sub.pending_update) return;
     const result = await provisionOrUndoDuplicate(sub, false);
     if (result && (inv.attempt_count ?? 1) <= 1) {
       const { data: plan } = result.row.plan_id

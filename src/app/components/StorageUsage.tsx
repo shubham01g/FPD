@@ -288,7 +288,9 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
     const cur = plans.find(p => p.id === paidSub.plan_id);
     const curEq = cur ? (paidSub.interval === "year" ? cur.priceAnnual / 12 : cur.priceMonthly) : 0;
     const newEq = interval === "year" ? priceAnnual / 12 : priceMonthly;
-    const up = newEq > curEq || (paidSub.plan_id === planId && paidSub.interval === "month" && interval === "year");
+    // Yearly → monthly always waits for the end of the paid year (same rule as the server).
+    const up = !(paidSub.interval === "year" && interval === "month")
+      && (newEq > curEq || (paidSub.plan_id === planId && paidSub.interval === "month" && interval === "year"));
     setPurchase({
       kind: "change", planId, planName, interval, direction: up ? "up" : "down",
       priceLabel: interval === "year" ? `${formatPrice(priceAnnual)}/yr` : `${formatPrice(priceMonthly)}/mo`,

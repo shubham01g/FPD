@@ -1,7 +1,7 @@
 // Plan changes go through the app, not the portal (framework §3.5):
 //
 //   upgrade            immediate and prorated (always_invoice). Usage is closed
-//   (or same plan,     at the old rate first. payment_behavior
+//   (or same plan,     at the old rate when the new plan lands. payment_behavior
 //   monthly → annual)  pending_if_incomplete: if the card is declined the
 //                      change simply doesn't happen.
 //   downgrade          at the end of the period, through a subscription
@@ -72,8 +72,11 @@ export async function changePlan(userId: string, planId: string, interval: Inter
   const sub = await retrieveSubscription(row.id);
   const metadata = { userId, planId, interval, purchaseType: "plan" };
   const sameTarget = row.plan_id === planId && row.interval === interval;
-  const higher = monthlyEquivalent(target.plan, interval) > monthlyEquivalent(current, row.interval as Interval)
-    || (row.plan_id === planId && row.interval === "month" && interval === "year");
+  // Yearly → monthly is never immediate: proration would credit back most of
+  // the paid year. It waits for the year to end, like a downgrade.
+  const higher = !(row.interval === "year" && interval === "month")
+    && (monthlyEquivalent(target.plan, interval) > monthlyEquivalent(current, row.interval as Interval)
+      || (row.plan_id === planId && row.interval === "month" && interval === "year"));
 
   // Switching back to the current plan just drops the pending downgrade.
   if (sameTarget) {
@@ -84,9 +87,12 @@ export async function changePlan(userId: string, planId: string, interval: Inter
 
   if (higher) {
     await releaseSchedule(idOf(sub.schedule));
-    // Close the current usage period at the old plan's rate first.
-    const { error } = await db.rpc("roll_usage_period", { p_user: userId, p_boundary: new Date().toISOString() });
-    if (error) throw new Error(`roll_usage_period failed: ${error.message}`);
+    // Bring the meter up to date. Usage is closed at the old plan's rate by
+    // apply_user_entitlements once the new plan is provisioned (and not at all
+    // if the payment fails). Rolling the period here instead would reopen it on
+    // the old plan for a moment, and that sliver would bill the overage twice.
+    const { error } = await db.rpc("refresh_storage_usage", { p_user: userId });
+    if (error) throw new Error(`refresh_storage_usage failed: ${error.message}`);
     // An upgrade means staying, so drop any cancellation first: a
     // pending_if_incomplete update accepts only items and proration fields.
     if (sub.cancel_at_period_end) await stripe("POST", `/subscriptions/${row.id}`, { cancel_at_period_end: false });
