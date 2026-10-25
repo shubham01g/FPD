@@ -275,6 +275,11 @@ test ids and sets only the two test accounts to `cancelled`.
 12. Delete the `server-billing` function and the `VITE_SERVER_FUNCTION` setting.
 13. Watch webhook deliveries (0 failures) and function logs.
 
+**App address (Oct 25):** the app runs at `https://fpd-alpha.vercel.app`; finalpassdown.com is
+added later. `APP_URL` was set to `https://fpd-alpha.vercel.app` at step 3. When the domain
+moves: set `APP_URL=https://finalpassdown.com`, then Admin → Stripe Billing → Set up portal
+again (it stores the return address).
+
 **Rollback:** `BILLING_PAUSED=true`; put the test key and test webhook secret back. Customers are stored per mode, so live data is untouched; live subscriptions keep billing in Stripe and their events retry for up to 3 days.
 
 ## Phase E: first 30 days
