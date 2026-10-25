@@ -105,6 +105,7 @@ users.post("/", async (c) => {
 
 // GET /admin/users/:id — profile + storage + recent payments + contacts +
 // legacy fee status + affiliate referral count (if this user is an affiliate)
+// + the plan subscription that currently gives access (paid or comped)
 users.get("/:id", async (c) => {
   const id = c.req.param("id");
   const db = adminClient();
@@ -117,6 +118,7 @@ users.get("/:id", async (c) => {
     { data: legacyFee },
     { data: affiliate },
     { data: twoFa },
+    { data: planSubs },
   ] = await Promise.all([
     db.from("users").select("*").eq("id", id).maybeSingle(),
     db.from("storage_usage").select("*").eq("user_id", id).order("billing_period", { ascending: false }).limit(1),
@@ -125,6 +127,9 @@ users.get("/:id", async (c) => {
     db.from("legacy_continuation_fees").select("status").eq("user_id", id).eq("status", "paid").maybeSingle(),
     db.from("affiliates").select("id").eq("user_id", id).maybeSingle(),
     db.from("account_2fa_settings").select("enabled, method").eq("user_id", id).maybeSingle(),
+    db.from("subscriptions").select("id, plan_id, status, interval, current_period_end, cancel_at_period_end")
+      .eq("user_id", id).eq("product_line", "plan").in("status", ["active", "trialing", "past_due"])
+      .order("updated_at", { ascending: false }).limit(1),
   ]);
 
   if (userErr) return c.json({ error: userErr.message }, 500);
@@ -140,6 +145,7 @@ users.get("/:id", async (c) => {
     user, storage: storage?.[0] ?? null, payments, contacts,
     legacyFeePaid: !!legacyFee, referralCount,
     twoFa: twoFa ?? { enabled: false, method: null },
+    subscription: planSubs?.[0] ?? null,
   });
 });
 

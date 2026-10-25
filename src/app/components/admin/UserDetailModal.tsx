@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Edit, Lock, Gift, Shield, CreditCard,
   CheckCircle, ToggleLeft, ToggleRight, Eye, EyeOff,
@@ -9,6 +9,7 @@ import { adminApi } from "../../services/adminApi";
 import { AdminUserBillingPanel } from "./AdminUserBillingPanel";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { supabase } from "../../services/supabase";
+import { usePlans } from "../../utils/planCatalog";
 
 /* ── Design tokens — matches the admin panel's white/Royal Vault Blue theme ── */
 const T = {
@@ -94,6 +95,8 @@ export interface AdminUser {
   lastLogin: string;
   nextBilling: string;
   autoRenew: boolean;
+  billingInterval: "month" | "year" | null;
+  comped: boolean;
   storage: number;
   storageTotal: number;
   storageVideos: number;
@@ -155,6 +158,28 @@ interface DBUserDetail {
   legacyFeePaid: boolean;
   referralCount: number;
   twoFa: { enabled: boolean; method: AdminUser["mfaMethod"] };
+  subscription: {
+    id: string; plan_id: string | null; status: string; interval: "month" | "year" | null;
+    current_period_end: string | null; cancel_at_period_end: boolean;
+  } | null;
+}
+
+/* What the Subscription card says about billing, from the plan subscription
+ * that currently gives access (none = no card plan: free Starter, or a paid
+ * plan that was never bought by card and so sees Reactivate). */
+function billingSummary(d: DBUserDetail): Pick<AdminUser, "nextBilling" | "autoRenew" | "billingInterval" | "comped"> {
+  const sub = d.subscription;
+  if (!sub) return { nextBilling: d.user.plan === "starter" ? "Free plan" : "No card subscription", autoRenew: false, billingInterval: null, comped: false };
+  if (sub.id.startsWith("comp_")) return { nextBilling: "Comped (no billing)", autoRenew: false, billingInterval: null, comped: true };
+  const date = sub.current_period_end
+    ? new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
+  return {
+    nextBilling: date ? `${sub.cancel_at_period_end ? "Ends" : "Renews"} ${date}` : "—",
+    autoRenew: !sub.cancel_at_period_end,
+    billingInterval: sub.interval,
+    comped: false,
+  };
 }
 
 function mapDbUserDetail(d: DBUserDetail): AdminUser {
@@ -178,8 +203,7 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
     mfaMethod: d.twoFa.method,
     joined: new Date(d.user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     lastLogin: "Not tracked",
-    nextBilling: "Not tracked",
-    autoRenew: d.user.plan_status === "active",
+    ...billingSummary(d),
     storage: usedGb,
     storageTotal: totalGb,
     storageVideos: 0, storagePhotos: 0, storageDocs: 0, storageOther: 0, // breakdown not tracked — see JSX below
@@ -261,6 +285,13 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [tab, setTab]   = useState<ModalTab>("overview");
   const [user, setUser] = useState<AdminUser>(init);
 
+  // A Billing-tab action refetches the account; carry the new plan and
+  // billing state into the Overview card (local edits to other fields stay).
+  useEffect(() => {
+    setUser(u => ({ ...u, plan: init.plan, planId: init.planId, status: init.status, nextBilling: init.nextBilling,
+      autoRenew: init.autoRenew, billingInterval: init.billingInterval, comped: init.comped }));
+  }, [init.plan, init.planId, init.status, init.nextBilling, init.autoRenew, init.billingInterval, init.comped]);
+
   /* edit state */
   const [eName,    setEName]    = useState(user.name);
   const [eEmail,   setEEmail]   = useState(user.email);
@@ -284,7 +315,9 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [savingWaive,setSavingWaive] = useState(false);
 
   const plan        = PLANS.find(p => p.id === user.planId) ?? PLANS[2];
-  const price       = plan.price;
+  const catalogPlan = usePlans().find(p => p.id === user.planId);
+  const yearly      = user.billingInterval === "year";
+  const price       = yearly ? (catalogPlan?.priceAnnual ?? plan.price * 12) : (catalogPlan?.priceMonthly ?? plan.price);
   const initials    = user.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
   const [photoFailed, setPhotoFailed] = useState(false);
   const storagePct  = Math.round((user.storage / user.storageTotal) * 100);
@@ -506,13 +539,13 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                 <div style={CARD}>
                   <SLabel>Subscription</SLabel>
                   <DRow label="Plan" value={<span style={{ color:plan.color, fontWeight:700 }}>{user.plan}</span>}/>
-                  <DRow label="Monthly Price" value={
-                    user.subscriptionWaived
+                  <DRow label={yearly ? "Yearly Price" : "Monthly Price"} value={
+                    user.subscriptionWaived || user.comped
                       ? <span className="flex items-center gap-2">
                           <span style={{ textDecoration:"line-through", color:T.muted, fontSize:14 }}>${price.toFixed(2)}</span>
-                          <span style={{ color:T.green, fontWeight:700 }}>$0.00 WAIVED</span>
+                          <span style={{ color:T.green, fontWeight:700 }}>$0.00 {user.comped ? "COMPED" : "WAIVED"}</span>
                         </span>
-                      : <span style={{ color:T.primary, fontWeight:700 }}>${price.toFixed(2)}/mo</span>
+                      : <span style={{ color:T.primary, fontWeight:700 }}>${price.toFixed(2)}/{yearly ? "yr" : "mo"}</span>
                   }/>
                   <DRow label="Storage Limit" value={plan.storage}/>
                   <DRow label="Next Billing"  value={user.nextBilling}/>

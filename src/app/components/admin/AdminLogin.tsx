@@ -16,7 +16,8 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() =>
+    new URLSearchParams(window.location.search).has("expired") ? "Your admin session expired. Please sign in again." : "");
   const [mfa, setMfa] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);

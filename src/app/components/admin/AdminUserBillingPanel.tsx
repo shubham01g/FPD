@@ -131,7 +131,7 @@ export function AdminUserBillingPanel({ userId, onChanged }: { userId: string; o
             <span style={{ ...MONO, fontSize: 12.5, color: "#8A9AB8", minWidth: 190 }}>{s.id}</span>
             <span style={{ flex: 1 }}>
               {s.product_line === "plan" ? planName(s.plan_id) : "Disaster Recovery"} {s.interval ? `· ${s.interval}ly` : ""} · <strong>{s.status}</strong>
-              {s.current_period_end ? ` · ${s.cancel_at_period_end ? "ends" : "renews"} ${day(s.current_period_end)}` : ""}
+              {s.current_period_end ? ` · ${!ACCESS.includes(s.status) ? "ended" : s.cancel_at_period_end ? "ends" : "renews"} ${day(s.ended_at ?? s.current_period_end)}` : ""}
               {s.pending_plan_id ? ` · switching to ${planName(s.pending_plan_id)} on ${day(s.pending_change_at)}` : ""}
               {s.comp_reason ? ` · comp: ${s.comp_reason} (${s.comp_granted_by ?? "admin"})` : ""}
             </span>

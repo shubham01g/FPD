@@ -15,7 +15,16 @@ affiliates.get("/", async (c) => {
 
   const { data, error } = await q;
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ affiliates: data });
+
+  // affiliates.active_referrals is never maintained, so count the active
+  // referrals here (the same rule the member's Affiliate Program page uses).
+  const { data: refs, error: refsErr } = await adminClient()
+    .from("affiliate_referrals").select("affiliate_id").eq("status", "active");
+  if (refsErr) return c.json({ error: refsErr.message }, 500);
+  const counts = new Map<string, number>();
+  for (const r of refs ?? []) counts.set(r.affiliate_id, (counts.get(r.affiliate_id) ?? 0) + 1);
+
+  return c.json({ affiliates: (data ?? []).map((a) => ({ ...a, active_referrals: counts.get(a.id) ?? 0 })) });
 });
 
 // GET /admin/affiliates/:id/referrals

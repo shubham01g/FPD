@@ -506,7 +506,7 @@ function buildTopMetrics(
       note:"No signup history — growth % not available" },
     { label:"Monthly Recurring Revenue", value: overview ? money(overview.mrr) : "—",
       color:"#D99A6B", tone:"warn", icon:<DollarSign size={16}/>,
-      note:"From active subscriptions" },
+      note:"Paid card subscriptions · yearly ÷ 12 · comps excluded" },
     { label: cur ? `Overage Revenue (${monthLabel})` : "Overage Revenue", value: cur ? money(cur.overage) : "—",
       change: cur && prev ? pctChange(cur.overage, prev.overage) : undefined,
       color:"#6FAE8B", tone:"good", icon:<TrendingUp size={16}/> },

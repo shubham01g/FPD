@@ -9,6 +9,7 @@
  */
 import { supabase } from "./supabase";
 import { SERVER_BASE } from "./serverBase";
+import { clearAdminAuthed, isAdminAuthed } from "./authSession";
 
 const FUNCTIONS_BASE = SERVER_BASE ? `${SERVER_BASE}/admin` : null;
 
@@ -21,6 +22,17 @@ export class AdminApiError extends Error {
     this.status = status;
     this.body = body;
   }
+}
+
+/* The backend answers 401 only when the bearer token is missing or expired.
+   Inside the admin portal that means the Supabase session behind it is gone,
+   so send the admin back to sign in instead of leaving every screen showing
+   an auth error. Callers outside the portal (concierge, white-label context)
+   are left alone. */
+function expireAdminSession() {
+  if (!isAdminAuthed() || !window.location.pathname.startsWith("/admin")) return;
+  clearAdminAuthed();
+  void supabase.auth.signOut().finally(() => window.location.assign("/admin/login?expired=1"));
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -47,6 +59,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json().catch(() => null) : await res.text();
+
+  if (res.status === 401) expireAdminSession();
 
   if (!res.ok || !isJson) {
     const message = (isJson && body && typeof body === "object" && "error" in body)

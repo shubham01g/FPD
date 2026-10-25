@@ -230,32 +230,36 @@ subscription changed nothing). `APP_URL` is confirmed as `https://finalpassdown.
 Affiliate enrolment was missing (nothing created an `affiliates` row): members now join on
 the Affiliate Program page (`/account/affiliate/join`, starts `inactive` = PENDING, admin
 alerted) and an admin approves with the tick in Affiliate Admin.
-Gaps left: `affiliates.active_referrals` stays 0 after a referral pays (needs a migration;
-the member page counts correctly); an admin portal whose login expired shows "Missing
-Authorization bearer token" instead of returning to sign-in.
-Display leftovers: a canceled subscription's row in the admin Billing tab still says
-"renews"; the user modal's Overview card shows monthly price and "Next billing: Not
-tracked" for yearly plans; the Master Admin MRR card counts `users.plan` (unpaid Foundation
-accounts, yearly at the monthly price).
+Gaps found in the run, fixed and checked in the admin UI on Oct 25 (pre-cutover check):
+Affiliate Admin counts active referrals from `affiliate_referrals` (the stored
+`active_referrals` column is never maintained); an expired admin login returns to sign-in
+with "Your admin session expired"; a canceled subscription's row says "ended <date>"; the
+user modal's Overview card shows the yearly price, "Renews <date>", comps and "No card
+subscription"; the MRR card counts paying subscriptions in the current mode (yearly ÷ 12,
+comps and test data excluded). The Approve tick was clicked in the UI and set the
+affiliate `active`.
+Pre-cutover check (Oct 25): deno/tsc/build clean; production schema complete (10 tables,
+17 functions, 18 columns); 98 test events, 0 unprocessed; cleanup script dry run left 0
+test ids and sets only the two test accounts to `cancelled`.
 
 ## Phase C: live Stripe dashboard (owner, Final Pass Down, LLC account)
 
-1. Business verification complete; payout bank account added (Settings → Payouts); statement descriptor; branding; customer receipt emails on.
-2. Payment methods: cards, Apple Pay, Google Pay, Link.
-3. Stripe Tax registrations, only if the accountant says so.
-4. Billing → Subscriptions and emails: Smart Retries; failed-payment emails; 3-D Secure hosted confirmation link; upcoming renewal events 30 days ahead; card auto-update.
-5. Radar default rules.
-6. **Adaptive Pricing off.**
-7. Webhook endpoint `…/functions/v1/server/make-server-b5ad85e0/public/stripe/webhook`, the 10 events, default API version. Save the signing secret in a password manager.
-8. Live secret key: save it in a password manager (it may be shown only once). **Don't** put it anywhere yet.
-9. Keep the **test** key and test webhook secret too, for rollback.
+1. Business verification complete; payout bank account added (Settings → Payouts); statement descriptor; branding; customer receipt emails on. *(Done Oct 25.)*
+2. Payment methods: cards, Apple Pay, Google Pay, Link. *(Done Oct 25.)*
+3. Stripe Tax registrations, only if the accountant says so. *(Skipped Oct 25: no registrations; `STRIPE_TAX_ENABLED` stays unset.)*
+4. Billing → Subscriptions and emails: Smart Retries; failed-payment emails; 3-D Secure hosted confirmation link; upcoming renewal events 30 days ahead; card auto-update. *(Done Oct 25: after all retries fail → cancel subscription; Stripe's own renewal email off, the app sends it.)*
+5. Radar default rules. *(Done Oct 25.)*
+6. **Adaptive Pricing off.** *(Done Oct 25.)*
+7. Webhook endpoint `…/functions/v1/server/make-server-b5ad85e0/public/stripe/webhook`, the 10 events, default API version. Save the signing secret in a password manager. *(Done Oct 25: "FPD live billing", 10 events, secret saved by the owner.)*
+8. Live secret key: save it in a password manager (it may be shown only once). **Don't** put it anywhere yet. *(Done Oct 25.)*
+9. Keep the **test** key and test webhook secret too, for rollback. *(Done Oct 25.)*
 10. White Label / enterprise products are invoiced by hand (Stripe Invoicing).
 
 ## Phase D: cutover window (about 1 hour, owner's explicit go)
 
 1. Set `BILLING_PAUSED=true`. `/public/billing/status` shows `billingPaused:true`.
 2. Merge `feature/stripe-billing` to `main`; deploy `server` from main; wait for the Vercel production deploy of that commit.
-3. Remove `RENEWAL_CONSENT_REQUIRED` (consent becomes required).
+3. Remove `RENEWAL_CONSENT_REQUIRED` (consent becomes required) and `BILLING_RETURN_ORIGINS` (it lists `http://localhost:5173`, which live checkout should not return to).
 4. Run `database/cutover/stripe_test_data_cleanup.sql` with `ROLLBACK`, read the counts, then with `COMMIT`.
 5. Owner pastes `sk_live_…` and the live `whsec_…`; `/public/billing/status` shows `livemode:true`.
 6. Admin → Sync catalog: dry run (expect 13 to create, 0 errors), apply; set up the portal; check the webhook.
@@ -264,7 +268,8 @@ accounts, yearly at the monthly price).
 9. Grandfathering (owner's decision, Oct 25): comp team and test accounts (Users → Billing → Comp a plan, Foundation); real customers see Reactivate.
    - Comp, team: `demo@`, `jc@`, `josh@finalpassdown.com`, `thecavittgroup@gmail.com`, `manishagunjal184@gmail.com`.
    - Comp, test: `claude-smoketest-17544@example.com`, `proxy-check-25893@example.com`, `cewohan662@neowd.com`, `fikij69990@dd2car.com`, `jenid99465@bitproy.com`, `kekobol340@airychen.com`, `shubham@gmail.com` (paused).
-   - Owner to confirm: `agmw.ambassador@gmail.com`, `jeraldcavitt@gmail.com`, `mary@bam.eco`, `ruchabagul12@gmail.com`.
+   - Comp, owner-confirmed (Oct 25): `jeraldcavitt@gmail.com`.
+   - Real customers (Reactivate wall, owner-confirmed Oct 25): `agmw.ambassador@gmail.com`, `mary@bam.eco`, `ruchabagul12@gmail.com`.
 10. Remove `BILLING_PAUSED`; status shows `billingPaused:false`.
 11. **Real-card smoke test:** buy Foundation monthly with a real card; check plan active, `stripe_events`, consent row, live customer row, receipt email; then Refund & end and check the refund.
 12. Delete the `server-billing` function and the `VITE_SERVER_FUNCTION` setting.
