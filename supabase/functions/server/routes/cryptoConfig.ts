@@ -129,8 +129,14 @@ cryptoConfig.get("/payments", async (c) => {
 //   - an empty secret field is ignored for the same reason
 //   - an empty non-secret field (a settlement currency, a webhook URL) does
 //     clear the stored value, because there is no other way to unset one
+// Stripe's keys live in the edge function's secrets (STRIPE_SECRET_KEY,
+// STRIPE_WEBHOOK_SECRET), never in this table, so the Stripe row can't be
+// saved, tested or revealed from here. Its status is under /admin/billing.
+const STRIPE_MANAGED = "Stripe keys are managed as server secrets, not here. See Admin → Subscription Config for Stripe status.";
+
 cryptoConfig.patch("/processors/:id", async (c) => {
   const id = c.req.param("id");
+  if (id === "stripe") return c.json({ error: STRIPE_MANAGED }, 400);
   const body = await c.req.json().catch(() => ({})) as {
     enabled?: boolean; isDefault?: boolean; config?: Record<string, string>;
   };
@@ -208,6 +214,7 @@ cryptoConfig.patch("/processors/:id", async (c) => {
 // checked; the rest say so instead of pretending.
 cryptoConfig.post("/processors/:id/test", async (c) => {
   const id = c.req.param("id");
+  if (id === "stripe") return c.json({ error: STRIPE_MANAGED }, 400);
   const { data, error } = await adminClient()
     .from("crypto_processor_configs")
     .select(PROCESSOR_COLUMNS)
@@ -290,6 +297,7 @@ cryptoConfig.post("/processors", async (c) => {
 // POST rather than GET so every reveal is written to audit_logs.
 cryptoConfig.post("/processors/:id/reveal", async (c) => {
   const id = c.req.param("id");
+  if (id === "stripe") return c.json({ error: STRIPE_MANAGED }, 400);
   const { data, error } = await adminClient()
     .from("crypto_processor_configs")
     .select(PROCESSOR_COLUMNS)

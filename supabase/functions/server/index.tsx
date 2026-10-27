@@ -33,14 +33,22 @@ import twoFactor from "./routes/twoFactor.ts";
 import settings from "./routes/settings.ts";
 import billing from "./routes/billing.ts";
 import contacts from "./routes/contacts.ts";
+import adminBilling from "./routes/adminBilling.ts";
+import internal from "./routes/internal.ts";
+import adminUserBilling from "./routes/adminUserBilling.ts";
+import adminBillingTest from "./routes/adminBillingTest.ts";
+import affiliateJoin from "./routes/affiliateJoin.ts";
 import vaultReset from "./routes/vaultReset.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
 // so a request to /functions/v1/server/make-server-b5ad85e0/health arrives here
 // as /server/make-server-b5ad85e0/health. The prefix must match the deployed
-// function name ("server") or every route 404s.
-const BASE = "/server/make-server-b5ad85e0";
+// function name or every route 404s. The same code is also deployed as
+// "server-billing" while Stripe billing is proven in test mode (see
+// GO_LIVE_CHECKLIST.md), so every route is mounted under both names.
+const FUNCTION_NAMES = ["server", "server-billing"];
+const api = new Hono();
 
 // Enable logger
 app.use("*", logger(console.log));
@@ -58,7 +66,7 @@ app.use(
 );
 
 // Health check endpoint
-app.get(`${BASE}/health`, (c) => {
+api.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
@@ -96,6 +104,12 @@ admin.use("/subscriptions", requireModulePermission("continuation"));
 admin.use("/subscriptions/*", requireModulePermission("continuation"));
 admin.use("/pricing", requireModulePermission("subscription"));
 admin.use("/pricing/*", requireModulePermission("subscription"));
+// Stripe setup (catalog sync, portal, webhook check) sits with plan pricing.
+admin.use("/billing", requireModulePermission("subscription"));
+admin.use("/billing/*", requireModulePermission("subscription"));
+// One account's billing (refunds, comps, plan changes) sits with user management.
+admin.use("/user-billing", requireModulePermission("users"));
+admin.use("/user-billing/*", requireModulePermission("users"));
 admin.use("/email-templates", requireModulePermission("email_templates"));
 admin.use("/email-templates/*", requireModulePermission("email_templates"));
 admin.use("/white-label", requireModulePermission("white_label"));
@@ -134,6 +148,10 @@ admin.route("/partnerships", partnerships);
 admin.route("/payouts", payouts);
 admin.route("/subscriptions", subscriptions);
 admin.route("/pricing", pricing);
+// Test-mode helpers for proving billing (404 with a live key).
+admin.route("/billing/test", adminBillingTest);
+admin.route("/billing", adminBilling);
+admin.route("/user-billing", adminUserBilling);
 admin.route("/email-templates", emailTemplates);
 admin.route("/white-label", whiteLabel);
 admin.route("/legacy", legacy);
@@ -147,7 +165,7 @@ admin.route("/white-glove", whiteGlove);
 admin.route("/wl-entitlements", wlEntitlements);
 admin.route("/disaster-recovery", drState);
 
-app.route(`${BASE}/admin`, admin);
+api.route("/admin", admin);
 
 // Routes a signed-in customer calls about their own account. Same JWT check as
 // /admin/* minus the is_admin requirement, and no module permission matrix —
@@ -157,10 +175,16 @@ account.use("*", requireUser);
 account.route("/2fa", twoFactor);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
+account.route("/affiliate", affiliateJoin);
 account.route("/vault", vaultReset);
-app.route(`${BASE}/account`, account);
+api.route("/account", account);
 
 // Public, unauthenticated data for the customer-facing app.
-app.route(`${BASE}/public`, publicRoutes);
+api.route("/public", publicRoutes);
+
+// Scheduled jobs (pg_cron), authenticated by CRON_SECRET.
+api.route("/internal", internal);
+
+for (const name of FUNCTION_NAMES) app.route(`/${name}/make-server-b5ad85e0`, api);
 
 Deno.serve(app.fetch);

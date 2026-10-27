@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { reportReachable, reportUnreachable, setProbeTarget } from "./netStatus";
+import { SERVER_FUNCTION } from "./serverBase";
 
 // createClient() throws synchronously if either value is empty, which — since
 // this module is imported from almost everywhere (adminApi, every context
@@ -79,7 +80,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
 
 export interface DBUser {
   id: string; email: string; full_name: string; phone?: string;
-  plan: "starter"|"essential"|"premium"|"legacy_pro"|"enterprise";
+  plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   plan_status: "active"|"paused"|"cancelled"|"past_due";
   stripe_customer_id?: string; stripe_subscription_id?: string;
   is_admin: boolean; email_verified: boolean; two_fa_enabled: boolean;
@@ -285,7 +286,7 @@ export const db = {
     if (!isSupabaseConfigured) return { error: "No Supabase project connected" };
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${DIRECT_URL}/functions/v1/server/make-server-b5ad85e0/account/contacts/${id}/invite`, {
+      const res = await fetch(`${DIRECT_URL}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/account/contacts/${id}/invite`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
       });
@@ -328,6 +329,23 @@ export const db = {
   // Affiliates
   async getAffiliate(userId: string) {
     return supabase.from("affiliates").select("*").eq("user_id", userId).single<DBAffiliate>();
+  },
+  /* Joins the affiliate programme through the edge function (routes/affiliateJoin.ts):
+     the browser can't write affiliate rows. The new row awaits admin approval. */
+  async joinAffiliateProgram(): Promise<{ affiliate: DBAffiliate | null; error: string | null }> {
+    if (!isSupabaseConfigured) return { affiliate: null, error: "No Supabase project connected" };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${DIRECT_URL}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/account/affiliate/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) return { affiliate: null, error: body?.error ? String(body.error) : `Request failed with status ${res.status}` };
+      return { affiliate: body?.affiliate ?? null, error: null };
+    } catch {
+      return { affiliate: null, error: "Could not reach the server" };
+    }
   },
   /* Joins the referred member so the affiliate screen can label each row.
      If RLS hides that user, PostgREST returns null for the join rather than
@@ -516,6 +534,10 @@ export const db = {
   },
 
   // Storage
+  async removeVaultFile(path: string) {
+    const { error } = await supabase.storage.from("vault-documents").remove([path]);
+    if (error) throw error;
+  },
   async uploadVaultFile(userId: string, file: File) {
     const path = `${userId}/${crypto.randomUUID()}-${file.name}`;
     const { error } = await supabase.storage.from("vault-documents").upload(path, file);

@@ -117,7 +117,7 @@ export function AffiliateAdmin() {
     setSavingId(aff.id);
     try {
       await adminApi.patch(`/affiliates/${aff.id}`, { status: nextStatus });
-      toast.success(`Affiliate ${nextStatus === "active" ? "reactivated" : "suspended"}`);
+      toast.success(`Affiliate ${nextStatus === "suspended" ? "suspended" : aff.status === "inactive" ? "approved" : "reactivated"}`);
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update affiliate");
@@ -260,7 +260,8 @@ export function AffiliateAdmin() {
                     fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 600, width: "fit-content",
                   }}
                 >
-                  {aff.status.toUpperCase()}
+                  {/* A member who applied (routes/affiliateJoin.ts) waits as inactive. */}
+                  {aff.status === "inactive" ? "PENDING" : aff.status.toUpperCase()}
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => openDetail(aff)} style={{ color: "var(--gold)" }}><Eye size={14} /></button>
@@ -268,6 +269,7 @@ export function AffiliateAdmin() {
                   <button
                     disabled={savingId === aff.id}
                     onClick={() => toggleStatus(aff)}
+                    title={aff.status === "active" ? "Suspend" : aff.status === "inactive" ? "Approve" : "Reactivate"}
                     style={{ color: aff.status === "active" ? "#FC8181" : "#D99A6B", opacity: savingId === aff.id ? 0.5 : 1 }}
                   >
                     {aff.status === "active" ? <XCircle size={14} /> : <CheckCircle size={14} />}

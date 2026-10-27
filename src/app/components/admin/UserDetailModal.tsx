@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Edit, Lock, Gift, Shield, CreditCard,
   CheckCircle, ToggleLeft, ToggleRight, Eye, EyeOff,
@@ -6,8 +6,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
+import { AdminUserBillingPanel } from "./AdminUserBillingPanel";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { supabase } from "../../services/supabase";
+import { usePlans } from "../../utils/planCatalog";
 
 /* ── Design tokens — matches the admin panel's white/Royal Vault Blue theme ── */
 const T = {
@@ -59,7 +61,7 @@ const INPUT: React.CSSProperties = {
 
 /* ── Plans — single source of truth for prices ──────────────────── */
 export const PLANS = [
-  { id:"starter",        name:"Starter",       price:1.99,   storage:"1 GB",   color:"#5A6A88" },
+  { id:"starter",        name:"Starter",       price:0,      storage:"1 GB",   color:"#5A6A88" },
   { id:"foundation",     name:"Foundation",    price:9.99,   storage:"50 GB",  color:"#6E90C9" },
   { id:"family_archive", name:"Legacy Archive",price:24.99,  storage:"250 GB", color:"#5B6EE1" },
   { id:"legacy_pro",     name:"Legacy Pro",    price:49.99,  storage:"500 GB", color:"#7E6BD8" },
@@ -93,6 +95,8 @@ export interface AdminUser {
   lastLogin: string;
   nextBilling: string;
   autoRenew: boolean;
+  billingInterval: "month" | "year" | null;
+  comped: boolean;
   storage: number;
   storageTotal: number;
   storageVideos: number;
@@ -154,6 +158,28 @@ interface DBUserDetail {
   legacyFeePaid: boolean;
   referralCount: number;
   twoFa: { enabled: boolean; method: AdminUser["mfaMethod"] };
+  subscription: {
+    id: string; plan_id: string | null; status: string; interval: "month" | "year" | null;
+    current_period_end: string | null; cancel_at_period_end: boolean;
+  } | null;
+}
+
+/* What the Subscription card says about billing, from the plan subscription
+ * that currently gives access (none = no card plan: free Starter, or a paid
+ * plan that was never bought by card and so sees Reactivate). */
+function billingSummary(d: DBUserDetail): Pick<AdminUser, "nextBilling" | "autoRenew" | "billingInterval" | "comped"> {
+  const sub = d.subscription;
+  if (!sub) return { nextBilling: d.user.plan === "starter" ? "Free plan" : "No card subscription", autoRenew: false, billingInterval: null, comped: false };
+  if (sub.id.startsWith("comp_")) return { nextBilling: "Comped (no billing)", autoRenew: false, billingInterval: null, comped: true };
+  const date = sub.current_period_end
+    ? new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
+  return {
+    nextBilling: date ? `${sub.cancel_at_period_end ? "Ends" : "Renews"} ${date}` : "—",
+    autoRenew: !sub.cancel_at_period_end,
+    billingInterval: sub.interval,
+    comped: false,
+  };
 }
 
 function mapDbUserDetail(d: DBUserDetail): AdminUser {
@@ -177,8 +203,7 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
     mfaMethod: d.twoFa.method,
     joined: new Date(d.user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     lastLogin: "Not tracked",
-    nextBilling: "Not tracked",
-    autoRenew: d.user.plan_status === "active",
+    ...billingSummary(d),
     storage: usedGb,
     storageTotal: totalGb,
     storageVideos: 0, storagePhotos: 0, storageDocs: 0, storageOther: 0, // breakdown not tracked — see JSX below
@@ -260,17 +285,21 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [tab, setTab]   = useState<ModalTab>("overview");
   const [user, setUser] = useState<AdminUser>(init);
 
+  // A Billing-tab action refetches the account; carry the new plan and
+  // billing state into the Overview card (local edits to other fields stay).
+  useEffect(() => {
+    setUser(u => ({ ...u, plan: init.plan, planId: init.planId, status: init.status, nextBilling: init.nextBilling,
+      autoRenew: init.autoRenew, billingInterval: init.billingInterval, comped: init.comped }));
+  }, [init.plan, init.planId, init.status, init.nextBilling, init.autoRenew, init.billingInterval, init.comped]);
+
   /* edit state */
   const [eName,    setEName]    = useState(user.name);
   const [eEmail,   setEEmail]   = useState(user.email);
   const [ePhone,   setEPhone]   = useState(user.phone);
-  const [ePlan,    setEPlan]    = useState(user.planId);
-  const [eRenew,   setERenew]   = useState(user.autoRenew);
   const [eNotes,   setENotes]   = useState(user.adminNotes);
   const [saving,   setSaving]   = useState(false);
 
   /* card state */
-  const [editCard,    setEditCard]   = useState(false);
   const [cardNum,     setCardNum]    = useState("");
   const [cardExp,     setCardExp]    = useState("");
   const [cardCvv,     setCardCvv]    = useState("");
@@ -286,7 +315,9 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [savingWaive,setSavingWaive] = useState(false);
 
   const plan        = PLANS.find(p => p.id === user.planId) ?? PLANS[2];
-  const price       = plan.price;
+  const catalogPlan = usePlans().find(p => p.id === user.planId);
+  const yearly      = user.billingInterval === "year";
+  const price       = yearly ? (catalogPlan?.priceAnnual ?? plan.price * 12) : (catalogPlan?.priceMonthly ?? plan.price);
   const initials    = user.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
   const [photoFailed, setPhotoFailed] = useState(false);
   const storagePct  = Math.round((user.storage / user.storageTotal) * 100);
@@ -304,13 +335,8 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
       // Only the plan is a real column this endpoint can change today — name/
       // email/phone edits aren't wired (email changes need Supabase Auth admin
       // APIs, phone/notes have no column) so they only update local view state.
-      if (ePlan !== user.planId) {
-        await adminApi.patch(`/users/${user.id}`, { plan: ePlan });
-      }
-      const np = PLANS.find(p => p.id === ePlan)!;
-      setUser(u => ({ ...u, name:eName, email:eEmail, phone:ePhone,
-        plan:np.name, planId:ePlan, autoRenew:eRenew, adminNotes:eNotes }));
-      toast.success(ePlan !== user.planId ? "Account updated — plan change saved" : "Account updated (plan unchanged)");
+      setUser(u => ({ ...u, name:eName, email:eEmail, phone:ePhone, adminNotes:eNotes }));
+      toast.success("Account updated");
       setTab("overview");
       onRefetch();
     } catch (err) {
@@ -513,13 +539,13 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                 <div style={CARD}>
                   <SLabel>Subscription</SLabel>
                   <DRow label="Plan" value={<span style={{ color:plan.color, fontWeight:700 }}>{user.plan}</span>}/>
-                  <DRow label="Monthly Price" value={
-                    user.subscriptionWaived
+                  <DRow label={yearly ? "Yearly Price" : "Monthly Price"} value={
+                    user.subscriptionWaived || user.comped
                       ? <span className="flex items-center gap-2">
                           <span style={{ textDecoration:"line-through", color:T.muted, fontSize:14 }}>${price.toFixed(2)}</span>
-                          <span style={{ color:T.green, fontWeight:700 }}>$0.00 WAIVED</span>
+                          <span style={{ color:T.green, fontWeight:700 }}>$0.00 {user.comped ? "COMPED" : "WAIVED"}</span>
                         </span>
-                      : <span style={{ color:T.primary, fontWeight:700 }}>${price.toFixed(2)}/mo</span>
+                      : <span style={{ color:T.primary, fontWeight:700 }}>${price.toFixed(2)}/{yearly ? "yr" : "mo"}</span>
                   }/>
                   <DRow label="Storage Limit" value={plan.storage}/>
                   <DRow label="Next Billing"  value={user.nextBilling}/>
@@ -534,13 +560,13 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                   )}
 
                   <div className="flex flex-col gap-2 mt-5">
-                    <button onClick={() => toast.success("Upgrade flow opened")}
+                    <button onClick={() => setTab("billing")}
                       className="w-full py-2.5 rounded-2xl text-sm font-bold"
                       style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
                         boxShadow:"0 4px 14px rgba(91,110,225,0.35)" }}>
                       Upgrade Plan
                     </button>
-                    <button onClick={() => toast.info("Downgrade flow opened")}
+                    <button onClick={() => setTab("billing")}
                       className="w-full py-2.5 rounded-2xl text-sm font-semibold"
                       style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
                       Downgrade Plan
@@ -618,41 +644,12 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                 </div>
               </div>
 
-              {/* Plan picker */}
               <div style={CARD}>
                 <SLabel>Subscription Plan</SLabel>
-                <div className="space-y-2 mb-5">
-                  {PLANS.map(p => (
-                    <button key={p.id} onClick={() => setEPlan(p.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all"
-                      style={{ background:ePlan===p.id?`${p.color}12`:T.card3,
-                        border:`1.5px solid ${ePlan===p.id ? p.color : T.border}` }}>
-                      <div className="flex items-center gap-3">
-                        <div style={{ width:10, height:10, borderRadius:"50%", background:p.color }}/>
-                        <div className="text-left">
-                          <div style={{ color:T.text, fontSize:16, fontWeight:600 }}>{p.name}</div>
-                          <div style={{ color:T.muted, fontSize:14 }}>{p.storage} storage</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span style={{ color:p.color, fontWeight:700, ...DISPLAY, fontSize:20 }}>${p.price.toFixed(2)}/mo</span>
-                        {ePlan===p.id && <CheckCircle size={14} color={p.color}/>}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Auto-renew toggle */}
-                <div className="flex items-center justify-between p-3 rounded-2xl"
-                  style={{ background:T.card3, border:`1px solid ${T.border}` }}>
-                  <div>
-                    <div style={{ color:T.text, fontSize:16, fontWeight:500 }}>Auto-Renew</div>
-                    <div style={{ color:T.muted, fontSize:14 }}>Charge card automatically on billing date</div>
-                  </div>
-                  <button onClick={() => setERenew(v => !v)} style={{ color:eRenew ? T.green : T.muted }}>
-                    {eRenew ? <ToggleRight size={30}/> : <ToggleLeft size={30}/>}
-                  </button>
-                </div>
+                <p style={{ color:T.sub, fontSize:15, lineHeight:1.6 }}>
+                  Plans change through billing so what the account has always matches what it pays.
+                  Use the <button onClick={() => setTab("billing")} style={{ color:T.primary, fontWeight:600 }}>Billing tab</button> to change, comp, or refund &amp; end a plan.
+                </p>
               </div>
 
               {/* Admin notes */}
@@ -680,227 +677,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
 
           {/* ── BILLING ─────────────────────────────────────────── */}
           {tab === "billing" && (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-5">
-
-                {/* Payment Method */}
-                <div style={CARD}>
-                  <div className="flex items-center justify-between mb-4">
-                    <SLabel>Payment Method</SLabel>
-                    <button onClick={() => setEditCard(v => !v)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                      style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
-                      <Edit size={10}/>{editCard ? "Cancel" : "Update Card"}
-                    </button>
-                  </div>
-
-                  {/* Card graphic */}
-                  <div className="rounded-2xl p-5 mb-4 relative overflow-hidden"
-                    style={{ background:"linear-gradient(135deg,#1A1F3A,#5B6EE1)", minHeight:140 }}>
-                    <div style={{ position:"absolute", top:-30, right:-30, width:130, height:130,
-                      borderRadius:"50%", background:"rgba(255,255,255,0.05)" }}/>
-                    <div style={{ position:"absolute", bottom:-20, right:20, width:90, height:90,
-                      borderRadius:"50%", background:"rgba(255,255,255,0.04)" }}/>
-                    <div className="flex items-center justify-between mb-6">
-                      <div style={{ width:40, height:28, background:"rgba(255,215,100,0.85)", borderRadius:6 }}/>
-                      <span style={{ color:"rgba(255,255,255,0.85)", fontSize:17.5, fontWeight:800, ...MONO }}>
-                        {user.cardBrand.toUpperCase()}
-                      </span>
-                    </div>
-                    <div style={{ color:"rgba(255,255,255,0.55)", fontSize:21.5, ...MONO,
-                      letterSpacing:"0.22em", marginBottom:18 }}>
-                      ●●●● &nbsp; ●●●● &nbsp; ●●●● &nbsp; {user.cardLast4}
-                    </div>
-                    <div className="flex items-end gap-8">
-                      <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, ...MONO, letterSpacing:"0.1em" }}>CARD HOLDER</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:15 }}>{user.cardHolder}</div>
-                      </div>
-                      <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, ...MONO, letterSpacing:"0.1em" }}>EXPIRES</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:15, ...MONO }}>{user.cardExpiry}</div>
-                      </div>
-                      <div>
-                        <div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, ...MONO, letterSpacing:"0.1em" }}>ZIP</div>
-                        <div style={{ color:"rgba(255,255,255,0.9)", fontSize:15, ...MONO }}>{user.billingZip}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Edit card form */}
-                  {editCard && (
-                    <div className="space-y-3 pt-4 border-t" style={{ borderColor:T.border }}>
-                      <div>
-                        <label style={{ color:T.muted, fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>NEW CARD NUMBER</label>
-                        <input value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g,"").slice(0,16))}
-                          placeholder="●●●● ●●●● ●●●● ●●●●" style={INPUT}/>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label style={{ color:T.muted, fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>EXPIRY (MM/YY)</label>
-                          <input value={cardExp} onChange={e => setCardExp(e.target.value)} placeholder="MM/YY" style={INPUT}/>
-                        </div>
-                        <div>
-                          <label style={{ color:T.muted, fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>CVV</label>
-                          <div className="relative">
-                            <input value={cardCvv} type={showCvv?"text":"password"} maxLength={4}
-                              onChange={e => setCardCvv(e.target.value)} placeholder="●●●"
-                              style={{ ...INPUT, paddingRight:38 }}/>
-                            <button onClick={() => setShowCvv(v=>!v)}
-                              style={{ position:"absolute", right:12, top:11, color:T.muted }}>
-                              {showCvv ? <EyeOff size={14}/> : <Eye size={14}/>}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <label style={{ color:T.muted, fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>CARDHOLDER NAME</label>
-                        <input value={cardName} onChange={e => setCardName(e.target.value)} style={INPUT}/>
-                      </div>
-                      <div>
-                        <label style={{ color:T.muted, fontSize:12.5, ...MONO, display:"block", marginBottom:5 }}>BILLING ZIP</label>
-                        <input value={cardZip} onChange={e => setCardZip(e.target.value)} maxLength={10} style={INPUT}/>
-                      </div>
-                      <div className="flex items-start gap-2 px-3 py-2.5 rounded-2xl"
-                        style={{ background:T.primaryBg, border:`1px solid ${T.primaryBd}` }}>
-                        <Lock size={11} color={T.primary} style={{ marginTop:2, flexShrink:0 }}/>
-                        <span style={{ color:T.primary, fontSize:14 }}>
-                          Transmitted via Stripe PCI vault. Only the last 4 digits and expiry are stored.
-                        </span>
-                      </div>
-                      <button onClick={saveCard} disabled={savingCard}
-                        className="w-full py-2.5 rounded-2xl font-bold text-sm"
-                        style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
-                          boxShadow:"0 4px 14px rgba(91,110,225,0.3)", opacity:savingCard?0.7:1 }}>
-                        {savingCard ? "Saving…" : "Save New Card"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Waive Fee */}
-                <div style={CARD}>
-                  <SLabel>Waive Subscription Fee</SLabel>
-                  <p style={{ color:T.sub, fontSize:15, marginBottom:16, lineHeight:1.7 }}>
-                    Choose the number of months to waive, a reason, and confirm. The waiver is logged in the audit trail and takes effect immediately.
-                  </p>
-
-                  {/* Active waiver notice */}
-                  {user.subscriptionWaived && (
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-4"
-                      style={{ background:T.amberBg, border:`1px solid ${T.amberBd}` }}>
-                      <Gift size={14} color={T.amber}/>
-                      <span style={{ color:T.amber, fontSize:15 }}>
-                        Active waiver: <strong>{user.waiveMonths} months</strong> · {WAIVE_REASONS.find(r=>r.id===user.waiveReason)?.label ?? "—"}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* 1–12 month pills */}
-                  <div style={{ marginBottom:16 }}>
-                    <div style={{ color:T.muted, fontSize:12.5, ...MONO, marginBottom:10 }}>MONTHS TO WAIVE</div>
-                    <div className="grid gap-2" style={{ gridTemplateColumns:"repeat(6, 1fr)" }}>
-                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
-                        <button key={m} onClick={() => setWMonths(m)}
-                          className="py-2.5 rounded-2xl font-bold text-sm transition-all"
-                          style={{
-                            background: wMonths===m ? T.primary : T.card3,
-                            color: wMonths===m ? "#fff" : T.sub,
-                            border: `1px solid ${wMonths===m ? T.primary : T.border}`,
-                            boxShadow: wMonths===m ? "0 2px 10px rgba(91,110,225,0.35)" : "none",
-                            ...MONO,
-                          }}>
-                          {m}mo
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Reason grid */}
-                  <div style={{ marginBottom:14 }}>
-                    <div style={{ color:T.muted, fontSize:12.5, ...MONO, marginBottom:8 }}>REASON FOR WAIVER *</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {WAIVE_REASONS.map(r => (
-                        <button key={r.id} onClick={() => setWReason(r.id)}
-                          className="px-3 py-2 rounded-2xl text-xs text-left transition-all"
-                          style={{
-                            background: wReason===r.id ? T.primaryBg : T.card3,
-                            border: `1px solid ${wReason===r.id ? T.primary : T.border}`,
-                            color: wReason===r.id ? T.primary : T.sub,
-                            fontWeight: wReason===r.id ? 700 : 400,
-                          }}>
-                          {r.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Optional note */}
-                  <div style={{ marginBottom:14 }}>
-                    <div style={{ color:T.muted, fontSize:12.5, ...MONO, marginBottom:6 }}>ADDITIONAL NOTE (optional)</div>
-                    <textarea value={wNote} onChange={e => setWNote(e.target.value)} rows={2}
-                      placeholder="E.g. Per phone call on Jul 15, 2026 — approved by management…"
-                      className="w-full resize-none" style={INPUT}/>
-                  </div>
-
-                  {/* Total */}
-                  <div className="flex items-center justify-between px-4 py-3 rounded-2xl mb-4"
-                    style={{ background:T.card3, border:`1px solid ${T.border}` }}>
-                    <span style={{ color:T.sub, fontSize:16 }}>Total Amount Waived</span>
-                    <span style={{ color:T.primary, fontSize:30, fontWeight:800, ...DISPLAY }}>
-                      ${(price * wMonths).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <button onClick={applyWaive} disabled={savingWaive}
-                    className="w-full py-3 rounded-2xl font-bold text-sm"
-                    style={{ background:"linear-gradient(135deg,#7E6BD8,#5B6EE1)", color:"#fff",
-                      boxShadow:"0 4px 16px rgba(91,110,225,0.35)", opacity:savingWaive?0.7:1 }}>
-                    {savingWaive
-                      ? "Applying Waiver…"
-                      : `Confirm Waiver — ${wMonths} Month${wMonths>1?"s":""} · $${(price * wMonths).toFixed(2)} Waived`}
-                  </button>
-                </div>
-              </div>
-
-              {/* Billing History */}
-              <div style={CARD}>
-                <div className="flex items-center justify-between mb-4">
-                  <SLabel>Billing History</SLabel>
-                  <button onClick={() => toast.success("CSV export downloaded")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                    style={{ background:T.primaryBg, color:T.primary, border:`1px solid ${T.primaryBd}` }}>
-                    <Download size={10}/> Export CSV
-                  </button>
-                </div>
-                <div className="rounded-2xl overflow-x-auto" style={{ border:`1px solid ${T.border}` }}>
-                  <div className="grid px-4 py-2.5"
-                    style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
-                      background:"rgba(10,20,40,0.9)" }}>
-                    {["Invoice","Description","Date","Amount","Status"].map(h => (
-                      <span key={h} style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h.toUpperCase()}</span>
-                    ))}
-                  </div>
-                  {user.billingHistory.map((row, i) => {
-                    const sc = row.status==="paid" ? T.green : row.status==="failed" ? T.red : T.amber;
-                    return (
-                      <div key={row.id} className="grid items-center px-4 py-3 border-t"
-                        style={{ gridTemplateColumns:"auto 1fr auto auto auto", gap:16,
-                          background:i%2===0?"#fff":"#F8FAFF", borderColor:"rgba(91,110,225,0.06)" }}>
-                        <span style={{ color:T.muted, fontSize:12.5, ...MONO }}>{row.id}</span>
-                        <span style={{ color:T.text, fontSize:15 }}>{row.description}</span>
-                        <span style={{ color:T.sub, fontSize:15, ...MONO }}>{row.date}</span>
-                        <span style={{ color:T.primary, fontSize:16, fontWeight:700, ...MONO }}>{row.amount}</span>
-                        <span className="px-2 py-0.5 rounded text-xs font-bold"
-                          style={{ background:`${sc}18`, color:sc, ...MONO, fontSize:11 }}>
-                          {row.status.toUpperCase()}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <AdminUserBillingPanel userId={user.id} onChanged={onRefetch}/>
           )}
 
           {/* ── SECURITY ─────────────────────────────────────────── */}

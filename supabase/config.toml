@@ -8,3 +8,9 @@ entrypoint = "./functions/server/index.tsx"
 # session. /admin/* stays protected: requireAdmin validates the bearer token
 # and users.is_admin on every request.
 verify_jwt = false
+
+# The same backend under a second name, for proving Stripe billing in test
+# mode without touching production's "server". Removed after cutover.
+[functions.server-billing]
+entrypoint = "./functions/server-billing/index.ts"
+verify_jwt = false

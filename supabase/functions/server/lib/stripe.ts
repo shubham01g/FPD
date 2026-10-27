@@ -1,41 +1,66 @@
-// Minimal Stripe client for the checkout routes (routes/billing.ts) and the
-// webhook (routes/public.ts). Plain fetch against the REST API rather than
-// the SDK: the calls needed are few, and this keeps the edge bundle small.
+// Stripe client for billing (routes/billing.ts, routes/stripeWebhook.ts,
+// routes/adminBilling.ts, lib/billing/*). Plain fetch against the REST API
+// rather than the SDK: the calls are few, and this keeps the edge bundle small.
 //
-// Credentials are whatever an admin saved under Developer → Payment
-// Processors → Stripe — nothing is read from the environment. Checkout is
-// therefore "on" exactly when Stripe is connected there and is the active
-// processor.
-import { adminClient } from "./supabaseAdmin.ts";
-import { decryptSecret } from "./keyCrypto.ts";
+// Keys come only from the function's secrets (STRIPE_SECRET_KEY,
+// STRIPE_WEBHOOK_SECRET), pasted by the owner in the Supabase dashboard. They
+// are never stored in the database, logged, or returned by any route
+// (GO_LIVE_CHECKLIST.md, "Secrets and flags").
+//
+// Every request sends a pinned Stripe-Version. Webhook payloads arrive in
+// whatever version the endpoint is set to in the dashboard, which may be newer
+// than this code expects, so the webhook re-reads every object through here
+// and only ever reads fields of this version (plus the tolerant accessors in
+// stripeShapes.ts).
 
-export interface StripeConfig {
-  secretKey: string;
-  webhookSecret: string;
-  testMode: boolean;
+/** The API version every request is made with. Record a change of it in
+ *  GO_LIVE_CHECKLIST.md and re-run Phase B. */
+export const STRIPE_API_VERSION = "2024-06-20";
+
+export type StripeMode = "test" | "live";
+
+export function stripeSecretKey(): string | null {
+  const key = Deno.env.get("STRIPE_SECRET_KEY")?.trim();
+  return key ? key : null;
 }
 
-/** null when Stripe isn't the connected, active processor (or has no secret key). */
-export async function loadStripeConfig(): Promise<StripeConfig | null> {
-  const { data } = await adminClient()
-    .from("crypto_processor_configs")
-    .select("enabled, is_default, config_encrypted")
-    .eq("id", "stripe")
-    .maybeSingle();
-  if (!data?.enabled || !data.is_default || !data.config_encrypted) return null;
+export function stripeWebhookSecret(): string | null {
+  const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET")?.trim();
+  return secret ? secret : null;
+}
 
-  try {
-    const config = JSON.parse(await decryptSecret(data.config_encrypted)) as Record<string, string>;
-    if (!config.secretKey) return null;
-    return {
-      secretKey: config.secretKey,
-      webhookSecret: config.webhookSecret ?? "",
-      testMode: config.mode === "test" || config.secretKey.startsWith("sk_test_"),
-    };
-  } catch (err) {
-    console.error("stripe config decrypt failed:", err);
-    return null;
+/** test or live from the key's prefix (sk_test_ / rk_test_ vs *_live_), null
+ *  when no usable key is set. Never reveals the key itself. */
+export function stripeMode(): StripeMode | null {
+  const key = stripeSecretKey();
+  if (!key) return null;
+  if (/^(sk|rk)_test_/.test(key)) return "test";
+  if (/^(sk|rk)_live_/.test(key)) return "live";
+  return null;
+}
+
+export function isLivemode(): boolean {
+  return stripeMode() === "live";
+}
+
+/** A Stripe API error with the fields callers branch on. */
+export class StripeError extends Error {
+  status: number;
+  type: string | null;
+  code: string | null;
+  param: string | null;
+  constructor(status: number, body: { error?: { message?: string; type?: string; code?: string; param?: string } } | null) {
+    super(body?.error?.message ?? `Stripe request failed with status ${status}`);
+    this.name = "StripeError";
+    this.status = status;
+    this.type = body?.error?.type ?? null;
+    this.code = body?.error?.code ?? null;
+    this.param = body?.error?.param ?? null;
   }
+}
+
+export function isResourceMissing(err: unknown): boolean {
+  return err instanceof StripeError && err.code === "resource_missing";
 }
 
 /** Flattens nested params into Stripe's form encoding: a[b][0][c]=v. */
@@ -49,23 +74,80 @@ function encode(params: Record<string, unknown>, prefix = "", out = new URLSearc
   return out;
 }
 
-export async function stripeRequest<T = Record<string, unknown>>(
-  secretKey: string, method: "GET" | "POST" | "DELETE", path: string, params?: Record<string, unknown>,
+export interface StripeRequestOptions {
+  /** Makes a POST safe to repeat: Stripe returns the first result for 24h. */
+  idempotencyKey?: string;
+  expand?: string[];
+}
+
+/**
+ * One Stripe API call. Throws StripeError on a Stripe error response, and a
+ * plain Error when no key is configured. Retries once on 429/5xx/network
+ * failure, but only when repeating can't double an effect (GET, DELETE, or a
+ * POST that carries an idempotency key).
+ */
+export async function stripe<T = Record<string, any>>(
+  method: "GET" | "POST" | "DELETE",
+  path: string,
+  params: Record<string, unknown> = {},
+  options: StripeRequestOptions = {},
 ): Promise<T> {
-  const res = await fetch(`https://api.stripe.com/v1${path}`, {
-    method,
-    headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/x-www-form-urlencoded" },
-    body: params && method !== "GET" ? encode(params) : undefined,
-  });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    throw new Error(body?.error?.message ?? `Stripe request failed with status ${res.status}`);
+  const key = stripeSecretKey();
+  if (!key) throw new Error("Stripe is not configured (STRIPE_SECRET_KEY is not set)");
+
+  const all = options.expand?.length ? { ...params, expand: options.expand } : params;
+  const query = method === "GET" ? encode(all).toString() : "";
+  const url = `https://api.stripe.com/v1${path}${query ? `?${query}` : ""}`;
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${key}`,
+    "Stripe-Version": STRIPE_API_VERSION,
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+  if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+  const body = method === "GET" ? undefined : encode(all).toString();
+  const retryable = method !== "POST" || Boolean(options.idempotencyKey);
+
+  for (let attempt = 0; ; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(url, { method, headers, body });
+    } catch (err) {
+      if (retryable && attempt === 0) { await new Promise((r) => setTimeout(r, 400)); continue; }
+      throw err;
+    }
+    const json = await res.json().catch(() => null);
+    if (res.ok) return json as T;
+    if (retryable && attempt === 0 && (res.status === 429 || res.status >= 500)) {
+      await new Promise((r) => setTimeout(r, 600));
+      continue;
+    }
+    throw new StripeError(res.status, json);
   }
-  return body as T;
+}
+
+/** Every page of a list endpoint (bounded, for admin views and setup checks). */
+export async function stripeListAll<T = Record<string, any>>(path: string, params: Record<string, unknown> = {}, maxPages = 10): Promise<T[]> {
+  const out: T[] = [];
+  let startingAfter: string | undefined;
+  for (let page = 0; page < maxPages; page++) {
+    const res = await stripe<{ data: T[]; has_more: boolean }>("GET", path, { limit: 100, ...params, starting_after: startingAfter });
+    out.push(...res.data);
+    if (!res.has_more || res.data.length === 0) break;
+    startingAfter = (res.data[res.data.length - 1] as { id: string }).id;
+  }
+  return out;
 }
 
 function hex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Constant-time string comparison (for signatures and shared secrets). */
+export function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 /** Verifies a Stripe-Signature header (scheme v1, HMAC-SHA256 over
@@ -80,12 +162,5 @@ export async function verifyStripeSignature(rawBody: string, header: string | un
 
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const expected = hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${rawBody}`)));
-
-  // Constant-time comparison.
-  return signatures.some((sig) => {
-    if (sig.length !== expected.length) return false;
-    let diff = 0;
-    for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
-    return diff === 0;
-  });
+  return signatures.some((sig) => safeEqual(sig, expected));
 }

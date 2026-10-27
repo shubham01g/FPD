@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type Doc, type VaultFolder } from "../context/DemoContext";
-import { useSpendingProtection } from "../hooks/useSpendingProtection";
+import { checkUpload, showQuotaRefusal } from "../utils/storageQuota";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
 // docSyncStore is a shared bridge used by many other sections (Warranties, TravelPlanner,
@@ -545,7 +545,6 @@ export function DigitalFileCabinet() {
     continuationFeePaid, docs, addDoc, deleteDoc,
     folders, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId,
   } = useDemo();
-  const { check: spCheck, capAmount } = useSpendingProtection();
   // Built-in folders first, then the account's own top-level folders.
   const allCabinets = useMemo(() => [
     ...themedCabinets,
@@ -588,21 +587,19 @@ export function DigitalFileCabinet() {
     docs.filter(d => d.folderId ? d.folderId === folderId : d.category === folderId).map(docToFolderFile),
   [docs]);
 
-  const doUpload = useCallback((folderId: string, files: FileList | null) => {
+  const doUpload = useCallback(async (folderId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    // Spending protection gate — runs before every upload
-    if (!spCheck.allowed) {
-      toast.error(
-        `Upload blocked — $${capAmount} spending protection cap reached. Delete files or upgrade your plan to continue uploading.`,
-        { duration: 6000 }
-      );
-      return;
-    }
+    // Ask before uploading: the plan's storage, the overage limit and a
+    // declined overage payment all decide (migration 040). The database
+    // refuses the row anyway if this check can't run.
+    const total = Array.from(files).reduce((s, f) => s + f.size, 0);
+    const quota = await checkUpload(total);
+    if (quota && !quota.allowed) { showQuotaRefusal(quota.reason); return; }
 
     const isCustom = folders.some(x => x.id === folderId);
     setUploading(true);
-    Promise.all(Array.from(files).map(f => addDoc({
+    await Promise.all(Array.from(files).map(f => addDoc({
       name: f.name,
       category: isCustom ? "custom" : folderId,
       folderId: isCustom ? folderId : undefined,
@@ -614,7 +611,7 @@ export function DigitalFileCabinet() {
       status: "verified",
       encrypted: true,
     }, f))).finally(() => setUploading(false));
-  }, [addDoc, spCheck.allowed, capAmount, folders, currentSub]);
+  }, [addDoc, folders, currentSub]);
 
   // Preview/Download used to be toast.info/success calls that never touched a
   // real file. Real uploads carry a vault-documents storage path (filePath);

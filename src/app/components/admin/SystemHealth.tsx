@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../../services/supabase";
 import { adminApi } from "../../services/adminApi";
+import { SERVER_FUNCTION } from "../../services/serverBase";
 
 /* ─────────────────────────────────────────────────────────────────────
    SYSTEM HEALTH — real checks only.
@@ -78,7 +79,7 @@ export const SERVICES: ServiceDef[] = [
     id:"edge", name:"Backend Edge Function", icon:<Server size={16}/>,
     description:"The server function's public /health route.",
     probe: async () => {
-      await expectOk(await fetch(`${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/health`, {
+      await expectOk(await fetch(`${SUPABASE_URL}/functions/v1/${SERVER_FUNCTION}/make-server-b5ad85e0/health`, {
         headers: { apikey: ANON_KEY ?? "", ...(await authHeader()) },
       }));
     },

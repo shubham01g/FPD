@@ -225,3 +225,61 @@ export function contactInviteEmail(o: {
 export function linkOrigin(originHeader: string | undefined): string {
   return originHeader && /^https?:\/\/[^/]+$/.test(originHeader) ? originHeader : SITE_URL;
 }
+// ── Billing ─────────────────────────────────────────────────────────────
+// Stripe sends receipts. These are the few billing emails the app sends
+// itself, each once per event (lib/billing/notify.ts).
+
+/** A renewal payment failed. Stripe retries the card on its own schedule. */
+export function paymentFailedEmail(o: { productName: string; amount: string; manageUrl: string }): Omit<EmailMessage, "to"> {
+  const lead = `We couldn't take the ${o.amount} payment for ${o.productName}. Your account stays open while we retry the card over the next few days.`;
+  const ask = "Please update your card so nothing is interrupted.";
+  return {
+    subject: `Payment failed for ${o.productName}`,
+    category: "billing_payment_failed",
+    text: `${lead}\n\n${ask}\n\nManage billing: ${o.manageUrl}`,
+    html: layout("Your payment didn't go through", `
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      <p style="margin:0 0 20px;line-height:1.6;">${ask}</p>
+      ${button(o.manageUrl, "Update payment method")}`),
+  };
+}
+
+/** A storage overage invoice was declined; uploads beyond the plan stop. */
+export function overageDeclinedEmail(o: { amount: string; manageUrl: string }): Omit<EmailMessage, "to"> {
+  const lead = `We couldn't take the ${o.amount} storage overage payment. Until it's paid, new uploads are limited to your plan's included storage. Everything already stored is safe.`;
+  return {
+    subject: "Storage overage payment failed",
+    category: "billing_overage_declined",
+    text: `${lead}\n\nPay the open invoice or update your card: ${o.manageUrl}`,
+    html: layout("Storage overage payment failed", `
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(lead)}</p>
+      ${button(o.manageUrl, "Pay or update card")}`),
+  };
+}
+
+/** Sent ahead of an annual renewal (invoice.upcoming). */
+export function renewalReminderEmail(o: { productName: string; amount: string; date: string; manageUrl: string }): Omit<EmailMessage, "to"> {
+  const lead = `${o.productName} renews on ${o.date}, and your card will be charged ${o.amount}.`;
+  const how = "If you'd like to cancel, you can do it any time before then in Usage & Billing → Manage billing. Cancelling stops the renewal; your plan stays active until the end of the current year.";
+  return {
+    subject: `Your ${o.productName} renews on ${o.date}`,
+    category: "billing_renewal_reminder",
+    text: `${lead}\n\n${how}\n\nManage billing: ${o.manageUrl}`,
+    html: layout("Upcoming renewal", `
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(how)}</p>
+      ${button(o.manageUrl, "Manage billing")}`),
+  };
+}
+
+/** Something in billing needs a person (duplicate subscription, dispute,
+ *  failed White Glove charge). Goes to the admin mailbox. */
+export function billingAlertEmail(o: { title: string; lines: string[] }): Omit<EmailMessage, "to"> {
+  return {
+    subject: `[Billing] ${o.title}`,
+    category: "billing_admin_alert",
+    replyTo: MAILBOX.admin,
+    text: o.lines.join("\n"),
+    html: layout(esc(o.title), o.lines.map((l) => `<p style="margin:0 0 10px;line-height:1.5;">${esc(l)}</p>`).join(""), MAILBOX.admin),
+  };
+}

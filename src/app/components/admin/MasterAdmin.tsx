@@ -212,12 +212,13 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
   );
 }
 
+/* Display only — prices are charged from the catalog (subscription_plans). */
 const PLANS = [
-  { id:"starter",    name:"Starter",    price:1.99,  storage:"1 GB",   color:"#8A9AB8" },
+  { id:"starter",    name:"Starter",    price:0,     storage:"1 GB",   color:"#8A9AB8" },
   { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#6FAE8B" },
   { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#6E90C9" },
-  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"1 TB", color:"#6FAE8B" },
-  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"5 TB", color:"#D99A6B" },
+  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"500 GB", color:"#6FAE8B" },
+  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"1 TB", color:"#D99A6B" },
 ];
 
 const WAIVE_REASONS = [
@@ -431,7 +432,8 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   { label:"Email",   value:form.email },
                   { label:"Phone",   value:form.phone || "—" },
                   { label:"Package", value:`${selectedPlan.name} · ${selectedPlan.storage}` },
-                  { label:"Monthly", value:form.subscriptionWaived ? "$0.00 (WAIVED)" : `$${selectedPlan.price}/mo` },
+                  // Without a waiver the account starts on free Starter and buys its own plan by card.
+                  { label:"Monthly", value:form.subscriptionWaived ? "$0.00 (WAIVED)" : "Starter; they pay by card" },
                   { label:"Waiver",  value:form.subscriptionWaived ? (WAIVE_REASONS.find(r=>r.id===form.waiveReason)?.label ?? "—") : "None" },
                   { label:"White Glove", value:form.whiteGlove ? "✓ Assigned" : "No" },
                   { label:"Welcome Email", value:form.sendWelcome ? "Will be sent" : "Skip" },
@@ -504,7 +506,7 @@ function buildTopMetrics(
       note:"No signup history — growth % not available" },
     { label:"Monthly Recurring Revenue", value: overview ? money(overview.mrr) : "—",
       color:"#D99A6B", tone:"warn", icon:<DollarSign size={16}/>,
-      note:"From active subscriptions" },
+      note:"Paid card subscriptions · yearly ÷ 12 · comps excluded" },
     { label: cur ? `Overage Revenue (${monthLabel})` : "Overage Revenue", value: cur ? money(cur.overage) : "—",
       change: cur && prev ? pctChange(cur.overage, prev.overage) : undefined,
       color:"#6FAE8B", tone:"good", icon:<TrendingUp size={16}/> },

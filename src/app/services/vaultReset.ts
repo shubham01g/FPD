@@ -8,11 +8,9 @@
  * exception, so the reset page can say exactly why.
  */
 import { supabase } from "./supabase";
+import { SERVER_BASE } from "./serverBase";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const FUNCTIONS_BASE = SUPABASE_URL
-  ? `${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/account/vault`
-  : null;
+const FUNCTIONS_BASE = SERVER_BASE ? `${SERVER_BASE}/account/vault` : null;
 
 export type ResetProblem = "invalid" | "wrong_account" | "used" | "expired";
 

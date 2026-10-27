@@ -17,11 +17,9 @@
  * gated by requireUser rather than requireAdmin.
  */
 import { supabase } from "./supabase";
+import { SERVER_BASE } from "./serverBase";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const FUNCTIONS_BASE = SUPABASE_URL
-  ? `${SUPABASE_URL}/functions/v1/server/make-server-b5ad85e0/account/2fa`
-  : null;
+const FUNCTIONS_BASE = SERVER_BASE ? `${SERVER_BASE}/account/2fa` : null;
 
 export type TwoFAMethod = "sms" | "email_otp" | "authenticator";
 

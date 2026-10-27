@@ -1,422 +1,202 @@
 /**
- * WGSessionTimer — White Glove Session Timer & Billing
+ * White Glove session timing and billing.
  *
- * Used by concierge specialists during a live session.
- * Tracks elapsed time, rounds UP to the nearest 30-minute block,
- * calculates the charge, and bills the client's card on file.
+ * Billing rules (charged by the server, routes/whiteGlove.ts):
+ *   - time is billed in 30-minute blocks, rounded up (1–30 min = 1 block)
+ *   - at the catalog's session price ($25 per block)
+ *   - to the card the client saved when paying the setup fee
  *
- * Billing rules:
- *   - Any time used (even 1 minute) = 1 block = $25
- *   - 1–30 min  = 1 block  = $25
- *   - 31–60 min = 2 blocks = $50
- *   - 61–90 min = 3 blocks = $75
- *   - etc.
+ * WGSessionTimer — for concierge specialists during a live session. It times
+ *   the session and logs it; an admin charges it from Admin → White Glove
+ *   (specialists can't charge cards).
+ * WGBillingHistory — admin console: a client's session charges, and the form
+ *   that charges a session.
  */
-import React, { useState, useEffect, useRef } from "react";
-import {
-  Play, Square, Clock, DollarSign, CreditCard, CheckCircle,
-  AlertCircle, X, ChevronRight, RefreshCw, Phone, Video
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Play, Square, Clock, DollarSign, CheckCircle, RefreshCw, Pause } from "lucide-react";
 import { toast } from "sonner";
+import { adminApi } from "../services/adminApi";
+import { useProducts } from "../utils/planCatalog";
+import { useWGBilling } from "./WGCardOnFile";
 
-const RATE_PER_BLOCK = 25;    // $ per 30-min block
-const BLOCK_MINUTES  = 30;    // minutes per billing block
+const BLOCK_MINUTES = 30;
+const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
+const BOX: React.CSSProperties = { background: "rgba(91,110,225,0.03)", border: "1px solid rgba(91,110,225,0.12)" };
+const INPUT: React.CSSProperties = { background: "#141B2E", border: "1px solid rgba(91,167,214,0.3)", color: "#FFFFFF", fontSize: 15, outline: "none", borderRadius: 10, padding: "8px 10px", width: "100%" };
 
-export interface SessionBillingRecord {
-  id: string;
-  clientId: string;
-  clientName: string;
-  specialistName: string;
-  sessionType: "phone" | "video";
-  startedAt: string;
-  endedAt: string;
-  durationMinutes: number;
-  blocksCharged: number;
-  amountCharged: number;
-  cardLast4: string;
-  status: "pending" | "charged" | "failed";
-}
-
-// Session billing history — in-memory only (wg_session_billing isn't wired
-// yet), so it starts empty and resets on refresh.
-export const billingHistory: SessionBillingRecord[] = [];
-
-// Cards on file — in-memory only (wg_payment_methods isn't wired yet).
-export const cardsOnFile: Record<string, { last4:string; brand:string; expiry:string; name:string }> = {};
-
-function calcBlocks(minutes: number): number {
-  if (minutes <= 0) return 0;
-  return Math.ceil(minutes / BLOCK_MINUTES);
-}
+const blocksFor = (minutes: number) => Math.max(1, Math.ceil(minutes / BLOCK_MINUTES));
 
 function formatTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = seconds % 60;
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-interface WGSessionTimerProps {
-  clientId: string;
-  clientName: string;
-  specialistName: string;
-  onSessionEnd?: (record: SessionBillingRecord) => void;
+function useBlockPrice(): number {
+  return (useProducts().wg_session_block?.amountCents ?? 2500) / 100;
 }
 
-type TimerState = "idle" | "running" | "paused" | "ended" | "billing" | "done";
-
-export function WGSessionTimer({ clientId, clientName, specialistName, onSessionEnd }: WGSessionTimerProps) {
-  const [state, setState]           = useState<TimerState>("idle");
-  const [elapsed, setElapsed]       = useState(0); // seconds
-  const [sessionType, setSessionType] = useState<"phone"|"video">("phone");
-  const [startTime, setStartTime]   = useState<Date | null>(null);
-  const [notes, setNotes]           = useState("");
-  const intervalRef                 = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const card = cardsOnFile[clientId];
-  const hasCard = card && card.last4 !== "";
-  const elapsedMinutes = Math.ceil(elapsed / 60);
-  const blocks = calcBlocks(elapsedMinutes);
-  const amount = blocks * RATE_PER_BLOCK;
+export function WGSessionTimer({ clientName }: { clientId: string; clientName: string; specialistName: string }) {
+  const [state, setState] = useState<"idle" | "running" | "paused" | "ended">("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const [startedAt, setStartedAt] = useState<Date | null>(null);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rate = useBlockPrice();
 
   useEffect(() => {
-    if (state === "running") {
-      intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    if (state === "running") timer.current = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => { if (timer.current) clearInterval(timer.current); };
   }, [state]);
 
-  function startSession() {
-    if (!hasCard) { toast.error("No card on file. Add a payment method before starting a session."); return; }
-    setElapsed(0);
-    setStartTime(new Date());
-    setState("running");
-    toast.success(`Session started with ${clientName}`);
-  }
+  const minutes = Math.max(1, Math.ceil(elapsed / 60));
+  const blocks = blocksFor(minutes);
 
-  function pauseSession() {
-    setState("paused");
-  }
-
-  function resumeSession() {
-    setState("running");
-  }
-
-  function endSession() {
-    setState("billing");
-  }
-
-  function confirmBilling() {
-    setState("done");
-    const now = new Date();
-    const record: SessionBillingRecord = {
-      id: `BIL-${Date.now().toString(36).toUpperCase()}`,
-      clientId, clientName, specialistName, sessionType,
-      startedAt: startTime?.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) + " · " + startTime?.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}) ?? "",
-      endedAt:   now.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) + " · " + now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
-      durationMinutes: elapsedMinutes,
-      blocksCharged: blocks,
-      amountCharged: amount,
-      cardLast4: card.last4,
-      status: "charged",
-    };
-    billingHistory.unshift(record);
-    onSessionEnd?.(record);
-    toast.success(`$${amount.toFixed(2)} charged to ${card.brand} ****${card.last4} — Session complete`);
-  }
-
-  function resetTimer() {
-    setState("idle");
-    setElapsed(0);
-    setStartTime(null);
-    setNotes("");
-  }
-
-  const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
-  const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-
-  // ── Idle state ──
-  if (state === "idle") {
-    return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.12)" }}>
-        <div className="px-4 py-3 border-b flex items-center gap-2"
-          style={{ borderColor:"rgba(91,110,225,0.08)", background:"rgba(91,110,225,0.04)" }}>
-          <Clock size={14} color="#FFFFFF"/>
-          <span style={{ color:"#6E90C9", fontSize:15, fontWeight:700, ...MONO }}>SESSION TIMER & BILLING</span>
-          {hasCard
-            ? <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B", ...MONO }}>
-                {card.brand} ****{card.last4} ON FILE
-              </span>
-            : <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ background:"rgba(252,129,129,0.1)", color:"#FC8181", ...MONO }}>
-                NO CARD ON FILE
-              </span>
-          }
-        </div>
-        <div className="p-4 space-y-3">
-          <div style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.6 }}>
-            Start the timer when the session begins. Any time used bills as a full 30-min block ($25). The client's card is charged automatically when you end the session.
+  return (
+    <div className="rounded-2xl overflow-hidden" style={BOX}>
+      <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "rgba(91,110,225,0.08)", background: "rgba(91,110,225,0.04)" }}>
+        <Clock size={14} color="#FFFFFF"/>
+        <span style={{ color: "#6E90C9", fontSize: 15, fontWeight: 700, ...MONO }}>SESSION TIMER</span>
+      </div>
+      <div className="p-4 space-y-3">
+        {state === "idle" && (<>
+          <div style={{ color: "#8A9AB8", fontSize: 15, lineHeight: 1.6 }}>
+            Time the session with {clientName}. Sessions are billed in 30-minute blocks (${rate.toFixed(2)} each), charged to the client's saved card by an admin.
           </div>
-          <div className="flex gap-2">
-            {[["phone","📞 Phone Call"],["video","📹 Video Call"]].map(([t,label]) => (
-              <button key={t} onClick={() => setSessionType(t as "phone"|"video")}
-                className="flex-1 py-2 rounded-2xl text-xs font-bold transition-all"
-                style={{ background:sessionType===t?"rgba(91,110,225,0.1)":"rgba(91,110,225,0.04)",
-                  border:`1.5px solid ${sessionType===t?"#5B6EE1":"rgba(91,110,225,0.1)"}`,
-                  color:sessionType===t?"#6E90C9":"#8A9AB8" }}>
-                {label}
-              </button>
-            ))}
-          </div>
-          <button onClick={startSession} disabled={!hasCard}
+          <button onClick={() => { setElapsed(0); setStartedAt(new Date()); setState("running"); }}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
-            style={{ background:hasCard?"linear-gradient(135deg,#5B6EE1,#5B6EE1)":"rgba(91,110,225,0.15)",
-              color:hasCard?"#F0F4FA":"#8A9AB8",
-              boxShadow:hasCard?"0 0 20px rgba(91,110,225,0.3)":"none" }}>
+            style={{ background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA" }}>
             <Play size={14}/> Start Session Timer
           </button>
-          {!hasCard && (
-            <div className="flex items-start gap-2 px-3 py-2 rounded-2xl"
-              style={{ background:"rgba(252,129,129,0.06)", border:"1px solid rgba(252,129,129,0.2)" }}>
-              <AlertCircle size={12} color="#FC8181" style={{ marginTop:1, flexShrink:0 }}/>
-              <span style={{ color:"#FC8181", fontSize:14 }}>
-                A payment method must be on file before starting a session. Ask the client to add their card in Account Settings, or add it for them in the admin panel.
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+        </>)}
 
-  // ── Running / Paused ──
-  if (state === "running" || state === "paused") {
-    const currentBlocks = calcBlocks(Math.ceil(elapsed / 60));
-    const currentAmount = currentBlocks * RATE_PER_BLOCK;
-    const nextBlockAt = currentBlocks * BLOCK_MINUTES * 60; // seconds
-    const progressToNext = ((elapsed % (BLOCK_MINUTES * 60)) / (BLOCK_MINUTES * 60)) * 100;
+        {(state === "running" || state === "paused") && (<>
+          <div className="text-center" style={{ fontSize: 40, color: "#E8EDF5", fontWeight: 700, ...MONO }}>{formatTime(elapsed)}</div>
+          <div className="text-center" style={{ color: "#8A9AB8", fontSize: 14 }}>{blocks} block{blocks === 1 ? "" : "s"} so far · ${(blocks * rate).toFixed(2)}</div>
+          <div className="flex gap-2">
+            <button onClick={() => setState(state === "running" ? "paused" : "running")} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "rgba(91,110,225,0.1)", color: "#AEB9F5" }}>
+              {state === "running" ? <><Pause size={13}/> Pause</> : <><Play size={13}/> Resume</>}
+            </button>
+            <button onClick={() => setState("ended")} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "rgba(252,129,129,0.12)", color: "#FC8181" }}>
+              <Square size={13}/> End Session
+            </button>
+          </div>
+        </>)}
 
-    return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:state==="running"?"rgba(91,110,225,0.04)":"rgba(246,173,85,0.04)", border:`2px solid ${state==="running"?"rgba(91,110,225,0.25)":"rgba(246,173,85,0.35)"}` }}>
-        {/* Timer display */}
-        <div className="px-5 pt-5 pb-3 text-center">
-          <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:4 }}>
-            {state === "running" ? "● SESSION IN PROGRESS" : "⏸ PAUSED"}
-          </div>
-          <div style={{ fontFamily:"var(--font-mono)", fontSize:65, fontWeight:700, color:state==="running"?"#E8EDF5":"#F6AD55", lineHeight:1 }}>
-            {formatTime(elapsed)}
-          </div>
-          <div style={{ color:"#8A9AB8", fontSize:15, marginTop:4 }}>
-            {sessionType === "phone" ? "📞 Phone" : "📹 Video"} · {clientName}
-          </div>
-        </div>
-
-        {/* Billing meter */}
-        <div className="mx-4 mb-4 p-3 rounded-2xl" style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.12)" }}>
-          <div className="flex items-center justify-between mb-2">
-            <span style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>CURRENT CHARGE</span>
-            <span style={{ color:"#6E90C9", fontSize:22.5, fontFamily:"var(--font-display)", fontWeight:700 }}>
-              ${currentAmount.toFixed(2)}
+        {state === "ended" && (<>
+          <div className="flex items-start gap-2" style={{ color: "#C9D3E6", fontSize: 15, lineHeight: 1.6 }}>
+            <CheckCircle size={16} color="#6FAE8B" style={{ marginTop: 3, flexShrink: 0 }}/>
+            <span>
+              Session logged: {startedAt?.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}, {minutes} min
+              = {blocks} block{blocks === 1 ? "" : "s"} (${(blocks * rate).toFixed(2)}). Tell your admin; they charge it from Admin → White Glove.
             </span>
           </div>
-          <div className="flex items-center gap-2 mb-2">
-            {Array.from({length: Math.max(currentBlocks, 1)}).map((_, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <div className="flex items-center justify-center rounded-xl text-xs font-bold"
-                  style={{ width:44, height:28, background:i < currentBlocks?"#5B6EE1":"rgba(91,110,225,0.1)", color:i < currentBlocks?"#fff":"#8A9AB8", fontFamily:"var(--font-mono)", fontSize:12.5 }}>
-                  {i < currentBlocks ? `$${RATE_PER_BLOCK}` : `$${RATE_PER_BLOCK}`}
-                </div>
-                {i < Math.max(currentBlocks,1) - 1 && <ChevronRight size={10} color="#C0CCD8"/>}
-              </div>
-            ))}
-            <div style={{ color:"#8A9AB8", fontSize:12.5, marginLeft:4 }}>
-              {currentBlocks} block{currentBlocks !== 1 ? "s" : ""} × ${RATE_PER_BLOCK}
-            </div>
-          </div>
-          {/* Progress to next block */}
-          <div className="h-1.5 rounded-full" style={{ background:"rgba(91,110,225,0.12)" }}>
-            <div className="h-1.5 rounded-full transition-all" style={{ width:`${progressToNext}%`, background:"#5B6EE1" }}/>
-          </div>
-          <div style={{ color:"#8A9AB8", fontSize:12.5, marginTop:3, ...MONO }}>
-            {Math.ceil(elapsed / 60)} min used · Next block at {(currentBlocks) * BLOCK_MINUTES} min
-          </div>
-        </div>
-
-        {/* Billing rule reminder */}
-        <div className="mx-4 mb-3 px-3 py-2 rounded-2xl"
-          style={{ background:"rgba(246,173,85,0.06)", border:"1px solid rgba(246,173,85,0.15)" }}>
-          <span style={{ color:"#F6AD55", fontSize:14 }}>
-            ⏱ Any time used counts as a full 30-min block ($25). Current session: {Math.ceil(elapsed/60)} min = {currentBlocks} block{currentBlocks!==1?"s":""} = <strong>${currentAmount}</strong>
-          </span>
-        </div>
-
-        {/* Controls */}
-        <div className="flex gap-2 px-4 pb-4">
-          {state === "running" ? (
-            <button onClick={pauseSession}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold"
-              style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.25)" }}>
-              ⏸ Pause
-            </button>
-          ) : (
-            <button onClick={resumeSession}
-              className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold"
-              style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.2)" }}>
-              <Play size={13}/> Resume
-            </button>
-          )}
-          <button onClick={endSession}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm"
-            style={{ background:"linear-gradient(135deg,#E53E3E,#FC8181)", color:"#fff" }}>
-            <Square size={13}/> End Session & Bill ${currentAmount.toFixed(2)}
+          <button onClick={() => { setState("idle"); setElapsed(0); setStartedAt(null); }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold" style={{ background: "rgba(91,110,225,0.1)", color: "#AEB9F5" }}>
+            <RefreshCw size={13}/> New Session
           </button>
-        </div>
+        </>)}
       </div>
-    );
-  }
-
-  // ── Billing confirmation ──
-  if (state === "billing") {
-    return (
-      <div className="rounded-2xl overflow-hidden" style={{ background:"rgba(91,110,225,0.03)", border:"2px solid rgba(91,110,225,0.25)" }}>
-        <div className="px-5 py-4 border-b text-center"
-          style={{ borderColor:"rgba(91,110,225,0.1)", background:"rgba(91,110,225,0.05)" }}>
-          <div style={{ color:"#6E90C9", fontSize:16, fontWeight:700 }}>Confirm Session Billing</div>
-        </div>
-        <div className="p-5 space-y-4">
-          {/* Summary */}
-          <div className="space-y-2">
-            {[
-              ["Client",       clientName],
-              ["Session Type", sessionType === "phone" ? "📞 Phone Call" : "📹 Video Call"],
-              ["Duration",     `${elapsedMinutes} minute${elapsedMinutes !== 1 ? "s" : ""}`],
-              ["Blocks",       `${blocks} × 30 min block${blocks !== 1 ? "s" : ""} ($${RATE_PER_BLOCK} each)`],
-              ["Card",         `${card.brand} ****${card.last4} (${card.expiry})`],
-            ].map(([k,v]) => (
-              <div key={k} className="flex justify-between py-2 border-b" style={{ borderColor:"rgba(91,110,225,0.07)" }}>
-                <span style={{ color:"#8A9AB8", fontSize:16 }}>{k}</span>
-                <span style={{ color:"#E8EDF5", fontSize:16, fontWeight:500 }}>{v}</span>
-              </div>
-            ))}
-            <div className="flex justify-between py-2">
-              <span style={{ color:"#E8EDF5", fontSize:19, fontWeight:700 }}>Total Charge</span>
-              <span style={{ color:"#6E90C9", fontSize:25, fontFamily:"var(--font-display)", fontWeight:700 }}>${amount.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label style={{ color:"#8A9AB8", fontSize:14, fontFamily:"var(--font-mono)", display:"block", marginBottom:5 }}>
-              SESSION NOTES (optional)
-            </label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-              placeholder="Brief notes about what was accomplished this session..."
-              className="w-full resize-none px-3 py-2.5 rounded-2xl"
-              style={{ background:"#141B2E", border:"1px solid rgba(91,167,214,0.3)", color:"#FFFFFF", fontSize:15, outline:"none" }}/>
-          </div>
-
-          <div className="flex gap-3">
-            <button onClick={confirmBilling}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
-              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(91,110,225,0.3)" }}>
-              <CreditCard size={14}/> Charge ${amount.toFixed(2)} to Card
-            </button>
-            <button onClick={() => setState("running")}
-              className="px-4 py-3 rounded-2xl text-sm"
-              style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
-              Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Done ──
-  return (
-    <div className="rounded-2xl p-5 text-center" style={{ background:"rgba(72,187,120,0.05)", border:"2px solid rgba(72,187,120,0.25)" }}>
-      <CheckCircle size={36} color="#FFFFFF" style={{ margin:"0 auto 12px" }}/>
-      <div style={{ color:"#E8EDF5", fontSize:19, fontWeight:700, marginBottom:4 }}>Session Complete</div>
-      <div style={{ color:"#8A9AB8", fontSize:16, marginBottom:12 }}>
-        ${amount.toFixed(2)} charged to {card.brand} ****{card.last4}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
-        {[
-          { label:"Duration",  value:`${elapsedMinutes} min` },
-          { label:"Blocks",    value:`${blocks} × 30 min` },
-          { label:"Charged",   value:`$${amount.toFixed(2)}` },
-        ].map(s => (
-          <div key={s.label} className="px-2 py-2 rounded-2xl"
-            style={{ background:"rgba(72,187,120,0.08)", border:"1px solid rgba(72,187,120,0.15)" }}>
-            <div style={{ color:"#D99A6B", fontSize:17.5, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
-            <div style={{ color:"#8A9AB8", fontSize:11, fontFamily:"var(--font-mono)" }}>{s.label.toUpperCase()}</div>
-          </div>
-        ))}
-      </div>
-      <button onClick={resetTimer}
-        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-sm font-semibold"
-        style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9", border:"1px solid rgba(91,110,225,0.15)" }}>
-        <RefreshCw size={12}/> Start New Session
-      </button>
     </div>
   );
 }
 
-/* ── Billing History table (used in admin) ─────────────────────── */
+/** Admin: a client's session charges, plus "Charge a session". */
 export function WGBillingHistory({ clientId }: { clientId?: string }) {
-  const records = clientId
-    ? billingHistory.filter(r => r.clientId === clientId)
-    : billingHistory;
-  const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-
-  if (records.length === 0) {
+  if (!clientId) {
     return (
-      <div className="py-6 text-center rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
-        <DollarSign size={24} color="rgba(91,110,225,0.2)" style={{ margin:"0 auto 8px" }}/>
-        <div style={{ color:"#8A9AB8", fontSize:16 }}>No billing records yet.</div>
+      <div className="p-4 rounded-2xl" style={BOX}>
+        <span style={{ color: "#8A9AB8", fontSize: 15 }}>Open a client to see and charge their White Glove sessions.</span>
       </div>
     );
   }
+  return <ClientSessionBilling clientId={clientId}/>;
+}
 
-  const total = records.reduce((s, r) => s + r.amountCharged, 0);
+function localInput(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function ClientSessionBilling({ clientId }: { clientId: string }) {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { card, sessions, error, loaded } = useWGBilling(clientId, refreshKey);
+  const rate = useBlockPrice();
+  const [startedAt, setStartedAt] = useState(() => localInput(new Date(Date.now() - 45 * 60_000)));
+  const [minutes, setMinutes] = useState("45");
+  const [sessionType, setSessionType] = useState<"phone" | "video" | "in_person">("video");
+  const [notes, setNotes] = useState("");
+  const [sessionKey, setSessionKey] = useState(() => crypto.randomUUID());
+  const [busy, setBusy] = useState(false);
+
+  const mins = Math.max(1, Math.round(Number(minutes) || 0));
+  const blocks = blocksFor(mins);
+
+  const charge = async () => {
+    const start = new Date(startedAt);
+    if (isNaN(start.getTime())) { toast.error("Enter when the session started"); return; }
+    if (!window.confirm(`Charge ${blocks} × $${rate.toFixed(2)} = $${(blocks * rate).toFixed(2)} to the client's saved card?`)) return;
+    setBusy(true);
+    try {
+      const res = await adminApi.post<{ session: Record<string, any>; invoiceStatus?: string; message?: string | null; duplicate?: boolean }>(
+        `/white-glove/clients/${clientId}/charge-session`,
+        { sessionKey, startedAt: start.toISOString(), endedAt: new Date(start.getTime() + mins * 60_000).toISOString(), sessionType, notes: notes || undefined });
+      if (res.duplicate) toast.info("That session was already charged.");
+      else if (res.invoiceStatus === "paid") toast.success(`Charged $${(blocks * rate).toFixed(2)}`);
+      else toast.error(res.message ? `Charge failed: ${res.message}` : "The card was declined. Stripe will retry and the client can update their card.");
+      setSessionKey(crypto.randomUUID());
+      setNotes("");
+      setRefreshKey(k => k + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not charge the session");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const statusColor = (s: string) => s === "charged" ? "#6FAE8B" : s === "failed" ? "#FC8181" : s === "refunded" ? "#D9A55E" : "#8A9AB8";
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>BILLING HISTORY</div>
-        <div style={{ color:"#6E90C9", fontSize:16, fontWeight:700 }}>
-          Total: ${total.toFixed(2)}
-          <span style={{ color:"#8A9AB8", fontSize:14, fontWeight:400, marginLeft:4 }}>
-            (incl. $99 setup)
-          </span>
-        </div>
+    <div className="rounded-2xl overflow-hidden" style={BOX}>
+      <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "rgba(91,110,225,0.08)", background: "rgba(91,110,225,0.04)" }}>
+        <DollarSign size={14} color="#FFFFFF"/>
+        <span style={{ color: "#6E90C9", fontSize: 15, fontWeight: 700, ...MONO }}>SESSION BILLING</span>
       </div>
-      <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
-        <div className="grid px-4 py-2.5 border-b"
-          style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12, background:"rgba(255,255,255,0.06)", borderColor:"rgba(91,110,225,0.1)", alignItems:"center" }}>
-          {["Date","Client","Type","Duration","Blocks","Charged"].map(h => (
-            <div key={h} style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h.toUpperCase()}</div>
+      <div className="p-4 space-y-4">
+        {error && <div style={{ color: "#FC8181", fontSize: 14 }}>{error}</div>}
+        {loaded && !error && (card?.card_last4 ? (
+          <div className="grid gap-2" style={{ gridTemplateColumns: "1.4fr 0.7fr 0.9fr" }}>
+            <label style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO }}>STARTED
+              <input type="datetime-local" value={startedAt} onChange={e => setStartedAt(e.target.value)} style={INPUT}/></label>
+            <label style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO }}>MINUTES
+              <input type="number" min={1} value={minutes} onChange={e => setMinutes(e.target.value)} style={INPUT}/></label>
+            <label style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO }}>TYPE
+              <select value={sessionType} onChange={e => setSessionType(e.target.value as typeof sessionType)} style={INPUT}>
+                <option value="video">Video</option><option value="phone">Phone</option><option value="in_person">In person</option>
+              </select></label>
+            <input placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} style={{ ...INPUT, gridColumn: "1 / -1" }}/>
+            <button onClick={() => void charge()} disabled={busy} className="py-2.5 rounded-2xl text-sm font-bold disabled:opacity-50"
+              style={{ gridColumn: "1 / -1", background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA" }}>
+              {busy ? "Charging…" : `Charge ${blocks} block${blocks === 1 ? "" : "s"}: $${(blocks * rate).toFixed(2)}`}
+            </button>
+          </div>
+        ) : (
+          <div style={{ color: "#8A9AB8", fontSize: 15 }}>No card on file yet, so sessions can't be charged. The client saves a card by paying the setup fee.</div>
+        ))}
+
+        <div className="space-y-2">
+          {sessions.length === 0 && loaded && <div style={{ color: "#8A9AB8", fontSize: 14 }}>No sessions charged yet.</div>}
+          {sessions.map(s => (
+            <div key={s.id} className="flex items-center gap-3 px-3 py-2 rounded-xl" style={{ background: "#0F1624" }}>
+              <span style={{ color: "#C9D3E6", fontSize: 14, flex: 1 }}>
+                {new Date(s.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} · {s.duration_minutes} min · {s.blocks_charged} block{s.blocks_charged === 1 ? "" : "s"}
+                {s.failure_message ? ` · ${s.failure_message}` : ""}
+              </span>
+              <span style={{ color: "#E8EDF5", fontSize: 14, fontWeight: 700, ...MONO }}>${Number(s.amount_charged).toFixed(2)}</span>
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: `${statusColor(s.status)}18`, color: statusColor(s.status), ...MONO }}>{String(s.status).toUpperCase()}</span>
+            </div>
           ))}
         </div>
-        {records.map((r, i) => (
-          <div key={r.id} className="grid px-4 py-3 border-b items-center"
-            style={{ gridTemplateColumns:"auto 1fr auto auto auto auto", gap:12,
-              background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>
-            <span style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>{r.startedAt.split(" · ")[0]}</span>
-            <div>
-              <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:500 }}>{r.clientName}</div>
-              <div style={{ color:"#8A9AB8", fontSize:12.5 }}>****{r.cardLast4}</div>
-            </div>
-            <span style={{ fontSize:17.5 }}>{r.sessionType === "phone" ? "📞" : "📹"}</span>
-            <span style={{ color:"#8A9AB8", fontSize:15, ...MONO }}>{r.durationMinutes} min</span>
-            <span style={{ color:"#8A9AB8", fontSize:15, ...MONO }}>{r.blocksCharged} × $25</span>
-            <span style={{ color:"#D99A6B", fontSize:16, fontWeight:700, ...MONO }}>${r.amountCharged.toFixed(2)}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

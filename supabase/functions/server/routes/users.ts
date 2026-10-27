@@ -76,29 +76,36 @@ users.post("/", async (c) => {
     return c.json({ error: authError?.message ?? "Failed to create the account" }, 500);
   }
 
-  // The signup trigger creates the public.users row from auth metadata;
-  // fill in the fields it doesn't know about.
-  const { data: profile, error: profileError } = await db
+  // The signup trigger creates the public.users row (on Starter) from auth
+  // metadata; fill in the fields it doesn't know about. A paid plan is only
+  // given here as a waived (comped) plan, recorded as a comp_ subscription;
+  // otherwise the account starts on Starter and buys a plan itself.
+  const { error: profileError } = await db
     .from("users")
     .update({
       phone: phone || null,
-      plan: plan || "foundation",
-      subscription_waived: !!subscriptionWaived,
-      waive_reason: subscriptionWaived ? (waiveReason || null) : null,
       white_glove: !!whiteGlove,
       admin_notes: notes || null,
       onboarded_by: onboardedBy || null,
     })
-    .eq("id", created.user.id)
-    .select()
-    .maybeSingle();
-
+    .eq("id", created.user.id);
   if (profileError) return c.json({ error: profileError.message }, 500);
+
+  if (subscriptionWaived && plan && plan !== "starter") {
+    const { error: compError } = await db.rpc("provision_subscription", { p: {
+      id: `comp_${created.user.id}`, user_id: created.user.id, product_line: "plan", plan_id: plan, status: "active",
+      comp_reason: waiveReason || "Waived at onboarding", comp_granted_by: onboardedBy || null,
+    } });
+    if (compError) return c.json({ error: compError.message }, 500);
+  }
+
+  const { data: profile } = await db.from("users").select().eq("id", created.user.id).maybeSingle();
   return c.json({ user: profile }, 201);
 });
 
 // GET /admin/users/:id — profile + storage + recent payments + contacts +
 // legacy fee status + affiliate referral count (if this user is an affiliate)
+// + the plan subscription that currently gives access (paid or comped)
 users.get("/:id", async (c) => {
   const id = c.req.param("id");
   const db = adminClient();
@@ -111,6 +118,7 @@ users.get("/:id", async (c) => {
     { data: legacyFee },
     { data: affiliate },
     { data: twoFa },
+    { data: planSubs },
   ] = await Promise.all([
     db.from("users").select("*").eq("id", id).maybeSingle(),
     db.from("storage_usage").select("*").eq("user_id", id).order("billing_period", { ascending: false }).limit(1),
@@ -119,6 +127,9 @@ users.get("/:id", async (c) => {
     db.from("legacy_continuation_fees").select("status").eq("user_id", id).eq("status", "paid").maybeSingle(),
     db.from("affiliates").select("id").eq("user_id", id).maybeSingle(),
     db.from("account_2fa_settings").select("enabled, method").eq("user_id", id).maybeSingle(),
+    db.from("subscriptions").select("id, plan_id, status, interval, current_period_end, cancel_at_period_end")
+      .eq("user_id", id).eq("product_line", "plan").in("status", ["active", "trialing", "past_due"])
+      .order("updated_at", { ascending: false }).limit(1),
   ]);
 
   if (userErr) return c.json({ error: userErr.message }, 500);
@@ -134,6 +145,7 @@ users.get("/:id", async (c) => {
     user, storage: storage?.[0] ?? null, payments, contacts,
     legacyFeePaid: !!legacyFee, referralCount,
     twoFa: twoFa ?? { enabled: false, method: null },
+    subscription: planSubs?.[0] ?? null,
   });
 });
 
@@ -183,9 +195,32 @@ users.patch("/:id", async (c) => {
     return c.json({ error: "No updatable fields provided" }, 400);
   }
 
-  const { data, error } = await adminClient().from("users").update(patch).eq("id", id).select().maybeSingle();
+  const db = adminClient();
+  const { data: current } = await db.from("users").select("plan, plan_status").eq("id", id).maybeSingle();
+  if (!current) return c.json({ error: "User not found" }, 404);
+
+  // A plan is changed through billing (Users → Billing: change plan, comp,
+  // refund & end), so what the account has always matches what it pays.
+  if ("plan" in patch && patch.plan !== current.plan) {
+    return c.json({ error: "Change the plan from the user's Billing tab (Change plan or Comp plan)." }, 409);
+  }
+  delete patch.plan;
+  // Billing owns active / past_due / cancelled; an admin only suspends
+  // ("paused") and lifts the suspension.
+  if ("plan_status" in patch && !["paused", "active"].includes(String(patch.plan_status))) {
+    return c.json({ error: "An admin can only suspend an account or lift the suspension." }, 400);
+  }
+  const lifting = patch.plan_status === "active" && current.plan_status === "paused";
+
+  const { data, error } = await db.from("users").update(patch).eq("id", id).select().maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: "User not found" }, 404);
+  if (lifting) {
+    // Back to whatever billing says (active, past_due or cancelled).
+    await db.rpc("apply_user_entitlements", { p_user: id });
+    const { data: fresh } = await db.from("users").select().eq("id", id).maybeSingle();
+    return c.json({ user: fresh ?? data });
+  }
   return c.json({ user: data });
 });
 

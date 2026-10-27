@@ -26,12 +26,9 @@ export const CARD_PROCESSORS: CatalogProcessor[] = [
     features: ["Subscriptions & recurring billing","Stripe Radar fraud detection","3D Secure authentication","ACH & bank transfers","Stripe Connect for marketplaces","Instant payouts","150+ currencies"],
     fees: "2.9% + $0.30 per transaction",
     settlement: "2 business days (Instant available)",
-    fields: [
-      "publishableKey",
-      "secretKey",
-      "webhookSecret",
-      "accountId",
-    ],
+    // Stripe's keys are edge-function secrets (STRIPE_SECRET_KEY,
+    // STRIPE_WEBHOOK_SECRET), never entered here — see StripeBillingPanel.
+    fields: [],
   },
   {
     id: "paypal",

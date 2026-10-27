@@ -7,6 +7,9 @@ import {
 import { toast } from "sonner";
 import heroWhiteGlovePhoto from "../../imports/whiteglove_hero_photo.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { useBillingSummary } from "../hooks/useBillingSummary";
+import { useProducts } from "../utils/planCatalog";
+import { CheckoutConsentModal } from "./billing/CheckoutConsentModal";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -71,84 +74,39 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
   );
 }
 
-/* ── Intake request form ─────────────────────────────────────────── */
+/* ── Getting started: the $99 setup ───────────────────────────────
+   Paid on Stripe's hosted checkout, which also saves the card (with the
+   client's consent) for per-session billing. The webhook then opens the
+   White Glove client record, and a specialist calls within a business day. */
 function IntakeForm({ onClose }: { onClose?: () => void }) {
-  const [form, setForm] = useState({ name:"", phone:"", email:"", preferredTime:"morning", notes:"", contactedBy:"self" });
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
+  const { summary } = useBillingSummary();
+  const products = useProducts();
+  const [buying, setBuying] = useState(false);
+  const setup = (products.wg_setup?.amountCents ?? 9900) / 100;
+  const block = (products.wg_session_block?.amountCents ?? 2500) / 100;
+  const card = summary?.wgCard ?? null;
 
-  function submit() {
-    if (!form.name.trim() || !form.phone.trim()) { toast.error("Name and phone number are required"); return; }
-    setSending(true);
-    setTimeout(() => { setSending(false); setSubmitted(true); }, 1000);
-  }
-
-  if (submitted) {
+  if (card) {
     return (
       <div className="submitted">
         <div className="submitted-ico"><CheckCircle size={40} color="#FFFFFF"/></div>
-        <h3>We'll Call You Soon!</h3>
-        <p>Thank you, <strong>{form.name}</strong>. A Final Pass Down specialist will call you at <strong>{form.phone}</strong> within 1 business day to get you started.</p>
-        <div className="ref-box">
-          <div className="ref-lbl">YOUR REFERENCE NUMBER</div>
-          <div className="ref-val">WG-{Math.random().toString(36).slice(2,7).toUpperCase()}</div>
-        </div>
+        <h3>You're all set</h3>
+        <p>Your White Glove setup is paid. A Final Pass Down specialist will call you within 1 business day. Sessions are billed to your <strong>{card.brand.toUpperCase()} ending {card.last4}</strong> after each one, at ${block.toFixed(2)} per 30 minutes.</p>
         {onClose && <button onClick={onClose} className="btn-ghost">Close</button>}
       </div>
     );
   }
 
   return (
-    <div className="intake-form">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="field col-span-2">
-          <label>YOUR FULL NAME *</label>
-          <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} placeholder="As it appears on your ID"/>
-        </div>
-        <div className="field">
-          <label>PHONE NUMBER *</label>
-          <input type="tel" value={form.phone} onChange={e => setForm(p=>({...p,phone:e.target.value}))} placeholder="+1 (555) 000-0000"/>
-        </div>
-        <div className="field">
-          <label>EMAIL (optional)</label>
-          <input type="email" value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} placeholder="your@email.com"/>
-        </div>
-      </div>
-
-      <div className="field">
-        <label>BEST TIME TO CALL</label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {[["morning","Morning (9am–12pm)"],["afternoon","Afternoon (12–5pm)"],["evening","Evening (5–7pm)"]].map(([id,label]) => (
-            <button key={id} onClick={() => setForm(p=>({...p,preferredTime:id}))} className="pick-btn"
-              style={{ background:form.preferredTime===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.preferredTime===id?ACCENT:"rgba(255,255,255,0.08)", color:form.preferredTime===id?"#6FAE8B":MUTED }}>
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="field">
-        <label>WHO IS CONTACTING US?</label>
-        <div className="grid grid-cols-2 gap-2">
-          {[["self","The account holder"],["family","A family member"]].map(([id,label]) => (
-            <button key={id} onClick={() => setForm(p=>({...p,contactedBy:id}))} className="pick-btn"
-              style={{ background:form.contactedBy===id?"rgba(91,110,225,0.14)":"rgba(255,255,255,0.03)", borderColor:form.contactedBy===id?ACCENT:"rgba(255,255,255,0.08)", color:form.contactedBy===id?"#6FAE8B":MUTED }}>
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="field">
-        <label>ANYTHING ELSE WE SHOULD KNOW? (optional)</label>
-        <textarea value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} rows={2}
-          placeholder="e.g. I have a will and some insurance documents ready. My daughter may join the call."/>
-      </div>
-
-      <button onClick={submit} disabled={sending} className="btn-primary-lg" style={{ opacity: sending ? 0.7 : 1 }}>
-        <Phone size={16}/>{sending ? "Sending Request…" : "Request My White Glove Call"}
+    <div className="space-y-4" style={{ textAlign: "center" }}>
+      <p style={{ color: "#BCC5DA", fontSize: 16, lineHeight: 1.6 }}>
+        Start with the one-time <strong>${setup.toFixed(2)}</strong> setup. Your card is saved securely by Stripe, and each session is billed afterwards at ${block.toFixed(2)} per 30 minutes. Questions first? Email {FPD_EMAIL.support}.
+      </p>
+      <button onClick={() => setBuying(true)} disabled={!summary?.checkoutEnabled} className="btn-primary-lg" style={{ opacity: summary?.checkoutEnabled ? 1 : 0.6 }}>
+        Get started: ${setup.toFixed(2)} setup
       </button>
-      <p className="reassure-line">No tech skills required. A real person will call you. No automated systems.</p>
+      {summary && !summary.checkoutEnabled && <p style={{ color: "#A3ADC9", fontSize: 14 }}>Card payments are being set up. Please try again shortly.</p>}
+      {buying && <CheckoutConsentModal purchase={{ kind: "wg_setup" }} page="white-glove" onClose={() => setBuying(false)}/>}
     </div>
   );
 }
@@ -297,7 +255,7 @@ export function WhiteGloveService() {
           <p>Not comfortable with technology? No problem. A dedicated Final Pass Down specialist will call you, walk you through everything, and upload all your important documents on your behalf.</p>
           <div className="hero-cta-row">
             <button onClick={() => setShowModal(true)} className="btn-hero">
-              <Phone size={18}/> Request a Call
+              <Phone size={18}/> Get Started
             </button>
             <div className="hero-note">
               <Clock size={14}/> We call within 1 business day
@@ -369,7 +327,7 @@ export function WhiteGloveService() {
           </div>
           <div className="includes-cta">
             <button onClick={() => setShowModal(true)} className="btn-cta">
-              <Phone size={16}/> Request Your White Glove Call
+              <Phone size={16}/> Get Started with White Glove
             </button>
           </div>
         </div>
@@ -379,7 +337,7 @@ export function WhiteGloveService() {
           <div className="intake-hd">
             <Star size={28} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
             <h2>Ready to Get Started?</h2>
-            <p>Leave your name and phone number. A real person will call you — no apps, no computers, no hassle.</p>
+            <p>Pay the one-time setup and a real person will call you — no apps, no computers, no hassle.</p>
           </div>
           <IntakeForm/>
         </div>
@@ -417,7 +375,7 @@ export function WhiteGloveService() {
             <div className="modal-head">
               <div className="flex items-center gap-2">
                 <Star size={16} color="#FFFFFF" fill="rgba(91,110,225,0.3)"/>
-                <h3>White Glove Request</h3>
+                <h3>White Glove Setup</h3>
               </div>
               <button onClick={() => setShowModal(false)}><X size={16}/></button>
             </div>

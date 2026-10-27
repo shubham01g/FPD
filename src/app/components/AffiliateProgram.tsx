@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "lucide-react";
+import { toast } from "sonner";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import heroAffiliatePhoto from "../../imports/affiliateprogram_hero_photo.webp";
@@ -142,8 +143,9 @@ export function AffiliateProgram() {
      is the enrolment state — not an error. */
   const [affiliate, setAffiliate] = useState<{
     referral_code: string; referral_url?: string; commission_rate: number;
-    total_earned: number; pending_payout: number;
+    total_earned: number; pending_payout: number; status: string;
   } | null>(null);
+  const [joining, setJoining] = useState(false);
   const [referrals, setReferrals] = useState<ReferralRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -181,8 +183,20 @@ export function AffiliateProgram() {
   const totalEarned = Number(affiliate?.total_earned ?? 0);
   const pendingPayout = Number(affiliate?.pending_payout ?? 0);
 
+  // A link only attributes signups once an admin has approved (status active).
+  const linkLive = affiliate?.status === "active";
+
+  const handleJoin = async () => {
+    setJoining(true);
+    const { affiliate: joined, error } = await db.joinAffiliateProgram();
+    setJoining(false);
+    if (error || !joined) { toast.error(error ?? "Could not join right now"); return; }
+    setAffiliate(joined);
+    toast.success("Application sent. Your link goes live once it's approved.");
+  };
+
   const handleCopy = () => {
-    if (!affiliateLink) return;
+    if (!affiliateLink || !linkLive) return;
     navigator.clipboard?.writeText(affiliateLink).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -210,9 +224,19 @@ export function AffiliateProgram() {
             <h1>Get paid for <span className="accent">sharing what works.</span></h1>
             <p>Share your referral link, earn recurring commission on every account that joins, and climb tiers as your network grows.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={handleCopy}><Copy size={15} /> Copy Referral Link</button>
-              <button className="hbtn ghost" onClick={() => referralsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><TrendingUp size={15} /> View My Referrals</button>
+              {!loading && !affiliate && (
+                <button className="hbtn primary" disabled={joining} onClick={() => void handleJoin()}><Share2 size={15} /> {joining ? "Joining…" : "Join the Affiliate Program"}</button>
+              )}
+              {linkLive && <button className="hbtn primary" onClick={handleCopy}><Copy size={15} /> Copy Referral Link</button>}
+              {affiliate && <button className="hbtn ghost" onClick={() => referralsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}><TrendingUp size={15} /> View My Referrals</button>}
             </div>
+            {affiliate && !linkLive && (
+              <p style={{ marginTop: 14, fontSize: 14.5, color: WARN }}>
+                {affiliate.status === "inactive"
+                  ? "Your application is waiting for approval. Your link starts counting signups once it's approved."
+                  : `Your affiliate link is paused. Questions? Email ${FPD_EMAIL.affiliates}.`}
+              </p>
+            )}
           </div>
         </div>
 
@@ -333,9 +357,11 @@ export function AffiliateProgram() {
             {!loading && loadError && <div className="tempty" style={{ color: NEG }}>{loadError}</div>}
             {!loading && !loadError && referrals.length === 0 && (
               <div className="tempty">
-                {affiliate
+                {linkLive
                   ? "No referrals yet. Share your link above — anyone who joins with it appears here."
-                  : "You're not enrolled in the affiliate programme yet, so there's nothing to show."}
+                  : affiliate
+                    ? "No referrals yet. They appear here once your link is approved and people join with it."
+                    : "You're not enrolled in the affiliate programme yet. Join above to get your link."}
               </div>
             )}
             {referrals.map(ref => {

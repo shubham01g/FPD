@@ -4,7 +4,8 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import { readPlatformSection } from "../lib/platformSettings.ts";
-import { loadStripeConfig, stripeRequest, verifyStripeSignature } from "../lib/stripe.ts";
+import stripeWebhook from "./stripeWebhook.ts";
+import { billingStatus } from "../lib/billingConfig.ts";
 
 const pub = new Hono();
 
@@ -12,13 +13,18 @@ const pub = new Hono();
 pub.get("/plans", async (c) => {
   const { data, error } = await adminClient()
     .from("subscription_plans")
-    .select("id, name, price_monthly, price_annual, storage_gb, max_contacts, overage_rate")
+    .select("id, name, price_monthly, price_annual, storage_gb, max_contacts, overage_rate, billable")
     .eq("is_active", true)
     .order("price_monthly", { ascending: true });
 
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ plans: data });
 });
+
+// GET /public/billing/status — proves which Stripe mode the backend is in
+// (and whether checkout is paused) without revealing any key. The cutover
+// steps in GO_LIVE_CHECKLIST.md check livemode and billingPaused here.
+pub.get("/billing/status", (c) => c.json(billingStatus()));
 
 // GET /public/platform — maintenance mode and feature flags from System →
 // Settings, for the customer-facing app to enforce (services/platform.ts).
@@ -157,106 +163,8 @@ pub.post("/wl-sales", async (c) => {
 });
 
 // ── Stripe webhook ───────────────────────────────────────────────────────
-// POST /public/stripe/webhook — the only place a card payment changes
-// anything. Stripe calls it; the Stripe-Signature header is verified against
-// the webhook secret saved under Payment Processors, so an unsigned or forged
-// request is rejected before any row is touched. Handlers are idempotent
-// (Stripe retries), keyed on the invoice / payment-intent id.
-interface StripeEvent { type: string; data: { object: Record<string, any> } }
-
-pub.post("/stripe/webhook", async (c) => {
-  const config = await loadStripeConfig();
-  if (!config?.webhookSecret) return c.json({ error: "Stripe webhook is not configured" }, 503);
-
-  const raw = await c.req.text();
-  if (!(await verifyStripeSignature(raw, c.req.header("stripe-signature"), config.webhookSecret))) {
-    return c.json({ error: "Invalid signature" }, 400);
-  }
-
-  const event = JSON.parse(raw) as StripeEvent;
-  const obj = event.data.object;
-  const db = adminClient();
-
-  /** Records a payment once; a retry of the same event is a no-op. */
-  async function recordPayment(row: {
-    user_id: string; type: string; amount: number; description: string;
-    intent?: string | null; invoice?: string | null;
-  }) {
-    const key = row.intent ? ["stripe_payment_intent", row.intent] : row.invoice ? ["stripe_invoice_id", row.invoice] : null;
-    if (key) {
-      const { data: existing } = await db.from("payments").select("id").eq(key[0], key[1]).limit(1);
-      if (existing?.length) return;
-    }
-    await db.from("payments").insert({
-      user_id: row.user_id, type: row.type, amount_usd: row.amount, status: "succeeded",
-      description: row.description, stripe_payment_intent: row.intent ?? null, stripe_invoice_id: row.invoice ?? null,
-      paid_at: new Date().toISOString(),
-    });
-  }
-
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const userId = obj.metadata?.user_id as string | undefined;
-      if (!userId || obj.payment_status === "unpaid") break;
-      const amount = Number(obj.amount_total ?? 0) / 100;
-
-      if (obj.metadata?.kind === "plan") {
-        const { data: before } = await db.from("users").select("stripe_subscription_id").eq("id", userId).maybeSingle();
-        await db.from("users").update({
-          plan: obj.metadata.plan_id, plan_status: "active",
-          stripe_customer_id: obj.customer ?? null, stripe_subscription_id: obj.subscription ?? null,
-        }).eq("id", userId);
-        // Changing plan starts a new subscription; stop billing the old one.
-        if (before?.stripe_subscription_id && before.stripe_subscription_id !== obj.subscription) {
-          await stripeRequest(config.secretKey, "DELETE", `/subscriptions/${before.stripe_subscription_id}`).catch((err) =>
-            console.error("could not cancel previous subscription:", err));
-        }
-        await recordPayment({ user_id: userId, type: "upgrade", amount, description: `Plan: ${obj.metadata.plan_id}`, invoice: obj.invoice });
-      }
-
-      if (obj.metadata?.kind === "continuation_fee") {
-        const intent = obj.payment_intent as string | null;
-        const { data: existing } = await db.from("legacy_continuation_fees").select("id").eq("stripe_payment_intent_id", intent).limit(1);
-        if (!existing?.length) {
-          const { data: months } = await db.from("admin_settings").select("value").eq("key", "continuation_fee_period_months").maybeSingle();
-          await db.from("legacy_continuation_fees").insert({
-            user_id: userId, paid_by_user_id: userId, paid_by_type: "account_owner", amount_usd: amount,
-            stripe_payment_intent_id: intent, status: "paid", paid_at: new Date().toISOString(),
-            activation_period_months: parseInt(months?.value ?? "24", 10),
-          });
-        }
-        if (obj.customer) await db.from("users").update({ stripe_customer_id: obj.customer }).eq("id", userId);
-        await recordPayment({ user_id: userId, type: "continuation_fee", amount, description: "Legacy Continuation Fee", intent });
-      }
-      break;
-    }
-
-    // Renewals. The first invoice of a subscription is already recorded by
-    // checkout.session.completed above.
-    case "invoice.paid": {
-      if (obj.billing_reason !== "subscription_cycle") break;
-      const { data: account } = await db.from("users").select("id").eq("stripe_customer_id", obj.customer).maybeSingle();
-      if (!account) break;
-      await db.from("users").update({ plan_status: "active" }).eq("id", account.id);
-      await recordPayment({ user_id: account.id, type: "subscription", amount: Number(obj.amount_paid ?? 0) / 100, description: "Subscription renewal", invoice: obj.id });
-      break;
-    }
-
-    case "invoice.payment_failed": {
-      await db.from("users").update({ plan_status: "past_due" }).eq("stripe_customer_id", obj.customer);
-      break;
-    }
-
-    case "customer.subscription.deleted": {
-      // Only when it is the account's CURRENT subscription — the old one that
-      // a plan change cancels must not mark the account cancelled.
-      await db.from("users").update({ plan_status: "cancelled" }).eq("stripe_subscription_id", obj.id);
-      break;
-    }
-  }
-
-  return c.json({ received: true });
-});
+// POST /public/stripe/webhook — see routes/stripeWebhook.ts.
+pub.route("/stripe", stripeWebhook);
 
 // ── Legacy Claim Portal (migration 027) ─────────────────────────────────
 // A legacy contact opens the link an admin issued from Mark Deceased. There

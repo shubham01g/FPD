@@ -4,7 +4,13 @@ import { Toaster } from "sonner";
 import { supabase } from "./services/supabase";
 import { trackPageView, trackHeartbeat, HEARTBEAT_INTERVAL_MS } from "./services/engagement";
 import { DemoProvider, useDemo } from "./context/DemoContext";
-import { StarterUpgradeWall, StarterCountdownBanner } from "./components/StarterUpgradeWall";
+import { StarterUpgradeWall, StarterCountdownBanner, PastDueBanner } from "./components/StarterUpgradeWall";
+import { usePaymentReturn } from "./hooks/usePaymentReturn";
+import { captureReferral } from "./utils/referral";
+
+// An affiliate link (/r/CODE or ?ref=CODE) is remembered before anything
+// renders, so it survives the visitor browsing around before signing up.
+captureReferral();
 import { starterDaysLeft } from "./utils/starterPlan";
 import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
 import { VaultResetPage } from "./components/VaultResetPage";
@@ -12,7 +18,7 @@ import { PortalNotice } from "./components/PortalNotice";
 import { usePlatform, hiddenPages } from "./services/platform";
 import { adminApi } from "./services/adminApi";
 import { useAdminFetch } from "./hooks/useAdminFetch";
-import { Wrench, Heart, UserX, Lock } from "lucide-react";
+import { Wrench, Heart, UserX, Lock, CreditCard } from "lucide-react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
@@ -392,6 +398,8 @@ function UserRoute() {
   const { session, authUser, loading, twoFactorPending, refreshTwoFactor } = useAuth();
   const { user } = useDemo();
   const platform = usePlatform();
+  // Back from Stripe Checkout (?payment=success|cancelled).
+  const { confirming } = usePaymentReturn();
   /* The portal's page is component state rather than a route, so the PWA
      manifest's home-screen shortcuts (/dashboard?page=file-cabinet) pass their
      target in as a query param. Read once, for the initial value only —
@@ -461,7 +469,19 @@ function UserRoute() {
   // Starter is a 14-day introductory plan (migration 026). Once it runs out
   // the portal is replaced by the upgrade screen until a bigger plan is chosen.
   const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
-  if (starterDays === 0) return <StarterUpgradeWall onSignOut={() => { signOut(); navigate("/"); }}/>;
+  // A paid (or comped) plan that ended — cancelled, or the card kept failing —
+  // gets the same choice, worded as reactivating. Nothing stored is lost.
+  const walled = starterDays === 0 || user.planStatus === "cancelled";
+  // Just paid: the webhook lifts the wall within seconds, so don't flash it.
+  if (walled && confirming) {
+    return (
+      <PortalNotice icon={<CreditCard size={30} color="#5B6EE1"/>} kicker="PAYMENT RECEIVED" title="Confirming your payment…"
+        body={"Thanks! Your plan is being activated. This usually takes a few seconds."}
+        actionLabel="Sign out" onAction={leave}/>
+    );
+  }
+  if (user.planStatus === "cancelled") return <StarterUpgradeWall reason="cancelled" onSignOut={leave}/>;
+  if (starterDays === 0) return <StarterUpgradeWall onSignOut={leave}/>;
 
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
@@ -521,6 +541,7 @@ function UserRoute() {
         onGoAdmin={() => navigate("/admin/login")}
         onSignOut={() => { signOut(); navigate("/"); }}
       >
+        {user.planStatus === "past_due" && <PastDueBanner/>}
         {starterDays !== null && userPage !== "storage-usage" && (
           <StarterCountdownBanner daysLeft={starterDays} onUpgrade={() => setUserPage("storage-usage")}/>
         )}
@@ -737,6 +758,7 @@ function AppShell() {
       <Route path="/" element={<LandingRoute/>}/>
       <Route path="/login" element={<UserLoginRoute/>}/>
       <Route path="/signup" element={<UserSignupRoute/>}/>
+      <Route path="/r/:code" element={<Navigate to="/" replace/>}/>
       <Route path="/dashboard" element={<UserRoute/>}/>
       <Route path="/admin/login" element={<AdminLoginRoute/>}/>
       <Route path="/admin/accept" element={<AdminInviteRoute/>}/>

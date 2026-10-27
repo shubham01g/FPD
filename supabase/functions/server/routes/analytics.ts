@@ -8,6 +8,7 @@
 // actual survey feature built from scratch, not covered here.
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
+import { isLivemode } from "../lib/stripe.ts";
 
 const analytics = new Hono();
 
@@ -20,25 +21,44 @@ analytics.get("/overview", async (c) => {
     { data: planRows, error: planErr },
     { data: plans, error: plansDefErr },
     { data: payments, error: paymentsErr },
+    { data: paidSubs, error: subsErr },
+    { data: products, error: productsErr },
   ] = await Promise.all([
     db.from("users").select("id", { count: "exact", head: true }),
     db.from("users").select("plan, plan_status"),
-    db.from("subscription_plans").select("id, price_monthly"),
+    db.from("subscription_plans").select("id, price_monthly, price_annual"),
     db.from("payments").select("amount_usd, status, type, created_at").order("created_at", { ascending: false }).limit(1000),
+    // MRR counts paying Stripe subscriptions in the current mode only: not
+    // users.plan (unpaid accounts keep a plan id), not comps, not test data.
+    db.from("subscriptions").select("product_line, plan_id, product_slug, interval")
+      .in("status", ["active", "past_due"]).eq("livemode", isLivemode()).not("id", "like", "comp_%"),
+    db.from("billing_products").select("slug, amount_cents"),
   ]);
 
   if (usersErr) return c.json({ error: usersErr.message }, 500);
   if (planErr) return c.json({ error: planErr.message }, 500);
   if (plansDefErr) return c.json({ error: plansDefErr.message }, 500);
   if (paymentsErr) return c.json({ error: paymentsErr.message }, 500);
+  if (subsErr) return c.json({ error: subsErr.message }, 500);
+  if (productsErr) return c.json({ error: productsErr.message }, 500);
 
-  const priceByPlan = new Map((plans ?? []).map((p) => [p.id, Number(p.price_monthly)]));
+  const planById = new Map((plans ?? []).map((p) => [p.id, p]));
+  const productCents = new Map((products ?? []).map((p) => [p.slug, Number(p.amount_cents)]));
 
   const usersByPlan: Record<string, number> = {};
+  for (const row of planRows ?? []) usersByPlan[row.plan] = (usersByPlan[row.plan] ?? 0) + 1;
+
+  // Yearly subscriptions count as a twelfth of the yearly price.
   let mrr = 0;
-  for (const row of planRows ?? []) {
-    usersByPlan[row.plan] = (usersByPlan[row.plan] ?? 0) + 1;
-    if (row.plan_status === "active") mrr += priceByPlan.get(row.plan) ?? 0;
+  for (const s of paidSubs ?? []) {
+    const yearly = s.interval === "year";
+    if (s.product_line === "plan") {
+      const p = planById.get(s.plan_id);
+      if (p) mrr += yearly ? Number(p.price_annual) / 12 : Number(p.price_monthly);
+    } else {
+      const dollars = (productCents.get(s.product_slug) ?? 0) / 100;
+      mrr += yearly ? dollars / 12 : dollars;
+    }
   }
 
   const revenueByType: Record<string, number> = {};
