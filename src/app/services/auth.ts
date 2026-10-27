@@ -49,6 +49,15 @@ export async function signInWithPassword(email: string, password: string) {
   return supabase.auth.signInWithPassword({ email, password });
 }
 
+/* Changing the sign-in email (client item 13). Supabase emails a
+   confirmation link and only switches the address once it is clicked
+   (with "Secure email change" on, both the old and the new address get a
+   link). Migration 045 then copies the new address onto public.users. */
+export async function requestEmailChange(newEmail: string) {
+  if (!isSupabaseConfigured) return notConfigured();
+  return supabase.auth.updateUser({ email: newEmail });
+}
+
 export async function signOut() {
   return supabase.auth.signOut();
 }

@@ -7,6 +7,10 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
+import { db } from "../services/supabase";
+import { requestEmailChange } from "../services/auth";
+import { prepareImage } from "../utils/imageInput";
+import { StoredImage } from "./StoredImage";
 import { isPushSupported, hasActivePushSubscription, subscribeToPush, unsubscribeFromPush } from "../services/push";
 import {
   type TwoFAMethod, type TwoFactorState,
@@ -263,13 +267,16 @@ export function AccountSettings() {
   const { user, updateUser, docs } = useDemo();
   const { authUser } = useAuth();
   const photoRef = useRef<HTMLInputElement>(null);
+  const personalRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<SettingsTab>("profile");
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   // Profile state
   const [name, setName]     = useState(user.name);
   const [email, setEmail]   = useState(user.email);
   const [phone, setPhone]   = useState(user.phone);
-  const [avatar, setAvatar] = useState<string | null>(null); // data URL for photo
   const [saving, setSaving] = useState(false);
 
   // Demographics — feed the admin Analytics tab; optional and editable here
@@ -278,6 +285,25 @@ export function AccountSettings() {
   const [birthdate, setBirthdate] = useState(user.birthdate);
   const [country, setCountry] = useState(user.country);
   const [referralSource, setReferralSource] = useState(user.referralSource);
+
+  /* The account row usually loads after this screen mounts (always on a
+     hard refresh), and useState only reads its first value, so the form
+     used to stay blank. Re-sync whenever the saved profile changes. */
+  useEffect(() => {
+    setName(user.name); setEmail(user.email); setPhone(user.phone);
+    setGender(user.gender); setBirthdate(user.birthdate);
+    setCountry(user.country); setReferralSource(user.referralSource);
+  }, [user.name, user.email, user.phone, user.gender, user.birthdate, user.country, user.referralSource]);
+
+  /* The hero's Edit Profile button: the Profile tab is usually already
+     open, so switching to it alone looked like nothing happened. */
+  function goEditProfile() {
+    setTab("profile");
+    requestAnimationFrame(() => {
+      personalRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      nameInputRef.current?.focus({ preventScroll: true });
+    });
+  }
 
   // Security / 2FA state — loaded from the server, never assumed. Until the
   // first fetch lands twoFA is null, which the UI renders as "checking" rather
@@ -348,25 +374,44 @@ export function AccountSettings() {
     }
   }
 
-  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  /* The photo used to live only in this screen's state and vanished on
+     refresh. It now goes to the private record-photos bucket, and its path
+     is saved to users.avatar_url, which also shows it in the sidebar. */
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5_000_000) { toast.error("Photo must be under 5 MB"); return; }
-    const reader = new FileReader();
-    reader.onload = ev => {
-      setAvatar(ev.target?.result as string);
-      toast.success("Profile photo updated");
-    };
-    reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file || !authUser) return;
+    setPhotoBusy(true);
+    try {
+      const img = await prepareImage(file);
+      URL.revokeObjectURL(img.url);
+      const path = await db.uploadRecordPhoto(authUser.id, img.blob);
+      await updateUser({ photoUrl: path });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not upload the photo");
+    } finally {
+      setPhotoBusy(false);
+    }
   }
 
   async function saveProfile() {
-    if (!name.trim() || !email.trim()) { toast.error("Name and email are required"); return; }
+    const newEmail = email.trim();
+    if (!name.trim() || !newEmail) { toast.error("Name and email are required"); return; }
     setSaving(true);
     await updateUser({
-      name: name.trim(), email: email.trim(), phone: phone.trim(),
+      name: name.trim(), phone: phone.trim(),
       gender, birthdate, country, referralSource,
     });
+    if (newEmail.toLowerCase() !== user.email.toLowerCase()) {
+      const { error } = await requestEmailChange(newEmail);
+      if (error) {
+        toast.error(`Email not changed: ${error.message}`);
+        setEmail(user.email);
+      } else {
+        setPendingEmail(newEmail);
+        toast.success(`Confirmation sent to ${newEmail}. Your sign-in email changes once you click the link.`, { duration: 9000 });
+      }
+    }
     setSaving(false);
   }
 
@@ -476,7 +521,7 @@ export function AccountSettings() {
             <h1>Your identity, <span className="accent">fully in your control.</span></h1>
             <p>Profile details, two-factor authentication, encryption, and notification preferences — all in one place.</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setTab("profile")}><User size={15} /> Edit Profile</button>
+              <button className="hbtn primary" onClick={goEditProfile}><User size={15} /> Edit Profile</button>
               <button className="hbtn ghost" onClick={() => setTab("security")}><Shield size={15} /> Security &amp; 2FA</button>
             </div>
           </div>
@@ -523,11 +568,11 @@ export function AccountSettings() {
               <h3 className="sec-title">Profile Photo</h3>
               <div className="avatar-row">
                 <div className="avatar-circle">
-                  {avatar
-                    ? <img src={avatar} alt="Profile" />
+                  {user.photoUrl
+                    ? <StoredImage src={user.photoUrl} alt="Profile" />
                     : <span className="avatar-init">{user.avatar}</span>
                   }
-                  <button className="avatar-cam" onClick={() => photoRef.current?.click()}>
+                  <button className="avatar-cam" disabled={photoBusy} onClick={() => photoRef.current?.click()}>
                     <Camera size={13}/>
                   </button>
                   <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload}/>
@@ -535,18 +580,25 @@ export function AccountSettings() {
                 <div>
                   <div className="avatar-name">{user.name}</div>
                   <div className="avatar-email">{user.email}</div>
-                  <button onClick={() => photoRef.current?.click()} className="btn-ghost" style={{ marginTop: 12 }}>
-                    <Camera size={12}/> Change Photo
-                  </button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                    <button onClick={() => photoRef.current?.click()} disabled={photoBusy} className="btn-ghost">
+                      <Camera size={12}/> {photoBusy ? "Uploading…" : user.photoUrl ? "Change Photo" : "Add Photo"}
+                    </button>
+                    {user.photoUrl && !photoBusy && (
+                      <button onClick={() => updateUser({ photoUrl: "" })} className="btn-ghost">
+                        <X size={12}/> Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Profile fields */}
-            <div className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div ref={personalRef} className="card pad" style={{ display: "flex", flexDirection: "column", gap: 14, scrollMarginTop: 16 }}>
               <h3 className="sec-title">Personal Information</h3>
               {[
-                { label:"FULL NAME",     value:name,  set:setName,  ph:"Your full name",     icon:<User size={14}/>,  type:"text" },
+                { label:"FULL NAME",     value:name,  set:setName,  ph:"Your full name",     icon:<User size={14}/>,  type:"text", ref:nameInputRef },
                 { label:"EMAIL ADDRESS", value:email, set:setEmail, ph:"your@email.com",      icon:<Mail size={14}/>,  type:"email" },
                 { label:"PHONE NUMBER",  value:phone, set:setPhone, ph:"+1 (555) 000-0000",   icon:<Phone size={14}/>, type:"tel" },
               ].map(f => (
@@ -554,8 +606,15 @@ export function AccountSettings() {
                   <label>{f.label}</label>
                   <div className="icon-field">
                     <span className="ic">{f.icon}</span>
-                    <input type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.ph} />
+                    <input ref={"ref" in f ? f.ref : undefined} type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.ph} />
                   </div>
+                  {f.type === "email" && (
+                    <div style={{ fontSize: 13.5, color: pendingEmail ? "#D9A55E" : "#929CBC", marginTop: 6, lineHeight: 1.5 }}>
+                      {pendingEmail
+                        ? `Waiting for you to confirm ${pendingEmail}. Check that inbox (and your current one) for the link.`
+                        : "This is your sign-in email. Changing it sends a confirmation link to the new address."}
+                    </div>
+                  )}
                 </div>
               ))}
               <button onClick={saveProfile} disabled={saving} className="btn-primary" style={{ width: "fit-content" }}>

@@ -93,6 +93,8 @@ export interface UserProfile {
   name: string; email: string; phone: string;
   plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   storageUsed: number; storageLimit: number; avatar: string;
+  /* Profile photo (users.avatar_url): a record-photos storage path, "" if none. */
+  photoUrl: string;
   /* When the 14-day Starter clock started (migration 026); null if the
      account has never been on Starter. See utils/starterPlan.ts. */
   starterStartedAt: string | null;
@@ -115,7 +117,7 @@ const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
 };
 
 const EMPTY_USER: UserProfile = {
-  name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "",
+  name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "", photoUrl: "",
   starterStartedAt: null, deceasedAt: null, suspended: false, planStatus: "active",
   gender: "", birthdate: "", country: "", referralSource: "",
 };
@@ -365,6 +367,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           name: userRes.data.full_name, email: userRes.data.email, phone: userRes.data.phone ?? "",
           plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: planGb.current[userRes.data.plan] ?? PLAN_STORAGE_GB[userRes.data.plan],
           avatar: initials(userRes.data.full_name),
+          photoUrl: userRes.data.avatar_url ?? "",
           starterStartedAt: userRes.data.starter_started_at ?? null,
           deceasedAt: userRes.data.deceased_at ?? null,
           suspended: userRes.data.plan_status === "paused",
@@ -410,15 +413,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const updateUser = useCallback(async (data: Partial<UserProfile>) => {
     if (!uid) return;
     const tid = toast.loading("Saving profile...");
-    const { error } = await db.updateUser(uid, {
-      full_name: data.name, phone: data.phone,
-      gender: (data.gender as DBUser["gender"]) || null,
-      birthdate: data.birthdate || null,
-      country: data.country || null,
-      referral_source: data.referralSource || null,
-    });
+    /* Only the fields passed are written, so saving just the photo can't
+       blank the demographics. Email is never written here: it is the
+       sign-in address and changes only through requestEmailChange. */
+    const row: Partial<DBUser> = {};
+    if (data.name !== undefined) row.full_name = data.name;
+    if (data.phone !== undefined) row.phone = data.phone;
+    if (data.gender !== undefined) row.gender = (data.gender as DBUser["gender"]) || null;
+    if (data.birthdate !== undefined) row.birthdate = data.birthdate || null;
+    if (data.country !== undefined) row.country = data.country || null;
+    if (data.referralSource !== undefined) row.referral_source = data.referralSource || null;
+    if (data.photoUrl !== undefined) row.avatar_url = data.photoUrl || null;
+    const { error } = await db.updateUser(uid, row);
     if (error) { toast.error("Could not save profile", { id: tid }); return; }
-    setUser(u => ({ ...u, ...data, plan: u.plan }));
+    const { email: _email, ...saved } = data;
+    setUser(u => ({ ...u, ...saved, plan: u.plan, avatar: saved.name ? initials(saved.name) : u.avatar }));
     toast.success("Profile updated", { id: tid });
   }, [uid]);
 

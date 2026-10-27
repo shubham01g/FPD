@@ -95,6 +95,8 @@ export interface DBUser {
      see services/vaultCrypto.ts. */
   vault_salt?: string | null;
   vault_verifier?: string | null;
+  /* Profile photo: a record-photos storage path, never a URL (item 13). */
+  avatar_url?: string | null;
   /* Demographics (migration 020). All NULL until signup or Account Settings
      writes them — pre-existing accounts have no history to backfill. */
   gender?: "female"|"male"|"nonbinary"|"prefer_not_to_say" | null;

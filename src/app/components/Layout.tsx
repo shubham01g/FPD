@@ -12,6 +12,7 @@ import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { VaultClone } from "./VaultClone";
 import { InstallApp } from "./InstallApp";
 import { OfflineBanner } from "./OfflineBanner";
+import { StoredImage } from "./StoredImage";
 import { useOnline } from "../hooks/useNetStatus";
 import { useDemo } from "../context/DemoContext";
 import { usePlatform, hiddenPages } from "../services/platform";
@@ -406,14 +407,14 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
           {collapsed ? (
             <button onClick={() => onNavigate("account-settings")} title={`${user.name} · Account`}
               className="w-full flex justify-center">
-              <div className="flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 15, fontWeight: 700 }}>
-                {user.avatar}
+              <div className="flex items-center justify-center rounded-full overflow-hidden" style={{ width: 36, height: 36, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 15, fontWeight: 700 }}>
+                {user.photoUrl ? <StoredImage src={user.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/> : user.avatar}
               </div>
             </button>
           ) : (
             <div className="flex items-center gap-2.5 rounded-xl" style={{ padding: "8px 9px", background: "rgba(91,110,225,0.07)", border: `1px solid ${BORDER}` }}>
-              <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 15, fontWeight: 700 }}>
-                {user.avatar}
+              <div className="flex items-center justify-center rounded-full flex-shrink-0 overflow-hidden" style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 15, fontWeight: 700 }}>
+                {user.photoUrl ? <StoredImage src={user.photoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/> : user.avatar}
               </div>
               <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}>
                 <div style={{ fontSize: 15.5, fontWeight: 650, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
