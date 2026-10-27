@@ -216,6 +216,9 @@ export interface DBMemory {
   type: "photo"|"video"|"note"|"audio"|"message"|"keepsake"|"goal"|"award";
   description?: string; tags: string[];
   recipient?: string; media_url?: string; achieved?: boolean; issuer?: string; child_name?: string;
+  /* Goals only (migration 044) */
+  goal_status?: "soon" | "in_progress" | "achieved"; start_date?: string | null; target_date?: string | null;
+  steps?: { text: string; done: boolean }[];
 }
 
 export interface DBFuneralPlan {
@@ -236,6 +239,8 @@ export interface DBEmergencyInfo {
   primary_doctor_name?: string; primary_doctor_specialty?: string; primary_doctor_phone?: string; primary_doctor_address?: string;
   hospital_name?: string; hospital_phone?: string; pharmacy_name?: string; pharmacy_phone?: string;
   insurance_carrier?: string; insurance_policy_number?: string; insurance_group_number?: string; insurance_member_id?: string;
+  /* Migration 044 */
+  alcohol_use?: string; tobacco_use?: string; implants_prosthetics?: string;
 }
 
 export interface DBOccasion {

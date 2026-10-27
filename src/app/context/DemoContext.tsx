@@ -57,7 +57,11 @@ export interface Memory {
   type: "photo"|"video"|"note"|"audio"|"message"|"keepsake"|"goal"|"award";
   description: string; tags: string[];
   recipient?: string; mediaUrl?: string; achieved?: boolean; issuer?: string; childName?: string;
+  /* Goals only (migration 044) */
+  goalStatus?: GoalStatus; startDate?: string; targetDate?: string; steps?: GoalStep[];
 }
+export type GoalStatus = "soon" | "in_progress" | "achieved";
+export interface GoalStep { text: string; done: boolean; }
 export interface Occasion {
   id: string; name: string; date: string; type: "birthday"|"anniversary"|"holiday"; recipient: string; notes: string; recurring: boolean;
 }
@@ -79,6 +83,8 @@ export interface EmergencyInfo {
   hospital: { name: string; phone: string };
   pharmacy: { name: string; phone: string };
   insurance: { carrier: string; policyNum: string; groupNum: string; memberId: string };
+  /* Lifestyle + implants (migration 044) */
+  alcoholUse: string; tobaccoUse: string; implantsProsthetics: string;
 }
 export interface Notification {
   id: string; title: string; message: string; type: "info"|"warning"|"success"|"error"; time: string; read: boolean;
@@ -129,6 +135,7 @@ const EMPTY_EMERGENCY_INFO: EmergencyInfo = {
   hospital: { name: "", phone: "" },
   pharmacy: { name: "", phone: "" },
   insurance: { carrier: "", policyNum: "", groupNum: "", memberId: "" },
+  alcoholUse: "", tobaccoUse: "", implantsProsthetics: "",
 };
 
 /* ─── Mappers: DB rows (canonical) <-> frontend shapes ─────────────── */
@@ -197,7 +204,12 @@ const rowToMemory = (r: DBMemory): Memory => ({
   id: r.id, title: r.title, date: r.memory_date ?? "", type: r.type, description: r.description ?? "", tags: r.tags ?? [],
   recipient: r.recipient ?? undefined, mediaUrl: r.media_url ?? undefined, achieved: r.achieved ?? undefined,
   issuer: r.issuer ?? undefined, childName: r.child_name ?? undefined,
+  goalStatus: r.goal_status ?? undefined, startDate: r.start_date ?? undefined, targetDate: r.target_date ?? undefined,
+  steps: r.steps ?? undefined,
 });
+/* start_date/target_date are DATE columns, so a cleared field must go as
+   null rather than "" (which Postgres rejects); undefined leaves it alone. */
+const dateOrNull = (v: string | undefined) => v === undefined ? undefined : (v || null);
 const rowToOccasion = (r: DBOccasion): Occasion => ({ id: r.id, name: r.name, date: r.occasion_date ?? "", type: r.type, recipient: r.recipient ?? "", notes: r.notes ?? "", recurring: r.recurring });
 const rowToNotif = (r: DBNotificationRow): Notification => ({ id: r.id, title: r.title, message: r.message, type: r.type, time: timeAgo(r.created_at), read: r.read });
 const rowToFuneralPlan = (r: DBFuneralPlan): FuneralPlan => ({
@@ -220,6 +232,7 @@ const rowToEmergencyInfo = (r: DBEmergencyInfo): EmergencyInfo => ({
   hospital: { name: r.hospital_name ?? "", phone: r.hospital_phone ?? "" },
   pharmacy: { name: r.pharmacy_name ?? "", phone: r.pharmacy_phone ?? "" },
   insurance: { carrier: r.insurance_carrier ?? "", policyNum: r.insurance_policy_number ?? "", groupNum: r.insurance_group_number ?? "", memberId: r.insurance_member_id ?? "" },
+  alcoholUse: r.alcohol_use ?? "", tobaccoUse: r.tobacco_use ?? "", implantsProsthetics: r.implants_prosthetics ?? "",
 });
 
 /* ─── Context ───────────────────────────────────────────────────── */
@@ -714,6 +727,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await db.addMemory({
       user_id: uid, title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
       recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
+      goal_status: m.goalStatus, start_date: dateOrNull(m.startDate), target_date: dateOrNull(m.targetDate), steps: m.steps,
     });
     if (error || !data) { toast.error("Could not save memory", { id: tid }); return; }
     setMemories(prev => [rowToMemory(data), ...prev]);
@@ -724,6 +738,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await db.updateMemory(id, {
       title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
       recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
+      goal_status: m.goalStatus, start_date: dateOrNull(m.startDate), target_date: dateOrNull(m.targetDate), steps: m.steps,
     });
     if (error || !data) { toast.error("Could not update memory"); return; }
     setMemories(prev => prev.map(x => x.id === id ? rowToMemory(data) : x));
@@ -782,6 +797,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       pharmacy_name: data.pharmacy.name, pharmacy_phone: data.pharmacy.phone,
       insurance_carrier: data.insurance.carrier, insurance_policy_number: data.insurance.policyNum,
       insurance_group_number: data.insurance.groupNum, insurance_member_id: data.insurance.memberId,
+      alcohol_use: data.alcoholUse, tobacco_use: data.tobaccoUse, implants_prosthetics: data.implantsProsthetics,
     });
     if (error || !row) { toast.error("Could not save emergency information", { id: tid }); return; }
     setEmergencyInfo(rowToEmergencyInfo(row));

@@ -492,7 +492,7 @@ export function PersonalAssets() {
     setEditingId(null);
   }
 
-  const COLLECTIBLE_CATEGORIES = ["Sports Cards","Coins / Currency","Stamps","Art / Paintings","Sculptures","Jewelry","Watches","Luxury Handbags","Rare Books","Vinyl / Music","Movie Memorabilia","Military Antiques","Musical Instruments","Wine / Whiskey","Toys / Action Figures","Other"];
+  const COLLECTIBLE_CATEGORIES = ["Sports Cards","Coins / Currency","Stamps","Art / Paintings","Sculptures","Jewelry","Watches","Luxury Handbags","Rare Books","Vinyl / Music","Movie Memorabilia","Military Antiques","Musical Instruments","Wine / Whiskey","Toys / Action Figures","Keepsake / Heirloom","Other"];
   const WEAPON_LOCKER_TYPES = ["Knife","Hunting Knife","Pocket Knife","Sword","Katana","Dagger","Machete","Tactical Axe / Tomahawk","Antique Sword","Bayonet","Other Edged Weapon"];
 
   const tabs = [
@@ -501,7 +501,7 @@ export function PersonalAssets() {
     { id: "digital" as Tab,         label: "Digital Assets", icon: <Bitcoin size={14} /> },
     { id: "weapons" as Tab,         label: "Firearms",       icon: <Lock size={14} /> },
     { id: "weapons_locker" as Tab,  label: "Weapons Locker", icon: <Sword size={14} /> },
-    { id: "collectibles" as Tab,    label: "Collectibles",   icon: <Gem size={14} /> },
+    { id: "collectibles" as Tab,    label: "Collectibles & Keepsakes", icon: <Gem size={14} /> },
   ];
 
   const Field = ({ label, value }: { label: string; value: string }) => (
@@ -864,7 +864,7 @@ export function PersonalAssets() {
                     </div>
                   </div>
                   <div className="dgrid two">
-                    {[["Condition", c.condition || "—"], ["Purchased From", c.purchasedFrom || "—"], ["Purchase Date", c.purchaseDate || "—"], ["Location of Item", c.location || "—"], ["Serial / Cert #", c.serialNum || "—"], ["Intended For", c.intendedFor || "—"]].map(([label, value]) => (
+                    {[["Condition", c.condition || "—"], ["Purchased From", c.purchasedFrom || "—"], ["Purchase Date", c.purchaseDate || "—"], ["Location", c.location || "—"], ["Serial / Cert #", c.serialNum || "—"], ["Intended For", c.intendedFor || "—"]].map(([label, value]) => (
                       <Field key={label as string} label={label as string} value={value as string} />
                     ))}
                   </div>
@@ -1136,7 +1136,7 @@ export function PersonalAssets() {
                     {COLLECTIBLE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-                {([["Item Name *", "name", "e.g. 1952 Topps Mickey Mantle Rookie Card"], ["Condition", "condition", "e.g. VG+, Mint, PSA 7"], ["Estimated Value", "estimatedValue", "e.g. $38,000"], ["Purchase Date", "purchaseDate", "e.g. Mar 2009"], ["Purchased From", "purchasedFrom", "e.g. Heritage Auctions"], ["Location of Item", "location", "e.g. Home safe, bank safe deposit box #214"], ["Serial / Certificate #", "serialNum", "e.g. PSA grading number"], ["Intended For", "intendedFor", "Who gets this item — or sell/donate"], ["Notes", "notes", "Provenance, authentication details"]] as [string, string, string][]).map(([label, key, ph]) => (
+                {([["Item Name *", "name", "e.g. 1952 Topps Mickey Mantle Rookie Card"], ["Condition", "condition", "e.g. VG+, Mint, PSA 7"], ["Estimated Value", "estimatedValue", "e.g. $38,000"], ["Purchase Date", "purchaseDate", "e.g. Mar 2009"], ["Purchased From", "purchasedFrom", "e.g. Heritage Auctions"], ["Location", "location", "e.g. Home safe, bank safe deposit box #214"], ["Serial / Certificate #", "serialNum", "e.g. PSA grading number"], ["Intended For", "intendedFor", "Who gets this item — or sell/donate"], ["Notes", "notes", "Story, provenance, authentication details"]] as [string, string, string][]).map(([label, key, ph]) => (
                   <div className="field" key={key}>
                     <label>{label}</label>
                     <input value={(cForm as any)[key]} onChange={e => setCForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />

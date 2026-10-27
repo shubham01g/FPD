@@ -24,7 +24,13 @@ const NEG     = "#D06B6B";
 interface PetVaccination { type: string; date: string; }
 interface PetCaretaker { name: string; phone: string; }
 interface PetProvider { name: string; phone: string; }
+/* `phone` is no longer asked for (client item 11) but is kept so rows saved
+   before that still round-trip unchanged. */
 interface PetInstruction { name: string; phone: string; description: string; }
+interface PetMedication { name: string; dose: string; frequency: string; notes: string; }
+interface PetExtras { favoriteToy: string; bedding: string; treats: string; travelInstructions: string; }
+const EMPTY_EXTRAS: PetExtras = { favoriteToy: "", bedding: "", treats: "", travelInstructions: "" };
+const EMPTY_MED: PetMedication = { name: "", dose: "", frequency: "", notes: "" };
 interface PetFeeding { foodType: string; timeType: string; quantity: string; locationOfFood: string; }
 interface PetRecord {
   id: string;
@@ -44,6 +50,8 @@ interface PetRecord {
   vetPhone: string;
   vetEmail: string;
   feedings: PetFeeding[];
+  extras: PetExtras;
+  medications: PetMedication[];
 }
 
 /* Rows come from the `pet_records` table — the screen used to open on sample
@@ -209,6 +217,13 @@ export function PetRecords() {
       instructions: (r.instructions as PetInstruction[] | null) ?? [],
       vaccinations: (r.vaccinations as PetVaccination[] | null) ?? [],
       feedings: (r.feedings as PetFeeding[] | null) ?? [],
+      extras: {
+        favoriteToy: String(r.favorite_toy ?? ""),
+        bedding: String(r.bedding ?? ""),
+        treats: String(r.treats ?? ""),
+        travelInstructions: String(r.travel_instructions ?? ""),
+      },
+      medications: (r.medications as PetMedication[] | null) ?? [],
     })));
   }, [authUser]);
 
@@ -228,6 +243,8 @@ export function PetRecords() {
   const [petVaccinations, setPetVaccinations] = useState<PetVaccination[]>([{type:"",date:""}]);
   const [petVet, setPetVet] = useState({vetName:"",vetPhone:"",vetEmail:""});
   const [petFeedings, setPetFeedings] = useState<PetFeeding[]>([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
+  const [petExtras, setPetExtras] = useState<PetExtras>(EMPTY_EXTRAS);
+  const [petMeds, setPetMeds] = useState<PetMedication[]>([EMPTY_MED]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const petPhotoRef = useRef<HTMLInputElement>(null);
 
@@ -236,6 +253,7 @@ export function PetRecords() {
     setPetInstructions([{name:"",phone:"",description:""}]); setPetAbout({name:"",dateOfBirth:"",gender:"",breed:"",colour:""});
     setPetDocs([]); setPetMedHistory(""); setPetVaccinations([{type:"",date:""}]);
     setPetVet({vetName:"",vetPhone:"",vetEmail:""}); setPetFeedings([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
+    setPetExtras(EMPTY_EXTRAS); setPetMeds([EMPTY_MED]);
   }
 
   function openAddPet() {
@@ -266,6 +284,8 @@ export function PetRecords() {
     setPetVaccinations(pet.vaccinations.length ? pet.vaccinations : [{type:"",date:""}]);
     setPetVet({ vetName: pet.vetName, vetPhone: pet.vetPhone, vetEmail: pet.vetEmail });
     setPetFeedings(pet.feedings.length ? pet.feedings : [{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
+    setPetExtras(pet.extras);
+    setPetMeds(pet.medications.length ? pet.medications : [EMPTY_MED]);
     setEditingId(pet.id);
     setShowPetForm(true);
   }
@@ -297,6 +317,11 @@ export function PetRecords() {
       instructions: petInstructions.filter(i => i.description.trim() || i.name.trim()),
       vaccinations: petVaccinations.filter(v => v.type.trim()),
       feedings: petFeedings.filter(f => f.foodType.trim()),
+      favorite_toy: petExtras.favoriteToy,
+      bedding: petExtras.bedding,
+      treats: petExtras.treats,
+      travel_instructions: petExtras.travelInstructions,
+      medications: petMeds.filter(m => m.name.trim()),
     };
 
     const { error } = editingId !== null
@@ -432,8 +457,48 @@ export function PetRecords() {
                     <h3 className="sec-title"><span className="tick"/>Special Care Instructions</h3>
                     {pet.instructions.map((ins,i) => (
                       <div key={i} className="instruction tile warn">
-                        <div className="top"><span className="nm">{ins.name}</span><span className="ph">{ins.phone}</span></div>
+                        <div className="top"><span className="nm">{ins.name}</span></div>
                         {ins.description && <div className="desc">{ins.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Favorites */}
+                {(pet.extras.favoriteToy || pet.extras.bedding || pet.extras.treats) && (
+                  <div>
+                    <h3 className="sec-title"><span className="tick"/>Favorites</h3>
+                    <div className="r-grid c3" style={{ margin: 0 }}>
+                      {[["Favorite Toy",pet.extras.favoriteToy],["Bedding",pet.extras.bedding],["Treats",pet.extras.treats]].map(([label,value])=>(
+                        <div key={label} className="tile">
+                          <div className="tk">{label}</div>
+                          <div className="tv">{value||"—"}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Travel Instructions */}
+                {pet.extras.travelInstructions && (
+                  <div>
+                    <h3 className="sec-title"><span className="tick"/>Travel Instructions</h3>
+                    <div className="tile"><div className="tv" style={{ whiteSpace: "pre-wrap" }}>{pet.extras.travelInstructions}</div></div>
+                  </div>
+                )}
+
+                {/* Medications */}
+                {pet.medications.length > 0 && (
+                  <div>
+                    <h3 className="sec-title"><span className="tick"/>Medications</h3>
+                    {pet.medications.map((m,i) => (
+                      <div key={i} className="r-grid c4" style={{ marginTop: 0, marginBottom: 8 }}>
+                        {[["Medication",m.name],["Dose",m.dose],["How Often",m.frequency],["Notes",m.notes]].map(([label,value])=>(
+                          <div key={label} className="tile">
+                            <div className="tk">{label}</div>
+                            <div className="tv">{value||"—"}</div>
+                          </div>
+                        ))}
                       </div>
                     ))}
                   </div>
@@ -585,15 +650,44 @@ export function PetRecords() {
 
                 {/* Special Care Instruction */}
                 <div className="pfsection">
-                  <div className="st">Special Care Instruction</div>
+                  <div className="st">Special Care Instructions</div>
                   {petInstructions.map((ins,i)=>(
                     <div key={i} className="pfrow">
-                      <input className="fin" value={ins.name} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Name"/>
-                      <input className="fin" value={ins.phone} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,phone:e.target.value}:x))} placeholder="🇺🇸 +1  Phone"/>
+                      <input className="fin" value={ins.name} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Instructions"/>
                       <textarea className="fin" value={ins.description} onChange={e=>setPetInstructions(p=>p.map((x,idx)=>idx===i?{...x,description:e.target.value}:x))} placeholder="Description" rows={3} style={{ resize: "none" }}/>
                     </div>
                   ))}
                   <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetInstructions(p=>[...p,{name:"",phone:"",description:""}])}><Plus size={12}/> Instruction</button></div>
+                </div>
+
+                {/* Favorites */}
+                <div className="pfsection">
+                  <div className="st">Favorites</div>
+                  <div className="pfrow">
+                    <input className="fin" value={petExtras.favoriteToy} onChange={e=>setPetExtras(p=>({...p,favoriteToy:e.target.value}))} placeholder="Favorite Toy"/>
+                    <input className="fin" value={petExtras.bedding} onChange={e=>setPetExtras(p=>({...p,bedding:e.target.value}))} placeholder="Bedding"/>
+                    <input className="fin" value={petExtras.treats} onChange={e=>setPetExtras(p=>({...p,treats:e.target.value}))} placeholder="Treats"/>
+                  </div>
+                </div>
+
+                {/* Travel Instructions */}
+                <div className="pfsection">
+                  <div className="st">Travel Instructions</div>
+                  <textarea className="fin" value={petExtras.travelInstructions} onChange={e=>setPetExtras(p=>({...p,travelInstructions:e.target.value}))} placeholder="Carrier or crate, car sickness, sedation, airline rules" rows={3} style={{ resize: "none" }}/>
+                </div>
+
+                {/* Medications */}
+                <div className="pfsection">
+                  <div className="st">Medications</div>
+                  {petMeds.map((m,i)=>(
+                    <div key={i} className="pfrow">
+                      <input className="fin" value={m.name} onChange={e=>setPetMeds(p=>p.map((x,idx)=>idx===i?{...x,name:e.target.value}:x))} placeholder="Medication"/>
+                      <input className="fin" value={m.dose} onChange={e=>setPetMeds(p=>p.map((x,idx)=>idx===i?{...x,dose:e.target.value}:x))} placeholder="Dose"/>
+                      <input className="fin" value={m.frequency} onChange={e=>setPetMeds(p=>p.map((x,idx)=>idx===i?{...x,frequency:e.target.value}:x))} placeholder="How Often"/>
+                      <input className="fin" value={m.notes} onChange={e=>setPetMeds(p=>p.map((x,idx)=>idx===i?{...x,notes:e.target.value}:x))} placeholder="Notes (e.g. give with food)"/>
+                    </div>
+                  ))}
+                  <div className="pfaddwrap"><button className="btn-mini" onClick={()=>setPetMeds(p=>[...p,EMPTY_MED])}><Plus size={12}/> Medication</button></div>
                 </div>
 
                 {/* About Your Beloved Pet */}

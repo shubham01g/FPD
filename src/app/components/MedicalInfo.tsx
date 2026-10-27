@@ -26,6 +26,16 @@ const sevStyle: Record<Allergy["severity"], { bg: string; color: string; label: 
 
 const bloodOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
 const codeOptions = ["Full Code", "DNR", "DNI", "DNR / DNI", "Comfort Care Only"];
+/* Plain-language meaning shown under Code Status (client item 14). */
+const codeMeaning: Record<string, string> = {
+  "Full Code": "Do everything to keep me alive: CPR, a breathing tube, and life support.",
+  "DNR": "Do Not Resuscitate: no CPR if my heart or breathing stops. Other treatment continues.",
+  "DNI": "Do Not Intubate: no breathing tube or ventilator. CPR and other treatment are still allowed.",
+  "DNR / DNI": "No CPR and no breathing tube. Other treatment continues.",
+  "Comfort Care Only": "Keep me comfortable and free of pain only: no CPR, breathing tube, or treatments meant to prolong life.",
+};
+const alcoholOptions = ["", "Never", "Socially", "Regularly", "Former drinker"];
+const tobaccoOptions = ["", "Never", "Former smoker", "Occasionally", "Daily", "Vape / e-cigarette"];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -191,7 +201,7 @@ function FSelect({ label, value, onChange, options }: {
     <div className="field">
       <label>{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        {options.map(o => <option key={o} value={o}>{o || "—"}</option>)}
       </select>
     </div>
   );
@@ -445,6 +455,26 @@ export function MedicalInfo() {
                   <VTile label="Primary Language" value={d.primaryLanguage} />
                   <VTile label="Code Status" value={d.codeStatus} />
                 </>}
+              </div>
+              {codeMeaning[d.codeStatus] && (
+                <div className="tile" style={{ marginBottom: 12, background: "rgba(91,110,225,0.06)", borderColor: "rgba(91,110,225,0.2)" }}>
+                  <div className="tk">ⓘ WHAT "{d.codeStatus.toUpperCase()}" MEANS</div>
+                  <div className="tv" style={{ fontSize: 15 }}>{codeMeaning[d.codeStatus]}</div>
+                </div>
+              )}
+              <div className="tgrid2" style={{ marginBottom: 12 }}>
+                {editing ? <>
+                  <FSelect label="DO YOU DRINK?" value={d.alcoholUse} onChange={v => setD({ alcoholUse: v })} options={alcoholOptions} />
+                  <FSelect label="DO YOU SMOKE?" value={d.tobaccoUse} onChange={v => setD({ tobaccoUse: v })} options={tobaccoOptions} />
+                </> : <>
+                  <VTile label="Do You Drink?" value={d.alcoholUse} />
+                  <VTile label="Do You Smoke?" value={d.tobaccoUse} />
+                </>}
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                {editing
+                  ? <FField label="ALTERNATIVE PARTS (IMPLANTS, PROSTHETICS, TRANSPLANTS, PACEMAKER…)" value={d.implantsProsthetics} onChange={v => setD({ implantsProsthetics: v })} placeholder="e.g. Pacemaker (2019), left hip replacement" />
+                  : <VTile label="Alternative Parts (implants, prosthetics, transplants)" value={d.implantsProsthetics} />}
               </div>
               <div className="chiprow">
                 <TChip label="DNR on File" active={d.dnr} onToggle={editing ? () => setD({ dnr: !d.dnr }) : undefined} />

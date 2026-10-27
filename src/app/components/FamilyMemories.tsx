@@ -1,34 +1,39 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { Camera, Video, Star, Trophy, Target, Heart, Plus, Edit2, Trash2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
+import { Camera, Video, Trophy, Target, Heart, Plus, Edit2, Trash2, Play, X, Upload, ImageIcon, Mic, Volume2, Square, Pause, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
 import { AttachDocumentField } from "./AttachDocumentField";
-import { useDemo, type Memory } from "../context/DemoContext";
+import { useDemo, type Memory, type GoalStatus, type GoalStep } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../services/supabase";
 import heroFamilyPhoto from "../../imports/familymemories_hero_photo.webp";
 
-type Tab = "memories" | "messages" | "audio" | "kids" | "keepsakes" | "goals" | "awards";
+type Tab = "memories" | "messages" | "audio" | "kids" | "goals" | "awards";
 
-/* Each of the 7 tabs is a filtered view over the single `memories` table
+/* Each of the 6 tabs is a filtered view over the single `memories` table
    (see DemoContext), keyed by Memory.type. Fields with no dedicated column
    are folded into `description` or `tags` per-type, as used below:
      photos    -> type "photo"    (tags = freeform hashtags, mediaUrl = the photo)
      messages  -> type "video"    (tags[0] = source, mediaUrl = the video)
      audio     -> type "audio"    (recipient = "for", mediaUrl = the recording)
      kids      -> type "note"     (childName = child, recipient = school, tags = activities)
-     keepsakes -> type "keepsake" (recipient = intended-for, tags = [location, value], mediaUrl = photo)
-     goals     -> type "goal"     (achieved = done y/n — no numeric progress column in the DB)
-     awards    -> type "award"    (issuer = organization, tags[0] = category, childName = optional recipient) */
+     goals     -> type "goal"     (goal_status, start/target dates, steps[], mediaUrl = picture; achieved mirrors status)
+     awards    -> type "award"    (issuer = organization, tags[0] = category, childName = optional recipient)
+   Keepsakes moved to Assets & Property → Collectibles (client item 9, migration
+   044 copied the old type "keepsake" rows across). */
 
-const statusStyles = {
-  completed: { color: "#D99A6B", bg: "rgba(72,187,120,0.12)", label: "COMPLETED" },
+const statusStyles: Record<GoalStatus, { color: string; bg: string; label: string }> = {
+  soon:        { color: "#D9A55E", bg: "rgba(217,165,94,0.12)", label: "SOON" },
   in_progress: { color: "#6E90C9", bg: "rgba(91,110,225,0.12)", label: "IN PROGRESS" },
+  achieved:    { color: "#D99A6B", bg: "rgba(72,187,120,0.12)", label: "ACHIEVED" },
 };
+/* Rows saved before migration 044 only have the achieved flag. */
+const goalStatusOf = (g: Memory): GoalStatus => g.goalStatus ?? (g.achieved ? "achieved" : "in_progress");
+const fmtGoalDate = (d?: string) => d ? new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar,
    AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
@@ -160,7 +165,7 @@ const FAM_CSS = `
 .fpd-fam .thumb{width:56px;height:56px;object-fit:cover;border-radius:16px;border:1px solid rgba(255,255,255,0.08);}
 .fpd-fam .thumb-more{width:56px;height:56px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:${MUTED};font-size:15px;}
 
-/* photo frame (keepsakes / awards) */
+/* photo frame (goals / awards) */
 .fpd-fam .photo-frame{position:relative;background:#0F1624;border-bottom:1px solid rgba(255,255,255,0.08);overflow:hidden;}
 .fpd-fam .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
 
@@ -239,7 +244,6 @@ export function FamilyMemories() {
   const videoList     = memories.filter(m => m.type === "video");
   const audioList     = memories.filter(m => m.type === "audio");
   const kidsList      = memories.filter(m => m.type === "note");
-  const keepsakesList = memories.filter(m => m.type === "keepsake");
   const goalsList     = memories.filter(m => m.type === "goal");
   const awardsList    = memories.filter(m => m.type === "award");
   const tabContentRef = React.useRef<HTMLDivElement>(null);
@@ -413,10 +417,17 @@ export function FamilyMemories() {
   const [form, setForm] = useState<Record<string,string>>({});
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  // ── Keepsake / Award photo + document attach (shared by both, one modal open at a time) ──
+  // ── Goal / Award photo + award document attach (one modal open at a time) ──
   const [itemPhoto, setItemPhoto] = useState("");
   const [itemDoc, setItemDoc] = useState<string|null>(null);
-  function resetItemMedia() { setItemPhoto(""); setItemDoc(null); }
+  const [goalSteps, setGoalSteps] = useState<GoalStep[]>([]);
+  function resetItemMedia() { setItemPhoto(""); setItemDoc(null); setGoalSteps([]); }
+
+  /* Ticking a step on the card saves straight away, without opening the modal. */
+  function toggleGoalStep(g: Memory, i: number) {
+    const steps = (g.steps ?? []).map((s, j) => j === i ? { ...s, done: !s.done } : s);
+    void updateMemory(g.id, { steps });
+  }
 
   function confirmRemoveMemory(id: string, label: string) {
     if (window.confirm(`Remove "${label}"?`)) removeMemory(id);
@@ -444,14 +455,10 @@ export function FamilyMemories() {
     setEditingId(k.id);
     setShowAdd("kids");
   }
-  function editKeepsake(k: Memory) {
-    setForm({ item: k.title, location: k.tags[0] || "", value: k.tags[1] || "", intendedFor: k.recipient || "", story: k.description });
-    setItemPhoto(k.mediaUrl || "");
-    setEditingId(k.id);
-    setShowAdd("keepsakes");
-  }
   function editGoal(g: Memory) {
-    setForm({ goal: g.title, notes: g.description, achieved: g.achieved ? "yes" : "" });
+    setForm({ goal: g.title, notes: g.description, status: goalStatusOf(g), startDate: g.startDate || "", targetDate: g.targetDate || "" });
+    setItemPhoto(g.mediaUrl || "");
+    setGoalSteps(g.steps ?? []);
     setEditingId(g.id);
     setShowAdd("goals");
   }
@@ -497,19 +504,17 @@ export function FamilyMemories() {
         else await addMemory({ title: form.name, date: "", type: "note", description: form.notes || "", tags: activities, recipient: form.school, childName: form.name });
         break;
       }
-      case "keepsakes": {
-        if (!form.item) { toast.error("Item name required"); return; }
-        const tags = [form.location || "—", form.value || "Sentimental"];
-        if (isEdit) await updateMemory(editingId!, { title: form.item, recipient: form.intendedFor, tags, description: form.story || "", mediaUrl: itemPhoto });
-        else await addMemory({ title: form.item, date: "", type: "keepsake", description: form.story || "", tags, recipient: form.intendedFor, mediaUrl: itemPhoto });
-        resetItemMedia();
-        break;
-      }
       case "goals": {
         if (!form.goal) { toast.error("Goal description required"); return; }
-        const achieved = form.achieved === "yes";
-        if (isEdit) await updateMemory(editingId!, { title: form.goal, description: form.notes || "", achieved });
-        else await addMemory({ title: form.goal, date: "", type: "goal", description: form.notes || "", tags: [], achieved });
+        const goalStatus = (form.status || "in_progress") as GoalStatus;
+        const goal = {
+          title: form.goal, description: form.notes || "", goalStatus, achieved: goalStatus === "achieved",
+          startDate: form.startDate || "", targetDate: form.targetDate || "",
+          steps: goalSteps.filter(s => s.text.trim()), mediaUrl: itemPhoto,
+        };
+        if (isEdit) await updateMemory(editingId!, goal);
+        else await addMemory({ ...goal, date: "", type: "goal", tags: [] });
+        resetItemMedia();
         break;
       }
       case "awards": {
@@ -531,7 +536,6 @@ export function FamilyMemories() {
     messages:  [{key:"title",label:"Video Title *",ph:"e.g. Christmas Morning 1994"},{key:"filmed",label:"When It Was Filmed",ph:"e.g. Dec 25, 1994"},{key:"source",label:"Source",ph:"e.g. Digitized VHS tape"},{key:"desc",label:"Description",ph:"What's on this video"}],
     audio:     [{key:"title",label:"Audio Memory Title *",ph:"e.g. Life Advice for Michael"},{key:"recipient",label:"For",ph:"e.g. Michael Doe (Son)"},{key:"desc",label:"Description",ph:"What this recording covers"}],
     kids:      [{key:"name",label:"Child's Name & Relation *",ph:"e.g. Tyler Doe (Grandson, age 8)"},{key:"school",label:"School",ph:""},{key:"activities",label:"Activities (comma-separated)",ph:"Baseball, Swimming"},{key:"notes",label:"Notes",ph:""}],
-    keepsakes: [{key:"item",label:"Item Name *",ph:"e.g. Grandfather's Watch"},{key:"location",label:"Where It Is",ph:""},{key:"value",label:"Value",ph:"e.g. Sentimental / ~$500"},{key:"intendedFor",label:"Intended For",ph:""},{key:"story",label:"Story / Significance",ph:"Why this item matters"}],
     goals:     [{key:"goal",label:"Goal *",ph:"e.g. Pay off mortgage"},{key:"notes",label:"Notes",ph:""}],
     awards:    [{key:"award",label:"Award Name *",ph:""},{key:"year",label:"Year",ph:String(new Date().getFullYear())},{key:"org",label:"Organization",ph:""},{key:"category",label:"Category",ph:"e.g. Military, Professional"},{key:"desc",label:"Description",ph:""},{key:"forChild",label:"For (child, if applicable)",ph:"e.g. Tyler Doe (Grandson)"}],
   };
@@ -541,17 +545,16 @@ export function FamilyMemories() {
     { id: "messages" as Tab, label: "Video Memories", icon: <Video size={14} /> },
     { id: "audio" as Tab,    label: "Audio Memories", icon: <Mic size={14} /> },
     { id: "kids" as Tab, label: "Kids & Family", icon: <Heart size={14} /> },
-    { id: "keepsakes" as Tab, label: "Keepsakes", icon: <Star size={14} /> },
     { id: "goals" as Tab, label: "Goals", icon: <Target size={14} /> },
     { id: "awards" as Tab, label: "Awards", icon: <Trophy size={14} /> },
   ];
 
-  const familyRecordsCount = kidsList.length + keepsakesList.length + goalsList.length + awardsList.length;
+  const familyRecordsCount = kidsList.length + goalsList.length + awardsList.length;
   const kpis = [
     { label: "Photo Memories", value: String(memoriesList.length), sub: "Moments preserved", icon: <Camera size={14} />, dot: ACCENT2 },
     { label: "Video Memories", value: String(videoList.length), sub: "Home movies & clips", icon: <Video size={14} />, dot: ACCENT2 },
     { label: "Audio Recordings", value: String(audioList.length), sub: "In your own voice", icon: <Mic size={14} />, dot: ACCENT2 },
-    { label: "Family Records", value: String(familyRecordsCount), sub: "Kids, keepsakes, goals & awards", icon: <Heart size={14} />, dot: POS },
+    { label: "Family Records", value: String(familyRecordsCount), sub: "Kids, goals & awards", icon: <Heart size={14} />, dot: POS },
   ];
 
   return (
@@ -567,7 +570,7 @@ export function FamilyMemories() {
           <div className="hcontent">
             <span className="heyebrow">The Moments Worth Keeping</span>
             <h1>Stories, photos, and memories — <span className="accent">saved for the people who'll want them.</span></h1>
-            <p>Photos, videos, voice recordings, and keepsakes — preserved in one place so the people you love can hold onto what mattered most.</p>
+            <p>Photos, videos, voice recordings, and goals — preserved in one place so the people you love can hold onto what mattered most.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => { setTab("memories"); setShowAdd("memories"); }}>
                 <Plus size={15}/> Add Memory
@@ -583,7 +586,7 @@ export function FamilyMemories() {
         <div>
           <div className="eyebrow"><Heart size={12} /> Family &amp; Legacy</div>
           <h1 className="pg-h1">Family &amp; Memories</h1>
-          <div className="pg-sub">Preserve your stories, messages, keepsakes, and the things that matter most.</div>
+          <div className="pg-sub">Preserve your stories, messages, goals, and the things that matter most.</div>
         </div>
 
         {/* ── KPI ledger ── */}
@@ -897,48 +900,6 @@ export function FamilyMemories() {
           </div>
         )}
 
-        {/* ── Keepsakes ── */}
-        {tab === "keepsakes" && (
-          <div className="stack">
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="btn-primary" onClick={()=>setShowAdd("keepsakes")}><Plus size={14} /> Add Keepsake</button>
-            </div>
-            {keepsakesList.map(k => (
-              <div key={k.id} className="card" style={{ overflow: "hidden" }}>
-                {k.mediaUrl && (
-                  <div className="photo-frame" style={{ height: 180 }}>
-                    <StoredImage src={k.mediaUrl} alt={k.title}/>
-                  </div>
-                )}
-                <div className="pad" style={{ padding: 22 }}>
-                  <div className="r-top">
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="r-title">{k.title}</div>
-                      <div className="r-sub accent" style={{ marginBottom: 8 }}>→ {k.recipient}</div>
-                      <div className="r-grid">
-                        {[{ label: "Location", value: k.tags[0] }, { label: "Estimated Value", value: k.tags[1] }].map(f => (
-                          <div key={f.label} className="tile">
-                            <div className="tk">{f.label}</div>
-                            <div className="tv">{f.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ color: SOFT, fontSize: 16, fontStyle: "italic", lineHeight: 1.6 }}>"{k.description}"</div>
-                      <div style={{ marginTop: 12 }}>
-                        <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" scanned and saved to File Cabinet`)} size="sm" label="Scan Document"/>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      <button title="Edit keepsake" onClick={() => editKeepsake(k)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
-                      <button title="Delete keepsake" onClick={() => confirmRemoveMemory(k.id, k.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* ── Goals ── */}
         {tab === "goals" && (
           <div className="stack">
@@ -946,18 +907,49 @@ export function FamilyMemories() {
               <button className="btn-primary" onClick={()=>setShowAdd("goals")}><Plus size={14} /> Add Goal</button>
             </div>
             {goalsList.map(g => {
-              const s = g.achieved ? statusStyles.completed : statusStyles.in_progress;
+              const s = statusStyles[goalStatusOf(g)];
+              const steps = g.steps ?? [];
+              const doneCount = steps.filter(x => x.done).length;
               return (
-                <div key={g.id} className="card pad">
-                  <div className="r-top" style={{ marginBottom: 12 }}>
-                    <div style={{ color: TEXT, fontSize: 19, fontWeight: 500 }}>{g.title}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span className="pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
-                      <button title="Edit goal" onClick={() => editGoal(g)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
-                      <button title="Delete goal" onClick={() => confirmRemoveMemory(g.id, g.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                <div key={g.id} className="card" style={{ overflow: "hidden" }}>
+                  {g.mediaUrl && (
+                    <div className="photo-frame" style={{ height: 180 }}>
+                      <StoredImage src={g.mediaUrl} alt={g.title}/>
                     </div>
+                  )}
+                  <div className="pad" style={{ padding: 22 }}>
+                    <div className="r-top" style={{ marginBottom: 12 }}>
+                      <div style={{ color: TEXT, fontSize: 19, fontWeight: 500 }}>{g.title}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span className="pill" style={{ background: s.bg, color: s.color }}>{s.label}</span>
+                        <button title="Edit goal" onClick={() => editGoal(g)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Edit2 size={14} /></button>
+                        <button title="Delete goal" onClick={() => confirmRemoveMemory(g.id, g.title)} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer" }}><Trash2 size={14} /></button>
+                      </div>
+                    </div>
+                    {(g.startDate || g.targetDate) && (
+                      <div className="r-grid" style={{ marginTop: 0 }}>
+                        <div className="tile"><div className="tk">Est. Start Date</div><div className="tv">{fmtGoalDate(g.startDate) || "—"}</div></div>
+                        <div className="tile"><div className="tk">Projected Completion</div><div className="tv">{fmtGoalDate(g.targetDate) || "—"}</div></div>
+                      </div>
+                    )}
+                    {g.description && <div className="r-sub" style={{ marginTop: 6 }}>{g.description}</div>}
+                    {steps.length > 0 && (
+                      <div style={{ marginTop: 14 }}>
+                        <div className="eyebrow" style={{ marginBottom: 8, justifyContent: "space-between" }}>
+                          <span>Steps to achieve this goal</span><span>{doneCount}/{steps.length}</span>
+                        </div>
+                        <div className="pbar" style={{ marginBottom: 10 }}><i style={{ width: `${(doneCount / steps.length) * 100}%`, background: POS }} /></div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {steps.map((st, i) => (
+                            <label key={i} style={{ display: "flex", alignItems: "center", gap: 10, color: st.done ? MUTED : TEXT, fontSize: 16, cursor: "pointer", textDecoration: st.done ? "line-through" : "none" }}>
+                              <input type="checkbox" checked={st.done} onChange={() => toggleGoalStep(g, i)} style={{ width: 17, height: 17, accentColor: ACCENT }} />
+                              {st.text}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {g.description && <div className="r-sub" style={{ marginTop: 6 }}>{g.description}</div>}
                 </div>
               );
             })}
@@ -1010,7 +1002,7 @@ export function FamilyMemories() {
               <div className="modal-head">
                 <h3>
                   {editingId !== null ? "Edit " : "Add "}
-                  {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "keepsakes" ? "Keepsake" : showAdd === "goals" ? "Goal" : "Award"}
+                  {showAdd === "memories" ? "Photo Memory" : showAdd === "messages" ? "Video Memory" : showAdd === "audio" ? "Audio Memory" : showAdd === "kids" ? "Child / Family Member" : showAdd === "goals" ? "Goal" : "Award"}
                 </h3>
                 <button onClick={closeAddModal}><X size={16}/></button>
               </div>
@@ -1078,19 +1070,46 @@ export function FamilyMemories() {
                   </div>
                 ))}
 
-                {/* Goals — achieved y/n (the DB tracks a done flag, not a numeric progress %) */}
+                {/* Goals — status, dates, steps and a picture (migration 044) */}
                 {showAdd === "goals" && (
-                  <div className="field">
-                    <label>STATUS</label>
-                    <select value={form.achieved||""} onChange={F("achieved")}>
-                      <option value="">In Progress</option>
-                      <option value="yes">Achieved</option>
-                    </select>
-                  </div>
+                  <>
+                    <div className="field">
+                      <label>STATUS</label>
+                      <select value={form.status||"in_progress"} onChange={F("status")}>
+                        <option value="soon">Soon</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="achieved">Achieved</option>
+                      </select>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div className="field">
+                        <label>EST. START DATE</label>
+                        <input type="date" value={form.startDate||""} onChange={F("startDate")}/>
+                      </div>
+                      <div className="field">
+                        <label>PROJECTED COMPLETION DATE</label>
+                        <input type="date" value={form.targetDate||""} onChange={F("targetDate")}/>
+                      </div>
+                    </div>
+                    <div className="field">
+                      <label>STEPS TO ACHIEVE THIS GOAL</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {goalSteps.map((st, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <input type="checkbox" checked={st.done} onChange={() => setGoalSteps(p => p.map((x, j) => j === i ? { ...x, done: !x.done } : x))} style={{ width: 17, height: 17, flexShrink: 0, accentColor: ACCENT }}/>
+                            <input value={st.text} onChange={e => setGoalSteps(p => p.map((x, j) => j === i ? { ...x, text: e.target.value } : x))} placeholder={`Step ${i + 1}`}/>
+                            <button title="Remove step" onClick={() => setGoalSteps(p => p.filter((_, j) => j !== i))} style={{ color: MUTED, background: "none", border: "none", cursor: "pointer", display: "flex" }}><X size={15}/></button>
+                          </div>
+                        ))}
+                        <button className="btn-sec" style={{ alignSelf: "flex-start" }} onClick={() => setGoalSteps(p => [...p, { text: "", done: false }])}><Plus size={13}/> Add Step</button>
+                      </div>
+                    </div>
+                    <PhotoPicker value={itemPhoto} onChange={setItemPhoto} label="Picture" aspectRatio="4/3"/>
+                  </>
                 )}
 
-                {/* Keepsakes & Awards — picture + document upload/scan */}
-                {(showAdd === "keepsakes" || showAdd === "awards") && (
+                {/* Awards — picture + document upload/scan */}
+                {showAdd === "awards" && (
                   <>
                     <PhotoPicker value={itemPhoto} onChange={setItemPhoto} label="Photo" aspectRatio="4/3"/>
                     <AttachDocumentField
@@ -1099,7 +1118,7 @@ export function FamilyMemories() {
                       folder="personal"
                       sectionId="family-memories"
                       sectionLabel="Family & Memories"
-                      label={showAdd === "keepsakes" ? "Attach Document (appraisal, certificate, provenance)" : "Attach Document (certificate, citation)"}
+                      label="Attach Document (certificate, citation)"
                     />
                   </>
                 )}
