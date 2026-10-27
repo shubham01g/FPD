@@ -7,6 +7,7 @@ import { DemoProvider, useDemo } from "./context/DemoContext";
 import { StarterUpgradeWall, StarterCountdownBanner } from "./components/StarterUpgradeWall";
 import { starterDaysLeft } from "./utils/starterPlan";
 import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
+import { VaultResetPage } from "./components/VaultResetPage";
 import { PortalNotice } from "./components/PortalNotice";
 import { usePlatform, hiddenPages } from "./services/platform";
 import { adminApi } from "./services/adminApi";
@@ -347,10 +348,15 @@ function LandingRoute() {
 /* ── User login / signup ─────────────────────────────────────────── */
 function UserLoginRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // ?next= brings a signed-out user back to the vault reset link they opened.
+  // Only that one page is allowed, so the parameter can't send anyone elsewhere.
+  const next = new URLSearchParams(location.search).get("next");
+  const afterLogin = next && /^\/vault-reset\/[0-9a-f]{64}$/.test(next) ? next : "/dashboard";
   return (
     <div className="size-full">
       <UserLogin
-        onLogin={() => navigate("/dashboard")}
+        onLogin={() => navigate(afterLogin)}
         onGoSignup={() => navigate("/signup")}
         onBackToSite={() => navigate("/")}
       />
@@ -695,6 +701,24 @@ function LegacyClaimRoute() {
   );
 }
 
+function VaultResetRoute() {
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const { session, loading, twoFactorPending } = useAuth();
+  const { user } = useDemo();
+  if (!token) return <Navigate to="/" replace/>;
+  if (loading) return null;
+  // Same gates as UserRoute: a session still owing its second factor must pass
+  // it first, and a frozen or suspended account gets the dashboard's notice.
+  if (session && twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/login")}/>;
+  if (session && (user.deceasedAt || user.suspended)) return <Navigate to="/dashboard" replace/>;
+  return (
+    <div className="size-full overflow-y-auto">
+      <VaultResetPage token={token}/>
+    </div>
+  );
+}
+
 function DocSubmitRoute() {
   // The real client flow is token-based and lives elsewhere; this route only
   // ever hosted the demo client picker, so without it there is nothing here.
@@ -724,6 +748,7 @@ function AppShell() {
       <Route path="/documents/submit" element={<DocSubmitRoute/>}/>
       <Route path="/schedule" element={<WGScheduleDemo/>}/>
       <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
+      <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
   );

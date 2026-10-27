@@ -8,6 +8,7 @@ import {
   type Frequency, type DueInput, WEEKDAYS, CYCLE_DAYS, CYCLE_MONTHS, AMOUNT_LABEL,
   anchorFor, nextDue, dueSentence, dueInputFrom, fmtDue, ordinal, parseIso,
 } from "../services/billingCycle";
+import { type TwoFactorInfo, TwoFactorFields, TwoFactorSummary, twoFactorFromRow, twoFactorToRow } from "./TwoFactorDetails";
 import {
   CreditCard, Plus, X, Search, Trash2, Edit2, Upload,
   Globe, Phone, AlertTriangle, CheckCircle, Calendar,
@@ -38,6 +39,8 @@ interface Subscription {
   nextBilling?: string; dueDay?: number;
   cancelInstructions?: string; notes?: string;
   autoPay: boolean; cancellationUrl?: string;
+  /** The account's own 2-step verification — see TwoFactorDetails.tsx */
+  tfa?: TwoFactorInfo;
 }
 
 /** The day of the month to store for this cycle; Weekly/Biweekly have none. */
@@ -218,6 +221,7 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
   useEscapeKey(true, onClose);
   const [form, setForm] = useState<Partial<Subscription>>(editing ?? { frequency:"Monthly", paymentType:"Visa", status:"active", autoPay:true, category:"Other" });
   const [due, setDue] = useState<DueInput>(() => editing ? dueInputFrom(editing.nextBilling, editing.dueDay) : {});
+  const [tfa, setTfa] = useState<TwoFactorInfo>(editing?.tfa ?? {});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -238,7 +242,7 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
     setLoading(true);
     const ok = await onSave({
       ...form, id: editing?.id ?? "", amount: Number(form.amount),
-      nextBilling: anchor ?? undefined, dueDay,
+      nextBilling: anchor ?? undefined, dueDay, tfa,
     } as Subscription);
     setLoading(false);
     if (ok) onClose();
@@ -336,6 +340,7 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
               </div>
             </div>
           </div>
+          <TwoFactorFields value={tfa} onChange={setTfa} />
           <div className="field">
             <label>CANCELLATION INSTRUCTIONS</label>
             <textarea style={{ resize:"vertical" }} value={form.cancelInstructions??""} onChange={e => setForm(p=>({...p,cancelInstructions:e.target.value}))} placeholder="Step-by-step instructions to cancel this subscription..." rows={2} />
@@ -427,6 +432,7 @@ export function SubscriptionManager() {
       cancelInstructions: (r.cancel_instructions as string | null) ?? undefined,
       notes: (r.notes as string | null) ?? undefined,
       autoPay: Boolean(r.auto_pay),
+      tfa: await twoFactorFromRow(r),
     })));
     setSubs(rows);
   }, [authUser]);
@@ -451,6 +457,7 @@ export function SubscriptionManager() {
       due_day: sub.dueDay ?? null,
       cancel_instructions: sub.cancelInstructions || null,
       notes: sub.notes || null,
+      ...(await twoFactorToRow(sub.tfa ?? {})),
       auto_pay: sub.autoPay,
       status: sub.status,
     };
@@ -618,6 +625,7 @@ export function SubscriptionManager() {
                     </div>
                   )}
                 </div>
+                <TwoFactorSummary key={selected.id} info={selected.tfa ?? {}} />
                 {selected.cancelInstructions && (
                   <div className="cancel-box">
                     <div className="tk">CANCELLATION INSTRUCTIONS</div>

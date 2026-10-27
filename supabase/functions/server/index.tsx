@@ -33,6 +33,7 @@ import twoFactor from "./routes/twoFactor.ts";
 import settings from "./routes/settings.ts";
 import billing from "./routes/billing.ts";
 import contacts from "./routes/contacts.ts";
+import vaultReset from "./routes/vaultReset.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -156,6 +157,7 @@ account.use("*", requireUser);
 account.route("/2fa", twoFactor);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
+account.route("/vault", vaultReset);
 app.route(`${BASE}/account`, account);
 
 // Public, unauthenticated data for the customer-facing app.

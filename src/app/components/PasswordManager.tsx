@@ -5,6 +5,7 @@ import { ScanButton } from "./DocumentScanner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { encryptField, decryptField } from "../services/vaultCrypto";
+import { type TwoFactorInfo, TwoFactorFields, TwoFactorSummary, twoFactorFromRow, twoFactorToRow } from "./TwoFactorDetails";
 import {
   Key, Eye, EyeOff, Copy, Plus, Trash2, Edit2, X, Search,
   Lock, Globe, User, FileText, Shield, CheckCircle, Upload,
@@ -35,6 +36,8 @@ interface PasswordEntry {
   securityQuestion?: string; securityAnswer?: string; notes?: string;
   category: string; strength: "weak"|"fair"|"good"|"strong";
   lastUpdated: string; importance?: Importance; twoFactor?: boolean;
+  /** The account's own 2-step verification — see TwoFactorDetails.tsx */
+  tfa?: TwoFactorInfo;
   documents?: string[];
 }
 
@@ -230,7 +233,7 @@ function PasswordStrengthBar({ strength }: { strength: PasswordEntry["strength"]
   );
 }
 
-function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry | null; onClose:()=>void; onSave:(p:PasswordEntry)=>void }) {
+function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry | null; onClose:()=>void; onSave:(p:PasswordEntry)=>Promise<boolean> }) {
   useEscapeKey(true, onClose);
   const [form, setForm] = useState(() => editing
     ? {
@@ -241,23 +244,26 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
         importance: editing.importance ?? "normal" as Importance,
       }
     : { title:"", website:"", username:"", email:"", password:"", accountNumber:"", securityQuestion:"", securityAnswer:"", notes:"", category:"Other", twoFactor:false, importance:"normal" as Importance });
+  const [tfa, setTfa] = useState<TwoFactorInfo>(editing?.tfa ?? {});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  /* The parent saves and toasts; the modal only closes once the row landed. */
   const submit = async () => {
     if (!form.title || !form.password) { toast.error("Title and password are required"); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    onSave({
+    const ok = await onSave({
       ...form,
-      id: editing?.id ?? `pw-${Date.now()}`,
+      id: editing?.id ?? "",
+      twoFactor: !!tfa.method,
+      tfa,
       strength: getStrength(form.password),
       lastUpdated: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
       documents: editing?.documents,
     });
-    toast.success(editing ? "Password entry updated" : `"${form.title}" saved to Password Manager 🔒`);
-    onClose();
+    setLoading(false);
+    if (ok) onClose();
   };
 
   const f = (key: string, label: string, ph: string, type = "text") => (
@@ -309,7 +315,7 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
           </div>
           <div className="field">
             <label>NOTES &amp; SIGN-IN PROCEDURES</label>
-            <textarea style={{ minHeight:78, resize:"vertical" }} value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} placeholder="Special instructions for logging in, 2FA notes, backup codes location..." rows={3} />
+            <textarea style={{ minHeight:78, resize:"vertical" }} value={form.notes} onChange={e => setForm(p=>({...p,notes:e.target.value}))} placeholder="Special instructions for logging in, security PINs, who to call..." rows={3} />
           </div>
           {/* Importance — graded, because legacy contacts need a triage order */}
           <div>
@@ -329,10 +335,7 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
             </div>
             <div className="imp-desc">{IMPORTANCE_META[form.importance].desc}</div>
           </div>
-          <label className="check-row">
-            <input type="checkbox" checked={form.twoFactor} onChange={e => setForm(p=>({...p,twoFactor:e.target.checked}))} />
-            2FA / MFA Enabled
-          </label>
+          <TwoFactorFields value={tfa} onChange={setTfa} />
           {/* Document upload */}
           <div className="field">
             <label>UPLOAD SUPPORTING DOCUMENTS (optional)</label>
@@ -378,6 +381,8 @@ export function PasswordManager() {
       // Decrypt once and reuse — deriving the plaintext twice per row was
       // needless work on a screen that can hold hundreds of entries.
       const password = await decryptField(r.encrypted_password as string | null);
+      // Rows from before migration 042 only have the on/off flag.
+      const tfa = await twoFactorFromRow(r, Boolean(r.two_fa_enabled));
       return {
         id: String(r.id),
         title: String(r.title ?? ""),
@@ -394,7 +399,8 @@ export function PasswordManager() {
         lastUpdated: r.last_updated
           ? new Date(String(r.last_updated)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
           : "",
-        twoFactor: Boolean(r.two_fa_enabled),
+        twoFactor: !!tfa.method,
+        tfa,
         importance: (r.starred ? "critical" : undefined) as Importance | undefined,
       };
     }));
@@ -406,8 +412,8 @@ export function PasswordManager() {
   const openAddPw = () => { setEditingPw(null); setShowAdd(true); };
   const openEditPw = (p: PasswordEntry) => { setEditingPw(p); setShowAdd(true); };
   const closePwModal = () => { setShowAdd(false); setEditingPw(null); };
-  const savePw = async (p: PasswordEntry) => {
-    if (!authUser) return;
+  const savePw = async (p: PasswordEntry): Promise<boolean> => {
+    if (!authUser) return false;
     // The two secret fields are encrypted before they leave the browser;
     // everything else is ordinary metadata and stored as-is.
     const row = {
@@ -421,7 +427,8 @@ export function PasswordManager() {
       encrypted_security_answer: await encryptField(p.securityAnswer ?? ""),
       notes: p.notes || null,
       category: p.category,
-      two_fa_enabled: Boolean(p.twoFactor),
+      two_fa_enabled: !!p.tfa?.method,
+      ...(await twoFactorToRow(p.tfa ?? {})),
       starred: p.importance === "critical",
       last_updated: new Date().toISOString(),
     };
@@ -430,13 +437,12 @@ export function PasswordManager() {
       ? await tables.passwordVault.update(p.id, row)
       : await tables.passwordVault.add(authUser.id, row);
 
-    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    if (error) { toast.error(`Could not save: ${error.message}`); return false; }
 
     await reload();
     setSelected(null);
     toast.success(editingPw ? `${p.title} updated` : `${p.title} added to your vault`);
-    setShowAdd(false);
-    setEditingPw(null);
+    return true;
   };
 
   const deletePw = async (id: string) => {
@@ -462,7 +468,7 @@ export function PasswordManager() {
   const kpis = [
     { label: "Total Entries", value: String(passwords.length), sub: "Stored credentials", icon: <Key size={14} />, dot: ACCENT2 },
     { label: "Critical Accounts", value: String(passwords.filter(p=>p.importance==="critical").length), sub: "Unlock everything else", icon: <Shield size={14} />, dot: NEG },
-    { label: "Weak / Fair Passwords", value: String(passwords.filter(p=>p.strength==="weak"||p.strength==="fair").length), sub: "Consider strengthening", icon: <AlertTriangle size={14} />, dot: WARN },
+    { label: "Weak / Fair Passwords", value: String(passwords.filter(p=>p.password && (p.strength==="weak"||p.strength==="fair")).length), sub: "Consider strengthening", icon: <AlertTriangle size={14} />, dot: WARN },
     { label: "2FA Enabled", value: String(passwords.filter(p=>p.twoFactor).length), sub: `of ${passwords.length} accounts`, icon: <CheckCircle size={14} />, dot: POS },
   ];
 
@@ -551,7 +557,7 @@ export function PasswordManager() {
                   </div>
                   <div className="psub">{p.username || p.email || p.website}</div>
                 </div>
-                <PasswordStrengthBar strength={p.strength}/>
+                {p.password ? <PasswordStrengthBar strength={p.strength}/> : <span className="psub">No password saved</span>}
                 <div className="pacts">
                   <button className="icon-btn" onClick={e => { e.stopPropagation(); copy(p.username||p.email||"", "Username"); }}>
                     <User size={13}/>
@@ -581,7 +587,7 @@ export function PasswordManager() {
                     <button className="icon-btn" onClick={() => setSelected(null)}><X size={13}/></button>
                   </div>
                 </div>
-                <PasswordStrengthBar strength={selected.strength}/>
+                {selected.password && <PasswordStrengthBar strength={selected.strength}/>}
                 <div className="tile-group">
                   {[
                     { label:"Website", value:selected.website, icon:<Globe size={11}/> },
@@ -597,7 +603,16 @@ export function PasswordManager() {
                       {row.copy && <button className="icon-btn" onClick={() => copy(row.value!, row.label)}><Copy size={12}/></button>}
                     </div>
                   ))}
-                  {/* Password field */}
+                  {/* Password field — empty after a vault reset (migration 043) */}
+                  {!selected.password ? (
+                    <div className="tile-row">
+                      <div className="trow-l">
+                        <div className="tk"><Lock size={11}/>PASSWORD</div>
+                        <div className="tv" style={{ color: MUTED }}>No password saved. Edit to add one.</div>
+                      </div>
+                      <button className="icon-btn" onClick={() => openEditPw(selected)}><Edit2 size={12}/></button>
+                    </div>
+                  ) : (
                   <div className="tile-row">
                     <div className="trow-l">
                       <div className="tk"><Lock size={11}/>PASSWORD</div>
@@ -610,13 +625,9 @@ export function PasswordManager() {
                       <button className="icon-btn" onClick={() => copy(selected.password, "Password")}><Copy size={12}/></button>
                     </div>
                   </div>
+                  )}
                 </div>
-                {selected.twoFactor && (
-                  <div className="tfa-banner">
-                    <Shield size={13}/>
-                    <span>Two-Factor Authentication enabled</span>
-                  </div>
-                )}
+                <TwoFactorSummary key={selected.id} info={selected.tfa ?? {}} />
                 {selected.securityQuestion && (
                   <div className="sq-box">
                     <div className="tk">SECURITY QUESTION</div>

@@ -155,6 +155,25 @@ export function claimLinkEmail(o: {
   };
 }
 
+/** Link to reset a forgotten vault passphrase (routes/vaultReset.ts). Says
+ *  plainly that resetting erases the saved passwords — nobody can recover them. */
+export function vaultResetEmail(o: { link: string; minutes: number }): Omit<EmailMessage, "to"> {
+  const lead = `Someone — hopefully you — asked to reset the vault passphrase on your ${APP_NAME} account.`;
+  const warn = "Resetting permanently erases the passwords saved in Password Manager and Auto Pay & Subs. Nobody can recover them, including us. Titles, usernames, amounts and dates are kept, and you will choose a new passphrase.";
+  const closing = `This link works once, expires in ${o.minutes} minutes, and only works while you are signed in to ${APP_NAME}. If you didn't ask for this, ignore this email — nothing changes.`;
+  return {
+    subject: `Reset your vault passphrase — ${APP_NAME}`,
+    category: "vault_reset",
+    replyTo: MAILBOX.support,
+    text: `${lead}\n\n${warn}\n\n${o.link}\n\n${closing}`,
+    html: layout("Reset your vault passphrase", `
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      <p style="margin:0 0 20px;padding:14px 16px;background:#fdf1f1;border-radius:8px;line-height:1.6;color:#8a2c2c;">${esc(warn)}</p>
+      ${button(o.link, "Reset vault passphrase")}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`),
+  };
+}
+
 /** Invitation to join the admin portal. */
 export function adminInviteEmail(o: { name: string; roleLabel: string; link: string; invitedBy: string }): Omit<EmailMessage, "to"> {
   const lead = `${o.invitedBy} has invited you to the ${APP_NAME} admin portal as ${o.roleLabel}.`;
