@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
-import { signInWithPassword, signOut } from "../services/auth";
+import { signInWithPassword, signOut, requestPasswordReset } from "../services/auth";
 import {
   type TwoFAMethod,
   getNativeChallengeState, challengeFactor, verifyChallenge, verifyFactor,
@@ -36,6 +36,21 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [forgot, setForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) { setError("Enter a valid email address."); return; }
+    setLoading(true);
+    const { error: resetError } = await requestPasswordReset(email);
+    setLoading(false);
+    // Supabase answers the same for unknown addresses, so this never reveals
+    // whether an account exists. Only rate limits or outages come back here.
+    if (resetError) { setError(resetError.message); return; }
+    setResetSent(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,6 +180,40 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
             onUseBackupCode={useBackupCode}
             onCancel={cancelChallenge}
           />
+        ) : forgot ? (
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h2 style={{ fontFamily:"var(--font-display)", fontSize:35.5, color:"#E8EDF5", marginBottom:8 }}>Reset your password</h2>
+            <p style={{ color:"#6B7FA8", fontSize:17.5 }}>
+              {resetSent
+                ? "If an account exists for that address, we've emailed a link to set a new password. It expires in one hour. Check your spam folder if it doesn't arrive."
+                : "Enter the email you sign in with and we'll send you a link to set a new password."}
+            </p>
+          </div>
+          {error && (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-5" style={{ background:"rgba(252,129,129,0.1)", border:"1px solid rgba(252,129,129,0.25)" }}>
+              <AlertCircle size={15} color="#FC8181"/>
+              <span style={{ color:"#FC8181", fontSize:16 }}>{error}</span>
+            </div>
+          )}
+          {!resetSent && (
+            <form onSubmit={handleForgot} className="space-y-4">
+              <div>
+                <label style={{ color:"#6B7FA8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>EMAIL</label>
+                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" autoComplete="email"
+                  className="w-full px-4 py-3.5 rounded-xl"
+                  style={{ background:"rgba(91,167,214,0.06)", border:"1px solid rgba(91,167,214,0.25)", color:"#E8EDF5", fontSize:17.5, outline:"none" }}/>
+              </div>
+              <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-sm mt-2"
+                style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: loading ? "#6FAE8B" : "#04080F", fontSize:19, cursor: loading ? "not-allowed" : "pointer" }}>
+                {loading ? "Sending..." : "Email me a reset link"}
+              </button>
+            </form>
+          )}
+          <button onClick={() => { setForgot(false); setError(""); }} className="w-full mt-6 text-center text-sm" style={{ color:"#6FAE8B" }}>
+            ← Back to sign in
+          </button>
+        </div>
         ) : (
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden">
@@ -200,6 +249,12 @@ export function UserLogin({ onLogin, onGoSignup, onBackToSite }: UserLoginProps)
                   {showPw ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
               </div>
+            </div>
+            <div style={{ textAlign:"right", marginTop:-4 }}>
+              <button type="button" onClick={() => { setForgot(true); setError(""); setResetSent(false); }}
+                style={{ color:"#6FAE8B", fontSize:14, textDecoration:"underline", background:"none", border:"none", cursor:"pointer" }}>
+                Forgot password?
+              </button>
             </div>
             <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold text-sm mt-2"
               style={{ background: loading ? "rgba(91,167,214,0.2)" : "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: loading ? "#6FAE8B" : "#04080F", fontSize:19, boxShadow: loading ? "none" : "0 0 30px rgba(91,167,214,0.35)", cursor: loading ? "not-allowed" : "pointer" }}>

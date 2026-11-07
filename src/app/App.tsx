@@ -27,6 +27,7 @@ import { WhiteLabelProvider } from "./context/WhiteLabelContext";
 import { WLPackagesProvider } from "./context/WLPackagesContext";
 import { WLEntitlementProvider } from "./context/WLEntitlementContext";
 import { UserLogin } from "./components/UserLogin";
+import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { TwoFactorGate } from "./components/twofa/TwoFactorGate";
 import { UserSignup } from "./components/UserSignup";
 import { signOut } from "./services/auth";
@@ -217,6 +218,14 @@ function WGClientSubmitDemo() {
 
 /* ── Client scheduling demo wrapper — creates a live token once per visit ── */
 function WGScheduleDemo() {
+  // Dev only, like /documents/submit: on the live site this page showed
+  // every visitor a made-up "Dorothy Henderson" booking. Real schedule
+  // links come with the Concierge Portal wiring.
+  if (!import.meta.env.DEV) return <Navigate to="/" replace/>;
+  return <WGScheduleDemoInner/>;
+}
+
+function WGScheduleDemoInner() {
   const [demoToken] = useState(() => {
     const today = new Date();
     const fmt = (d: Date, t: string) =>
@@ -771,6 +780,17 @@ function VaultResetRoute() {
   );
 }
 
+/* "Forgot password?" email lands here. Deliberately outside the 2FA gate:
+   the page runs the native challenge itself before allowing the change. */
+function ResetPasswordRoute() {
+  const navigate = useNavigate();
+  return (
+    <div className="size-full overflow-y-auto">
+      <ResetPasswordPage onDone={() => navigate("/dashboard")} onBackToLogin={() => navigate("/login")}/>
+    </div>
+  );
+}
+
 /* ── Contacts (migration 046) ─────────────────────────────────────── */
 /* The emailed Legacy/Guardian invite. Signed out is fine — the page offers
    sign in or sign up and comes back. Same gates as VaultResetRoute. */
@@ -838,6 +858,7 @@ function AppShell() {
       <Route path="/schedule" element={<WGScheduleDemo/>}/>
       <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
       <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
+      <Route path="/reset-password" element={<ResetPasswordRoute/>}/>
       <Route path="/contact-accept/:token" element={<ContactAcceptRoute/>}/>
       <Route path="/access" element={<AccessRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>

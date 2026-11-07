@@ -4,6 +4,7 @@ import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useDemo } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import heroIDPhoto from "../../imports/idkeeper_hero_photo.webp";
@@ -177,7 +178,9 @@ export function IDKeeper() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingID, setEditingID] = useState<IDRecord | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const emptyForm = { type:ID_TYPES[0], idNumber:"", holder:"James William Doe", issuedBy:"", issueDate:"", expiryDate:"", notes:"", photo:"" };
+  // The holder defaults to the account owner (it used to be a sample name).
+  const { user } = useDemo();
+  const emptyForm = { type:ID_TYPES[0], idNumber:"", holder:user.name ?? "", issuedBy:"", issueDate:"", expiryDate:"", notes:"", photo:"" };
   const [form, setForm] = useState(emptyForm);
   const idListRef = React.useRef<HTMLDivElement>(null);
 

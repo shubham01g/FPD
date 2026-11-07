@@ -254,8 +254,9 @@ function SignaturePad({ onSign }: { onSign: (dataUrl: string) => void }) {
 
 /* ── User-facing waiver signing page ─────────────────────────────── */
 export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack?: () => void }) {
-  const waiver = waiverStore.find(w => w.id === (waiverId ?? "WAV-002"))
-    ?? waiverStore[1]; // default to first pending for demo
+  // No fallback to "some other waiver": opening a link for one that doesn't
+  // exist used to crash the page (the store is empty) or show a stranger's.
+  const waiver = waiverId ? waiverStore.find(w => w.id === waiverId) : undefined;
 
   const [step, setStep] = useState<"read"|"sign"|"done">("read");
   const [scrolled, setScrolled] = useState(false);
@@ -275,6 +276,7 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
   }
 
   function submit() {
+    if (!waiver) return;
     const sig = sigMode === "type" ? typedName : drawnSig;
     if (!sig.trim()) { toast.error("Please provide your signature"); return; }
     if (!checked1 || !checked2 || !checked3) { toast.error("Please check all acknowledgment boxes"); return; }
@@ -292,6 +294,18 @@ export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack
       setSubmitting(false);
       setStep("done");
     }, 1200);
+  }
+
+  if (!waiver) {
+    return (
+      <div style={{ maxWidth: 520, margin: "60px auto", padding: "0 20px", textAlign: "center", fontFamily: "var(--font-body)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 10 }}>Waiver not found</h2>
+        <p style={{ color: "var(--muted-foreground)", fontSize: 16, marginBottom: 22 }}>
+          This waiver link isn't valid or has already been used. Ask your White Glove specialist to send a new one.
+        </p>
+        {onBack && <button onClick={onBack} className="btn-ghost">Back</button>}
+      </div>
+    );
   }
 
   if (waiver.status === "signed" || step === "done") {

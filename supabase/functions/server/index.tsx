@@ -41,6 +41,7 @@ import adminBillingTest from "./routes/adminBillingTest.ts";
 import affiliateJoin from "./routes/affiliateJoin.ts";
 import vaultReset from "./routes/vaultReset.ts";
 import contactAccess from "./routes/contactAccess.ts";
+import password from "./routes/password.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -183,6 +184,7 @@ api.route("/admin", admin);
 const account = new Hono();
 account.use("*", requireUser);
 account.route("/2fa", twoFactor);
+account.route("/password", password);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
 account.route("/affiliate", affiliateJoin);

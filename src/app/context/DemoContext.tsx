@@ -23,6 +23,12 @@ export interface Doc {
   subCategory?: string;
   /* Set when the doc lives in a user-created folder (category "custom"). */
   folderId?: string;
+  /* The file belongs to a record elsewhere (an attachment on a warranty,
+     pet, trip...) and this row only files it in the cabinet too. Deleting
+     the row must not delete the file the record still points at. */
+  linked?: boolean;
+  /* Which section it came from, for linked docs ("Warranties"). */
+  sourceSection?: string;
 }
 /* A user-created folder or sub-folder — see DBVaultFolder. */
 export interface VaultFolder {
@@ -173,6 +179,8 @@ function rowToDoc(row: DBDocument): Doc {
     uploaded: formatDate(row.uploaded_at), uploadedAt: row.uploaded_at, type: row.file_type,
     status: row.status, encrypted: row.is_encrypted, filePath: row.file_path,
     subCategory: row.sub_category ?? undefined, folderId: row.folder_id ?? undefined,
+    linked: Boolean((row.metadata as Record<string, unknown> | null)?.linked),
+    sourceSection: ((row.metadata as Record<string, unknown> | null)?.source_section as string | undefined) ?? undefined,
   };
 }
 
@@ -263,6 +271,9 @@ interface DemoCtx {
   refreshUser: () => Promise<void>;
   addDoc: (doc: Omit<Doc,"id"|"uploaded"|"uploadedAt"|"filePath">, file?: File) => Promise<void>;
   deleteDoc: (id: string) => Promise<void>;
+  /** Files an already-uploaded attachment (a vault-documents path) in the
+   *  File Cabinet as well. Used by AttachDocumentField's auto-sync. */
+  linkStoredDoc: (o: { path: string; name: string; sizeBytes: number; fileType: string; category: string; sourceSection: string }) => Promise<void>;
   addFolder: (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => Promise<VaultFolder | null>;
   renameFolder: (id: string, name: string) => Promise<void>;
   /** Refuses (resolves false) while any document is still filed in the folder or its sub-folders. */
@@ -471,7 +482,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // The database measured the stored file; count what it recorded.
       setUser(u => ({ ...u, storageUsed: Number((u.storageUsed + data.file_size_bytes / 1024 ** 3).toFixed(2)) }));
       notifyBillingChanged();
-      toast.success("Document uploaded & encrypted", { id: tid });
+      toast.success("Document uploaded", { id: tid });
     } catch (err) {
       // The row was refused, so don't leave the stored file behind.
       if (uploadedPath) await db.removeVaultFile(uploadedPath).catch(() => undefined);
@@ -486,13 +497,26 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     const doc = docs.find(x => x.id === id);
     const { error } = await db.deleteDocument(id);
     if (error) { toast.error("Could not delete document", { id: tid }); return; }
-    // The stored file goes too — storage you've deleted shouldn't count.
-    if (doc?.filePath && !doc.filePath.includes("/manual-")) await db.removeVaultFile(doc.filePath).catch(() => undefined);
+    // The stored file goes too — storage you've deleted shouldn't count —
+    // unless it is a linked attachment that its record still uses.
+    if (doc?.filePath && !doc.linked && !doc.filePath.includes("/manual-")) await db.removeVaultFile(doc.filePath).catch(() => undefined);
     setDocs(d => d.filter(x => x.id !== id));
     if (doc) setUser(u => ({ ...u, storageUsed: Math.max(0, Number((u.storageUsed - docBytes(doc) / 1024 ** 3).toFixed(2))) }));
     notifyBillingChanged();
     toast.success("Document permanently deleted", { id: tid });
   }, [docs]);
+
+  const linkStoredDoc = useCallback(async (o: { path: string; name: string; sizeBytes: number; fileType: string; category: string; sourceSection: string }) => {
+    if (!uid) return;
+    const { data, error } = await db.uploadDocument({
+      user_id: uid, name: o.name, category: o.category, file_path: o.path,
+      file_size_bytes: o.sizeBytes, file_type: o.fileType, is_encrypted: false,
+      status: "pending", starred: false, locked: false, tags: [],
+      metadata: { linked: true, source_section: o.sourceSection },
+    });
+    if (error || !data) throw error ?? new Error("Could not file the document");
+    setDocs(d => [rowToDoc(data), ...d]);
+  }, [uid]);
 
   /* Folders */
   const addFolder = useCallback(async (f: { name: string; description?: string; parentId?: string | null; parentCategory?: string | null; color?: string }) => {
@@ -844,7 +868,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     <DemoContext.Provider value={{
       user, docs, folders, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       funeralPlan, emergencyInfo,
-      updateUser, refreshUser, addDoc, deleteDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
+      updateUser, refreshUser, addDoc, deleteDoc, linkStoredDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders, saveContactVerification,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,

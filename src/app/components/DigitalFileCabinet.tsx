@@ -10,11 +10,8 @@ import { useDemo, type Doc, type VaultFolder } from "../context/DemoContext";
 import { checkUpload, showQuotaRefusal } from "../utils/storageQuota";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
-// docSyncStore is a shared bridge used by many other sections (Warranties, TravelPlanner,
-// PetRecords, JobHistory, DaycareInfo, etc. via AttachDocumentField/SyncToFileCabinet) to push
-// documents into the File Cabinet — it's entangled with all of those unrelated components, so
-// it's left as-is here rather than folded into the new vault_documents-backed `docs` list.
-import { subscribeToSyncedDocs, removeSyncedDoc, type SyncedDoc } from "../services/docSyncStore";
+// Attachments from other sections (Warranties, Pets, Trips...) arrive here as
+// ordinary vault_documents rows marked linked (DemoContext.linkStoredDoc).
 import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar & AI assistant) ── */
@@ -50,6 +47,9 @@ interface FolderFile {
   filePath?: string;
   /* Sub-folder (set of documents) the file is filed under, if any. */
   subCategory?: string;
+  /* Set for attachments filed here from another section (Warranties,
+     Pets...): shown as a badge, and deleting removes only the cabinet row. */
+  sourceSection?: string;
 }
 
 interface Cabinet {
@@ -331,7 +331,7 @@ function docToFolderFile(d: Doc): FolderFile {
     d.type.includes("video") ? "video" :
     d.type.includes("pdf") ? "pdf" :
     d.type.includes("doc") ? "doc" : "other";
-  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded, filePath: d.filePath, subCategory: d.subCategory };
+  return { id: d.id, name: d.name, type, size: `${d.size} ${d.sizeUnit}`, modified: d.uploaded, filePath: d.filePath, subCategory: d.subCategory, sourceSection: d.linked ? (d.sourceSection ?? "Linked") : undefined };
 }
 
 function relativeTime(date?: Date): string {
@@ -561,12 +561,9 @@ export function DigitalFileCabinet() {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selected, setSelected] = useState<FolderFile | null>(null);
-  const [syncedDocs, setSyncedDocs] = useState<SyncedDoc[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const drawersRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => subscribeToSyncedDocs(setSyncedDocs), []);
 
   // Folders & Reminders hands over a folder to open.
   useEffect(() => {
@@ -608,8 +605,10 @@ export function DigitalFileCabinet() {
       size: Number((f.size/1024/1024).toFixed(1)),
       sizeUnit: "MB",
       type: f.type.startsWith("image") ? "image" : f.type.startsWith("video") ? "video" : f.type.includes("pdf") ? "pdf" : "other",
-      status: "verified",
-      encrypted: true,
+      // Nobody has reviewed it and the browser doesn't encrypt it (Storage
+      // encrypts at rest), so don't record either as if it had happened.
+      status: "pending",
+      encrypted: false,
     }, f))).finally(() => setUploading(false));
   }, [addDoc, folders, currentSub]);
 
@@ -683,20 +682,18 @@ export function DigitalFileCabinet() {
   };
 
   const folderCount = (folder: Cabinet) =>
-    folder.files.length + docsForFolder(folder.id).length + syncedDocs.filter(d => d.targetFolderId === folder.id).length;
+    folder.files.length + docsForFolder(folder.id).length;
 
   // Card-grid stats — size total & most-recent-activity, derived from the same
-  // files/uploaded docs/synced docs as folderCount, nothing added or removed.
+  // files and uploaded docs as folderCount, nothing added or removed.
   const folderStats = (folder: Cabinet) => {
     const sizes: (string | undefined)[] = [
       ...folder.files.map(f => f.size),
       ...docsForFolder(folder.id).map(f => f.size),
-      ...syncedDocs.filter(d => d.targetFolderId === folder.id).map(d => d.size),
     ];
     const dateStrs: (string | undefined)[] = [
       ...folder.files.map(f => f.modified),
       ...docsForFolder(folder.id).map(f => f.modified),
-      ...syncedDocs.filter(d => d.targetFolderId === folder.id).map(d => d.syncedAt),
     ];
     const totalMB = sizes.reduce((s, sz) => s + parseSizeMB(sz), 0);
     const dates = dateStrs.map(s => (s ? new Date(s) : undefined)).filter((d): d is Date => !!d && !isNaN(d.getTime()));
@@ -704,23 +701,12 @@ export function DigitalFileCabinet() {
     return { sizeLabel: formatMB(totalMB), updated: relativeTime(latest) };
   };
 
-  // Convert synced docs into FolderFile shape so the cabinet can render them
-  const syncedForCurrent: (FolderFile & { _synced: true; _sourceSection: string; _syncId: string })[] = current
-    ? syncedDocs
-        .filter(d => d.targetFolderId === current.id)
-        .map(d => ({
-          id: `synced-${d.id}`, name: d.name, size: d.size, modified: d.syncedAt,
-          type: (d.type === "Image" ? "image" : "pdf") as FolderFile["type"],
-          _synced: true as const, _sourceSection: d.sourceSection, _syncId: d.id,
-        }))
-    : [];
-
-  const currentFiles = current ? [...current.files, ...docsForFolder(current.id), ...syncedForCurrent] : [];
+  const currentFiles = current ? [...current.files, ...docsForFolder(current.id)] : [];
   const filteredFiles = currentFiles.filter(f =>
     f.name.toLowerCase().includes(search.toLowerCase()) && (!currentSub || f.subCategory === currentSub));
   const subCount = (name: string) => currentFiles.filter(f => f.subCategory === name).length;
 
-  const totalFiles = allCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0) + syncedDocs.length;
+  const totalFiles = allCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0);
   const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
 
   const kpis = [
@@ -1005,7 +991,7 @@ export function DigitalFileCabinet() {
                     <div className="fname">{file.name}</div>
                     <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
                       <span className="fmeta">{file.count?`${file.count} files`:file.size}</span>
-                      {(file as any)._synced && <span className="synced">🔗 {(file as any)._sourceSection}</span>}
+                      {file.sourceSection && <span className="synced">🔗 {file.sourceSection}</span>}
                     </div>
                   </div>
                   <div className="fdate">{file.modified}</div>
@@ -1016,8 +1002,7 @@ export function DigitalFileCabinet() {
                     <button onClick={e=>{e.stopPropagation(); void previewFile(file);}}><Eye size={13}/></button>
                     <button className="del" onClick={e=>{
                       e.stopPropagation();
-                      if ((file as any)._synced) { removeSyncedDoc((file as any)._syncId); toast.success("Removed from File Cabinet"); }
-                      else if (docs.some(d => d.id === file.id)) { deleteDoc(file.id); if (selected?.id === file.id) setSelected(null); }
+                      if (docs.some(d => d.id === file.id)) { deleteDoc(file.id); if (selected?.id === file.id) setSelected(null); }
                       else { toast.success(`Deleted: ${file.name}`); }
                     }}><Trash2 size={13}/></button>
                   </div>

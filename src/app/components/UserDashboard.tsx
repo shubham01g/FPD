@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Archive, Users, HardDrive, TrendingUp, AlertTriangle, AlertCircle, FileText,
   ArrowRight, Bell, Plus, Check
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../services/supabase";
 import { deriveStorageBreakdown } from "../utils/storageBreakdown";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
 
@@ -204,11 +206,29 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
 
   const unread = notifications.filter(n => !n.read).length;
 
+  // Real affiliate earnings (this tile used to show "$284.50" to everyone).
+  const { authUser } = useAuth();
+  const [affiliate, setAffiliate] = useState<{ total_earned: number; status: string } | null | undefined>(undefined);
+  useEffect(() => {
+    if (!authUser) return;
+    let alive = true;
+    db.getAffiliate(authUser.id)
+      .then(({ data }) => { if (alive) setAffiliate(data ? { total_earned: Number(data.total_earned ?? 0), status: data.status } : null); })
+      .catch(() => { if (alive) setAffiliate(null); });
+    return () => { alive = false; };
+  }, [authUser]);
+  const referralValue = affiliate === undefined ? "…"
+    : affiliate === null ? "—"
+    : "$" + affiliate.total_earned.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const referralSub = affiliate === undefined ? "Loading"
+    : affiliate === null ? "Join the affiliate program"
+    : affiliate.status === "active" ? "Total earned" : "Awaiting approval";
+
   const statCards = [
     { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN },
     { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS },
     { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2 },
-    { label: "Referral Earnings", value: "$284.50", sub: "This month", icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: ACCENT },
+    { label: "Referral Earnings", value: referralValue, sub: referralSub, icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: ACCENT },
   ];
 
   const quickActions = [

@@ -19,7 +19,8 @@ import React, { useRef, useState } from "react";
 import { Upload, CheckCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import { ScanButton } from "./DocumentScanner";
-import { syncDocToFileCabinet, SECTION_FOLDER_MAP } from "../services/docSyncStore";
+import { SECTION_FOLDER_MAP } from "../services/docSyncStore";
+import { useDemo } from "../context/DemoContext";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 
@@ -62,23 +63,28 @@ export function AttachDocumentField({
 }: AttachDocumentFieldProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { authUser } = useAuth();
+  const { linkStoredDoc } = useDemo();
   const [busy, setBusy] = useState(false);
 
-  function autoSync(filename: string) {
+  /* Also file the attachment in the Digital File Cabinet, in the first
+     (most relevant) folder for this section. It is a real vault_documents
+     row pointing at the same stored file, marked linked so deleting it from
+     the cabinet never removes the file the record still uses. This used to
+     go to an in-memory list that vanished on refresh. */
+  async function autoSync(file: File, path: string) {
     if (!sectionId) return;
     const folders = SECTION_FOLDER_MAP[sectionId];
     if (!folders?.length) return;
-    // Auto-sync to the first (most relevant) folder for this section
-    const { folderId, folderLabel } = folders[0];
-    syncDocToFileCabinet({
-      name: filename,
-      sourceSection: sectionLabel,
-      sourceSectionId: sectionId,
-      targetFolder: folderLabel,
-      targetFolderId: folderId,
-      size: "—",
-      type: filename.endsWith(".pdf") ? "PDF" : "Document",
-    });
+    try {
+      await linkStoredDoc({
+        path, name: file.name, sizeBytes: file.size,
+        fileType: file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf") ? "pdf" : (file.type.startsWith("image/") ? "image" : "doc"),
+        category: folders[0].folderId, sourceSection: sectionLabel,
+      });
+    } catch {
+      // The attachment itself is saved; only the cabinet copy failed.
+      toast.message(`"${file.name}" is attached, but couldn't also be filed in the File Cabinet.`);
+    }
   }
 
   /* Shared by the upload button and the scanner, which also hands over a
@@ -89,7 +95,7 @@ export function AttachDocumentField({
     try {
       const path = await db.uploadVaultFile(authUser.id, file);
       onChange(path);
-      autoSync(file.name);
+      void autoSync(file, path);
       toast.success(`"${file.name}" attached`);
     } catch (err) {
       toast.error(`Could not attach "${file.name}": ${(err as Error).message}`);

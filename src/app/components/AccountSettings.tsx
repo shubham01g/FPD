@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../services/supabase";
-import { requestEmailChange } from "../services/auth";
+import { requestEmailChange, changePassword as changePasswordOnServer } from "../services/auth";
 import { prepareImage } from "../utils/imageInput";
 import { StoredImage } from "./StoredImage";
 import { isPushSupported, hasActivePushSubscription, subscribeToPush, unsubscribeFromPush } from "../services/push";
@@ -470,12 +470,15 @@ export function AccountSettings() {
     if (!currentPw) { toast.error("Enter your current password"); return; }
     if (newPw.length < 8) { toast.error("New password must be at least 8 characters"); return; }
     if (newPw !== confirmPw) { toast.error("New passwords don't match"); return; }
+    if (newPw === currentPw) { toast.error("Choose a password different from the current one"); return; }
     setChangingPw(true);
-    setTimeout(() => {
-      setChangingPw(false);
-      setCurrentPw(""); setNewPw(""); setConfirmPw("");
-      toast.success("Password updated successfully");
-    }, 1000);
+    changePasswordOnServer(currentPw, newPw)
+      .then(() => {
+        setCurrentPw(""); setNewPw(""); setConfirmPw("");
+        toast.success("Password updated. Use the new one next time you sign in.");
+      })
+      .catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't change the password"))
+      .finally(() => setChangingPw(false));
   }
 
   const TABS: { id: SettingsTab; label: string }[] = [
