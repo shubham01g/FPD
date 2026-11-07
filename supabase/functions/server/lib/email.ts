@@ -191,10 +191,10 @@ export function adminInviteEmail(o: { name: string; roleLabel: string; link: str
   };
 }
 
-/** Tells someone they were named a Legacy or Guardian Contact. There is no
- *  contact sign-in, so this explains the role rather than asking for a click. */
+/** Tells someone they were named a Legacy or Guardian Contact, with the link
+ *  that connects the role to their own Final Pass Down sign-in (046). */
 export function contactInviteEmail(o: {
-  contactName: string; ownerName: string; type: "legacy" | "guardian"; link: string;
+  contactName: string; ownerName: string; type: "legacy" | "guardian"; link: string; days: number;
 }): Omit<EmailMessage, "to"> {
   const role = o.type === "legacy" ? "Legacy Contact" : "Guardian Contact";
   const lead = `${o.ownerName} has named you as their ${role} on ${APP_NAME}.`;
@@ -202,21 +202,46 @@ export function contactInviteEmail(o: {
     ? `A Legacy Contact is the person trusted to receive access to their vault after their passing. Nothing is shared with you today.`
     : `A Guardian Contact is someone trusted with view-only access to the folders they choose to share, such as medical or household records.`;
   const next = o.type === "legacy"
-    ? `You don't need to do anything right now. ${o.ownerName} may ask you for a government-issued photo ID so our team can verify your identity ahead of time. If the time comes, we will email you a secure link to claim access.`
-    : `You don't need to do anything right now. ${o.ownerName} can tell you more about what they have shared with you.`;
-  const closing = `If you don't know ${o.ownerName}, you can ignore this email.`;
+    ? `Accept the invitation by signing in to ${APP_NAME}, or creating a free sign-in. ${o.ownerName} may also ask you for a government-issued photo ID so our team can verify your identity ahead of time. If the time comes, your access opens on that same sign-in.`
+    : `Accept the invitation by signing in to ${APP_NAME}, or creating a free sign-in. Once our team has verified you, what ${o.ownerName} shared appears under "Shared with me".`;
+  const closing = `This link is unique to you and works for ${o.days} days. If you don't know ${o.ownerName}, you can ignore this email.`;
   return {
     subject: `${o.ownerName} named you as their ${role} — ${APP_NAME}`,
     category: "contact_invite",
     replyTo: MAILBOX.verify,
-    text: `Hi ${o.contactName},\n\n${lead}\n\n${meaning}\n\n${next}\n\nAbout ${APP_NAME}: ${o.link}\n\n${closing}\nQuestions? Reply to this email or write to ${MAILBOX.verify}.`,
+    text: `Hi ${o.contactName},\n\n${lead}\n\n${meaning}\n\n${next}\n\nAccept the invitation: ${o.link}\n\n${closing}\nQuestions? Reply to this email or write to ${MAILBOX.verify}.`,
     html: layout(`You've been named a ${role}`, `
       <p style="margin:0 0 16px;line-height:1.6;">Hi ${esc(o.contactName)},</p>
       <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
       <p style="margin:0 0 16px;line-height:1.6;">${esc(meaning)}</p>
       <p style="margin:0 0 20px;line-height:1.6;">${esc(next)}</p>
-      ${button(o.link, `About ${APP_NAME}`)}
+      ${button(o.link, "Accept invitation")}
       <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`, MAILBOX.verify),
+  };
+}
+
+/** Sent to each approved claimant when an admin activates the continuation
+ *  fee: the Legacy Vault is open. `link` is the Access Portal for a contact
+ *  already linked to a sign-in, or a fresh accept link for one who isn't. */
+export function accessLiveEmail(o: {
+  contactName: string; ownerName: string; link: string; needsAccept: boolean; until: string;
+}): Omit<EmailMessage, "to"> {
+  const lead = `Your Legacy Contact access to ${o.ownerName}'s ${APP_NAME} vault is now open. You can view what they left for you until ${o.until}.`;
+  const how = o.needsAccept
+    ? `Open the link below, then sign in to ${APP_NAME} or create a free sign-in. That connects your access to your sign-in, and from then on it is under "Shared with me".`
+    : `Sign in to ${APP_NAME} with your usual sign-in and open "Shared with me".`;
+  const closing = "Saved passwords stay encrypted with the owner's own passphrase and can't be shown yet. Everything else is view-only.";
+  return {
+    subject: `Your Legacy Vault access is open — ${APP_NAME}`,
+    category: "legacy_access_live",
+    replyTo: MAILBOX.claims,
+    text: `Dear ${o.contactName},\n\n${lead}\n\n${how}\n\n${o.link}\n\n${closing}\n\nQuestions? Reply to this email or write to ${MAILBOX.claims}.`,
+    html: layout("Your Legacy Vault access is open", `
+      <p style="margin:0 0 16px;line-height:1.6;">Dear ${esc(o.contactName)},</p>
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(how)}</p>
+      ${button(o.link, "Open the Legacy Vault")}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`, MAILBOX.claims),
   };
 }
 

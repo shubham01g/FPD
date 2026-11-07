@@ -91,8 +91,11 @@ export function ContinuationFeeAdmin({ view }: { view: "config" | "payments" }) 
   const activateFee = async (id: string, userName: string) => {
     setActivatingId(id);
     try {
-      await adminApi.post(`/subscriptions/${id}/activate`);
+      // The server also emails each approved claimant their Access Portal link.
+      const r = await adminApi.post<{ emailed?: number; emailErrors?: string[] }>(`/subscriptions/${id}/activate`);
       toast.success(`Vault activated for ${userName} — ${periodMonths}-month window started`);
+      if (r.emailed) toast.success(`Access email sent to ${r.emailed} legacy contact${r.emailed === 1 ? "" : "s"}`);
+      if (r.emailErrors?.length) toast.warning(`Access email not sent: ${r.emailErrors.join("; ")}`);
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to activate continuation fee");

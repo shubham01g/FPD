@@ -4,13 +4,15 @@
 // Adding a Legacy or Guardian Contact has always shown "Verification invite
 // sent", but nothing was ever sent — the browser only stamped invite_sent_at on
 // the row. This is the send: the contact gets an email telling them who named
-// them and what the role means.
+// them, what the role means, and a link that connects the role to their own
+// sign-in (lib/contactLink.ts, migration 046).
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 import {
   EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, contactInviteEmail, linkOrigin, sendEmail,
 } from "../lib/email.ts";
+import { CONTACT_LINK_DAYS, contactAcceptPath, issueContactLink } from "../lib/contactLink.ts";
 
 const contacts = new Hono();
 
@@ -51,6 +53,14 @@ contacts.post("/:id/invite", async (c) => {
 
   const { data: owner } = await db.from("users").select("full_name").eq("id", user.id).maybeSingle();
 
+  let token: string;
+  try {
+    token = await issueContactLink(db, contact.id);
+  } catch (err) {
+    console.error("contact invite: could not store the link", err);
+    return c.json({ error: "The invite link could not be created." }, 500);
+  }
+
   try {
     await sendEmail({
       to: contact.email,
@@ -58,7 +68,8 @@ contacts.post("/:id/invite", async (c) => {
         contactName: contact.full_name,
         ownerName: owner?.full_name || user.email,
         type: contact.contact_type,
-        link: linkOrigin(c.req.header("Origin")),
+        link: `${linkOrigin(c.req.header("Origin"))}${contactAcceptPath(token)}`,
+        days: CONTACT_LINK_DAYS,
       }),
     });
   } catch (err) {

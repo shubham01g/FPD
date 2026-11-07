@@ -39,6 +39,7 @@ import adminUserBilling from "./routes/adminUserBilling.ts";
 import adminBillingTest from "./routes/adminBillingTest.ts";
 import affiliateJoin from "./routes/affiliateJoin.ts";
 import vaultReset from "./routes/vaultReset.ts";
+import contactAccess from "./routes/contactAccess.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -177,6 +178,8 @@ account.route("/billing", billing);
 account.route("/contacts", contacts);
 account.route("/affiliate", affiliateJoin);
 account.route("/vault", vaultReset);
+// The Access Portal: a Legacy/Guardian Contact reading what they were given.
+account.route("/access", contactAccess);
 api.route("/account", account);
 
 // Public, unauthenticated data for the customer-facing app.

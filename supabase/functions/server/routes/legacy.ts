@@ -196,10 +196,17 @@ legacy.post("/claims/:id/approve", async (c) => {
     .update({ status: "approved", reviewed_by: admin.id, reviewed_at: new Date().toISOString(), rejection_reason: null })
     .eq("id", id)
     .in("status", ["pending_review", "awaiting_docs"])
-    .select("id, requested_access")
+    .select("id, requested_access, contact_id")
     .maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
   if (!updated) return c.json({ error: "Claim not found, or it is not waiting on review" }, 400);
+
+  // The claim proved who the claimant is, so the contact counts as verified
+  // (the Access Portal opens once the fee is activated too — contactAccess.ts).
+  if (updated.contact_id) {
+    const { error: vErr } = await db.from("contacts").update({ verification_status: "verified" }).eq("id", updated.contact_id);
+    if (vErr) console.error("approve: could not mark the contact verified", vErr);
+  }
 
   await addEvent(db, id, `Admin approved claim — ${updated.requested_access} granted`, admin.email);
   const { data } = await loadClaim(db, id);

@@ -187,10 +187,12 @@ interface LayoutProps {
   onNavigate: (page: PageId) => void;
   onGoAdmin?: () => void;
   onSignOut?: () => void;
+  /** Set when this user is someone's Legacy/Guardian Contact: opens /access. */
+  onOpenShared?: () => void;
   children: React.ReactNode;
 }
 
-export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children }: LayoutProps) {
+export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, onOpenShared, children }: LayoutProps) {
   const [showClone, setShowClone] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [query, setQuery] = useState("");
@@ -391,6 +393,20 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, children
 
         {/* Footer — Vault Clone + user card */}
         <div className="flex-shrink-0" style={{ borderTop: `1px solid ${BORDER}`, padding: collapsed ? "10px 12px" : "12px" }}>
+          {onOpenShared && (
+            <button onClick={onOpenShared} title={collapsed ? "Shared with me" : undefined}
+              className="w-full flex items-center rounded-xl transition-all"
+              style={{
+                gap: collapsed ? 0 : 10, justifyContent: collapsed ? "center" : "flex-start",
+                padding: collapsed ? "10px 0" : "9px 11px", marginBottom: 8,
+                background: "rgba(217,154,107,0.1)", border: `1px solid ${BORDER}`, color: SOFT,
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(217,154,107,0.2)"}
+              onMouseLeave={e => e.currentTarget.style.background = "rgba(217,154,107,0.1)"}>
+              <Users size={16} style={{ color: "#D99A6B", flexShrink: 0 }}/>
+              {!collapsed && <span style={{ fontSize: 15.5, fontWeight: 600 }}>Shared with me</span>}
+            </button>
+          )}
           <button onClick={() => setShowClone(true)} title={collapsed ? "Legacy Vault Export" : undefined}
             className="w-full flex items-center rounded-xl transition-all"
             style={{

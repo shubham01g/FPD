@@ -14,6 +14,9 @@ captureReferral();
 import { starterDaysLeft } from "./utils/starterPlan";
 import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
 import { VaultResetPage } from "./components/VaultResetPage";
+import { ContactAcceptPage } from "./components/ContactAcceptPage";
+import { AccessPortal } from "./components/AccessPortal";
+import { listSharedOwners } from "./services/contactAccess";
 import { PortalNotice } from "./components/PortalNotice";
 import { usePlatform, hiddenPages } from "./services/platform";
 import { adminApi } from "./services/adminApi";
@@ -355,23 +358,33 @@ function LandingRoute() {
 function UserLoginRoute() {
   const navigate = useNavigate();
   const location = useLocation();
-  // ?next= brings a signed-out user back to the vault reset link they opened.
-  // Only that one page is allowed, so the parameter can't send anyone elsewhere.
-  const next = new URLSearchParams(location.search).get("next");
-  const afterLogin = next && /^\/vault-reset\/[0-9a-f]{64}$/.test(next) ? next : "/dashboard";
+  // ?next= brings a signed-out user back to the link they opened. Only these
+  // pages are allowed, so the parameter can't send anyone elsewhere.
+  const next = safeNext(location.search);
+  const afterLogin = next ?? "/dashboard";
   return (
     <div className="size-full">
       <UserLogin
         onLogin={() => navigate(afterLogin)}
-        onGoSignup={() => navigate("/signup")}
+        onGoSignup={() => navigate(next ? `/signup?next=${encodeURIComponent(next)}` : "/signup")}
         onBackToSite={() => navigate("/")}
       />
     </div>
   );
 }
 
+/** The ?next= targets sign-in and sign-up may return to: the vault reset
+ *  link, a contact invite (migration 046) and the Access Portal. */
+function safeNext(search: string): string | null {
+  const next = new URLSearchParams(search).get("next");
+  return next && /^(\/vault-reset\/[0-9a-f]{64}|\/contact-accept\/[0-9a-f]{64}|\/access)$/.test(next) ? next : null;
+}
+
 function UserSignupRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // A contact invited from /contact-accept/:token comes back there.
+  const afterSignup = safeNext(location.search);
   // System → Settings → Feature Flags → Public Signup.
   const platform = usePlatform();
   if (platform.ready && !platform.flags.publicSignup) {
@@ -384,8 +397,8 @@ function UserSignupRoute() {
   return (
     <div className="size-full">
       <UserSignup
-        onSignedUp={() => navigate("/dashboard")}
-        onGoLogin={() => navigate("/login")}
+        onSignedUp={() => navigate(afterSignup ?? "/dashboard")}
+        onGoLogin={() => navigate(afterSignup ? `/login?next=${encodeURIComponent(afterSignup)}` : "/login")}
         onBackToSite={() => navigate("/")}
       />
     </div>
@@ -416,6 +429,14 @@ function UserRoute() {
     if (!authUser) return;
     trackPageView(authUser.id, userPage);
   }, [authUser, userPage]);
+
+  // Someone who is also a Legacy/Guardian Contact gets a "Shared with me"
+  // link in the sidebar (migration 046). Quietly absent if the call fails.
+  const [hasShared, setHasShared] = useState(false);
+  useEffect(() => {
+    if (!authUser) return;
+    listSharedOwners().then(o => setHasShared(o.length > 0)).catch(() => setHasShared(false));
+  }, [authUser]);
 
   useEffect(() => {
     if (!authUser) return;
@@ -540,6 +561,7 @@ function UserRoute() {
         onNavigate={setUserPage}
         onGoAdmin={() => navigate("/admin/login")}
         onSignOut={() => { signOut(); navigate("/"); }}
+        onOpenShared={hasShared ? () => navigate("/access") : undefined}
       >
         {user.planStatus === "past_due" && <PastDueBanner/>}
         {starterDays !== null && userPage !== "storage-usage" && (
@@ -740,6 +762,42 @@ function VaultResetRoute() {
   );
 }
 
+/* ── Contacts (migration 046) ─────────────────────────────────────── */
+/* The emailed Legacy/Guardian invite. Signed out is fine — the page offers
+   sign in or sign up and comes back. Same gates as VaultResetRoute. */
+function ContactAcceptRoute() {
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const { session, loading, twoFactorPending } = useAuth();
+  const { user } = useDemo();
+  if (!token) return <Navigate to="/" replace/>;
+  if (loading) return null;
+  if (session && twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/login")}/>;
+  if (session && (user.deceasedAt || user.suspended)) return <Navigate to="/dashboard" replace/>;
+  return (
+    <div className="size-full overflow-y-auto">
+      <ContactAcceptPage token={token}/>
+    </div>
+  );
+}
+
+/* "Shared with me". Not behind the contact's own plan: a contact never has to
+   pay to see what was left for them. */
+function AccessRoute() {
+  const navigate = useNavigate();
+  const { session, loading, twoFactorPending } = useAuth();
+  const { user } = useDemo();
+  if (loading) return null;
+  if (!session) return <Navigate to={`/login?next=${encodeURIComponent("/access")}`} replace/>;
+  if (twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/login")}/>;
+  if (user.deceasedAt || user.suspended) return <Navigate to="/dashboard" replace/>;
+  return (
+    <div className="size-full overflow-y-auto">
+      <AccessPortal/>
+    </div>
+  );
+}
+
 function DocSubmitRoute() {
   // The real client flow is token-based and lives elsewhere; this route only
   // ever hosted the demo client picker, so without it there is nothing here.
@@ -771,6 +829,8 @@ function AppShell() {
       <Route path="/schedule" element={<WGScheduleDemo/>}/>
       <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
       <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
+      <Route path="/contact-accept/:token" element={<ContactAcceptRoute/>}/>
+      <Route path="/access" element={<AccessRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
     </Routes>
   );
