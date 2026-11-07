@@ -64,8 +64,10 @@ adminAccounts.post("/", async (c) => {
   if (!name || !email || !role || !Array.isArray(permissions)) {
     return c.json({ error: "'name', 'email', 'role', and 'permissions' are required" }, 400);
   }
-  if (role === "super_admin" && !canGrantSuperAdmin(actor)) {
-    return c.json({ error: "Only a super admin can grant the super_admin role" }, 403);
+  // Inviting sets a permission list, so a sub-admin could otherwise invite an
+  // address they control with more access than they have.
+  if (!canGrantSuperAdmin(actor)) {
+    return c.json({ error: "Only a super admin can invite admins" }, 403);
   }
 
   const inviteToken = randomToken();
@@ -101,13 +103,26 @@ adminAccounts.patch("/:id", async (c) => {
   if (Object.keys(patch).length === 0) {
     return c.json({ error: "No updatable fields provided" }, 400);
   }
-  if (patch.role === "super_admin" && !canGrantSuperAdmin(actor)) {
-    return c.json({ error: "Only a super admin can grant the super_admin role" }, 403);
+  const { data: target } = await adminClient().from("admin_accounts").select("email, role").eq("id", id).maybeSingle();
+  if (!target) return c.json({ error: "Admin account not found" }, 404);
+  const isSelf = target.email === actor.email;
+  const isSuper = canGrantSuperAdmin(actor);
+
+  // Role and permissions decide what an admin can reach, so only a super admin
+  // changes them, and never on their own account.
+  if (("role" in patch || "permissions" in patch) && !isSuper) {
+    return c.json({ error: "Only a super admin can change roles or permissions" }, 403);
+  }
+  if (("role" in patch || "permissions" in patch) && isSelf) {
+    return c.json({ error: "You can't change your own role or permissions" }, 400);
+  }
+  // A sub-admin must not be able to suspend or edit a super admin.
+  if (target.role === "super_admin" && !isSuper) {
+    return c.json({ error: "Only a super admin can change a super admin's account" }, 403);
   }
   // Suspending yourself locks you out of the portal with no way back in.
-  if (patch.status === "suspended") {
-    const { data: target } = await adminClient().from("admin_accounts").select("email").eq("id", id).maybeSingle();
-    if (target?.email === actor.email) return c.json({ error: "You can't suspend your own admin account" }, 400);
+  if (patch.status === "suspended" && isSelf) {
+    return c.json({ error: "You can't suspend your own admin account" }, 400);
   }
 
   const { data, error } = await adminClient().from("admin_accounts").update(patch).eq("id", id).select().maybeSingle();

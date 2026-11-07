@@ -185,11 +185,18 @@ users.post("/:id/reset-mfa", async (c) => {
   return c.json({ ok: true });
 });
 
-// PATCH /admin/users/:id — admin edit (plan, plan_status, is_admin)
+// PATCH /admin/users/:id — admin edit (plan_status, email_verified).
+// is_admin is deliberately NOT editable here: an admin with only "users: edit"
+// could otherwise promote an account they control to an unrestricted admin
+// (no admin_accounts row = permissions null = everything). Admins are made
+// only through Admin Team & Roles → Invite, which records their permissions.
 users.patch("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json().catch(() => ({}));
-  const allowed = ["plan", "plan_status", "is_admin", "email_verified"] as const;
+  if ("is_admin" in body) {
+    return c.json({ error: "Admin access is granted from Admin Team & Roles, not here." }, 400);
+  }
+  const allowed = ["plan", "plan_status", "email_verified"] as const;
   const patch: Record<string, unknown> = {};
   for (const key of allowed) if (key in body) patch[key] = body[key];
 

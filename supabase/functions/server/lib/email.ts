@@ -1,4 +1,5 @@
 // SendGrid v3 sender — the one place the edge function sends email from.
+import { defaultOrigin, isOurOrigin, originOf } from "./origins.ts";
 //
 // The key is an Edge Function secret, never in the repo:
 //   npx supabase secrets set SENDGRID_API_KEY=SG.... --project-ref <ref>
@@ -245,10 +246,13 @@ export function accessLiveEmail(o: {
   };
 }
 
-/** Where links in outgoing mail point: the page the admin sent it from, so a
- *  link issued on a staging or preview site leads back to that same site. */
+/** Where links in outgoing mail point: the page it was sent from, so a link
+ *  issued on a staging or preview site leads back to that same site, but
+ *  only when that page is one of ours (lib/origins.ts). The Origin header is
+ *  set by the caller, so trusting any value let anyone make our mail server
+ *  send invite links that point at their own domain. */
 export function linkOrigin(originHeader: string | undefined): string {
-  return originHeader && /^https?:\/\/[^/]+$/.test(originHeader) ? originHeader : SITE_URL;
+  return isOurOrigin(originHeader) ? originOf(originHeader)! : defaultOrigin();
 }
 // ── Billing ─────────────────────────────────────────────────────────────
 // Stripe sends receipts. These are the few billing emails the app sends

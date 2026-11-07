@@ -5,6 +5,7 @@
 // customer calls about their own account.
 import type { Context, Next } from "npm:hono";
 import { anonClient } from "../lib/supabaseAdmin.ts";
+import { tokenClaims } from "../lib/twoFactorGate.ts";
 
 export interface AuthedUser {
   id: string;
@@ -20,21 +21,9 @@ export interface AuthedUser {
   aal: string;
 }
 
-/**
- * Reads claims out of an *already verified* token. getUser() below checks the
- * signature against the auth server; this only pulls fields that
- * getUser()'s response does not expose.
- */
-function claims(token: string): { sessionId: string | null; aal: string } {
-  try {
-    const part = token.split(".")[1];
-    const json = atob(part.replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(json) as { session_id?: string; aal?: string };
-    return { sessionId: payload.session_id ?? null, aal: payload.aal ?? "aal1" };
-  } catch {
-    return { sessionId: null, aal: "aal1" };
-  }
-}
+// getUser() below checks the token's signature; tokenClaims only reads
+// fields its response does not expose.
+const claims = tokenClaims;
 
 export async function requireUser(c: Context, next: Next) {
   const authHeader = c.req.header("Authorization") ?? "";

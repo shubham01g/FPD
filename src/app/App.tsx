@@ -593,14 +593,15 @@ function AdminLoginRoute() {
 function AdminRoute() {
   const navigate = useNavigate();
   const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
+  const { session, loading: authLoading, twoFactorPending } = useAuth();
 
   // System → Settings → Security → Session Timeout: sign an idle admin out.
   const authed = isAdminAuthed();
   const { data: settingsData } = useAdminFetch(
-    () => authed
+    () => authed && !twoFactorPending
       ? adminApi.get<{ settings: { security?: { sessionTimeout?: string } } }>("/settings")
       : Promise.resolve({ settings: {} as { security?: { sessionTimeout?: string } } }),
-    [authed],
+    [authed, twoFactorPending],
   );
   const timeoutMinutes = Number(settingsData?.settings.security?.sessionTimeout);
   useEffect(() => {
@@ -615,6 +616,14 @@ function AdminRoute() {
   }, [authed, timeoutMinutes, navigate]);
 
   if (!authed) return <Navigate to="/admin/login" replace/>;
+  if (authLoading) return null;
+  // Same gate as the member portal. AdminLogin only challenges native
+  // (authenticator/SMS) factors, so an email-code admin, or a restored
+  // session that still owes a second factor, is challenged here. The server
+  // refuses /admin/* until it is passed (requireAdmin).
+  if (session && twoFactorPending) {
+    return <TwoFactorGate onCancelled={() => { supabase.auth.signOut(); clearAdminAuthed(); navigate("/admin/login"); }}/>;
+  }
 
   const renderAdminPage = () => {
     switch (adminPage) {

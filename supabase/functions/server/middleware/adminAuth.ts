@@ -2,6 +2,7 @@
 // Every /admin/* route is expected to run this before its handler.
 import type { Context, Next } from "npm:hono";
 import { adminClient, anonClient } from "../lib/supabaseAdmin.ts";
+import { secondFactorState } from "../lib/twoFactorGate.ts";
 
 export interface ModulePermission {
   module: string;
@@ -69,6 +70,24 @@ export async function requireAdmin(c: Context, next: Next) {
     if (account.status === "invited") {
       return c.json({ error: "This admin account has not accepted its invite yet" }, 403);
     }
+  }
+
+  // Second factor, enforced here and not only in AdminLogin: without this a
+  // stolen admin password plus a direct API call skipped 2FA entirely.
+  // Admins who have not enrolled any factor still pass, so nobody is locked
+  // out. Enrolment for every admin is a separate step.
+  let mfa;
+  try {
+    mfa = await secondFactorState(authedUser.id, token);
+  } catch (err) {
+    console.error("requireAdmin: 2FA check failed", err);
+    return c.json({ error: "Failed to verify two-step verification" }, 500);
+  }
+  if (!mfa.passed) {
+    return c.json({ error: "Two-step verification required", code: "2fa_required" }, 403);
+  }
+  if (!mfa.enrolled) {
+    console.warn(`requireAdmin: admin ${row.email} has no two-step verification enrolled`);
   }
 
   const admin: AdminUser = {

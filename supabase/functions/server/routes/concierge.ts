@@ -8,7 +8,12 @@ const concierge = new Hono();
 function genTempPassword(): string {
   // Readable-enough one-time credential the admin hands to the employee
   // themselves — there's no email delivery wired up to send it automatically.
-  return Math.random().toString(36).slice(2, 6).toUpperCase() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+  // crypto.getRandomValues, not Math.random: 12 characters from a 32-letter
+  // alphabet without look-alikes (0/O, 1/I/L) = 60 bits.
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  const chars = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+  return `${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8)}`;
 }
 
 // GET /admin/concierge — never returns password_hash

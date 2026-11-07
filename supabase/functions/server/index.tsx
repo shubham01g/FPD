@@ -1,6 +1,7 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
+import { isOurOrigin } from "./lib/origins.ts";
 import * as kv from "./kv_store.tsx";
 
 import { requireAdmin } from "./middleware/adminAuth.ts";
@@ -51,14 +52,22 @@ const app = new Hono();
 const FUNCTION_NAMES = ["server", "server-billing"];
 const api = new Hono();
 
-// Enable logger
-app.use("*", logger(console.log));
+// Request logger. Several public links carry their secret in the URL (claim
+// links, admin invites, vault-reset and contact-invite tokens), and function
+// logs are readable by anyone with dashboard access, so those path segments
+// and every query string are blanked before the line is written.
+const SECRET_SEGMENTS = /(\/(?:legacy-claim|admin-invite|reset|invite|accept)\/)[^/?\s]+/g;
+function redactLogLine(line: string): string {
+  return line.replace(SECRET_SEGMENTS, "$1[redacted]").replace(/\?[^\s]*/g, "?[redacted]");
+}
+app.use("*", logger((line: string, ...rest: string[]) => console.log(redactLogLine(line), ...rest)));
 
-// Enable CORS for all routes and methods
+// CORS: only our own sites (lib/origins.ts). Server-to-server callers
+// (the Stripe webhook, the cron job) send no Origin and are unaffected.
 app.use(
   "/*",
   cors({
-    origin: "*",
+    origin: (origin) => (isOurOrigin(origin) ? origin : null),
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],

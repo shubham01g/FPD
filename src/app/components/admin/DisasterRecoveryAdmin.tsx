@@ -7,6 +7,10 @@ import { toast } from "sonner";
 import { adminApi, AdminApiError } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../services/supabase";
+import {
+  challengeFactor, checkEmailCode, getLocalTwoFactorSettings, startEmailCode, verifyChallenge, verifyFactor,
+} from "../../services/twoFactor";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -111,19 +115,65 @@ function GrantModal({
   const [notes, setNotes] = useState("");
   const [agreed, setAgreed] = useState(false);
 
-  const handleAcknowledge = () => {
+  // The code is checked for real against the admin's own second factor.
+  // Before, any six characters opened a 48-hour bypass.
+  const [factor, setFactor] = useState<
+    | { kind: "totp"; factorId: string }
+    | { kind: "phone"; factorId: string; challengeId: string }
+    | { kind: "email" }
+    | null
+  >(null);
+  const [busy, setBusy] = useState(false);
+
+  const handleAcknowledge = async () => {
     if (!reason) { toast.error("Please select a reason code"); return; }
     if (!agreed) { toast.error("You must acknowledge the security implications"); return; }
-    setStep("mfa");
+    setBusy(true);
+    try {
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const totp = factors?.totp?.[0];
+      const phone = factors?.phone?.[0];
+      if (totp) {
+        setFactor({ kind: "totp", factorId: totp.id });
+      } else if (phone) {
+        setFactor({ kind: "phone", factorId: phone.id, challengeId: await challengeFactor(phone.id) });
+        toast.success("We sent a code to your phone");
+      } else {
+        const settings = await getLocalTwoFactorSettings();
+        if (!settings.enabled || settings.method !== "email_otp") {
+          toast.error("Turn on two-step verification for your admin account (Account Settings → Security) before granting a bypass.");
+          return;
+        }
+        await startEmailCode();
+        setFactor({ kind: "email" });
+        toast.success("We emailed you a code");
+      }
+      setStep("mfa");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start verification");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const handleMFA = () => {
+  const handleMFA = async () => {
     if (mfaCode.length < 6) { toast.error("Enter your 6-digit MFA code"); return; }
+    if (!factor) { toast.error("Start verification again"); setStep("acknowledge"); return; }
+    setBusy(true);
+    try {
+      if (factor.kind === "totp") await verifyFactor(factor.factorId, mfaCode);
+      else if (factor.kind === "phone") await verifyChallenge(factor.factorId, factor.challengeId, mfaCode);
+      else await checkEmailCode(mfaCode, "login");
+    } catch (err) {
+      setBusy(false);
+      setMfaCode("");
+      toast.error(err instanceof Error ? err.message : "That code isn't right");
+      return;
+    }
+    setBusy(false);
     setStep("complete");
-    setTimeout(() => {
-      const reasonLabel = REASON_CODES.find(r => r.id === reason)?.label ?? reason;
-      onGrant(user.userId, reasonLabel);
-    }, 800);
+    const reasonLabel = REASON_CODES.find(r => r.id === reason)?.label ?? reason;
+    onGrant(user.userId, reasonLabel);
   };
 
   return (
@@ -213,8 +263,8 @@ function GrantModal({
                 </span>
               </label>
 
-              <button onClick={handleAcknowledge}
-                style={{ width:"100%", padding:"12px", borderRadius:10,
+              <button onClick={handleAcknowledge} disabled={busy}
+                style={{ opacity: busy ? 0.6 : 1, width:"100%", padding:"12px", borderRadius:10,
                   background:"linear-gradient(135deg,#D9A55E,#B4842E)", border:"none", cursor:"pointer",
                   color:"#1C1608", fontWeight:700, fontSize:14,
                   display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
@@ -283,8 +333,8 @@ function GrantModal({
                     background:"transparent", cursor:"pointer", color:"#A3ADC9", fontWeight:600, fontSize:13 }}>
                   Back
                 </button>
-                <button onClick={handleMFA}
-                  style={{ flex:2, padding:"11px", borderRadius:10,
+                <button onClick={handleMFA} disabled={busy}
+                  style={{ opacity: busy ? 0.6 : 1, flex:2, padding:"11px", borderRadius:10,
                     background:"linear-gradient(135deg,#D9A55E,#B4842E)",
                     border:"none", cursor:"pointer", color:"#1C1608", fontWeight:700, fontSize:14,
                     display:"flex", alignItems:"center", justifyContent:"center", gap:8
