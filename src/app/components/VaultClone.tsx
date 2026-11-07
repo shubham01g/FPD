@@ -6,6 +6,9 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthContext";
+import { buildVaultExport, type ExportResult } from "../services/vaultExport";
+import { downloadBlob } from "../utils/zip";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -149,7 +152,10 @@ const VCLONE_CSS = `
 `;
 
 export function VaultClone({ onClose, mode }: VaultCloneProps) {
-  const { continuationFeePaid, docs, wishes, allergies, medications, memories, contacts } = useDemo();
+  const { continuationFeePaid, docs, wishes, allergies, medications, memories, contacts, user } = useDemo();
+  const { authUser } = useAuth();
+  const [phase, setPhase] = useState("");
+  const [result, setResult] = useState<ExportResult | null>(null);
   const contents = buildContents({ docs, wishes, allergies, medications, memories, contacts });
   const [step, setStep] = useState<"overview"|"confirm"|"downloading"|"done">("overview");
   const [includeSecretVault, setIncludeSecretVault] = useState(false);
@@ -160,19 +166,33 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
   // For demo: fee paid = unlocked
   const isUnlocked = continuationFeePaid;
 
-  const startDownload = () => {
+  /* Builds the real archive (services/vaultExport.ts): every section's
+     records as JSON + CSV and the stored files themselves. Progress is the
+     export's own progress, not a timer. */
+  const startDownload = async () => {
+    if (!authUser) { toast.error("Sign in again to export."); return; }
     setStep("downloading");
-    let p = 0;
-    const interval = setInterval(() => {
-      p += Math.random() * 12 + 3;
-      if (p >= 100) {
-        p = 100;
-        clearInterval(interval);
-        setDownloadId(`LVC-${Date.now().toString(36).toUpperCase()}`);
-        setTimeout(() => setStep("done"), 500);
-      }
-      setProgress(Math.min(p, 100));
-    }, 180);
+    setProgress(0);
+    try {
+      const r = await buildVaultExport(
+        { id: authUser.id, name: user.name, email: authUser.email ?? "" },
+        { includeFiles: true, includeSecretVault },
+        (p) => { setPhase(p.phase); setProgress(p.total ? Math.round((p.done / p.total) * 100) : 0); },
+      );
+      setResult(r);
+      setDownloadId(`LVC-${Date.now().toString(36).toUpperCase()}`);
+      setProgress(100);
+      setStep("done");
+      if (r.skipped.length) toast.warning(`${r.skipped.length} item${r.skipped.length === 1 ? "" : "s"} couldn't be included — see README.txt in the archive.`);
+    } catch (err) {
+      toast.error(`Export failed: ${(err as Error).message}`);
+      setStep("confirm");
+    }
+  };
+
+  const saveToDevice = () => {
+    if (!result) return;
+    downloadBlob(result.blob, `final-pass-down-export-${new Date().toISOString().slice(0, 10)}.zip`);
   };
 
   const totalItems = contents.reduce((sum, c) => sum + c.count, 0);
@@ -266,8 +286,8 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                   onChange={e => setIncludeSecretVault(e.target.checked)}
                   style={{ accentColor: NEG, width:15, height:15, marginTop:2, flexShrink:0 }}/>
                 <div>
-                  <div className="st-title">Include Secret Vault (3 items)</div>
-                  <div className="st-sub">Contains seed phrases, safe combinations, and ultra-sensitive items. Handle with extreme care.</div>
+                  <div className="st-title">Include Secret Vault</div>
+                  <div className="st-sub">Only if it is unlocked with your PIN in this session (open it from the File Cabinet first). Handle the archive with extreme care.</div>
                 </div>
               </label>
 
@@ -287,7 +307,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                   <span style={{ color: WARN, fontSize: 16, fontWeight: 700 }}>Confirm Complete Download</span>
                 </div>
                 <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>
-                  You are about to download a complete encrypted package of this account. This includes{" "}
+                  You are about to download a complete copy of this account. This includes{" "}
                   <strong style={{ color: TEXT }}>all documents, records, memories, diary entries, financial information, medical records, and personal data</strong>{" "}
                   that was saved to this Final Pass Down account. {includeSecretVault && <strong style={{ color: NEG }}>Secret Vault items are included.</strong>}
                 </p>
@@ -298,9 +318,9 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 {[
                   ["Total Items",      `${totalItems}+ records`],
                   ["Categories",       "30+ life categories"],
-                  ["Encrypted",        "AES-256 — decryption key separate"],
-                  ["Format",           "Encrypted ZIP package"],
-                  ["Download ID",      `Will be generated on confirm`],
+                  ["Format",           "ZIP — records as JSON + CSV, plus the original files"],
+                  ["Saved passwords",  "Still encrypted — need your vault passphrase"],
+                  ["Built",            "On this device; nothing is emailed or shared"],
                 ].map(([k, v]) => (
                   <div key={k} className="summary-row"><span>{k}</span><span>{v}</span></div>
                 ))}
@@ -321,18 +341,13 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               </div>
               <div>
                 <div className="status-title">Preparing Your Legacy Package</div>
-                <div className="status-sub">Encrypting and packaging all account data...</div>
+                <div className="status-sub">Collecting your records and downloading your files…</div>
               </div>
               <div className="progress-track">
                 <div className="progress-fill" style={{ width:`${progress}%` }}/>
               </div>
               <div className="progress-pct">{Math.round(progress)}%</div>
-              <div style={{ color: MUTED, fontSize: 14 }}>
-                {progress < 30 ? "Gathering documents and records..." :
-                 progress < 60 ? "Packaging memories and media..." :
-                 progress < 85 ? "Encrypting complete package..." :
-                 "Finalizing download..."}
-              </div>
+              <div style={{ color: MUTED, fontSize: 14 }}>{phase || "Starting…"}</div>
             </div>
           )}
 
@@ -344,7 +359,9 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               </div>
               <div>
                 <div className="status-title">Legacy Package Ready</div>
-                <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>The complete account package has been prepared. This encrypted file contains everything saved to this Final Pass Down account.</p>
+                <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7 }}>
+                  {result ? `${result.records} records and ${result.files} files, ${(result.bytes / 1024 / 1024).toFixed(1)} MB.` : ""} Save it to your device now; it isn't kept anywhere else.
+                </p>
               </div>
 
               <div className="ref-box">
@@ -354,11 +371,11 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
 
               <div className="important-box">
                 <div className="important-lbl">IMPORTANT</div>
-                <p>Keep this encrypted file and its decryption key secure. The package contains all of the account holder's personal, financial, and sensitive information. Share only with verified legacy contacts.</p>
+                <p>This file is not encrypted. It contains all of the account holder's personal, financial, and sensitive information. Store it somewhere safe and share it only with verified legacy contacts.</p>
               </div>
 
               <div className="btn-row">
-                <button onClick={() => toast.success("Legacy package download started (demo)")} className="btn-save">
+                <button onClick={saveToDevice} className="btn-save">
                   <Download size={14}/> Save to Device
                 </button>
                 <button onClick={onClose} className="btn-back" style={{ flex: 1 }}>Close</button>

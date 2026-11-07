@@ -8,7 +8,7 @@
  *   1. $199 Legacy Continuation Fee paid
  *   2. Confirmation of passing verified by FPD admin
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Lock, Unlock, Shield, ArrowRight, CheckCircle, Eye, Download,
   FileText, Heart, Stethoscope, Wallet, Car, Camera,
@@ -17,7 +17,9 @@ import {
 import { useDemo } from "../context/DemoContext";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
-import { createZip, downloadBlob, type ZipEntry } from "../utils/zip";
+import { downloadBlob } from "../utils/zip";
+import { useAuth } from "../context/AuthContext";
+import { buildVaultExport, countRecords, previewRecords, type PreviewRow } from "../services/vaultExport";
 import heroVaultPhoto from "../../imports/legacyvault_hero_photo.webp";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant & file cabinet) ── */
@@ -118,71 +120,65 @@ const PACKAGE_SECTIONS = [
 const RAMP = ["#5BA7D6","#5BA7D6","#7E6BD8","#6F9E94","#6FAE8B","#97A2C6","#7E6BD8","#5BA7D6","#5B6EE1"];
 const THEMED_SECTIONS = PACKAGE_SECTIONS.map((s, i) => ({ ...s, color: RAMP[i % RAMP.length] }));
 
-/* ── Archive builders ────────────────────────────────────────────────
-   The download is a real ZIP, not a stub. In demo mode the entries are
-   generated manifests describing what each section contains; when the API
-   lands, swap buildEntries() to stream the actual stored files in — the
-   zip/download plumbing below does not change. */
+/* ── What each section exports ───────────────────────────────────────
+   The download used to be a "DEMONSTRATION EXPORT — NOT A BACKUP" of
+   manifest files. Each section now names the real tables it covers;
+   services/vaultExport.ts builds the archive from the owner's records and
+   stored files. */
+const SECTION_TABLES: Record<string, { tables: string[]; files?: boolean }> = {
+  "Digital File Cabinet":           { tables: [], files: true },
+  "Final Wishes & Legacy Planning": { tables: ["final_wishes", "funeral_plans"] },
+  "Wills and Living Trusts":        { tables: ["wills_trusts"] },
+  "Medical Records":                { tables: ["medical_emergency_info", "medications", "allergies"] },
+  "Financial Records":              { tables: ["financial_records", "receipts"] },
+  "Personal Assets":                { tables: ["real_estate", "vehicles", "utilities", "digital_assets", "weapons", "weapons_locker", "collectibles"] },
+  "Memories & Media":               { tables: ["memories", "messages_to_loved_ones"] },
+  "Digital Diary":                  { tables: ["diary_entries"] },
+  "Password Manager":               { tables: ["password_vault"] },
+  "Contacts & Instructions":        { tables: ["contacts", "family_friends"] },
+  "ID Keeper":                      { tables: ["id_keeper_records"] },
+  "Warranties":                     { tables: ["warranties"] },
+  "Pet Records":                    { tables: ["pet_records"] },
+};
+const ALL_TABLES = Array.from(new Set(Object.values(SECTION_TABLES).flatMap(x => x.tables)));
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
-function sectionManifest(section: typeof THEMED_SECTIONS[number], owner: string): string {
-  return [
-    `FINAL PASS DOWN — LEGACY PACKAGE`,
-    `Section: ${section.label}`,
-    `Account holder: ${owner}`,
-    `Generated: ${new Date().toLocaleString("en-US")}`,
-    ``,
-    `CONTENTS`,
-    `${section.itemCount}`,
-    ``,
-    `DESCRIPTION`,
-    section.desc,
-    ``,
-    `--`,
-    `NOTE: This is a DEMONSTRATION export. It contains an index of what this`,
-    `section holds, not the stored files themselves — this build has no server`,
-    `and no file storage behind it. Do not treat this archive as a backup or as`,
-    `delivery of the account holder's records.`,
-  ].join("\n");
-}
-
-function buildEntries(owner: string, sections: typeof THEMED_SECTIONS): ZipEntry[] {
-  const entries: ZipEntry[] = sections.map(s => ({
-    name: `${s.label.replace(/[\\/:*?"<>|]/g, "-")}/MANIFEST.txt`,
-    content: sectionManifest(s, owner),
-  }));
-
-  entries.unshift({
-    name: "README.txt",
-    content: [
-      `FINAL PASS DOWN — LEGACY VAULT CLONE`,
-      `Account holder: ${owner}`,
-      `Exported: ${new Date().toLocaleString("en-US")}`,
-      `Sections included: ${sections.length}`,
-      ``,
-      `*** DEMONSTRATION EXPORT — NOT A BACKUP ***`,
-      ``,
-      `This build of Final Pass Down has no server and no file storage. This`,
-      `archive contains an INDEX of what each section would hold, not the`,
-      `account holder's actual documents, photos, recordings or credentials.`,
-      ``,
-      `Each folder corresponds to one section of the account. Open MANIFEST.txt`,
-      `inside any folder to see what that section is meant to contain.`,
-      ``,
-      `If you received this as a legacy contact and expected real records,`,
-      `contact Final Pass Down support with the account holder's name.`,
-    ].join("\n"),
-  });
-
-  entries.push({
-    name: "INDEX.csv",
-    content: ["Section,Contents,Description",
-      ...sections.map(s => `"${s.label}","${s.itemCount}","${s.desc.replace(/"/g, "'")}"`),
-    ].join("\n"),
-  });
-
-  return entries;
+/* Preview of one section's real records. Inline styles: this screen's own
+   .modal classes are scoped to other layouts. */
+function SectionPreview({ label, uid, onClose }: { label: string; uid: string; onClose: () => void }) {
+  const [groups, setGroups] = useState<{ table: string; rows: PreviewRow[] }[] | null>(null);
+  const spec = SECTION_TABLES[label];
+  useEffect(() => {
+    if (!spec?.tables.length) { setGroups([]); return; }
+    previewRecords(uid, spec.tables).then(setGroups).catch(() => setGroups([]));
+  }, [uid, spec]);
+  const total = groups?.reduce((n, g) => n + g.rows.length, 0) ?? 0;
+  return (
+    <div role="dialog" aria-modal="true" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(5,8,14,0.78)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ width: "100%", maxWidth: 560, maxHeight: "85vh", overflowY: "auto", background: "#101728", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18, padding: 22 }}>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ flex: 1, fontFamily: "var(--font-display)", fontSize: 20, color: TEXT }}>{label}</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", fontSize: 15 }}>Close</button>
+        </div>
+        {spec?.files && <p style={{ color: MUTED, fontSize: 15 }}>Your File Cabinet documents are included as the original files. Open the File Cabinet to browse them.</p>}
+        {groups === null && <p style={{ color: MUTED }}>Loading…</p>}
+        {groups && !spec?.files && total === 0 && <p style={{ color: MUTED }}>Nothing saved in this section yet.</p>}
+        {groups?.filter(g => g.rows.length).map(g => (
+          <div key={g.table} style={{ marginBottom: 14 }}>
+            <div style={{ color: MUTED, fontSize: 12.5, fontFamily: "var(--font-mono)", marginBottom: 6 }}>{g.table.replace(/_/g, " ").toUpperCase()} · {g.rows.length}</div>
+            {g.rows.map((r, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,0.05)", color: TEXT, fontSize: 15 }}>
+                <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.label}</span>
+                <span style={{ color: MUTED, fontSize: 13 }}>{r.detail}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
@@ -297,7 +293,7 @@ function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; titl
 }
 
 export function LegacyVault() {
-  const { continuationFeePaid, user, deathVerified, deathVerifiedDoc, submitDeathRecord } = useDemo();
+  const { continuationFeePaid, user, docs, deathVerified, deathVerifiedDoc, submitDeathRecord } = useDemo();
   const [showVaultClone, setShowVaultClone] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const recordRef = React.useRef<HTMLInputElement>(null);
@@ -305,25 +301,52 @@ export function LegacyVault() {
 
   const fullyUnlocked = continuationFeePaid && deathVerified;
 
-  const owner = user?.name ?? "Account Holder";
+  const { authUser } = useAuth();
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+  const [previewing, setPreviewing] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
 
-  /* Single section → a one-folder archive. */
-  const downloadSection = (section: typeof THEMED_SECTIONS[number]) => {
-    const blob = createZip(buildEntries(owner, [section]));
-    const safe = section.label.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-    downloadBlob(blob, `fpd-${safe}-${stamp()}.zip`);
-    toast.success(`Downloaded: ${section.label}`);
+  useEffect(() => {
+    if (!authUser) return;
+    countRecords(authUser.id, ALL_TABLES).then(setCounts).catch(() => setCounts({}));
+  }, [authUser]);
+
+  /* The real number of records each section holds. */
+  const countLabel = (label: string) => {
+    const spec = SECTION_TABLES[label];
+    if (!spec) return "";
+    if (spec.files) return `${docs.length} file${docs.length === 1 ? "" : "s"}`;
+    if (!counts) return "…";
+    const n = spec.tables.reduce((sum, t) => sum + (counts[t] ?? 0), 0);
+    return `${n} record${n === 1 ? "" : "s"}`;
   };
 
-  /* Everything → the full Legacy Vault Export archive. */
-  const downloadFullPackage = () => {
-    const blob = createZip(buildEntries(owner, THEMED_SECTIONS));
-    const kb = Math.max(1, Math.round(blob.size / 1024));
-    downloadBlob(blob, `fpd-legacy-vault-export-${stamp()}.zip`);
-    toast.success(`Legacy Vault Export downloaded — ${THEMED_SECTIONS.length} sections, ${kb} KB`);
+  const runExport = async (label: string | null) => {
+    if (!authUser || exporting) return;
+    setExporting(label ?? "all");
+    const tid = toast.loading("Preparing your export…");
+    try {
+      const spec = label ? SECTION_TABLES[label] : null;
+      const r = await buildVaultExport(
+        { id: authUser.id, name: user?.name ?? "", email: authUser.email ?? "" },
+        spec
+          ? { custom: { id: "section", label, tables: spec.tables }, includeFiles: Boolean(spec.files) }
+          : { includeFiles: true },
+        (p) => toast.loading(p.phase, { id: tid }),
+      );
+      const safe = (label ?? "legacy-vault-export").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+      downloadBlob(r.blob, `fpd-${safe}-${stamp()}.zip`);
+      toast.success(`Downloaded — ${r.records} records, ${r.files} files${r.skipped.length ? ` (${r.skipped.length} couldn't be included, see README)` : ""}`, { id: tid });
+    } catch (err) {
+      toast.error(`Export failed: ${(err as Error).message}`, { id: tid });
+    }
+    setExporting(null);
   };
 
-  if (showVaultClone) return <VaultClone onBack={() => setShowVaultClone(false)} />;
+  const downloadSection = (section: typeof THEMED_SECTIONS[number]) => void runExport(section.label);
+  const downloadFullPackage = () => void runExport(null);
+
+  if (showVaultClone) return <VaultClone onClose={() => setShowVaultClone(false)} mode="export" />;
 
   return (
     <div className="fpd-vault">
@@ -429,14 +452,14 @@ export function LegacyVault() {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div className="psec-top">
                     <span className="psec-lbl">{section.label}</span>
-                    <span className="psec-cnt" style={{ background:`${section.color}18`, color:section.color }}>{section.itemCount}</span>
+                    <span className="psec-cnt" style={{ background:`${section.color}18`, color:section.color }}>{countLabel(section.label)}</span>
                   </div>
                   <div className="psec-desc">{section.desc}</div>
                 </div>
                 <div className="psec-acts">
                   <button
                     onClick={() => continuationFeePaid
-                      ? toast.success(`Viewing: ${section.label}`)
+                      ? setPreviewing(section.label)
                       : toast.error("Pay the $199 fee to preview content")}
                     title={continuationFeePaid ? "Preview" : "Locked"}>
                     <Eye size={14}/>
@@ -503,6 +526,7 @@ export function LegacyVault() {
           </div>
         </div>
       </div>
+      {previewing && authUser && <SectionPreview label={previewing} uid={authUser.id} onClose={() => setPreviewing(null)}/>}
     </div>
   );
 }

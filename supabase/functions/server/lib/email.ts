@@ -47,6 +47,8 @@ export interface EmailMessage {
   category?: string;
   /** Where a reply goes. Defaults to support. */
   replyTo?: string;
+  /** Files to attach; `content` is base64. */
+  attachments?: { filename: string; content: string; type: string }[];
 }
 
 /** Sends one email. Throws on any non-2xx (SendGrid answers 202 on success). */
@@ -70,6 +72,7 @@ export async function sendEmail(msg: EmailMessage): Promise<void> {
         { type: "text/html", value: msg.html },
       ],
       categories: msg.category ? [msg.category] : undefined,
+      attachments: msg.attachments?.map((a) => ({ filename: a.filename, content: a.content, type: a.type, disposition: "attachment" })),
       // Rewritten links in a security email look like phishing.
       tracking_settings: {
         click_tracking: { enable: false, enable_text: false },
@@ -171,6 +174,28 @@ export function vaultResetEmail(o: { link: string; minutes: number }): Omit<Emai
       <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
       <p style="margin:0 0 20px;padding:14px 16px;background:#fdf1f1;border-radius:8px;line-height:1.6;color:#8a2c2c;">${esc(warn)}</p>
       ${button(o.link, "Reset vault passphrase")}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`),
+  };
+}
+
+/** A month of receipts sent to the owner's accountant (routes/receipts.ts). */
+export function receiptPackageEmail(o: {
+  ownerName: string; ownerEmail: string; period: string; count: number; total: string;
+  images: { label: string; url: string }[]; linkDays: number; csvAttached: boolean;
+}): Omit<EmailMessage, "to"> {
+  const lead = `${o.ownerName || o.ownerEmail} shared their ${o.period} receipts with you through ${APP_NAME}: ${o.count} receipt${o.count === 1 ? "" : "s"}, ${o.total} in total.`;
+  const csv = o.csvAttached ? "A spreadsheet (CSV) of every receipt is attached." : "";
+  const linkNote = o.images.length ? `The receipt images below can be opened for ${o.linkDays} days.` : "";
+  const closing = `Questions about these receipts? Reply to this email to reach ${o.ownerEmail}.`;
+  return {
+    subject: `${o.period} receipts from ${o.ownerName || o.ownerEmail}`,
+    category: "receipt_package",
+    replyTo: o.ownerEmail,
+    text: [lead, csv, linkNote, ...o.images.map((i) => `${i.label}: ${i.url}`), closing].filter(Boolean).join("\n\n"),
+    html: layout(`${esc(o.period)} receipts`, `
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(lead)}</p>
+      ${csv ? `<p style="margin:0 0 16px;line-height:1.6;">${esc(csv)}</p>` : ""}
+      ${o.images.length ? `<p style="margin:0 0 8px;line-height:1.6;">${esc(linkNote)}</p><ul style="margin:0 0 16px;padding-left:18px;line-height:1.8;">${o.images.map((i) => `<li><a href="${esc(i.url)}" style="color:${BRAND};">${esc(i.label)}</a></li>`).join("")}</ul>` : ""}
       <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`),
   };
 }

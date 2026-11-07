@@ -43,6 +43,7 @@ import vaultReset from "./routes/vaultReset.ts";
 import contactAccess from "./routes/contactAccess.ts";
 import password from "./routes/password.ts";
 import secretVault from "./routes/secretVault.ts";
+import receiptsRoute from "./routes/receipts.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -187,6 +188,7 @@ account.use("*", requireUser);
 account.route("/2fa", twoFactor);
 account.route("/password", password);
 account.route("/secret-vault", secretVault);
+account.route("/receipts", receiptsRoute);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
 account.route("/affiliate", affiliateJoin);

@@ -6,7 +6,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
-import { persistMediaValue, useStoredFileUrl } from "../services/storedFiles";
+import { isStoredPath, persistMediaValue, signStoredFile, useStoredFileUrl } from "../services/storedFiles";
+import { createZip, downloadBlob } from "../utils/zip";
+import { emailReceiptPackage } from "../services/receiptsApi";
+import { readReceipt, type ReceiptOcrResult } from "../services/receiptOcr";
 
 /* A saved receipt image (vault-documents path), shown through a signed link. */
 function ReceiptImage({ value, maxHeight }: { value: string; maxHeight: number }) {
@@ -69,6 +72,63 @@ const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
+
+const receiptCsv = (rows: Receipt[]) => [
+  "Date,Merchant,Amount,Category,Tax year,Tax deductible",
+  ...rows.map(r => [r.isoDate, r.merchant, r.amount.toFixed(2), r.category, r.taxYear ?? "", r.taxDeductible ? "yes" : "no"]
+    .map(v => { const t = String(v); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; }).join(",")),
+].join("\r\n");
+
+const receiptFileName = (r: Receipt, ext = "jpg") =>
+  `${r.isoDate}-${r.merchant.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "receipt"}.${ext}`;
+
+/* Saves the receipt image with a readable name. */
+async function downloadReceipt(r: Receipt) {
+  if (!isStoredPath(r.imageUrl)) { toast.error("No image is saved with this receipt."); return; }
+  try { window.location.href = await signStoredFile(r.imageUrl, receiptFileName(r)); }
+  catch (err) { toast.error(`Could not download: ${(err as Error).message}`); }
+}
+
+/* Share sheet where the device has one (with the image when possible);
+   otherwise the details are copied to the clipboard. */
+async function shareReceipt(r: Receipt) {
+  const text = `${r.merchant} · $${r.amount.toFixed(2)} · ${r.date}${r.category ? ` · ${r.category}` : ""}`;
+  try {
+    if (navigator.share) {
+      let files: File[] | undefined;
+      if (isStoredPath(r.imageUrl)) {
+        const blob = await (await fetch(await signStoredFile(r.imageUrl))).blob();
+        const f = new File([blob], receiptFileName(r), { type: blob.type || "image/jpeg" });
+        if (navigator.canShare?.({ files: [f] })) files = [f];
+      }
+      await navigator.share({ title: `Receipt — ${r.merchant}`, text, ...(files ? { files } : {}) });
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    toast.success("Receipt details copied to the clipboard");
+  } catch (err) {
+    if ((err as Error).name !== "AbortError") toast.error("Couldn't share this receipt");
+  }
+}
+
+/* A month's receipts as a ZIP: the CSV plus each saved image. */
+async function downloadMonthPackage(rows: Receipt[], label: string) {
+  if (!rows.length) { toast.error("No receipts in this month."); return; }
+  const tid = toast.loading("Building the package…");
+  const entries: { name: string; content: string | Uint8Array }[] = [{ name: "receipts.csv", content: receiptCsv(rows) }];
+  let missing = 0;
+  for (const r of rows) {
+    if (!isStoredPath(r.imageUrl)) continue;
+    try {
+      const res = await fetch(await signStoredFile(r.imageUrl));
+      if (!res.ok) throw new Error();
+      const ext = (r.imageUrl.split(".").pop() ?? "jpg").slice(0, 5);
+      entries.push({ name: `images/${receiptFileName(r, ext)}`, content: new Uint8Array(await res.arrayBuffer()) });
+    } catch { missing++; }
+  }
+  downloadBlob(createZip(entries), `receipts-${label.replace(/\s+/g, "-").toLowerCase()}.zip`);
+  toast.success(`Package downloaded${missing ? ` (${missing} image${missing === 1 ? "" : "s"} couldn't be included)` : ""}`, { id: tid });
+}
 
 
 
@@ -299,10 +359,10 @@ function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
 
         <div className="modal-foot" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 10 }}>
-            <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => { toast.success(`Downloading receipt — ${receipt.merchant}`); }}>
+            <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => void downloadReceipt(receipt)}>
               <Download size={14} /> Download
             </button>
-            <button className="btn-primary" style={{ flex: 1, padding: "11px 16px" }} onClick={() => { toast.success(`Sharing receipt — ${receipt.merchant}`); }}>
+            <button className="btn-primary" style={{ flex: 1, padding: "11px 16px" }} onClick={() => void shareReceipt(receipt)}>
               <Send size={14} /> Share
             </button>
           </div>
@@ -317,17 +377,25 @@ function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
 }
 
 /* ── Email CPA Modal ───────────────────────────────────────────────── */
-function EmailCPAModal({ month, year, total, onClose }: { month: string; year: number; total: number; onClose: () => void }) {
+function EmailCPAModal({ month, year, section, total, onClose }: { month: string; year: number; section: Section; total: number; onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [includeCSV, setIncludeCSV] = useState(true);
   const [includeImages, setIncludeImages] = useState(true);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const handleSend = () => {
-    if (!email) { toast.error("Please enter an email address"); return; }
+  const handleSend = async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { toast.error("Please enter a valid email address"); return; }
+    if (!includeCSV && !includeImages) { toast.error("Choose the CSV, the images, or both"); return; }
     setSending(true);
-    setTimeout(() => { setSending(false); setSent(true); toast.success(`Secure package sent to ${email}`); }, 1200);
+    try {
+      await emailReceiptPackage({ email: email.trim(), year, month: MONTHS.indexOf(month) + 1, section, includeCSV, includeImages });
+      setSent(true);
+      toast.success(`Package sent to ${email.trim()}`);
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
+    setSending(false);
   };
 
   return (
@@ -338,7 +406,7 @@ function EmailCPAModal({ month, year, total, onClose }: { month: string; year: n
             <span className="modal-head-title"><Mail size={16} /> Email to CPA</span>
             <button className="modal-close" onClick={onClose}><X size={15} /></button>
           </div>
-          <div className="modal-head-sub">{month} {year} · {fmt(total)} total · Encrypted secure delivery</div>
+          <div className="modal-head-sub">{month} {year} · {fmt(total)} total · Sent by email from Final Pass Down</div>
         </div>
 
         {!sent ? (
@@ -363,7 +431,7 @@ function EmailCPAModal({ month, year, total, onClose }: { month: string; year: n
                     <div className="opt-check">{includeImages && <CheckCircle size={11} color="#fff" />}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: TEXT, fontSize: 13.5, fontWeight: 600, marginBottom: 2, display: "flex", alignItems: "center", gap: 7 }}><Package size={13} /> Image Bundle</div>
-                      <div style={{ color: MUTED, fontSize: 12 }}>All receipt images in a single ZIP archive</div>
+                      <div style={{ color: MUTED, fontSize: 12 }}>A private link to each receipt image, valid for 7 days</div>
                     </div>
                   </button>
                 </div>
@@ -371,12 +439,12 @@ function EmailCPAModal({ month, year, total, onClose }: { month: string; year: n
 
               <div style={{ display: "flex", gap: 9, padding: "12px 14px", borderRadius: 14, background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.16)" }}>
                 <CheckCircle size={13} color={ACCENT2} style={{ marginTop: 1, flexShrink: 0 }} />
-                <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.6, margin: 0 }}>Package is encrypted end-to-end. Your CPA receives a secure download link valid for 48 hours.</p>
+                <p style={{ color: MUTED, fontSize: 12, lineHeight: 1.6, margin: 0 }}>Your CPA receives an email with the CSV attached and private image links that expire after 7 days. Replies come straight to you.</p>
               </div>
             </div>
             <div className="modal-foot">
               <button className="btn-primary" disabled={sending} onClick={handleSend}>
-                {sending ? "Sending…" : <><Send size={15} /> Send Secure Package</>}
+                {sending ? "Sending…" : <><Send size={15} /> Send Package</>}
               </button>
             </div>
           </>
@@ -386,8 +454,8 @@ function EmailCPAModal({ month, year, total, onClose }: { month: string; year: n
               <CheckCircle size={30} color={POS} />
             </div>
             <h3 style={{ fontFamily: "var(--font-display)", fontSize: 17, color: TEXT, marginBottom: 8 }}>Package Sent!</h3>
-            <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>{month} {year} receipt package delivered securely to<br /><strong style={{ color: ACCENT2 }}>{email}</strong></p>
-            <p style={{ color: FAINT, fontSize: 12, marginTop: 8 }}>Download link valid for 48 hours.</p>
+            <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>{month} {year} receipt package emailed to<br /><strong style={{ color: ACCENT2 }}>{email}</strong></p>
+            <p style={{ color: FAINT, fontSize: 12, marginTop: 8 }}>Image links stay valid for 7 days.</p>
             <button className="btn-ghost" style={{ marginTop: 20 }} onClick={onClose}>Done</button>
           </div>
         )}
@@ -397,9 +465,9 @@ function EmailCPAModal({ month, year, total, onClose }: { month: string; year: n
 }
 
 /* ── OCR Review Modal — confirms fields against the scanned image ──── */
-function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave: (r: NewReceipt) => void; onClose: () => void }) {
+function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave: (r: NewReceipt) => Promise<boolean | void>; onClose: () => void }) {
   const today = new Date();
-  const [merchant, setMerchant] = useState(doc.name || "New Receipt");
+  const [merchant, setMerchant] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`);
   const [category, setCategory] = useState(CATEGORY_PICKLIST[0]);
@@ -415,24 +483,49 @@ function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave
     if (!taxYearTouched && /^\d{4}/.test(v)) setTaxYear(v.slice(0, 4));
   };
 
+  /* Real OCR (services/receiptOcr.ts, Tesseract.js in the browser). It
+     fills in what it can read; the user confirms or corrects. The fixed
+     91/63/88% bars and the always-"verified" 95% are gone. */
+  const [ocr, setOcr] = useState<ReceiptOcrResult | null>(null);
+  const [ocrState, setOcrState] = useState<"reading" | "done" | "failed">("reading");
+  const [ocrPct, setOcrPct] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    readReceipt(doc.file, (p) => { if (alive) setOcrPct(p); })
+      .then((r) => {
+        if (!alive) return;
+        setOcr(r);
+        setOcrState("done");
+        if (r.amount.value != null) setAmount(r.amount.value.toFixed(2));
+        if (r.merchant.value) setMerchant(r.merchant.value);
+        if (r.isoDate.value) changeDate(r.isoDate.value);
+      })
+      .catch(() => { if (alive) setOcrState("failed"); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doc.file]);
+
   const confidence = [
-    { label: "MERCHANT", pct: 91 },
-    { label: "AMOUNT", pct: 63 },
-    { label: "DATE", pct: 88 },
+    { label: "MERCHANT", pct: ocr?.merchant.value ? ocr.merchant.confidence : null },
+    { label: "AMOUNT", pct: ocr?.amount.value != null ? ocr.amount.confidence : null },
+    { label: "DATE", pct: ocr?.isoDate.value ? ocr.isoDate.confidence : null },
   ];
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { toast.error("Enter the receipt total"); return; }
     if (taxYear && !isValidTaxYear(taxYear)) { toast.error("Enter a 4-digit tax year"); return; }
     if (deductible && !taxYear) { toast.error("Enter the tax year this receipt counts toward"); return; }
+    // "OCR verified" only when the total the user saves is the one OCR read.
+    const ocrVerified = ocr?.amount.value != null && Math.abs(ocr.amount.value - amt) < 0.005;
     setSaving(true);
-    setTimeout(() => {
-      onSave({ merchant, amount: amt, isoDate: date, category, ocrVerified: true, confidence: 95, imageUrl: doc.previewUrl,
-        taxYear: taxYear ? Number(taxYear) : null, taxDeductible: deductible });
-      toast.success(`Receipt saved to ${folder} folder`);
-      onClose();
-    }, 600);
+    const ok = await onSave({ merchant: merchant.trim() || "Receipt", amount: amt, isoDate: date, category, ocrVerified,
+      confidence: ocr ? ocr.confidence : 0, imageUrl: doc.previewUrl,
+      taxYear: taxYear ? Number(taxYear) : null, taxDeductible: deductible });
+    setSaving(false);
+    if (ok === false) return;
+    toast.success(`Receipt saved to ${folder} folder`);
+    onClose();
   };
 
   return (
@@ -443,14 +536,26 @@ function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave
             <span className="modal-head-title"><Cpu size={15} /> Confirm Receipt Details</span>
             <button className="modal-close" onClick={onClose}><X size={15} /></button>
           </div>
-          <div className="modal-head-sub">Review the scanned fields before saving</div>
+          <div className="modal-head-sub">We read what we could from the scan. Check each field before saving.</div>
         </div>
 
         <div className="conf-strip">
-          {confidence.map(f => (
+          {ocrState === "reading" ? (
+            <div className="conf-cell" style={{ flex: 1 }}>
+              <div className="k">READING RECEIPT</div>
+              <div className="v" style={{ color: MUTED }}>{ocrPct ? `${ocrPct}%` : "Starting…"}</div>
+            </div>
+          ) : ocrState === "failed" ? (
+            <div className="conf-cell" style={{ flex: 1 }}>
+              <div className="k">COULDN'T READ THE RECEIPT</div>
+              <div className="v" style={{ color: WARN }}>Enter the details below</div>
+            </div>
+          ) : confidence.map(f => (
             <div key={f.label} className="conf-cell">
               <div className="k">{f.label}</div>
-              <div className="v" style={{ color: f.pct >= 90 ? POS : f.pct >= 75 ? WARN : NEG }}>{f.pct}% <CheckCircle size={10} /></div>
+              <div className="v" style={{ color: f.pct == null ? MUTED : f.pct >= 90 ? POS : f.pct >= 75 ? WARN : NEG }}>
+                {f.pct == null ? "Not found" : `${f.pct}%`}
+              </div>
             </div>
           ))}
         </div>
@@ -464,13 +569,13 @@ function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave
             <label>TOTAL AMOUNT</label>
             <div className="amount-box">
               <span className="sign">$</span>
-              <input value={amount} onChange={e => setAmount(e.target.value)} type="number" step="0.01" placeholder="0.00" autoFocus />
+              <input value={amount} onChange={e => setAmount(e.target.value)} type="number" step="0.01" placeholder={ocrState === "reading" ? "Reading…" : "0.00"} autoFocus />
             </div>
           </div>
 
           <div className="field">
             <label>MERCHANT NAME</label>
-            <input value={merchant} onChange={e => setMerchant(e.target.value)} />
+            <input value={merchant} onChange={e => setMerchant(e.target.value)} placeholder={ocrState === "reading" ? "Reading…" : "Store or business name"} />
           </div>
 
           <div className="field">
@@ -604,7 +709,7 @@ function MonthDetail({
         </div>
 
         <div className="mdacts">
-          <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => toast.success(`Downloading ${month} ${year} receipt package…`)}>
+          <button className="btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={() => void downloadMonthPackage(data.receipts, `${month} ${year} ${section}`)}>
             <Download size={14} /> Download Package
           </button>
           <button className="btn-primary" style={{ flex: 1, padding: "10px 16px" }} onClick={onEmailCPA}>
@@ -906,7 +1011,7 @@ export function ReceiptsExpenses() {
       )}
 
       {showEmail && (
-        <EmailCPAModal month={selectedMonth} year={selectedYear} total={activeData[selectedMonth]?.total ?? 0} onClose={() => setShowEmail(false)} />
+        <EmailCPAModal month={selectedMonth} year={selectedYear} section={section} total={activeData[selectedMonth]?.total ?? 0} onClose={() => setShowEmail(false)} />
       )}
     </div>
   );

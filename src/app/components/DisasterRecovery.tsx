@@ -15,6 +15,8 @@ import { FPD_EMAIL } from "../utils/fpdEmails";
 import { useProducts } from "../utils/planCatalog";
 import { notifyBillingChanged, type Interval } from "../services/billing";
 import { CheckoutConsentModal } from "./billing/CheckoutConsentModal";
+import { buildVaultExport, type ExportResult } from "../services/vaultExport";
+import { downloadBlob } from "../utils/zip";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & account settings) ── */
 const TEXT    = "#EFF2F9";
@@ -262,6 +264,7 @@ export function DisasterRecovery() {
   const drYear = (products.dr_addon_year?.amountCents ?? 4788) / 100;
 
   const { docs, user } = useDemo();
+  const { authUser } = useAuth();
   const canBuy = user.plan !== "starter" && user.planStatus !== "cancelled";
   useEffect(() => {
     const on = () => void refreshBypass();
@@ -284,12 +287,9 @@ export function DisasterRecovery() {
     : 0;
   const [exportPhase, setExportPhase] = useState<ExportPhase>("idle");
   const [progress, setProgress] = useState(0);
-  const [downloadLink, setDownloadLink] = useState("");
-  const [linkExpiry, setLinkExpiry] = useState<number | null>(null);
   const [showInfo, setShowInfo] = useState(false);
   const [notifBanner, setNotifBanner] = useState(bypassState === "active");
 
-  const linkCountdown = useCountdown(linkExpiry);
   const selectedCats = categories.filter(c => c.selected);
   const totalGB = selectedCats.reduce((s, c) => s + c.sizeGB, 0);
   const totalFiles = selectedCats.reduce((s, c) => s + c.count, 0);
@@ -301,34 +301,40 @@ export function DisasterRecovery() {
   const toggleCat = (id: string) =>
     setCategories(cs => cs.map(c => c.id === id ? { ...c, selected: !c.selected } : c));
 
-  const startExport = useCallback(() => {
-    if (bypassState !== "active" || selectedCats.length === 0) return;
+  /* Real archive (services/vaultExport.ts): the documents in the chosen
+     categories plus every section's records as JSON/CSV, built on this
+     device. It used to be a timed progress bar and a made-up link. */
+  const [archive, setArchive] = useState<ExportResult | null>(null);
+  const [phaseText, setPhaseText] = useState("");
+  const startExport = useCallback(async () => {
+    if (bypassState !== "active" || selectedCats.length === 0 || !authUser) return;
     setExportPhase("generating");
     setProgress(0);
-    const phases = [12, 28, 44, 61, 78, 91, 100];
-    const delays  = [400, 900, 1500, 2200, 3000, 3800, 4400];
-    phases.forEach((pct, i) => {
-      setTimeout(() => setProgress(pct), delays[i]);
-    });
-    setTimeout(() => {
-      const link = `https://secure.finalpassdown.com/dr/download/${Math.random().toString(36).slice(2,10).toUpperCase()}`;
-      setDownloadLink(link);
-      setLinkExpiry(Date.now() + 15 * 60 * 1000);
+    try {
+      const r = await buildVaultExport(
+        { id: authUser.id, name: user.name, email: authUser.email ?? "" },
+        { includeFiles: true, docCategories: selectedCats.map(c => c.id) },
+        (pr) => { setPhaseText(pr.phase); setProgress(pr.total ? Math.round((pr.done / pr.total) * 100) : 0); },
+      );
+      setArchive(r);
+      setProgress(100);
       setExportPhase("ready");
-      toast.success("Archive ready — download within 15 minutes");
-    }, 4800);
-  }, [bypassState, selectedCats]);
+      toast.success("Archive ready — save it to your device");
+    } catch (err) {
+      toast.error(`Export failed: ${(err as Error).message}`);
+      setExportPhase("idle");
+    }
+  }, [bypassState, selectedCats, authUser, user.name]);
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(downloadLink).catch(() => {});
-    toast.success("Secure link copied to clipboard");
+  const saveArchive = () => {
+    if (!archive) return;
+    downloadBlob(archive.blob, `final-pass-down-disaster-recovery-${new Date().toISOString().slice(0, 10)}.zip`);
   };
 
   const resetExport = () => {
     setExportPhase("idle");
     setProgress(0);
-    setDownloadLink("");
-    setLinkExpiry(null);
+    setArchive(null);
   };
 
   /* ── LOCKED STATE ───────────────────────────────────────────────── */
@@ -494,7 +500,7 @@ export function DisasterRecovery() {
             <h1 style={{ fontSize: 26 }}>Disasters don't send <span className="accent">a warning.</span></h1>
             <p>Wildfires, storms, and outages can take your devices — and your records — in minutes. Your bypass window, encrypted export, and audit trail are ready the moment you need them, not after.</p>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:14 }}>
-              {["48-HR WINDOW","100 GB EXPORT","AES-256 SECURE"].map(chip => (
+              {["48-HR WINDOW","100 GB EXPORT","BUILT ON YOUR DEVICE"].map(chip => (
                 <span key={chip} style={{
                   ...MONO, fontSize:11, fontWeight:700, letterSpacing:"0.06em", color:"#fff",
                   background:"rgba(255,255,255,0.14)", border:"1px solid rgba(255,255,255,0.22)",
@@ -686,9 +692,9 @@ export function DisasterRecovery() {
               background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.25)", borderRadius:10 }}>
               <Info size={14} color={ACCENT2} style={{ marginTop:1, flexShrink:0 }} />
               <p style={{ fontSize:12, color:SOFT, lineHeight:1.6 }}>
-                All exports are encrypted with AES-256. The secure download link expires after
-                15 minutes and can only be used once. Download activity is logged and audited.
-                Do not share your download link.
+                The archive is built on this device from your own vault and saved straight to it;
+                nothing is emailed or left on a server. It is a normal (unencrypted) ZIP, so store
+                it somewhere safe.
               </p>
             </div>
           </>
@@ -707,12 +713,7 @@ export function DisasterRecovery() {
                 Generating Your Archive
               </div>
               <div style={{ fontSize:13, color:SOFT }}>
-                {progress < 30  ? "Scanning vault contents…"
-                : progress < 50 ? `Indexing ${totalFiles.toLocaleString()} files…`
-                : progress < 65 ? "Compressing documents…"
-                : progress < 80 ? "Encrypting archive (AES-256)…"
-                : progress < 95 ? "Packaging media files…"
-                : "Finalising and generating secure link…"}
+                {phaseText || "Starting…"}
               </div>
             </div>
 
@@ -728,7 +729,7 @@ export function DisasterRecovery() {
             </div>
 
             <div style={{ fontSize:12, color:MUTED, ...MONO }}>
-              Do not close this page · Archive encrypted in transit
+              Do not close this page while the archive is built
             </div>
           </div>
         )}
@@ -745,29 +746,16 @@ export function DisasterRecovery() {
                 Archive Ready
               </div>
               <p style={{ fontSize:14, color:SOFT, maxWidth:380 }}>
-                Your encrypted archive has been generated. Your secure download link is active
-                for the next 15 minutes.
+                {archive ? `${archive.records} records and ${archive.files} files are ready.` : "Your archive is ready."}
+                {archive?.skipped.length ? ` ${archive.skipped.length} item(s) couldn't be included; see README.txt inside.` : ""}
               </p>
             </div>
 
-            {linkExpiry && (
-              <div style={{
-                display:"flex", alignItems:"center", gap:8, padding:"8px 16px", borderRadius:8,
-                background: linkCountdown.remaining < 120_000 ? "rgba(208,107,107,0.12)" : "rgba(91,110,225,0.12)",
-                border: `1px solid ${linkCountdown.remaining < 120_000 ? "rgba(208,107,107,0.3)" : "rgba(91,110,225,0.3)"}`,
-              }}>
-                <Clock size={14} color={linkCountdown.remaining < 120_000 ? NEG : ACCENT2} />
-                <span style={{ fontSize:13, fontWeight:700, ...MONO, color: linkCountdown.remaining < 120_000 ? NEG : ACCENT2 }}>
-                  Link expires in {String(linkCountdown.m).padStart(2,"0")}:{String(linkCountdown.s).padStart(2,"0")}
-                </span>
-              </div>
-            )}
-
             <div className="flex gap-6 flex-wrap justify-center">
               {[
-                { label:"Files", value:totalFiles.toLocaleString() },
-                { label:"Archive Size", value:`${totalGB.toFixed(1)} GB` },
-                { label:"Encrypted", value:"AES-256" },
+                { label:"Files", value:(archive?.files ?? 0).toLocaleString() },
+                { label:"Records", value:(archive?.records ?? 0).toLocaleString() },
+                { label:"Archive Size", value:`${((archive?.blob.size ?? 0) / 1024 / 1024).toFixed(1)} MB` },
                 { label:"Categories", value:selectedCats.length },
               ].map((item, i) => (
                 <div key={i} style={{ textAlign:"center" }}>
@@ -777,27 +765,12 @@ export function DisasterRecovery() {
               ))}
             </div>
 
-            <div style={{ width:"100%", maxWidth:500 }}>
-              <div style={{ display:"flex", alignItems:"center", border:"1.5px solid rgba(91,110,225,0.3)", borderRadius:10, overflow:"hidden" }}>
-                <div style={{ flex:1, padding:"10px 14px", fontSize:12, color:SOFT, ...MONO,
-                  background:"#0F1624", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {downloadLink}
-                </div>
-                <button onClick={copyLink} style={{ padding:"10px 14px", background:"rgba(91,110,225,0.12)",
-                  border:"none", borderLeft:"1px solid rgba(91,110,225,0.3)", cursor:"pointer", color:ACCENT2,
-                  display:"flex", alignItems:"center", gap:6, fontSize:12, fontWeight:600, whiteSpace:"nowrap" }}>
-                  <Copy size={13} /> Copy
-                </button>
-              </div>
-            </div>
-
             <div className="flex gap-3 flex-wrap justify-center">
-              <a href="#" onClick={e => { e.preventDefault(); toast.success("Download started — save your archive securely"); }}
-                className="btn-primary" style={{ background:"linear-gradient(135deg,#5FBE91,#3F8F68)", color:"#fff", textDecoration:"none" }}>
+              <button onClick={saveArchive}
+                className="btn-primary" style={{ background:"linear-gradient(135deg,#5FBE91,#3F8F68)", color:"#fff" }}>
                 <Download size={18} />
-                Download Encrypted Archive
-                <ExternalLink size={14} style={{ opacity:0.7 }} />
-              </a>
+                Save Archive to Device
+              </button>
               <button onClick={resetExport} className="btn-ghost">
                 <RefreshCw size={15} />
                 New Export
@@ -805,8 +778,8 @@ export function DisasterRecovery() {
             </div>
 
             <div style={{ fontSize:12, color:MUTED, textAlign:"center", lineHeight:1.7 }}>
-              This link is single-use and expires in 15 minutes.<br/>
-              Do not share it. All download activity is logged and audited.
+              The archive exists only on this device once saved.<br/>
+              Keep it private: it holds your documents and records.
             </div>
           </div>
         )}
