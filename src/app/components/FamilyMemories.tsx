@@ -10,6 +10,17 @@ import { AttachDocumentField } from "./AttachDocumentField";
 import { useDemo, type Memory, type GoalStatus, type GoalStep } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../services/supabase";
+import { persistMediaValue, uploadMedia, useStoredFileUrl } from "../services/storedFiles";
+
+/* Plays a saved video/audio memory (vault-documents path) through a signed
+   link; a just-picked blob: preview plays as is. */
+function MemoryMedia({ value, video, style }: { value: string; video: boolean; style?: React.CSSProperties }) {
+  const url = useStoredFileUrl(value);
+  if (!url) return <div style={{ color: "var(--muted-foreground)", fontSize: 13 }}>Loading…</div>;
+  return video
+    ? <video src={url} controls preload="metadata" style={style}/>
+    : <audio src={url} controls style={style}/>;
+}
 import heroFamilyPhoto from "../../imports/familymemories_hero_photo.webp";
 
 type Tab = "memories" | "messages" | "audio" | "kids" | "goals" | "awards";
@@ -382,16 +393,23 @@ export function FamilyMemories() {
 
   async function saveAudioMemory() {
     if (!recTitle.trim()) { toast.error("Please enter a title for the recording"); return; }
+    if (!authUser) { toast.error("Sign in to save recordings."); return; }
     const duration = formatTime(recSeconds);
+    // Upload the take; it used to be saved as a blob: URL that died on refresh.
+    let mediaPath: string | undefined;
+    if (recBlob) {
+      try { mediaPath = await uploadMedia(authUser.id, recBlob, recTitle); }
+      catch (err) { toast.error(`The recording couldn't be saved: ${(err as Error).message}`); return; }
+    }
     await addMemory({
       title: recTitle, type: "audio",
       date: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
       recipient: recRecipient || "Family",
       description: recDesc || `Audio memory — ${duration}`,
       tags: [],
-      mediaUrl: recUrl || undefined,   // kept so it plays back from the list
+      mediaUrl: mediaPath,
     });
-    // cleanup — the blob URL stays alive for playback in the list
+    if (recUrl) URL.revokeObjectURL(recUrl);
     setRecState("idle"); setRecTitle(""); setRecRecipient(""); setRecDesc("");
     setRecBlob(null); setRecUrl(null); setRecSeconds(0);
   }
@@ -485,15 +503,25 @@ export function FamilyMemories() {
       case "messages": {
         if (!form.title) { toast.error("Title required"); return; }
         const tags = [form.source || (pendingVideo ? "Uploaded file" : "Added manually")];
-        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.filmed, description: form.desc || "", tags, mediaUrl: pendingVideo?.url });
-        else await addMemory({ title: form.title, date: form.filmed || "Unknown", type: "video", description: form.desc || "", tags, mediaUrl: pendingVideo?.url });
+        let videoPath: string | undefined;
+        if (pendingVideo && authUser) {
+          try { videoPath = (await persistMediaValue(authUser.id, pendingVideo.url, pendingVideo.name)) ?? undefined; }
+          catch (err) { toast.error(`The video couldn't be saved: ${(err as Error).message}`); return; }
+        }
+        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.filmed, description: form.desc || "", tags, ...(videoPath ? { mediaUrl: videoPath } : {}) });
+        else await addMemory({ title: form.title, date: form.filmed || "Unknown", type: "video", description: form.desc || "", tags, mediaUrl: videoPath });
         setPendingVideo(null);  // ownership passes to the saved memory
         break;
       }
       case "audio": {
         if (!form.title) { toast.error("Title required"); return; }
-        if (isEdit) await updateMemory(editingId!, { title: form.title, recipient: form.recipient, description: form.desc || "", mediaUrl: pendingAudio?.url });
-        else await addMemory({ title: form.title, date: today, type: "audio", description: form.desc || "", tags: [], recipient: form.recipient || "Family", mediaUrl: pendingAudio?.url });
+        let audioPath: string | undefined;
+        if (pendingAudio && authUser) {
+          try { audioPath = (await persistMediaValue(authUser.id, pendingAudio.url, pendingAudio.name)) ?? undefined; }
+          catch (err) { toast.error(`The recording couldn't be saved: ${(err as Error).message}`); return; }
+        }
+        if (isEdit) await updateMemory(editingId!, { title: form.title, recipient: form.recipient, description: form.desc || "", ...(audioPath ? { mediaUrl: audioPath } : {}) });
+        else await addMemory({ title: form.title, date: today, type: "audio", description: form.desc || "", tags: [], recipient: form.recipient || "Family", mediaUrl: audioPath });
         setPendingAudio(null);  // ownership passes to the saved memory
         break;
       }
@@ -691,13 +719,11 @@ export function FamilyMemories() {
               {videoList.map(vid => (
                 <div key={vid.id} className="card pad">
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                    {vid.url ? (
-                      <video src={vid.url} controls preload="metadata"
+                    {vid.mediaUrl ? (
+                      <MemoryMedia value={vid.mediaUrl} video
                         style={{ width: 168, borderRadius: 12, background: "#000", flexShrink: 0 }}/>
                     ) : (
-                      <button className="vplay" onClick={() => toast.success(`▶ Playing: ${vid.title}`)}>
-                        <Play size={22} color="#FFFFFF" />
-                      </button>
+                      <div className="vplay" title="No video file saved"><Video size={22} color="#FFFFFF" /></div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="r-title">{vid.title}</div>
@@ -845,15 +871,10 @@ export function FamilyMemories() {
                           <div className="r-title">{msg.title}</div>
                           <div className="r-sub accent" style={{ marginBottom: 4 }}>For: {msg.recipient}</div>
                           <div className="r-desc">{msg.description}</div>
-                          {msg.mediaUrl && <audio src={msg.mediaUrl} controls style={{ marginTop:10 }}/>}
+                          {msg.mediaUrl && <MemoryMedia value={msg.mediaUrl} video={false} style={{ marginTop:10 }}/>}
                           <div className="r-meta">
                             <span className="txt">Recorded {msg.date}</span>
-                            {!msg.mediaUrl && (
-                              <button className="btn-ghost" style={{ padding: "6px 12px", fontSize: 14 }}
-                                onClick={() => toast.success(`▶ Playing: ${msg.title}`)}>
-                                <Play size={11}/> Play
-                              </button>
-                            )}
+                            {!msg.mediaUrl && <span className="txt">· No recording saved</span>}
                             <span className="pill" style={{ background: "rgba(95,190,145,0.14)", color: "#D99A6B", marginLeft: "auto" }}>SECURED</span>
                           </div>
                         </div>

@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroJobPhoto from "../../imports/jobhistory_hero_photo.webp";
+import { openStoredFile } from "../services/storedFiles";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -391,7 +392,7 @@ export function JobHistory() {
                       <div className="docs-lbl">DOCUMENTS ({job.documents.length})</div>
                       <div className="flex flex-wrap gap-2">
                         {job.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                          <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
                             📄 {attachmentDisplayName(d)}
                           </button>
                         ))}

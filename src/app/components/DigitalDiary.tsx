@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ScanButton } from "./DocumentScanner";
 import { tables } from "../services/supabase";
+import { uploadMedia, useStoredFileUrl } from "../services/storedFiles";
 import { useAuth } from "../context/AuthContext";
 import {
   BookOpen, Mic, Video, Upload, Plus, Play, Pause, Square,
@@ -35,8 +36,8 @@ interface DiaryEntry {
   private: boolean;
   duration?: string;
   thumbnail?: string;
-  audioUrl?: string;
-  videoUrl?: string;
+  /* Storage path of the saved recording (diary_entries.media_url). */
+  mediaUrl?: string;
 }
 
 const moodConfig: Record<Mood, { icon: React.ReactNode; label: string; color: string }> = {
@@ -70,6 +71,26 @@ function TypeBadge({ type, color }: { type: EntryType; color?: string }) {
 
 /* Recording logic (getUserMedia / MediaRecorder / interval timers) is untouched below —
    only the surrounding JSX classNames/styles were restyled to the shared premium chrome. */
+/** "m:ss" → seconds. */
+function parseDuration(label: string): number | null {
+  const m = label.match(/^(\d+):(\d{1,2})$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  const n = Number(label);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
+/** seconds → "m:ss". */
+function formatDuration(total: number): string {
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+/** Plays a saved diary recording through a short-lived signed link. */
+function DiaryMedia({ value, video }: { value: string; video: boolean }) {
+  const url = useStoredFileUrl(value);
+  if (!url) return <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Loading recording…</div>;
+  return video
+    ? <video src={url} controls playsInline style={{ width: "100%", maxHeight: 320, borderRadius: 10, background: "#0B1120" }}/>
+    : <audio src={url} controls style={{ width: "100%" }}/>;
+}
+
 function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => void }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -138,7 +159,7 @@ function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => v
 
 /* Recording logic (getUserMedia / MediaRecorder / preview stream) is untouched below —
    only the surrounding JSX classNames/styles were restyled to the shared premium chrome. */
-function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) {
+function VideoRecorderPanel({ onSave }: { onSave: (duration: string, blob: Blob) => void }) {
   const [recording, setRecording] = useState(false);
   const [preview, setPreview] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -176,7 +197,8 @@ function VideoRecorderPanel({ onSave }: { onSave: (duration: string) => void }) 
     mr.onstop = () => {
       const total = secondsRef.current;
       const mins = Math.floor(total/60), secs = total % 60;
-      onSave(`${mins}:${secs.toString().padStart(2,"0")}`);
+      const blob = new Blob(chunks.current, { type: mr.mimeType || "video/webm" });
+      onSave(`${mins}:${secs.toString().padStart(2,"0")}`, blob);
       stopAll();
     };
     mr.start();
@@ -410,7 +432,10 @@ export function DigitalDiary() {
   const [form, setForm] = useState({ title:"", body:"", mood:"good" as Mood, tags:"", private:false });
   const [audioSaved, setAudioSaved] = useState(false);
   const [videoDuration, setVideoDuration] = useState<string | null>(null);
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  // The recording waiting to be saved with the entry, and its length.
+  const [mediaBlob, setMediaBlob] = useState<Blob | null>(null);
+  const [recDuration, setRecDuration] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const entriesRef = React.useRef<HTMLDivElement>(null);
 
@@ -418,7 +443,7 @@ export function DigitalDiary() {
     setCreating(false);
     setEditingId(null);
     setForm({ title:"", body:"", mood:"good", tags:"", private:false });
-    setAudioSaved(false); setVideoDuration(null);
+    setAudioSaved(false); setVideoDuration(null); setMediaBlob(null); setRecDuration(null);
   }
 
   function openAdd() {
@@ -468,7 +493,8 @@ export function DigitalDiary() {
       mood: (r.mood as Mood | null) ?? undefined,
       tags: (r.tags as string[] | null) ?? [],
       private: Boolean(r.is_private),
-      duration: r.duration_s ? String(r.duration_s) : undefined,
+      duration: r.duration_s ? formatDuration(Number(r.duration_s)) : undefined,
+      mediaUrl: (r.media_url as string | null) ?? undefined,
     })));
   }, [authUser]);
 
@@ -484,23 +510,40 @@ export function DigitalDiary() {
     if (!authUser) return;
     if (!form.title.trim()) { toast.error("Please add a title"); return; }
     const tags = form.tags.split(",").map(t => t.trim()).filter(Boolean);
-    // duration_s is INTEGER in the table; the UI's "duration" is a label, so
-    // only a real recorded length is worth storing.
-    const durationS = newType === "video" && videoDuration ? Number(String(videoDuration).replace(/[^0-9]/g, "")) || null : null;
+    if (saving) return;
+    // duration_s is whole seconds; the recorder reports "m:ss". ("1:23" used
+    // to be stored as 123 seconds.)
+    const durationS = newType !== "written" && recDuration ? parseDuration(recDuration) : null;
 
-    const row = {
+    setSaving(true);
+    // Upload the recording (it used to be thrown away).
+    let mediaPath: string | null | undefined;
+    if (newType !== "written" && mediaBlob) {
+      try {
+        mediaPath = await uploadMedia(authUser.id, mediaBlob, form.title.trim() || "diary");
+      } catch (err) {
+        setSaving(false);
+        toast.error(`The recording couldn't be saved: ${(err as Error).message}`);
+        return;
+      }
+    }
+
+    const row: Record<string, unknown> = {
       title: form.title.trim(),
       body: form.body || null,
       entry_type: newType,
       mood: form.mood || null,
       tags,
       is_private: form.private,
-      duration_s: durationS,
     };
+    // Editing without re-recording keeps the existing recording and length.
+    if (mediaPath !== undefined) { row.media_url = mediaPath; row.duration_s = durationS; }
+    else if (editingId == null) row.duration_s = durationS;
 
     const { error } = editingId != null
       ? await tables.diaryEntries.update(editingId, row)
       : await tables.diaryEntries.add(authUser.id, row);
+    setSaving(false);
 
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
 
@@ -655,13 +698,8 @@ export function DigitalDiary() {
                   {entry.body && <p className="ebody line-clamp-2">{entry.body}</p>}
                   {entry.type === "audio" && entry.duration && (
                     <div className="eaudio">
-                      <button onClick={e => { e.stopPropagation(); setPlayingAudio(playingAudio===entry.id ? null : entry.id); if (playingAudio !== entry.id) toast.success("▶ Playing audio entry — " + entry.duration); }} className="eaudio-btn">
-                        {playingAudio===entry.id ? <Pause size={14}/> : <Play size={14}/>}
-                      </button>
-                      <div className="eaudio-track">
-                        <div className="eaudio-fill" style={{ width: playingAudio===entry.id ? "35%" : "0%" }}/>
-                      </div>
-                      <span className="edate">{entry.duration}</span>
+                      <Mic size={14}/>
+                      <span className="edate">Voice recording · {entry.duration}{entry.mediaUrl ? "" : " (not saved)"}</span>
                     </div>
                   )}
                   {entry.tags.length > 0 && (
@@ -700,22 +738,17 @@ export function DigitalDiary() {
                 {selected.type === "audio" && (
                   <div className="daudio">
                     <Mic size={24} color="#FFFFFF" style={{ margin:"0 auto 8px" }}/>
-                    <div style={{ color: TEXT, fontSize: 16 }}>Voice Recording · {selected.duration}</div>
-                    <button onClick={() => { setPlayingAudio(playingAudio===selected.id ? null : selected.id); toast.success(playingAudio===selected.id ? "⏸ Paused" : "▶ Playing audio — " + selected.duration); }} className="daudio-btn">
-                      <Play size={13}/> Play Recording
-                    </button>
+                    <div style={{ color: TEXT, fontSize: 16, marginBottom: 8 }}>Voice Recording{selected.duration ? ` · ${selected.duration}` : ""}</div>
+                    {selected.mediaUrl
+                      ? <DiaryMedia value={selected.mediaUrl} video={false}/>
+                      : <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>No recording was saved with this entry.</div>}
                   </div>
                 )}
                 {selected.type === "video" && (
-                  <div className="dvideo" onClick={() => toast.success("▶ Video playback started — demo mode")}>
-                    {selected.thumbnail
-                      ? <img src={selected.thumbnail} alt=""/>
-                      : <div className="dvideo-placeholder"><Video size={28} color="#FFFFFF"/></div>
-                    }
-                    <div className="dvideo-overlay">
-                      <div className="dvideo-play"><Play size={20} color="#FFFFFF" fill="#FFFFFF"/></div>
-                    </div>
-                  </div>
+                  selected.mediaUrl
+                    ? <DiaryMedia value={selected.mediaUrl} video/>
+                    : <div className="dvideo"><div className="dvideo-placeholder"><Video size={28} color="#FFFFFF"/></div>
+                        <div style={{ color: "var(--muted-foreground)", fontSize: 14, padding: 8 }}>No video was saved with this entry.</div></div>
                 )}
                 {selected.tags.length > 0 && (
                   <div className="etags" style={{ marginTop: 16 }}>
@@ -778,7 +811,7 @@ export function DigitalDiary() {
                 <div className="record-box">
                   {audioSaved
                     ? <div className="record-done"><div style={{ fontSize: 30, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Audio recorded successfully</div></div>
-                    : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); toast.success(`Recorded ${dur} of audio`); }}/>}
+                    : <AudioRecorder onSave={(blob, dur) => { setAudioSaved(true); setMediaBlob(blob); setRecDuration(dur); toast.success(`Recorded ${dur} of audio`); }}/>}
                 </div>
               )}
 
@@ -786,7 +819,7 @@ export function DigitalDiary() {
                 <div className="record-box" style={{ padding: 16 }}>
                   {videoDuration
                     ? <div className="record-done"><div style={{ fontSize: 30, marginBottom: 8 }}>✅</div><div style={{ color: "#D99A6B", fontWeight: 600 }}>Video recorded: {videoDuration}</div></div>
-                    : <VideoRecorderPanel onSave={dur => { setVideoDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
+                    : <VideoRecorderPanel onSave={(dur, blob) => { setVideoDuration(dur); setMediaBlob(blob); setRecDuration(dur); toast.success(`Recorded ${dur} of video`); }}/>}
                 </div>
               )}
 
@@ -836,7 +869,7 @@ export function DigitalDiary() {
               </div>
             </div>
             <div className="modal-foot">
-              <button className="save" onClick={handleSave}><Save size={14}/>{editingId != null ? "Save Changes" : "Save Entry"}</button>
+              <button className="save" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.6 : 1 }}><Save size={14}/>{saving ? "Saving…" : editingId != null ? "Save Changes" : "Save Entry"}</button>
               <button className="btn-sec" onClick={closeCreateModal}>Cancel</button>
             </div>
           </div>

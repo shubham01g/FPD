@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
+import { persistMediaValue, useStoredFileUrl } from "../services/storedFiles";
 import { useAuth } from "../context/AuthContext";
 import { useDemo } from "../context/DemoContext";
 import heroMessagesPhoto from "../../imports/messages_hero_photo.webp";
@@ -243,6 +244,15 @@ const MSG_CSS = `
 .fpd-msg .save{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:18px;font-size:16px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-family:var(--font-body);transition:filter .18s;}
 .fpd-msg .save:hover{filter:brightness(1.08);}
 `;
+
+/* Plays a saved recording through a short-lived signed link. */
+function StoredMedia({ value, video }: { value: string; video: boolean }) {
+  const url = useStoredFileUrl(value);
+  if (!url) return <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Loading recording…</div>;
+  return video
+    ? <video src={url} controls playsInline style={{ width: "100%", maxHeight: 300, borderRadius: 10, background: "#0B1120" }} />
+    : <audio src={url} controls style={{ width: "100%" }} />;
+}
 
 /* ── Recorder — real capture via getUserMedia + MediaRecorder.
    This must genuinely record: a user leaving a goodbye video has no way to
@@ -650,14 +660,23 @@ export function MessagesToLovedOnes() {
   const save = async (m: Message) => {
     if (!authUser) { toast.error("Sign in to save messages."); return; }
 
+    // A just-recorded take is a blob: URL in browser memory; upload it so
+    // the message keeps its recording (it used to be dropped on save).
+    let mediaPath: string | null = null;
+    if (m.medium !== "letter" && m.mediaUrl) {
+      try {
+        mediaPath = await persistMediaValue(authUser.id, m.mediaUrl, m.title || "message");
+      } catch (err) {
+        toast.error(`The recording couldn't be saved: ${(err as Error).message}`);
+        return;
+      }
+    }
     const row = {
       title: m.title, recipient_name: m.recipient, relationship: m.relationship,
       medium: m.medium, trigger_type: m.trigger,
       trigger_date: m.triggerDate ?? null, status: m.status,
       body: m.body, duration_s: fromDuration(m.duration),
-      // m.mediaUrl is an in-memory blob: URL for a just-recorded take. It is
-      // meaningless in another session, so it is deliberately not stored —
-      // persisting recordings needs a Storage upload, which is separate work.
+      media_url: mediaPath,
     };
 
     const { error } = editing
@@ -840,14 +859,9 @@ export function MessagesToLovedOnes() {
                               <div className="mrow-media" style={{ borderColor: `${mm.color}33` }}>
                                 {m.mediaUrl ? (
                                   /* A real recording from this session — play the actual media */
-                                  m.medium === "video" ? (
-                                    <video src={m.mediaUrl} controls playsInline
-                                      style={{ width: "100%", maxHeight: 300, borderRadius: 10, background: "#0B1120" }} />
-                                  ) : (
-                                    <audio src={m.mediaUrl} controls style={{ width: "100%" }} />
-                                  )
+                                  <StoredMedia value={m.mediaUrl} video={m.medium === "video"}/>
                                 ) : (
-                                  /* Seeded demo entry — no media file behind it, so say so */
+                                  /* Saved before recordings were stored, or never recorded */
                                   <div className="flex items-center gap-3">
                                     <div className="flex items-center justify-center rounded-full flex-shrink-0"
                                       style={{ width: 38, height: 38, background: `${mm.color}26`, color: mm.color }}>
@@ -857,7 +871,7 @@ export function MessagesToLovedOnes() {
                                       <div style={{ color: TEXT, fontSize: 15.5 }}>
                                         {mm.label} message · {m.duration}
                                       </div>
-                                      <div className="sample-tag">SAMPLE ENTRY — NO MEDIA FILE ATTACHED</div>
+                                      <div className="sample-tag">NO RECORDING SAVED — EDIT TO RECORD AGAIN</div>
                                     </div>
                                   </div>
                                 )}

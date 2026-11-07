@@ -6,6 +6,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
+import { persistMediaValue, useStoredFileUrl } from "../services/storedFiles";
+
+/* A saved receipt image (vault-documents path), shown through a signed link. */
+function ReceiptImage({ value, maxHeight }: { value: string; maxHeight: number }) {
+  const url = useStoredFileUrl(value);
+  if (!url) return null;
+  return <img src={url} alt="Scanned receipt" style={{ width: "100%", maxHeight, objectFit: "contain", borderRadius: 14, background: "#0B1120", border: "1px solid rgba(255,255,255,0.08)" }} />;
+}
 import { useAuth } from "../context/AuthContext";
 import { DocumentScanner, type ScannedDocument } from "./DocumentScanner";
 
@@ -263,7 +271,7 @@ function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
 
         {receipt.imageUrl && (
           <div style={{ padding: "18px 22px 0" }}>
-            <img src={receipt.imageUrl} alt="Scanned receipt" style={{ width: "100%", maxHeight: 200, objectFit: "contain", borderRadius: 14, background: "#0B1120", border: "1px solid rgba(255,255,255,0.08)" }} />
+            <ReceiptImage value={receipt.imageUrl} maxHeight={200} />
           </div>
         )}
 
@@ -727,6 +735,15 @@ export function ReceiptsExpenses() {
       ? r.isoDate
       : `${selectedYear}-${String(MONTHS.indexOf(selectedMonth || currentMonth) + 1).padStart(2, "0")}-01`;
 
+    // The scan is a blob: URL in browser memory; store the image itself.
+    let imagePath: string | null = null;
+    try {
+      imagePath = await persistMediaValue(authUser.id, r.imageUrl, r.merchant || "receipt");
+    } catch (err) {
+      toast.error(`The receipt image couldn't be saved: ${(err as Error).message}`);
+      return false;
+    }
+
     const { error } = await tables.receipts.add(authUser.id, {
       section,
       merchant: r.merchant,
@@ -735,12 +752,13 @@ export function ReceiptsExpenses() {
       category: r.category || null,
       ocr_verified: r.ocrVerified,
       ocr_confidence: r.confidence || null,
-      image_url: r.imageUrl || null,
+      image_url: imagePath,
       tax_year: r.taxYear,
       tax_deductible: r.taxDeductible,
     });
-    if (error) { toast.error(`Could not save receipt: ${error.message}`); return; }
+    if (error) { toast.error(`Could not save receipt: ${error.message}`); return false; }
     await reload();
+    return true;
   };
 
   const updateTax = async (id: string, patch: { tax_year: number | null; tax_deductible: boolean }) => {

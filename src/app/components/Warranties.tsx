@@ -9,6 +9,7 @@ import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
+import { openStoredFile } from "../services/storedFiles";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
 const TEXT    = "#EFF2F9";
@@ -470,7 +471,7 @@ export function Warranties() {
                     <div className="doclbl">Documents ({w.documents.length})</div>
                     <div className="docs">
                       {w.documents.map(d => (
-                        <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                        <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
                           <FileText size={12} /> {attachmentDisplayName(d)}
                         </button>
                       ))}

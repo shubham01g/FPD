@@ -9,6 +9,7 @@ import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroTravelPhoto from "../../imports/travel_hero_photo.webp";
+import { openStoredFile } from "../services/storedFiles";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -443,7 +444,7 @@ export function TravelPlanner() {
                       <div className="docs-lbl">TRAVEL DOCUMENTS ({trip.documents.length})</div>
                       <div className="flex flex-wrap gap-2">
                         {trip.documents.map(d => (
-                          <button key={d.name} className="docchip" onClick={() => toast.success(`Opening: ${d.name}`)}>
+                          <button key={d.name} className="docchip" onClick={() => void openStoredFile(d.path, d.name)}>
                             📄 {d.name} <span style={{ color: MUTED, marginLeft: 4 }}>({d.type})</span>
                           </button>
                         ))}

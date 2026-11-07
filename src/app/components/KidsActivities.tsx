@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroKidsPhoto from "../../imports/kidsactivities_hero_photo.webp";
+import { openStoredFile } from "../services/storedFiles";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -485,7 +486,7 @@ export function KidsActivities() {
                       <div className="doclbl">DOCUMENTS ({act.documents.length})</div>
                       <div className="docrow">
                         {act.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => toast.success(`Opening: ${attachmentDisplayName(d)}`)}>
+                          <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
                             <FileText size={12} /> {attachmentDisplayName(d)}
                           </button>
                         ))}

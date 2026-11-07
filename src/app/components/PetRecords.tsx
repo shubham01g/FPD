@@ -9,6 +9,8 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { StoredImage } from "./StoredImage";
 import heroPetPhoto from "../../imports/petrecords_hero_photo.webp";
+import { openStoredFile } from "../services/storedFiles";
+import { attachmentDisplayName } from "./AttachDocumentField";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";
@@ -559,7 +561,7 @@ export function PetRecords() {
                 {pet.documents.length > 0 && (
                   <div className="petdocs">
                     {pet.documents.map(d=>(
-                      <button key={d} className="petdoc" onClick={()=>toast.success(`Opening: ${d}`)}>📄 {d}</button>
+                      <button key={d} className="petdoc" onClick={()=>void openStoredFile(d, attachmentDisplayName(d))}>📄 {attachmentDisplayName(d)}</button>
                     ))}
                   </div>
                 )}
