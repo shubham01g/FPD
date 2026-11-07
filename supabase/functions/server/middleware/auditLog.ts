@@ -29,7 +29,11 @@ export async function auditLog(c: Context, next: Next) {
   if (!admin) return;
 
   const path = new URL(c.req.url).pathname;
-  const { targetType, targetId } = inferTarget(path);
+  const inferred = inferTarget(path);
+  // A route whose target id is in the body (e.g. POST /admin/legacy/deceased
+  // { userId }) names it with c.set("auditTargetId", id).
+  const targetType = inferred.targetType;
+  const targetId = (c.get("auditTargetId") as string | undefined) ?? inferred.targetId;
 
   try {
     await adminClient().from("audit_logs").insert({

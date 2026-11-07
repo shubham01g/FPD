@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Edit, Lock, Gift, Shield, CreditCard,
   CheckCircle, ToggleLeft, ToggleRight, Eye, EyeOff,
-  Save, Activity, Download, Loader2, AlertCircle
+  Save, Activity, Download, Loader2, AlertCircle, ScrollText, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
@@ -225,7 +225,7 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
   };
 }
 
-type ModalTab = "overview" | "edit" | "billing" | "security";
+type ModalTab = "overview" | "edit" | "billing" | "security" | "audit";
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 function SLabel({ children }: { children: React.ReactNode }) {
@@ -388,6 +388,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
     { id:"edit",     label:"Edit Account", icon:<Edit size={13}/> },
     { id:"billing",  label:"Billing",      icon:<CreditCard size={13}/> },
     { id:"security", label:"Security",     icon:<Shield size={13}/> },
+    { id:"audit",    label:"Audit Log",    icon:<ScrollText size={13}/> },
   ];
 
   return (
@@ -681,6 +682,8 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
           )}
 
           {/* ── SECURITY ─────────────────────────────────────────── */}
+          {tab === "audit" && <UserAuditLog userId={user.id} />}
+
           {tab === "security" && (
             <div className="space-y-5">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -771,6 +774,81 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
 
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Audit Log tab — every admin action recorded against this account
+ * (GET /admin/audit?targetId=). Rows come from the auditLog middleware, which
+ * stores the raw request ("PATCH /…/admin/users/<id>"), so describeAction
+ * turns that back into words. ───────────────────────────────────────── */
+interface AuditRow { id: string; actor_email: string | null; action: string; target_type: string | null; target_id: string | null; ip_address: string | null; created_at: string; }
+
+const BILLING_ACTIONS: Record<string, string> = {
+  "POST refund-and-end": "Refunded and ended the subscription",
+  "POST refund":         "Refunded a charge",
+  "POST comp":           "Comped a plan",
+  "DELETE comp":         "Removed the comped plan",
+  "POST change-plan":    "Changed the plan",
+};
+
+function describeAction(row: AuditRow): string {
+  const [method, path = ""] = row.action.split(" ");
+  const parts = path.split("/").filter(Boolean);
+  const rest = parts.slice(parts.indexOf("admin") + 3); // after admin/<domain>/<id>
+  const sub = rest.join("/");
+  switch (row.target_type) {
+    case "users":
+      if (sub === "reset-mfa") return "Reset two-factor authentication";
+      if (method === "DELETE") return "Deleted the account";
+      if (method === "PATCH") return "Edited the account (status or admin access)";
+      break;
+    case "user-billing":
+      return BILLING_ACTIONS[`${method} ${sub}`] ?? `Billing: ${sub || method.toLowerCase()}`;
+    case "legacy":
+      if (parts.includes("deceased")) return "Marked the account as deceased";
+      break;
+    case "disaster-recovery":
+      return "Changed disaster recovery access";
+  }
+  return `${method} ${row.target_type ?? ""}${sub ? ` / ${sub}` : ""}`;
+}
+
+function UserAuditLog({ userId }: { userId: string }) {
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => adminApi.get<{ logs: AuditRow[]; total: number }>(`/audit?targetId=${userId}&pageSize=200`),
+    [userId],
+  );
+  // Filtered here too: a server without the targetId filter returns every account's log.
+  const logs = (data?.logs ?? []).filter(r => r.target_id === userId);
+
+  return (
+    <div style={CARD}>
+      <div className="flex items-center justify-between mb-3">
+        <SLabel>Admin actions on this account</SLabel>
+        <button onClick={refetch} disabled={loading} className="flex items-center gap-1.5" style={{ color:T.primary, fontSize:14, fontWeight:600 }}>
+          <RefreshCw size={13} className={loading ? "animate-spin" : undefined}/> Refresh
+        </button>
+      </div>
+      {loading && !data && <div className="flex items-center gap-2 py-6 justify-center" style={{ color:T.sub }}><Loader2 size={16} className="animate-spin"/> Loading…</div>}
+      {error && <div style={{ color:T.red, fontSize:15, padding:"12px 0" }}>{error}</div>}
+      {!loading && !error && logs.length === 0 && (
+        <div style={{ color:T.muted, fontSize:15, textAlign:"center", padding:"24px 0" }}>No admin actions have been recorded on this account yet.</div>
+      )}
+      {logs.map(row => (
+        <div key={row.id} className="flex items-start justify-between gap-4 py-3 border-b" style={{ borderColor:"rgba(91,110,225,0.06)" }}>
+          <div>
+            <div style={{ color:T.text, fontSize:15, fontWeight:600 }}>{describeAction(row)}</div>
+            <div style={{ color:T.sub, fontSize:13.5, marginTop:2 }}>by {row.actor_email ?? "unknown admin"}{row.ip_address ? ` · ${row.ip_address}` : ""}</div>
+          </div>
+          <div style={{ color:T.muted, fontSize:13, ...MONO, whiteSpace:"nowrap" }}>
+            {new Date(row.created_at).toLocaleString("en-US", { month:"short", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit" })}
+          </div>
+        </div>
+      ))}
+      {data && data.logs.length === logs.length && data.total > logs.length && (
+        <div style={{ color:T.muted, fontSize:13.5, marginTop:10 }}>Showing the latest {logs.length} of {data.total}. The full history is in Master Admin → Audit Log.</div>
+      )}
     </div>
   );
 }

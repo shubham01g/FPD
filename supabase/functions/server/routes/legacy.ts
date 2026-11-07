@@ -114,6 +114,7 @@ legacy.post("/deceased", async (c) => {
   const { data: owner, error: ownerErr } = await db.from("users").select("id, full_name").eq("id", userId).maybeSingle();
   if (ownerErr) return c.json({ error: ownerErr.message }, 500);
   if (!owner) return c.json({ error: "User not found" }, 404);
+  c.set("auditTargetId", userId);
 
   const { data: contacts, error: contactsErr } = await db
     .from("contacts")

@@ -3,10 +3,10 @@ import { adminClient } from "../lib/supabaseAdmin.ts";
 
 const audit = new Hono();
 
-// GET /admin/audit?actorId=&severity=&targetType=&page=&pageSize=
+// GET /admin/audit?actorId=&severity=&targetType=&targetId=&page=&pageSize=
 // Populated automatically by the auditLog middleware on every mutating /admin/* request.
 audit.get("/", async (c) => {
-  const { actorId, severity, targetType } = c.req.query();
+  const { actorId, severity, targetType, targetId } = c.req.query();
   const page = Math.max(1, Number(c.req.query("page") ?? 1));
   const pageSize = Math.min(200, Number(c.req.query("pageSize") ?? 50));
   const from = (page - 1) * pageSize;
@@ -21,6 +21,9 @@ audit.get("/", async (c) => {
   if (actorId) q = q.eq("actor_id", actorId);
   if (severity) q = q.eq("severity", severity);
   if (targetType) q = q.eq("target_type", targetType);
+  // One account's history: /admin/users/:id, /admin/user-billing/:id, ... all
+  // record that id as target_id.
+  if (targetId) q = q.eq("target_id", targetId);
 
   const { data, error, count } = await q;
   if (error) return c.json({ error: error.message }, 500);
