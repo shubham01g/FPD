@@ -197,8 +197,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
       const file = new File([capturedBlob], fileName, { type: isPdf ? "application/pdf" : "image/jpeg" });
       const url = capturedUrl!;
       setUploading(false);
+      // The scanner only hands the file back; the page that opened it does the
+      // saving and reports the real result, so no "uploaded" claim here.
       onUpload({ file, previewUrl:url, name:docName.trim() });
-      toast.success(`"${docName}" scanned and uploaded to ${FOLDERS.find(f=>f.id===docFolder)?.label ?? docFolder}`);
       onClose();
     }, 800);
   }

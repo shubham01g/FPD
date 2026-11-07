@@ -587,7 +587,7 @@ export function DigitalFileCabinet() {
     docs.filter(d => d.folderId ? d.folderId === folderId : d.category === folderId).map(docToFolderFile),
   [docs]);
 
-  const doUpload = useCallback(async (folderId: string, files: FileList | null) => {
+  const doUpload = useCallback(async (folderId: string, files: FileList | File[] | null) => {
     if (!files || files.length === 0) return;
 
     // Ask before uploading: the plan's storage, the overage limit and a
@@ -802,7 +802,7 @@ export function DigitalFileCabinet() {
                 <input ref={fileRef} type="file" className="hidden" multiple accept={current.acceptedTypes} onChange={e => doUpload(current.id, e.target.files)}/>
                 <ScanButton
                   folder={current.id}
-                  onUpload={doc => { toast.success(`"${doc.name}" scanned and added to ${current.label}`); doUpload(current.id, null); }}
+                  onUpload={doc => { void doUpload(current.id, [doc.file]); }}
                   size="md"
                   label="Scan"
                 />
