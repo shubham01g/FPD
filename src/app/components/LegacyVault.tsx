@@ -352,7 +352,7 @@ export function LegacyVault() {
 
         {/* ── Header ── */}
         <div>
-          <div className="eyebrow"><Lock size={12}/> AES-256 Encrypted · Zero-Knowledge</div>
+          <div className="eyebrow"><Lock size={12}/> AES-256 Encrypted at Rest</div>
           <h1 className="pg-h1">Your Legacy Package</h1>
           <div className="pg-sub">
             This is a preview of everything your verified legacy contacts will receive. All content is stored across

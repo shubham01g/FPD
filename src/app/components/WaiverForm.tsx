@@ -116,11 +116,12 @@ function WaiverText({ waiver }: { waiver: WaiverRecord }) {
       </div>
 
       <div>
-        <div style={{ color:"#FFFFFF", fontSize:17.5, fontWeight:700, marginBottom:8 }}>5. SECURITY & ZERO-KNOWLEDGE ENCRYPTION</div>
+        <div style={{ color:"#FFFFFF", fontSize:17.5, fontWeight:700, marginBottom:8 }}>5. SECURITY & ENCRYPTION</div>
         <p>
-          I understand that FPD uses AES-256 zero-knowledge encryption. <strong>The Specialist
-          assists with uploading and organizing my documents but cannot read the contents of
-          encrypted files.</strong> My master encryption key is never shared with or accessible
+          I understand that FPD stores my files encrypted at rest (AES-256) and that my saved
+          passwords are encrypted on my device with my vault passphrase. <strong>The Specialist
+          assists with uploading and organizing my documents and sees only what I show or upload
+          during a session.</strong> My vault passphrase is never shared with or accessible
           to the Specialist or FPD staff. The Specialist's access is limited to the platform
           interface and terminates automatically upon completion of the White Glove service
           engagement.

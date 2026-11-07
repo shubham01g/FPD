@@ -170,7 +170,7 @@ export function VaultReadiness({ items, onNavigate }: VaultReadinessProps) {
 
         <p style={{ color: MUTED, fontSize: 17.5, lineHeight: 1.55, maxWidth: 420 }}>
           {sealed
-            ? <>All {total} essentials in place, encrypted end-to-end.</>
+            ? <>All {total} essentials in place, stored encrypted.</>
             : <>{done} of {total} essentials in place. {nextUp ? <>Next up — {nextUp.label.toLowerCase()}.</> : null}</>}
         </p>
 

@@ -267,7 +267,7 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
             <h2 className="pg-h1">Welcome back, <span className="accent-name">{firstName}</span></h2>
             <div className="pg-sub">
               {sealed
-                ? "Your legacy is fully prepared, sealed, and encrypted end-to-end."
+                ? "Your legacy is fully prepared, sealed, and stored encrypted."
                 : `You're ${readyPct}% of the way to a fully prepared vault.`}
             </div>
           </div>

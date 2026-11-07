@@ -505,7 +505,7 @@ export function AccountSettings() {
       sub: twoFA === null ? "Checking" : twoFAEnabled ? `Via ${methodLabel}` : "Not enabled",
       icon:<Shield size={14}/>,
       dot: twoFA === null ? ACCENT2 : twoFAEnabled ? POS : WARN },
-    { label:"Encryption", value:"AES-256", sub:"Always on", icon:<Lock size={14}/>, dot:POS },
+    { label:"Encryption", value:"AES-256", sub:"At rest, always on", icon:<Lock size={14}/>, dot:POS },
     { label:"Notifications", value:`${notifEnabledCount}/6`, sub:"Channels enabled", icon:<Bell size={14}/>, dot:ACCENT2 },
   ];
 
@@ -828,38 +828,38 @@ export function AccountSettings() {
               </div>
               <div>
                 <div className="btitle" style={{ color: "#D99A6B" }}>
-                  AES-256 Encryption Active — Always On
+                  Encryption Active — Always On
                 </div>
                 <p className="btext">
-                  Every file you upload is encrypted with AES-256-GCM <strong style={{ color: TEXT }}>before it leaves your device</strong>. Every file you download is decrypted <strong style={{ color: TEXT }}>only on your device</strong>. No one — not FPD staff, not servers, not anyone — can read your files without your encryption key.
+                  Every file travels to Final Pass Down over an encrypted connection (TLS) and is stored <strong style={{ color: TEXT }}>encrypted at rest with AES-256</strong>. Your saved passwords and Auto Pay logins go further: they are encrypted <strong style={{ color: TEXT }}>on your device</strong> with your vault passphrase, so no one at Final Pass Down can read them.
                 </p>
               </div>
             </div>
 
             {/* How it works */}
             <div className="card pad">
-              <h3 className="sec-title">How Your Files Are Protected</h3>
+              <h3 className="sec-title">How Your Information Is Protected</h3>
               <div className="steps">
                 {[
                   {
                     step:"1", color:"#6E90C9",
-                    title:"Upload — Encrypted Before Sending",
-                    desc:"When you upload a file, it is encrypted with AES-256-GCM in your browser before any data is transmitted. The encrypted file travels to FPD servers. The unencrypted original never leaves your device.",
+                    title:"In Transit — Encrypted Connection",
+                    desc:"Everything you upload or view travels over HTTPS (TLS 1.2+), so it can't be read or changed on the way between your device and our servers.",
                   },
                   {
                     step:"2", color:"#6FAE8B",
-                    title:"Storage — Encrypted at Rest",
-                    desc:"Your files are stored on FPD's Supabase infrastructure in encrypted form only. FPD servers store ciphertext — unreadable without your personal encryption key. Even a complete server breach exposes nothing readable.",
+                    title:"At Rest — AES-256 Storage Encryption",
+                    desc:"Documents, photos and records are stored in private, encrypted storage (AES-256). Files are never public: each download uses a short-lived signed link issued only to you or to a contact you have granted access.",
                   },
                   {
                     step:"3", color:"#D99A6B",
-                    title:"Download — Decrypted Only on Your Device",
-                    desc:"When you or an authorized legacy contact downloads a file, the encrypted ciphertext is sent from the server. Decryption happens locally in the browser using your key. The decrypted file exists only on your device, never on FPD servers.",
+                    title:"Access — Only You and the People You Choose",
+                    desc:"Database rules tie every record to your account. Legacy and Guardian contacts see only what you share with them, and only after their access is approved. Two-step verification protects your sign-in.",
                   },
                   {
                     step:"4", color:WARN,
-                    title:"Zero-Knowledge Architecture",
-                    desc:"Your encryption key is derived from your master password using PBKDF2 (100,000 iterations, SHA-256). This key is never transmitted to FPD. We mathematically cannot read your files — not even if we wanted to.",
+                    title:"Passwords — Encrypted on Your Device",
+                    desc:"Password Manager and Auto Pay credentials are encrypted in your browser with AES-256-GCM, using a key derived from your vault passphrase (PBKDF2, 600,000 iterations). The key never leaves your device, so we cannot read these entries.",
                   },
                 ].map(s => (
                   <div key={s.step} className="step">
@@ -878,9 +878,9 @@ export function AccountSettings() {
             {/* Encryption stats */}
             <div className="stat3">
               {[
-                { label:"Encryption Standard", value:"AES-256-GCM", color:"#6E90C9", sub:"Military-grade" },
-                { label:"Key Derivation",       value:"PBKDF2",      color:"#6FAE8B", sub:"100,000 iterations" },
-                { label:"Architecture",         value:"Zero-Knowledge", color:"#D99A6B", sub:"FPD cannot read your data" },
+                { label:"Files at Rest",    value:"AES-256",     color:"#6E90C9", sub:"Private encrypted storage" },
+                { label:"In Transit",       value:"TLS",         color:"#6FAE8B", sub:"HTTPS on every request" },
+                { label:"Saved Passwords",  value:"On-device",   color:"#D99A6B", sub:"Only your passphrase unlocks them" },
               ].map(s => (
                 <div key={s.label} className="card scell">
                   <div className="sval" style={{ color: s.color }}>{s.value}</div>

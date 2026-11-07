@@ -625,13 +625,13 @@ function MemoriesStory({ onStart }: { onStart: () => void }) {
 /* ── SECURITY ─────────────────────────────────────────────────── */
 const SEC_ITEMS = [
   { icon: <Lock size={22} />, title: "AES-256 Encryption", desc: "Military-grade encryption protects every file, message, and record in your vault." },
-  { icon: <Eye size={22} />, title: "Zero-Knowledge Architecture", desc: "We cannot read your data. Only you and your designated contacts can decrypt it." },
+  { icon: <Eye size={22} />, title: "Private by Design", desc: "Every record is tied to your account by database rules. Your saved passwords are encrypted on your device, so we cannot read them." },
   { icon: <Shield size={22} />, title: "Government ID Verification", desc: "Every legacy contact must submit and pass identity verification before gaining access." },
   { icon: <KeyRound size={22} />, title: "Multi-Factor Authentication", desc: "Biometric + authenticator app + backup codes — your account is always protected." },
   { icon: <Globe size={22} />, title: "SOC 2 Type II Compliant", desc: "Annual third-party security audits validate our infrastructure and data practices." },
   { icon: <Zap size={22} />, title: "Breach Notification", desc: "Real-time alerts if any suspicious access is detected on your account." },
 ];
-const SEC_BADGES = ["AES-256 Encrypted", "Zero-Knowledge", "SOC 2 Type II", "HIPAA Compliant", "GDPR Ready", "ISO 27001"];
+const SEC_BADGES = ["AES-256 at Rest", "TLS in Transit", "Two-Step Verification", "Private Signed Links", "On-Device Password Encryption"];
 
 function Security() {
   return (
@@ -1385,7 +1385,7 @@ function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConcierg
             <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.7, maxWidth: 300, marginBottom: 12 }}>
               The secure digital vault for everything that matters — prepared by you, passed down to those you love.
             </p>
-            <p style={{ color: FAINT, fontSize: 14 }}>AES-256 Encrypted · SOC 2 Type II · HIPAA Compliant</p>
+            <p style={{ color: FAINT, fontSize: 14 }}>AES-256 Encrypted at Rest · TLS in Transit · Two-Step Verification</p>
             <div className="mt-5"><PrimaryBtn onClick={onStart}>Get Started</PrimaryBtn></div>
           </div>
           {FOOTER_COLS.map(([title, links]) => (

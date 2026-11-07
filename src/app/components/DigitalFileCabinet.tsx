@@ -10,6 +10,7 @@ import { useDemo, type Doc, type VaultFolder } from "../context/DemoContext";
 import { checkUpload, showQuotaRefusal } from "../utils/storageQuota";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
+import { SecretVaultPanel } from "./SecretVaultPanel";
 // Attachments from other sections (Warranties, Pets, Trips...) arrive here as
 // ordinary vault_documents rows marked linked (DemoContext.linkStoredDoc).
 import heroCabinetPhoto from "../../imports/filecabinet_hero_photo.webp";
@@ -281,7 +282,7 @@ const cabinets: Cabinet[] = [
   },
   {
     id:"secret", label:"Secret Vault", color:"#E53E3E", emoji:"🔐",
-    description:"Ultra-sensitive items — AES-256 encrypted · PIN required",
+    description:"Ultra-sensitive items — locked behind your Secret Vault PIN",
     acceptedTypes:"*/*",
     files:[],
   },
@@ -553,6 +554,7 @@ export function DigitalFileCabinet() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [currentSub, setCurrentSub] = useState<string | null>(null);
   const [dialog, setDialog] = useState<FolderDialog | null>(null);
+  const [secretOpen, setSecretOpen] = useState(false);
   // Derived, so a rename shows straight away and a deleted folder closes itself.
   const current = allCabinets.find(c => c.id === currentId) ?? null;
   const setCurrent = (c: Cabinet | null) => { setCurrentId(c?.id ?? null); setCurrentSub(null); };
@@ -567,7 +569,10 @@ export function DigitalFileCabinet() {
 
   // Folders & Reminders hands over a folder to open.
   useEffect(() => {
-    if (pendingFolderId && allCabinets.some(c => c.id === pendingFolderId)) {
+    if (pendingFolderId === "secret") {
+      setSecretOpen(true);
+      setPendingFolderId(null);
+    } else if (pendingFolderId && allCabinets.some(c => c.id === pendingFolderId)) {
       setCurrentId(pendingFolderId); setCurrentSub(null); setSearch(""); setSelected(null);
       setPendingFolderId(null);
     }
@@ -636,7 +641,9 @@ export function DigitalFileCabinet() {
   }, []);
 
   const openFolder = (c: Cabinet) => {
-    if ((c as any).locked === true) { toast.info("🔒 Enter your PIN to access the Secret Vault"); return; }
+    // The Secret Vault opens its own PIN-protected panel; its documents are
+    // only ever served by the server (migration 049).
+    if (c.id === "secret") { setSecretOpen(true); return; }
     setCurrent(c); setSearch(""); setSelected(null);
   };
 
@@ -713,7 +720,7 @@ export function DigitalFileCabinet() {
     { label: "Folders", value: String(allCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={16}/>, dot: ACCENT2, tone: "sky" },
     { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={16}/>, dot: ACCENT, tone: "violet" },
     { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={16}/>, dot: NEG, tone: "critical" },
-    { label: "Encryption", value: "AES-256", icon: <Shield size={16}/>, sub: "Client-side, zero-knowledge", dot: POS, tone: "good" },
+    { label: "Encryption", value: "AES-256", icon: <Shield size={16}/>, sub: "Encrypted at rest", dot: POS, tone: "good" },
   ];
 
   return (
@@ -730,7 +737,7 @@ export function DigitalFileCabinet() {
             <div className="hcontent">
               <span className="heyebrow">Everything, Filed & Protected</span>
               <h1>Your records, <span className="accent">organized and encrypted.</span></h1>
-              <p>Legal, financial, medical and personal documents — sorted into folders and secured with AES-256 encryption before they ever leave your device.</p>
+              <p>Legal, financial, medical and personal documents — sorted into folders and stored in private storage encrypted at rest with AES-256.</p>
               <div className="hactions">
                 <button className="hbtn primary" onClick={() => drawersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                   <FolderOpen size={15}/> Browse Folders
@@ -765,7 +772,7 @@ export function DigitalFileCabinet() {
               </div>
               <h1 className="pg-h1">{current ? current.label : "Digital File Cabinet"}</h1>
               <div className="pg-sub">
-                {current ? current.description : `${allCabinets.length} folders · ${totalFiles}+ files, all encrypted client-side before they leave your device.`}
+                {current ? current.description : `${allCabinets.length} folders · ${totalFiles}+ files, stored encrypted at rest.`}
               </div>
             </div>
           </div>
@@ -1055,6 +1062,7 @@ export function DigitalFileCabinet() {
           </div>
         </div>
       )}
+      {secretOpen && <SecretVaultPanel onClose={() => setSecretOpen(false)}/>}
     </div>
   );
 }
