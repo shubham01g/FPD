@@ -125,6 +125,15 @@ export interface DBVaultFolder extends OwnerScopedRow {
   created_at: string;
 }
 
+/** What the Add/Edit Contact form saves (migration 047). An empty word or
+ *  answer keeps the one already stored. */
+export interface ContactVerificationInput {
+  methods: string[];
+  word?: string;
+  question?: string;
+  answer?: string;
+}
+
 export interface DBContact {
   id: string; owner_user_id: string; full_name: string; email: string;
   phone?: string; relationship: string;
@@ -283,6 +292,18 @@ export const db = {
   },
   async updateContact(id: string, updates: Partial<Omit<DBContact,"id"|"owner_user_id"|"created_at">>) {
     return supabase.from("contacts").update(updates).eq("id", id).select().single<DBContact>();
+  },
+  /* Secret word / security question (migration 047). Only hashes are stored,
+     so the read says whether a word is set, never what it is. */
+  async getContactVerification(contactId: string) {
+    const { data, error } = await supabase.rpc("get_contact_verification", { p_contact_id: contactId });
+    const row = (data as { methods: string[]; question: string | null; has_word: boolean; has_answer: boolean }[] | null)?.[0] ?? null;
+    return { data: row, error };
+  },
+  async setContactVerification(contactId: string, v: ContactVerificationInput) {
+    return supabase.rpc("set_contact_verification", {
+      p_contact_id: contactId, p_methods: v.methods, p_word: v.word ?? "", p_question: v.question ?? "", p_answer: v.answer ?? "",
+    });
   },
   async updateGuardianFolderAccess(contactId: string, folderIds: string[]) {
     return supabase.from("contacts").update({ allowed_folder_ids: folderIds }).eq("id", contactId);

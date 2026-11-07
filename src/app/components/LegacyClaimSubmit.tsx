@@ -14,7 +14,18 @@ import { FPD_EMAIL } from "../utils/fpdEmails";
    URL identifies the one claim it belongs to (routes/public.ts). */
 
 /* ─── Types ───────────────────────────────────────────────────────── */
-type Step = "intro" | "identity" | "documents" | "review" | "submitted";
+type Step = "intro" | "security" | "identity" | "documents" | "review" | "submitted";
+
+/* The account holder's Preset Security Word / Security Question for this
+   contact (migration 047). Only what to ask — the answers stay on the server. */
+interface ClaimSecurity {
+  required: boolean;
+  word: boolean;
+  question: string | null;
+  passed: boolean;
+  locked: boolean;
+  attemptsLeft: number;
+}
 
 interface DocSlot {
   key: "death_certificate" | "claimant_id" | "will" | "power_of_attorney" | "obituary" | "hospital_records" | "other";
@@ -42,6 +53,7 @@ interface ClaimRow {
   link_message: string | null;
   owner: { full_name: string; plan: string } | null;
   documents: { doc_type: DocSlot["key"]; file_name: string }[];
+  security?: ClaimSecurity;
 }
 
 /* What the form reads — pre-filled from the secure link. */
@@ -59,7 +71,10 @@ interface ClaimToken {
   /** Documents already received from an earlier submission (admin asked for more). */
   onFile: Partial<Record<DocSlot["key"], string>>;
   deathCertOverride: boolean;
+  security: ClaimSecurity;
 }
+
+const NO_SECURITY: ClaimSecurity = { required: false, word: false, question: null, passed: true, locked: false, attemptsLeft: 5 };
 
 const PLAN_LABEL: Record<string, string> = {
   starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
@@ -80,6 +95,7 @@ function toClaimToken(row: ClaimRow): ClaimToken {
     tokenExpires: new Date(row.token_expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     onFile: Object.fromEntries(row.documents.map(d => [d.doc_type, d.file_name])),
     deathCertOverride: row.death_cert_override,
+    security: row.security ?? NO_SECURITY,
   };
 }
 
@@ -88,7 +104,8 @@ const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 /* ─── Helpers ─────────────────────────────────────────────────────── */
 function ProgressDots({ step }: { step: Step }) {
   const steps: Step[] = ["intro", "identity", "documents", "review", "submitted"];
-  const idx = steps.indexOf(step);
+  // The security check is the first half of the identity step.
+  const idx = steps.indexOf(step === "security" ? "identity" : step);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       {steps.slice(0, 4).map((s, i) => (
@@ -106,6 +123,7 @@ function ProgressDots({ step }: { step: Step }) {
 function StepLabel({ step }: { step: Step }) {
   const map: Record<Step, string> = {
     intro: "Step 1 of 4 — Welcome",
+    security: "Step 2 of 4 — Security Check",
     identity: "Step 2 of 4 — Your Identity",
     documents: "Step 3 of 4 — Upload Documents",
     review: "Step 4 of 4 — Review & Submit",
@@ -230,7 +248,110 @@ export function LegacyClaimSubmit({ token }: { token: string }) {
       />
     );
   }
+  if (data.claim.security?.locked) {
+    return <PortalNotice icon={<Lock size={28} color="#FC8181" />} title="This claim is locked"
+      body={`The security check was answered incorrectly too many times. For your protection this link can no longer be used. Please email ${FPD_EMAIL.claims} and quote claim ${data.claim.claim_ref}.`} />;
+  }
   return <ClaimForm t={toClaimToken(data.claim)} token={token} />;
+}
+
+/* The account holder's secret word and/or security question. Checked on the
+   server; five wrong answers lock the claim. */
+function SecurityCheck({ t, token, onPassed, onBack }: { t: ClaimToken; token: string; onPassed: () => void; onBack: () => void }) {
+  const [word, setWord] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [showWord, setShowWord] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [attemptsLeft, setAttemptsLeft] = useState(t.security.attemptsLeft);
+  const [locked, setLocked] = useState(false);
+  const [wrong, setWrong] = useState(false);
+  const ready = (!t.security.word || word.length > 0) && (!t.security.question || answer.trim().length > 0);
+
+  async function check() {
+    setChecking(true);
+    try {
+      const r = await publicApi.post<{ ok: boolean; locked: boolean; attemptsLeft: number }>(
+        `/legacy-claim/${encodeURIComponent(token)}/verify`, { word, answer });
+      if (r.ok) { toast.success("Security check passed"); onPassed(); return; }
+      setWrong(true);
+      setAttemptsLeft(r.attemptsLeft);
+      setLocked(r.locked);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not check your answer. Please try again.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  if (locked) {
+    return <PortalNotice icon={<Lock size={28} color="#FC8181" />} title="This claim is locked"
+      body={`The security check was answered incorrectly too many times. For your protection this link can no longer be used. Please email ${FPD_EMAIL.claims} and quote claim ${t.claimId}.`} />;
+  }
+
+  const input: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 10,
+    padding: "11px 14px", fontSize: 13, color: "#E8EDF5", outline: "none" };
+  const label: React.CSSProperties = { fontSize: 10, color: "#8A9AB8", ...MONO, display: "block", marginBottom: 6 };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ background: "#101728", borderRadius: 20, padding: 28,
+        border: "1px solid rgba(91,110,225,0.1)", boxShadow: "0 4px 24px rgba(91,110,225,0.07)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", fontWeight: 800, marginBottom: 6 }}>
+          Security Check
+        </h2>
+        <p style={{ fontSize: 13, color: "#8A9AB8", marginBottom: 24, lineHeight: 1.6 }}>
+          {t.deceasedName} set this up privately with you. Answer it to continue your claim.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {t.security.word && (
+            <div>
+              <label style={label}>SECRET WORD <span style={{ color: "#FC8181" }}>*</span></label>
+              <div style={{ position: "relative" }}>
+                <input value={word} onChange={e => { setWord(e.target.value); setWrong(false); }} type={showWord ? "text" : "password"}
+                  autoComplete="off" placeholder="Exactly as agreed, including capitals" style={{ ...input, paddingRight: 40 }} />
+                <button onClick={() => setShowWord(!showWord)} type="button"
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+                    background: "none", border: "none", cursor: "pointer", color: "#8A9AB8", padding: 2 }}>
+                  {showWord ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+          )}
+          {t.security.question && (
+            <div>
+              <label style={label}>{t.security.question.toUpperCase()} <span style={{ color: "#FC8181" }}>*</span></label>
+              <input value={answer} onChange={e => { setAnswer(e.target.value); setWrong(false); }} autoComplete="off"
+                placeholder="Your answer" style={input} />
+            </div>
+          )}
+        </div>
+        {wrong && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 18, padding: "12px 16px",
+            borderRadius: 12, background: "rgba(252,129,129,0.07)", border: "1px solid rgba(252,129,129,0.25)" }}>
+            <AlertTriangle size={14} color="#FC8181" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: "#FC8181" }}>
+              That doesn't match. {attemptsLeft} attempt{attemptsLeft === 1 ? "" : "s"} left before this claim is locked.
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "flex", gap: 12 }}>
+        <button onClick={onBack}
+          style={{ padding: "14px 22px", borderRadius: 14, background: "#101728", color: "#8A9AB8",
+            border: "1px solid rgba(91,110,225,0.15)", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+          Back
+        </button>
+        <button onClick={check} disabled={!ready || checking}
+          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            padding: "14px 24px", borderRadius: 14, fontSize: 14, fontWeight: 700, border: "none",
+            background: ready ? "linear-gradient(135deg,#5B6EE1,#7E6BD8)" : "rgba(91,110,225,0.15)",
+            color: ready ? "#fff" : "#8A9AB8", cursor: ready && !checking ? "pointer" : "default",
+            boxShadow: ready ? "0 6px 20px rgba(91,110,225,0.3)" : "none", opacity: checking ? 0.7 : 1 }}>
+          {checking ? <><Loader2 size={15} className="animate-spin" /> Checking…</> : <>Check & Continue <ChevronRight size={15} /></>}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
@@ -238,6 +359,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
   const [agreed, setAgreed] = useState(false);
   const [showId, setShowId] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [securityPassed, setSecurityPassed] = useState(t.security.passed);
 
   /* Identity fields */
   const [fullName,  setFullName]  = useState(t.claimantName);
@@ -431,7 +553,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
               </label>
             </div>
 
-            <button onClick={() => setStep("identity")} disabled={!agreed}
+            <button onClick={() => setStep(securityPassed ? "identity" : "security")} disabled={!agreed}
               style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                 padding: "16px 24px", borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: agreed ? "pointer" : "default",
                 background: agreed ? "linear-gradient(135deg,#5B6EE1,#7E6BD8)" : "rgba(91,110,225,0.15)",
@@ -441,6 +563,12 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
               Begin Claim Submission <ChevronRight size={17} />
             </button>
           </div>
+        )}
+
+        {/* ══ SECURITY CHECK ══ */}
+        {step === "security" && (
+          <SecurityCheck t={t} token={token} onBack={() => setStep("intro")}
+            onPassed={() => { setSecurityPassed(true); setStep("identity"); }} />
         )}
 
         {/* ══ IDENTITY ══ */}

@@ -297,6 +297,18 @@ export function renewalReminderEmail(o: { productName: string; amount: string; d
   };
 }
 
+/** A legacy claim needs a person (a claimant locked out of the security
+ *  check). Goes to the claims mailbox. */
+export function claimAlertEmail(o: { title: string; lines: string[] }): Omit<EmailMessage, "to"> {
+  return {
+    subject: `[Claims] ${o.title}`,
+    category: "legacy_claim_alert",
+    replyTo: MAILBOX.claims,
+    text: o.lines.join("\n"),
+    html: layout(esc(o.title), o.lines.map((l) => `<p style="margin:0 0 10px;line-height:1.5;">${esc(l)}</p>`).join(""), MAILBOX.claims),
+  };
+}
+
 /** Something in billing needs a person (duplicate subscription, dispute,
  *  failed White Glove charge). Goes to the admin mailbox. */
 export function billingAlertEmail(o: { title: string; lines: string[] }): Omit<EmailMessage, "to"> {

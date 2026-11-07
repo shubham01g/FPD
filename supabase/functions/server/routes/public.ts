@@ -6,6 +6,7 @@ import { adminClient } from "../lib/supabaseAdmin.ts";
 import { readPlatformSection } from "../lib/platformSettings.ts";
 import stripeWebhook from "./stripeWebhook.ts";
 import { billingStatus } from "../lib/billingConfig.ts";
+import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/email.ts";
 
 const pub = new Hono();
 
@@ -183,10 +184,35 @@ async function claimByToken(token: string) {
     .select(
       "id, claim_ref, status, token_expires_at, claimant_name, claimant_email, claimant_phone, claimant_relationship, " +
       "claimant_id_type, requested_access, death_cert_override, link_message, " +
+      "contact_id, secret_attempts, secret_verified_at, secret_locked_at, " +
       "owner:owner_user_id(full_name, plan), documents:legacy_claim_documents(doc_type, file_name)",
     )
     .eq("token", token)
     .maybeSingle();
+}
+
+// The owner's Preset Security Word / Security Question for this claimant
+// (migration 047). Hashes never leave the database; this only says what to ask.
+const SECRET_MAX_ATTEMPTS = 5;
+async function claimSecurity(claim: { contact_id: string | null; secret_attempts: number; secret_verified_at: string | null; secret_locked_at: string | null }) {
+  let word = false;
+  let question: string | null = null;
+  if (claim.contact_id) {
+    const { data } = await adminClient()
+      .from("contact_secrets")
+      .select("methods, word_hash, question, answer_hash")
+      .eq("contact_id", claim.contact_id)
+      .maybeSingle();
+    word = Boolean(data?.word_hash && data.methods?.includes("security_word"));
+    question = data?.answer_hash && data.methods?.includes("security_qa") ? data.question : null;
+  }
+  const required = word || question !== null;
+  return {
+    required, word, question,
+    passed: !required || Boolean(claim.secret_verified_at),
+    locked: Boolean(claim.secret_locked_at),
+    attemptsLeft: Math.max(0, SECRET_MAX_ATTEMPTS - claim.secret_attempts),
+  };
 }
 
 // GET /public/legacy-claim/:token — what the portal pre-fills.
@@ -198,7 +224,61 @@ pub.get("/legacy-claim/:token", async (c) => {
     return c.json({ error: "This claim link has expired. Please contact Final Pass Down for a new one." }, 410);
   }
 
-  return c.json({ claim: { ...claim, open: CLAIM_OPEN_STATUSES.includes(claim.status) } });
+  const { contact_id: _c, secret_attempts: _a, secret_verified_at: _v, secret_locked_at: _l, ...rest } = claim;
+  return c.json({ claim: { ...rest, open: CLAIM_OPEN_STATUSES.includes(claim.status), security: await claimSecurity(claim) } });
+});
+
+// POST /public/legacy-claim/:token/verify { word, answer } — the claimant's
+// answer to the owner's security word/question. Five wrong answers lock the
+// claim until an admin issues a new link.
+pub.post("/legacy-claim/:token/verify", async (c) => {
+  const { data: claim, error } = await claimByToken(c.req.param("token"));
+  if (error) return c.json({ error: error.message }, 500);
+  if (!claim) return c.json({ error: "This claim link is not valid." }, 404);
+  if (new Date(claim.token_expires_at).getTime() < Date.now()) return c.json({ error: "This claim link has expired." }, 410);
+  if (!CLAIM_OPEN_STATUSES.includes(claim.status)) {
+    return c.json({ error: "This claim has already been submitted and is with the review team." }, 409);
+  }
+
+  const { word, answer } = await c.req.json().catch(() => ({}));
+  const db = adminClient();
+  const { data: rows, error: rpcErr } = await db.rpc("check_claim_secret", {
+    p_claim_id: claim.id, p_word: typeof word === "string" ? word : "", p_answer: typeof answer === "string" ? answer : "",
+  });
+  if (rpcErr) return c.json({ error: rpcErr.message }, 500);
+  const result = (rows as { ok: boolean; attempts: number; locked: boolean }[] | null)?.[0];
+  if (!result) return c.json({ error: "The security check could not be run. Please try again." }, 500);
+  const attemptsLeft = Math.max(0, SECRET_MAX_ATTEMPTS - result.attempts);
+
+  // Only the transition is logged: a repeat call on a passed or locked claim
+  // returns the same answer without another event or email.
+  if (result.ok && !claim.secret_verified_at) {
+    await db.from("legacy_claim_events").insert({
+      claim_id: claim.id, actor: claim.claimant_name, type: "claimant", event: "Claimant passed the owner's security word/question check",
+    });
+  } else if (!result.ok && !claim.secret_locked_at) {
+    await db.from("legacy_claim_events").insert({
+      claim_id: claim.id, actor: "System", type: "warn",
+      event: result.locked
+        ? `Security check locked after ${SECRET_MAX_ATTEMPTS} wrong answers — issue a new link to let the claimant try again`
+        : `Wrong answer to the security check (${result.attempts} of ${SECRET_MAX_ATTEMPTS})`,
+    });
+    if (result.locked && EMAIL_CONFIGURED) {
+      const owner = claim.owner as { full_name?: string } | null;
+      await sendEmail({
+        to: MAILBOX.claims,
+        ...claimAlertEmail({
+          title: `Claim ${claim.claim_ref} locked after failed security check`,
+          lines: [
+            `${claim.claimant_name} (${claim.claimant_email}) answered the security word/question wrong ${SECRET_MAX_ATTEMPTS} times on the claim for ${owner?.full_name ?? "an account holder"}'s account.`,
+            "The claim portal is now locked for this link. Contact the claimant through a trusted channel before issuing a new link from Master Admin → Legacy Claims.",
+          ],
+        }),
+      }).catch((err) => console.error("claim lock alert email failed:", err));
+    }
+  }
+
+  return c.json({ ok: result.ok, locked: result.locked, attemptsLeft });
 });
 
 // POST /public/legacy-claim/:token — multipart form: fullName, email, phone,
@@ -211,6 +291,9 @@ pub.post("/legacy-claim/:token", async (c) => {
   if (!CLAIM_OPEN_STATUSES.includes(claim.status)) {
     return c.json({ error: "This claim has already been submitted and is with the review team." }, 409);
   }
+  const security = await claimSecurity(claim);
+  if (security.locked) return c.json({ error: `This claim is locked. Please email ${MAILBOX.claims}.` }, 423);
+  if (!security.passed) return c.json({ error: "Please answer the security check before submitting." }, 403);
 
   const form = await c.req.formData().catch(() => null);
   if (!form) return c.json({ error: "Expected a multipart form submission" }, 400);

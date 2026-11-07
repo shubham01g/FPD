@@ -57,6 +57,8 @@ interface DeathClaim {
   claimantRelationship: string;
   claimantIdVerified: boolean;
   requestedAccess: string;
+  /* The owner's security word/question (migration 047) */
+  securityCheck: { label: string; color: string; warn: boolean };
 
   /* Documents */
   docs: ClaimDoc[];
@@ -86,8 +88,11 @@ interface ClaimRow {
   admin_notes: string | null;
   rejection_reason: string | null;
   submitted_at: string | null;
+  secret_attempts?: number;
+  secret_verified_at?: string | null;
+  secret_locked_at?: string | null;
   owner: { id: string; full_name: string; email: string; plan: string; country: string | null; created_at: string } | null;
-  contact: { id: string; verification_status: string } | null;
+  contact: { id: string; verification_status: string; secret?: { methods: string[] } | { methods: string[] }[] | null } | null;
   documents: { id: string; doc_type: DocType; file_name: string; uploaded_at: string }[];
   events: { id: string; event: string; actor: string; type: TimelineEvent["type"]; created_at: string }[];
 }
@@ -112,6 +117,17 @@ const fmtDate = (iso: string | null) =>
 const fmtDateTime = (iso: string) =>
   `${fmtDate(iso)} · ${new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
 
+function securityCheck(row: ClaimRow): DeathClaim["securityCheck"] {
+  const raw = row.contact?.secret;
+  const methods = (Array.isArray(raw) ? raw[0] : raw)?.methods ?? [];
+  const asks = [methods.includes("security_word") && "word", methods.includes("security_qa") && "question"].filter(Boolean).join(" + ");
+  if (!asks) return { label: "Not set by owner", color: "#8A9AB8", warn: false };
+  if (row.secret_locked_at) return { label: `Locked — ${asks} failed 5×`, color: "#FC8181", warn: true };
+  if (row.secret_verified_at) return { label: `Passed (${asks}) ✓`, color: "#48BB78", warn: false };
+  const tries = row.secret_attempts ?? 0;
+  return { label: `Not passed yet (${asks})${tries ? ` — ${tries} wrong` : ""}`, color: "#F6AD55", warn: true };
+}
+
 function toClaim(row: ClaimRow): DeathClaim {
   return {
     dbId: row.id,
@@ -134,6 +150,7 @@ function toClaim(row: ClaimRow): DeathClaim {
     claimantRelationship: row.claimant_relationship ?? "Legacy Contact",
     claimantIdVerified: row.contact?.verification_status === "verified",
     requestedAccess: row.requested_access,
+    securityCheck: securityCheck(row),
     docs: DOC_SLOTS.map(slot => {
       const doc = row.documents.find(d => d.doc_type === slot.type);
       return { ...slot, submitted: Boolean(doc), fileName: doc?.file_name, storedAt: doc ? fmtDateTime(doc.uploaded_at) : undefined };
@@ -361,6 +378,7 @@ function ClaimModal({ claim, onClose, onApprove, onReject, onRequestDocs, onChan
               { label: "DATE OF DEATH", val: claim.deceasedDOD },
               { label: "DOCS RECEIVED", val: `${submittedCount} / ${totalDocs}`, color: submittedCount < 2 ? "#F6AD55" : undefined },
               { label: "CLAIMANT ID",   val: claim.claimantIdVerified ? "Pre-Verified ✓" : "Not Verified", color: claim.claimantIdVerified ? "#48BB78" : "#FC8181" },
+              { label: "SECURITY CHECK", val: claim.securityCheck.label, color: claim.securityCheck.color },
               { label: "END-OF-LIFE DOCS", val: claim.deathCertOverride ? "Override Active ⚠" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "Received ✓" : "Not Received", color: claim.deathCertOverride ? "#D9A55E" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "#48BB78" : "#FC8181" },
             ].map(f => (
               <div key={f.label} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "7px 14px" }}>
@@ -472,6 +490,7 @@ function ClaimModal({ claim, onClose, onApprove, onReject, onRequestDocs, onChan
                     { label: "Relationship",    val: claim.claimantRelationship },
                     { label: "ID Pre-Verified", val: claim.claimantIdVerified ? "Yes — verified prior to claim" : "No — not pre-verified",
                       warn: !claim.claimantIdVerified },
+                    { label: "Security Check",  val: claim.securityCheck.label, warn: claim.securityCheck.warn },
                     { label: "Access Requested", val: claim.requestedAccess     },
                   ].map(f => (
                     <div key={f.label} style={fieldBox(f.warn)}>
@@ -1111,6 +1130,7 @@ export function LegacyClaims() {
                     color: submittedDocs < 2 ? "#D9A55E" : undefined },
                   { label: "ID VERIFIED",    val: claim.claimantIdVerified ? "Yes ✓" : "No ✗",
                     color: claim.claimantIdVerified ? "#5FBE91" : "#FC8181" },
+                  { label: "SECURITY CHECK", val: claim.securityCheck.label, color: claim.securityCheck.color },
                   { label: "END-OF-LIFE DOCS",
                     val: claim.deathCertOverride ? "Override ⚠" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "Received ✓" : "Missing ✗",
                     color: claim.deathCertOverride ? "#D9A55E" : claim.docs.find(d => d.type === "death_certificate")?.submitted ? "#5FBE91" : "#FC8181" },

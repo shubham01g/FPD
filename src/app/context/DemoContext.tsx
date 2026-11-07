@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 import {
   db, supabase, tables, type DBUser, type DBDocument, type DBContact, type DBIdVerification,
   type DBFinalWish, type DBAllergy, type DBMedication, type DBReminder, type DBMemory, type DBOccasion,
-  type DBFuneralPlan, type DBEmergencyInfo, type DBVaultFolder,
+  type DBFuneralPlan, type DBEmergencyInfo, type DBVaultFolder, type ContactVerificationInput,
 } from "../services/supabase";
 
 /* ─── Types ─────────────────────────────────────────────────────── */
@@ -271,7 +271,8 @@ interface DemoCtx {
      Cabinet straight onto a folder. The cabinet consumes and clears it. */
   pendingFolderId: string | null;
   setPendingFolderId: (id: string | null) => void;
-  addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => Promise<void>;
+  addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean; verification?: ContactVerificationInput }) => Promise<void>;
+  saveContactVerification: (id: string, v: ContactVerificationInput) => Promise<boolean>;
   removeContact: (id: string) => Promise<void>;
   updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<void>;
   sendVerificationInvite: (id: string) => Promise<void>;
@@ -556,7 +557,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, [folders, docs]);
 
   /* Contacts */
-  const addContact = useCallback(async (c: Omit<Contact,"id">, opts?: { invite?: boolean }) => {
+  const addContact = useCallback(async (c: Omit<Contact,"id">, opts?: { invite?: boolean; verification?: ContactVerificationInput }) => {
     if (!uid) return;
     const tid = toast.loading("Adding contact...");
     const { data, error } = await db.addContact({
@@ -566,6 +567,15 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
     if (error || !data) { toast.error("Could not add contact", { id: tid }); return; }
     setContacts(prev => [rowToContact(data), ...prev]);
+    // Saved before the invite goes out, so a contact is never invited without
+    // the protection the owner asked for. On failure the invite waits.
+    if (opts?.verification) {
+      const { error: vErr } = await db.setContactVerification(data.id, opts.verification);
+      if (vErr) {
+        toast.error(`Contact added, but the security word/question was not saved: ${vErr.message}. Open Edit to try again — no invite was sent.`, { id: tid, duration: 10000 });
+        return;
+      }
+    }
     // Only Legacy and Guardian Contacts are emailed, and never on a bulk
     // import — that would mail a whole address book in one click.
     const invitable = c.type === "legacy" || c.type === "guardian";
@@ -626,6 +636,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       toast.error("Could not submit ID document", { id: tid });
     }
   }, [uid]);
+
+  const saveContactVerification = useCallback(async (id: string, v: ContactVerificationInput) => {
+    const { error } = await db.setContactVerification(id, v);
+    if (error) { toast.error(`Security word/question not saved: ${error.message}`); return false; }
+    return true;
+  }, []);
 
   const updateGuardianFolders = useCallback(async (id: string, folderIds: string[]) => {
     const tid = toast.loading("Updating folder access...");
@@ -829,7 +845,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       user, docs, folders, contacts, wishes, allergies, medications, reminders, memories, occasions, notifications,
       funeralPlan, emergencyInfo,
       updateUser, refreshUser, addDoc, deleteDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
-      sendVerificationInvite, submitIdVerification, updateGuardianFolders,
+      sendVerificationInvite, submitIdVerification, updateGuardianFolders, saveContactVerification,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
       addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,
       saveFuneralPlan, saveEmergencyInfo,

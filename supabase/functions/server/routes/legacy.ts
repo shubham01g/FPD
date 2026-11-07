@@ -22,7 +22,7 @@ const legacy = new Hono();
 const LINK_VALID_DAYS = 30;
 const CLAIM_SELECT =
   "*, owner:owner_user_id(id, full_name, email, plan, country, created_at, deceased_at), " +
-  "contact:contact_id(id, verification_status, id_verified_at), " +
+  "contact:contact_id(id, verification_status, id_verified_at, secret:contact_secrets(methods)), " +
   "documents:legacy_claim_documents(id, doc_type, file_name, uploaded_at), " +
   "events:legacy_claim_events(id, event, actor, type, created_at)";
 
@@ -291,14 +291,18 @@ legacy.post("/claims/:id/escalate", async (c) => {
 
 // POST /admin/legacy/claims/:id/link { email, message }
 // Issues a fresh link (the old one stops working) — for a lost link, or to
-// send it to a corrected address.
+// send it to a corrected address. Also the unlock for a claimant locked out
+// of the security check: the new link gets a fresh set of attempts.
 legacy.post("/claims/:id/link", async (c) => {
   const admin = c.get("admin") as AdminUser;
   const id = c.req.param("id");
   const { email, message } = await c.req.json().catch(() => ({}));
   const db = adminClient();
 
-  const update: Record<string, unknown> = { token: newToken(), token_expires_at: linkExpiry() };
+  const { data: before } = await db.from("legacy_claims").select("secret_locked_at").eq("id", id).maybeSingle();
+  const update: Record<string, unknown> = {
+    token: newToken(), token_expires_at: linkExpiry(), secret_attempts: 0, secret_locked_at: null,
+  };
   if (email) update.claimant_email = email;
   if (message !== undefined) update.link_message = message || null;
 
@@ -314,6 +318,7 @@ legacy.post("/claims/:id/link", async (c) => {
   const ownerName = (data.owner as { full_name?: string } | null)?.full_name ?? "the account holder";
   const mail = await emailClaimLink(c.req.header("origin"), data, ownerName, data.link_message);
   await addEvent(db, id, mail.emailed ? `New claim link emailed to ${data.claimant_email}` : `New claim link issued for ${data.claimant_email}`, admin.email);
+  if (before?.secret_locked_at) await addEvent(db, id, "Security check unlocked — the new link allows 5 more attempts", admin.email, "warn");
   return c.json({ claim: data, ...mail });
 });
 

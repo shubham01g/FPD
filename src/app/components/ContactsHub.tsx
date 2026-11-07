@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Users, Shield, AlertCircle, PawPrint, Plus, Phone, Mail,
   CheckCircle, Clock, X, Trash2, FolderOpen, Eye,
@@ -6,6 +6,7 @@ import {
   AlertTriangle, Upload, RefreshCw, UserCheck, Smartphone, FileUp, Edit2
 } from "lucide-react";
 import { useDemo, type Contact } from "../context/DemoContext";
+import { db, type ContactVerificationInput } from "../services/supabase";
 import { toast } from "sonner";
 import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
@@ -138,10 +139,11 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
 }
 
 /* ── Add / Edit Contact Modal ────────────────────────────────────── */
-function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveFolders }: {
+function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveFolders, onSaveVerification }: {
   defaultType: ContactType; editing?: Contact | null; onClose:()=>void;
-  onAdd:(c:Omit<Contact,"id">)=>Promise<void>; onSave?:(id:string, updates:Partial<Contact>)=>void;
+  onAdd:(c:Omit<Contact,"id">, verification?:ContactVerificationInput)=>Promise<void>; onSave?:(id:string, updates:Partial<Contact>)=>void;
   onSaveFolders?:(id:string, folderIds:string[])=>Promise<void>;
+  onSaveVerification?:(id:string, v:ContactVerificationInput)=>Promise<boolean>;
 }) {
   const [form, setForm] = useState(() => editing
     ? { name: editing.name, email: editing.email, phone: editing.phone, relationship: editing.relationship, type: editing.type, accessLevel: editing.accessLevel ?? "", notes: editing.notes ?? "", photo: editing.photo ?? "" }
@@ -154,17 +156,45 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
   const [securityQ, setSecurityQ] = useState("");
   const [securityA, setSecurityA] = useState("");
   const [loading, setLoading] = useState(false);
+  // What is already stored for the contact being edited. Only hashes are kept,
+  // so this says whether a word/answer exists, never what it is. null until
+  // loaded; stays null if the load fails, and then the edit leaves it alone.
+  const [stored, setStored] = useState<{ hasWord: boolean; hasAnswer: boolean } | null>(null);
 
   const isGuardian = form.type === "guardian";
   const isLegacy   = form.type === "legacy";
-  const showVerifications = !editing && (isLegacy || isGuardian);
+  const showVerifications = (isLegacy || isGuardian) && (!editing || stored !== null);
+
+  useEffect(() => {
+    if (!editing || !(editing.type === "legacy" || editing.type === "guardian")) return;
+    let live = true;
+    db.getContactVerification(editing.id).then(({ data, error }) => {
+      if (!live || error) return;
+      if (data) {
+        setSelectedVerifications(data.methods.includes("death_cert") ? data.methods : ["death_cert", ...data.methods]);
+        setSecurityQ(data.question ?? "");
+      }
+      setStored({ hasWord: Boolean(data?.has_word), hasAnswer: Boolean(data?.has_answer) });
+    });
+    return () => { live = false; };
+  }, [editing]);
+
   const needsWord = showVerifications && selectedVerifications.includes("security_word");
   const needsQA   = showVerifications && selectedVerifications.includes("security_qa");
+  // Blank keeps the word/answer already stored when editing.
+  const keepWord   = Boolean(stored?.hasWord) && !securityWord && !securityWordConfirm;
+  const keepAnswer = Boolean(stored?.hasAnswer) && !securityA.trim();
   // Exact match — the contact must provide the word exactly.
   const wordsMatch = securityWord === securityWordConfirm;
   const verifIncomplete =
-    (needsWord && (!securityWord.trim() || !wordsMatch)) ||
-    (needsQA && (!securityQ.trim() || !securityA.trim()));
+    (needsWord && !keepWord && (!securityWord.trim() || !wordsMatch)) ||
+    (needsQA && (!securityQ.trim() || (!keepAnswer && !securityA.trim())));
+  const verification: ContactVerificationInput = {
+    methods: selectedVerifications,
+    word: needsWord && !keepWord ? securityWord : "",
+    question: needsQA ? securityQ.trim() : "",
+    answer: needsQA && !keepAnswer ? securityA : "",
+  };
 
   function toggleVerification(id:string) {
     if (id === "death_cert") return; // always required
@@ -174,11 +204,15 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
   const submit = async () => {
     if (!form.name || !form.email) { toast.error("Name and email are required"); return; }
     if (isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
-    if (needsWord && !securityWord.trim()) { toast.error("Enter your shared secret word"); return; }
-    if (needsWord && !wordsMatch) { toast.error("Secret words do not match — please re-enter"); return; }
-    if (needsQA && (!securityQ.trim() || !securityA.trim())) { toast.error("Enter both a security question and its answer"); return; }
+    if (needsWord && !keepWord && !securityWord.trim()) { toast.error("Enter your shared secret word"); return; }
+    if (needsWord && !keepWord && !wordsMatch) { toast.error("Secret words do not match — please re-enter"); return; }
+    if (needsQA && (!securityQ.trim() || (!keepAnswer && !securityA.trim()))) { toast.error("Enter both a security question and its answer"); return; }
     setLoading(true);
     if (editing) {
+      if (showVerifications && onSaveVerification && !(await onSaveVerification(editing.id, verification))) {
+        setLoading(false);
+        return;
+      }
       onSave?.(editing.id, {
         name: form.name, email: form.email, phone: form.phone, relationship: form.relationship,
         notes: form.notes, photo: form.photo || undefined,
@@ -193,7 +227,12 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
       ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned`
       : form.accessLevel;
     // Legacy/Guardian start un-invited; the server marks them sent once the email goes out.
-    await onAdd({ ...form, accessLevel:accessDesc, verificationStatus:(isLegacy || isGuardian) ? "not_sent" : "pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined });
+    // Only sent when the owner ticked something beyond the always-required
+    // documents, so plain contacts don't depend on migration 047.
+    await onAdd(
+      { ...form, accessLevel:accessDesc, verificationStatus:(isLegacy || isGuardian) ? "not_sent" : "pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined },
+      showVerifications && selectedVerifications.length > 1 ? verification : undefined,
+    );
     onClose();
   };
 
@@ -269,11 +308,11 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
                 <div className="sub-panel space-y-3">
                   <div>
                     <label>YOUR SHARED SECRET WORD</label>
-                    <input type="password" autoComplete="new-password" value={securityWord} onChange={e=>setSecurityWord(e.target.value)} placeholder="A word only you and your contact know — e.g. a childhood memory"/>
+                    <input type="password" autoComplete="new-password" value={securityWord} onChange={e=>setSecurityWord(e.target.value)} placeholder={stored?.hasWord ? "A word is set — leave blank to keep it" : "A word only you and your contact know — e.g. a childhood memory"}/>
                   </div>
                   <div>
                     <label>CONFIRM SECRET WORD</label>
-                    <input type="password" autoComplete="new-password" value={securityWordConfirm} onChange={e=>setSecurityWordConfirm(e.target.value)} placeholder="Type the secret word again"/>
+                    <input type="password" autoComplete="new-password" value={securityWordConfirm} onChange={e=>setSecurityWordConfirm(e.target.value)} placeholder={stored?.hasWord ? "Only needed if you're changing it" : "Type the secret word again"}/>
                     {securityWordConfirm && (
                       <p className="sub-hint" style={{ color: wordsMatch && securityWord.trim() ? POS : NEG }}>
                         {wordsMatch && securityWord.trim() ? "Secret words match" : "Secret words do not match"}
@@ -291,8 +330,9 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
                   </div>
                   <div>
                     <label>ANSWER</label>
-                    <input value={securityA} onChange={e=>setSecurityA(e.target.value)} placeholder="The exact answer your contact must provide"/>
+                    <input value={securityA} onChange={e=>setSecurityA(e.target.value)} placeholder={stored?.hasAnswer ? "An answer is set — leave blank to keep it" : "The answer your contact must provide"}/>
                   </div>
+                  <p className="sub-hint">Capital letters and extra spaces in the answer are ignored. Only a scrambled copy is stored, so nobody can read it back.</p>
                 </div>
               )}
             </div>
@@ -818,7 +858,7 @@ const CONTACTS_CSS = `
 
 /* ── Main Component ──────────────────────────────────────────────── */
 export function ContactsHub({ initialSection = "legacy" }: { initialSection?: ContactType }) {
-  const { contacts, addContact, removeContact, updateContact, sendVerificationInvite, submitIdVerification, updateGuardianFolders } = useDemo();
+  const { contacts, addContact, removeContact, updateContact, sendVerificationInvite, submitIdVerification, updateGuardianFolders, saveContactVerification } = useDemo();
   const [addingType, setAddingType] = useState<ContactType | null>(null);
   const [importingType, setImportingType] = useState<ContactType | null>(null);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
@@ -944,7 +984,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           <AddContactModal
             defaultType={addingType}
             onClose={() => setAddingType(null)}
-            onAdd={async c => { await addContact(c); setAddingType(null); toast.success(`${typeConfig[c.type].label} added`); }}
+            onAdd={async (c, verification) => { await addContact(c, { verification }); setAddingType(null); }}
           />
         )}
 
@@ -959,6 +999,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
               setEditingContact(null);
             }}
             onSaveFolders={updateGuardianFolders}
+            onSaveVerification={saveContactVerification}
           />
         )}
 
