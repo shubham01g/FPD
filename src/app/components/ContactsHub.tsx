@@ -60,7 +60,7 @@ const typeConfig = {
 /* ── Verification methods a user can configure per Legacy Contact ─── */
 const VERIFICATION_METHODS = [
   { id:"death_cert",     label:"End-of-Life / Incapacitation Documents", icon:"📜", required:true,  desc:"Official certified end-of-life or incapacitation documents — coroner's report, police report, death certificate, or medical documents. Always required." },
-  { id:"security_word",  label:"Preset Security Word",            icon:"🔑", required:false, desc:"A secret word agreed upon privately between you and your legacy contact." },
+  { id:"security_word",  label:"Preset Security Word",            icon:"🔑", required:false, desc:"A secret word agreed upon privately between you and your contact." },
   { id:"security_qa",    label:"Security Question & Answer",      icon:"❓", required:false, desc:"A personal question only you and your contact would know the answer to." },
   { id:"govt_id",        label:"Government-Issued Photo ID",      icon:"🪪", required:false, desc:"Driver's license or passport to confirm your contact's identity." },
   { id:"notarized",      label:"Notarized Affidavit",             icon:"✍️", required:false, desc:"A legally notarized letter from your contact confirming their authority." },
@@ -150,12 +150,21 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
   const [showFolders, setShowFolders] = useState(!!editing);
   const [selectedVerifications, setSelectedVerifications] = useState<string[]>(["death_cert"]);
   const [securityWord, setSecurityWord] = useState("");
+  const [securityWordConfirm, setSecurityWordConfirm] = useState("");
   const [securityQ, setSecurityQ] = useState("");
   const [securityA, setSecurityA] = useState("");
   const [loading, setLoading] = useState(false);
 
   const isGuardian = form.type === "guardian";
   const isLegacy   = form.type === "legacy";
+  const showVerifications = !editing && (isLegacy || isGuardian);
+  const needsWord = showVerifications && selectedVerifications.includes("security_word");
+  const needsQA   = showVerifications && selectedVerifications.includes("security_qa");
+  // Exact match — the contact must provide the word exactly.
+  const wordsMatch = securityWord === securityWordConfirm;
+  const verifIncomplete =
+    (needsWord && (!securityWord.trim() || !wordsMatch)) ||
+    (needsQA && (!securityQ.trim() || !securityA.trim()));
 
   function toggleVerification(id:string) {
     if (id === "death_cert") return; // always required
@@ -165,6 +174,9 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
   const submit = async () => {
     if (!form.name || !form.email) { toast.error("Name and email are required"); return; }
     if (isGuardian && guardianFolders.length === 0) { toast.error("Assign at least one folder for guardian access"); return; }
+    if (needsWord && !securityWord.trim()) { toast.error("Enter your shared secret word"); return; }
+    if (needsWord && !wordsMatch) { toast.error("Secret words do not match — please re-enter"); return; }
+    if (needsQA && (!securityQ.trim() || !securityA.trim())) { toast.error("Enter both a security question and its answer"); return; }
     setLoading(true);
     if (editing) {
       onSave?.(editing.id, {
@@ -226,10 +238,10 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
             </div>
           )}
 
-          {!editing && isLegacy && (
+          {showVerifications && (
             <div>
               <div style={{ color:MUTED, fontSize:14, fontFamily:"var(--font-mono)", marginBottom:8 }}>
-                VERIFICATION REQUIREMENTS (choose what your legacy contact must provide)
+                VERIFICATION REQUIREMENTS (choose what your contact must provide)
               </div>
               <div className="space-y-2">
                 {VERIFICATION_METHODS.map(vm => {
@@ -254,9 +266,20 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
               </div>
 
               {selectedVerifications.includes("security_word") && (
-                <div className="sub-panel">
-                  <label>YOUR SHARED SECRET WORD</label>
-                  <input value={securityWord} onChange={e=>setSecurityWord(e.target.value)} placeholder="A word only you and your contact know — e.g. a childhood memory"/>
+                <div className="sub-panel space-y-3">
+                  <div>
+                    <label>YOUR SHARED SECRET WORD</label>
+                    <input type="password" autoComplete="new-password" value={securityWord} onChange={e=>setSecurityWord(e.target.value)} placeholder="A word only you and your contact know — e.g. a childhood memory"/>
+                  </div>
+                  <div>
+                    <label>CONFIRM SECRET WORD</label>
+                    <input type="password" autoComplete="new-password" value={securityWordConfirm} onChange={e=>setSecurityWordConfirm(e.target.value)} placeholder="Type the secret word again"/>
+                    {securityWordConfirm && (
+                      <p className="sub-hint" style={{ color: wordsMatch && securityWord.trim() ? POS : NEG }}>
+                        {wordsMatch && securityWord.trim() ? "Secret words match" : "Secret words do not match"}
+                      </p>
+                    )}
+                  </div>
                   <p className="sub-hint">Keep this private. Your contact must provide this word exactly to gain access.</p>
                 </div>
               )}
@@ -281,7 +304,7 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
           </div>
         </div>
         <div className="modal-foot">
-          <button onClick={submit} disabled={loading} className="save" style={{ opacity: loading ? 0.7 : 1 }}>
+          <button onClick={submit} disabled={loading || verifIncomplete} className="save" style={{ opacity: verifIncomplete ? 0.5 : loading ? 0.7 : 1, cursor: verifIncomplete ? "not-allowed" : undefined }}>
             {editing
               ? (loading ? "Saving…" : "Save Changes")
               : (isLegacy || isGuardian)
