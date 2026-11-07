@@ -7,6 +7,7 @@ import { SystemHealth } from "./SystemHealth";
 import { DisasterRecoveryAdmin } from "./DisasterRecoveryAdmin";
 import { LegacyClaims } from "./LegacyClaims";
 import { MarkDeceasedModal } from "./MarkDeceasedModal";
+import { DeleteUserModal } from "./DeleteUserModal";
 import type { AdminPageId } from "./AdminLayout";
 import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
@@ -941,6 +942,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
   const [exportingUsers, setExportingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [deceasedModal, setDeceasedModal] = useState<DBUserRow | null>(null);
+  const [deleteModal, setDeleteModal] = useState<DBUserRow | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
 
   const userQueryString = `search=${encodeURIComponent(userSearch)}&plan=${userPlanFilter}&status=${userStatusFilter}`;
@@ -1510,6 +1512,9 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                       <Heart size={11}/> Deceased
                     </button>
                   )}
+                  {!user.is_admin && (
+                    <button onClick={()=>setDeleteModal(user)} title="Delete account" style={{color:"#FC8181"}}><Trash2 size={13}/></button>
+                  )}
                 </div>
               </div>
               );
@@ -1526,6 +1531,13 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
               user={{ id: deceasedModal.id, name: deceasedModal.full_name, email: deceasedModal.email }}
               onClose={() => setDeceasedModal(null)}
               onConfirm={() => refetchUsers()}
+            />
+          )}
+          {deleteModal && (
+            <DeleteUserModal
+              user={{ id: deleteModal.id, name: deleteModal.full_name, email: deleteModal.email }}
+              onClose={() => setDeleteModal(null)}
+              onDeleted={() => refetchUsers()}
             />
           )}
         </div>

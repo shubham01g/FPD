@@ -54,6 +54,12 @@ async function pendingChange(sub: Obj, currentPriceId: string | null) {
 export async function provisionSubscription(sub: Obj): Promise<{ userId: string; productLine: "plan" | "dr_addon"; row: Obj } | null> {
   const userId = sub.metadata?.userId as string | undefined;
   if (!userId) return null;
+  // An admin-deleted account: its cancellation event still arrives afterwards.
+  const { data: owner } = await adminClient().from("users").select("id").eq("id", userId).maybeSingle();
+  if (!owner) {
+    console.warn(`subscription ${sub.id}: account ${userId} no longer exists; ignored`);
+    return null;
+  }
 
   const firstPrice = sub.items?.data?.[0]?.price ?? null;
   const item = await catalogItemForPrice(firstPrice);
