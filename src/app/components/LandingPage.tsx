@@ -13,6 +13,7 @@ import {
   Stethoscope, Wallet, Car, Folder, Globe, Zap, Eye, FileText,
   Bell, Calendar, Award, PawPrint, Video, DollarSign, HardDrive,
   BarChart3, Layers, ShieldAlert, BookOpen, Download, Share, SquarePlus,
+  MessageSquare, Send, Info, LifeBuoy, Wrench, Briefcase, ShieldCheck,
 } from "lucide-react";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { usePwaInstall } from "../hooks/usePwaInstall";
@@ -1214,8 +1215,69 @@ function WhiteLabel({ onApply }: { onApply?: (tier: string) => void }) {
 }
 
 /* ── HELP & FAQ ───────────────────────────────────────────────── */
+const CONTACT_HOURS = "Mon–Fri, 9am–6pm EST";
+const DEPT_ICONS: Record<string, React.ReactNode> = {
+  "General": <MessageSquare size={18} />, "Information": <Info size={18} />,
+  "Support": <LifeBuoy size={18} />, "Technical Support": <Wrench size={18} />,
+  "Sales": <Briefcase size={18} />, "Partnerships": <Handshake size={18} />,
+  "Affiliates": <Users size={18} />, "Legacy Claims": <FileText size={18} />,
+  "Verification": <ShieldCheck size={18} />,
+};
+const FIELD: React.CSSProperties = {
+  width: "100%", padding: "11px 14px", borderRadius: 10, fontSize: 16, color: TEXT,
+  background: "rgba(7,10,18,0.6)", border: "1px solid rgba(91,110,225,0.22)", outline: "none",
+};
+const LABEL: React.CSSProperties = { color: SOFT, fontSize: 14, fontWeight: 600, marginBottom: 6, display: "block" };
+
+/* No contact-form endpoint or live-chat provider exists yet, so the form opens
+   a pre-filled email to the chosen department's mailbox. */
+function ContactForm({ category, setCategory }: { category: string; setCategory: (c: string) => void }) {
+  const [f, setF] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [err, setErr] = useState("");
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!f.name.trim() || !/^\S+@\S+\.\S+$/.test(f.email) || !f.subject.trim() || !f.message.trim()) {
+      setErr("Please fill in your name, a valid email, a subject and a message.");
+      return;
+    }
+    setErr("");
+    const dept = FPD_EMAIL_DIRECTORY.find(d => d.label === category) ?? FPD_EMAIL_DIRECTORY[0];
+    const body = `${f.message}\n\n— ${f.name}\n${f.email}${f.phone ? `\n${f.phone}` : ""}`;
+    window.location.href = `mailto:${dept.email}?subject=${encodeURIComponent(f.subject)}&body=${encodeURIComponent(body)}`;
+  };
+  return (
+    <form id="contact-form" onSubmit={submit} className="flex flex-col gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <label><span style={LABEL}>Your Name *</span><input style={FIELD} value={f.name} onChange={set("name")} placeholder="John Doe" autoComplete="name" /></label>
+        <label><span style={LABEL}>Email Address *</span><input style={FIELD} type="email" value={f.email} onChange={set("email")} placeholder="john@example.com" autoComplete="email" /></label>
+        <label><span style={LABEL}>Phone Number</span><input style={FIELD} type="tel" value={f.phone} onChange={set("phone")} placeholder="+1 (555) 123-4567" autoComplete="tel" /></label>
+        <label><span style={LABEL}>Category</span>
+          <select style={{ ...FIELD, appearance: "auto" }} value={category} onChange={e => setCategory(e.target.value)}>
+            {FPD_EMAIL_DIRECTORY.map(d => <option key={d.label} value={d.label} style={{ background: CARD }}>{d.label}</option>)}
+          </select>
+        </label>
+      </div>
+      <label><span style={LABEL}>Subject *</span><input style={FIELD} value={f.subject} onChange={set("subject")} placeholder="How can we help?" /></label>
+      <label><span style={LABEL}>Message *</span><textarea style={{ ...FIELD, minHeight: 140, resize: "vertical" }} value={f.message} onChange={set("message")} placeholder="Tell us more about your question or how we can help..." /></label>
+      {err && <div style={{ color: "#F87171", fontSize: 14 }}>{err}</div>}
+      <PrimaryBtn large className="w-full justify-center"><Send size={16} /> Send Message</PrimaryBtn>
+    </form>
+  );
+}
+
 function Help() {
   const [open, setOpen] = useState<number | null>(null);
+  const [category, setCategory] = useState(FPD_EMAIL_DIRECTORY[0].label);
+  const startChat = () => {
+    setCategory("Support");
+    document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+  const topCard = "p-7 rounded-2xl text-center glow-surface flex flex-col items-center";
+  const topCardStyle: React.CSSProperties = { background: CARD, border: "1px solid rgba(91,110,225,0.22)" };
+  const iconChip = (icon: React.ReactNode) => (
+    <div className="flex items-center justify-center rounded-xl mb-4" style={{ width: 46, height: 46, background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff" }}>{icon}</div>
+  );
   const faqs = [
     { q: "Who can access my vault?", a: "Only you and the contacts you specifically designate. Legacy Contacts must pass government-ID verification before any access is granted. You control exactly what each contact can see and when." },
     { q: "What happens to my data if I cancel?", a: "Your data is retained for 90 days after cancellation so you can export everything. After 90 days it is permanently and irreversibly deleted per our privacy policy." },
@@ -1232,22 +1294,47 @@ function Help() {
       kicker="Get in touch" title={<>Contact Us</>}
       sub="Our team is available 7 days a week. Average response time: under 2 hours." />
     <section id="help" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-16 p-8 rounded-2xl text-center glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
-          <div className="flex flex-wrap items-center justify-center gap-3.5">
-            <a href={`mailto:${FPD_EMAIL.contact}`}><PrimaryBtn large><Mail size={16} /> Contact Us</PrimaryBtn></a>
+      <div className="max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto mb-16">
+          <div className={topCard} style={topCardStyle}>
+            {iconChip(<Mail size={20} />)}
+            <div style={{ ...DISPLAY, color: TEXT, fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Email Us</div>
+            <a href={`mailto:${FPD_EMAIL.contact}`} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8, wordBreak: "break-all" }}>{FPD_EMAIL.contact}</a>
+            <div style={{ color: MUTED, fontSize: 14.5 }}>For general inquiries — we'll route you to the right team</div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 mt-8 text-left">
-            {FPD_EMAIL_DIRECTORY.map(d => (
-              <div key={d.email}>
-                <div style={{ color: FAINT, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", ...MONO }}>{d.label}</div>
-                <a href={`mailto:${d.email}`} className="transition-colors hover:text-white" style={{ color: TEXT, fontSize: 17.5, wordBreak: "break-all" }}>{d.email}</a>
-                <div style={{ color: MUTED, fontSize: 14 }}>{d.note}</div>
-              </div>
-            ))}
+          <div className={topCard} style={topCardStyle}>
+            {iconChip(<MessageSquare size={20} />)}
+            <div style={{ ...DISPLAY, color: TEXT, fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Chat Live</div>
+            <button onClick={startChat} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8 }}>Start a conversation</button>
+            <div style={{ color: MUTED, fontSize: 14.5 }}>{CONTACT_HOURS}</div>
           </div>
         </div>
 
+        <div className="grid lg:grid-cols-[1.15fr_1fr] gap-10 mb-20">
+          <div>
+            <div style={{ ...DISPLAY, fontSize: 27, fontWeight: 700, color: TEXT, marginBottom: 20 }}>Send Us a Message</div>
+            <div className="p-6 sm:p-7 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+              <ContactForm category={category} setCategory={setCategory} />
+            </div>
+          </div>
+          <div>
+            <div style={{ ...DISPLAY, fontSize: 27, fontWeight: 700, color: TEXT, marginBottom: 20 }}>Department Directory</div>
+            <div className="flex flex-col gap-3">
+              {FPD_EMAIL_DIRECTORY.map(d => (
+                <div key={d.email} className="flex gap-4 p-4 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)" }}>
+                  <div className="flex items-center justify-center rounded-xl flex-shrink-0" style={{ width: 40, height: 40, background: "rgba(91,110,225,0.18)", color: "#fff" }}>{DEPT_ICONS[d.label] ?? <Mail size={18} />}</div>
+                  <div className="min-w-0">
+                    <div style={{ color: TEXT, fontSize: 17, fontWeight: 600 }}>{d.label}</div>
+                    <div style={{ color: MUTED, fontSize: 14.5, marginBottom: 2 }}>{d.note}</div>
+                    <a href={`mailto:${d.email}`} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 14.5, wordBreak: "break-all" }}>{d.email}</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto">
         <div style={{ ...DISPLAY, fontSize: 25, fontWeight: 700, color: TEXT, marginBottom: 20, textAlign: "center" }}>Frequently Asked Questions</div>
         <div className="flex flex-col gap-3 fpd-stagger">
           {faqs.map((faq, i) => (
@@ -1262,6 +1349,7 @@ function Help() {
               )}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </section>
