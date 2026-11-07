@@ -14,6 +14,7 @@
  *   />
  */
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Camera, X, RotateCcw, CheckCircle, Upload, ZoomIn, ZoomOut,
   SwitchCamera, Sun, Contrast, FileText, AlertCircle, Scan
@@ -51,6 +52,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
   const [phase, setPhase] = useState<"camera"|"preview"|"naming">("camera");
   const [capturedUrl, setCapturedUrl] = useState<string | null>(null);
+  // The unfiltered capture; every scan mode is baked from this, never from an
+  // already-filtered copy, so switching modes doesn't stack filters.
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [scanMode, setScanMode] = useState<ScanMode>("document");
   const [docName, setDocName] = useState(defaultName ?? "");
@@ -71,44 +75,47 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     { id:"other",    label:"Other Documents",   emoji:"📁" },
   ];
 
-  const startCamera = useCallback(async () => {
-    setCameraError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width:{ ideal:1920 }, height:{ ideal:1080 } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    } catch (err: any) {
-      const msg = err.name === "NotAllowedError"
-        ? "Camera permission denied. Please allow camera access in your browser settings, or use the file upload option below."
-        : "Camera not available on this device. Use file upload instead.";
-      setCameraError(msg);
-    }
-  }, [facing]);
-
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
   }, []);
 
+  // One camera stream per (open, camera phase, facing). A stream that resolves
+  // after its effect was cleaned up is stopped at once — otherwise a fast
+  // close/flip/retake leaves the camera light on with nothing showing it.
   useEffect(() => {
-    if (open && phase === "camera") {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-    return () => stopCamera();
-  }, [open, phase, facing, startCamera, stopCamera]);
+    if (!open || phase !== "camera") { stopCamera(); return; }
+    let cancelled = false;
+    setCameraError(null);
+    (async () => {
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error("no camera api"), { name: "NotSupportedError" });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facing, width:{ ideal:1920 }, height:{ ideal:1080 } },
+          audio: false,
+        });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        const msg = err.name === "NotAllowedError"
+          ? "Camera permission denied. Please allow camera access in your browser settings, or use the file upload option below."
+          : "Camera not available on this device. Use file upload instead.";
+        setCameraError(msg);
+      }
+    })();
+    return () => { cancelled = true; stopCamera(); };
+  }, [open, phase, facing, stopCamera]);
 
   useEffect(() => {
     if (!open) {
       setPhase("camera");
       setCapturedUrl(null);
+      setOriginalUrl(null);
       setCapturedBlob(null);
       setScanMode("document");
       setDocName(defaultName ?? "");
@@ -132,19 +139,27 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     canvas.toBlob(blob => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
+      setOriginalUrl(url);
       setCapturedUrl(url);
       setCapturedBlob(blob);
       stopCamera();
       setPhase("preview");
+      bakeFilter(url, scanMode);
     }, "image/jpeg", 0.92);
   }
 
   function applyFilter(mode: ScanMode) {
     setScanMode(mode);
+    if (originalUrl) bakeFilter(originalUrl, mode);
+  }
+
+  // Burns the scan mode into the image that gets uploaded (the preview shows
+  // that same baked image, so what you see is what is saved).
+  function bakeFilter(sourceUrl: string, mode: ScanMode) {
     const canvas = canvasRef.current;
-    if (!canvas || !capturedUrl) return;
+    if (!canvas) return;
     const img = new Image();
-    img.src = capturedUrl;
+    img.src = sourceUrl;
     img.onload = () => {
       const ctx = canvas.getContext("2d")!;
       canvas.width = img.naturalWidth;
@@ -163,9 +178,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
   function retake() {
     setCapturedUrl(null);
+    setOriginalUrl(null);
     setCapturedBlob(null);
     setPhase("camera");
-    startCamera();
   }
 
   function confirm() {
@@ -176,8 +191,10 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     if (!capturedBlob) { toast.error("No image captured"); return; }
     setUploading(true);
     setTimeout(() => {
-      const fileName = `${docName.trim().replace(/[^a-z0-9]/gi,"_")}_${Date.now()}.jpg`;
-      const file = new File([capturedBlob], fileName, { type:"image/jpeg" });
+      // Keep a chosen PDF a PDF; camera captures and baked images are JPEG.
+      const isPdf = capturedBlob.type === "application/pdf";
+      const fileName = `${docName.trim().replace(/[^a-z0-9]/gi,"_")}_${Date.now()}.${isPdf ? "pdf" : "jpg"}`;
+      const file = new File([capturedBlob], fileName, { type: isPdf ? "application/pdf" : "image/jpeg" });
       const url = capturedUrl!;
       setUploading(false);
       onUpload({ file, previewUrl:url, name:docName.trim() });
@@ -191,10 +208,13 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
+    setOriginalUrl(url);
     setCapturedUrl(url);
     setCapturedBlob(file);
     stopCamera();
     setPhase("preview");
+    // PDFs can't be drawn to a canvas — upload them as chosen.
+    if (file.type.startsWith("image/")) bakeFilter(url, scanMode);
     setDocName(file.name.replace(/\.[^.]+$/, "").replace(/_/g," "));
   }
 
@@ -207,10 +227,13 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     borderRadius:16,
   };
 
-  return (
+  // Portalled to <body>: most ScanButtons sit inside a page modal whose
+  // backdrop-filter makes it the containing block for position:fixed, which
+  // would trap the scanner inside that modal instead of covering the screen.
+  return createPortal(
     // A camera UI is used on a phone more than anywhere else: edge-to-edge
     // bottom sheet below sm, centred card above it.
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center"
       style={{ background:"rgba(0,0,0,0.85)", backdropFilter:"blur(12px)" }}>
 
       <div className="w-full max-w-2xl mx-0 sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
@@ -246,7 +269,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
         {/* Camera phase */}
         {phase === "camera" && (
           <div className="flex flex-col" style={{ flex:1, minHeight:0 }}>
-            <div className="relative flex-1 bg-black" style={{ minHeight:280 }}>
+            {/* Bounded height: an unbounded 1080p video pushed the shutter row
+                off the bottom of the card, leaving nothing to press. */}
+            <div className="relative bg-black" style={{ height:"min(58dvh, 480px)", minHeight:220, flexShrink:1 }}>
               {cameraError ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
                   <AlertCircle size={40} color="#FC8181"/>
@@ -287,7 +312,7 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
             {/* Camera controls */}
             {!cameraError && (
-              <div className="flex items-center justify-between px-6 py-4" style={{ background:"#060D1A" }}>
+              <div className="flex items-center justify-between px-6 py-4" style={{ background:"#060D1A", flexShrink:0 }}>
                 <button onClick={() => fileRef.current?.click()}
                   className="flex flex-col items-center gap-1"
                   style={{ color:"#4A5A7A" }}>
@@ -319,8 +344,13 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
           <div className="flex flex-col" style={{ flex:1, minHeight:0, overflowY:"auto" }}>
             {/* Preview image */}
             <div className="relative flex-1 bg-black flex items-center justify-center" style={{ minHeight:240 }}>
-              <img src={capturedUrl} alt="Scanned document"
-                style={{ maxHeight:340, maxWidth:"100%", objectFit:"contain", filter:SCAN_FILTERS[scanMode].css }}/>
+              {capturedBlob?.type === "application/pdf" ? (
+                <div className="flex flex-col items-center gap-2 p-8" style={{ color:"#BCC5DA" }}>
+                  <FileText size={44}/>
+                  <span style={{ fontSize:15 }}>PDF selected — it will be uploaded as-is</span>
+                </div>
+              ) : <img src={capturedUrl} alt="Scanned document"
+                style={{ maxHeight:340, maxWidth:"100%", objectFit:"contain" }}/>}
             </div>
 
             {/* Scan mode picker */}
@@ -401,7 +431,8 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
