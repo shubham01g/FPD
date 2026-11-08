@@ -4,6 +4,7 @@ import { isLivemode, stripe, stripeMode } from "../lib/stripe.ts";
 import { billingPaused } from "../lib/billingConfig.ts";
 import { CatalogError, productPrice } from "../lib/billing/catalog.ts";
 import { findCustomer } from "../lib/billing/customers.ts";
+import { chargeWgSession } from "../lib/wgBilling.ts";
 
 const whiteGlove = new Hono();
 
@@ -89,81 +90,25 @@ whiteGlove.get("/clients/:id/billing", async (c) => {
 // POST /admin/white-glove/clients/:id/charge-session
 //   { sessionKey (uuid, one per session), startedAt, endedAt, sessionType, notes? }
 // Charging the same sessionKey twice returns the first charge.
+// GET /admin/white-glove/waivers — every authorization waiver (migration 051).
+// Waivers are sent by the specialist from the Concierge Portal and signed by
+// the client at /waiver/:token; this is the read-only admin view.
+whiteGlove.get("/waivers", async (c) => {
+  const { data, error } = await adminClient().from("wg_waivers")
+    .select("id, status, sent_at, signed_at, signed_name, signer_ip, specialist_name, authorized_scope, expires_at, users:client_user_id(full_name, email)")
+    .order("sent_at", { ascending: false }).limit(500);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ waivers: data ?? [] });
+});
+
 whiteGlove.post("/clients/:id/charge-session", async (c) => {
-  if (!stripeMode()) return c.json({ error: "Stripe is not configured" }, 503);
-  if (billingPaused()) return c.json({ error: "Billing is being updated. Please try again in a few minutes." }, 503);
   const body = await c.req.json().catch(() => ({}));
-  const sessionKey = String(body.sessionKey ?? "");
-  if (!/^[0-9a-f-]{36}$/i.test(sessionKey)) return c.json({ error: "sessionKey must be a UUID" }, 400);
-  const started = new Date(body.startedAt);
-  const ended = new Date(body.endedAt);
-  if (isNaN(started.getTime()) || isNaN(ended.getTime()) || ended <= started) return c.json({ error: "Enter a valid start and end time" }, 400);
-  const sessionType = ["phone", "video", "in_person"].includes(body.sessionType) ? body.sessionType : "video";
-
-  const db = adminClient();
-  const { data: existing } = await db.from("wg_session_billing").select("*").eq("session_key", sessionKey).maybeSingle();
-  if (existing) return c.json({ session: existing, duplicate: true });
-
-  const { data: client } = await db.from("wg_clients").select("user_id, specialist_id").eq("id", c.req.param("id")).maybeSingle();
-  if (!client?.user_id) return c.json({ error: "Client not found" }, 404);
-  const { data: card } = await db.from("wg_payment_methods").select("*").eq("user_id", client.user_id).maybeSingle();
-  if (!card?.stripe_payment_method || card.livemode !== isLivemode()) {
-    return c.json({ error: "This client has no card on file. They need to complete White Glove setup first." }, 409);
-  }
-
-  let block;
-  try {
-    block = await productPrice("wg_session_block");
-  } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : "Session price unavailable" }, err instanceof CatalogError ? err.status : 500);
-  }
-  const minutes = Math.max(1, Math.ceil((ended.getTime() - started.getTime()) / 60000));
-  const blocks = Math.max(1, Math.ceil(minutes / 30));
   const admin = c.get("admin" as never) as { email?: string } | undefined;
-
-  const { data: row, error: insertErr } = await db.from("wg_session_billing").insert({
-    session_key: sessionKey, client_user_id: client.user_id, specialist_id: client.specialist_id ?? null,
-    session_type: sessionType, started_at: started.toISOString(), ended_at: ended.toISOString(),
-    duration_minutes: minutes, blocks_charged: blocks, amount_charged: (blocks * block.amountCents) / 100,
-    rate_per_block: block.amountCents / 100, card_last4: card.card_last4, card_brand: card.card_brand,
-    status: "pending", specialist_notes: body.notes ?? null, livemode: isLivemode(), charged_by: admin?.email ?? null,
-  }).select().single();
-  if (insertErr) {
-    if (insertErr.code === "23505") {
-      const { data: again } = await db.from("wg_session_billing").select("*").eq("session_key", sessionKey).maybeSingle();
-      return c.json({ session: again, duplicate: true });
-    }
-    return c.json({ error: insertErr.message }, 500);
-  }
-
-  try {
-    const customer = card.stripe_customer_id ?? await findCustomer(client.user_id);
-    const invoice = await stripe<Record<string, any>>("POST", "/invoices", {
-      customer,
-      collection_method: "charge_automatically",
-      auto_advance: true,
-      pending_invoice_items_behavior: "exclude",
-      default_payment_method: card.stripe_payment_method,
-      description: "White Glove session",
-      metadata: { purpose: "wg_session", userId: client.user_id, sessionBillingId: row.id },
-    }, { idempotencyKey: `wg-invoice:${sessionKey}` });
-    await stripe("POST", "/invoiceitems", {
-      customer, invoice: invoice.id, price: block.priceId, quantity: blocks,
-      description: `White Glove ${sessionType.replace("_", " ")} session, ${minutes} min (${blocks} × 30 min)`,
-      metadata: { purpose: "wg_session", sessionBillingId: row.id },
-    }, { idempotencyKey: `wg-item:${sessionKey}` });
-    await db.from("wg_session_billing").update({ stripe_invoice_id: invoice.id }).eq("id", row.id);
-    await stripe("POST", `/invoices/${invoice.id}/finalize`, { auto_advance: true }, { idempotencyKey: `wg-finalize:${sessionKey}` });
-    // A decline is reported by invoice.payment_failed (row → failed, admin emailed).
-    const paid = await stripe<Record<string, any>>("POST", `/invoices/${invoice.id}/pay`, { off_session: true },
-      { idempotencyKey: `wg-pay:${sessionKey}` }).catch((err) => ({ status: "payment_failed", message: err instanceof Error ? err.message : String(err) }));
-    const { data: fresh } = await db.from("wg_session_billing").select("*").eq("id", row.id).maybeSingle();
-    return c.json({ session: fresh ?? row, invoiceStatus: paid.status, message: (paid as { message?: string }).message ?? null });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    await db.from("wg_session_billing").update({ status: "failed", failure_message: message }).eq("id", row.id);
-    return c.json({ error: message }, 502);
-  }
+  const r = await chargeWgSession({
+    wgClientId: c.req.param("id"), sessionKey: body.sessionKey, startedAt: body.startedAt, endedAt: body.endedAt,
+    sessionType: body.sessionType, notes: body.notes ?? null, chargedBy: admin?.email ?? null,
+  });
+  return c.json(r.body, r.status as 200);
 });
 
 export default whiteGlove;

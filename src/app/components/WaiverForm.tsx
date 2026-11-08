@@ -1,20 +1,21 @@
 /**
- * White Glove Concierge Authorization & Waiver Form
- * — User-facing: sign and submit
- * — Admin-facing: send to user, track status
+ * White Glove Concierge Authorization & Waiver
+ * — Public: the client signs at /waiver/:token (WaiverPublicPage)
+ * — Admin: every waiver, read-only (WaiverManager)
+ * Sending happens in the Concierge Portal (migration 051). This file used to
+ * keep waivers in an in-memory array that was empty on every load.
  */
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Shield, CheckCircle, Edit3, X, Download, AlertCircle,
-  Clock, User, Star, FileText, Lock, Eye
-} from "lucide-react";
+import { Shield, CheckCircle, Edit3, X, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { publicApi } from "../services/publicApi";
+import { adminApi } from "../services/adminApi";
+import { useAdminFetch } from "../hooks/useAdminFetch";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
 
-/* ── In-memory waiver store (demo) ──────────────────────────────── */
 export interface WaiverRecord {
   id: string;
   userId: string;
@@ -30,8 +31,6 @@ export interface WaiverRecord {
   specialistScope: string[];
 }
 
-// Starts empty — wg_waivers isn't wired yet, so waivers are in-memory only.
-export let waiverStore: WaiverRecord[] = [];
 
 const SCOPE_LABELS: Record<string, string> = {
   document_upload: "Upload and organize documents in all vault folders",
@@ -44,8 +43,6 @@ const SCOPE_LABELS: Record<string, string> = {
   password_manager: "Add and organize password and account records",
   all_features: "Full access to all Final Pass Down platform features",
 };
-
-/* ── Waiver document text ────────────────────────────────────────── */
 function WaiverText({ waiver }: { waiver: WaiverRecord }) {
   return (
     <div className="space-y-5" style={{ color:"rgba(255,255,255,0.8)", fontSize:16, lineHeight:1.9 }}>
@@ -253,429 +250,132 @@ function SignaturePad({ onSign }: { onSign: (dataUrl: string) => void }) {
   );
 }
 
-/* ── User-facing waiver signing page ─────────────────────────────── */
-export function WaiverSignPage({ waiverId, onBack }: { waiverId?: string; onBack?: () => void }) {
-  // No fallback to "some other waiver": opening a link for one that doesn't
-  // exist used to crash the page (the store is empty) or show a stranger's.
-  const waiver = waiverId ? waiverStore.find(w => w.id === waiverId) : undefined;
+/* ── Public waiver signing page: /waiver/:token (migration 051) ─────
+   The specialist emails this link from the Concierge Portal. The client
+   reads the authorization, types their full legal name (and may draw a
+   signature), and signs. GET/POST /public/waiver/:token. */
+interface PublicWaiver {
+  status: "pending" | "signed" | "declined" | "expired";
+  specialistName: string; scope: string[]; clientName: string;
+  signedAt: string | null; signedName: string | null;
+}
 
-  const [step, setStep] = useState<"read"|"sign"|"done">("read");
-  const [scrolled, setScrolled] = useState(false);
+export function WaiverPublicPage({ token }: { token: string }) {
+  const [w, setW] = useState<PublicWaiver | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
   const [typedName, setTypedName] = useState("");
-  const [drawnSig, setDrawnSig] = useState("");
-  const [sigMode, setSigMode] = useState<"type"|"draw">("type");
-  const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(false);
-  const [checked3, setChecked3] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [drawn, setDrawn] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const readRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    publicApi.get<PublicWaiver>(`/waiver/${encodeURIComponent(token)}`)
+      .then(setW)
+      .catch(() => setProblem("This waiver link isn't valid. Ask your White Glove specialist for a new one."));
+  }, [token]);
 
-  function onScroll() {
-    const el = readRef.current;
-    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 60) setScrolled(true);
-  }
-
-  function submit() {
-    if (!waiver) return;
-    const sig = sigMode === "type" ? typedName : drawnSig;
-    if (!sig.trim()) { toast.error("Please provide your signature"); return; }
-    if (!checked1 || !checked2 || !checked3) { toast.error("Please check all acknowledgment boxes"); return; }
-    if (sigMode === "type" && typedName.trim().toLowerCase() !== waiver.userName.toLowerCase().split(" ").slice(0,2).join(" ").toLowerCase()
-      && typedName.trim().split(" ").length < 2) {
-      toast.error("Please type your full legal name to sign"); return;
+  const sign = async () => {
+    if (typedName.trim().split(/\s+/).length < 2) { toast.error("Type your full legal name to sign"); return; }
+    if (!agree) { toast.error("Please confirm that you agree"); return; }
+    setBusy(true);
+    try {
+      const r = await publicApi.post<{ signedAt: string }>(`/waiver/${encodeURIComponent(token)}/sign`, { signedName: typedName.trim(), agree, signature: drawn || undefined });
+      setW(prev => prev ? { ...prev, status: "signed", signedAt: r.signedAt, signedName: typedName.trim() } : prev);
+      toast.success("Signed — thank you");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not sign");
     }
-    setSubmitting(true);
-    setTimeout(() => {
-      // Update demo store
-      const idx = waiverStore.findIndex(w => w.id === waiver.id);
-      if (idx >= 0) {
-        waiverStore[idx] = { ...waiverStore[idx], status:"signed", signedAt:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}), signedName:typedName || "Signed via drawn signature", ipAddress:"72.14.xxx.xxx" };
-      }
-      setSubmitting(false);
-      setStep("done");
-    }, 1200);
-  }
+    setBusy(false);
+  };
 
-  if (!waiver) {
-    return (
-      <div style={{ maxWidth: 520, margin: "60px auto", padding: "0 20px", textAlign: "center", fontFamily: "var(--font-body)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--foreground)", marginBottom: 10 }}>Waiver not found</h2>
-        <p style={{ color: "var(--muted-foreground)", fontSize: 16, marginBottom: 22 }}>
-          This waiver link isn't valid or has already been used. Ask your White Glove specialist to send a new one.
-        </p>
-        {onBack && <button onClick={onBack} className="btn-ghost">Back</button>}
-      </div>
-    );
-  }
-
-  if (waiver.status === "signed" || step === "done") {
-    return (
-      <div className="max-w-lg mx-auto p-8 text-center">
-        <div className="rounded-full p-6 mx-auto mb-6 w-fit" style={{ background:"rgba(72,187,120,0.1)", border:"2px solid rgba(72,187,120,0.3)" }}>
-          <CheckCircle size={52} color="#FFFFFF"/>
-        </div>
-        <h2 style={{ ...DISPLAY, fontSize:32.5, color:"#FFFFFF", marginBottom:8 }}>Waiver Signed Successfully</h2>
-        <p style={{ color:"rgba(255,255,255,0.7)", fontSize:17.5, lineHeight:1.8, marginBottom:24 }}>
-          Your White Glove Concierge Authorization has been recorded. {waiver.specialistName} can now begin setting up your Final Pass Down vault. You'll receive a call to schedule your first session.
-        </p>
-        <div className="p-4 rounded-2xl mb-6 text-left space-y-2" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-          {[
-            ["Document ID", waiver.id],
-            ["Signed", waiverStore.find(w=>w.id===waiver.id)?.signedAt ?? waiver.signedAt ?? "Just now"],
-            ["Signed by", waiverStore.find(w=>w.id===waiver.id)?.signedName ?? typedName],
-            ["Specialist", waiver.specialistName],
-          ].map(([k,v]) => (
-            <div key={k} className="flex justify-between">
-              <span style={{ color:"rgba(255,255,255,0.65)", fontSize:15, ...MONO }}>{k}</span>
-              <span style={{ color:"#FFFFFF", fontSize:15, fontWeight:500 }}>{v}</span>
-            </div>
-          ))}
-        </div>
-        {onBack && (
-          <button onClick={onBack} className="px-6 py-3 rounded-2xl font-bold text-sm"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
-            ← Back to Dashboard
-          </button>
-        )}
-      </div>
-    );
-  }
+  const record: WaiverRecord | null = w ? {
+    id: token.slice(0, 8).toUpperCase(), userId: "", userName: w.clientName, userEmail: "", sentAt: "", sentBy: w.specialistName,
+    status: w.status, signedAt: w.signedAt ?? undefined, signedName: w.signedName ?? undefined,
+    specialistName: w.specialistName, specialistScope: w.scope,
+  } : null;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl"
-        style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
-        <div className="rounded-2xl p-3 flex-shrink-0" style={{ background:"rgba(91,110,225,0.08)" }}>
-          <FileText size={22} color="#FFFFFF"/>
-        </div>
-        <div>
-          <div style={{ ...DISPLAY, fontSize:22.5, color:"#FFFFFF" }}>White Glove Concierge Authorization</div>
-          <div style={{ color:"rgba(255,255,255,0.7)", fontSize:15, marginTop:2 }}>
-            Sent by FPD Admin · {waiver.sentAt} · Specialist: {waiver.specialistName}
-          </div>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full flex-shrink-0"
-          style={{ background:"rgba(246,173,85,0.12)", border:"1px solid rgba(246,173,85,0.3)" }}>
-          <Clock size={11} color="#F6AD55"/>
-          <span style={{ color:"#F6AD55", fontSize:12.5, fontWeight:700, ...MONO }}>AWAITING SIGNATURE</span>
-        </div>
-      </div>
-
-      {/* Step tracker */}
-      <div className="flex items-center gap-3">
-        {[["read","1. Read Agreement"],["sign","2. Sign & Confirm"],["done","3. Complete"]].map(([id,label],i) => (
-          <React.Fragment key={id}>
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center justify-center rounded-full text-xs font-bold"
-                style={{ width:22, height:22, background:step===id?"#5B6EE1":i<["read","sign","done"].indexOf(step)?"#48BB78":"rgba(91,110,225,0.1)", color:step===id||i<["read","sign","done"].indexOf(step)?"#fff":"#8A9AB8" }}>
-                {i<["read","sign","done"].indexOf(step) ? <CheckCircle size={12}/> : i+1}
+    <div style={{ minHeight: "100%", background: "#070A12", padding: "32px 16px", fontFamily: "var(--font-body)" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        {problem && <p style={{ color: "#A3ADC9", fontSize: 17 }}>{problem}</p>}
+        {!problem && !w && <p style={{ color: "#A3ADC9" }}>Loading…</p>}
+        {w && record && (
+          <div className="rounded-2xl p-6" style={{ background: "#101728", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <WaiverText waiver={record}/>
+            {w.status === "signed" ? (
+              <div className="flex items-center gap-2 mt-6" style={{ color: "#48BB78", fontSize: 16 }}>
+                <CheckCircle size={18}/> Signed by {w.signedName}{w.signedAt ? ` on ${new Date(w.signedAt).toLocaleString("en-US")}` : ""}. You can close this page.
               </div>
-              <span style={{ fontSize:14, color:step===id?"#FFFFFF":"rgba(255,255,255,0.65)", fontWeight:step===id?600:400 }}>{label}</span>
-            </div>
-            {i<2 && <div style={{ flex:1, height:1, background:"rgba(91,110,225,0.1)" }}/>}
-          </React.Fragment>
-        ))}
-      </div>
-
-      {/* Read step */}
-      {step === "read" && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Eye size={14} color="rgba(255,255,255,0.65)"/>
-            <span style={{ color:"rgba(255,255,255,0.65)", fontSize:15 }}>Please read the entire agreement before signing.</span>
-          </div>
-          <div ref={readRef} onScroll={onScroll}
-            className="rounded-2xl p-6 overflow-y-auto"
-            style={{ background:"#101728", border:"1px solid rgba(91,110,225,0.12)", maxHeight:500, boxShadow:"inset 0 -20px 20px -10px rgba(91,110,225,0.04)" }}>
-            <WaiverText waiver={waiver}/>
-          </div>
-          {!scrolled && (
-            <div className="flex items-center gap-2 mt-3 px-4 py-2 rounded-2xl"
-              style={{ background:"rgba(246,173,85,0.08)", border:"1px solid rgba(246,173,85,0.2)" }}>
-              <AlertCircle size={13} color="#F6AD55"/>
-              <span style={{ color:"#F6AD55", fontSize:15 }}>Please scroll to the bottom to read the full agreement</span>
-            </div>
-          )}
-          <button onClick={() => { if (!scrolled) { setScrolled(true); } setStep("sign"); }}
-            className="w-full mt-4 py-4 rounded-2xl font-bold text-base"
-            style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#FFFFFF", boxShadow:"0 0 24px rgba(91,110,225,0.3)" }}>
-            I Have Read the Agreement — Continue to Sign →
-          </button>
-        </div>
-      )}
-
-      {/* Sign step */}
-      {step === "sign" && (
-        <div className="space-y-5">
-          {/* Signature mode toggle */}
-          <div>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, marginBottom:8 }}>SIGNATURE METHOD</div>
-            <div className="flex gap-2 p-1 rounded-2xl w-fit" style={{ background:"rgba(91,110,225,0.06)" }}>
-              {[["type","Type Name"],["draw","Draw Signature"]].map(([id,label]) => (
-                <button key={id} onClick={() => setSigMode(id as "type"|"draw")}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-                  style={{ background:sigMode===id?"#5B6EE1":"transparent", color:sigMode===id?"#fff":"rgba(255,255,255,0.7)" }}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {sigMode === "type" ? (
-            <div>
-              <label style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>TYPE YOUR FULL LEGAL NAME TO SIGN</label>
-              <input value={typedName} onChange={e => setTypedName(e.target.value)}
-                placeholder={waiver.userName}
-                className="w-full px-4 py-4 rounded-2xl text-lg"
-                style={{ background:"#0F1A33", border:"2px solid rgba(91,110,225,0.25)", color:"#FFFFFF", outline:"none", fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:25 }}/>
-              {typedName && (
-                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14, marginTop:4 }}>
-                  Signature: <em style={{ fontFamily:"Georgia, serif", color:"#FFFFFF" }}>{typedName}</em>
+            ) : w.status !== "pending" ? (
+              <div className="flex items-center gap-2 mt-6" style={{ color: "#F6AD55", fontSize: 16 }}>
+                <Clock size={18}/> This link has expired. Ask {w.specialistName} to send a new one.
+              </div>
+            ) : (
+              <div className="space-y-4 mt-6">
+                <div>
+                  <div style={{ color: "#8A9AB8", fontSize: 13, ...MONO, marginBottom: 6 }}>TYPE YOUR FULL LEGAL NAME</div>
+                  <input value={typedName} onChange={e => setTypedName(e.target.value)} placeholder={w.clientName || "First Last"}
+                    style={{ width: "100%", background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", borderRadius: 10, padding: "10px 12px", color: "#fff", fontSize: 17 }}/>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <label style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>DRAW YOUR SIGNATURE</label>
-              <SignaturePad onSign={setDrawnSig}/>
-            </div>
-          )}
-
-          {/* Acknowledgment checkboxes */}
-          <div className="space-y-3 p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.1)" }}>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:12.5, ...MONO, marginBottom:6 }}>ACKNOWLEDGMENTS</div>
-            {[
-              [checked1, setChecked1, `I am ${waiver.userName} or their legally authorized representative, and I have the authority to sign this agreement.`],
-              [checked2, setChecked2, `I have read and understand the full White Glove Concierge Authorization agreement, including the scope of access granted to ${waiver.specialistName}.`],
-              [checked3, setChecked3, "I understand this authorization is revocable at any time and that all Specialist actions are logged in a permanent audit trail."],
-            ].map(([checked, setChecked, label], i) => (
-              <div key={i} className="flex items-start gap-3">
-                <button onClick={() => (setChecked as React.Dispatch<React.SetStateAction<boolean>>)(!checked)}
-                  className="flex items-center justify-center rounded-xl flex-shrink-0 mt-0.5 transition-all"
-                  style={{ width:20, height:20, background:checked?"#5B6EE1":"#101728", border:`2px solid ${checked?"#5B6EE1":"rgba(91,110,225,0.3)"}` }}>
-                  {checked && <CheckCircle size={12} color="#fff"/>}
+                <div>
+                  <div style={{ color: "#8A9AB8", fontSize: 13, ...MONO, marginBottom: 6 }}>SIGNATURE (OPTIONAL)</div>
+                  <SignaturePad onSign={setDrawn}/>
+                </div>
+                <label className="flex items-start gap-2" style={{ color: "#E8EDF5", fontSize: 15 }}>
+                  <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} style={{ marginTop: 4 }}/>
+                  I have read this authorization and agree to it. I can withdraw it at any time by contacting {FPD_EMAIL.support}.
+                </label>
+                <button onClick={sign} disabled={busy} className="w-full py-3 rounded-xl font-bold"
+                  style={{ background: "linear-gradient(135deg,#5BA7D6,#6F9E94)", color: "#04080F", opacity: busy ? 0.6 : 1 }}>
+                  <Edit3 size={15} style={{ display: "inline", marginRight: 6 }}/>{busy ? "Signing…" : "Sign Authorization"}
                 </button>
-                <span style={{ color:"rgba(255,255,255,0.8)", fontSize:15, lineHeight:1.6 }}>{label as string}</span>
               </div>
-            ))}
+            )}
           </div>
-
-          {/* Security notice */}
-          <div className="flex items-start gap-2 px-4 py-3 rounded-2xl"
-            style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-            <Lock size={13} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
-            <p style={{ color:"#D99A6B", fontSize:14, lineHeight:1.6 }}>
-              Your signature is encrypted and time-stamped. This document is legally binding under the E-SIGN Act.
-              IP address and device fingerprint are recorded with your signature.
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <button onClick={() => setStep("read")} className="px-5 py-3 rounded-2xl text-sm"
-              style={{ background:"rgba(91,110,225,0.06)", color:"rgba(255,255,255,0.7)" }}>← Back</button>
-            <button onClick={submit} disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base"
-              style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#FFFFFF",
-                boxShadow:"0 0 24px rgba(91,110,225,0.35)", opacity:submitting?0.7:1 }}>
-              <Shield size={16}/>{submitting ? "Recording Signature…" : "Sign & Authorize White Glove Service"}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
-/* ── Admin: send + track waivers ─────────────────────────────────── */
+/* ── Admin: every waiver, read-only (GET /admin/white-glove/waivers) ──
+   Specialists send waivers from the Concierge Portal; clients sign at
+   /waiver/:token. */
+interface AdminWaiver {
+  id: string; status: string; sent_at: string; signed_at: string | null; signed_name: string | null;
+  signer_ip: string | null; specialist_name: string; expires_at: string;
+  users: { full_name: string | null; email: string } | null;
+}
+
 export function WaiverManager() {
-  const [waivers, setWaivers] = useState<WaiverRecord[]>([...waiverStore]);
-  const [showSend, setShowSend] = useState(false);
-  const [previewId, setPreviewId] = useState<string | null>(null);
-  const [sendForm, setSendForm] = useState({ name:"", email:"", specialist:"Marcus Williams", scope: ["document_upload","legacy_contacts","final_wishes","vault_organization"] });
-  const [sending, setSending] = useState(false);
-
-  const statusColor: Record<string,string> = { pending:"#F6AD55", signed:"#48BB78", declined:"#FC8181", expired:"#8A9AB8" };
-  const statusBg: Record<string,string> = { pending:"rgba(246,173,85,0.12)", signed:"rgba(72,187,120,0.12)", declined:"rgba(252,129,129,0.12)", expired:"rgba(107,114,128,0.12)" };
-
-  function sendWaiver() {
-    if (!sendForm.name.trim() || !sendForm.email.trim()) { toast.error("Name and email required"); return; }
-    setSending(true);
-    setTimeout(() => {
-      const newW: WaiverRecord = {
-        id: `WAV-${String(Date.now()).slice(-3)}`,
-        userId: `WG-NEW`,
-        userName: sendForm.name,
-        userEmail: sendForm.email,
-        sentAt: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) + " · " + new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
-        sentBy: FPD_EMAIL.admin,
-        status: "pending",
-        specialistName: sendForm.specialist,
-        specialistScope: sendForm.scope,
-      };
-      waiverStore = [newW, ...waiverStore];
-      setWaivers([...waiverStore]);
-      toast.success(`Waiver sent to ${sendForm.email}`);
-      setSendForm({ name:"", email:"", specialist:"Marcus Williams", scope:["document_upload","legacy_contacts","final_wishes","vault_organization"] });
-      setSending(false);
-      setShowSend(false);
-    }, 900);
-  }
-
-  if (previewId) {
-    return (
-      <div>
-        <button onClick={() => setPreviewId(null)} className="flex items-center gap-2 mb-4 text-sm"
-          style={{ color:"#6E90C9" }}>
-          ← Back to Waivers
-        </button>
-        <WaiverSignPage waiverId={previewId} onBack={() => setPreviewId(null)}/>
-      </div>
-    );
-  }
-
-  const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.1)", boxShadow:"0 2px 12px rgba(91,110,225,0.06)", borderRadius:22 };
-  const INPUT: React.CSSProperties = { background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.2)", color:"#FFFFFF", fontSize:16, outline:"none", borderRadius:10, padding:"8px 12px", width:"100%" };
-
+  const { data, loading, error } = useAdminFetch(() => adminApi.get<{ waivers: AdminWaiver[] }>("/white-glove/waivers"), []);
+  const statusColor: Record<string, string> = { pending: "#F6AD55", signed: "#48BB78", declined: "#FC8181", expired: "#8A9AB8" };
+  const waivers = data?.waivers ?? [];
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <div style={{ color:"#6FAE8B", fontSize:14, ...MONO, letterSpacing:"0.1em", marginBottom:4 }}>WHITE GLOVE · WAIVER MANAGEMENT</div>
-          <h2 style={{ ...DISPLAY, fontSize:25, color:"#FFFFFF" }}>Concierge Authorization Waivers</h2>
-        </div>
-        <button onClick={() => setShowSend(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
-          style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", boxShadow:"0 0 16px rgba(91,167,214,0.3)" }}>
-          <Star size={14}/> Send Waiver
-        </button>
+    <div className="space-y-3">
+      <div className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "rgba(91,167,214,0.04)", border: "1px solid rgba(91,167,214,0.15)" }}>
+        <Shield size={14} color="#FFFFFF" style={{ marginTop: 2 }}/>
+        <p style={{ color: "#8A9AB8", fontSize: 15, lineHeight: 1.7 }}>
+          The assigned specialist emails the waiver from the Concierge Portal; the client signs it from that link. Uploads to a client's vault unlock once it is signed.
+        </p>
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label:"Total Sent",    value:waivers.length,                           color:"#6E90C9" },
-          { label:"Signed",        value:waivers.filter(w=>w.status==="signed").length, color:"#D99A6B" },
-          { label:"Pending",       value:waivers.filter(w=>w.status==="pending").length, color:"#F6AD55" },
-          { label:"Sign Rate",     value:`${Math.round(waivers.filter(w=>w.status==="signed").length/Math.max(waivers.length,1)*100)}%`, color:"#6FAE8B" },
-        ].map(s => (
-          <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
-            <div style={{ ...DISPLAY, fontSize:30, color:s.color }}>{s.value}</div>
-            <div style={{ color:"rgba(255,255,255,0.7)", fontSize:15, marginTop:2 }}>{s.label}</div>
+      {loading && <div style={{ color: "#8A9AB8" }}>Loading…</div>}
+      {error && <div style={{ color: "#FC8181" }}>{error}</div>}
+      {!loading && !error && waivers.length === 0 && <div style={{ color: "#8A9AB8" }}>No waivers have been sent yet.</div>}
+      {waivers.map(w => (
+        <div key={w.id} className="p-4 rounded-2xl flex items-center justify-between gap-3 flex-wrap" style={{ background: "#101728", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div>
+            <div style={{ color: "#E8EDF5", fontSize: 16, fontWeight: 600 }}>{w.users?.full_name || w.users?.email}</div>
+            <div style={{ color: "#8A9AB8", fontSize: 13.5 }}>
+              Sent {new Date(w.sent_at).toLocaleDateString("en-US")} by {w.specialist_name}
+              {w.signed_at ? ` · signed ${new Date(w.signed_at).toLocaleString("en-US")} as "${w.signed_name}"${w.signer_ip ? ` from ${w.signer_ip}` : ""}` : ""}
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Waiver table */}
-      <div className="rounded-2xl overflow-x-auto" style={{ border:"1px solid rgba(91,110,225,0.1)" }}>
-        <div className="px-5 py-3 border-b" style={{ background:"#141B2E", borderColor:"rgba(91,110,225,0.1)" }}>
-          <div style={{ display:"grid", gridTemplateColumns:"auto 1fr auto auto auto auto", gap:16, alignItems:"center" }}>
-            {["ID","Client","Specialist","Sent","Status","Actions"].map(h => (
-              <div key={h} style={{ color:"rgba(255,255,255,0.7)", fontSize:12.5, ...MONO }}>{h.toUpperCase()}</div>
-            ))}
-          </div>
+          <span className="px-2 py-1 rounded-full text-xs font-bold" style={{ background: `${statusColor[w.status] ?? "#8A9AB8"}20`, color: statusColor[w.status] ?? "#8A9AB8", ...MONO }}>
+            {w.status.toUpperCase()}
+          </span>
         </div>
-        {waivers.map((w, i) => (
-          <div key={w.id} className="px-5 py-4 border-b"
-            style={{ display:"grid", gridTemplateColumns:"auto 1fr auto auto auto auto", gap:16, alignItems:"center",
-              background:i%2===0?"#101728":"#0F1A33", borderColor:"rgba(91,110,225,0.06)" }}>
-            <span style={{ color:"#6E90C9", fontSize:12.5, ...MONO }}>{w.id}</span>
-            <div>
-              <div style={{ color:"#FFFFFF", fontSize:16, fontWeight:500 }}>{w.userName}</div>
-              <div style={{ color:"rgba(255,255,255,0.65)", fontSize:14 }}>{w.userEmail}</div>
-            </div>
-            <span style={{ color:"rgba(255,255,255,0.7)", fontSize:15 }}>{w.specialistName}</span>
-            <div>
-              <div style={{ color:"rgba(255,255,255,0.7)", fontSize:14 }}>{w.sentAt.split(" · ")[0]}</div>
-              {w.signedAt && <div style={{ color:"#D99A6B", fontSize:12.5 }}>Signed: {w.signedAt.split(" · ")[0]}</div>}
-            </div>
-            <span className="px-2 py-1 rounded text-xs font-bold"
-              style={{ background:statusBg[w.status], color:statusColor[w.status], ...MONO, width:"fit-content" }}>
-              {w.status.toUpperCase()}
-            </span>
-            <div className="flex gap-2">
-              <button onClick={() => setPreviewId(w.id)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold"
-                style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
-                <Eye size={11}/> {w.status === "pending" ? "Preview" : "View"}
-              </button>
-              {w.status === "pending" && (
-                <button onClick={() => { toast.success(`Reminder sent to ${w.userEmail}`); }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                  style={{ background:"rgba(246,173,85,0.1)", color:"#F6AD55" }}>
-                  Remind
-                </button>
-              )}
-              {w.status === "signed" && (
-                <button onClick={() => toast.success("Signed waiver PDF downloaded (demo)")}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                  style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B" }}>
-                  <Download size={11}/>
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Send modal */}
-      {showSend && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
-          <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ ...CARD, maxHeight:"90vh", overflowY:"auto" }}>
-            <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white z-10"
-              style={{ borderColor:"rgba(91,110,225,0.08)" }}>
-              <div className="flex items-center gap-2">
-                <Star size={16} color="#FFFFFF"/>
-                <span style={{ ...DISPLAY, fontSize:20, color:"#FFFFFF" }}>Send Waiver to Client</span>
-              </div>
-              <button onClick={() => setShowSend(false)} style={{ color:"rgba(255,255,255,0.65)" }}><X size={16}/></button>
-            </div>
-            <div className="p-6 space-y-4">
-              {[["CLIENT FULL NAME *","name","Dorothy Henderson"],["CLIENT EMAIL *","email","client@email.com"]].map(([lbl,key,ph]) => (
-                <div key={key}>
-                  <label style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>{lbl}</label>
-                  <input value={(sendForm as any)[key]} placeholder={ph}
-                    onChange={e => setSendForm(p=>({...p,[key]:e.target.value}))} style={INPUT}/>
-                </div>
-              ))}
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, display:"block", marginBottom:5 }}>ASSIGNED SPECIALIST</label>
-                <select value={sendForm.specialist} onChange={e => setSendForm(p=>({...p,specialist:e.target.value}))} style={INPUT}>
-                  {["Marcus Williams","Patricia Chen","James Rivera"].map(s=><option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>AUTHORIZED SCOPE</label>
-                <div className="space-y-2">
-                  {Object.entries(SCOPE_LABELS).map(([key, label]) => (
-                    <div key={key} className="flex items-center gap-3">
-                      <button onClick={() => setSendForm(p => ({
-                        ...p,
-                        scope: p.scope.includes(key) ? p.scope.filter(s=>s!==key) : [...p.scope, key]
-                      }))} className="flex items-center justify-center rounded-xl flex-shrink-0"
-                        style={{ width:18, height:18, background:sendForm.scope.includes(key)?"#5B6EE1":"#101728", border:`2px solid ${sendForm.scope.includes(key)?"#5B6EE1":"rgba(91,110,225,0.3)"}` }}>
-                        {sendForm.scope.includes(key) && <CheckCircle size={10} color="#fff"/>}
-                      </button>
-                      <span style={{ color:"rgba(255,255,255,0.8)", fontSize:15 }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button onClick={sendWaiver} disabled={sending}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm"
-                  style={{ background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity:sending?0.7:1 }}>
-                  <Star size={14}/>{sending ? "Sending…" : "Send Waiver via Email"}
-                </button>
-                <button onClick={() => setShowSend(false)} className="px-5 py-3 rounded-2xl text-sm"
-                  style={{ background:"rgba(91,110,225,0.06)", color:"rgba(255,255,255,0.7)" }}>Cancel</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      ))}
     </div>
   );
 }

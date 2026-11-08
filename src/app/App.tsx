@@ -92,7 +92,7 @@ import { WhiteLabelConfig } from "./components/WhiteLabelConfig";
 import { ContinuationFeeAdmin } from "./components/admin/ContinuationFeeAdmin";
 import { WhiteGloveAdmin } from "./components/admin/WhiteGloveAdmin";
 import { WhiteGloveService } from "./components/WhiteGloveService";
-import { WaiverSignPage } from "./components/WaiverForm";
+import { WaiverPublicPage } from "./components/WaiverForm";
 import { AccountSettings } from "./components/AccountSettings";
 import { WGClientSubmit } from "./components/WGClientSubmit";
 import { WGSchedulePage } from "./components/WGSchedulePage";
@@ -557,7 +557,6 @@ function UserRoute() {
       case "storage-usage":       return <StorageUsage onNavigate={nav}/>;
       case "affiliate":           return <AffiliateProgram/>;
       case "white-glove":         return <WhiteGloveService/>;
-      case "waiver-sign":         return <div className="p-6"><WaiverSignPage onBack={() => nav("dashboard")}/></div>;
       case "account-settings":    return <AccountSettings/>;
       case "fpd-ai":              return <AIAgent pageMode={true}/>;
       default:                    return <UserDashboard onNavigate={nav}/>;
@@ -770,6 +769,13 @@ function LovedOneMessageRoute() {
   return <div className="size-full overflow-y-auto"><LovedOneMessagePage token={token}/></div>;
 }
 
+/* White Glove authorization, signed from the emailed link (migration 051). */
+function WaiverRoute() {
+  const { token } = useParams();
+  if (!token) return <Navigate to="/" replace/>;
+  return <div className="size-full overflow-y-auto"><WaiverPublicPage token={token}/></div>;
+}
+
 function VaultResetRoute() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -868,6 +874,7 @@ function AppShell() {
       <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
       <Route path="/reset-password" element={<ResetPasswordRoute/>}/>
       <Route path="/message/:token" element={<LovedOneMessageRoute/>}/>
+      <Route path="/waiver/:token" element={<WaiverRoute/>}/>
       <Route path="/contact-accept/:token" element={<ContactAcceptRoute/>}/>
       <Route path="/access" element={<AccessRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>

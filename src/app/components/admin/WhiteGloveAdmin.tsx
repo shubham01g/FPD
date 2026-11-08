@@ -205,7 +205,7 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
           <div>
             <div className="flex items-center justify-between mb-3">
               <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
-              <button onClick={() => toast.info("Session scheduling isn't built yet.")}
+              <button onClick={() => toast.info("Sessions are booked by the assigned specialist in the Concierge Portal (/concierge), which emails the client a calendar invite.")}
                 className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
                 style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
                 <Plus size={10}/> Schedule Session

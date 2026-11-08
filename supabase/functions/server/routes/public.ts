@@ -12,6 +12,47 @@ import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/em
 const pub = new Hono();
 
 // GET /public/plans — live subscription plan pricing for the marketing/pricing pages.
+// ── White Glove authorization waiver (migration 051) ───────────────
+// The client signs through the link emailed from the Concierge Portal.
+async function waiverByToken(token: string) {
+  if (!/^[0-9a-f]{64}$/.test(token)) return null;
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  const hash = Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+  const { data } = await adminClient().from("wg_waivers")
+    .select("id, client_user_id, specialist_name, authorized_scope, status, signed_at, signed_name, token_expires_at, users:client_user_id(full_name)")
+    .eq("token_hash", hash).maybeSingle();
+  return data;
+}
+
+pub.get("/waiver/:token", async (c) => {
+  const w = await waiverByToken(c.req.param("token"));
+  if (!w) return c.json({ error: "This waiver link isn't valid." }, 404);
+  const expired = w.status === "expired" || (w.status === "pending" && (!w.token_expires_at || new Date(w.token_expires_at).getTime() < Date.now()));
+  return c.json({
+    status: expired ? "expired" : w.status, specialistName: w.specialist_name, scope: w.authorized_scope ?? [],
+    clientName: (w.users as { full_name?: string } | null)?.full_name ?? "", signedAt: w.signed_at, signedName: w.signed_name,
+  });
+});
+
+pub.post("/waiver/:token/sign", async (c) => {
+  const w = await waiverByToken(c.req.param("token"));
+  if (!w) return c.json({ error: "This waiver link isn't valid." }, 404);
+  if (w.status !== "pending") return c.json({ error: w.status === "signed" ? "This waiver is already signed." : "This waiver link is no longer active." }, 409);
+  if (!w.token_expires_at || new Date(w.token_expires_at).getTime() < Date.now()) return c.json({ error: "This waiver link has expired. Ask your specialist for a new one." }, 410);
+  const body = await c.req.json().catch(() => ({})) as { signedName?: string; agree?: boolean; signature?: string };
+  const name = String(body.signedName ?? "").trim();
+  if (!body.agree) return c.json({ error: "Please confirm that you agree." }, 400);
+  if (name.split(/\s+/).length < 2) return c.json({ error: "Type your full legal name to sign." }, 400);
+  const ip = (c.req.header("x-forwarded-for") ?? "").split(",")[0].trim() || null;
+  const { data, error } = await adminClient().from("wg_waivers").update({
+    status: "signed", signed_at: new Date().toISOString(), signed_name: name.slice(0, 200), signer_ip: ip,
+    signature_data: typeof body.signature === "string" && body.signature.startsWith("data:image/") ? body.signature.slice(0, 200_000) : name,
+    token_hash: null,
+  }).eq("id", w.id).eq("status", "pending").select("signed_at").maybeSingle();
+  if (error || !data) return c.json({ error: error?.message ?? "Could not record the signature" }, 400);
+  return c.json({ signed: true, signedAt: data.signed_at });
+});
+
 // GET /public/message/:token — a delivered Message to Loved Ones (050).
 pub.get("/message/:token", async (c) => {
   const m = await openDeliveredMessage(c.req.param("token"));

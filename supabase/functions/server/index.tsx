@@ -44,6 +44,7 @@ import contactAccess from "./routes/contactAccess.ts";
 import password from "./routes/password.ts";
 import secretVault from "./routes/secretVault.ts";
 import receiptsRoute from "./routes/receipts.ts";
+import conciergePortal from "./routes/conciergePortal.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -59,7 +60,7 @@ const api = new Hono();
 // links, admin invites, vault-reset and contact-invite tokens), and function
 // logs are readable by anyone with dashboard access, so those path segments
 // and every query string are blanked before the line is written.
-const SECRET_SEGMENTS = /(\/(?:legacy-claim|admin-invite|reset|invite|accept|message)\/)[^/?\s]+/g;
+const SECRET_SEGMENTS = /(\/(?:legacy-claim|admin-invite|reset|invite|accept|message|waiver)\/)[^/?\s]+/g;
 function redactLogLine(line: string): string {
   return line.replace(SECRET_SEGMENTS, "$1[redacted]").replace(/\?[^\s]*/g, "?[redacted]");
 }
@@ -202,6 +203,7 @@ api.route("/public", publicRoutes);
 
 // Scheduled jobs (pg_cron), authenticated by CRON_SECRET.
 api.route("/internal", internal);
+api.route("/concierge", conciergePortal);
 
 for (const name of FUNCTION_NAMES) app.route(`/${name}/make-server-b5ad85e0`, api);
 

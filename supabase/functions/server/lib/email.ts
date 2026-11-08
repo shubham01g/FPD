@@ -178,6 +178,24 @@ export function vaultResetEmail(o: { link: string; minutes: number }): Omit<Emai
   };
 }
 
+/** A plain notice with an optional button (Concierge Portal emails). */
+export function noticeEmail(o: {
+  name: string; heading: string; paragraphs: string[]; button?: { href: string; label: string } | null;
+  replyTo?: string; category: string; footnote?: string;
+}): Omit<EmailMessage, "to"> {
+  return {
+    subject: `${o.heading} — ${APP_NAME}`,
+    category: o.category,
+    replyTo: o.replyTo ?? MAILBOX.support,
+    text: [`Dear ${o.name || "there"},`, ...o.paragraphs, o.button ? `${o.button.label}: ${o.button.href}` : "", o.footnote ?? ""].filter(Boolean).join("\n\n"),
+    html: layout(esc(o.heading), `
+      <p style="margin:0 0 16px;line-height:1.6;">Dear ${esc(o.name || "there")},</p>
+      ${o.paragraphs.map((p) => `<p style="margin:0 0 16px;line-height:1.6;white-space:pre-wrap;">${esc(p)}</p>`).join("")}
+      ${o.button ? button(o.button.href, o.button.label) : ""}
+      ${o.footnote ? `<p style="margin:0;color:#6e7781;font-size:13px;">${esc(o.footnote)}</p>` : ""}`),
+  };
+}
+
 /** The outcome of a review (legacy claim or ID verification). */
 export function reviewDecisionEmail(o: {
   name: string; heading: string; lead: string; detail?: string | null; next: string; mailbox: string; category: string;
