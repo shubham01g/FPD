@@ -222,11 +222,12 @@ function PermissionRow({
 
 /* ── Admin account card ──────────────────────────────────────────── */
 function AdminCard({
-  admin, onUpdate, onRevoke, isSelf
+  admin, onUpdate, onRevoke, onResend, isSelf
 }: {
   admin: AdminAccount;
-  onUpdate: (id: string, changes: Partial<AdminAccount>) => void;
-  onRevoke: (id: string) => void;
+  onUpdate: (id: string, changes: Partial<AdminAccount>) => Promise<boolean>;
+  onRevoke: (id: string) => Promise<boolean>;
+  onResend: (id: string) => Promise<void>;
   isSelf: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -236,17 +237,21 @@ function AdminCard({
   const statusColor = { active:"#48BB78", invited:"#F6AD55", suspended:"#FC8181" }[admin.status];
   const isSuper = admin.role === "super_admin";
 
-  function savePerms() {
-    onUpdate(admin.id, { permissions: localPerms, role: "custom" });
-    setEditingPerms(false);
-    toast.success("Permissions saved");
+  // Success is shown only after the server accepts the change; a refusal
+  // (e.g. a non-super admin) already shows its own error.
+  async function savePerms() {
+    if (await onUpdate(admin.id, { permissions: localPerms, role: "custom" })) {
+      setEditingPerms(false);
+      toast.success("Permissions saved");
+    }
   }
 
-  function applyPreset(role: AdminRole) {
+  async function applyPreset(role: AdminRole) {
     const perms = ROLE_PRESETS[role].permissions;
-    setLocalPerms(perms);
-    onUpdate(admin.id, { role, permissions: perms });
-    toast.success(`Role set to ${ROLE_PRESETS[role].label}`);
+    if (await onUpdate(admin.id, { role, permissions: perms })) {
+      setLocalPerms(perms);
+      toast.success(`Role set to ${ROLE_PRESETS[role].label}`);
+    }
   }
 
   return (
@@ -278,21 +283,21 @@ function AdminCard({
           </div>
           <div className="flex items-center gap-2">
             {!isSelf && !isSuper && admin.status !== "suspended" && (
-              <button onClick={() => { onRevoke(admin.id); toast.success(`${admin.name} suspended`); }}
+              <button onClick={async () => { if (await onRevoke(admin.id)) toast.success(`${admin.name} suspended`); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.2)" }}>
                 <UserX size={11}/> Suspend
               </button>
             )}
             {admin.status === "suspended" && (
-              <button onClick={() => { onUpdate(admin.id, { status:"active" }); toast.success(`${admin.name} reactivated`); }}
+              <button onClick={async () => { if (await onUpdate(admin.id, { status:"active" })) toast.success(`${admin.name} reactivated`); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <Unlock size={11}/> Reactivate
               </button>
             )}
             {admin.status === "invited" && (
-              <button onClick={() => toast.success(`Invite resent to ${admin.email}`)}
+              <button onClick={() => void onResend(admin.id)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(246,173,85,0.08)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.2)" }}>
                 <Send size={11}/> Resend Invite
@@ -453,11 +458,23 @@ export function AdminRoles() {
     try {
       await adminApi.patch(`/admin-accounts/${id}`, patch);
       refetch();
+      return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update admin account");
+      return false;
     }
   }
-  async function revokeAdmin(id: string) { await updateAdmin(id, { status:"suspended" }); }
+  async function revokeAdmin(id: string) { return updateAdmin(id, { status:"suspended" }); }
+  async function resendInvite(id: string) {
+    try {
+      const res = await adminApi.post<{ account: DBAdminAccount; emailed?: boolean; emailError?: string }>(`/admin-accounts/${id}/resend-invite`);
+      if (res.emailed) toast.success(`New invite emailed to ${res.account.email}`);
+      else toast.warning(`${res.emailError ?? "The invite email was not sent"} — open the account to copy the new link`);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not resend the invite");
+    }
+  }
 
   async function sendInvite() {
     if (!newAdmin.name.trim() || !newAdmin.email.trim()) { toast.error("Name and email required"); return; }
@@ -604,7 +621,7 @@ export function AdminRoles() {
           <div className="text-center py-10" style={{ color:"#8A9AB8" }}>No admin accounts match your filter.</div>
         )}
         {filtered.map(admin => (
-          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} isSelf={admin.id === SELF_ID}/>
+          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} onResend={resendInvite} isSelf={admin.id === SELF_ID}/>
         ))}
       </div>
 

@@ -542,7 +542,7 @@ function ClaimModal({ claim, onClose, onApprove, onReject, onRequestDocs, onChan
                     "All submitted documents are permanently stored and archived in the secure vault",
                     `The account's $199 Legacy Continuation Fee becomes "Ready to Activate" in the Continuation Vault tab`,
                     `Activating the fee opens ${claim.deceasedName}'s Legacy Vault to verified legacy contacts for the activation window`,
-                    `${claim.claimantName} must be told of the outcome by the FPD team — email sending is not connected yet`,
+                    `${claim.claimantName} is emailed the outcome automatically`,
                     "A full audit record of this decision is saved in the claim timeline and the Audit Log",
                   ].map((step, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12,
@@ -707,6 +707,7 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
   const [customMsg,      setCustomMsg]      = useState(claim.linkMessage || "We are sorry for your loss. Please use the secure link below to submit the required documents so we can process your legacy access claim.");
   const [sending,        setSending]        = useState(false);
   const [sent,           setSent]           = useState(false);
+  const [emailed,        setEmailed]        = useState(false);
   const [token,          setToken]          = useState(claim.token);
 
   const link = claimLink(token);
@@ -721,6 +722,7 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
       const res = await adminApi.post<{ claim: { token: string }; emailed?: boolean; emailError?: string }>(`/legacy/claims/${claim.dbId}/link`, { email: recipientEmail, message: customMsg });
       setToken(res.claim.token);
       setSent(true);
+      setEmailed(Boolean(res.emailed));
       if (res.emailed) {
         toast.success(`New claim link emailed to ${recipientEmail}`);
       } else {
@@ -884,7 +886,9 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
                 New Claim Link Ready
               </div>
               <div style={{ fontSize: 13, color: "#A3ADC9", lineHeight: 1.7, marginBottom: 20 }}>
-                The message and new link are on your clipboard. Email sending is not connected yet, so paste it into an email to <strong style={{ color: "#E8EDF5" }}>{recipientEmail}</strong> yourself.
+                {emailed
+                  ? <>The new link was emailed to <strong style={{ color: "#E8EDF5" }}>{recipientEmail}</strong>. The old link no longer works.</>
+                  : <>The email couldn't be sent, so the message and new link are on your clipboard. Paste it into an email to <strong style={{ color: "#E8EDF5" }}>{recipientEmail}</strong>.</>}
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                 <button onClick={copyLink}

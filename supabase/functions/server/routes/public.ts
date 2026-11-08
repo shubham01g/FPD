@@ -12,6 +12,17 @@ import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/em
 const pub = new Hono();
 
 // GET /public/plans — live subscription plan pricing for the marketing/pricing pages.
+// GET /public/white-label — the branding every page renders with. Only
+// display fields (no ids of who edited it). WhiteLabelProvider used to read
+// /admin/white-label/configs on every page load, so every visitor got a 401.
+pub.get("/white-label", async (c) => {
+  const { data, error } = await adminClient().from("white_label_configs")
+    .select("id, company_name, tagline, primary_color, accent_color, logo_text, domain, support_email, sender_name, features, plan_names, footer_text, terms_url, privacy_url, is_active")
+    .order("created_at", { ascending: false }).limit(1);
+  if (error) return c.json({ configs: [] });
+  return c.json({ configs: data ?? [] });
+});
+
 // ── White Glove authorization waiver (migration 051) ───────────────
 // The client signs through the link emailed from the Concierge Portal.
 async function waiverByToken(token: string) {

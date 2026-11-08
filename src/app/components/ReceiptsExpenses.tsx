@@ -10,6 +10,7 @@ import { isStoredPath, persistMediaValue, signStoredFile, useStoredFileUrl } fro
 import { createZip, downloadBlob } from "../utils/zip";
 import { emailReceiptPackage } from "../services/receiptsApi";
 import { readReceipt, type ReceiptOcrResult } from "../services/receiptOcr";
+import { usePlatform } from "../services/platform";
 
 /* A saved receipt image (vault-documents path), shown through a signed link. */
 function ReceiptImage({ value, maxHeight }: { value: string; maxHeight: number }) {
@@ -489,8 +490,12 @@ function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave
   const [ocr, setOcr] = useState<ReceiptOcrResult | null>(null);
   const [ocrState, setOcrState] = useState<"reading" | "done" | "failed">("reading");
   const [ocrPct, setOcrPct] = useState(0);
+  const platform = usePlatform();
   useEffect(() => {
     let alive = true;
+    // Admin → Settings → "Receipt OCR" off: no automatic reading.
+    if (platform.ready && !platform.flags.receiptOCR) { setOcrState("failed"); return; }
+    if (!platform.ready) return;
     readReceipt(doc.file, (p) => { if (alive) setOcrPct(p); })
       .then((r) => {
         if (!alive) return;
@@ -503,7 +508,7 @@ function OCRReviewModal({ doc, onSave, onClose }: { doc: ScannedDocument; onSave
       .catch(() => { if (alive) setOcrState("failed"); });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doc.file]);
+  }, [doc.file, platform.ready, platform.flags.receiptOCR]);
 
   const confidence = [
     { label: "MERCHANT", pct: ocr?.merchant.value ? ocr.merchant.confidence : null },

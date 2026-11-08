@@ -140,7 +140,7 @@ export function EmailTemplates() {
             <span style={{ color: "#6E90C9", fontSize: 14, ...MONO, letterSpacing: "0.12em" }}>ADMIN · EMAIL TEMPLATES</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "#E8EDF5" }}>Email Template Manager</h1>
-          <p style={{ color: "#8A9AB8", fontSize: 16, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories — all editable and live-previewed</p>
+          <p style={{ color: "#8A9AB8", fontSize: 16, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories. Edits apply to the emails sent from now on: in the subject, {"{{subject}}"} is the standard subject; in the body, {"{{content}}"} is the standard message (keep it, or the standard body is used). Turn a template off to go back to the standard email.</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8A9AB8" }} />

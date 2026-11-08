@@ -610,6 +610,10 @@ app.post('/fpd-webhook', (req, res) => {
                 <input type="number" min={1} value={newKeyRateLimit} onChange={e => setNewKeyRateLimit(Number(e.target.value))}
                   className="w-full px-4 py-2.5 rounded-2xl" style={{ background: "#141B2E", border: "1px solid rgba(91,110,225,0.3)", color: "#FFFFFF", fontSize: 16, ...MONO, outline: "none" }} />
               </div>
+              <p style={{ color: "#F6AD55", fontSize: 14, lineHeight: 1.6 }}>
+                Keys are stored securely and can be revoked, but the public Enterprise API that accepts them isn't live yet,
+                so a key doesn't unlock anything today. Issue keys only to partners who are preparing an integration.
+              </p>
               <div className="flex gap-3">
                 <button onClick={issueKey} disabled={issuing} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold disabled:opacity-50"
                   style={{ background: "linear-gradient(135deg,#5B6EE1,#5B6EE1)", color: "#F0F4FA" }}>

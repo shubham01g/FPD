@@ -14,6 +14,8 @@ export interface PlatformFlags {
   cryptoPayments: boolean;
   receiptOCR: boolean;
   disasterProtection: boolean;
+  /** Contacts can submit a photo ID for review (ContactsHub). */
+  idVerification: boolean;
 }
 
 export interface PlatformState {
@@ -32,7 +34,7 @@ export interface PlatformState {
    the app into maintenance. */
 const DEFAULT_FLAGS: PlatformFlags = {
   publicSignup: true, aiAssistant: true, whiteGloveConcierge: true, affiliateProgram: true,
-  partnerPortal: true, cryptoPayments: true, receiptOCR: true, disasterProtection: true,
+  partnerPortal: true, cryptoPayments: true, receiptOCR: true, disasterProtection: true, idVerification: true,
 };
 
 /* Which portal pages each flag switches off. */
@@ -40,7 +42,8 @@ const FLAG_PAGES: Partial<Record<keyof PlatformFlags, string[]>> = {
   aiAssistant: ["fpd-ai"],
   whiteGloveConcierge: ["white-glove", "waiver-sign"],
   affiliateProgram: ["affiliate"],
-  receiptOCR: ["receipts-expenses"],
+  // receiptOCR switches off only the automatic reading of scans
+  // (ReceiptsExpenses), not the whole Receipts page.
   disasterProtection: ["disaster-recovery"],
 };
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { adminApi } from "../services/adminApi";
+import { publicApi } from "../services/publicApi";
 import { FPD_EMAIL } from "../utils/fpdEmails";
 
 export interface WhiteLabelConfig {
@@ -135,7 +136,7 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     let cancelled = false;
-    adminApi.get<{ configs: DBWhiteLabelConfig[] }>("/white-label/configs")
+    publicApi.get<{ configs: DBWhiteLabelConfig[] }>("/white-label")
       .then((res) => {
         if (cancelled) return;
         const row = res.configs?.[0];

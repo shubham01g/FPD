@@ -347,11 +347,15 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   }
 
   function saveCard() {
-    toast.error("Card management isn't wired up — payment methods would need a real Stripe integration (none exists in this backend yet) to edit safely.");
+    // Card numbers never pass through Final Pass Down: the customer changes
+    // their card in Stripe's billing portal (Usage & Billing → Manage billing).
+    toast.info("Cards are changed by the customer in Usage & Billing → Manage billing (Stripe). Admins can't see or edit card numbers.");
   }
 
   function applyWaive() {
-    toast.error("Subscription waivers aren't backed by a database column yet — this needs a schema decision (e.g. a waived_until column) before it can be wired up.");
+    // Free access is given with a comped subscription, which billing honours
+    // everywhere (no invoices, plan stays active).
+    toast.info("To waive charges, open the Billing tab and use \"Comp a plan\".");
   }
 
   async function toggleSuspend() {

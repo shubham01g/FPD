@@ -12,6 +12,7 @@ import {
 } from "../../services/wlPackages";
 import type { WLPackage, WLSale, PaymentProcessor, BillingModel } from "../../services/wlPackages";
 import { FPD_EMAIL } from "../../utils/fpdEmails";
+import { adminApi } from "../../services/adminApi";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -411,7 +412,9 @@ export function PartnerOnboardingAdmin() {
   useEffect(() => { reload(); }, []);
 
   function doCopy(tierId: string) {
-    const link = `https://finalpassdown.com/partner/onboard?tier=${tierId}&token=${Date.now().toString(36).toUpperCase()}`;
+    // This site's own address (finalpassdown.com isn't serving the app yet),
+    // and no made-up "token": the onboarding page needs only the tier.
+    const link = `${window.location.origin}/partner/onboard?tier=${encodeURIComponent(tierId)}`;
     copyToClipboard(link);
     setCopiedId(tierId);
     toast.success("Onboarding link copied");
@@ -755,13 +758,16 @@ export function PartnerOnboardingAdmin() {
                   placeholder="contact@organization.com" style={INPUT}/>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => {
-                  if (!sendEmail) { toast.error("Email required"); return; }
-                  // No email provider is integrated, so nothing can actually be
-                  // sent — hand the admin the link to send themselves.
-                  doCopy(sendPkgId);
-                  toast.info(`Email isn't set up yet — the onboarding link is copied so you can send it to ${sendEmail} yourself.`);
-                  setSendEmail(""); setShowSend(false);
+                <button onClick={async () => {
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sendEmail.trim())) { toast.error("Enter a valid email"); return; }
+                  try {
+                    await adminApi.post("/white-label/invite", { email: sendEmail.trim(), tierId: sendPkgId });
+                    toast.success(`Onboarding invite emailed to ${sendEmail.trim()}`);
+                    setSendEmail(""); setShowSend(false);
+                  } catch (err) {
+                    doCopy(sendPkgId);
+                    toast.error(`${err instanceof Error ? err.message : "The email could not be sent"} — the link was copied instead`);
+                  }
                 }} className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm"
                   style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA" }}>
                   <Send size={14}/> Send Invite

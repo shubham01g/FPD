@@ -51,9 +51,40 @@ export interface EmailMessage {
   attachments?: { filename: string; content: string; type: string }[];
 }
 
+/* Admin → Email Templates (migration 052). Cached for a minute per
+   category so a burst of sends doesn't query the table each time. */
+type TemplateRow = { subject: string; html: string; is_active: boolean } | null;
+const templateCache = new Map<string, { at: number; row: TemplateRow }>();
+
+async function templateFor(category: string): Promise<TemplateRow> {
+  const hit = templateCache.get(category);
+  if (hit && Date.now() - hit.at < 60_000) return hit.row;
+  let row: TemplateRow = null;
+  try {
+    const { adminClient } = await import("./supabaseAdmin.ts");
+    const { data } = await adminClient().from("email_templates")
+      .select("subject, html, is_active").eq("trigger_event", category).eq("is_active", true).limit(1).maybeSingle();
+    row = data ?? null;
+  } catch { row = null; }
+  templateCache.set(category, { at: Date.now(), row });
+  return row;
+}
+
+/** Applies an admin-edited template, keeping the built-in email as the body. */
+async function applyTemplate(msg: EmailMessage): Promise<EmailMessage> {
+  if (!msg.category) return msg;
+  const t = await templateFor(msg.category);
+  if (!t) return msg;
+  const fill = (s: string) => s.replaceAll("{{subject}}", msg.subject).replaceAll("{{app_name}}", APP_NAME);
+  const subject = t.subject?.trim() ? fill(t.subject).slice(0, 250) : msg.subject;
+  const html = t.html?.includes("{{content}}") ? fill(t.html).replace("{{content}}", msg.html) : msg.html;
+  return { ...msg, subject, html };
+}
+
 /** Sends one email. Throws on any non-2xx (SendGrid answers 202 on success). */
-export async function sendEmail(msg: EmailMessage): Promise<void> {
+export async function sendEmail(original: EmailMessage): Promise<void> {
   if (!EMAIL_CONFIGURED) throw new Error(EMAIL_NOT_CONFIGURED_MESSAGE);
+  const msg = await applyTemplate(original);
 
   const res = await fetch(SENDGRID_SEND_URL, {
     method: "POST",

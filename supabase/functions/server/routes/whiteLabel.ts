@@ -4,8 +4,38 @@
 // instead of living only in React state.
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
+import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, linkOrigin, noticeEmail, sendEmail } from "../lib/email.ts";
 
 const whiteLabel = new Hono();
+
+// POST /admin/white-label/invite { email, tierId } — emails the White Label
+// onboarding link for a package (the admin "Send Invite" button used to
+// only copy the link).
+whiteLabel.post("/invite", async (c) => {
+  if (!EMAIL_CONFIGURED) return c.json({ error: EMAIL_NOT_CONFIGURED_MESSAGE }, 503);
+  const body = await c.req.json().catch(() => ({})) as { email?: string; tierId?: string };
+  const to = String(body.email ?? "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return c.json({ error: "Enter a valid email" }, 400);
+  const tierId = String(body.tierId ?? "");
+  const { data: pkg } = await adminClient().from("wl_packages").select("id, name").eq("id", tierId).maybeSingle();
+  if (!pkg) return c.json({ error: "Package not found" }, 404);
+  const link = `${linkOrigin(c.req.header("origin"))}/partner/onboard?tier=${encodeURIComponent(pkg.id)}`;
+  try {
+    await sendEmail({
+      to,
+      ...noticeEmail({
+        name: "", heading: `Your ${pkg.name} White Label setup`, category: "wl_invite", replyTo: MAILBOX.admin,
+        paragraphs: [`You've been invited to set up a ${pkg.name} White Label partnership with Final Pass Down.`,
+          "Open the link below to choose your branding and complete setup."],
+        button: { href: link, label: "Start setup" },
+      }),
+    });
+  } catch (err) {
+    console.error("WL invite email failed:", err);
+    return c.json({ error: "The email could not be sent" }, 502);
+  }
+  return c.json({ sent: true, link });
+});
 
 // POST /admin/white-label/configs — create a config row (used the first time
 // there's nothing to edit yet; white_label_configs has no default seed row).

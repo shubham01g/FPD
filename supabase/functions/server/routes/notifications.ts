@@ -2,7 +2,7 @@ import { Hono } from "npm:hono";
 import webpush from "npm:web-push@3.6.7";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
-import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, sendEmail, testEmail } from "../lib/email.ts";
+import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, noticeEmail, sendEmail, testEmail } from "../lib/email.ts";
 
 const notifications = new Hono();
 
@@ -67,6 +67,9 @@ notifications.post("/", async (c) => {
   const admin = c.get("admin") as AdminUser;
   const body = await c.req.json().catch(() => ({}));
   const { title, body: message, type, target, scheduled, scheduledFor } = body;
+  // "push" (in-app + device), "email", or "both".
+  const channel: "push" | "email" | "both" = ["email", "both"].includes(body.channel) ? body.channel : "push";
+  if (channel !== "push" && !EMAIL_CONFIGURED) return c.json({ error: EMAIL_NOT_CONFIGURED_MESSAGE }, 503);
 
   if (!title?.trim()) return c.json({ error: "Notification title is required" }, 400);
   if (!message?.trim()) return c.json({ error: "Message body is required" }, 400);
@@ -147,7 +150,34 @@ notifications.post("/", async (c) => {
     }
   }
 
-  return c.json({ notification: campaign, pushConfigured: PUSH_CONFIGURED, pushSent }, 201);
+  // Email, for "email"/"both": skips anyone who turned email notifications
+  // off in Account Settings (notification_preferences, migration 050).
+  let emailSent = 0, emailSkipped = 0;
+  if (channel !== "push" && userIds.length > 0) {
+    const [{ data: people }, { data: prefs }] = await Promise.all([
+      db.from("users").select("id, email, full_name").in("id", userIds),
+      db.from("notification_preferences").select("user_id, email").in("user_id", userIds),
+    ]);
+    const optedOut = new Set((prefs ?? []).filter((p: { email: boolean }) => p.email === false).map((p: { user_id: string }) => p.user_id));
+    for (const p of (people ?? []).slice(0, 2000) as { id: string; email: string | null; full_name: string | null }[]) {
+      if (!p.email || optedOut.has(p.id)) { emailSkipped++; continue; }
+      try {
+        await sendEmail({
+          to: p.email,
+          ...noticeEmail({
+            name: p.full_name ?? "", heading: String(title).slice(0, 120), category: "announcement",
+            paragraphs: [String(message).slice(0, 5000)],
+            footnote: "You can turn these emails off in Account Settings → Notifications.",
+          }),
+        });
+        emailSent++;
+      } catch (err) {
+        console.error("announcement email failed:", err);
+      }
+    }
+  }
+
+  return c.json({ notification: campaign, pushConfigured: PUSH_CONFIGURED, pushSent, channel, emailSent, emailSkipped }, 201);
 });
 
 export default notifications;

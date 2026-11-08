@@ -15,6 +15,7 @@ import heroLegacyPhoto from "../../imports/legacycontacts_hero_photo.webp";
 import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.webp";
 import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { usePlatform } from "../services/platform";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -864,7 +865,13 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
 
+  const platform = usePlatform();
   async function handleScanId(id: string, name: string, doc: ScannedDocument) {
+    // Admin → Settings → "ID Verification" switch.
+    if (platform.ready && !platform.flags.idVerification) {
+      toast.error("ID verification is switched off right now. Please try again later or contact support.");
+      return;
+    }
     setSubmittingId(id);
     await submitIdVerification(id, doc.file, "Government-Issued Photo ID");
     setSubmittingId(null);

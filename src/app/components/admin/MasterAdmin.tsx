@@ -617,18 +617,21 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
     if (!body.trim()) { toast.error("Message body is required"); return; }
     setSending(true);
     try {
-      const res = await adminApi.post<{ pushConfigured: boolean; pushSent: number }>("/notifications", {
-        title, body, type, target,
+      const res = await adminApi.post<{ pushConfigured: boolean; pushSent: number; emailSent?: number; emailSkipped?: number }>("/notifications", {
+        title, body, type, target, channel,
         scheduled: scheduleMode, scheduledFor: scheduleMode ? scheduleDate : undefined,
       });
       // In-app always lands. Real device push only reaches users who've
       // enabled it on a device (AccountSettings > Notifications) — report
       // the true count rather than implying every recipient got a push.
-      const pushNote = !res.pushConfigured
+      const emailNote = channel !== "push"
+        ? ` — emailed ${res.emailSent ?? 0}${res.emailSkipped ? ` (${res.emailSkipped} opted out or had no address)` : ""}`
+        : "";
+      const pushNote = channel === "email" ? emailNote : (!res.pushConfigured
         ? " (in-app only — device push isn't configured on the server yet)"
         : res.pushSent > 0
           ? ` — ${res.pushSent} device${res.pushSent === 1 ? "" : "s"} got a real push`
-          : " (no recipients have push notifications enabled yet)";
+          : " (no recipients have push notifications enabled yet)") + emailNote;
       toast.success(`🔔 Notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!${pushNote}`);
       setTitle(""); setBody(""); setType("marketing"); setTarget("all"); setScheduleMode(false); setScheduleDate("");
       setView("history");
@@ -713,16 +716,15 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
               </div>
             </div>
 
-            {/* Delivery channel — Email/Both are disabled: no email provider is
-                wired up anywhere in the app, so offering them as clickable
-                options would promise delivery that can't happen. */}
+            {/* Delivery channel. Email goes through SendGrid and skips anyone who
+                turned email notifications off (notification_preferences). */}
             <div>
               <label style={{ color:"#8A9AB8", fontSize:14, ...MONO_S, display:"block", marginBottom:7 }}>DELIVERY CHANNEL</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {([
                   { id:"push",  label:"Push", icon:"🔔", desc:"In-app + real device push", disabled:false },
-                  { id:"email", label:"Email", icon:"✉️", desc:"Coming soon — no provider connected", disabled:true },
-                  { id:"both",  label:"Push & Email", icon:"📡", desc:"Coming soon — no provider connected", disabled:true },
+                  { id:"email", label:"Email", icon:"✉️", desc:"Email only (respects each user's preference)", disabled:false },
+                  { id:"both",  label:"Push & Email", icon:"📡", desc:"In-app, device push and email", disabled:false },
                 ] as const).map(ch => (
                   <button key={ch.id} onClick={() => !ch.disabled && setChannel(ch.id)} disabled={ch.disabled}
                     className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl text-center transition-all relative"
