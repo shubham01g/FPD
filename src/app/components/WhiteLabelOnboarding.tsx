@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
+import { billing } from "../services/billing";
 import { CryptoPayment } from "./CryptoPayment";
 import { useWLPackages } from "../context/WLPackagesContext";
 import { createSale } from "../services/wlPackages";
@@ -62,7 +64,9 @@ export function WhiteLabelOnboarding() {
   const navigate = useNavigate();
   const preselectTier = searchParams.get("tier");
 
-  const [step, setStep] = useState<WizardStep>("package");
+  const { session } = useAuth();
+  const returning = searchParams.get("payment");
+  const [step, setStep] = useState<WizardStep>(returning === "success" ? "complete" : "package");
   const [selectedId, setSelectedId] = useState<string | null>(preselectTier);
   const [org, setOrg] = useState({ name:"", type:"law_firm", email:"", phone:"", contact:"", website:"", subdomain:"", why:"" });
   const [subdomainTouched, setSubdomainTouched] = useState(false);
@@ -77,6 +81,23 @@ export function WhiteLabelOnboarding() {
     setOrg(o => ({ ...o, name, subdomain: subdomainTouched ? o.subdomain : slugify(name) }));
   }
 
+  /* Card payment: Stripe Checkout (product wl_setup, migration 053); the
+     webhook records the paid sale. No card details are typed here. */
+  async function payByCard() {
+    if (!selected) return;
+    if (!session) { navigate(`/login?next=${encodeURIComponent(`/partner/onboard?tier=${selected.id}`)}`); return; }
+    setPaying(true);
+    try {
+      const { url } = await billing.whiteLabelCheckout(selected.id, { name: org.name, contact: org.contact, email: org.email }, org.subdomain);
+      window.location.href = url;
+    } catch (err) {
+      setPaying(false);
+      toast.error(err instanceof Error ? err.message : "Could not open checkout");
+    }
+  }
+
+  /* Crypto stays as it is for now (user decision); it records the
+     application, and the team confirms payment by hand. */
   async function submitApplication(processor: string) {
     if (!selected) return;
     setPaying(true);
@@ -104,14 +125,16 @@ export function WhiteLabelOnboarding() {
           </div>
           <h2 style={{ ...DISPLAY, fontSize:40.5, color:"#E8EDF5", marginBottom:8 }}>Application Received!</h2>
           <p style={{ color:"#8A9AB8", fontSize:19, lineHeight:1.9, marginBottom:8 }}>
-            Your ${selected?.billing.setupFee.toLocaleString()} setup fee has been processed. A member of our white label team will reach out within <strong>1 business day</strong> to begin provisioning "{org.name}" on your custom subdomain.
+            {returning === "success"
+              ? <>Thank you — your payment went through on Stripe and Stripe has emailed your receipt. A member of our white label team will reach out within <strong>1 business day</strong> to begin provisioning your instance.</>
+              : <>We've received your application. A member of our white label team will reach out within <strong>1 business day</strong> to confirm payment and begin provisioning "{org.name}".</>}
           </p>
           <p style={{ color:"#8A9AB8", fontSize:17.5, lineHeight:1.8, marginBottom:32 }}>
             There's nothing you need to log in to yet — we'll set up your branding, domain, and admin access, then send you an invite once your instance is live.
           </p>
           <div className="p-5 rounded-2xl mb-6" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:6 }}>APPLICATION REFERENCE</div>
-            <div style={{ ...MONO, fontSize:25, color:"#6E90C9", fontWeight:700, marginBottom:4 }}>{applicationId}</div>
+            <div style={{ ...MONO, fontSize:25, color:"#6E90C9", fontWeight:700, marginBottom:4 }}>{applicationId ?? "Sent to your email by Stripe"}</div>
             <div style={{ color:"#4A5A7A", fontSize:14 }}>Save this reference for any follow-up with our team at {FPD_EMAIL.sales}</div>
           </div>
           <button onClick={() => navigate("/")} className="w-full py-4 rounded-2xl font-bold text-base"
@@ -291,38 +314,11 @@ export function WhiteLabelOnboarding() {
                 </div>
               </div>
 
-              <div className="rounded-2xl p-6 space-y-4" style={GLASS}>
-                <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>PAYMENT DETAILS — STRIPE SECURE CHECKOUT</div>
-                <div>
-                  <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CARDHOLDER NAME</label>
-                  <input defaultValue={org.contact} placeholder="Name on card"
-                    className="w-full px-4 py-3 rounded-2xl"
-                    style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none" }}/>
-                </div>
-                <div>
-                  <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CARD NUMBER</label>
-                  <input placeholder="4242 4242 4242 4242" maxLength={19}
-                    className="w-full px-4 py-3 rounded-2xl"
-                    style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>EXPIRY</label>
-                    <input placeholder="MM / YY" maxLength={7}
-                      className="w-full px-4 py-3 rounded-2xl"
-                      style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                  </div>
-                  <div>
-                    <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CVC</label>
-                    <input placeholder="•••" maxLength={4}
-                      className="w-full px-4 py-3 rounded-2xl"
-                      style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                  <Shield size={12} color="#FFFFFF"/>
-                  <span style={{ color:"#D99A6B", fontSize:14 }}>256-bit SSL encryption · Processed by Stripe · No card data stored</span>
-                </div>
+              <div className="rounded-2xl p-6 space-y-3" style={GLASS}>
+                <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>PAYMENT — STRIPE SECURE CHECKOUT</div>
+                <p style={{ color:"#C7D0E3", fontSize:16, lineHeight:1.7 }}>You'll pay on Stripe's secure page; Final Pass Down never sees your card number.</p>
+                {!session && <p style={{ color:"#F6AD55", fontSize:15 }}>Sign in or create a free Final Pass Down account first, so we can link the purchase to you.</p>}
+                {returning === "cancelled" && <p style={{ color:"#F6AD55", fontSize:15 }}>Checkout was cancelled — nothing was charged.</p>}
               </div>
             </div>
 
@@ -331,9 +327,9 @@ export function WhiteLabelOnboarding() {
                 style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                 <ArrowLeft size={15}/> Back
               </button>
-              <button onClick={() => submitApplication("card")} disabled={paying} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
+              <button onClick={() => void payByCard()} disabled={paying} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
                 style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 28px rgba(91,110,225,0.4)", opacity:paying?0.7:1 }}>
-                {paying ? "Processing…" : <><CheckCircle size={16}/> Pay ${selected.billing.setupFee.toLocaleString()} (Card)</>}
+                {paying ? "Opening checkout…" : session ? <><CheckCircle size={16}/> Pay ${selected.billing.setupFee.toLocaleString()} by Card</> : <>Sign in to continue</>}
               </button>
               <button onClick={() => setShowCrypto(true)} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
                 style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)" }}>

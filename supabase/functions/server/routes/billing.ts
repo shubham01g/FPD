@@ -257,10 +257,72 @@ billing.post("/checkout/addon", async (c) => {
   }
 });
 
-// POST /account/billing/checkout/one-time { product: "continuation_fee" | "wg_setup", consent?, page? }
+/* Partner Program ($599, catalog product partner_setup) and White Label
+   setup (per package, wl_packages.setup_fee) — migration 053. The buyer is
+   signed in; the organisation details ride along as Checkout metadata and
+   the webhook creates the partner / the White Label sale once Stripe
+   confirms payment. Before, both pages took card numbers and charged nothing. */
+const meta = (v: unknown, max = 200) => String(v ?? "").trim().slice(0, max);
+
+async function orgCheckout(c: Context<Env>, product: "partner_setup" | "wl_setup", body: Record<string, unknown>) {
+  const user = c.get("user");
+  const origin = returnOrigin(c);
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+  const org = (body.org ?? {}) as Record<string, unknown>;
+  const orgName = meta(org.name);
+  if (orgName.length < 2) return c.json({ error: "Enter your organisation's name" }, 400);
+  const account = await loadAccount(user.id);
+  if (!account) return c.json({ error: "Account not found" }, 404);
+  const db = adminClient();
+
+  try {
+    const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
+    const common = {
+      userId: user.id, purchaseType: product, orgName, orgType: meta(org.type, 40), contactName: meta(org.contact) || (account.full_name ?? ""),
+      contactEmail: meta(org.email) || account.email, contactPhone: meta(org.phone, 40), website: meta(org.website),
+    };
+    let lineItem: Record<string, unknown>;
+    let metadata: Record<string, string>;
+    let back: string;
+    if (product === "partner_setup") {
+      const { data: existing } = await db.from("partners").select("id").eq("user_id", user.id).neq("status", "suspended").limit(1);
+      if (existing?.length) return c.json({ error: "This account is already a partner." }, 409);
+      const { product: row, priceId } = await productPrice("partner_setup");
+      lineItem = { price: priceId, quantity: 1 };
+      metadata = { ...common, productSlug: row.slug };
+      back = "/partner";
+    } else {
+      const packageId = meta(body.packageId, 60);
+      const { data: pkg } = await db.from("wl_packages").select("id, name, setup_fee, active").eq("id", packageId).maybeSingle();
+      if (!pkg || pkg.active === false) return c.json({ error: "That White Label package isn't available" }, 404);
+      const cents = Math.round(Number(pkg.setup_fee ?? 0) * 100);
+      if (cents < 50) return c.json({ error: "This package has no setup fee to pay" }, 400);
+      lineItem = { quantity: 1, price_data: { currency: "usd", unit_amount: cents, product_data: { name: `White Label setup — ${pkg.name}` } } };
+      metadata = { ...common, productSlug: "wl_setup", packageId: pkg.id, subdomain: meta(body.subdomain, 60).toLowerCase().replace(/[^a-z0-9-]/g, "") };
+      back = `/partner/onboard?tier=${encodeURIComponent(pkg.id)}`;
+    }
+    const sep = back.includes("?") ? "&" : "?";
+    const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
+      ...sessionBase(origin, "dashboard", customer, user.id),
+      success_url: `${origin}${back}${sep}payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}${back}${sep}payment=cancelled`,
+      mode: "payment",
+      line_items: [lineItem],
+      metadata,
+      payment_intent_data: { metadata },
+      invoice_creation: { enabled: true, invoice_data: { metadata } },
+    });
+    return c.json({ url: session.url });
+  } catch (err) {
+    return errorResponse(c, err);
+  }
+}
+
+// POST /account/billing/checkout/one-time { product: "continuation_fee" | "wg_setup" | "partner_setup" | "wl_setup", consent?, page? }
 async function oneTimeCheckout(c: Context<Env>, product: string, body: Record<string, unknown>) {
   const blocked = purchaseBlocked(c);
   if (blocked) return blocked;
+  if (product === "partner_setup" || product === "wl_setup") return orgCheckout(c, product, body);
   const user = c.get("user");
   if (product !== "continuation_fee" && product !== "wg_setup") return c.json({ error: "Unknown product" }, 400);
   const origin = returnOrigin(c);
@@ -293,7 +355,9 @@ async function oneTimeCheckout(c: Context<Env>, product: string, body: Record<st
     }
 
     const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
-    const metadata = { userId: user.id, productSlug: row.slug, purchaseType: product };
+    // Who the owner says is paying the $199 fee (recorded on the fee row).
+    const paidByType = product === "continuation_fee" && body.payerType === "legacy_contact" ? "legacy_contact" : "account_owner";
+    const metadata = { userId: user.id, productSlug: row.slug, purchaseType: product, paidByType };
     const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
       ...sessionBase(origin, page, customer, user.id),
       mode: "payment",

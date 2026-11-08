@@ -387,7 +387,7 @@ function UserLoginRoute() {
  *  link, a contact invite (migration 046) and the Access Portal. */
 function safeNext(search: string): string | null {
   const next = new URLSearchParams(search).get("next");
-  return next && /^(\/vault-reset\/[0-9a-f]{64}|\/contact-accept\/[0-9a-f]{64}|\/access)$/.test(next) ? next : null;
+  return next && /^(\/vault-reset\/[0-9a-f]{64}|\/contact-accept\/[0-9a-f]{64}|\/access|\/partner|\/partner\/onboard(\?tier=[\w-]{1,60})?)$/.test(next) ? next : null;
 }
 
 function UserSignupRoute() {

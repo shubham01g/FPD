@@ -261,7 +261,7 @@ export function LegacyContinuationFee() {
         toast.error(`Card payments are not connected yet. Please contact ${FPD_EMAIL.support}.`, { id: tid });
         return;
       }
-      const { url } = await billing.continuationFeeCheckout();
+      const { url } = await billing.continuationFeeCheckout(payerType === "legacy_contact" ? "legacy_contact" : "account_owner");
       window.location.assign(url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });

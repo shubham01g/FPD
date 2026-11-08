@@ -167,7 +167,8 @@ async function onCheckoutCompleted(sessionId: string) {
     if (!existing?.length) {
       const { data: months } = await db.from("admin_settings").select("value").eq("key", "continuation_fee_period_months").maybeSingle();
       const { error } = await db.from("legacy_continuation_fees").insert({
-        user_id: userId, paid_by_user_id: userId, paid_by_type: "account_owner",
+        user_id: userId, paid_by_user_id: userId,
+        paid_by_type: session.metadata?.paidByType === "legacy_contact" ? "legacy_contact" : "account_owner",
         amount_usd: (session.amount_total ?? 0) / 100, stripe_payment_intent_id: pi,
         stripe_charge_id: idOf(session.payment_intent?.latest_charge),
         stripe_checkout_session_id: session.id, status: "paid", paid_at: nowIso(),
@@ -194,7 +195,57 @@ async function onCheckoutCompleted(sessionId: string) {
     if (!client?.length) await db.from("wg_clients").insert({ user_id: userId, status: "intake", reason: "White Glove setup paid" });
   }
 
+  if (purchase === "partner_setup" || purchase === "wl_setup") await onOrgSetupPaid(session, userId, purchase);
+
   await db.from("billing_consents").update({ completed_at: nowIso() }).eq("checkout_session_id", session.id).is("completed_at", null);
+}
+
+/* Partner Program / White Label setup paid (migration 053). Idempotent on
+   the Checkout session id. The team is told; the buyer gets Stripe's receipt. */
+async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_setup" | "wl_setup") {
+  const db = adminClient();
+  const m = (session.metadata ?? {}) as Record<string, string>;
+  const paid = (session.amount_total ?? 0) / 100;
+  if (purchase === "partner_setup") {
+    const { data: existing } = await db.from("partners").select("id").eq("stripe_checkout_session_id", session.id).maybeSingle();
+    if (existing) return;
+    let code = "";
+    for (let i = 0; i < 5 && !code; i++) {
+      const candidate = `P${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[b % 31]).join("")}`;
+      const { data: clash } = await db.from("partners").select("id").eq("partner_code", candidate).maybeSingle();
+      if (!clash) code = candidate;
+    }
+    const { error } = await db.from("partners").insert({
+      user_id: userId, organization_name: m.orgName || "Partner", organization_type: m.orgType || "other",
+      contact_name: m.contactName || "", contact_email: m.contactEmail || "", contact_phone: m.contactPhone || null,
+      partner_code: code, tier: 1, commission_rate: 0.20, status: "active", stripe_checkout_session_id: session.id,
+    });
+    if (error && error.code !== "23505") throw new Error(`partner insert failed: ${error.message}`);
+    await notifyTeam(`New partner: ${m.orgName}`, [`${m.orgName} (${m.orgType || "organisation"}) paid the $${paid.toFixed(2)} Partner Program setup fee.`,
+      `Contact: ${m.contactName} <${m.contactEmail}>${m.contactPhone ? `, ${m.contactPhone}` : ""}. Partner code ${code}.`], "partnerships@finalpassdown.com");
+  } else {
+    const { data: existing } = await db.from("wl_sales").select("id").eq("stripe_checkout_session_id", session.id).maybeSingle();
+    if (existing) return;
+    const id = `WL-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    const { error } = await db.from("wl_sales").insert({
+      id, org: m.orgName || "White Label partner", contact: m.contactName || "", email: m.contactEmail || "",
+      package_id: m.packageId, status: "pending", total_paid: paid, subdomain: m.subdomain || null, processor: "stripe",
+      user_id: userId, stripe_checkout_session_id: session.id,
+    });
+    if (error && error.code !== "23505") throw new Error(`wl_sales insert failed: ${error.message}`);
+    await notifyTeam(`White Label setup paid: ${m.orgName}`, [`${m.orgName} paid $${paid.toFixed(2)} for White Label package ${m.packageId}.`,
+      `Contact: ${m.contactName} <${m.contactEmail}>. Requested subdomain: ${m.subdomain || "none"}. Sale ${id} is pending provisioning in Admin → White Label.`], "sales@finalpassdown.com");
+  }
+}
+
+async function notifyTeam(heading: string, paragraphs: string[], to: string) {
+  try {
+    const { EMAIL_CONFIGURED, noticeEmail, sendEmail } = await import("../lib/email.ts");
+    if (!EMAIL_CONFIGURED) return;
+    await sendEmail({ to, ...noticeEmail({ name: "team", heading, paragraphs, category: "billing_admin_alert" }) });
+  } catch (err) {
+    console.error("team notice failed:", err);
+  }
 }
 
 // ── Subscriptions ───────────────────────────────────────────────────────

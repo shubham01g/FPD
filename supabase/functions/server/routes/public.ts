@@ -196,30 +196,34 @@ pub.get("/wl-packages", async (c) => {
 // POST /public/wl-sales — a prospective partner submits the onboarding
 // wizard. No admin session exists at this point, so this writes through the
 // service-role client directly rather than requireAdmin's /admin/* routes.
+// POST /public/wl-sales — a White Label enquiry from someone who isn't
+// signed in. It is only a request: nothing is paid here (paid setups come
+// from Stripe Checkout, routes/billing.ts wl_setup, migration 053). It used
+// to record total_paid = the setup fee without any payment, and numbered
+// rows count+1, which collided under concurrent submissions.
 pub.post("/wl-sales", async (c) => {
   const body = await c.req.json().catch(() => ({}));
-  const { org, contact, email, packageId, subdomain, processor } = body;
-
+  const { org, contact, email, packageId, subdomain } = body;
   if (!org?.trim() || !contact?.trim() || !email?.trim() || !packageId) {
     return c.json({ error: "'org', 'contact', 'email' and 'packageId' are required" }, 400);
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) return c.json({ error: "Enter a valid email" }, 400);
 
   const db = adminClient();
-  const { data: pkg } = await db.from("wl_packages").select("setup_fee").eq("id", packageId).maybeSingle();
+  const { data: pkg } = await db.from("wl_packages").select("id").eq("id", packageId).maybeSingle();
   if (!pkg) return c.json({ error: "Unknown package" }, 400);
 
-  const { count } = await db.from("wl_sales").select("id", { count: "exact", head: true });
-  const id = `WL-${String((count ?? 0) + 1).padStart(3, "0")}`;
+  // At most 3 enquiries per address per day.
+  const { count } = await db.from("wl_sales").select("id", { count: "exact", head: true })
+    .eq("email", String(email).trim().toLowerCase()).gte("created_at", new Date(Date.now() - 86_400_000).toISOString());
+  if ((count ?? 0) >= 3) return c.json({ error: "We already have your request. Our team will be in touch." }, 429);
 
-  const { data, error } = await db
-    .from("wl_sales")
-    .insert({
-      id, org, contact, email, package_id: packageId, subdomain: subdomain || null, processor: processor || null,
-      total_paid: Number(pkg.setup_fee) || 0,
-    })
-    .select()
-    .single();
-
+  const { data, error } = await db.from("wl_sales").insert({
+    id: `WL-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+    org: String(org).trim().slice(0, 200), contact: String(contact).trim().slice(0, 200), email: String(email).trim().toLowerCase(),
+    package_id: packageId, subdomain: subdomain ? String(subdomain).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) : null,
+    processor: null, total_paid: 0, status: "pending",
+  }).select().single();
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ sale: data }, 201);
 });

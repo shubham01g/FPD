@@ -80,7 +80,14 @@ export const billing = {
     post<{ url: string }>("/checkout/addon", { product: "dr_addon", interval, consent: consentBody(consent), page }),
   checkoutOneTime: (product: "continuation_fee" | "wg_setup", consent: Consent | null, page?: string) =>
     post<{ url: string }>("/checkout/one-time", { product, consent: consentBody(consent), page }),
-  continuationFeeCheckout: () => post<{ url: string }>("/checkout/one-time", { product: "continuation_fee" }),
+  continuationFeeCheckout: (payerType: "account_owner" | "legacy_contact" = "account_owner") =>
+    post<{ url: string }>("/checkout/one-time", { product: "continuation_fee", payerType }),
+  /** Partner Program setup ($599) — migration 053. */
+  partnerCheckout: (org: { name: string; type: string; contact: string; email: string; phone: string; website: string }) =>
+    post<{ url: string }>("/checkout/one-time", { product: "partner_setup", org }),
+  /** White Label setup fee for a package — migration 053. */
+  whiteLabelCheckout: (packageId: string, org: { name: string; contact: string; email: string }, subdomain: string) =>
+    post<{ url: string }>("/checkout/one-time", { product: "wl_setup", packageId, org, subdomain }),
   changePlan: (planId: string, interval: Interval) => post<PlanChangeResult>("/change-plan", { planId, interval }),
   cancelPendingChange: () => post<{ ok: true }>("/change-plan/cancel-pending"),
   cancel: (productLine: ProductLine) => post<{ ok: true }>("/cancel", { productLine }),
