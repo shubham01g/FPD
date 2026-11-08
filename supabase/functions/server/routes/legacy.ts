@@ -15,7 +15,34 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
-import { EMAIL_CONFIGURED, claimLinkEmail, linkOrigin, sendEmail } from "../lib/email.ts";
+import { EMAIL_CONFIGURED, MAILBOX, claimLinkEmail, linkOrigin, reviewDecisionEmail, sendEmail } from "../lib/email.ts";
+
+/* Tells the claimant how their claim was decided. Best effort: the decision
+   stands even if the email fails; the failure is logged on the claim. */
+async function emailClaimDecision(db: ReturnType<typeof adminClient>, claimId: string, approved: boolean, reason?: string | null) {
+  if (!EMAIL_CONFIGURED) return;
+  const { data: claim } = await db.from("legacy_claims")
+    .select("claimant_name, claimant_email, owner:owner_user_id(full_name)").eq("id", claimId).maybeSingle();
+  const to = claim?.claimant_email as string | undefined;
+  if (!to) return;
+  const owner = (claim?.owner as { full_name?: string } | null)?.full_name || "the account holder";
+  try {
+    await sendEmail({
+      to,
+      ...reviewDecisionEmail(approved
+        ? { name: String(claim?.claimant_name ?? ""), heading: "Your legacy claim was approved", mailbox: MAILBOX.claims, category: "claim_decision",
+            lead: `We reviewed your claim for ${owner}'s Final Pass Down vault and approved it.`,
+            next: "Access opens once the Legacy Continuation Fee is settled and activated. We'll email you again with your sign-in details then." }
+        : { name: String(claim?.claimant_name ?? ""), heading: "Your legacy claim was not approved", mailbox: MAILBOX.claims, category: "claim_decision",
+            lead: `We reviewed your claim for ${owner}'s Final Pass Down vault and could not approve it.`,
+            detail: reason, next: `If you think this is a mistake, reply to this email or write to ${MAILBOX.claims}.` }),
+    });
+    await addEvent(db, claimId, `Decision emailed to ${to}`, "system");
+  } catch (err) {
+    console.error("claim decision email failed:", err);
+    await addEvent(db, claimId, "Decision email could not be sent", "system");
+  }
+}
 
 const legacy = new Hono();
 
@@ -209,6 +236,7 @@ legacy.post("/claims/:id/approve", async (c) => {
   }
 
   await addEvent(db, id, `Admin approved claim — ${updated.requested_access} granted`, admin.email);
+  await emailClaimDecision(db, id, true);
   const { data } = await loadClaim(db, id);
   return c.json({ claim: data });
 });
@@ -231,6 +259,7 @@ legacy.post("/claims/:id/reject", async (c) => {
   if (!updated) return c.json({ error: "Claim not found, or it is not waiting on review" }, 400);
 
   await addEvent(db, id, `Admin rejected claim${reason ? ` — ${reason}` : ""}`, admin.email);
+  await emailClaimDecision(db, id, false, reason ?? null);
   const { data } = await loadClaim(db, id);
   return c.json({ claim: data });
 });

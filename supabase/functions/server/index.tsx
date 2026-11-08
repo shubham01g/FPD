@@ -59,7 +59,7 @@ const api = new Hono();
 // links, admin invites, vault-reset and contact-invite tokens), and function
 // logs are readable by anyone with dashboard access, so those path segments
 // and every query string are blanked before the line is written.
-const SECRET_SEGMENTS = /(\/(?:legacy-claim|admin-invite|reset|invite|accept)\/)[^/?\s]+/g;
+const SECRET_SEGMENTS = /(\/(?:legacy-claim|admin-invite|reset|invite|accept|message)\/)[^/?\s]+/g;
 function redactLogLine(line: string): string {
   return line.replace(SECRET_SEGMENTS, "$1[redacted]").replace(/\?[^\s]*/g, "?[redacted]");
 }

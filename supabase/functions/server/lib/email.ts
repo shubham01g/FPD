@@ -178,6 +178,44 @@ export function vaultResetEmail(o: { link: string; minutes: number }): Omit<Emai
   };
 }
 
+/** The outcome of a review (legacy claim or ID verification). */
+export function reviewDecisionEmail(o: {
+  name: string; heading: string; lead: string; detail?: string | null; next: string; mailbox: string; category: string;
+}): Omit<EmailMessage, "to"> {
+  return {
+    subject: `${o.heading} — ${APP_NAME}`,
+    category: o.category,
+    replyTo: o.mailbox,
+    text: [`Dear ${o.name || "there"},`, o.lead, o.detail ? `Reason: ${o.detail}` : "", o.next].filter(Boolean).join("\n\n"),
+    html: layout(esc(o.heading), `
+      <p style="margin:0 0 16px;line-height:1.6;">Dear ${esc(o.name || "there")},</p>
+      <p style="margin:0 0 16px;line-height:1.6;">${esc(o.lead)}</p>
+      ${o.detail ? `<p style="margin:0 0 16px;padding:12px 14px;background:#f6f7f9;border-radius:8px;line-height:1.6;"><strong>Reason:</strong> ${esc(o.detail)}</p>` : ""}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(o.next)}</p>`, o.mailbox),
+  };
+}
+
+/** A Message to Loved Ones reaching its recipient (lib/messageDelivery.ts). */
+export function lovedOneMessageEmail(o: {
+  senderName: string; recipientName: string; title: string; medium: string; link: string; days: number; afterPassing: boolean;
+}): Omit<EmailMessage, "to"> {
+  const kind = o.medium === "video" ? "a video message" : o.medium === "voice" ? "a voice message" : "a letter";
+  const lead = o.afterPassing
+    ? `${o.senderName} recorded ${kind} for you before they passed, and asked ${APP_NAME} to deliver it to you now.`
+    : `${o.senderName} left ${kind} for you with ${APP_NAME}, to be delivered today.`;
+  const closing = `This private link works for ${o.days} days. Please don't forward this email: anyone with the link can open the message.`;
+  return {
+    subject: `${o.recipientName ? `${o.recipientName}, ` : ""}a message from ${o.senderName}`,
+    category: "loved_one_message",
+    replyTo: MAILBOX.support,
+    text: `${lead}\n\n"${o.title}"\n\n${o.link}\n\n${closing}`,
+    html: layout(esc(o.title || "A message for you"), `
+      <p style="margin:0 0 20px;line-height:1.6;">${esc(lead)}</p>
+      ${button(o.link, "Open the message")}
+      <p style="margin:0;color:#6e7781;font-size:13px;">${esc(closing)}</p>`),
+  };
+}
+
 /** A month of receipts sent to the owner's accountant (routes/receipts.ts). */
 export function receiptPackageEmail(o: {
   ownerName: string; ownerEmail: string; period: string; count: number; total: string;

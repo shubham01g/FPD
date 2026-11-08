@@ -7,7 +7,7 @@ import {
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../services/supabase";
+import { db, supabase } from "../services/supabase";
 import { requestEmailChange, changePassword as changePasswordOnServer } from "../services/auth";
 import { prepareImage } from "../utils/imageInput";
 import { StoredImage } from "./StoredImage";
@@ -328,6 +328,30 @@ export function AccountSettings() {
   const [notifStorageAlerts, setNotifStorage] = useState(true);
   const [notifContactUpdates, setNotifContact]= useState(true);
   const [notifMarketing, setNotifMarketing]   = useState(false);
+
+  // The other toggles are saved in notification_preferences (migration
+  // 050); they used to be screen-only and reset on every visit.
+  const [prefsBusy, setPrefsBusy] = useState(false);
+  useEffect(() => {
+    if (!authUser) return;
+    supabase.from("notification_preferences").select("*").eq("user_id", authUser.id).maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setNotifEmail(data.email); setNotifSMS(data.sms); setNotifStorage(data.storage_alerts);
+        setNotifContact(data.contact_updates); setNotifMarketing(data.marketing);
+      });
+  }, [authUser]);
+  const savePrefs = async () => {
+    if (!authUser) return;
+    setPrefsBusy(true);
+    const { error } = await supabase.from("notification_preferences").upsert({
+      user_id: authUser.id, email: notifEmail, sms: false, storage_alerts: notifStorageAlerts,
+      contact_updates: notifContactUpdates, marketing: notifMarketing, updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    setPrefsBusy(false);
+    if (error) toast.error(`Couldn't save: ${error.message}`);
+    else toast.success("Notification preferences saved");
+  };
 
   // Push Notifications reflects a real browser subscription, not a saved
   // preference — initialize it from what's actually registered.
@@ -920,7 +944,7 @@ export function AccountSettings() {
               <h3 className="sec-title">Notification Preferences</h3>
               {[
                 { label:"Email Notifications",        sub:"Receive important updates to your email address",       value:notifEmail,          set:setNotifEmail },
-                { label:"SMS Notifications",          sub:"Receive alerts via text message to your phone number",  value:notifSMS,            set:setNotifSMS },
+                { label:"SMS Notifications",          sub:"Not available yet — text messages are used only for sign-in codes", value:false, set:setNotifSMS },
                 { label:"Push Notifications",         sub:"In-app and device push notifications",                  value:notifPush,           set:setNotifPush },
                 { label:"Storage Alerts",             sub:"Alerts when storage reaches 80%, 90%, and 95%",         value:notifStorageAlerts,  set:setNotifStorage },
                 { label:"Contact Updates",            sub:"When legacy contacts verify their ID or access changes", value:notifContactUpdates, set:setNotifContact },
@@ -934,18 +958,18 @@ export function AccountSettings() {
                   <button
                     onClick={() => n.label === "Push Notifications"
                       ? togglePush()
-                      : (() => { n.set(!n.value); toast.success(`${n.label} ${!n.value?"enabled":"disabled"}`); })()}
-                    disabled={n.label === "Push Notifications" && pushBusy}
+                      : n.set(!n.value)}
+                    disabled={(n.label === "Push Notifications" && pushBusy) || n.label === "SMS Notifications"}
                     className="toggle"
                     style={{ background:n.value?"rgba(91,110,225,0.85)":"rgba(255,255,255,0.06)", borderColor:n.value?ACCENT:"rgba(255,255,255,0.14)",
-                      opacity: n.label === "Push Notifications" && pushBusy ? 0.6 : 1 }}>
+                      opacity: (n.label === "Push Notifications" && pushBusy) || n.label === "SMS Notifications" ? 0.45 : 1 }}>
                     <div className="thumb" style={{ left:n.value?24:4 }}/>
                   </button>
                 </div>
               ))}
-              <button onClick={() => toast.success("Notification preferences saved")}
-                className="btn-primary" style={{ marginTop: 6, width: "fit-content" }}>
-                <Save size={14}/> Save Preferences
+              <button onClick={() => void savePrefs()} disabled={prefsBusy}
+                className="btn-primary" style={{ marginTop: 6, width: "fit-content", opacity: prefsBusy ? 0.6 : 1 }}>
+                <Save size={14}/> {prefsBusy ? "Saving…" : "Save Preferences"}
               </button>
             </div>
           </div>

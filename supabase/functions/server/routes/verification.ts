@@ -1,6 +1,30 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
+import { EMAIL_CONFIGURED, MAILBOX, reviewDecisionEmail, sendEmail } from "../lib/email.ts";
+
+/* Tells the contact how their ID check went. Best effort, logged on failure. */
+async function emailIdDecision(contactId: string, approved: boolean, reason?: string | null) {
+  if (!EMAIL_CONFIGURED) return;
+  const { data: contact } = await adminClient().from("contacts")
+    .select("full_name, email, owner:owner_user_id(full_name)").eq("id", contactId).maybeSingle();
+  if (!contact?.email) return;
+  const owner = (contact.owner as { full_name?: string } | null)?.full_name || "the account holder";
+  try {
+    await sendEmail({
+      to: contact.email,
+      ...reviewDecisionEmail(approved
+        ? { name: contact.full_name ?? "", heading: "Your ID was verified", mailbox: MAILBOX.verify, category: "id_decision",
+            lead: `Your identity check as a contact for ${owner} on Final Pass Down was approved.`,
+            next: "Nothing else is needed from you right now." }
+        : { name: contact.full_name ?? "", heading: "Your ID could not be verified", mailbox: MAILBOX.verify, category: "id_decision",
+            lead: `We couldn't verify the ID you submitted as a contact for ${owner} on Final Pass Down.`,
+            detail: reason, next: `Reply to this email or write to ${MAILBOX.verify} to try again.` }),
+    });
+  } catch (err) {
+    console.error("ID decision email failed:", err);
+  }
+}
 
 const verification = new Hono();
 
@@ -116,6 +140,7 @@ verification.post("/:id/approve", async (c) => {
 
   // Approving an ID verification also marks the underlying contact verified.
   await adminClient().from("contacts").update({ verification_status: "verified", id_verified_at: new Date().toISOString(), id_verified_by: admin.id }).eq("id", data.contact_id);
+  await emailIdDecision(data.contact_id, true);
 
   return c.json({ verification: data });
 });
@@ -137,6 +162,7 @@ verification.post("/:id/reject", async (c) => {
   if (!data) return c.json({ error: "Verification not found" }, 404);
 
   await adminClient().from("contacts").update({ verification_status: "rejected" }).eq("id", data.contact_id);
+  await emailIdDecision(data.contact_id, false, reason ?? null);
 
   return c.json({ verification: data });
 });

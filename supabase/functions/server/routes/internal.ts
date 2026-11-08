@@ -7,6 +7,7 @@ import type { Context, Next } from "npm:hono";
 import { safeEqual, stripeMode } from "../lib/stripe.ts";
 import { billingPaused } from "../lib/billingConfig.ts";
 import { runRollover } from "../lib/billing/usage.ts";
+import { runMessageDelivery } from "../lib/messageDelivery.ts";
 
 const internal = new Hono();
 
@@ -30,6 +31,17 @@ internal.post("/billing/rollover", async (c) => {
   } catch (err) {
     console.error("rollover failed:", err);
     return c.json({ error: err instanceof Error ? err.message : "Rollover failed" }, 500);
+  }
+});
+
+// POST /internal/messages/deliver — hourly: email Messages to Loved Ones
+// that are due (migration 050, lib/messageDelivery.ts).
+internal.post("/messages/deliver", async (c) => {
+  try {
+    return c.json(await runMessageDelivery());
+  } catch (err) {
+    console.error("message delivery failed:", err);
+    return c.json({ error: err instanceof Error ? err.message : "Delivery failed" }, 500);
   }
 });
 

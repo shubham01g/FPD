@@ -6,11 +6,20 @@ import { adminClient } from "../lib/supabaseAdmin.ts";
 import { readPlatformSection } from "../lib/platformSettings.ts";
 import stripeWebhook from "./stripeWebhook.ts";
 import { billingStatus } from "../lib/billingConfig.ts";
+import { openDeliveredMessage } from "../lib/messageDelivery.ts";
 import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/email.ts";
 
 const pub = new Hono();
 
 // GET /public/plans — live subscription plan pricing for the marketing/pricing pages.
+// GET /public/message/:token — a delivered Message to Loved Ones (050).
+pub.get("/message/:token", async (c) => {
+  const m = await openDeliveredMessage(c.req.param("token"));
+  if (!m) return c.json({ error: "This message link isn't valid." }, 404);
+  if (m.expired) return c.json({ error: "This message link has expired.", expired: true }, 410);
+  return c.json(m);
+});
+
 pub.get("/plans", async (c) => {
   const { data, error } = await adminClient()
     .from("subscription_plans")

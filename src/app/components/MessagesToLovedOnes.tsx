@@ -38,6 +38,11 @@ interface Message {
   id: string;
   title: string;
   recipient: string;
+  /** Where the message is emailed when it is due (migration 050). */
+  recipientEmail?: string;
+  /** Last delivery, and the last delivery error, if any. */
+  deliveredAt?: string;
+  deliveryError?: string;
   relationship: string;
   medium: Medium;
   trigger: Trigger;
@@ -83,7 +88,7 @@ const fmtTriggerDate = (isoStr?: string) => {
 /* Recipients are the account's own contacts. This list used to be a fixed
    family (Sarah Johnson, Michael/Emily/Tyler/Lily/Robert Doe) offered to
    every user regardless of who they had actually added. */
-interface Recipient { name: string; relationship: string }
+interface Recipient { name: string; relationship: string; email?: string }
 
 /* Rows come from the `messages_to_loved_ones` table — the screen used to open
    on sample letters identical for every account and lost on refresh. */
@@ -416,7 +421,7 @@ function ComposeModal({
     const byName = new Map<string, Recipient>();
     for (const c of contacts) {
       if (!c.name?.trim()) continue;
-      if (!byName.has(c.name)) byName.set(c.name, { name: c.name, relationship: c.relationship ?? "" });
+      if (!byName.has(c.name)) byName.set(c.name, { name: c.name, relationship: c.relationship ?? "", email: c.email ?? "" });
     }
     return [...byName.values()].sort((x, y) => x.name.localeCompare(y.name));
   }, [contacts]);
@@ -451,11 +456,15 @@ function ComposeModal({
       return toast.error("Pick the delivery date.");
     }
 
+    if (form.recipientEmail?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.recipientEmail.trim())) {
+      toast.error("Check the recipient's email address"); return;
+    }
     const rec = customRecipient ? undefined : recipients.find(r => r.name === form.recipient);
     onSave({
       id: editing?.id ?? `m${Date.now()}`,
       title: form.title!.trim(),
       recipient: form.recipient!.trim(),
+      recipientEmail: (form.recipientEmail ?? "").trim() || undefined,
       relationship: customRecipient ? (form.relationship ?? "").trim() : rec?.relationship ?? "",
       medium: form.medium as Medium,
       trigger: form.trigger as Trigger,
@@ -518,6 +527,8 @@ function ComposeModal({
                   } else {
                     setCustomRecipient(false);
                     setF("recipient", e.target.value);
+                    const known = recipients.find(r => r.name === e.target.value);
+                    if (known?.email && !form.recipientEmail) setF("recipientEmail", known.email);
                   }
                 }}>
                 <option value="">{recipients.length ? "Select a person…" : "No contacts yet"}</option>
@@ -551,6 +562,15 @@ function ComposeModal({
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="field">
+            <label>Recipient's Email (for delivery)</label>
+            <input type="email" value={form.recipientEmail ?? ""} onChange={e => setF("recipientEmail", e.target.value)}
+              placeholder="name@example.com" autoComplete="off" />
+            <span className="field-hint">
+              When the message is due we email them a private link to it. Without an address it can't be delivered.
+            </span>
           </div>
 
           {form.trigger !== "on_passing" && (
@@ -616,6 +636,9 @@ export function MessagesToLovedOnes() {
       id: String(r.id),
       title: String(r.title ?? ""),
       recipient: String(r.recipient_name ?? ""),
+      recipientEmail: (r.recipient_email as string | null) ?? undefined,
+      deliveredAt: (r.delivered_at as string | null) ?? undefined,
+      deliveryError: (r.delivery_error as string | null) ?? undefined,
       relationship: String(r.relationship ?? ""),
       medium: (r.medium as Medium) ?? "letter",
       trigger: (r.trigger_type as Trigger) ?? "on_passing",
@@ -672,7 +695,7 @@ export function MessagesToLovedOnes() {
       }
     }
     const row = {
-      title: m.title, recipient_name: m.recipient, relationship: m.relationship,
+      title: m.title, recipient_name: m.recipient, recipient_email: m.recipientEmail ?? null, relationship: m.relationship,
       medium: m.medium, trigger_type: m.trigger,
       trigger_date: m.triggerDate ?? null, status: m.status,
       body: m.body, duration_s: fromDuration(m.duration),
@@ -692,6 +715,11 @@ export function MessagesToLovedOnes() {
   };
 
   const seal = async (id: string) => {
+    const msg = messages.find(x => x.id === id);
+    if (msg && !msg.recipientEmail) {
+      toast.error("Add the recipient's email first (Edit), so the message can be delivered.");
+      return;
+    }
     const { error } = await tables.messagesToLovedOnes.update(id, {
       status: "sealed", sealed_at: new Date().toISOString(),
     });
@@ -883,8 +911,10 @@ export function MessagesToLovedOnes() {
                             <div className="mrow-foot">
                               <div className="mrow-when">
                                 <Clock size={12} />
-                                {m.status === "sealed"
-                                  ? <>Sealed on {m.sealedOn} · {tm.label.toLowerCase()}</>
+                                {m.status === "delivered"
+                                  ? <>Delivered{m.deliveredAt ? ` on ${new Date(m.deliveredAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}{m.recipientEmail ? ` to ${m.recipientEmail}` : ""}</>
+                                  : m.status === "sealed"
+                                  ? <>Sealed on {m.sealedOn} · {tm.label.toLowerCase()}{m.recipientEmail ? ` · to ${m.recipientEmail}` : " · no email address"}{m.deliveryError ? " · last delivery failed, we'll retry" : ""}</>
                                   : <>Draft — not sealed, will not be delivered</>}
                               </div>
                               <div className="mrow-actions">

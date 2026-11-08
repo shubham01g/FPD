@@ -250,9 +250,9 @@ interface DemoCtx {
   user: UserProfile;
   continuationFeePaid: boolean;
   setContinuationFeePaid: (paid: boolean) => void;
+  /* True once Final Pass Down has marked the account holder deceased
+     (users.deceased_at, set by an admin from a reviewed Legacy Claim). */
   deathVerified: boolean;
-  deathVerifiedDoc: string | null;
-  submitDeathRecord: (docName: string) => void;
   docs: Doc[];
   folders: VaultFolder[];
   contacts: Contact[];
@@ -333,7 +333,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [funeralPlan, setFuneralPlan] = useState<FuneralPlan>(EMPTY_FUNERAL_PLAN);
   const [emergencyInfo, setEmergencyInfo] = useState<EmergencyInfo>(EMPTY_EMERGENCY_INFO);
   const [continuationFeePaid, setContinuationFeePaid] = useState(false);
-  const [deathVerifiedDoc, setDeathVerifiedDoc] = useState<string | null>(null);
   /* Storage allowance per plan, from subscription_plans. */
   const planGb = useRef<Record<string, number>>({ ...PLAN_STORAGE_GB });
 
@@ -416,10 +415,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [uid]);
 
-  const submitDeathRecord = useCallback((docName: string) => {
-    setDeathVerifiedDoc(docName);
-    toast.success(`"${docName}" accepted — confirmation of passing verified`);
-  }, []);
+  /* There is deliberately no way to "submit a record of passing" from the
+     owner's own session. It used to accept any file name locally and toast
+     "confirmation of passing verified". The real path: an admin marks the
+     account deceased, the Legacy Contact uploads the record through the
+     emailed claim link (/legacy-claim/:token), and an admin reviews it. */
 
   /* User */
   const updateUser = useCallback(async (data: Partial<UserProfile>) => {
@@ -875,7 +875,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       saveFuneralPlan, saveEmergencyInfo,
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,
-      deathVerified: deathVerifiedDoc !== null, deathVerifiedDoc, submitDeathRecord,
+      deathVerified: Boolean(user.deceasedAt),
     }}>
       {children}
     </DemoContext.Provider>

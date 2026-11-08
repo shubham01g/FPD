@@ -293,10 +293,9 @@ function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; titl
 }
 
 export function LegacyVault() {
-  const { continuationFeePaid, user, docs, deathVerified, deathVerifiedDoc, submitDeathRecord } = useDemo();
+  const { continuationFeePaid, user, docs, deathVerified } = useDemo();
   const [showVaultClone, setShowVaultClone] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const recordRef = React.useRef<HTMLInputElement>(null);
   const sectionsRef = React.useRef<HTMLDivElement>(null);
 
   const fullyUnlocked = continuationFeePaid && deathVerified;
@@ -399,21 +398,15 @@ export function LegacyVault() {
               met={deathVerified}
               title="Confirmation of Passing — Verified by FPD Admin"
               desc={deathVerified
-                ? `Accepted record on file: ${deathVerifiedDoc}. Verified by FPD admin review.`
+                ? "A record of passing was reviewed and accepted by Final Pass Down."
                 : "Accepted documents: death certificate, obituary, hospital notice, coroner report, funeral home letter, probate filing, or any credible official record. Submitted by a legacy contact after your passing."}
             />
             {!deathVerified && (
-              <>
-                <input
-                  ref={recordRef}
-                  type="file"
-                  className="hidden"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) submitDeathRecord(f.name); }}
-                />
-                <button className="btn-ghost" onClick={() => recordRef.current?.click()}>
-                  <FileText size={15}/> Submit Record of Passing (Legacy Contact)
-                </button>
-              </>
+              <p style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>
+                <FileText size={13} style={{ verticalAlign: -2, marginRight: 6 }}/>
+                How this happens: your Legacy Contact tells Final Pass Down, we email them a secure claim link,
+                they upload the record there, and our team reviews it. Nothing is submitted from your own account.
+              </p>
             )}
             <div className={`status-row ${fullyUnlocked ? "ok" : "no"}`}>
               {fullyUnlocked

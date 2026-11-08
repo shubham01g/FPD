@@ -28,6 +28,7 @@ import { WLPackagesProvider } from "./context/WLPackagesContext";
 import { WLEntitlementProvider } from "./context/WLEntitlementContext";
 import { UserLogin } from "./components/UserLogin";
 import { ResetPasswordPage } from "./components/ResetPasswordPage";
+import { LovedOneMessagePage } from "./components/LovedOneMessagePage";
 import { TwoFactorGate } from "./components/twofa/TwoFactorGate";
 import { UserSignup } from "./components/UserSignup";
 import { signOut } from "./services/auth";
@@ -762,6 +763,13 @@ function LegacyClaimRoute() {
   );
 }
 
+/* A delivered Message to Loved Ones (migration 050). No account needed. */
+function LovedOneMessageRoute() {
+  const { token } = useParams();
+  if (!token) return <Navigate to="/" replace/>;
+  return <div className="size-full overflow-y-auto"><LovedOneMessagePage token={token}/></div>;
+}
+
 function VaultResetRoute() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -859,6 +867,7 @@ function AppShell() {
       <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
       <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
       <Route path="/reset-password" element={<ResetPasswordRoute/>}/>
+      <Route path="/message/:token" element={<LovedOneMessageRoute/>}/>
       <Route path="/contact-accept/:token" element={<ContactAcceptRoute/>}/>
       <Route path="/access" element={<AccessRoute/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
