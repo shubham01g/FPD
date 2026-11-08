@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle } from "lucide-react";
+import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle, Trash2 } from "lucide-react";
+import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -370,6 +371,22 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
   };
   const contentRef = React.useRef<HTMLDivElement>(null);
 
+  /* There was no way to delete a financial record or policy except SQL. */
+  const { requestDelete, confirmDialog } = useConfirmDelete();
+  function askDelete(item: any) {
+    if (!item?.id) return;
+    requestDelete({
+      label: String(item.title ?? item.name ?? item.carrier ?? item.institution ?? "this record"),
+      noun: "record",
+      onConfirm: async () => {
+        const { error } = await tables.financialRecords.remove(String(item.id));
+        if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+        await reload();
+        toast.success("Deleted");
+      },
+    });
+  }
+
   function openEdit(t: Tab, item: any) {
     setEditingItem({ tab: t, original: item });
     setShowAdd(t);
@@ -499,6 +516,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span className="rbadge">{policy.status.toUpperCase()}</span>
                       <button className="redit" onClick={() => openEdit("insurance", policy)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(policy)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid">
@@ -533,6 +551,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div className="bigval" style={{ color: "#6FAE8B" }}>{acct.balance}</div>
                       <button className="redit" onClick={() => openEdit("personal", acct)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(acct)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid">
@@ -566,6 +585,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div className="bigval" style={{ color: "#D99A6B" }}>{p.value}</div>
                       <button className="redit" onClick={() => openEdit("portfolios", p)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(p)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid">
@@ -600,6 +620,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div className="bigval" style={{ color: "#6FAE8B" }}>{r.balance}</div>
                       <button className="redit" onClick={() => openEdit("retirement", r)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(r)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid">
@@ -642,6 +663,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div className="bigval" style={{ fontSize: 19, color: String(t.refund ?? "").includes("refund") ? "#D99A6B" : NEG }}>{t.refund}</div>
                       <button className="redit" onClick={() => openEdit("taxes", t)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(t)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                   <div className="rgrid c2">
@@ -678,6 +700,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                       </div>
                     </div>
                     <button className="redit" onClick={() => openEdit("business", b)}><Edit2 size={14} /></button>
+                      <button className="redit" aria-label="Delete" onClick={() => askDelete(b)}><Trash2 size={14} /></button>
                   </div>
                   <div className="rgrid">
                     <div className="tile"><div className="tk">Bank</div><div className="tv">{b.bank}</div></div>
@@ -786,6 +809,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
           );
         })()}
       </div>
+      {confirmDialog}
     </div>
   );
 }

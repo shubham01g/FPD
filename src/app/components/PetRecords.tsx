@@ -11,6 +11,7 @@ import { StoredImage } from "./StoredImage";
 import heroPetPhoto from "../../imports/petrecords_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { attachmentDisplayName } from "./AttachDocumentField";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";
@@ -192,6 +193,7 @@ const PETS_CSS = `
 `;
 
 export function PetRecords() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [petsList, setPetsList] = useState<PetRecord[]>([]);
 
@@ -757,7 +759,7 @@ export function PetRecords() {
 
               {/* Upload / Save button */}
               <div className="modal-foot">
-                <button className="save" onClick={savePetRecord}>{editingId !== null ? "Save Changes" : "Upload"}</button>
+                <button className="save" onClick={guard(savePetRecord)} disabled={saving}>{editingId !== null ? "Save Changes" : "Upload"}</button>
               </div>
             </div>
           </div>

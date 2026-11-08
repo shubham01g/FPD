@@ -294,18 +294,21 @@ interface DemoCtx {
   removeWish: (id: string) => Promise<void>;
   addAllergy: (a: Omit<Allergy,"id">) => Promise<void>;
   removeAllergy: (id: string) => Promise<void>;
-  updateAllergy: (id: string, a: Omit<Allergy,"id">) => Promise<void>;
+  updateAllergy: (id: string, a: Omit<Allergy,"id">) => Promise<boolean>;
   addMedication: (m: Omit<Medication,"id">) => Promise<void>;
   removeMedication: (id: string) => Promise<void>;
-  updateMedication: (id: string, m: Omit<Medication,"id">) => Promise<void>;
+  updateMedication: (id: string, m: Omit<Medication,"id">) => Promise<boolean>;
   addReminder: (r: Omit<Reminder,"id">) => Promise<void>;
-  completeReminder: (id: string) => void;
-  removeReminder: (id: string) => void;
+  completeReminder: (id: string) => Promise<void>;
+  removeReminder: (id: string) => Promise<void>;
   addMemory: (m: Omit<Memory,"id">) => Promise<void>;
   updateMemory: (id: string, m: Partial<Omit<Memory,"id">>) => Promise<void>;
   removeMemory: (id: string) => Promise<void>;
   addOccasion: (o: Omit<Occasion,"id">) => Promise<void>;
-  saveFuneralPlan: (data: FuneralPlan) => Promise<void>;
+  updateOccasion: (id: string, o: Omit<Occasion,"id">) => Promise<void>;
+  removeOccasion: (id: string) => Promise<void>;
+  updateReminder: (id: string, r: Omit<Reminder,"id">) => Promise<void>;
+  saveFuneralPlan: (data: FuneralPlan) => Promise<boolean>;
   saveEmergencyInfo: (data: EmergencyInfo) => Promise<void>;
   markNotifRead: (id: string) => void;
   markAllRead: () => void;
@@ -721,8 +724,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       allergen: a.allergen, severity: a.severity, reaction: a.reaction,
       type: a.type, diagnosed: a.diagnosed, document_urls: a.documentUrls ?? [],
     });
-    if (error || !data) { toast.error("Could not update allergy"); return; }
+    if (error || !data) { toast.error("Could not update allergy"); return false; }
     setAllergies(prev => prev.map(x => x.id === id ? rowToAllergy(data) : x));
+    return true;
   }, []);
 
   const addMedication = useCallback(async (m: Omit<Medication,"id">) => {
@@ -743,8 +747,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const updateMedication = useCallback(async (id: string, m: Omit<Medication,"id">) => {
     const { data, error } = await db.updateMedication(id, { name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate, document_urls: m.documentUrls ?? [] });
-    if (error || !data) { toast.error("Could not update medication"); return; }
+    if (error || !data) { toast.error("Could not update medication"); return false; }
     setMeds(prev => prev.map(x => x.id === id ? rowToMed(data) : x));
+    return true;
   }, []);
 
   /* Reminders */
@@ -757,14 +762,18 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Reminder created", { id: tid });
   }, [uid]);
 
-  const completeReminder = useCallback((id: string) => {
-    db.updateReminder(id, { status: "completed" });
+  /* These used to fire the request and report success without waiting, so
+     a failed save still showed "marked complete" / "deleted". */
+  const completeReminder = useCallback(async (id: string) => {
+    const { error } = await db.updateReminder(id, { status: "completed" });
+    if (error) { toast.error("Could not update the reminder"); return; }
     setReminders(r => r.map(x => x.id === id ? { ...x, status:"completed" } : x));
     toast.success("Reminder marked complete");
   }, []);
 
-  const removeReminder = useCallback((id: string) => {
-    db.deleteReminder(id);
+  const removeReminder = useCallback(async (id: string) => {
+    const { error } = await db.deleteReminder(id);
+    if (error) { toast.error("Could not delete the reminder"); return; }
     setReminders(r => r.filter(x => x.id !== id));
     toast.success("Reminder deleted");
   }, []);
@@ -810,9 +819,30 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     toast.success("Occasion saved", { id: tid });
   }, [uid]);
 
+  const updateOccasion = useCallback(async (id: string, o: Omit<Occasion,"id">) => {
+    const { data, error } = await db.updateOccasion(id, { name: o.name, occasion_date: o.date, type: o.type, recipient: o.recipient, notes: o.notes, recurring: o.recurring });
+    if (error || !data) { toast.error("Could not update occasion"); return; }
+    setOccasions(prev => prev.map(x => x.id === id ? rowToOccasion(data) : x));
+    toast.success("Occasion updated");
+  }, []);
+
+  const removeOccasion = useCallback(async (id: string) => {
+    const { error } = await db.deleteOccasion(id);
+    if (error) { toast.error("Could not delete occasion"); return; }
+    setOccasions(prev => prev.filter(x => x.id !== id));
+    toast.success("Occasion deleted");
+  }, []);
+
+  const updateReminder = useCallback(async (id: string, r: Omit<Reminder,"id">) => {
+    const { data, error } = await db.updateReminder(id, { title: r.title, due_date: r.dueDate, frequency: r.frequency, category: r.category, status: r.status, notes: r.notes });
+    if (error || !data) { toast.error("Could not update reminder"); return; }
+    setReminders(prev => prev.map(x => x.id === id ? rowToReminder(data) : x));
+    toast.success("Reminder updated");
+  }, []);
+
   /* Funeral plan (one row per user) */
   const saveFuneralPlan = useCallback(async (data: FuneralPlan) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving funeral plan...");
     const { data: row, error } = await db.saveFuneralPlan(uid, {
       service_type: data.serviceType, location: data.location, preferred_date: data.preferredDate,
@@ -827,9 +857,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       celebration_location: data.celebrationLocation, final_words: data.finalWords,
       gravestone_inscription: data.gravestoneInscription, life_regrets: data.lifeRegrets,
     });
-    if (error || !row) { toast.error("Could not save funeral plan", { id: tid }); return; }
+    if (error || !row) { toast.error("Could not save funeral plan", { id: tid }); return false; }
     setFuneralPlan(rowToFuneralPlan(row));
     toast.success("Funeral plan saved", { id: tid });
+    return true;
   }, [uid]);
 
   /* Medical emergency info (one row per user) */
@@ -871,7 +902,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       updateUser, refreshUser, addDoc, deleteDoc, linkStoredDoc, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId, addContact, removeContact, updateContact,
       sendVerificationInvite, submitIdVerification, updateGuardianFolders, saveContactVerification,
       addWish, updateWish, removeWish, addAllergy, removeAllergy, updateAllergy, addMedication, removeMedication, updateMedication,
-      addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion,
+      addReminder, completeReminder, removeReminder, addMemory, updateMemory, removeMemory, addOccasion, updateOccasion, removeOccasion, updateReminder,
       saveFuneralPlan, saveEmergencyInfo,
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,

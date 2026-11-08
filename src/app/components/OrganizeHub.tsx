@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, Car, PawPrint, Clock, ArrowRight } from "lucide-react";
+import { Folder, Bell, Calendar, Plus, Trash2, CheckCircle, X, Cake, Heart, PartyPopper, Scale, Landmark, HeartPulse, Car, PawPrint, Clock, ArrowRight, Edit2 } from "lucide-react";
 import { useDemo, type Reminder, type Occasion } from "../context/DemoContext";
 import { toast } from "sonner";
 import heroFoldersPhoto from "../../imports/folders_hero_photo.webp";
@@ -184,8 +184,10 @@ const ORG_CSS = `
 @media (max-width:640px){.fpd-org .fgrid,.fpd-org .ogrid{grid-template-columns:1fr;}}
 `;
 
-function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<Reminder,"id">)=>Promise<void> }) {
-  const [form, setForm] = useState({ title:"", dueDate:"", frequency:"Annual", category:"Legal", status:"upcoming" as Reminder["status"], notes:"" });
+function AddReminderModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(r:Omit<Reminder,"id">)=>Promise<void>; initial?: Reminder | null }) {
+  const [form, setForm] = useState(initial
+    ? { title: initial.title, dueDate: initial.dueDate, frequency: initial.frequency, category: initial.category, status: initial.status, notes: initial.notes ?? "" }
+    : { title:"", dueDate:"", frequency:"Annual", category:"Legal", status:"upcoming" as Reminder["status"], notes:"" });
   const [loading, setLoading] = useState(false);
   const submit = async () => {
     if (!form.title || !form.dueDate) { toast.error("Title and due date required"); return; }
@@ -196,7 +198,7 @@ function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<
   return (
     <div className="backdrop">
       <div className="card modal">
-        <div className="modal-head"><h3>Add Reminder</h3><button onClick={onClose}><X size={15}/></button></div>
+        <div className="modal-head"><h3>{initial ? "Edit Reminder" : "Add Reminder"}</h3><button onClick={onClose}><X size={15}/></button></div>
         {[{key:"title",label:"REMINDER TITLE",ph:"e.g. Update Will"},{key:"dueDate",label:"DUE DATE",ph:"e.g. Sep 15, 2026"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
           <div className="field" key={f.key}>
             <label>{f.label}</label>
@@ -224,8 +226,10 @@ function AddReminderModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(r:Omit<
   );
 }
 
-function AddOccasionModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(o:Omit<Occasion,"id">)=>Promise<void> }) {
-  const [form, setForm] = useState({ name:"", date:"", type:"birthday" as Occasion["type"], recipient:"", notes:"", recurring:true });
+function AddOccasionModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(o:Omit<Occasion,"id">)=>Promise<void>; initial?: Occasion | null }) {
+  const [form, setForm] = useState(initial
+    ? { name: initial.name, date: initial.date, type: initial.type, recipient: initial.recipient ?? "", notes: initial.notes ?? "", recurring: initial.recurring }
+    : { name:"", date:"", type:"birthday" as Occasion["type"], recipient:"", notes:"", recurring:true });
   const [loading, setLoading] = useState(false);
   const submit = async () => {
     if (!form.name || !form.date) { toast.error("Name and date required"); return; }
@@ -236,7 +240,7 @@ function AddOccasionModal({ onClose, onAdd }: { onClose:()=>void; onAdd:(o:Omit<
   return (
     <div className="backdrop">
       <div className="card modal">
-        <div className="modal-head"><h3>Add Occasion</h3><button onClick={onClose}><X size={15}/></button></div>
+        <div className="modal-head"><h3>{initial ? "Edit Occasion" : "Add Occasion"}</h3><button onClick={onClose}><X size={15}/></button></div>
         {[{key:"name",label:"OCCASION NAME",ph:"e.g. Sarah's Birthday"},{key:"date",label:"DATE",ph:"e.g. Aug 14"},{key:"recipient",label:"RECIPIENT",ph:"e.g. Sarah Johnson"},{key:"notes",label:"NOTES",ph:"Optional notes"}].map(f=>(
           <div className="field" key={f.key}>
             <label>{f.label}</label>
@@ -282,12 +286,14 @@ function AddFolderModal({ onClose, onAdd, form, setForm }: { onClose:()=>void; o
 
 export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
   const {
-    reminders, occasions, addReminder, completeReminder, removeReminder, addOccasion,
+    reminders, occasions, addReminder, completeReminder, removeReminder, addOccasion, updateOccasion, removeOccasion, updateReminder,
     docs, folders, addFolder: createFolder, setPendingFolderId,
   } = useDemo();
   const [tab, setTab] = useState<Tab>("folders");
   const [showAddRem, setShowAddRem] = useState(false);
   const [showAddOcc, setShowAddOcc] = useState(false);
+  const [editRem, setEditRem] = useState<Reminder | null>(null);
+  const [editOcc, setEditOcc] = useState<Occasion | null>(null);
   const [showAddFolder, setShowAddFolder] = useState(false);
   // The same custom folders the File Cabinet shows — top level only; their
   // sub-folders are opened from inside the cabinet.
@@ -466,6 +472,7 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
                             {r.status!=="completed" && (
                               <button className="done" onClick={()=>completeReminder(r.id)} style={{ color:"#6FAE8B" }}><CheckCircle size={15}/></button>
                             )}
+                            <button className="done" aria-label="Edit reminder" onClick={()=>setEditRem(r)} style={{ color:"#AEB9F5" }}><Edit2 size={14}/></button>
                             <button className="del" onClick={()=>removeReminder(r.id)} style={{ color:NEG }}><Trash2 size={14}/></button>
                           </div>
                         </div>
@@ -476,6 +483,7 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
               })}
             </div>
             {showAddRem && <AddReminderModal onClose={()=>setShowAddRem(false)} onAdd={addReminder}/>}
+            {editRem && <AddReminderModal initial={editRem} onClose={()=>setEditRem(null)} onAdd={r => updateReminder(editRem.id, r)}/>}
           </div>
         )}
 
@@ -523,6 +531,10 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
                               {o.recurring && <span className="oannual"><ot.Icon size={11}/> ANNUAL</span>}
                             </div>
                             {o.notes && <div className="onotes">{o.notes}</div>}
+                            <div style={{ display:"flex", gap:8, marginTop:8 }}>
+                              <button aria-label="Edit occasion" onClick={()=>setEditOcc(o)} style={{ color:"#AEB9F5", background:"none", border:"none", cursor:"pointer" }}><Edit2 size={14}/></button>
+                              <button aria-label="Delete occasion" onClick={()=>{ if (window.confirm(`Delete "${o.name}"?`)) void removeOccasion(o.id); }} style={{ color:NEG, background:"none", border:"none", cursor:"pointer" }}><Trash2 size={14}/></button>
+                            </div>
                           </div>
                         );
                       })}
@@ -532,6 +544,7 @@ export function OrganizeHub({ onNavigate }: { onNavigate?: (page: string) => voi
               })}
             </div>
             {showAddOcc && <AddOccasionModal onClose={()=>setShowAddOcc(false)} onAdd={addOccasion}/>}
+            {editOcc && <AddOccasionModal initial={editOcc} onClose={()=>setEditOcc(null)} onAdd={o => updateOccasion(editOcc.id, o)}/>}
           </div>
         )}
 

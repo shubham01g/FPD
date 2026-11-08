@@ -10,6 +10,7 @@ import { StoredImage } from "./StoredImage";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroTravelPhoto from "../../imports/travel_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -167,6 +168,7 @@ const TRAVEL_CSS = `
 `;
 
 export function TravelPlanner() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
 
@@ -485,7 +487,7 @@ export function TravelPlanner() {
                 <AttachDocumentField value={tDoc} onChange={setTDoc} folder="personal" label="Attach Document (itinerary, tickets, travel insurance, passport copy)" sectionId="travel-planner" sectionLabel="Travel Planner"/>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveTrip}>{editingTrip ? "Save Changes" : "Add Trip"}</button>
+                <button className="save" onClick={guard(saveTrip)} disabled={saving}>{editingTrip ? "Save Changes" : "Add Trip"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>

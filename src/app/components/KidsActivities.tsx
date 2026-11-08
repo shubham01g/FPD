@@ -8,6 +8,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroKidsPhoto from "../../imports/kidsactivities_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -193,6 +194,7 @@ const KIDS_CSS = `
 `;
 
 export function KidsActivities() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
 
@@ -549,7 +551,7 @@ export function KidsActivities() {
                 <AttachDocumentField value={kDoc} onChange={setKDoc} folder="personal" label="Attach Document (registration form, waiver, medical clearance)" sectionId="kids-activities" sectionLabel="Kids Activities" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveActivity}>{editingId != null ? "Save Changes" : "Add Activity"}</button>
+                <button className="save" onClick={guard(saveActivity)} disabled={saving}>{editingId != null ? "Save Changes" : "Add Activity"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>

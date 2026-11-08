@@ -10,6 +10,7 @@ import { StoredImage } from "./StoredImage";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes, wills & personal assets) ── */
 const TEXT    = "#EFF2F9";
@@ -198,6 +199,7 @@ const WARR_CSS = `
 `;
 
 export function Warranties() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -489,7 +491,7 @@ export function Warranties() {
 
                   {w.providerPhone && (
                     <div>
-                      <button className="btn-pos" onClick={() => toast.success(`Calling warranty support: ${w.providerPhone}`)}>
+                      <button className="btn-pos" onClick={() => { window.location.href = `tel:${String(w.providerPhone).replace(/[^\d+]/g, "")}`; }}>
                         <Phone size={11} /> Call Support
                       </button>
                     </div>
@@ -541,7 +543,7 @@ export function Warranties() {
                 <AttachDocumentField value={wDoc} onChange={setWDoc} folder="personal" sectionId="warranties" sectionLabel="Warranties" label="Attach Document (receipt, warranty card, protection plan)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveWarranty}>{editingId !== null ? "Save Changes" : "Add Warranty"}</button>
+                <button className="save" onClick={guard(saveWarranty)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Warranty"}</button>
                 <button className="btn-sec" onClick={closeWarrantyModal}>Cancel</button>
               </div>
             </div>

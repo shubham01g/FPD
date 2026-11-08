@@ -523,7 +523,7 @@ function UserRoute() {
       case "family-friends":      return <FamilyFriends/>;
       case "legacy-vault":        return <LegacyVault/>;
       case "final-wishes":        return <FinalWishes/>;
-      case "wills-trusts":        return <WillsAndTrusts/>;
+      case "wills-trusts":        return <WillsAndTrusts onNavigate={nav}/>;
       case "job-history":         return <JobHistory/>;
       case "daycare-info":        return <DaycareInfo/>;
       case "id-keeper":           return <IDKeeper/>;

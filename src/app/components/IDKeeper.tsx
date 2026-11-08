@@ -8,6 +8,7 @@ import { useDemo } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import heroIDPhoto from "../../imports/idkeeper_hero_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -150,6 +151,7 @@ const IDK_CSS = `
 `;
 
 export function IDKeeper() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [ids, setIds] = useState<IDRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -433,7 +435,7 @@ export function IDKeeper() {
                 ))}
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveID}>{editingID ? "Save Changes" : "Add to ID Keeper"}</button>
+                <button className="save" onClick={guard(saveID)} disabled={saving}>{editingID ? "Save Changes" : "Add to ID Keeper"}</button>
                 <button className="btn-sec" onClick={closeIDModal}>Cancel</button>
               </div>
             </div>

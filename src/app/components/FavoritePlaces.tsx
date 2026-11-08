@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
 import heroPlacesPhoto from "../../imports/favoriteplaces_hero_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -179,6 +180,7 @@ const FAV_CSS = `
 `;
 
 export function FavoritePlaces() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [places, setPlaces] = useState<Place[]>([]);
 
@@ -422,12 +424,12 @@ export function FavoritePlaces() {
 
                   <div className="pacts">
                     {place.phone && (
-                      <button className="pact-btn" onClick={() => toast.success(`Calling ${place.name}: ${place.phone}`)}>
+                      <button className="pact-btn" onClick={() => { window.location.href = `tel:${String(place.phone).replace(/[^\d+]/g, "")}`; }}>
                         <Phone size={11} />{place.phone}
                       </button>
                     )}
                     {place.website && (
-                      <button className="pact-btn" onClick={() => toast.success(`Opening: ${place.website}`)}>
+                      <button className="pact-btn" onClick={() => window.open(/^https?:\/\//i.test(place.website) ? place.website : `https://${place.website}`, "_blank", "noopener,noreferrer")}>
                         <Globe size={11} />{place.website}
                       </button>
                     )}
@@ -472,7 +474,7 @@ export function FavoritePlaces() {
                 </div>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={savePlace}>{editingPlace ? "Save Changes" : "Save Place"}</button>
+                <button className="save" onClick={guard(savePlace)} disabled={saving}>{editingPlace ? "Save Changes" : "Save Place"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>

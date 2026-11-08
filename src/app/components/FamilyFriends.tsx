@@ -58,12 +58,12 @@ function BlastEmailModal({
     setSending(true);
     // Build mailto: BCC link so recipients see only themselves
     const bcc = withEmail.map(c => c.email!).join(",");
-    setTimeout(() => {
-      setSending(false);
-      window.open(`mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-      toast.success(`Email blast sent to ${withEmail.length} contacts in "${group.name}"`);
-      onClose();
-    }, 600);
+    // This opens the user's own email app with everyone in BCC; nothing is
+    // sent until they press Send there (it used to say "Email blast sent").
+    setSending(false);
+    window.open(`mailto:?bcc=${encodeURIComponent(bcc)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    toast.info(`Opened your email app with ${withEmail.length} contacts from "${group.name}" in BCC — press Send there.`);
+    onClose();
   }
 
   return (
@@ -124,7 +124,7 @@ const groupConfig = {
 };
 
 function AddContactModal({ editing, onClose, onAdd, onSave }: {
-  editing?: Contact | null; onClose: () => void; onAdd: (c: Contact) => void; onSave?: (id: string, updates: Partial<Contact>) => void;
+  editing?: Contact | null; onClose: () => void; onAdd: (c: Contact) => Promise<boolean | void> | void; onSave?: (id: string, updates: Partial<Contact>) => void;
 }) {
   useEscapeKey(true, onClose);
   const [form, setForm] = useState(() => editing
@@ -136,12 +136,13 @@ function AddContactModal({ editing, onClose, onAdd, onSave }: {
   const submit = async () => {
     if (!form.name) { toast.error("Name is required"); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
     const initials = form.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
     if (editing) {
       onSave?.(editing.id, { ...form, initials, photo: photo || undefined });
     } else {
-      onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
+      // Confirm only after the database accepted it (the toast used to come first).
+      const ok = await onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
+      if (ok === false) { setLoading(false); return; }
       toast.success(`${form.name} added to Family & Friends`);
     }
     setLoading(false);
@@ -607,10 +608,11 @@ export function FamilyFriends() {
   });
 
   const addContact = async (c: Contact) => {
-    if (!authUser) { toast.error("Sign in to save contacts."); return; }
+    if (!authUser) { toast.error("Sign in to save contacts."); return false; }
     const { error } = await tables.familyFriends.add(authUser.id, toRow(c));
-    if (error) { toast.error(`Could not add contact: ${error.message}`); return; }
+    if (error) { toast.error(`Could not add contact: ${error.message}`); return false; }
     await reload();
+    return true;
   };
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<Contact["group"] | "all" | "starred">("all");
@@ -947,7 +949,7 @@ export function FamilyFriends() {
         </div>
       </div>
 
-      {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => { void addContact(c); }}/>}
+      {showAdd && <AddContactModal onClose={() => setShowAdd(false)} onAdd={c => addContact(c)}/>}
       {editingContact && (
         <AddContactModal
           editing={editingContact}

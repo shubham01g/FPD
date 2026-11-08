@@ -8,6 +8,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroDaycarePhoto from "../../imports/daycare_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -182,8 +183,24 @@ const DAYCARE_CSS = `
 `;
 
 export function DaycareInfo() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [records, setRecords] = useState<DaycareRecord[]>([]);
+
+  /* Adds an authorized pickup person to the record (authorized_pickups);
+     this used to show a "(demo)" toast. */
+  const addPickup = async (rec: { id: string; authorizedPickups: AuthorizedPerson[] }) => {
+    const name = window.prompt("Full name of the person allowed to pick up?")?.trim();
+    if (!name) return;
+    const relationship = window.prompt(`How is ${name} related to the child? (e.g. Grandmother)`)?.trim() ?? "";
+    const phone = window.prompt(`${name}'s phone number?`)?.trim() ?? "";
+    const photoId = window.prompt("Photo ID on file with the daycare? (e.g. Driver's license on file)")?.trim() || "Photo ID not recorded";
+    const next = [...rec.authorizedPickups, { name, relationship, phone, photoId }];
+    const { error } = await tables.daycareRecords.update(rec.id, { authorized_pickups: next });
+    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    await reload();
+    toast.success(`${name} added as an authorized pickup`);
+  };
 
   const reload = useCallback(async () => {
     if (!authUser) { setRecords([]); return; }
@@ -439,7 +456,7 @@ export function DaycareInfo() {
                             </div>
                           </div>
                         ))}
-                        <button className="adddash" onClick={() => toast.success("Add authorized pickup — opens form (demo)")}>
+                        <button className="adddash" onClick={() => void addPickup(rec)}>
                           <Plus size={13} /> Add Authorized Pickup Person
                         </button>
                       </>
@@ -482,7 +499,7 @@ export function DaycareInfo() {
                 <AttachDocumentField value={dDoc} onChange={setDDoc} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveRecord}>{editingRecord ? "Save Changes" : "Add Daycare"}</button>
+                <button className="save" onClick={guard(saveRecord)} disabled={saving}>{editingRecord ? "Save Changes" : "Add Daycare"}</button>
                 <button className="btn-sec" onClick={closeDaycareModal}>Cancel</button>
               </div>
             </div>

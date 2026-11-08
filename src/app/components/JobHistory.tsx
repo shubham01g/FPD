@@ -8,6 +8,7 @@ import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroJobPhoto from "../../imports/jobhistory_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -144,6 +145,7 @@ const JOB_CSS = `
 `;
 
 export function JobHistory() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -434,7 +436,7 @@ export function JobHistory() {
                 <AttachDocumentField value={jDoc} onChange={setJDoc} folder="personal" label="Attach Document (offer letter, W-2, contract)" sectionId="job-history" sectionLabel="Job History" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveJob}>{editingJob ? "Save Changes" : "Add Record"}</button>
+                <button className="save" onClick={guard(saveJob)} disabled={saving}>{editingJob ? "Save Changes" : "Add Record"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>

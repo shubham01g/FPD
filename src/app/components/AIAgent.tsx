@@ -7,6 +7,7 @@ import {
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import heroQAPhoto from "../../imports/ai_hero_qa.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { publicApi } from "../services/publicApi";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
 const TEXT    = "#EFF2F9";
@@ -142,6 +143,32 @@ const KB: Record<string, string> = {
 };
 
 /* ── Match query to knowledge base ─────────────────────────────── */
+
+/* The plans answer is rebuilt from the live price list (GET /public/plans and
+   /public/platform) so it can't drift from what checkout charges; the text
+   above is only the fallback until that loads. */
+interface LivePlan { id: string; name: string; price_monthly: number; price_annual: number; storage_gb: number; max_contacts: number; overage_rate: number; billable: boolean }
+let livePlansLoaded = false;
+async function loadLivePlans() {
+  if (livePlansLoaded) return;
+  try {
+    const [{ plans }, platform] = await Promise.all([
+      publicApi.get<{ plans: LivePlan[] }>("/plans"),
+      publicApi.get<{ starterTrialDays?: number; continuationFee?: { amount: number; months: number } }>("/platform"),
+    ]);
+    if (!plans?.length) return;
+    const gb = (n: number) => (n >= 1024 ? `${n / 1024} TB` : `${n} GB`);
+    const rows = plans.map(pl => pl.billable
+      ? `| ${pl.name} | $${pl.price_monthly.toFixed(2)} | $${pl.price_annual.toFixed(2)}/yr | ${gb(pl.storage_gb)} | ${pl.max_contacts < 0 ? "Unlimited" : pl.max_contacts} | $${pl.overage_rate.toFixed(2)}/GB |`
+      : `| ${pl.name} | Free for ${platform.starterTrialDays ?? 14} days | — | ${gb(pl.storage_gb)} | ${pl.max_contacts} | None |`);
+    const fee = platform.continuationFee;
+    KB["plans"] = `**Final Pass Down Subscription Plans:**\n\n| Plan | Monthly | Yearly | Storage | Contacts | Overage |\n|------|---------|--------|---------|----------|---------|\n${rows.join("\n")}`
+      + (fee ? `\n\n**Legacy Continuation Fee:** $${fee.amount} one-time, ${fee.months} months of legacy access after passing.` : "")
+      + `\n\nChange plans any time in **Billing & Earn → Usage & Billing**.`;
+    livePlansLoaded = true;
+  } catch { /* keep the built-in answer */ }
+}
+
 function getResponse(query: string): string {
   const q = query.toLowerCase();
 
@@ -546,6 +573,7 @@ const AI_CSS = `
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════════ */
 export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
+  useEffect(() => { void loadLivePlans(); }, []);
   const [open, setOpen] = useState(pageMode);
   const [minimized, setMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([{

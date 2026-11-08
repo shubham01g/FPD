@@ -291,7 +291,7 @@ function TaxFields({ deductible, taxYear, onDeductible, onTaxYear }: {
 
 /* ── Receipt Detail Modal ─────────────────────────────────────────── */
 function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
-  receipt: Receipt; onClose: () => void; onDelete: () => void;
+  receipt: Receipt; onClose: () => void; onDelete: () => Promise<boolean>;
   onSaveTax: (patch: { tax_year: number | null; tax_deductible: boolean }) => void;
 }) {
   const color = catColor(receipt.category);
@@ -368,7 +368,7 @@ function ReceiptDetailModal({ receipt, onClose, onDelete, onSaveTax }: {
             </button>
           </div>
           <button className="btn-sec" style={{ justifyContent: "center", color: NEG, background: "rgba(208,107,107,0.08)", borderColor: "rgba(208,107,107,0.2)" }}
-            onClick={() => { onDelete(); toast.error("Receipt deleted"); onClose(); }}>
+            onClick={async () => { if (!window.confirm(`Delete the ${receipt.merchant} receipt?`)) return; if (await onDelete()) { toast.success("Receipt deleted"); onClose(); } }}>
             <Trash2 size={13} /> Delete Receipt
           </button>
         </div>
@@ -881,8 +881,9 @@ export function ReceiptsExpenses() {
 
   const deleteReceipt = async (id: string) => {
     const { error } = await tables.receipts.remove(id);
-    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+    if (error) { toast.error(`Could not delete: ${error.message}`); return false; }
     await reload();
+    return true;
   };
 
   const accent = section === "personal" ? POS : ACCENT2;

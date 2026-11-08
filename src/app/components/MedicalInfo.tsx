@@ -231,7 +231,7 @@ function TChip({ label, active, onToggle }: { label: string; active: boolean; on
   );
 }
 
-function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null; onClose: () => void; onSave: (a: Omit<Allergy, "id">) => Promise<void> }) {
+function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null; onClose: () => void; onSave: (a: Omit<Allergy, "id">) => Promise<boolean | void> }) {
   const [form, setForm] = useState(() => editing
     ? { allergen: editing.allergen, severity: editing.severity, reaction: editing.reaction, type: editing.type, diagnosed: editing.diagnosed }
     : { allergen: "", severity: "mild" as Allergy["severity"], reaction: "", type: "food", diagnosed: new Date().getFullYear().toString() });
@@ -246,7 +246,9 @@ function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null
     const documentUrls = aDoc
       ? [...(editing?.documentUrls ?? []).filter(d => d !== aDoc), aDoc]
       : editing?.documentUrls ?? [];
-    await onSave({ ...form, documentUrls });
+    // Close and confirm only when the save really landed.
+    const ok = await onSave({ ...form, documentUrls });
+    if (ok === false) { setLoading(false); return; }
     onClose();
     if (editing) toast.success("Allergy updated");
   };
@@ -276,7 +278,7 @@ function AddAllergyModal({ editing, onClose, onSave }: { editing: Allergy | null
   );
 }
 
-function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null; onClose: () => void; onSave: (m: Omit<Medication, "id">) => Promise<void> }) {
+function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null; onClose: () => void; onSave: (m: Omit<Medication, "id">) => Promise<boolean | void> }) {
   const [form, setForm] = useState(() => editing
     ? { name: editing.name, dose: editing.dose, frequency: editing.frequency, condition: editing.condition, prescriber: editing.prescriber, pharmacy: editing.pharmacy, refillDate: editing.refillDate }
     : { name: "", dose: "", frequency: "", condition: "", prescriber: "", pharmacy: "", refillDate: "" });
@@ -289,7 +291,9 @@ function AddMedModal({ editing, onClose, onSave }: { editing: Medication | null;
     const documentUrls = mDoc
       ? [...(editing?.documentUrls ?? []).filter(d => d !== mDoc), mDoc]
       : editing?.documentUrls ?? [];
-    await onSave({ ...form, documentUrls });
+    // Close and confirm only when the save really landed.
+    const ok = await onSave({ ...form, documentUrls });
+    if (ok === false) { setLoading(false); return; }
     onClose();
     if (editing) toast.success("Medication updated");
   };

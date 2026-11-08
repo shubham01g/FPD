@@ -315,7 +315,8 @@ export function AffiliateProgram() {
             {[
               { label: "Share via Email", action: () => { window.open(`mailto:?subject=Join Final Pass Down&body=Use my referral link: ${affiliateLink}`); } },
               { label: "Share via SMS",   action: () => { window.open(`sms:?body=Join Final Pass Down with my link: ${affiliateLink}`); } },
-              { label: "Download Materials", action: () => { const a=document.createElement("a"); a.href="#"; alert("Marketing kit download started (demo)"); } },
+              // No downloadable kit exists yet, so this asks the affiliates team for it.
+              { label: "Request Materials", action: () => { window.location.href = `mailto:${FPD_EMAIL.affiliates}?subject=${encodeURIComponent("Affiliate marketing materials")}&body=${encodeURIComponent(`Please send me the marketing kit. My link: ${affiliateLink}`)}`; } },
             ].map(btn => (
               <button key={btn.label} onClick={btn.action} className="share-btn">
                 <Share2 size={13} /> {btn.label}

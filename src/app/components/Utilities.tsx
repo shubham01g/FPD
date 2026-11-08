@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the rest of Life Records) ── */
 const TEXT    = "#EFF2F9";
@@ -119,6 +120,7 @@ const UTIL_CSS = `
 `;
 
 export function Utilities() {
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [utilityList, setUtilityList] = useState<UtilityRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -322,7 +324,7 @@ export function Utilities() {
                 <AttachDocumentField value={uDoc} onChange={setUDoc} folder="utilities" sectionId="utilities" sectionLabel="Utilities" label="Attach Document (bill, statement, account setup)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveUtility}>{editingId !== null ? "Save Changes" : "Add Utility"}</button>
+                <button className="save" onClick={guard(saveUtility)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Utility"}</button>
                 <button className="btn-sec" onClick={closeUtilityModal}>Cancel</button>
               </div>
             </div>

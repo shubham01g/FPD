@@ -9,6 +9,8 @@ import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
 import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
+import { useConfirmDelete } from "./ConfirmDelete";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders, final wishes & wills) ── */
 const TEXT    = "#EFF2F9";
@@ -196,6 +198,7 @@ const fromMoney = (v: string) => {
 };
 
 export function PersonalAssets() {
+  const { busy: saving, guard } = useSingleFlight();
   const [tab, setTab] = useState<Tab>("vehicles");
   const { authUser } = useAuth();
   const [vehicleList, setVehicleList] = useState<any[]>([]);
@@ -208,6 +211,21 @@ export function PersonalAssets() {
   /* Each tab has its own table (migration 007, columns completed by 015).
      Money is NUMERIC in the database but the UI shows "$45,000" strings, so
      it converts at this boundary rather than changing either side. */
+  /* Records here had no Delete at all; only SQL could remove one. */
+  const { requestDelete, confirmDialog } = useConfirmDelete();
+  function askDelete(table: "vehicles" | "realEstate" | "digitalAssets" | "weapons" | "weaponsLocker" | "collectibles", id: unknown, label: unknown) {
+    if (!id) return;
+    requestDelete({
+      label: String(label ?? "this item"), noun: "item",
+      onConfirm: async () => {
+        const { error } = await tables[table].remove(String(id));
+        if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+        await reload();
+        toast.success("Deleted");
+      },
+    });
+  }
+
   const reload = useCallback(async () => {
     if (!authUser) return;
     const fail = (what: string, e: { message: string }) => toast.error(`Could not load ${what}: ${e.message}`);
@@ -608,6 +626,7 @@ export function PersonalAssets() {
                   {v.notes && <div className="notewarn">{v.notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editVehicle(v)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("vehicles", v.id, (([v?.year, v?.make, v?.model].filter(Boolean).join(" ")) || "this item"))}><Trash2 size={12} /> Delete</button>
                   </div>
                 </div>
               </div>
@@ -692,6 +711,7 @@ export function PersonalAssets() {
                   {r.notes && <div className="notewarn">{r.notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editRealEstate(r)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("realEstate", r.id, ((r?.name ?? r?.propertyName ?? r?.address) || "this item"))}><Trash2 size={12} /> Delete</button>
                     <ScanButton folder="property" onUpload={doc => toast.success(`"${doc.name}" added to ${r.address}`)} size="sm" label="Scan Document" />
                   </div>
                 </div>
@@ -728,6 +748,7 @@ export function PersonalAssets() {
                 {(d as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((d as any).attachedDoc)}</div>}
                 <div className="dacts">
                   <button className="btn-sec" onClick={() => editDigital(d)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("digitalAssets", d.id, ((d?.name ?? d?.assetName) || "this item"))}><Trash2 size={12} /> Delete</button>
                   <ScanButton folder="digital" onUpload={doc => { setDigitalList(p => p.map(x => x.id === d.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${d.asset}`); }} size="sm" label="Scan Document" />
                 </div>
               </div>
@@ -785,6 +806,7 @@ export function PersonalAssets() {
                   </div>
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editWeapon(w)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("weapons", w.id, (([w?.make, w?.model].filter(Boolean).join(" ")) || "this item"))}><Trash2 size={12} /> Delete</button>
                   </div>
                 </div>
               </div>
@@ -832,6 +854,7 @@ export function PersonalAssets() {
                   {(w as any).notes && <div className="notewarn">{(w as any).notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editWeaponsLocker(w)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("weaponsLocker", w.id, (([w?.make, w?.model].filter(Boolean).join(" ") || w?.itemType) || "this item"))}><Trash2 size={12} /> Delete</button>
                   </div>
                 </div>
               </div>
@@ -871,6 +894,7 @@ export function PersonalAssets() {
                   {c.notes && <div className="noteinfo">{c.notes}</div>}
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editCollectible(c)}><Edit2 size={12} /> Edit</button>
+                    <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("collectibles", c.id, ((c?.name ?? c?.itemName) || "this item"))}><Trash2 size={12} /> Delete</button>
                     <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" linked to ${c.name}`)} size="sm" label="Attach Document" />
                   </div>
                 </div>
@@ -938,7 +962,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={vDoc} onChange={setVDoc} folder="vehicles" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (title, registration, insurance)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addVehicle}>{editingId !== null ? "Save Changes" : "Add Vehicle"}</button>
+                <button className="save" onClick={guard(addVehicle)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Vehicle"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -969,7 +993,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={dDoc} onChange={setDDoc} folder="digital" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (account statement, ownership record)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addDigital}>{editingId !== null ? "Save Changes" : "Add Asset"}</button>
+                <button className="save" onClick={guard(addDigital)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Asset"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -1001,7 +1025,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={wDoc} onChange={setWDoc} folder="firearms" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (registration, purchase receipt)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addWeapon}>{editingId !== null ? "Save Changes" : "Add Firearm"}</button>
+                <button className="save" onClick={guard(addWeapon)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Firearm"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -1081,7 +1105,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={rDoc} onChange={setRDoc} folder="property" sectionId="personal-assets" sectionLabel="Personal Assets" label="Attach Document (deed, mortgage statement, title)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addRealEstate}>{editingId !== null ? "Save Changes" : "Add Property"}</button>
+                <button className="save" onClick={guard(addRealEstate)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Property"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -1113,7 +1137,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={wlDoc} onChange={setWlDoc} folder="weapons_locker" sectionId="weapons_locker" sectionLabel="Weapons Locker" label="Attach Document (appraisal, provenance, receipt)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addWeaponsLocker}>{editingId !== null ? "Save Changes" : "Add to Locker"}</button>
+                <button className="save" onClick={guard(addWeaponsLocker)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add to Locker"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -1145,7 +1169,7 @@ export function PersonalAssets() {
                 <AttachDocumentField value={cDoc} onChange={setCDoc} folder="personal" sectionId="collectibles" sectionLabel="Collectibles" label="Attach Document (appraisal, certificate of authenticity)" />
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={addCollectible}>{editingId !== null ? "Save Changes" : "Add Collectible"}</button>
+                <button className="save" onClick={guard(addCollectible)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Collectible"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
@@ -1161,6 +1185,7 @@ export function PersonalAssets() {
           onChange={e => { if (e.target.files?.[0]) { uploadPhoto(e.target.files[0]); e.target.value = ""; } }}
         />
       </div>
+      {confirmDialog}
     </div>
   );
 }

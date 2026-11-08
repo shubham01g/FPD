@@ -18,6 +18,7 @@ import { persistMediaValue, useStoredFileUrl } from "../services/storedFiles";
 import { useAuth } from "../context/AuthContext";
 import { useDemo } from "../context/DemoContext";
 import heroMessagesPhoto from "../../imports/messages_hero_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -414,6 +415,7 @@ function RecorderPanel({ medium, onCapture }: { medium: Medium; onCapture: (dur:
 function ComposeModal({
   editing, onClose, onSave,
 }: { editing: Message | null; onClose: () => void; onSave: (m: Message) => void }) {
+  const { busy: saving, guard } = useSingleFlight();
   const { contacts } = useDemo();
   /* Contacts can repeat across types (a guardian who is also a legacy
      contact), so collapse by name for the picker. */
@@ -615,7 +617,7 @@ function ComposeModal({
 
         <div className="modal-foot">
           <button className="btn-sec" onClick={onClose}>Cancel</button>
-          <button className="save" onClick={submit}>
+          <button className="save" onClick={guard(submit)} disabled={saving}>
             <Send size={14} /> {editing ? "Save Changes" : "Save Message"}
           </button>
         </div>

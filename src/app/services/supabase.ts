@@ -397,7 +397,10 @@ export const db = {
   // Legacy continuation fee
   async getContinuationFee(userId: string) {
     return supabase.from("legacy_continuation_fees")
-      .select("*").eq("user_id", userId).eq("status","paid").single<DBLegacyContinuationFee>();
+      // Newest paid row; .single() errored (and read as "unpaid") when an
+      // account had two paid rows.
+      .select("*").eq("user_id", userId).eq("status","paid")
+      .order("paid_at", { ascending: false }).limit(1).maybeSingle<DBLegacyContinuationFee>();
   },
   async recordContinuationFee(fee: Partial<DBLegacyContinuationFee>) {
     return supabase.from("legacy_continuation_fees").insert(fee).select().single<DBLegacyContinuationFee>();
@@ -530,6 +533,12 @@ export const db = {
   },
   async addOccasion(o: Omit<DBOccasion,"id">) {
     return supabase.from("occasions").insert(o).select().single<DBOccasion>();
+  },
+  async updateOccasion(id: string, o: Partial<Omit<DBOccasion,"id"|"user_id">>) {
+    return supabase.from("occasions").update(o).eq("id", id).select().single<DBOccasion>();
+  },
+  async deleteOccasion(id: string) {
+    return supabase.from("occasions").delete().eq("id", id);
   },
 
   // Entitlement state — read-only for the owner. Both tables grant owner SELECT

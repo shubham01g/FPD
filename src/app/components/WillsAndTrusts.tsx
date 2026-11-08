@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { FileText, Plus, Edit2, CheckCircle, Shield, X, Users, Clock } from "lucide-react";
+import { FileText, Plus, Edit2, CheckCircle, Shield, X, Users, Clock , Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import heroWillsPhoto from "../../imports/wills_hero_photo.webp";
 import trustSidePhoto from "../../imports/trust_side_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
+import { useDemo } from "../context/DemoContext";
+import { useConfirmDelete } from "./ConfirmDelete";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
 const TEXT    = "#EFF2F9";
@@ -154,7 +157,13 @@ const WILLS_CSS = `
 
 const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" };
 
-export function WillsAndTrusts() {
+export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
+  /* "View in Vault" opens the File Cabinet's Legal Documents folder, where
+     scanned copies are filed (it used to only show a toast). */
+  const { addDoc, setPendingFolderId } = useDemo();
+  const openLegalFolder = () => { setPendingFolderId("legal"); onNavigate?.("file-cabinet"); };
+  const { requestDelete, confirmDialog } = useConfirmDelete();
+  const { busy: saving, guard } = useSingleFlight();
   const { authUser } = useAuth();
   const [wills, setWills] = useState<WillRow[]>([]);
 
@@ -253,7 +262,7 @@ export function WillsAndTrusts() {
             <p>Wills, trusts, and powers of attorney — executed with your attorney and kept current, so your intentions carry the full weight of the law.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={openAdd}><Plus size={15} /> Add Document</button>
-              <button className="hbtn ghost" onClick={() => toast.success(`Opening ${wills[0]?.type ?? "your documents"} in Legacy Vault`)}><Shield size={15} /> View in Vault</button>
+              <button className="hbtn ghost" onClick={openLegalFolder}><Shield size={15} /> View in Vault</button>
             </div>
           </div>
         </div>
@@ -341,15 +350,32 @@ export function WillsAndTrusts() {
               </div>
 
               <div className="dacts">
-                <button className="btn-ghost" onClick={() => toast.success(`Opening ${will.type} in Legacy Vault`)}>
+                <button className="btn-ghost" onClick={openLegalFolder}>
                   <FileText size={13} /> View in Vault
                 </button>
                 <button className="btn-sec" onClick={() => openEdit(will)}>
                   <Edit2 size={13} /> Update Record
                 </button>
+                <button className="btn-sec" style={{ color: "#FC8181" }} onClick={() => requestDelete({
+                  label: will.type, noun: "record",
+                  onConfirm: async () => {
+                    const { error } = await tables.willsTrusts.remove(String(will.id));
+                    if (error) { toast.error(`Could not delete: ${error.message}`); return; }
+                    await reload();
+                    toast.success("Deleted");
+                  },
+                })}>
+                  <Trash2 size={13} /> Delete
+                </button>
                 <ScanButton
                   folder="legal"
-                  onUpload={doc => toast.success(`"${doc.name}" uploaded and linked to ${will.type}`)}
+                  onUpload={doc => {
+                    // Really store the scan in the Legal Documents folder.
+                    void addDoc({ name: doc.name, category: "legal", subCategory: undefined, folderId: undefined,
+                      size: Number((doc.file.size / 1024 / 1024).toFixed(1)), sizeUnit: "MB",
+                      type: doc.file.type.includes("pdf") ? "pdf" : doc.file.type.startsWith("image") ? "image" : "other",
+                      status: "pending", encrypted: false }, doc.file);
+                  }}
                   size="sm"
                   label="Scan & Upload Copy"
                 />
@@ -398,13 +424,14 @@ export function WillsAndTrusts() {
                 </div>
               </div>
               <div className="modal-foot">
-                <button className="save" onClick={saveDocument}>{editingId != null ? "Save Changes" : "Add Document"}</button>
+                <button className="save" onClick={guard(saveDocument)} disabled={saving}>{editingId != null ? "Save Changes" : "Add Document"}</button>
                 <button className="btn-sec" onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </div>
         )}
       </div>
+      {confirmDialog}
     </div>
   );
 }

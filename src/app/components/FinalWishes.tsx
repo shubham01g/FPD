@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useDemo, type FinalWish as Wish, type FuneralPlan } from "../context/DemoContext";
 import heroWishesPhoto from "../../imports/finalwishes_hero_photo.webp";
 import heroFuneralPhoto from "../../imports/funeral_hero_photo.webp";
+import { useSingleFlight } from "../hooks/useSingleFlight";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault & folders) ── */
 const TEXT    = "#EFF2F9";
@@ -184,6 +185,7 @@ const WISHES_CSS = `
 function WishModal({ editing, onClose, onSave }: {
   editing: Wish | null; onClose: () => void; onSave: (w: Omit<Wish,"id">) => void;
 }) {
+  const { busy: saving, guard } = useSingleFlight();
   const [form, setForm] = useState<Partial<Wish>>(editing ?? { category: WISH_CATEGORIES[0], item: "", recipient: "", notes: "" });
 
   React.useEffect(() => {
@@ -236,7 +238,7 @@ function WishModal({ editing, onClose, onSave }: {
         </div>
         <div className="modal-foot">
           <button className="btn-sec" onClick={onClose}>Cancel</button>
-          <button className="btn-primary" onClick={submit}>
+          <button className="btn-primary" onClick={guard(submit)} disabled={saving}>
             <CheckCircle size={14} /> {editing ? "Save Changes" : "Add Wish"}
           </button>
         </div>
@@ -291,7 +293,7 @@ export function FinalWishes() {
   // Every funeral card edits the same planDraft, so one Edit / Save covers them all.
   const planActs = (
     <div className="acts-row">
-      <button className="btn-pos" onClick={async () => { await saveFuneralPlan(planDraft); setEditingPlan(false); }}>
+      <button className="btn-pos" onClick={async () => { if (await saveFuneralPlan(planDraft)) setEditingPlan(false); }}>
         <Check size={13} /> Save Changes
       </button>
       <button className="btn-sec" onClick={() => { setPlanDraft(funeralPlan); setEditingPlan(false); }}>Cancel</button>
