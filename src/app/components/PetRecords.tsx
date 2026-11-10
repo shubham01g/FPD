@@ -711,9 +711,17 @@ export function PetRecords() {
                       <span style={{ fontSize: 35.5 }}>📄</span>
                       <div className="dt" style={{ fontSize: 16 }}>Upload Documents</div>
                       <div className="ds">Minimum 1 Maximum 10 documents</div>
-                      <ScanButton folder="pets" onUpload={doc=>{ setPetDocs(p=>[...p,doc.name]); toast.success(`"${doc.name}" attached`); }} size="sm" label="Scan or Upload"/>
+                      <ScanButton folder="pets" store={{ sectionLabel: "Pet Records" }} onUpload={doc => {
+                        // Stored + filed by the scanner; saved on the pet with the form.
+                        if (!doc.path) return;
+                        setPetDocs(p => [...p.filter(x => x !== doc.path), doc.path!]);
+                        toast.success(`"${doc.name}" attached — saved with the pet`);
+                      }} size="sm" label="Scan or Upload"/>
                     </div>
-                    {petDocs.length > 0 && <div className="pfdocs">{petDocs.map(d=><span key={d} className="pfdoc">📄 {d}</span>)}</div>}
+                    {petDocs.length > 0 && <div className="pfdocs">{petDocs.map(d=>(
+                      <span key={d} className="pfdoc">📄 {attachmentDisplayName(d)}
+                        <button type="button" title="Remove" onClick={() => setPetDocs(p => p.filter(x => x !== d))} style={{ marginLeft: 6, color: "#FC8181", background: "none", border: "none", cursor: "pointer" }}>×</button>
+                      </span>))}</div>}
                   </div>
                 </div>
 

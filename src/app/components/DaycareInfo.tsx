@@ -62,6 +62,8 @@ interface DaycareRecord {
 // `days` is TEXT[] in the table but a single comma-separated field in the form.
 const toDays = (v: unknown) => Array.isArray(v) ? (v as string[]).join(", ") : String(v ?? "");
 const fromDays = (v: string) => v.split(",").map(d => d.trim()).filter(Boolean);
+/* Older rows were saved with the placeholder "None known" / "None". */
+const hasInfo = (v: string) => Boolean(v.trim()) && !/^none( known)?$/i.test(v.trim());
 const fromMoney = (v: string) => { const n = Number(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) && String(v).trim() !== "" ? n : null; };
 const toMoney = (n: number | null | undefined) => (n === null || n === undefined ? "" : `$${Number(n).toLocaleString()}`);
 
@@ -242,7 +244,7 @@ export function DaycareInfo() {
   const [editingRecord, setEditingRecord] = useState<DaycareRecord | null>(null);
   const [activeTab, setActiveTab] = useState<"info"|"pickups"|"docs">("info");
   const recordsRef = React.useRef<HTMLDivElement>(null);
-  const emptyForm = { facilityName:"", childName:"", address:"", phone:"", email:"", directorName:"", teacherName:"", dropoffTime:"", pickupTime:"", days:"Monday – Friday", tuition:"", allergiesOnFile:"None known", emergencyContact:"", emergencyPhone:"", notes:"" };
+  const emptyForm = { facilityName:"", childName:"", address:"", phone:"", email:"", website:"", directorName:"", teacherName:"", teacherPhone:"", dropoffTime:"", pickupTime:"", days:"Monday – Friday", tuition:"", tuitionDue:"", paymentMethod:"", enrollDate:"", allergiesOnFile:"", medicationsOnFile:"", emergencyContact:"", emergencyPhone:"", notes:"" };
   const [form, setForm] = useState(emptyForm);
   const [dDoc, setDDoc] = useState<string | null>(null);
 
@@ -270,10 +272,11 @@ export function DaycareInfo() {
     setEditingRecord(rec);
     setForm({
       facilityName: rec.facilityName, childName: rec.childName, address: rec.address, phone: rec.phone,
-      email: rec.email, directorName: rec.directorName, teacherName: rec.teacherName,
-      dropoffTime: rec.dropoffTime, pickupTime: rec.pickupTime, days: rec.days, tuition: rec.tuition,
-      allergiesOnFile: rec.allergiesOnFile, emergencyContact: rec.emergencyContact, emergencyPhone: rec.emergencyPhone,
-      notes: rec.notes,
+      email: rec.email, website: rec.website, directorName: rec.directorName, teacherName: rec.teacherName,
+      teacherPhone: rec.teacherPhone, dropoffTime: rec.dropoffTime, pickupTime: rec.pickupTime, days: rec.days,
+      tuition: rec.tuition, tuitionDue: rec.tuitionDue, paymentMethod: rec.paymentMethod, enrollDate: rec.enrollDate,
+      allergiesOnFile: rec.allergiesOnFile, medicationsOnFile: rec.medicationsOnFile,
+      emergencyContact: rec.emergencyContact, emergencyPhone: rec.emergencyPhone, notes: rec.notes,
     });
     setDDoc(null);   // attaching is additive; existing documents are kept
     setShowAdd(true);
@@ -291,22 +294,21 @@ export function DaycareInfo() {
 
     const row = {
       facility_name: form.facilityName, child_name: form.childName,
-      address: form.address, phone: form.phone, email: form.email,
-      director_name: form.directorName, teacher_name: form.teacherName,
+      address: form.address, phone: form.phone, email: form.email, website: form.website || null,
+      director_name: form.directorName, teacher_name: form.teacherName, teacher_phone: form.teacherPhone || null,
       dropoff_time: form.dropoffTime, pickup_time: form.pickupTime,
       days: fromDays(form.days), tuition: fromMoney(form.tuition),
-      allergies_on_file: form.allergiesOnFile, emergency_contact: form.emergencyContact,
+      tuition_due: form.tuitionDue || null, payment_method: form.paymentMethod || null,
+      enroll_date: form.enrollDate || null,
+      allergies_on_file: form.allergiesOnFile || null, medications_on_file: form.medicationsOnFile || null,
+      emergency_contact: form.emergencyContact,
       emergency_phone: form.emergencyPhone, notes: form.notes,
       // Attaching adds to whatever the record already had, and
       // re-attaching the same file does not duplicate it.
       document_urls: dDoc
         ? [...(editingRecord?.documents ?? []).filter(d => d !== dDoc), dDoc]
         : editingRecord?.documents ?? [],
-      ...(editingRecord ? {} : {
-        medications_on_file: "None",
-        enroll_date: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-        status: "active",
-      }),
+      ...(editingRecord ? {} : { status: "active" }),
     };
 
     const { error } = editingRecord
@@ -419,13 +421,13 @@ export function DaycareInfo() {
                             </div>
                           ))}
                         </div>
-                        {rec.allergiesOnFile !== "None known" && (
+                        {(hasInfo(rec.allergiesOnFile) || hasInfo(rec.medicationsOnFile)) && (
                           <div className="alert">
                             <AlertCircle size={14} color={NEG} style={{ marginTop: 1, flexShrink: 0 }} />
                             <div>
-                              <div className="ak">ALLERGIES ON FILE</div>
-                              <div className="av">{rec.allergiesOnFile}</div>
-                              {rec.medicationsOnFile !== "None" && <div className="am">Medications: {rec.medicationsOnFile}</div>}
+                              <div className="ak">ALLERGIES &amp; MEDICATIONS ON FILE</div>
+                              {hasInfo(rec.allergiesOnFile) && <div className="av">{rec.allergiesOnFile}</div>}
+                              {hasInfo(rec.medicationsOnFile) && <div className="am">Medications: {rec.medicationsOnFile}</div>}
                             </div>
                           </div>
                         )}
@@ -471,7 +473,14 @@ export function DaycareInfo() {
                             </button>
                           ))}
                         </div>
-                        <ScanButton folder="personal" onUpload={doc => { setRecords(p=>p.map(r=>r.id===rec.id?{...r,documents:[...r.documents,doc.name]}:r)); toast.success(`"${doc.name}" added`); }} size="sm" label="Scan or Upload Document" />
+                        <ScanButton folder="daycare" store={{ sectionLabel: "Daycare Information" }} onUpload={async doc => {
+                          // Stored + filed by the scanner; link it to this record.
+                          if (!doc.path) return;
+                          const { error } = await tables.daycareRecords.update(rec.id, { document_urls: [...rec.documents.filter(d => d !== doc.path), doc.path] });
+                          if (error) { toast.error(`The scan is in your File Cabinet, but couldn't be linked: ${error.message}`); return; }
+                          await reload();
+                          toast.success(`"${doc.name}" added`);
+                        }} size="sm" label="Scan or Upload Document" />
                       </>
                     )}
                   </div>
@@ -490,7 +499,7 @@ export function DaycareInfo() {
                 <button onClick={closeDaycareModal}><X size={16} /></button>
               </div>
               <div className="modal-body">
-                {[["Child's Full Name *","childName",""],["Facility Name *","facilityName",""],["Address","address",""],["Phone","phone",""],["Email","email",""],["Director's Name","directorName",""],["Teacher / Caregiver","teacherName",""],["Drop-off Time","dropoffTime","e.g. 7:30 AM"],["Pickup Time","pickupTime","e.g. 5:30 PM"],["Days Attended","days","e.g. Monday – Friday"],["Monthly Tuition","tuition","e.g. $1,200/month"],["Allergies on File","allergiesOnFile","e.g. Peanuts or None known"],["Emergency Contact","emergencyContact",""],["Emergency Phone","emergencyPhone",""],["Notes","notes",""]].map(([label,key,ph]) => (
+                {[["Child's Full Name *","childName",""],["Facility Name *","facilityName",""],["Address","address",""],["Phone","phone",""],["Email","email",""],["Director's Name","directorName",""],["Teacher / Caregiver","teacherName",""],["Drop-off Time","dropoffTime","e.g. 7:30 AM"],["Pickup Time","pickupTime","e.g. 5:30 PM"],["Days Attended","days","e.g. Monday – Friday"],["Website","website","e.g. brightkids.com"],["Teacher Phone","teacherPhone",""],["Monthly Tuition","tuition","e.g. $1,200/month"],["Tuition Due","tuitionDue","e.g. 1st of the month"],["Payment Method","paymentMethod","e.g. Autopay from checking"],["Enrolled Since","enrollDate","e.g. Sep 2025"],["Allergies on File","allergiesOnFile","e.g. Peanuts"],["Medications on File","medicationsOnFile","e.g. Inhaler as needed"],["Emergency Contact","emergencyContact",""],["Emergency Phone","emergencyPhone",""],["Notes","notes",""]].map(([label,key,ph]) => (
                   <div className="field" key={key}>
                     <label>{label.toUpperCase()}</label>
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />

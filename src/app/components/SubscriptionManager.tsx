@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import { ScanButton } from "./DocumentScanner";
+import { AttachDocumentsList, AttachmentChips } from "./AttachDocumentField";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { encryptField, decryptField } from "../services/vaultCrypto";
@@ -10,7 +10,7 @@ import {
 } from "../services/billingCycle";
 import { type TwoFactorInfo, TwoFactorFields, TwoFactorSummary, twoFactorFromRow, twoFactorToRow } from "./TwoFactorDetails";
 import {
-  CreditCard, Plus, X, Search, Trash2, Edit2, Upload,
+  CreditCard, Plus, X, Search, Trash2, Edit2,
   Globe, Phone, AlertTriangle, CheckCircle, Calendar,
   DollarSign, Lock, Eye, EyeOff, RefreshCw
 } from "lucide-react";
@@ -41,6 +41,8 @@ interface Subscription {
   autoPay: boolean; cancellationUrl?: string;
   /** The account's own 2-step verification — see TwoFactorDetails.tsx */
   tfa?: TwoFactorInfo;
+  /** Stored bills/statements (document_urls, migration 054) */
+  documents?: string[];
 }
 
 /** The day of the month to store for this cycle; Weekly/Biweekly have none. */
@@ -224,7 +226,7 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
   const [tfa, setTfa] = useState<TwoFactorInfo>(editing?.tfa ?? {});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [docs, setDocs] = useState<string[]>(editing?.documents ?? []);
 
   const freq = (form.frequency ?? "Monthly") as Frequency;
   /* An untouched schedule keeps its stored anchor, so re-saving a Biweekly
@@ -242,7 +244,7 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
     setLoading(true);
     const ok = await onSave({
       ...form, id: editing?.id ?? "", amount: Number(form.amount),
-      nextBilling: anchor ?? undefined, dueDay, tfa,
+      nextBilling: anchor ?? undefined, dueDay, tfa, documents: docs,
     } as Subscription);
     setLoading(false);
     if (ok) onClose();
@@ -355,15 +357,8 @@ function AddSubModal({ editing, onClose, onSave }: { editing: Subscription | nul
           </label>
           {/* Upload */}
           <div className="field">
-            <label>ATTACH DOCUMENTS</label>
-            <input ref={fileRef} type="file" multiple style={{ display:"none" }} onChange={e => { if(e.target.files?.[0]) toast.success(`Attached: ${e.target.files[0].name}`); }}/>
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div onClick={() => fileRef.current?.click()} className="dropzone">
-                <Upload size={14} color="#FFFFFF" style={{ opacity:0.7 }}/>
-                <span>Attach bill, statement, or agreement</span>
-              </div>
-              <ScanButton folder="financial" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
-            </div>
+            <AttachDocumentsList value={docs} onChange={setDocs} folder="financial" sectionLabel="Auto Pay & Subscriptions"
+              label="Bills, statements or agreements (optional)"/>
           </div>
         </div>
         <div className="modal-foot">
@@ -433,6 +428,7 @@ export function SubscriptionManager() {
       notes: (r.notes as string | null) ?? undefined,
       autoPay: Boolean(r.auto_pay),
       tfa: await twoFactorFromRow(r),
+      documents: (r.document_urls as string[] | null) ?? [],
     })));
     setSubs(rows);
   }, [authUser]);
@@ -460,6 +456,7 @@ export function SubscriptionManager() {
       ...(await twoFactorToRow(sub.tfa ?? {})),
       auto_pay: sub.autoPay,
       status: sub.status,
+      document_urls: sub.documents ?? [],
     };
     const { error } = editingSub
       ? await tables.subscriptionTracker.update(sub.id, row)
@@ -638,6 +635,7 @@ export function SubscriptionManager() {
                     <div className="tv">{selected.notes}</div>
                   </div>
                 )}
+                <AttachmentChips paths={selected.documents}/>
               </div>
             ) : (
               <div className="card empty">

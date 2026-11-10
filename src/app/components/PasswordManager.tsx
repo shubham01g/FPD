@@ -1,14 +1,14 @@
 import { copyToClipboard } from "../utils/clipboard";
 import { useEscapeKey } from "../hooks/useEscapeKey";
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { ScanButton } from "./DocumentScanner";
+import React, { useState, useEffect, useCallback } from "react";
+import { AttachDocumentsList, AttachmentChips } from "./AttachDocumentField";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { encryptField, decryptField } from "../services/vaultCrypto";
 import { type TwoFactorInfo, TwoFactorFields, TwoFactorSummary, twoFactorFromRow, twoFactorToRow } from "./TwoFactorDetails";
 import {
   Key, Eye, EyeOff, Copy, Plus, Trash2, Edit2, X, Search,
-  Lock, Globe, User, FileText, Shield, CheckCircle, Upload,
+  Lock, Globe, User, FileText, Shield, CheckCircle,
   AlertTriangle, ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
@@ -247,7 +247,7 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
   const [tfa, setTfa] = useState<TwoFactorInfo>(editing?.tfa ?? {});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [docs, setDocs] = useState<string[]>(editing?.documents ?? []);
 
   /* The parent saves and toasts; the modal only closes once the row landed. */
   const submit = async () => {
@@ -260,7 +260,7 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
       tfa,
       strength: getStrength(form.password),
       lastUpdated: new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-      documents: editing?.documents,
+      documents: docs,
     });
     setLoading(false);
     if (ok) onClose();
@@ -338,15 +338,8 @@ function AddPasswordModal({ editing, onClose, onSave }: { editing: PasswordEntry
           <TwoFactorFields value={tfa} onChange={setTfa} />
           {/* Document upload */}
           <div className="field">
-            <label>UPLOAD SUPPORTING DOCUMENTS (optional)</label>
-            <input ref={fileRef} type="file" multiple className="hidden" style={{ display:"none" }} accept=".pdf,.jpg,.png,.doc,.docx" onChange={e => { if (e.target.files?.[0]) toast.success(`Document attached: ${e.target.files[0].name}`); }}/>
-            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-              <div onClick={() => fileRef.current?.click()} className="dropzone">
-                <Upload size={15} color="#FFFFFF" style={{ opacity:0.7 }}/>
-                <span>Attach PDF, image, or document</span>
-              </div>
-              <ScanButton folder="other" onUpload={doc => toast.success(`"${doc.name}" attached`)} size="sm" label="Scan"/>
-            </div>
+            <AttachDocumentsList value={docs} onChange={setDocs} folder="digital" sectionLabel="Password Manager"
+              label="Supporting documents (optional)" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"/>
           </div>
         </div>
         <div className="modal-foot">
@@ -401,7 +394,9 @@ export function PasswordManager() {
           : "",
         twoFactor: !!tfa.method,
         tfa,
-        importance: (r.starred ? "critical" : undefined) as Importance | undefined,
+        // importance column (migration 054); older rows only had starred.
+        importance: ((r.importance as Importance | null) ?? (r.starred ? "critical" : "normal")) as Importance,
+        documents: (r.document_urls as string[] | null) ?? [],
       };
     }));
     setPasswords(rows);
@@ -430,6 +425,8 @@ export function PasswordManager() {
       two_fa_enabled: !!p.tfa?.method,
       ...(await twoFactorToRow(p.tfa ?? {})),
       starred: p.importance === "critical",
+      importance: p.importance ?? "normal",
+      document_urls: p.documents ?? [],
       last_updated: new Date().toISOString(),
     };
 
@@ -642,6 +639,7 @@ export function PasswordManager() {
                     <div className="tv">{selected.notes}</div>
                   </div>
                 )}
+                <AttachmentChips paths={selected.documents}/>
                 <div className="dfoot">Last updated: {selected.lastUpdated}</div>
               </div>
             ) : (

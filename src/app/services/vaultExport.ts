@@ -45,7 +45,8 @@ const ownerCol = (t: string) => OWNER_COLUMN[t] ?? "user_id";
 export async function countRecords(uid: string, tables: string[]): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
   await Promise.all(tables.map(async (t) => {
-    const { count } = await supabase.from(t).select("id", { count: "exact", head: true }).eq(ownerCol(t), uid);
+    // "*" not "id": funeral_plans and medical_emergency_info are keyed by user_id and have no id column.
+    const { count } = await supabase.from(t).select("*", { count: "exact", head: true }).eq(ownerCol(t), uid);
     out[t] = count ?? 0;
   }));
   return out;

@@ -67,7 +67,7 @@ export const SECTIONS: SectionSpec[] = [
   { key: "pets", label: "Pet Records", folders: ["pets"], tables: [
     { table: "pet_records", label: "Pets" },
   ] },
-  { key: "memories", label: "Family Memories", folders: ["personal", "photos", "videos"], tables: [
+  { key: "memories", label: "Family Memories", folders: ["personal", "photos", "videos", "awards", "goals"], tables: [
     { table: "memories", label: "Memories" },
   ] },
   { key: "digital", label: "Digital Assets & Passwords", folders: ["digital", "crypto"], tables: [
@@ -84,17 +84,17 @@ export const SECTIONS: SectionSpec[] = [
     { table: "kids_activities", label: "Kids' Activities" },
     { table: "daycare_records", label: "Daycare" },
   ] },
-  { key: "ids", label: "IDs & Work History", folders: [], tables: [
+  { key: "ids", label: "IDs & Work History", folders: ["ids"], tables: [
     { table: "id_keeper_records", label: "IDs" },
     { table: "job_history", label: "Job History" },
   ] },
-  { key: "possessions", label: "Possessions & Warranties", folders: [], tables: [
+  { key: "possessions", label: "Possessions & Warranties", folders: ["warranties", "firearms", "weapons_locker", "keepsakes"], tables: [
     { table: "collectibles", label: "Collectibles" },
     { table: "weapons", label: "Firearms" },
     { table: "weapons_locker", label: "Weapons Locker" },
     { table: "warranties", label: "Warranties" },
   ] },
-  { key: "places", label: "Travel & Favorite Places", folders: [], tables: [
+  { key: "places", label: "Travel & Favorite Places", folders: ["places"], tables: [
     { table: "travel_trips", label: "Trips" },
     { table: "favorite_places", label: "Favorite Places" },
   ] },

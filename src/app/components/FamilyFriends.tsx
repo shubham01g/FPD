@@ -247,7 +247,7 @@ async function pickDeviceContacts(): Promise<Omit<ParsedContact,"selected">[]> {
 }
 
 function BulkImportModal({ onClose, onImport }: {
-  onClose:()=>void; onImport:(contacts:Contact[])=>void;
+  onClose:()=>void; onImport:(contacts:Contact[])=>Promise<boolean>;
 }) {
   useEscapeKey(true, onClose);
   const [stage, setStage] = useState<"choose"|"preview">("choose");
@@ -287,7 +287,6 @@ function BulkImportModal({ onClose, onImport }: {
     const chosen = rows.filter(r => r.selected);
     if (chosen.length === 0) return;
     setImporting(true);
-    await new Promise(r => setTimeout(r, 500));
     const imported: Contact[] = chosen.map((r, i) => ({
       id: `cf-import-${Date.now()}-${i}`,
       name: r.name, relationship: "", phone: r.phone || undefined, email: r.email || undefined,
@@ -295,8 +294,10 @@ function BulkImportModal({ onClose, onImport }: {
       initials: r.name.split(" ").map(w=>w[0]).filter(Boolean).join("").slice(0,2).toUpperCase() || "?",
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
     }));
-    onImport(imported);
+    // The parent saves them; the count is shown only once the insert succeeded.
+    const ok = await onImport(imported);
     setImporting(false);
+    if (!ok) return;
     toast.success(`${imported.length} contact${imported.length===1?"":"s"} imported`);
     onClose();
   }
@@ -965,12 +966,13 @@ export function FamilyFriends() {
           })(); }}
         />
       )}
-      {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={imported => { void (async () => {
-        if (!authUser) { toast.error("Sign in to import contacts."); return; }
+      {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={async imported => {
+        if (!authUser) { toast.error("Sign in to import contacts."); return false; }
         const { error } = await tables.familyFriends.addMany(authUser.id, imported.map(toRow));
-        if (error) { toast.error(`Could not import: ${error.message}`); return; }
+        if (error) { toast.error(`Could not import: ${error.message}`); return false; }
         await reload();
-      })(); }}/>}
+        return true;
+      }}/>}
       {blastGroup && <BlastEmailModal group={blastGroup} contacts={contacts} onClose={() => setBlastGroup(null)}/>}
     </div>
   );

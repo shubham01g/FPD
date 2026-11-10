@@ -79,25 +79,32 @@ const verStyle = {
 };
 
 /* ── Folder catalog ──────────────────────────────────────────────── */
+/* The File Cabinet's real folder ids (DigitalFileCabinet's cabinets). The
+   PIN-locked Secret Vault is never shareable, so it is not offered. */
 const FOLDER_CATALOG = [
-  { id:"legal",     label:"Legal Documents",        emoji:"⚖️",  color:"#6E90C9" },
-  { id:"financial", label:"Financial Records",       emoji:"💰",  color:"#D99A6B" },
-  { id:"medical",   label:"Medical Records",         emoji:"🏥",  color:"#FC8181" },
-  { id:"taxes",     label:"Tax Records",             emoji:"📋",  color:"#F6AD55" },
-  { id:"property",  label:"Property & Real Estate",  emoji:"🏠",  color:"#ED8936" },
-  { id:"vehicles",  label:"Vehicles",                emoji:"🚗",  color:"#6FAE8B" },
-  { id:"utilities", label:"Utilities & Services",    emoji:"⚡",  color:"#D68FA8" },
-  { id:"insurance", label:"Insurance Policies",      emoji:"🛡️",  color:"#6E90C9" },
-  { id:"pets",      label:"Pet Records",             emoji:"🐾",  color:"#F6AD55" },
-  { id:"personal",  label:"Personal Letters",        emoji:"💌",  color:"#E53E3E" },
-  { id:"photos",    label:"Photo Albums",            emoji:"📷",  color:"#F6AD55" },
-  { id:"videos",    label:"Videos & Recordings",     emoji:"🎬",  color:"#6E90C9" },
-  { id:"digital",   label:"Digital Assets",          emoji:"💻",  color:"#6E90C9" },
-  { id:"business",  label:"Business Records",        emoji:"📊",  color:"#D99A6B" },
-  { id:"crypto",    label:"Crypto & NFTs",           emoji:"₿",   color:"#F6AD55" },
-  { id:"education", label:"Education & Awards",      emoji:"🎓",  color:"#6FAE8B" },
-  { id:"military",  label:"Military Records",        emoji:"🎖️",  color:"#ED8936" },
-  { id:"other",     label:"Other Documents",         emoji:"📁",  color:MUTED },
+  { id:"legal",          label:"Legal Documents",        emoji:"⚖️",  color:"#6E90C9" },
+  { id:"financial",      label:"Financial Records",      emoji:"💰",  color:"#D99A6B" },
+  { id:"medical",        label:"Medical Records",        emoji:"🏥",  color:"#FC8181" },
+  { id:"taxes",          label:"Tax Records",            emoji:"📋",  color:"#F6AD55" },
+  { id:"property",       label:"Property & Real Estate", emoji:"🏠",  color:"#ED8936" },
+  { id:"vehicles",       label:"Vehicles",               emoji:"🚗",  color:"#6FAE8B" },
+  { id:"utilities",      label:"Utilities & Services",   emoji:"⚡",  color:"#D68FA8" },
+  { id:"insurance",      label:"Insurance Policies",     emoji:"🛡️",  color:"#6E90C9" },
+  { id:"pets",           label:"Pet Records",            emoji:"🐾",  color:"#F6AD55" },
+  { id:"personal",       label:"Personal Letters",       emoji:"💌",  color:"#E53E3E" },
+  { id:"photos",         label:"Photo Albums",           emoji:"📷",  color:"#F6AD55" },
+  { id:"videos",         label:"Videos & Recordings",    emoji:"🎬",  color:"#6E90C9" },
+  { id:"keepsakes",      label:"Keepsakes",              emoji:"🎁",  color:"#D68FA8" },
+  { id:"digital",        label:"Digital Assets",         emoji:"💻",  color:"#6E90C9" },
+  { id:"business",       label:"Business Records",       emoji:"📊",  color:"#D99A6B" },
+  { id:"awards",         label:"Awards & Achievements",  emoji:"🏆",  color:"#6FAE8B" },
+  { id:"goals",          label:"Goals",                  emoji:"🎯",  color:"#6FAE8B" },
+  { id:"weapons_locker", label:"Knives & Edged Weapons", emoji:"🔪",  color:MUTED },
+  { id:"firearms",       label:"Firearms",               emoji:"🎯",  color:"#ED8936" },
+  { id:"warranties",     label:"Warranties",             emoji:"🧾",  color:"#D99A6B" },
+  { id:"ids",            label:"IDs",                    emoji:"🪪",  color:"#6E90C9" },
+  { id:"daycare",        label:"Daycare",                emoji:"🧸",  color:"#F6AD55" },
+  { id:"places",         label:"Favorite Places",        emoji:"📍",  color:"#6FAE8B" },
 ];
 
 /* ── Folder selector ─────────────────────────────────────────────── */
@@ -1015,9 +1022,12 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             defaultType={importingType}
             onClose={() => setImportingType(null)}
             onImport={async contacts => {
-              for (const c of contacts) await addContact(c, { invite: false });
+              // Count only the rows that really saved.
+              let saved = 0;
+              for (const c of contacts) if (await addContact(c, { invite: false })) saved++;
               setImportingType(null);
-              toast.success(`${contacts.length} contact${contacts.length===1?"":"s"} imported`);
+              if (saved === contacts.length) toast.success(`${saved} contact${saved===1?"":"s"} imported`);
+              else toast.error(`${saved} of ${contacts.length} contacts imported — the others could not be saved.`);
             }}
           />
         )}

@@ -6,6 +6,14 @@ import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
 import { EMAIL_CONFIGURED, adminInviteEmail, linkOrigin, sendEmail } from "../lib/email.ts";
+import { sha256Hex } from "../lib/contactLink.ts";
+
+/* Only a SHA-256 of an invite token is stored (migration 054); the raw token
+   travels once, in the email. These columns never leave the server. */
+const stripSecrets = <T extends Record<string, unknown>>(row: T) => {
+  const { invite_token: _t, invite_token_hash: _h, ...rest } = row;
+  return rest;
+};
 
 const adminAccounts = new Hono();
 
@@ -49,7 +57,7 @@ adminAccounts.get("/", async (c) => {
 
   const { data, error } = await q;
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ accounts: data });
+  return c.json({ accounts: (data ?? []).map(stripSecrets) });
 });
 
 // POST /admin/admin-accounts — invite a new admin.
@@ -79,7 +87,8 @@ adminAccounts.post("/", async (c) => {
       name, email, role, notes: notes ?? null, permissions,
       status: "invited",
       invited_by: actor.id,
-      invite_token: inviteToken,
+      invite_token: null,
+      invite_token_hash: await sha256Hex(inviteToken),
       invite_expires_at: inviteExpiresAt,
     })
     .select()
@@ -87,7 +96,7 @@ adminAccounts.post("/", async (c) => {
 
   if (error) return c.json({ error: error.message }, 500);
   const mail = await emailInvite(c.req.header("origin"), data, inviteToken, actor.email);
-  return c.json({ account: data, inviteToken, ...mail }, 201);
+  return c.json({ account: stripSecrets(data), inviteToken, ...mail }, 201);
 });
 
 // PATCH /admin/admin-accounts/:id — role/permission changes, status changes, notes.
@@ -139,7 +148,7 @@ adminAccounts.post("/:id/resend-invite", async (c) => {
 
   const { data, error } = await adminClient()
     .from("admin_accounts")
-    .update({ invite_token: inviteToken, invite_expires_at: inviteExpiresAt, status: "invited" })
+    .update({ invite_token: null, invite_token_hash: await sha256Hex(inviteToken), invite_expires_at: inviteExpiresAt, status: "invited" })
     .eq("id", id)
     .select()
     .maybeSingle();
@@ -147,7 +156,7 @@ adminAccounts.post("/:id/resend-invite", async (c) => {
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: "Admin account not found" }, 404);
   const mail = await emailInvite(c.req.header("origin"), data, inviteToken, (c.get("admin") as AdminUser).email);
-  return c.json({ account: data, inviteToken, ...mail });
+  return c.json({ account: stripSecrets(data), inviteToken, ...mail });
 });
 
 export default adminAccounts;

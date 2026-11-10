@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Car, Lock, Bitcoin, Plus, Edit2, Trash2, Key, X, Home, Camera, Image, Gem, Sword, Boxes } from "lucide-react";
 import { toast } from "sonner";
-import { tables } from "../services/supabase";
+import { db, tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { prepareImage } from "../utils/imageInput";
-import { ScanButton } from "./DocumentScanner";
+import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, AttachmentChips } from "./AttachDocumentField";
 import heroAssetsPhoto from "../../imports/personalassets_hero_photo_v2.webp";
 import { useSingleFlight } from "../hooks/useSingleFlight";
 import { useConfirmDelete } from "./ConfirmDelete";
@@ -247,6 +247,7 @@ export function PersonalAssets() {
       value: toMoney(r.current_value), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
       warrantyProvider: String(r.warranty_provider ?? ""), warrantyStart: String(r.warranty_start ?? ""),
       warrantyEnd: String(r.warranty_end ?? ""), service: (Array.isArray(r.service_history) ? r.service_history : []) as ServiceEntry[],
+      documents: (r.document_urls as string[] | null) ?? [],
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -263,13 +264,17 @@ export function PersonalAssets() {
       rent: toMoney(r.monthly_rent), leaseStart: String(r.lease_start ?? ""), leaseEnd: String(r.lease_end ?? ""),
       deposit: toMoney(r.security_deposit), mgmtCompany: String(r.management_company ?? ""),
       mgmtContact: String(r.management_contact ?? ""), careInstructions: String(r.special_care_instructions ?? ""),
-      photo: String(r.photo_url ?? ""), attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
+      photo: String(r.photo_url ?? ""), documents: (r.document_urls as string[] | null) ?? [],
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
     if (d.error) fail("digital assets", d.error); else setDigitalList((d.data ?? []).map(r => ({
       id: String(r.id), category: String(r.asset_type ?? ""), platform: String(r.platform ?? ""),
       asset: String(r.asset_name ?? ""), holdings: String(r.holdings ?? ""), value: toMoney(r.estimated_value),
-      accessMethod: String(r.access_instructions ?? ""), notes: String(r.notes ?? ""), attachedDoc: null,
+      accessMethod: String(r.access_instructions ?? ""), notes: String(r.notes ?? ""),
+      // document_urls on digital_assets is new in migration 054.
+      documents: (r.document_urls as string[] | null) ?? [],
+      attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
     if (w.error) fail("weapons", w.error); else setWeaponList((w.data ?? []).map(r => ({
@@ -277,6 +282,7 @@ export function PersonalAssets() {
       caliber: String(r.caliber ?? ""), serial: String(r.serial_number ?? ""), registration: String(r.permit_number ?? ""),
       storage: String(r.storage_location ?? ""), transfer: String(r.transfer_to ?? ""), photo: String(r.photo_url ?? ""),
       marks: String(r.identifying_marks ?? ""), value: toMoney(r.current_value),
+      documents: (r.document_urls as string[] | null) ?? [],
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -285,6 +291,7 @@ export function PersonalAssets() {
       blade: String(r.blade ?? ""), handle: String(r.handle ?? ""), storage: String(r.location ?? ""),
       transfer: String(r.transfer_to ?? ""), notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
       value: toMoney(r.current_value),
+      documents: (r.document_urls as string[] | null) ?? [],
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
 
@@ -295,6 +302,7 @@ export function PersonalAssets() {
       intendedFor: String(r.intended_for ?? ""), serialNum: String(r.serial_number ?? ""),
       location: String(r.storage_location ?? ""),
       notes: String(r.notes ?? ""), photo: String(r.photo_url ?? ""),
+      documents: (r.document_urls as string[] | null) ?? [],
       attachedDoc: ((r.document_urls as string[] | null) ?? [])[0] ?? null,
     })));
   }, [authUser]);
@@ -304,7 +312,7 @@ export function PersonalAssets() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const tabContentRef = React.useRef<HTMLDivElement>(null);
-  const [pendingPhotoTarget, setPendingPhotoTarget] = useState<{type:"realestate"|"weapon"; id:number}|null>(null);
+  const [pendingPhotoTarget, setPendingPhotoTarget] = useState<{type:"realestate"|"weapon"; id:string}|null>(null);
 
   const [vForm, setVForm] = useState(EMPTY_VEHICLE);
   const [vDoc, setVDoc] = useState<string|null>(null);
@@ -319,19 +327,40 @@ export function PersonalAssets() {
   const [wlForm, setWlForm] = useState({ type:"Knife", make:"", model:"", blade:"", handle:"", value:"", storage:"", transfer:"", notes:"", photo:"" });
   const [wlDoc, setWlDoc] = useState<string|null>(null);
 
+  /* Card "add photo": shrink, store in the private record-photos bucket and
+     save photo_url (it used to stay a blob: URL that vanished on refresh). */
   async function uploadPhoto(file: File) {
-    if (!pendingPhotoTarget) return;
-    let url: string;
-    try { url = (await prepareImage(file)).url; }
-    catch (err) { toast.error((err as Error).message); return; }
-    if (pendingPhotoTarget.type === "realestate") {
-      setRealEstateList(p => p.map(r => r.id === pendingPhotoTarget.id ? { ...r, photo: url } : r));
-      toast.success("Property photo added");
-    } else {
-      setWeaponList(p => p.map(w => w.id === pendingPhotoTarget.id ? { ...w, photo: url } : w));
-      toast.success("Firearm photo added");
-    }
+    const target = pendingPhotoTarget;
     setPendingPhotoTarget(null);
+    if (!target || !authUser) return;
+    try {
+      const prepared = await prepareImage(file);
+      URL.revokeObjectURL(prepared.url);
+      const path = await db.uploadRecordPhoto(authUser.id, prepared.blob);
+      const table = target.type === "realestate" ? tables.realEstate : tables.weapons;
+      const { error } = await table.update(target.id, { photo_url: path });
+      if (error) throw new Error(error.message);
+      await reload();
+      toast.success(target.type === "realestate" ? "Property photo saved" : "Firearm photo saved");
+    } catch (err) {
+      toast.error(`Could not save the photo: ${(err as Error).message}`);
+    }
+  }
+
+  /* A document scanned from a record card: the scanner stored it and filed
+     it in the File Cabinet; this links it to the record. */
+  async function attachScan(table: "realEstate" | "digitalAssets" | "collectibles", rec: { id: string | number; documents?: string[] }, doc: ScannedDocument, label: string) {
+    if (!doc.path) return;
+    const { error } = await tables[table].update(String(rec.id), { document_urls: [...(rec.documents ?? []), doc.path] });
+    if (error) { toast.error(`The scan is in your File Cabinet, but couldn't be linked: ${error.message}`); return; }
+    await reload();
+    toast.success(`"${doc.name}" attached to ${label}`);
+  }
+
+  /* The form edits a record's first document; any others are kept. */
+  function docsFor(primary: string | null, list: { id: string | number; documents?: string[] }[]) {
+    const rest = editingId !== null ? (list.find(x => String(x.id) === String(editingId))?.documents ?? []).slice(1) : [];
+    return primary ? [primary, ...rest.filter(d => d !== primary)] : rest;
   }
 
   async function addRealEstate() {
@@ -354,7 +383,7 @@ export function PersonalAssets() {
       monthly_rent: fromMoney(rForm.rent), lease_start: rForm.leaseStart || null, lease_end: rForm.leaseEnd || null,
       security_deposit: fromMoney(rForm.deposit), management_company: rForm.mgmtCompany || null,
       management_contact: rForm.mgmtContact || null, special_care_instructions: rForm.careInstructions || null,
-      document_urls: rDoc ? [rDoc] : [],
+      document_urls: docsFor(rDoc, realEstateList),
     };
     const { error } = editingId !== null
       ? await tables.realEstate.update(String(editingId), row)
@@ -382,7 +411,7 @@ export function PersonalAssets() {
         .map(e => ({ date: e.date, details: e.details.trim() }))
         .sort((a, b) => b.date.localeCompare(a.date)),
       notes: vForm.notes || null, photo_url: vForm.photo || null,
-      document_urls: vDoc ? [vDoc] : [],
+      document_urls: docsFor(vDoc, vehicleList),
     };
     const { error } = editingId !== null
       ? await tables.vehicles.update(String(editingId), row)
@@ -400,6 +429,7 @@ export function PersonalAssets() {
       asset_name: dForm.asset, asset_type: dForm.category || null, platform: dForm.platform || null,
       holdings: dForm.holdings || null, estimated_value: fromMoney(dForm.value),
       access_instructions: dForm.accessMethod || null, notes: dForm.notes || null,
+      document_urls: docsFor(dDoc, digitalList),
     };
     const { error } = editingId !== null
       ? await tables.digitalAssets.update(String(editingId), row)
@@ -418,7 +448,7 @@ export function PersonalAssets() {
       serial_number: wForm.serial || null, permit_number: wForm.registration || null,
       identifying_marks: wForm.marks || null, current_value: fromMoney(wForm.value),
       storage_location: wForm.storage || null, transfer_to: wForm.transfer || null,
-      photo_url: wForm.photo || null, document_urls: wDoc ? [wDoc] : [],
+      photo_url: wForm.photo || null, document_urls: docsFor(wDoc, weaponList),
     };
     const { error } = editingId !== null
       ? await tables.weapons.update(String(editingId), row)
@@ -439,7 +469,7 @@ export function PersonalAssets() {
       acquired_from: cForm.purchasedFrom || null, intended_for: cForm.intendedFor || null,
       serial_number: cForm.serialNum || null, storage_location: cForm.location || null,
       notes: cForm.notes || null, photo_url: cForm.photo || null,
-      document_urls: cDoc ? [cDoc] : [],
+      document_urls: docsFor(cDoc, collectiblesList),
     };
     const { error } = editingId !== null
       ? await tables.collectibles.update(String(editingId), row)
@@ -461,7 +491,7 @@ export function PersonalAssets() {
       blade: wlForm.blade || null, handle: wlForm.handle || null, location: wlForm.storage || null,
       current_value: fromMoney(wlForm.value),
       transfer_to: wlForm.transfer || null, notes: wlForm.notes || null, photo_url: wlForm.photo || null,
-      document_urls: wlDoc ? [wlDoc] : [],
+      document_urls: docsFor(wlDoc, weaponsLockerList),
     };
     const { error } = editingId !== null
       ? await tables.weaponsLocker.update(String(editingId), row)
@@ -475,11 +505,13 @@ export function PersonalAssets() {
 
   function editVehicle(v: any) {
     setVForm({ year:String(v.year), make:v.make, model:v.model, color:v.color, vin:v.vin, plate:v.plate, title:v.title, lien:v.lien, insurance:v.insurance, registration:v.registration, value:v.value, warrantyProvider:v.warrantyProvider, warrantyStart:v.warrantyStart, warrantyEnd:v.warrantyEnd, service:v.service.map((e: ServiceEntry) => ({ ...e })), notes:v.notes, photo:(v as any).photo || "" });
+    setVDoc(v.attachedDoc || null);
     setEditingId(v.id);
     setShowAdd("vehicles");
   }
   function editRealEstate(r: any) {
     setRForm(Object.fromEntries(Object.keys(EMPTY_PROPERTY).map(k => [k, r[k] ?? ""])) as typeof EMPTY_PROPERTY);
+    setRDoc(r.attachedDoc || null);
     setEditingId(r.id);
     setShowAdd("realestate");
   }
@@ -491,16 +523,19 @@ export function PersonalAssets() {
   }
   function editWeapon(w: any) {
     setWForm({ type:w.type, make:w.make, model:w.model, caliber:w.caliber, serial:w.serial, registration:w.registration, marks:w.marks, value:w.value, storage:w.storage, transfer:w.transfer, photo:w.photo || "" });
+    setWDoc(w.attachedDoc || null);
     setEditingId(w.id);
     setShowAdd("weapons");
   }
   function editWeaponsLocker(w: any) {
     setWlForm({ type:w.type, make:w.make, model:w.model, blade:w.blade, handle:w.handle, value:w.value, storage:w.storage, transfer:w.transfer, notes:w.notes, photo:w.photo || "" });
+    setWlDoc(w.attachedDoc || null);
     setEditingId(w.id);
     setShowAdd("weapons_locker");
   }
   function editCollectible(c: any) {
     setCForm({ name:c.name, category:c.category, condition:c.condition, estimatedValue:c.estimatedValue, purchaseDate:c.purchaseDate, purchasedFrom:c.purchasedFrom, location:c.location, intendedFor:c.intendedFor, serialNum:c.serialNum, notes:c.notes, photo:c.photo || "" });
+    setCDoc(c.attachedDoc || null);
     setEditingId(c.id);
     setShowAdd("collectibles");
   }
@@ -712,8 +747,9 @@ export function PersonalAssets() {
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editRealEstate(r)}><Edit2 size={12} /> Edit</button>
                     <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("realEstate", r.id, ((r?.name ?? r?.propertyName ?? r?.address) || "this item"))}><Trash2 size={12} /> Delete</button>
-                    <ScanButton folder="property" onUpload={doc => toast.success(`"${doc.name}" added to ${r.address}`)} size="sm" label="Scan Document" />
+                    <ScanButton folder="property" store={{ sectionLabel: "Assets & Property" }} onUpload={doc => void attachScan("realEstate", r, doc, r.address)} size="sm" label="Scan Document" />
                   </div>
+                  <AttachmentChips paths={r.documents}/>
                 </div>
               </div>
             ))}
@@ -745,11 +781,11 @@ export function PersonalAssets() {
                   <Field label="Access Method" value={d.accessMethod} />
                 </div>
                 {d.notes && <div className="noteitalic">{d.notes}</div>}
-                {(d as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((d as any).attachedDoc)}</div>}
+                <AttachmentChips paths={d.documents}/>
                 <div className="dacts">
                   <button className="btn-sec" onClick={() => editDigital(d)}><Edit2 size={12} /> Edit</button>
                     <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("digitalAssets", d.id, ((d?.name ?? d?.assetName) || "this item"))}><Trash2 size={12} /> Delete</button>
-                  <ScanButton folder="digital" onUpload={doc => { setDigitalList(p => p.map(x => x.id === d.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${d.asset}`); }} size="sm" label="Scan Document" />
+                  <ScanButton folder="digital" store={{ sectionLabel: "Assets & Property" }} onUpload={doc => void attachScan("digitalAssets", d, doc, d.asset)} size="sm" label="Scan Document" />
                 </div>
               </div>
             ))}
@@ -895,8 +931,9 @@ export function PersonalAssets() {
                   <div className="dacts">
                     <button className="btn-sec" onClick={() => editCollectible(c)}><Edit2 size={12} /> Edit</button>
                     <button className="btn-sec" style={{ color:"#FC8181" }} onClick={() => askDelete("collectibles", c.id, ((c?.name ?? c?.itemName) || "this item"))}><Trash2 size={12} /> Delete</button>
-                    <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" linked to ${c.name}`)} size="sm" label="Attach Document" />
+                    <ScanButton folder="keepsakes" store={{ sectionLabel: "Collectibles" }} onUpload={doc => void attachScan("collectibles", c, doc, c.name)} size="sm" label="Attach Document" />
                   </div>
+                  <AttachmentChips paths={c.documents}/>
                 </div>
               </div>
             ))}

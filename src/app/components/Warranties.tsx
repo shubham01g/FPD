@@ -477,10 +477,10 @@ export function Warranties() {
                           <FileText size={12} /> {attachmentDisplayName(d)}
                         </button>
                       ))}
-                      <ScanButton folder="personal" onUpload={async doc => {
-                        // Persist the attachment: a local-only push would vanish
-                        // on the next load now that rows come from the database.
-                        const next = [...w.documents.filter(d => d !== doc.name), doc.name];
+                      <ScanButton folder="warranties" store={{ sectionLabel: "Warranties" }} onUpload={async doc => {
+                        // Stored + filed by the scanner; link the stored path.
+                        if (!doc.path) return;
+                        const next = [...w.documents.filter(d => d !== doc.path), doc.path];
                         const { error } = await tables.warranties.update(w.id, { document_urls: next });
                         if (error) { toast.error(`Could not attach "${doc.name}": ${error.message}`); return; }
                         await reload();

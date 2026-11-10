@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { CreditCard, Plus, X, Eye, EyeOff, Shield, Calendar, ScanLine, CheckCircle2, Edit2, Trash2 } from "lucide-react";
 import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
-import { tables } from "../services/supabase";
+import { db, tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useDemo } from "../context/DemoContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
+import { StoredImage } from "./StoredImage";
 import heroIDPhoto from "../../imports/idkeeper_hero_photo.webp";
 import { useSingleFlight } from "../hooks/useSingleFlight";
 
@@ -52,6 +53,8 @@ interface IDRecord {
   expiryDate: string;
   notes: string;
   documentScanned: boolean;
+  /** record-photos path of the ID image (id_keeper_records.document_url) */
+  documentUrl?: string;
   masked: boolean;
 }
 
@@ -170,6 +173,7 @@ export function IDKeeper() {
       expiryDate: String(r.expiry_date ?? ""),
       notes: String(r.notes ?? ""),
       documentScanned: Boolean(r.document_url),
+      documentUrl: (r.document_url as string | null) ?? undefined,
       masked: true,
     })));
     setLoading(false);
@@ -188,7 +192,7 @@ export function IDKeeper() {
 
   const F = (k:string) => (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>) => setForm(p=>({...p,[k]:e.target.value}));
 
-  function toggleMask(id:number) {
+  function toggleMask(id: string) {
     setIds(p => p.map(r => r.id===id ? {...r,masked:!r.masked} : r));
   }
 
@@ -211,7 +215,7 @@ export function IDKeeper() {
 
   function openEditID(rec: IDRecord) {
     setEditingID(rec);
-    setForm({ type: rec.type, idNumber: rec.idNumber, holder: rec.holder, issuedBy: rec.issuedBy, issueDate: rec.issueDate, expiryDate: rec.expiryDate, notes: rec.notes, photo: "" });
+    setForm({ type: rec.type, idNumber: rec.idNumber, holder: rec.holder, issuedBy: rec.issuedBy, issueDate: rec.issueDate, expiryDate: rec.expiryDate, notes: rec.notes, photo: rec.documentUrl ?? "" });
     setShowAdd(true);
   }
 
@@ -393,9 +397,24 @@ export function IDKeeper() {
 
                 {r.notes && <div className="inotes">{r.notes}</div>}
 
+                {r.documentUrl && (
+                  <div className="mt-3" style={{ borderRadius: 10, overflow: "hidden", maxHeight: 180 }}>
+                    <StoredImage src={r.documentUrl} alt={`${r.type} scan`}/>
+                  </div>
+                )}
                 {!r.documentScanned && (
                   <div className="mt-3">
-                    <ScanButton folder="personal" onUpload={doc => { setIds(p=>p.map(x=>x.id===r.id?{...x,documentScanned:true}:x)); toast.success(`${r.type} scanned and saved`); }} size="sm" label="Scan & Upload ID Document"/>
+                    <ScanButton folder="ids" onUpload={async doc => {
+                      if (!authUser) return;
+                      try {
+                        // Same private bucket as the photo picker in the form.
+                        const path = await db.uploadRecordPhoto(authUser.id, doc.file);
+                        const { error } = await tables.idKeeperRecords.update(r.id, { document_url: path });
+                        if (error) throw new Error(error.message);
+                        await reload();
+                        toast.success(`${r.type} scan saved`);
+                      } catch (err) { toast.error(`Could not save the scan: ${(err as Error).message}`); }
+                    }} size="sm" label="Scan & Upload ID Document"/>
                   </div>
                 )}
               </div>
@@ -415,7 +434,14 @@ export function IDKeeper() {
                 <div className="scan-box">
                   <div className="scan-lbl">SCAN OR UPLOAD ID DOCUMENT</div>
                   <div className="flex gap-2 flex-wrap">
-                    <ScanButton folder="personal" onUpload={doc => { setForm(p=>({...p,documentScanned:"true" as any})); toast.success(`"${doc.name}" scanned and attached`); }} size="sm" label="📷 Scan with Camera"/>
+                    <ScanButton folder="ids" onUpload={async doc => {
+                      if (!authUser) return;
+                      try {
+                        const path = await db.uploadRecordPhoto(authUser.id, doc.file);
+                        setForm(p => ({ ...p, photo: path }));
+                        toast.success(`"${doc.name}" attached — saved with the ID`);
+                      } catch (err) { toast.error(`Could not upload the scan: ${(err as Error).message}`); }
+                    }} size="sm" label="📷 Scan with Camera"/>
                   </div>
                   <div className="mt-3">
                     <PhotoPicker value={form.photo} onChange={url => setForm(p=>({...p,photo:url}))} label="Or upload a photo of the ID" aspectRatio="16/9"/>

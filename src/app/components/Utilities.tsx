@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, AttachmentChips } from "./AttachDocumentField";
 import heroUtilitiesPhoto from "../../imports/utilities_hero_photo.webp";
 import { useSingleFlight } from "../hooks/useSingleFlight";
 
@@ -126,7 +126,7 @@ export function Utilities() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const [uForm, setUForm] = useState({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
+  const [uForm, setUForm] = useState({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "", autopay: false });
   const [uDoc, setUDoc] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -153,7 +153,7 @@ export function Utilities() {
   const { requestDelete, confirmDialog } = useConfirmDelete();
 
   function resetUtilityForm() {
-    setUForm({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "" });
+    setUForm({ service: "", provider: "", accountNum: "", phone: "", website: "", monthlyAvg: "", notes: "", autopay: false });
     setUDoc(null);
   }
 
@@ -175,7 +175,7 @@ export function Utilities() {
   }
 
   function openEditUtility(u: UtilityRow) {
-    setUForm({ service: u.service, provider: u.provider, accountNum: u.accountNum, phone: u.phone, website: u.website, monthlyAvg: u.monthlyAvg, notes: u.notes });
+    setUForm({ service: u.service, provider: u.provider, accountNum: u.accountNum, phone: u.phone, website: u.website, monthlyAvg: u.monthlyAvg, notes: u.notes, autopay: u.autopay });
     setUDoc(u.attachedDoc ?? null);
     setEditingId(u.id);
     setShowAdd(true);
@@ -200,11 +200,12 @@ export function Utilities() {
       monthly_avg: fromMoney(uForm.monthlyAvg),
       notes: uForm.notes,
       document_url: uDoc,
+      autopay: uForm.autopay,
     };
 
     const { error } = editingId !== null
       ? await tables.utilities.update(editingId, row)
-      : await tables.utilities.add(authUser.id, { ...row, autopay: false });
+      : await tables.utilities.add(authUser.id, row);
 
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
 
@@ -296,11 +297,18 @@ export function Utilities() {
                 <Field label="Website" value={u.website || "—"} />
               </div>
               {u.notes && <div className="notemuted">{u.notes}</div>}
-              {(u as any).attachedDoc && <div className="notemuted">📄 {attachmentDisplayName((u as any).attachedDoc)}</div>}
+              {u.attachedDoc && <AttachmentChips paths={[u.attachedDoc]}/>}
               <div className="dacts">
                 <button className="btn-sec" onClick={() => openEditUtility(u)}><Edit2 size={13} /> Edit</button>
                 <button className="btn-sec" onClick={() => requestDelete({ noun: "utility", label: u.service, onConfirm: () => removeUtility(u.id) })}><Trash2 size={13} /> Delete</button>
-                <ScanButton folder="utilities" onUpload={doc => { setUtilityList(p => p.map(x => x.id === u.id ? { ...x, attachedDoc: doc.name } : x)); toast.success(`"${doc.name}" linked to ${u.service}`); }} size="sm" label="Scan Document" />
+                <ScanButton folder="utilities" store={{ sectionLabel: "Utilities" }} onUpload={async doc => {
+                  // Stored + filed by the scanner; it becomes this utility's document.
+                  if (!doc.path) return;
+                  const { error } = await tables.utilities.update(u.id, { document_url: doc.path });
+                  if (error) { toast.error(`The scan is in your File Cabinet, but couldn't be linked: ${error.message}`); return; }
+                  await reload();
+                  toast.success(`"${doc.name}" attached to ${u.service}`);
+                }} size="sm" label={u.attachedDoc ? "Replace Document" : "Scan Document"} />
               </div>
             </div>
           ))}
@@ -321,6 +329,10 @@ export function Utilities() {
                     <input value={(uForm as any)[key]} onChange={e => setUForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
                   </div>
                 ))}
+                <label className="field" style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                  <input type="checkbox" checked={uForm.autopay} onChange={e => setUForm(p => ({ ...p, autopay: e.target.checked }))} style={{ width: 18, height: 18 }}/>
+                  <span>Paid by autopay</span>
+                </label>
                 <AttachDocumentField value={uDoc} onChange={setUDoc} folder="utilities" sectionId="utilities" sectionLabel="Utilities" label="Attach Document (bill, statement, account setup)" />
               </div>
               <div className="modal-foot">

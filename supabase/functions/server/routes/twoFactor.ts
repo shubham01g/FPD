@@ -257,6 +257,9 @@ twoFactor.post("/backup-codes", async (c) => {
   return c.json({ backupCodes: codes });
 });
 
+const BACKUP_MAX_ATTEMPTS = 5;
+const BACKUP_LOCK_MINUTES = 15;
+
 // POST /backup-codes/redeem { code }
 // A backup code means "I no longer have the device". Redeeming one tears down
 // the enrolled factors and switches 2FA off, so the user lands in a working
@@ -272,7 +275,7 @@ twoFactor.post("/backup-codes/redeem", async (c) => {
   const db = adminClient();
   const { data: row } = await db
     .from("account_2fa_settings")
-    .select("enabled, backup_codes")
+    .select("enabled, backup_codes, backup_failed_attempts, backup_locked_until")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -281,10 +284,25 @@ twoFactor.post("/backup-codes/redeem", async (c) => {
     return c.json({ error: "No backup codes are set up for this account." }, 409);
   }
 
+  // A correct code switches 2FA off, so guesses are limited (migration 054):
+  // BACKUP_MAX_ATTEMPTS wrong codes lock redemption for BACKUP_LOCK_MINUTES.
+  if (row.backup_locked_until && new Date(row.backup_locked_until).getTime() > Date.now()) {
+    return c.json({ error: `Too many incorrect backup codes. Try again after ${new Date(row.backup_locked_until).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}.` }, 429);
+  }
+
   const index = hashes.findIndex((h) => {
     try { return bcrypt.compareSync(supplied, h); } catch { return false; }
   });
-  if (index === -1) return c.json({ error: "That backup code isn't valid." }, 400);
+  if (index === -1) {
+    const failed = (row.backup_failed_attempts ?? 0) + 1;
+    const locked = failed >= BACKUP_MAX_ATTEMPTS;
+    await db.from("account_2fa_settings").update(locked
+      ? { backup_failed_attempts: 0, backup_locked_until: new Date(Date.now() + BACKUP_LOCK_MINUTES * 60_000).toISOString() }
+      : { backup_failed_attempts: failed }).eq("user_id", user.id);
+    return c.json({ error: locked
+      ? `Too many incorrect backup codes. Redemption is locked for ${BACKUP_LOCK_MINUTES} minutes.`
+      : `That backup code isn't valid. ${BACKUP_MAX_ATTEMPTS - failed} attempt${BACKUP_MAX_ATTEMPTS - failed === 1 ? "" : "s"} left.` }, locked ? 429 : 400);
+  }
 
   await deleteAllFactors(user.id);
 
@@ -295,6 +313,8 @@ twoFactor.post("/backup-codes/redeem", async (c) => {
     phone_verified: false,
     email_verified: false,
     backup_codes: null,
+    backup_failed_attempts: 0,
+    backup_locked_until: null,
     enabled_at: null,
     updated_at: new Date().toISOString(),
   }).eq("user_id", user.id);

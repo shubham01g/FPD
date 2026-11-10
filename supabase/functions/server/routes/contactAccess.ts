@@ -136,9 +136,14 @@ async function documentsFor(db: DB, grant: Grant): Promise<DocRow[]> {
     .order("uploaded_at", { ascending: false })
     .returns<DocRow[]>();
   if (error) throw error;
-  if (grant.kind === "legacy") return data ?? [];
+  // The PIN-locked Secret Vault is the owner's alone: it is never shared with
+  // a Legacy or Guardian contact (owner decision, 2026-11-10). Both the
+  // category and the "<uid>/secret/" storage path count, as in
+  // is_secret_vault_path() (migration 049).
+  const shareable = (data ?? []).filter((d) => d.category !== "secret" && d.file_path.split("/")[1] !== "secret");
+  if (grant.kind === "legacy") return shareable;
   const open = expandFolders(grant.folders, await ownerFolders(db, grant.ownerId));
-  return (data ?? []).filter((d) => open.has(d.category) || (d.folder_id !== null && open.has(d.folder_id)));
+  return shareable.filter((d) => open.has(d.category) || (d.folder_id !== null && open.has(d.folder_id)));
 }
 
 const notOpen = (c: { json: (b: unknown, s: number) => Response }) =>

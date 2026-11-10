@@ -57,7 +57,14 @@ export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => voi
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       settled = true;
-      const native = await getNativeChallengeState().catch(() => ({ status: "satisfied" as const }));
+      // Fail closed: if two-step status can't be read, never show the
+      // new-password form (that would skip an enrolled second factor).
+      let native: Awaited<ReturnType<typeof getNativeChallengeState>>;
+      try { native = await getNativeChallengeState(); }
+      catch {
+        setStage({ kind: "invalid", reason: "We couldn't confirm your two-step verification. Check your connection and open the reset link again." });
+        return;
+      }
       if (native.status === "challenge") {
         const challengeId = native.type === "phone" ? await challengeFactor(native.factorId) : undefined;
         setStage({ kind: "challenge", type: native.type, factorId: native.factorId, challengeId });

@@ -23,6 +23,8 @@ export function isStoredPath(value: string | null | undefined): value is string 
 const EXT: Record<string, string> = {
   "audio/webm": "webm", "video/webm": "webm", "audio/ogg": "ogg", "audio/mp4": "m4a",
   "video/mp4": "mp4", "audio/mpeg": "mp3", "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
+  "image/gif": "gif", "image/heic": "heic", "video/quicktime": "mov", "audio/wav": "wav", "audio/x-wav": "wav",
+  "audio/aac": "aac", "application/pdf": "pdf",
 };
 
 /**

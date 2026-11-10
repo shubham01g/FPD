@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
+import { AttachDocumentField } from "./AttachDocumentField";
+import { openStoredFile } from "../services/storedFiles";
 import heroWillsPhoto from "../../imports/wills_hero_photo.webp";
 import trustSidePhoto from "../../imports/trust_side_photo.webp";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -36,6 +38,8 @@ const DOCUMENT_TYPES = [
 interface WillRow {
   id: string; type: string; attorney: string; dateExecuted: string;
   lastReviewed: string; status: string; location: string; notes: string;
+  /** The stored certified copy (wills_trusts.document_url) */
+  documentUrl: string | null;
 }
 
 /* Rows come from the `wills_trusts` table. The screen used to open on three
@@ -155,12 +159,12 @@ const WILLS_CSS = `
 .fpd-wills .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
-const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"" };
+const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"", documentUrl: null as string | null };
 
 export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
   /* "View in Vault" opens the File Cabinet's Legal Documents folder, where
      scanned copies are filed (it used to only show a toast). */
-  const { addDoc, setPendingFolderId } = useDemo();
+  const { setPendingFolderId } = useDemo();
   const openLegalFolder = () => { setPendingFolderId("legal"); onNavigate?.("file-cabinet"); };
   const { requestDelete, confirmDialog } = useConfirmDelete();
   const { busy: saving, guard } = useSingleFlight();
@@ -180,6 +184,7 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
       status: String(r.status ?? "current"),
       location: String(r.location ?? ""),
       notes: String(r.notes ?? ""),
+      documentUrl: (r.document_url as string | null) ?? null,
     })));
   }, [authUser]);
 
@@ -202,7 +207,7 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
   }
 
   function openEdit(will: WillRow) {
-    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: will.notes });
+    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: will.notes, documentUrl: will.documentUrl });
     setEditingId(will.id);
     setShowAdd(true);
   }
@@ -217,10 +222,12 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
     const row = {
       doc_type: newDoc.type,
       attorney_name: newDoc.attorney,
-      date_executed: newDoc.dateExecuted || existing?.dateExecuted || today,
+      // Left blank = not recorded; a legal record must never invent a date or place.
+      date_executed: newDoc.dateExecuted || existing?.dateExecuted || null,
       last_reviewed: today,
-      location: newDoc.location || existing?.location || "Legacy Vault",
+      location: newDoc.location.trim() || null,
       notes: newDoc.notes,
+      document_url: newDoc.documentUrl,
       ...(editingId == null ? { status: "current" } : {}),
     };
 
@@ -344,14 +351,14 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
                 ].map(f => (
                   <div key={f.label} className="tile">
                     <div className="tk">{f.label}</div>
-                    <div className="tv">{f.value}</div>
+                    <div className="tv" style={f.value ? undefined : { opacity: 0.55 }}>{f.value || "Not recorded"}</div>
                   </div>
                 ))}
               </div>
 
               <div className="dacts">
-                <button className="btn-ghost" onClick={openLegalFolder}>
-                  <FileText size={13} /> View in Vault
+                <button className="btn-ghost" onClick={() => will.documentUrl ? void openStoredFile(will.documentUrl, will.type) : openLegalFolder()}>
+                  <FileText size={13} /> {will.documentUrl ? "Open Certified Copy" : "View in Vault"}
                 </button>
                 <button className="btn-sec" onClick={() => openEdit(will)}>
                   <Edit2 size={13} /> Update Record
@@ -369,15 +376,17 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
                 </button>
                 <ScanButton
                   folder="legal"
-                  onUpload={doc => {
-                    // Really store the scan in the Legal Documents folder.
-                    void addDoc({ name: doc.name, category: "legal", subCategory: undefined, folderId: undefined,
-                      size: Number((doc.file.size / 1024 / 1024).toFixed(1)), sizeUnit: "MB",
-                      type: doc.file.type.includes("pdf") ? "pdf" : doc.file.type.startsWith("image") ? "image" : "other",
-                      status: "pending", encrypted: false }, doc.file);
+                  store={{ sectionLabel: "Wills & Trusts" }}
+                  onUpload={async doc => {
+                    // Stored + filed in Legal by the scanner; link it to this document.
+                    if (!doc.path) return;
+                    const { error } = await tables.willsTrusts.update(will.id, { document_url: doc.path });
+                    if (error) { toast.error(`The scan is in your File Cabinet, but couldn't be linked: ${error.message}`); return; }
+                    await reload();
+                    toast.success(`"${doc.name}" saved as the certified copy`);
                   }}
                   size="sm"
-                  label="Scan & Upload Copy"
+                  label={will.documentUrl ? "Replace Copy" : "Scan & Upload Copy"}
                 />
               </div>
             </div>
@@ -414,13 +423,8 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
                     placeholder="e.g. Safe deposit box at First National Bank" />
                 </div>
                 <div className="field">
-                  <label>UPLOAD CERTIFIED COPY (optional)</label>
-                  <ScanButton
-                    folder="legal"
-                    onUpload={doc => toast.success(`"${doc.name}" will be linked to this document`)}
-                    size="sm"
-                    label="Scan or Upload Document"
-                  />
+                  <AttachDocumentField value={newDoc.documentUrl} onChange={v => setNewDoc(p => ({ ...p, documentUrl: v }))}
+                    folder="legal" sectionLabel="Wills & Trusts" label="Certified copy (optional)"/>
                 </div>
               </div>
               <div className="modal-foot">

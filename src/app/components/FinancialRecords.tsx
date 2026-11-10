@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, Upload, FileText, CheckCircle, Trash2 } from "lucide-react";
+import { Shield, TrendingUp, Briefcase, DollarSign, Receipt, Plus, Edit2, User, X, FileText, CheckCircle, Trash2 } from "lucide-react";
 import { useConfirmDelete } from "./ConfirmDelete";
 import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
-import { ScanButton } from "./DocumentScanner";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { openStoredFile } from "../services/storedFiles";
 import { DEDUCTIBLE_YEAR_KEY } from "./ReceiptsExpenses";
 import heroFinancialPhoto from "../../imports/financialrecords_hero_photo.webp";
 
@@ -201,25 +202,25 @@ function ContactTiles({ r }: { r: Record<string, any> }) {
   );
 }
 
-function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, onAdd }: {
+function AddModal({ title, submitLabel, fields, initial, initialDoc, folder = "financial", onClose, onAdd }: {
   title: string;
   submitLabel?: string;
   fields: FieldDef[];
   initial?: Record<string, string>;
   initialDoc?: string | null;
+  /** File Cabinet folder the attachment is filed in */
+  folder?: string;
   onClose: () => void;
-  onAdd: (form: Record<string, string>, attachedDoc: string | null) => void;
+  /** Resolves true once the row is saved; the parent closes the modal then. */
+  onAdd: (form: Record<string, string>, attachedDoc: string | null) => Promise<boolean>;
 }) {
   const [form, setForm] = useState<Record<string, string>>(initial ?? Object.fromEntries(fields.map(f => [f.key, ""])));
   const [attachedDoc, setAttachedDoc] = useState<string | null>(initialDoc ?? null);
-  const fileRef = React.useRef<HTMLInputElement>(null);
-
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAttachedDoc(file.name);
-    toast.success(`"${file.name}" attached`);
-    e.target.value = "";
+  const [saving, setSaving] = useState(false);
+  async function submit() {
+    if (saving) return;
+    setSaving(true);
+    try { await onAdd(form, attachedDoc); } finally { setSaving(false); }
   }
 
   return (
@@ -242,38 +243,13 @@ function AddModal({ title, submitLabel, fields, initial, initialDoc, onClose, on
           ))}
           </div>
 
-          {/* Document upload — attach the actual file right here */}
           <div className="field">
-            <label>Attach Document (optional — upload the actual file)</label>
-            {attachedDoc ? (
-              <div className="upload-ok">
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <CheckCircle size={14} color="#FFFFFF" />
-                  <span style={{ color: TEXT, fontSize: 16 }}>{attachedDoc}</span>
-                </div>
-                <button onClick={() => setAttachedDoc(null)}><X size={13} /></button>
-              </div>
-            ) : (
-              <div className="upload-row">
-                <button onClick={() => fileRef.current?.click()} className="upload-btn"><Upload size={14} /> Upload File (PDF, image, doc)</button>
-                <ScanButton
-                  folder="financial"
-                  onUpload={doc => { setAttachedDoc(doc.name); toast.success(`"${doc.name}" scanned`); }}
-                  size="sm"
-                  label="Scan"
-                />
-              </div>
-            )}
-            <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,image/*" className="hidden" onChange={handleFileUpload} />
-            {!attachedDoc && (
-              <p className="upload-hint">
-                Upload the actual document (policy PDF, statement, deed, etc.) so it's stored alongside the record details. It will also sync to the File Cabinet automatically.
-              </p>
-            )}
+            <AttachDocumentField value={attachedDoc} onChange={setAttachedDoc} folder={folder} sectionLabel="Financial Records"
+              label="Attach Document (optional — policy, statement, deed)"/>
           </div>
         </div>
         <div className="modal-foot">
-          <button className="save" onClick={() => onAdd(form, attachedDoc)}>{submitLabel ?? `Add Record${attachedDoc ? " + Document" : ""}`}</button>
+          <button className="save" onClick={() => void submit()} disabled={saving}>{saving ? "Saving…" : submitLabel ?? `Add Record${attachedDoc ? " + Document" : ""}`}</button>
           <button className="btn-sec" onClick={onClose}>Cancel</button>
         </div>
       </div>
@@ -312,7 +288,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
     for (const r of data ?? []) {
       const details = (r.details ?? {}) as Record<string, unknown>;
       const docs = (r.document_urls as string[] | null) ?? [];
-      (bySection[String(r.section)] ??= []).push({ ...details, id: String(r.id), attachedDoc: docs[0] ?? null });
+      (bySection[String(r.section)] ??= []).push({ ...details, id: String(r.id), attachedDoc: docs[0] ?? null, documents: docs });
     }
     setPolicies(bySection.insurance);
     setPersonalList(bySection.personal);
@@ -345,8 +321,8 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const persist = async (section: Tab, original: any | undefined, record: any) => {
-    if (!authUser) return;
+  const persist = async (section: Tab, original: any | undefined, record: any, successMsg: string): Promise<boolean> => {
+    if (!authUser) return false;
     const { id: _dbId, attachedDoc, ...details } = record;
     const row = {
       section,
@@ -361,13 +337,19 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
       status: record.status || "active",
       notes: record.notes || null,
       details,
-      document_urls: attachedDoc ? [attachedDoc] : [],
+      // The form edits the first document; any others on the row are kept.
+      document_urls: [
+        ...(attachedDoc ? [attachedDoc] : []),
+        ...((original?.documents as string[] | undefined) ?? []).slice(1).filter(d => d !== attachedDoc),
+      ],
     };
     const { error } = original?.id
       ? await tables.financialRecords.update(String(original.id), row)
       : await tables.financialRecords.add(authUser.id, row);
-    if (error) { toast.error(`Could not save: ${error.message}`); return; }
+    if (error) { toast.error(`Could not save: ${error.message}`); return false; }
     await reload();
+    toast.success(successMsg);
+    return true;
   };
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -526,7 +508,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{policy.beneficiary}</div></div>
                     <div className="tile"><div className="tk">Agent / Contact</div><div className="tv">{policy.agent}</div></div>
                   </div>
-                  {(policy as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(policy as any).attachedDoc}</div>}
+                  {(policy as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((policy as any).attachedDoc, attachmentDisplayName((policy as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((policy as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -560,7 +542,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div className="tile"><div className="tk">Notes</div><div className="tv">{acct.notes}</div></div>
                   </div>
                   <ContactTiles r={acct} />
-                  {(acct as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(acct as any).attachedDoc}</div>}
+                  {(acct as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((acct as any).attachedDoc, attachmentDisplayName((acct as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((acct as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -594,7 +576,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div className="tile"><div className="tk">Contact / Login</div><div className="tv">{p.contact}</div></div>
                   </div>
                   <ContactTiles r={p} />
-                  {(p as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(p as any).attachedDoc}</div>}
+                  {(p as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((p as any).attachedDoc, attachmentDisplayName((p as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((p as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -629,7 +611,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     <div className="tile"><div className="tk">Beneficiary</div><div className="tv">{r.beneficiary}</div></div>
                   </div>
                   <ContactTiles r={r} />
-                  {(r as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(r as any).attachedDoc}</div>}
+                  {(r as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((r as any).attachedDoc, attachmentDisplayName((r as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((r as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -677,7 +659,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                     </div></div>
                   </div>
                   <ContactTiles r={t} />
-                  {(t as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(t as any).attachedDoc}</div>}
+                  {(t as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((t as any).attachedDoc, attachmentDisplayName((t as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((t as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -711,7 +693,7 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
                   </div>
                   <ContactTiles r={b} />
                   <div className="notewarn"><b>Succession Note:</b> {b.notes}</div>
-                  {(b as any).attachedDoc && <div className="docpill"><FileText size={12} /> {(b as any).attachedDoc}</div>}
+                  {(b as any).attachedDoc && <button type="button" className="docpill" style={{ cursor: "pointer", border: "none" }} onClick={() => void openStoredFile((b as any).attachedDoc, attachmentDisplayName((b as any).attachedDoc))}><FileText size={12} /> {attachmentDisplayName((b as any).attachedDoc)}</button>}
                 </div>
               ))}
             </div>
@@ -721,90 +703,90 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
 
         {showAdd === "insurance" && (() => {
           const isEdit = editingItem?.tab === "insurance";
-          const orig = isEdit ? (editingItem!.original as typeof insurancePolicies[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Insurance Policy" : "Add Insurance Policy"} submitLabel={isEdit ? "Save Changes" : undefined}
-              fields={insuranceFields} initial={editInitial("insurance", insuranceFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
+              fields={insuranceFields} folder="insurance" initial={editInitial("insurance", insuranceFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={async (f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), type: f.type || "Policy", carrier: f.carrier || "", policyNum: f.policyNum || "", coverage: f.coverage || "", premium: f.premium || "", beneficiary: f.beneficiary || "", agent: f.agent || "", status: f.status || "active", attachedDoc: doc };
-                void persist("insurance", orig, record);
-                toast.success(isEdit ? `${record.type} updated` : `${record.type} added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+                const ok = await persist("insurance", orig, record, isEdit ? `${record.type} updated` : `${record.type} added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}
 
         {showAdd === "personal" && (() => {
           const isEdit = editingItem?.tab === "personal";
-          const orig = isEdit ? (editingItem!.original as typeof personalAccounts[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Personal Account" : "Add Personal Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={personalFields} initial={editInitial("personal", personalFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", ...pickContact(f), attachedDoc: doc };
-                void persist("personal", orig, record);
-                toast.success(isEdit ? `${record.accountName} updated` : `${record.accountName} added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+              onAdd={async (f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), accountName: f.accountName || "Account", bank: f.bank || "", accountType: f.accountType || "", accountNum: f.accountNum || "", balance: f.balance || "", beneficiary: f.beneficiary || "", notes: f.notes || "", ...pickContact(f), attachedDoc: doc };
+                const ok = await persist("personal", orig, record, isEdit ? `${record.accountName} updated` : `${record.accountName} added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}
 
         {showAdd === "portfolios" && (() => {
           const isEdit = editingItem?.tab === "portfolios";
-          const orig = isEdit ? (editingItem!.original as typeof portfolios[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Investment Account" : "Add Investment Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={portfolioFields} initial={editInitial("portfolios", portfolioFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "XXXX-????", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", ...pickContact(f), attachedDoc: doc };
-                void persist("portfolios", orig, record);
-                toast.success(isEdit ? `${record.institution} updated` : `Investment account added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+              onAdd={async (f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), institution: f.institution || "", accountType: f.accountType || "", accountNum: f.accountNum || "", value: f.value || "", holdings: f.holdings || "", beneficiary: f.beneficiary || "", contact: f.contact || "", ...pickContact(f), attachedDoc: doc };
+                const ok = await persist("portfolios", orig, record, isEdit ? `${record.institution} updated` : `Investment account added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}
 
         {showAdd === "retirement" && (() => {
           const isEdit = editingItem?.tab === "retirement";
-          const orig = isEdit ? (editingItem!.original as typeof retirementAccounts[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Retirement Account" : "Add Retirement Account"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={retirementFields} initial={editInitial("retirement", retirementFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
-                const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "XXXX-????", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", ...pickContact(f), attachedDoc: doc };
-                void persist("retirement", orig, record);
-                toast.success(isEdit ? `${record.type || "Retirement account"} updated` : `Retirement account added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+              onAdd={async (f, doc) => {
+                const record = { id: orig?.id ?? Date.now(), type: f.type || "", employer: f.employer || "", institution: f.institution || "", accountNum: f.accountNum || "", balance: f.balance || "", contributions: f.contributions || "", vested: f.vested || "", beneficiary: f.beneficiary || "", ...pickContact(f), attachedDoc: doc };
+                const ok = await persist("retirement", orig, record, isEdit ? `${record.type || "Retirement account"} updated` : `Retirement account added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}
 
         {showAdd === "taxes" && (() => {
           const isEdit = editingItem?.tab === "taxes";
-          const orig = isEdit ? (editingItem!.original as typeof taxes[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Tax Year" : "Add Tax Year"} submitLabel={isEdit ? "Save Changes" : undefined}
-              fields={taxFields} initial={editInitial("taxes", taxFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
+              fields={taxFields} folder="taxes" initial={editInitial("taxes", taxFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
+              onAdd={async (f, doc) => {
                 const record = { year: f.year || "", filedDate: f.filedDate || "", filedWith: f.filedWith || "", refund: f.refund || "", accountant: f.accountant || "", accountantPhone: f.accountantPhone || "", documents: f.documents || doc || "", ...pickContact(f), attachedDoc: doc };
-                void persist("taxes", orig, record);
-                toast.success(isEdit ? `Tax year ${record.year} updated` : `Tax year ${record.year} added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+                const ok = await persist("taxes", orig, record, isEdit ? `Tax year ${record.year} updated` : `Tax year ${record.year} added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}
 
         {showAdd === "business" && (() => {
           const isEdit = editingItem?.tab === "business";
-          const orig = isEdit ? (editingItem!.original as typeof businessAccounts[0]) : undefined;
+          const orig = isEdit ? (editingItem!.original as Record<string, any>) : undefined;
           return (
             <AddModal title={isEdit ? "Edit Business" : "Add Business"} submitLabel={isEdit ? "Save Changes" : undefined}
               fields={businessFields} initial={editInitial("business", businessFields)} initialDoc={(orig as any)?.attachedDoc ?? null} onClose={closeModal}
-              onAdd={(f, doc) => {
+              onAdd={async (f, doc) => {
                 const record = { id: orig?.id ?? Date.now(), businessName: f.businessName || "", type: f.type || "", ein: f.ein || "", bank: f.bank || "", accountNum: f.accountNum || "", revenue: f.revenue || "", accountant: f.accountant || "", accountantPhone: f.accountantPhone || "", notes: f.notes || "", ...pickContact(f), attachedDoc: doc };
-                void persist("business", orig, record);
-                toast.success(isEdit ? `${record.businessName} updated` : `${record.businessName || "Business"} added${doc ? ` with document "${doc}"` : ""}`);
-                closeModal();
+                const ok = await persist("business", orig, record, isEdit ? `${record.businessName} updated` : `${record.businessName || "Business"} added${doc ? ` with document "${attachmentDisplayName(doc)}"` : ""}`);
+                if (ok) closeModal();
+                return ok;
               }} />
           );
         })()}

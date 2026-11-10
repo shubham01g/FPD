@@ -254,8 +254,9 @@ export function FinalWishes() {
   const [editingWish, setEditingWish] = useState<Wish | null>(null);
 
   const saveWish = async (w: Omit<Wish,"id">) => {
-    if (editingWish) await updateWish(editingWish.id, w);
-    else await addWish(w);
+    // On failure the modal stays open with what was typed (the error is shown).
+    const ok = editingWish ? await updateWish(editingWish.id, w) : await addWish(w);
+    if (!ok) return;
     setWishModal(false);
     setEditingWish(null);
   };

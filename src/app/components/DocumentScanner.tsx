@@ -20,11 +20,27 @@ import {
   SwitchCamera, Sun, Contrast, FileText, AlertCircle, Scan
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthContext";
+import { useDemo } from "../context/DemoContext";
+import { db } from "../services/supabase";
+import { checkUpload, showQuotaRefusal } from "../utils/storageQuota";
 
 export interface ScannedDocument {
   file: File;
   previewUrl: string;
   name: string;
+  /** Storage path in vault-documents — set only when the scanner stored it (`store`). */
+  path?: string;
+  /** File Cabinet folder the user picked. */
+  folder: string;
+}
+
+/** When given, the scanner itself uploads the scan and files it in the
+    File Cabinet, and hands back the Storage `path`. Pages that save the
+    file their own way (AttachDocumentField, Receipts, ID scan…) omit it. */
+export interface ScanStoreOptions {
+  /** Shown in the File Cabinet as where the document came from. */
+  sectionLabel: string;
 }
 
 interface DocumentScannerProps {
@@ -33,6 +49,38 @@ interface DocumentScannerProps {
   onUpload: (doc: ScannedDocument) => void;
   folder?: string;
   defaultName?: string;
+  store?: ScanStoreOptions;
+}
+
+/* The real File Cabinet folders (ids match DigitalFileCabinet's cabinets;
+   the PIN-locked Secret Vault is deliberately not offered here). */
+const CABINET_FOLDERS = [
+  { id:"legal",          label:"Legal",       emoji:"⚖️" },
+  { id:"financial",      label:"Financial",   emoji:"💰" },
+  { id:"medical",        label:"Medical",     emoji:"🏥" },
+  { id:"taxes",          label:"Taxes",       emoji:"📋" },
+  { id:"property",       label:"Property",    emoji:"🏠" },
+  { id:"vehicles",       label:"Vehicles",    emoji:"🚗" },
+  { id:"utilities",      label:"Utilities",   emoji:"⚡" },
+  { id:"insurance",      label:"Insurance",   emoji:"🛡️" },
+  { id:"pets",           label:"Pets",        emoji:"🐾" },
+  { id:"personal",       label:"Personal",    emoji:"💌" },
+  { id:"photos",         label:"Photos",      emoji:"📷" },
+  { id:"keepsakes",      label:"Keepsakes",   emoji:"🎁" },
+  { id:"digital",        label:"Digital",     emoji:"💻" },
+  { id:"awards",         label:"Awards",      emoji:"🏆" },
+  { id:"weapons_locker", label:"Knives",      emoji:"🔪" },
+  { id:"firearms",       label:"Firearms",    emoji:"🎯" },
+  { id:"warranties",     label:"Warranties",  emoji:"🧾" },
+  { id:"ids",            label:"IDs",         emoji:"🪪" },
+  { id:"daycare",        label:"Daycare",     emoji:"🧸" },
+  { id:"places",         label:"Places",      emoji:"📍" },
+];
+const FOLDER_ALIASES: Record<string, string> = { other: "personal", memories: "photos" };
+/** Maps a caller's folder hint to a real File Cabinet folder id. */
+export function cabinetFolder(id?: string): string {
+  const v = id ? (FOLDER_ALIASES[id] ?? id) : "personal";
+  return CABINET_FOLDERS.some(f => f.id === v) ? v : "personal";
 }
 
 type ScanMode = "color" | "grayscale" | "blackwhite" | "document";
@@ -44,7 +92,7 @@ const SCAN_FILTERS: Record<ScanMode, { label: string; css: string; desc: string 
   document:   { label:"Document",   css:"grayscale(100%) contrast(1.4) brightness(1.15) saturate(0)", desc:"Best for text" },
 };
 
-export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }: DocumentScannerProps) {
+export function DocumentScanner({ open, onClose, onUpload, folder, defaultName, store }: DocumentScannerProps) {
   const videoRef   = useRef<HTMLVideoElement>(null);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const streamRef  = useRef<MediaStream | null>(null);
@@ -58,22 +106,15 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [scanMode, setScanMode] = useState<ScanMode>("document");
   const [docName, setDocName] = useState(defaultName ?? "");
-  const [docFolder, setDocFolder] = useState(folder ?? "legal");
+  const [docFolder, setDocFolder] = useState(cabinetFolder(folder));
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facing, setFacing] = useState<"user"|"environment">("environment");
   const [uploading, setUploading] = useState(false);
   const [flashActive, setFlashActive] = useState(false);
 
-  const FOLDERS = [
-    { id:"legal",    label:"Legal Documents",   emoji:"⚖️" },
-    { id:"financial",label:"Financial Records", emoji:"💰" },
-    { id:"medical",  label:"Medical Records",   emoji:"🏥" },
-    { id:"taxes",    label:"Tax Records",       emoji:"📋" },
-    { id:"property", label:"Property",          emoji:"🏠" },
-    { id:"insurance",label:"Insurance",         emoji:"🛡️" },
-    { id:"personal", label:"Personal Letters",  emoji:"💌" },
-    { id:"other",    label:"Other Documents",   emoji:"📁" },
-  ];
+  const FOLDERS = CABINET_FOLDERS;
+  const { authUser } = useAuth();
+  const { linkStoredDoc } = useDemo();
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -183,25 +224,44 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
     setPhase("camera");
   }
 
-  function confirm() {
+  async function confirm() {
     if (!docName.trim()) {
       toast.error("Please give the document a name");
       return;
     }
     if (!capturedBlob) { toast.error("No image captured"); return; }
-    setUploading(true);
-    setTimeout(() => {
-      // Keep a chosen PDF a PDF; camera captures and baked images are JPEG.
-      const isPdf = capturedBlob.type === "application/pdf";
-      const fileName = `${docName.trim().replace(/[^a-z0-9]/gi,"_")}_${Date.now()}.${isPdf ? "pdf" : "jpg"}`;
-      const file = new File([capturedBlob], fileName, { type: isPdf ? "application/pdf" : "image/jpeg" });
-      const url = capturedUrl!;
-      setUploading(false);
-      // The scanner only hands the file back; the page that opened it does the
-      // saving and reports the real result, so no "uploaded" claim here.
-      onUpload({ file, previewUrl:url, name:docName.trim() });
+    // Keep a chosen PDF a PDF; camera captures and baked images are JPEG.
+    const isPdf = capturedBlob.type === "application/pdf";
+    const fileName = `${docName.trim().replace(/[^a-z0-9]/gi,"_")}.${isPdf ? "pdf" : "jpg"}`;
+    const file = new File([capturedBlob], fileName, { type: isPdf ? "application/pdf" : "image/jpeg" });
+    const url = capturedUrl!;
+    if (!store) {
+      // The page that opened the scanner stores the file and reports the result.
+      onUpload({ file, previewUrl:url, name:docName.trim(), folder:docFolder });
       onClose();
-    }, 800);
+      return;
+    }
+    if (!authUser) { toast.error("Please sign in again before saving a scan."); return; }
+    setUploading(true);
+    try {
+      const quota = await checkUpload(file.size);
+      if (quota && !quota.allowed) { showQuotaRefusal(quota.reason); return; }
+      const path = await db.uploadVaultFile(authUser.id, file);
+      try {
+        await linkStoredDoc({
+          path, name: file.name, sizeBytes: file.size, fileType: isPdf ? "pdf" : "image",
+          category: docFolder, sourceSection: store.sectionLabel,
+        });
+      } catch {
+        toast.message(`"${docName.trim()}" is saved, but couldn't also be filed in the File Cabinet.`);
+      }
+      onUpload({ file, previewUrl:url, name:docName.trim(), path, folder:docFolder });
+      onClose();
+    } catch (err) {
+      toast.error(`Could not save "${docName.trim()}": ${(err as Error).message}`);
+    } finally {
+      setUploading(false);
+    }
   }
 
   // File upload fallback
@@ -379,20 +439,20 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                   className="w-full px-4 py-3 rounded-xl"
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", fontSize:17.5, outline:"none" }}/>
               </div>
-              <div>
-                <label style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>SAVE TO FOLDER</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {store && <div>
+                <label style={{ color:"#4A5A7A", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:6 }}>ALSO FILE IN FILE CABINET FOLDER</label>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5" style={{ maxHeight:168, overflowY:"auto" }}>
                   {FOLDERS.map(f => (
-                    <button key={f.id} onClick={() => setDocFolder(f.id)}
+                    <button key={f.id} type="button" onClick={() => setDocFolder(f.id)}
                       className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-center transition-all"
                       style={{ background:docFolder===f.id?"rgba(91,110,225,0.2)":"rgba(255,255,255,0.04)",
                         border:`1px solid ${docFolder===f.id?"rgba(91,110,225,0.5)":"rgba(255,255,255,0.06)"}` }}>
                       <span style={{ fontSize:17.5 }}>{f.emoji}</span>
-                      <span style={{ fontSize:10, color:docFolder===f.id?"#6FAE8B":"#4A5A7A", lineHeight:1.2 }}>{f.label.split(" ")[0]}</span>
+                      <span style={{ fontSize:10, color:docFolder===f.id?"#6FAE8B":"#4A5A7A", lineHeight:1.2 }}>{f.label}</span>
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>}
             </div>
 
             {/* Action buttons */}
@@ -407,9 +467,9 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
                 style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
                   boxShadow:"0 0 24px rgba(91,110,225,0.4)", opacity:uploading||!docName.trim()?0.6:1 }}>
                 {uploading ? (
-                  <><RotateCcw size={15} style={{ animation:"spin 1s linear infinite" }}/> Uploading…</>
+                  <><RotateCcw size={15} style={{ animation:"spin 1s linear infinite" }}/> Saving…</>
                 ) : (
-                  <><CheckCircle size={15}/> Upload to Vault</>
+                  <><CheckCircle size={15}/> {store ? "Save to Vault" : "Use this scan"}</>
                 )}
               </button>
             </div>
@@ -439,12 +499,14 @@ export function DocumentScanner({ open, onClose, onUpload, folder, defaultName }
 
 /* ── Scan button — drop-in anywhere ──────────────────────────────── */
 export function ScanButton({
-  onUpload, folder, size = "md", label = "Scan Document",
+  onUpload, folder, size = "md", label = "Scan Document", store,
 }: {
   onUpload: (doc: ScannedDocument) => void;
   folder?: string;
   size?: "sm" | "md" | "lg";
   label?: string;
+  /** Let the scanner upload + file the scan itself and return `doc.path`. */
+  store?: ScanStoreOptions;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -467,6 +529,7 @@ export function ScanButton({
         onClose={() => setOpen(false)}
         onUpload={doc => { onUpload(doc); setOpen(false); }}
         folder={folder}
+        store={store}
       />
     </>
   );

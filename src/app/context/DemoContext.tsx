@@ -65,6 +65,8 @@ export interface Memory {
   recipient?: string; mediaUrl?: string; achieved?: boolean; issuer?: string; childName?: string;
   /* Goals only (migration 044) */
   goalStatus?: GoalStatus; startDate?: string; targetDate?: string; steps?: GoalStep[];
+  /** Stored document paths (award certificates…), migration 054 */
+  documents?: string[];
 }
 export type GoalStatus = "soon" | "in_progress" | "achieved";
 export interface GoalStep { text: string; done: boolean; }
@@ -216,6 +218,7 @@ const rowToMemory = (r: DBMemory): Memory => ({
   issuer: r.issuer ?? undefined, childName: r.child_name ?? undefined,
   goalStatus: r.goal_status ?? undefined, startDate: r.start_date ?? undefined, targetDate: r.target_date ?? undefined,
   steps: r.steps ?? undefined,
+  documents: r.document_urls ?? [],
 });
 /* start_date/target_date are DATE columns, so a cleared field must go as
    null rather than "" (which Postgres rejects); undefined leaves it alone. */
@@ -282,34 +285,34 @@ interface DemoCtx {
      Cabinet straight onto a folder. The cabinet consumes and clears it. */
   pendingFolderId: string | null;
   setPendingFolderId: (id: string | null) => void;
-  addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean; verification?: ContactVerificationInput }) => Promise<void>;
+  addContact: (c: Omit<Contact,"id">, opts?: { invite?: boolean; verification?: ContactVerificationInput }) => Promise<boolean>;
   saveContactVerification: (id: string, v: ContactVerificationInput) => Promise<boolean>;
   removeContact: (id: string) => Promise<void>;
-  updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<void>;
+  updateContact: (id: string, updates: Partial<Omit<Contact,"id">>) => Promise<boolean>;
   sendVerificationInvite: (id: string) => Promise<void>;
   submitIdVerification: (contactId: string, file: File, idType: string) => Promise<void>;
   updateGuardianFolders: (id: string, folderIds: string[]) => Promise<void>;
-  addWish: (w: Omit<FinalWish,"id">) => Promise<void>;
-  updateWish: (id: string, w: Omit<FinalWish,"id">) => Promise<void>;
+  addWish: (w: Omit<FinalWish,"id">) => Promise<boolean>;
+  updateWish: (id: string, w: Omit<FinalWish,"id">) => Promise<boolean>;
   removeWish: (id: string) => Promise<void>;
-  addAllergy: (a: Omit<Allergy,"id">) => Promise<void>;
+  addAllergy: (a: Omit<Allergy,"id">) => Promise<boolean>;
   removeAllergy: (id: string) => Promise<void>;
   updateAllergy: (id: string, a: Omit<Allergy,"id">) => Promise<boolean>;
-  addMedication: (m: Omit<Medication,"id">) => Promise<void>;
+  addMedication: (m: Omit<Medication,"id">) => Promise<boolean>;
   removeMedication: (id: string) => Promise<void>;
   updateMedication: (id: string, m: Omit<Medication,"id">) => Promise<boolean>;
-  addReminder: (r: Omit<Reminder,"id">) => Promise<void>;
+  addReminder: (r: Omit<Reminder,"id">) => Promise<boolean>;
   completeReminder: (id: string) => Promise<void>;
   removeReminder: (id: string) => Promise<void>;
-  addMemory: (m: Omit<Memory,"id">) => Promise<void>;
-  updateMemory: (id: string, m: Partial<Omit<Memory,"id">>) => Promise<void>;
+  addMemory: (m: Omit<Memory,"id">) => Promise<boolean>;
+  updateMemory: (id: string, m: Partial<Omit<Memory,"id">>) => Promise<boolean>;
   removeMemory: (id: string) => Promise<void>;
-  addOccasion: (o: Omit<Occasion,"id">) => Promise<void>;
-  updateOccasion: (id: string, o: Omit<Occasion,"id">) => Promise<void>;
+  addOccasion: (o: Omit<Occasion,"id">) => Promise<boolean>;
+  updateOccasion: (id: string, o: Omit<Occasion,"id">) => Promise<boolean>;
   removeOccasion: (id: string) => Promise<void>;
-  updateReminder: (id: string, r: Omit<Reminder,"id">) => Promise<void>;
+  updateReminder: (id: string, r: Omit<Reminder,"id">) => Promise<boolean>;
   saveFuneralPlan: (data: FuneralPlan) => Promise<boolean>;
-  saveEmergencyInfo: (data: EmergencyInfo) => Promise<void>;
+  saveEmergencyInfo: (data: EmergencyInfo) => Promise<boolean>;
   markNotifRead: (id: string) => void;
   markAllRead: () => void;
   unreadCount: number;
@@ -585,14 +588,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Contacts */
   const addContact = useCallback(async (c: Omit<Contact,"id">, opts?: { invite?: boolean; verification?: ContactVerificationInput }) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Adding contact...");
     const { data, error } = await db.addContact({
       owner_user_id: uid, full_name: c.name, email: c.email, phone: c.phone, relationship: c.relationship,
-      contact_type: c.type, verification_status: c.verificationStatus, access_level: c.accessLevel,
+      contact_type: c.type, access_level: c.accessLevel,
       notes: c.notes, allowed_folder_ids: c.allowedFolderIds ?? [], photo_url: c.photo ?? null,
     });
-    if (error || !data) { toast.error("Could not add contact", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not add contact", { id: tid }); return false; }
     setContacts(prev => [rowToContact(data), ...prev]);
     // Saved before the invite goes out, so a contact is never invited without
     // the protection the owner asked for. On failure the invite waits.
@@ -600,19 +603,20 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       const { error: vErr } = await db.setContactVerification(data.id, opts.verification);
       if (vErr) {
         toast.error(`Contact added, but the security word/question was not saved: ${vErr.message}. Open Edit to try again — no invite was sent.`, { id: tid, duration: 10000 });
-        return;
+        return true;
       }
     }
     // Only Legacy and Guardian Contacts are emailed, and never on a bulk
     // import — that would mail a whole address book in one click.
     const invitable = c.type === "legacy" || c.type === "guardian";
-    if (!invitable || opts?.invite === false || !c.email) { toast.success("Contact added", { id: tid }); return; }
+    if (!invitable || opts?.invite === false || !c.email) { toast.success("Contact added", { id: tid }); return true; }
     const sent = await db.sendContactInvite(data.id);
     if (sent.error) toast.error(`Contact added, but the invite email was not sent: ${sent.error}`, { id: tid });
     else {
       setContacts(prev => prev.map(x => x.id === data.id ? { ...x, verificationStatus: sent.verificationStatus ?? x.verificationStatus } : x));
       toast.success(`Invite emailed to ${c.email}`, { id: tid });
     }
+    return true;
   }, [uid]);
 
   const removeContact = useCallback(async (id: string) => {
@@ -632,7 +636,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       // undefined would blank the column on every other kind of save.
       ...(updates.photo === undefined ? {} : { photo_url: updates.photo ?? null }),
     });
-    if (error || !data) { toast.error("Could not save contact", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not save contact", { id: tid }); return false; }
     // Merge only the edited fields — rowToContact would also reset idVerificationStatus/
     // idRejectionReason to null since `data` here has no joined id_verifications row.
     setContacts(c => c.map(x => x.id === id ? {
@@ -641,6 +645,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       photo: data.photo_url ?? undefined,
     } : x));
     toast.success("Contact updated", { id: tid });
+    return true;
   }, []);
 
   const sendVerificationInvite = useCallback(async (id: string) => {
@@ -680,19 +685,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Final Wishes */
   const addWish = useCallback(async (w: Omit<FinalWish,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving final wish...");
     const { data, error } = await db.addFinalWish({ user_id: uid, category: w.category, item: w.item, recipient: w.recipient, notes: w.notes });
-    if (error || !data) { toast.error("Could not save wish", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not save wish", { id: tid }); return false; }
     setWishes(prev => [rowToWish(data), ...prev]);
     toast.success("Final wish saved to vault", { id: tid });
+    return true;
   }, [uid]);
 
   const updateWish = useCallback(async (id: string, w: Omit<FinalWish,"id">) => {
     const { data, error } = await db.updateFinalWish(id, { category: w.category, item: w.item, recipient: w.recipient, notes: w.notes });
-    if (error || !data) { toast.error("Could not update wish"); return; }
+    if (error || !data) { toast.error("Could not update wish"); return false; }
     setWishes(prev => prev.map(x => x.id === id ? rowToWish(data) : x));
     toast.success("Wish updated");
+    return true;
   }, []);
 
   const removeWish = useCallback(async (id: string) => {
@@ -704,12 +711,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Medical */
   const addAllergy = useCallback(async (a: Omit<Allergy,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving allergy...");
     const { data, error } = await db.addAllergy({ user_id: uid, allergen: a.allergen, severity: a.severity, reaction: a.reaction, type: a.type, diagnosed: a.diagnosed, document_urls: a.documentUrls ?? [] });
-    if (error || !data) { toast.error("Could not save allergy", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not save allergy", { id: tid }); return false; }
     setAllergies(prev => [rowToAllergy(data), ...prev]);
     toast.success("Allergy record saved", { id: tid });
+    return true;
   }, [uid]);
 
   const removeAllergy = useCallback(async (id: string) => {
@@ -730,12 +738,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addMedication = useCallback(async (m: Omit<Medication,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving medication...");
     const { data, error } = await db.addMedication({ user_id: uid, name: m.name, dose: m.dose, frequency: m.frequency, condition: m.condition, prescriber: m.prescriber, pharmacy: m.pharmacy, refill_date: m.refillDate, document_urls: m.documentUrls ?? [] });
-    if (error || !data) { toast.error("Could not save medication", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not save medication", { id: tid }); return false; }
     setMeds(prev => [rowToMed(data), ...prev]);
     toast.success("Medication record saved", { id: tid });
+    return true;
   }, [uid]);
 
   const removeMedication = useCallback(async (id: string) => {
@@ -754,12 +763,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Reminders */
   const addReminder = useCallback(async (r: Omit<Reminder,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Creating reminder...");
     const { data, error } = await db.addReminder({ user_id: uid, title: r.title, due_date: r.dueDate, frequency: r.frequency, category: r.category, status: r.status, notes: r.notes });
-    if (error || !data) { toast.error("Could not create reminder", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not create reminder", { id: tid }); return false; }
     setReminders(prev => [rowToReminder(data), ...prev]);
     toast.success("Reminder created", { id: tid });
+    return true;
   }, [uid]);
 
   /* These used to fire the request and report success without waiting, so
@@ -780,16 +790,18 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Memories */
   const addMemory = useCallback(async (m: Omit<Memory,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving memory...");
     const { data, error } = await db.addMemory({
       user_id: uid, title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
       recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
       goal_status: m.goalStatus, start_date: dateOrNull(m.startDate), target_date: dateOrNull(m.targetDate), steps: m.steps,
+      document_urls: m.documents,
     });
-    if (error || !data) { toast.error("Could not save memory", { id: tid }); return; }
+    if (error || !data) { toast.error(`Could not save memory${error?.message ? `: ${error.message}` : ""}`, { id: tid }); return false; }
     setMemories(prev => [rowToMemory(data), ...prev]);
     toast.success("Memory saved to vault", { id: tid });
+    return true;
   }, [uid]);
 
   const updateMemory = useCallback(async (id: string, m: Partial<Omit<Memory,"id">>) => {
@@ -797,9 +809,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       title: m.title, memory_date: m.date, type: m.type, description: m.description, tags: m.tags,
       recipient: m.recipient, media_url: m.mediaUrl, achieved: m.achieved, issuer: m.issuer, child_name: m.childName,
       goal_status: m.goalStatus, start_date: dateOrNull(m.startDate), target_date: dateOrNull(m.targetDate), steps: m.steps,
+      document_urls: m.documents,
     });
-    if (error || !data) { toast.error("Could not update memory"); return; }
+    if (error || !data) { toast.error(`Could not update memory${error?.message ? `: ${error.message}` : ""}`); return false; }
     setMemories(prev => prev.map(x => x.id === id ? rowToMemory(data) : x));
+    return true;
   }, []);
 
   const removeMemory = useCallback(async (id: string) => {
@@ -811,19 +825,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Occasions */
   const addOccasion = useCallback(async (o: Omit<Occasion,"id">) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving occasion...");
     const { data, error } = await db.addOccasion({ user_id: uid, name: o.name, occasion_date: o.date, type: o.type, recipient: o.recipient, notes: o.notes, recurring: o.recurring });
-    if (error || !data) { toast.error("Could not save occasion", { id: tid }); return; }
+    if (error || !data) { toast.error("Could not save occasion", { id: tid }); return false; }
     setOccasions(prev => [rowToOccasion(data), ...prev]);
     toast.success("Occasion saved", { id: tid });
+    return true;
   }, [uid]);
 
   const updateOccasion = useCallback(async (id: string, o: Omit<Occasion,"id">) => {
     const { data, error } = await db.updateOccasion(id, { name: o.name, occasion_date: o.date, type: o.type, recipient: o.recipient, notes: o.notes, recurring: o.recurring });
-    if (error || !data) { toast.error("Could not update occasion"); return; }
+    if (error || !data) { toast.error("Could not update occasion"); return false; }
     setOccasions(prev => prev.map(x => x.id === id ? rowToOccasion(data) : x));
     toast.success("Occasion updated");
+    return true;
   }, []);
 
   const removeOccasion = useCallback(async (id: string) => {
@@ -835,9 +851,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const updateReminder = useCallback(async (id: string, r: Omit<Reminder,"id">) => {
     const { data, error } = await db.updateReminder(id, { title: r.title, due_date: r.dueDate, frequency: r.frequency, category: r.category, status: r.status, notes: r.notes });
-    if (error || !data) { toast.error("Could not update reminder"); return; }
+    if (error || !data) { toast.error("Could not update reminder"); return false; }
     setReminders(prev => prev.map(x => x.id === id ? rowToReminder(data) : x));
     toast.success("Reminder updated");
+    return true;
   }, []);
 
   /* Funeral plan (one row per user) */
@@ -865,7 +882,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   /* Medical emergency info (one row per user) */
   const saveEmergencyInfo = useCallback(async (data: EmergencyInfo) => {
-    if (!uid) return;
+    if (!uid) return false;
     const tid = toast.loading("Saving emergency information...");
     const { data: row, error } = await db.saveEmergencyInfo(uid, {
       blood_type: data.bloodType, height: data.height, weight: data.weight, primary_language: data.primaryLanguage,
@@ -879,9 +896,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       insurance_group_number: data.insurance.groupNum, insurance_member_id: data.insurance.memberId,
       alcohol_use: data.alcoholUse, tobacco_use: data.tobaccoUse, implants_prosthetics: data.implantsProsthetics,
     });
-    if (error || !row) { toast.error("Could not save emergency information", { id: tid }); return; }
+    if (error || !row) { toast.error("Could not save emergency information", { id: tid }); return false; }
     setEmergencyInfo(rowToEmergencyInfo(row));
     toast.success("Emergency information updated", { id: tid });
+    return true;
   }, [uid]);
 
   /* Notifications */

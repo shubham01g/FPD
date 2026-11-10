@@ -18,12 +18,29 @@ export function defaultOrigin(): string {
   return originOf(Deno.env.get("APP_URL")) ?? PUBLIC_SITE;
 }
 
-export function isOurOrigin(origin: string | null | undefined): boolean {
+/**
+ * Origins we put in links we EMAIL: only the configured app (APP_URL), the
+ * public domain and anything listed in BILLING_RETURN_ORIGINS. A preview
+ * pattern like fpd*.vercel.app is not enough here — anyone can register a
+ * Vercel project with that name and have our mail point at it.
+ */
+export function isTrustedLinkOrigin(origin: string | null | undefined): boolean {
   const o = originOf(origin);
   if (!o) return false;
   if (o === defaultOrigin() || o === PUBLIC_SITE || o === PUBLIC_SITE.replace("https://", "https://www.")) return true;
   for (const extra of (Deno.env.get("BILLING_RETURN_ORIGINS") ?? "").split(",")) {
     if (originOf(extra) === o) return true;
   }
+  return false;
+}
+
+/**
+ * Origins allowed to call the API from a browser (CORS). Auth is a bearer
+ * token, so this is looser: trusted origins plus Vercel previews and local dev.
+ */
+export function isOurOrigin(origin: string | null | undefined): boolean {
+  if (isTrustedLinkOrigin(origin)) return true;
+  const o = originOf(origin);
+  if (!o) return false;
   return /^https:\/\/fpd[a-z0-9-]*\.vercel\.app$/.test(o) || /^http:\/\/localhost(:\d+)?$/.test(o);
 }

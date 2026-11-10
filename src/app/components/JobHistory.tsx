@@ -398,7 +398,14 @@ export function JobHistory() {
                             📄 {attachmentDisplayName(d)}
                           </button>
                         ))}
-                        <ScanButton folder="legal" onUpload={doc => { setJobs(p => p.map(j => j.id === job.id ? { ...j, documents: [...j.documents, doc.name] } : j)); toast.success(`"${doc.name}" added`); }} size="sm" label="Add Document" />
+                        <ScanButton folder="legal" store={{ sectionLabel: "Job History" }} onUpload={async doc => {
+                          // Stored + filed by the scanner; link it to this record.
+                          if (!doc.path) return;
+                          const { error } = await tables.jobHistory.update(job.id, { document_urls: [...job.documents.filter(d => d !== doc.path), doc.path] });
+                          if (error) { toast.error(`The scan is in your File Cabinet, but couldn't be linked: ${error.message}`); return; }
+                          await reload();
+                          toast.success(`"${doc.name}" added`);
+                        }} size="sm" label="Add Document" />
                       </div>
                     </div>
                   )}

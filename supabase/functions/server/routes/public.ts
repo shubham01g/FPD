@@ -7,6 +7,7 @@ import { readPlatformSection } from "../lib/platformSettings.ts";
 import stripeWebhook from "./stripeWebhook.ts";
 import { billingStatus } from "../lib/billingConfig.ts";
 import { openDeliveredMessage } from "../lib/messageDelivery.ts";
+import { safeEqual, sha256Hex } from "../lib/contactLink.ts";
 import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/email.ts";
 
 const pub = new Hono();
@@ -123,10 +124,12 @@ async function loadInvite(id: string, token: string) {
   if (!id || !token) return null;
   const { data } = await adminClient()
     .from("admin_accounts")
-    .select("id, name, email, role, status, invite_token, invite_expires_at")
+    .select("id, name, email, role, status, invite_token_hash, invite_expires_at")
     .eq("id", id)
     .maybeSingle();
-  if (!data || data.status !== "invited" || !data.invite_token || data.invite_token !== token) return null;
+  // Only the hash is stored (054); compare in constant time.
+  if (!data || data.status !== "invited" || !data.invite_token_hash) return null;
+  if (!safeEqual(await sha256Hex(token), data.invite_token_hash)) return null;
   if (data.invite_expires_at && new Date(data.invite_expires_at) < new Date()) return null;
   return data;
 }
@@ -173,7 +176,7 @@ pub.post("/admin-invite/:id/accept", async (c) => {
 
   const { error: acceptErr } = await db
     .from("admin_accounts")
-    .update({ status: "active", user_id: account.id, invite_token: null, invite_expires_at: null })
+    .update({ status: "active", user_id: account.id, invite_token: null, invite_token_hash: null, invite_expires_at: null })
     .eq("id", invite.id);
   if (acceptErr) return c.json({ error: acceptErr.message }, 500);
 
@@ -394,7 +397,9 @@ pub.post("/legacy-claim/:token", async (c) => {
   const db = adminClient();
   const bucket = db.storage.from("legacy-claims");
   for (const { type, file } of files) {
-    const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
+    // Only a short alphanumeric extension from the claimant's filename is kept.
+    const rawExt = file.name.includes(".") ? (file.name.split(".").pop() ?? "").toLowerCase() : "";
+    const ext = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : "bin";
     const path = `${claim.id}/${type}-${Date.now()}.${ext}`;
     const { error: upErr } = await bucket.upload(path, file, { contentType: file.type || undefined });
     if (upErr) return c.json({ error: `Could not store ${file.name}: ${upErr.message}` }, 500);

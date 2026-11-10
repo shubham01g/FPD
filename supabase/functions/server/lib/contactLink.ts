@@ -13,6 +13,14 @@ export async function sha256Hex(s: string): Promise<string> {
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** Constant-time string compare, for token hashes. */
+export function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 /** Stores a fresh link on the contact and returns the raw token for the email. */
 export async function issueContactLink(db: SupabaseClient, contactId: string): Promise<string> {
   const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join("");

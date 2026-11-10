@@ -184,7 +184,7 @@ const ORG_CSS = `
 @media (max-width:640px){.fpd-org .fgrid,.fpd-org .ogrid{grid-template-columns:1fr;}}
 `;
 
-function AddReminderModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(r:Omit<Reminder,"id">)=>Promise<void>; initial?: Reminder | null }) {
+function AddReminderModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(r:Omit<Reminder,"id">)=>Promise<boolean>; initial?: Reminder | null }) {
   const [form, setForm] = useState(initial
     ? { title: initial.title, dueDate: initial.dueDate, frequency: initial.frequency, category: initial.category, status: initial.status, notes: initial.notes ?? "" }
     : { title:"", dueDate:"", frequency:"Annual", category:"Legal", status:"upcoming" as Reminder["status"], notes:"" });
@@ -192,8 +192,8 @@ function AddReminderModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd
   const submit = async () => {
     if (!form.title || !form.dueDate) { toast.error("Title and due date required"); return; }
     setLoading(true);
-    await onAdd(form);
-    onClose();
+    // Stay open on failure so nothing typed is lost.
+    if (await onAdd(form)) onClose();
   };
   return (
     <div className="backdrop">
@@ -226,7 +226,7 @@ function AddReminderModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd
   );
 }
 
-function AddOccasionModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(o:Omit<Occasion,"id">)=>Promise<void>; initial?: Occasion | null }) {
+function AddOccasionModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd:(o:Omit<Occasion,"id">)=>Promise<boolean>; initial?: Occasion | null }) {
   const [form, setForm] = useState(initial
     ? { name: initial.name, date: initial.date, type: initial.type, recipient: initial.recipient ?? "", notes: initial.notes ?? "", recurring: initial.recurring }
     : { name:"", date:"", type:"birthday" as Occasion["type"], recipient:"", notes:"", recurring:true });
@@ -234,8 +234,8 @@ function AddOccasionModal({ onClose, onAdd, initial }: { onClose:()=>void; onAdd
   const submit = async () => {
     if (!form.name || !form.date) { toast.error("Name and date required"); return; }
     setLoading(true);
-    await onAdd(form);
-    onClose();
+    // Stay open on failure so nothing typed is lost.
+    if (await onAdd(form)) onClose();
   };
   return (
     <div className="backdrop">

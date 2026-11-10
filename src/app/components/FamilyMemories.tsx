@@ -6,11 +6,11 @@ import { prepareImage } from "../utils/imageInput";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
 import { useDemo, type Memory, type GoalStatus, type GoalStep } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../services/supabase";
-import { persistMediaValue, uploadMedia, useStoredFileUrl } from "../services/storedFiles";
+import { openStoredFile, persistMediaValue, uploadMedia, useStoredFileUrl } from "../services/storedFiles";
 
 /* Plays a saved video/audio memory (vault-documents path) through a signed
    link; a just-picked blob: preview plays as is. */
@@ -483,6 +483,7 @@ export function FamilyMemories() {
   function editAward(a: Memory) {
     setForm({ award: a.title, year: a.date, org: a.issuer || "", category: a.tags[0] || "", desc: a.description, forChild: a.childName || "" });
     setItemPhoto(a.mediaUrl || "");
+    setItemDoc(a.documents?.[0] ?? null);
     setEditingId(a.id);
     setShowAdd("awards");
   }
@@ -490,13 +491,23 @@ export function FamilyMemories() {
   async function quickAdd() {
     const isEdit = editingId !== null;
     const today = new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    // Each branch sets ok from the real save; on failure the modal stays open
+    // with everything the user typed (the context already showed the error).
+    let ok = true;
     switch(showAdd) {
       case "memories": {
         if (!form.title) { toast.error("Title required"); return; }
         const tags = (form.tags||"").split(",").map(t=>t.trim()).filter(Boolean);
-        const mediaUrl = pendingPhotos[0]; // only one photo per memory is persisted (media_url is a single column)
-        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.date, description: form.desc || "", tags, mediaUrl });
-        else await addMemory({ title: form.title, date: form.date || today, type: "photo", description: form.desc || "", tags, mediaUrl });
+        // media_url holds one photo, so several picked photos become one
+        // memory each ("Title (2 of 3)"); none of them is dropped.
+        if (isEdit) ok = await updateMemory(editingId!, { title: form.title, date: form.date, description: form.desc || "", tags, ...(pendingPhotos[0] ? { mediaUrl: pendingPhotos[0] } : {}) });
+        else if (pendingPhotos.length <= 1) ok = await addMemory({ title: form.title, date: form.date || today, type: "photo", description: form.desc || "", tags, mediaUrl: pendingPhotos[0] });
+        else {
+          for (let i = 0; i < pendingPhotos.length && ok; i++) {
+            ok = await addMemory({ title: `${form.title} (${i + 1} of ${pendingPhotos.length})`, date: form.date || today, type: "photo", description: form.desc || "", tags, mediaUrl: pendingPhotos[i] });
+          }
+        }
+        if (!ok) return;
         setPendingPhotos([]);   // ownership passes to the saved memory
         break;
       }
@@ -508,8 +519,9 @@ export function FamilyMemories() {
           try { videoPath = (await persistMediaValue(authUser.id, pendingVideo.url, pendingVideo.name)) ?? undefined; }
           catch (err) { toast.error(`The video couldn't be saved: ${(err as Error).message}`); return; }
         }
-        if (isEdit) await updateMemory(editingId!, { title: form.title, date: form.filmed, description: form.desc || "", tags, ...(videoPath ? { mediaUrl: videoPath } : {}) });
-        else await addMemory({ title: form.title, date: form.filmed || "Unknown", type: "video", description: form.desc || "", tags, mediaUrl: videoPath });
+        if (isEdit) ok = await updateMemory(editingId!, { title: form.title, date: form.filmed, description: form.desc || "", tags, ...(videoPath ? { mediaUrl: videoPath } : {}) });
+        else ok = await addMemory({ title: form.title, date: form.filmed || "Unknown", type: "video", description: form.desc || "", tags, mediaUrl: videoPath });
+        if (!ok) return;
         setPendingVideo(null);  // ownership passes to the saved memory
         break;
       }
@@ -520,16 +532,18 @@ export function FamilyMemories() {
           try { audioPath = (await persistMediaValue(authUser.id, pendingAudio.url, pendingAudio.name)) ?? undefined; }
           catch (err) { toast.error(`The recording couldn't be saved: ${(err as Error).message}`); return; }
         }
-        if (isEdit) await updateMemory(editingId!, { title: form.title, recipient: form.recipient, description: form.desc || "", ...(audioPath ? { mediaUrl: audioPath } : {}) });
-        else await addMemory({ title: form.title, date: today, type: "audio", description: form.desc || "", tags: [], recipient: form.recipient || "Family", mediaUrl: audioPath });
+        if (isEdit) ok = await updateMemory(editingId!, { title: form.title, recipient: form.recipient, description: form.desc || "", ...(audioPath ? { mediaUrl: audioPath } : {}) });
+        else ok = await addMemory({ title: form.title, date: today, type: "audio", description: form.desc || "", tags: [], recipient: form.recipient || "Family", mediaUrl: audioPath });
+        if (!ok) return;
         setPendingAudio(null);  // ownership passes to the saved memory
         break;
       }
       case "kids": {
         if (!form.name) { toast.error("Name required"); return; }
         const activities = (form.activities||"").split(",").map(t=>t.trim()).filter(Boolean);
-        if (isEdit) await updateMemory(editingId!, { title: form.name, childName: form.name, recipient: form.school, tags: activities, description: form.notes || "" });
-        else await addMemory({ title: form.name, date: "", type: "note", description: form.notes || "", tags: activities, recipient: form.school, childName: form.name });
+        if (isEdit) ok = await updateMemory(editingId!, { title: form.name, childName: form.name, recipient: form.school, tags: activities, description: form.notes || "" });
+        else ok = await addMemory({ title: form.name, date: "", type: "note", description: form.notes || "", tags: activities, recipient: form.school, childName: form.name });
+        if (!ok) return;
         break;
       }
       case "goals": {
@@ -540,16 +554,22 @@ export function FamilyMemories() {
           startDate: form.startDate || "", targetDate: form.targetDate || "",
           steps: goalSteps.filter(s => s.text.trim()), mediaUrl: itemPhoto,
         };
-        if (isEdit) await updateMemory(editingId!, goal);
-        else await addMemory({ ...goal, date: "", type: "goal", tags: [] });
+        if (isEdit) ok = await updateMemory(editingId!, goal);
+        else ok = await addMemory({ ...goal, date: "", type: "goal", tags: [] });
+        if (!ok) return;
         resetItemMedia();
         break;
       }
       case "awards": {
         if (!form.award) { toast.error("Award name required"); return; }
         const tags = [form.category || "Other"];
-        if (isEdit) await updateMemory(editingId!, { title: form.award, date: form.year, issuer: form.org, tags, description: form.desc || "", mediaUrl: itemPhoto, childName: form.forChild || undefined });
-        else await addMemory({ title: form.award, date: form.year || String(new Date().getFullYear()), type: "award", description: form.desc || "", tags, issuer: form.org, achieved: true, mediaUrl: itemPhoto, childName: form.forChild || undefined });
+        // The certificate is kept on the award (document_urls, migration 054);
+        // documents attached from the card are preserved on edit.
+        const existing = isEdit ? (memories.find(m => m.id === editingId)?.documents ?? []) : [];
+        const documents = itemDoc ? [itemDoc, ...existing.filter(d => d !== itemDoc)] : existing;
+        if (isEdit) ok = await updateMemory(editingId!, { title: form.award, date: form.year, issuer: form.org, tags, description: form.desc || "", mediaUrl: itemPhoto, childName: form.forChild || undefined, documents });
+        else ok = await addMemory({ title: form.award, date: form.year || String(new Date().getFullYear()), type: "award", description: form.desc || "", tags, issuer: form.org, achieved: true, mediaUrl: itemPhoto, childName: form.forChild || undefined, documents });
+        if (!ok) return;
         resetItemMedia();
         break;
       }
@@ -1000,8 +1020,18 @@ export function FamilyMemories() {
                         <span className="tag" style={{ background: "rgba(255,255,255,0.05)", color: MUTED }}>{a.tags[0]}</span>
                       </div>
                       {a.description && <div className="r-desc" style={{ marginTop: 6 }}>{a.description}</div>}
-                      <div style={{ marginTop: 12 }}>
-                        <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" scanned and saved to File Cabinet`)} size="sm" label="Scan Document"/>
+                      <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                        {(a.documents ?? []).map(d => (
+                          <button key={d} className="tag" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}
+                            style={{ background: "rgba(91,110,225,0.1)", color: "#6E90C9", border: "none", cursor: "pointer" }}>
+                            📄 {attachmentDisplayName(d)}
+                          </button>
+                        ))}
+                        <ScanButton folder="awards" store={{ sectionLabel: "Family & Memories" }} size="sm" label="Scan Document"
+                          onUpload={async doc => {
+                            if (!doc.path) return;
+                            if (await updateMemory(a.id, { documents: [...(a.documents ?? []), doc.path] })) toast.success(`"${doc.name}" attached to ${a.title}`);
+                          }}/>
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>

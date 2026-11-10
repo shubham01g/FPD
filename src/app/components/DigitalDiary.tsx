@@ -83,12 +83,24 @@ function formatDuration(total: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 /** Plays a saved diary recording through a short-lived signed link. */
-function DiaryMedia({ value, video }: { value: string; video: boolean }) {
+/* What a stored file is, from its extension (uploaded media keeps one). */
+function mediaKind(path: string): "image" | "video" | "audio" | "pdf" | "file" {
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  if (["jpg", "jpeg", "png", "webp", "gif", "heic"].includes(ext)) return "image";
+  if (["mp4", "mov", "webm", "m4v"].includes(ext)) return "video";
+  if (["mp3", "m4a", "wav", "ogg", "aac"].includes(ext)) return "audio";
+  if (ext === "pdf") return "pdf";
+  return "file";
+}
+
+function DiaryMedia({ value, video }: { value: string; video?: boolean }) {
   const url = useStoredFileUrl(value);
-  if (!url) return <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Loading recording…</div>;
-  return video
-    ? <video src={url} controls playsInline style={{ width: "100%", maxHeight: 320, borderRadius: 10, background: "#0B1120" }}/>
-    : <audio src={url} controls style={{ width: "100%" }}/>;
+  if (!url) return <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>Loading…</div>;
+  const kind = video === undefined ? mediaKind(value) : (video ? "video" : "audio");
+  if (kind === "image") return <img src={url} alt="" style={{ width: "100%", maxHeight: 360, objectFit: "contain", borderRadius: 10, background: "#0B1120" }}/>;
+  if (kind === "video") return <video src={url} controls playsInline style={{ width: "100%", maxHeight: 320, borderRadius: 10, background: "#0B1120" }}/>;
+  if (kind === "audio") return <audio src={url} controls style={{ width: "100%" }}/>;
+  return <a href={url} target="_blank" rel="noreferrer" style={{ color: "#6E90C9", fontSize: 15 }}>Open attached {kind === "pdf" ? "PDF" : "file"}</a>;
 }
 
 function AudioRecorder({ onSave }: { onSave: (blob: Blob, duration: string) => void }) {
@@ -434,6 +446,8 @@ export function DigitalDiary() {
   const [videoDuration, setVideoDuration] = useState<string | null>(null);
   // The recording waiting to be saved with the entry, and its length.
   const [mediaBlob, setMediaBlob] = useState<Blob | null>(null);
+  /* Name of a picked/scanned file for a "photo" (media) entry. */
+  const [mediaName, setMediaName] = useState<string | null>(null);
   const [recDuration, setRecDuration] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -443,7 +457,7 @@ export function DigitalDiary() {
     setCreating(false);
     setEditingId(null);
     setForm({ title:"", body:"", mood:"good", tags:"", private:false });
-    setAudioSaved(false); setVideoDuration(null); setMediaBlob(null); setRecDuration(null);
+    setAudioSaved(false); setVideoDuration(null); setMediaBlob(null); setMediaName(null); setRecDuration(null);
   }
 
   function openAdd() {
@@ -744,6 +758,9 @@ export function DigitalDiary() {
                       : <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>No recording was saved with this entry.</div>}
                   </div>
                 )}
+                {selected.type === "photo" && selected.mediaUrl && (
+                  <div style={{ marginTop: 12 }}><DiaryMedia value={selected.mediaUrl}/></div>
+                )}
                 {selected.type === "video" && (
                   selected.mediaUrl
                     ? <DiaryMedia value={selected.mediaUrl} video/>
@@ -827,15 +844,24 @@ export function DigitalDiary() {
                 <div>
                   <input ref={fileRef} type="file" accept="video/*,image/*,audio/*" className="hidden" onChange={e => {
                     const f = e.target.files?.[0];
-                    if (f) { toast.success(`"${f.name}" attached to entry`); }
+                    e.target.value = "";
+                    // Kept until Save, which uploads it with the entry.
+                    if (f) { setMediaBlob(f); setMediaName(f.name); }
                   }}/>
-                  <div onClick={() => fileRef.current?.click()} className="upload-box">
-                    <Upload size={28} color="#FFFFFF" style={{ opacity:0.7 }}/>
-                    <div style={{ color: MUTED, fontSize: 16 }}>Upload video, photo, or audio file</div>
-                    <div style={{ color: FAINT, fontSize: 14 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
-                  </div>
+                  {mediaName ? (
+                    <div className="record-done" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                      <span style={{ color: TEXT, fontSize: 15 }}>📎 {mediaName} — saved when you save the entry</span>
+                      <button type="button" onClick={() => { setMediaBlob(null); setMediaName(null); }} style={{ color: "#FC8181", background: "none", border: "none", cursor: "pointer" }}><X size={14}/></button>
+                    </div>
+                  ) : (
+                    <div onClick={() => fileRef.current?.click()} className="upload-box">
+                      <Upload size={28} color="#FFFFFF" style={{ opacity:0.7 }}/>
+                      <div style={{ color: MUTED, fontSize: 16 }}>Upload video, photo, or audio file</div>
+                      <div style={{ color: FAINT, fontSize: 14 }}>MP4, MOV, JPG, PNG, MP3, WAV</div>
+                    </div>
+                  )}
                   <div className="flex justify-center" style={{ marginTop: 12 }}>
-                    <ScanButton folder="personal" onUpload={doc => toast.success(`"${doc.name}" attached to diary entry`)} size="sm" label="Or Scan Document"/>
+                    <ScanButton folder="personal" onUpload={doc => { setMediaBlob(doc.file); setMediaName(doc.file.name); }} size="sm" label="Or Scan Document"/>
                   </div>
                 </div>
               )}

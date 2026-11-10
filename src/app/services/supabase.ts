@@ -230,6 +230,8 @@ export interface DBMemory {
   /* Goals only (migration 044) */
   goal_status?: "soon" | "in_progress" | "achieved"; start_date?: string | null; target_date?: string | null;
   steps?: { text: string; done: boolean }[];
+  /* Attached documents, e.g. an award certificate (migration 054) */
+  document_urls?: string[];
 }
 
 export interface DBFuneralPlan {
@@ -287,7 +289,7 @@ export const db = {
   async listContacts(ownerId: string) {
     return supabase.from("contacts").select("*").eq("owner_user_id", ownerId).returns<DBContact[]>();
   },
-  async addContact(contact: Omit<DBContact,"id"|"created_at">) {
+  async addContact(contact: Omit<DBContact,"id"|"created_at"|"verification_status">) {
     return supabase.from("contacts").insert(contact).select().single<DBContact>();
   },
   async updateContact(id: string, updates: Partial<Omit<DBContact,"id"|"owner_user_id"|"created_at">>) {
@@ -356,7 +358,7 @@ export const db = {
 
   // Affiliates
   async getAffiliate(userId: string) {
-    return supabase.from("affiliates").select("*").eq("user_id", userId).single<DBAffiliate>();
+    return supabase.from("affiliates").select("*").eq("user_id", userId).maybeSingle<DBAffiliate>();
   },
   /* Joins the affiliate programme through the edge function (routes/affiliateJoin.ts):
      the browser can't write affiliate rows. The new row awaits admin approval. */
