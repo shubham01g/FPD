@@ -437,9 +437,9 @@ export function DisasterRecovery() {
 
           <div style={{ width:"100%", maxWidth:440, textAlign:"left" }}>
             {[
-              { icon:"📦", label:"Bulk export up to 100 GB of your vault" },
-              { icon:"⚡", label:"Instant archive generation — one click" },
-              { icon:"🔐", label:"Encrypted, time-limited secure download link" },
+              { icon:"📦", label:"Bulk export of your whole vault" },
+              { icon:"⚡", label:"The archive is built in your browser — one click" },
+              { icon:"🔐", label:"Files are fetched over an encrypted connection" },
               { icon:"⏱️", label:"Active for 48 hours from admin approval" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 py-2.5"
@@ -478,8 +478,8 @@ export function DisasterRecovery() {
             {[
               { title:"Request Access", desc:"Call or email FPD support. Describe your emergency — account compromise, natural disaster, or urgent estate access." },
               { title:"Admin Verification", desc:"A Master Admin authenticates via MFA, enters a reason code, and activates your 48-hour bypass window." },
-              { title:"You're Notified", desc:"You receive an email and in-app notification immediately. The Emergency Recovery dashboard becomes active." },
-              { title:"Bulk Export", desc:"Select which sections to include, generate your encrypted archive, and download via a secure 15-minute link." },
+              { title:"You're Notified", desc:"You receive an email as soon as the window opens, and the Emergency Recovery dashboard becomes active." },
+              { title:"Bulk Export", desc:"Choose the sections to include and download them as a ZIP file built in your browser. Keep it somewhere safe — the ZIP itself isn't password-protected." },
             ].map((item, i) => (
               <div key={i} className="gcard">
                 <div className="gnum">{String(i+1).padStart(2,"0")}</div>

@@ -925,7 +925,7 @@ export function AccountSettings() {
                     <div key={d.id} className="filetag">
                       <Lock size={10} color="#FFFFFF"/>
                       <span>{d.name}</span>
-                      <span className="fbadge">ENCRYPTED</span>
+                      <span className="fbadge" title="Stored encrypted at rest (AES-256)">ENCRYPTED</span>
                     </div>
                   ))}
                 </div>

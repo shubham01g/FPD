@@ -333,7 +333,7 @@ function Hero({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: s
           <p className="fpd-seq fpd-hero-tag" style={{ color: FAINT, ...MONO, marginBottom: 32, ...seq(3) }}>PREPARE · PROTECT · PASS DOWN</p>
           <div className="fpd-seq flex flex-wrap items-center justify-center gap-3 sm:gap-3.5 mb-6 sm:mb-16" style={seq(4)}>
             <PrimaryBtn onClick={onStart} large>Start Your Legacy <ArrowRight size={18} /></PrimaryBtn>
-            <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> Watch Demo</GhostBtn>
+            <GhostBtn onClick={() => onNavigate("how-it-works")} large><Play size={16} /> See How It Works</GhostBtn>
             <DownloadAppButton large />
           </div>
         </div>
@@ -759,7 +759,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
     <>
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
       kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
-      sub={`Start free for ${starterTrialDays} days. Paid plans include their storage; anything above it is $0.40/GB (the peak each month), never more than the monthly limit you set.`} />
+      sub={`Start free for ${starterTrialDays} days. Paid plans include their storage; anything above it is $${(PLANS.find(p => p.overage > 0)?.overage ?? 0.4).toFixed(2)}/GB (the peak each month), never more than the monthly limit you set.`} />
     <section id="pricing" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-12">
@@ -872,10 +872,13 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
 /* ── AFFILIATES ───────────────────────────────────────────────── */
 function Affiliates({ onStart }: { onStart: () => void }) {
+  // The worked example uses the live Legacy Archive price.
+  const { data: planData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
+  const exampleRate = Number(planData?.plans?.find(p => p.id === "family_archive")?.price_monthly ?? 24.99);
   const tiers = [
     { tier: "Tier 1", range: "5–24 active accounts", rate: "20%", note: "12-month cap per referral" },
     { tier: "Tier 2", range: "25–74 active accounts", rate: "25%", note: "12-month cap per referral" },
-    { tier: "Tier 3", range: "74+ active accounts", rate: "30%", note: "12-month cap per referral" },
+    { tier: "Tier 3", range: "75+ active accounts", rate: "30%", note: "12-month cap per referral" },
   ];
   const benefits: [string, string][] = [
     ["Commission paid monthly", "Commissions hit your account on the 1st of each month"],
@@ -922,8 +925,8 @@ function Affiliates({ onStart }: { onStart: () => void }) {
             </div>
           ))}
           <div className="p-5 rounded-2xl text-center" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
-            <div style={{ color: MUTED, fontSize: 16 }}>Example: 30 referrals on Legacy Archive ($24.99/mo) =</div>
-            <div style={{ ...DISPLAY, fontSize: 35.5, fontWeight: 800, color: "#6FAE8B", marginTop: 4 }}>$187.43 / month</div>
+            <div style={{ color: MUTED, fontSize: 16 }}>Example: 30 referrals on Legacy Archive (${exampleRate.toFixed(2)}/mo) =</div>
+            <div style={{ ...DISPLAY, fontSize: 35.5, fontWeight: 800, color: "#6FAE8B", marginTop: 4 }}>${(30 * exampleRate * 0.25).toFixed(2)} / month</div>
             <div style={{ color: MUTED, fontSize: 15, marginTop: 2 }}>at Tier 2 (25%) for 12 months</div>
           </div>
         </div>
@@ -989,6 +992,11 @@ function Partnerships({ onStart }: { onStart: () => void }) {
 
 /* ── WHITE GLOVE CONCIERGE ────────────────────────────────────── */
 function WhiteGlove({ onStart }: { onStart: () => void }) {
+  // Setup fee and session block from the billing catalog (what checkout charges).
+  const products = useProducts();
+  const wgSetup = (products.wg_setup?.amountCents ?? 9900) / 100;
+  const wgBlock = (products.wg_session_block?.amountCents ?? 2500) / 100;
+  const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
   const vBorder = "rgba(126,107,216,0.25)";
   const steps = [
     { icon: <Phone size={20} />, num: "01", title: "We Call You", desc: "A dedicated Final Pass Down specialist calls you personally. No forms to fill out online. Just a phone call." },
@@ -1042,7 +1050,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
         <div className="grid md:grid-cols-2 gap-5 mb-14 fpd-stagger">
           <div className="rounded-3xl p-8 text-center" style={{ background: "linear-gradient(135deg,#0A0820,#150E30)", border: `2px solid rgba(126,107,216,0.4)`, boxShadow: "0 0 48px rgba(126,107,216,0.15)" }}>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>ONE-TIME SETUP FEE</div>
-            <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$99</div>
+            <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>{usd(wgSetup)}</div>
             <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>Paid once · Gets you started with your dedicated specialist</div>
             <div className="flex flex-col gap-2 text-left">
               {["Specialist assigned to your account", "Intake call to understand your needs", "Secure document upload link sent to you", "Full onboarding plan created"].map(f => (
@@ -1055,8 +1063,8 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
           </div>
           <div className="rounded-3xl p-8 text-center" style={{ background: "rgba(126,107,216,0.06)", border: `2px solid ${vBorder}` }}>
             <div style={{ color: "#A98CC7", fontSize: 14, ...MONO, letterSpacing: "0.14em", marginBottom: 12 }}>SESSION RATE</div>
-            <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>$25</div>
-            <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>per 30 minutes · Only pay for time you use</div>
+            <div style={{ ...DISPLAY, fontSize: 90, fontWeight: 800, color: TEXT, lineHeight: 1, marginBottom: 6 }}>{usd(wgBlock)}</div>
+            <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>per started 30-minute block</div>
             <div className="flex flex-col gap-2 text-left mb-6">
               {["Phone or video session with your specialist", "Specialist uploads documents during the call", "Session notes + progress tracking", "No minimum session requirement"].map(f => (
                 <div key={f} className="flex items-center gap-2">
@@ -1066,8 +1074,8 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               ))}
             </div>
             <div className="px-4 py-3 rounded-2xl" style={{ background: "rgba(126,107,216,0.1)", border: `1px solid ${vBorder}` }}>
-              <div style={{ color: "#A98CC7", fontSize: 15, fontWeight: 600 }}>Typical Total: $199–$249</div>
-              <div style={{ color: MUTED, fontSize: 14 }}>$99 setup + 2–3 hours of sessions</div>
+              <div style={{ color: "#A98CC7", fontSize: 15, fontWeight: 600 }}>Typical Total: {usd(wgSetup + wgBlock * 4)}–{usd(wgSetup + wgBlock * 6)}</div>
+              <div style={{ color: MUTED, fontSize: 14 }}>{usd(wgSetup)} setup + 2–3 hours of sessions</div>
             </div>
           </div>
         </div>
@@ -1102,19 +1110,19 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>A specialist calls within 1 business day. No apps. No computers. Just a phone call.</div>
               <div className="flex justify-center gap-4 mb-5">
                 <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
-                  <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>$99</div>
+                  <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>{usd(wgSetup)}</div>
                   <div style={{ color: MUTED, fontSize: 12.5, ...MONO }}>SETUP FEE</div>
                 </div>
                 <div style={{ color: FAINT, fontSize: 25, display: "flex", alignItems: "center" }}>+</div>
                 <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
-                  <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>$25</div>
+                  <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>{usd(wgBlock)}</div>
                   <div style={{ color: MUTED, fontSize: 12.5, ...MONO }}>PER 30 MIN</div>
                 </div>
               </div>
               <button onClick={onStart} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base fpd-btn-lift" style={{ background: `linear-gradient(135deg,${VIOLET},${VIOLET_SOFT})`, color: "#0A0820", boxShadow: "0 0 32px rgba(126,107,216,0.4)" }}>
                 <Phone size={18} /> Request My White Glove Call
               </button>
-              <div style={{ color: FAINT, fontSize: 14, marginTop: 12 }}>No obligation · Available Mon–Fri 9AM–7PM</div>
+              <div style={{ color: FAINT, fontSize: 14, marginTop: 12 }}>No obligation · Available {CONTACT_HOURS}</div>
             </div>
           </div>
         </div>
@@ -1229,25 +1237,47 @@ const FIELD: React.CSSProperties = {
 };
 const LABEL: React.CSSProperties = { color: SOFT, fontSize: 14, fontWeight: 600, marginBottom: 6, display: "block" };
 
-/* No contact-form endpoint or live-chat provider exists yet, so the form opens
-   a pre-filled email to the chosen department's mailbox. */
+/* Sends through POST /public/contact: the chosen department gets an email
+   (replies come straight back to the sender) and a copy is kept. */
 function ContactForm({ category, setCategory }: { category: string; setCategory: (c: string) => void }) {
-  const [f, setF] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", subject: "", message: "", website: "" });
   const [err, setErr] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.name.trim() || !/^\S+@\S+\.\S+$/.test(f.email) || !f.subject.trim() || !f.message.trim()) {
       setErr("Please fill in your name, a valid email, a subject and a message.");
       return;
     }
     setErr("");
-    const dept = FPD_EMAIL_DIRECTORY.find(d => d.label === category) ?? FPD_EMAIL_DIRECTORY[0];
-    const body = `${f.message}\n\n— ${f.name}\n${f.email}${f.phone ? `\n${f.phone}` : ""}`;
-    window.location.href = `mailto:${dept.email}?subject=${encodeURIComponent(f.subject)}&body=${encodeURIComponent(body)}`;
+    setSending(true);
+    try {
+      await publicApi.post("/contact", { category, ...f });
+      setSent(true);
+      setF({ name: "", email: "", phone: "", subject: "", message: "", website: "" });
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Your message could not be sent. Please email us directly.");
+    } finally {
+      setSending(false);
+    }
   };
+  if (sent) {
+    return (
+      <div id="contact-form" className="flex flex-col items-center gap-3 text-center py-6">
+        <CheckCircle2 size={32} color="#6FAE8B" />
+        <div style={{ ...DISPLAY, color: TEXT, fontSize: 22, fontWeight: 700 }}>Message sent</div>
+        <div style={{ color: MUTED, fontSize: 16 }}>Our {category} team has it and will reply to your email address.</div>
+        <button type="button" onClick={() => setSent(false)} style={{ color: HILITE, fontSize: 15, fontWeight: 600 }}>Send another message</button>
+      </div>
+    );
+  }
   return (
     <form id="contact-form" onSubmit={submit} className="flex flex-col gap-4">
+      {/* Honeypot for bots — hidden from people and screen readers. */}
+      <input type="text" name="website" value={f.website} onChange={set("website")} tabIndex={-1} autoComplete="off" aria-hidden="true"
+        style={{ position: "absolute", left: -10000, width: 1, height: 1, opacity: 0 }} />
       <div className="grid sm:grid-cols-2 gap-4">
         <label><span style={LABEL}>Your Name *</span><input style={FIELD} value={f.name} onChange={set("name")} placeholder="John Doe" autoComplete="name" /></label>
         <label><span style={LABEL}>Email Address *</span><input style={FIELD} type="email" value={f.email} onChange={set("email")} placeholder="john@example.com" autoComplete="email" /></label>
@@ -1261,13 +1291,15 @@ function ContactForm({ category, setCategory }: { category: string; setCategory:
       <label><span style={LABEL}>Subject *</span><input style={FIELD} value={f.subject} onChange={set("subject")} placeholder="How can we help?" /></label>
       <label><span style={LABEL}>Message *</span><textarea style={{ ...FIELD, minHeight: 140, resize: "vertical" }} value={f.message} onChange={set("message")} placeholder="Tell us more about your question or how we can help..." /></label>
       {err && <div style={{ color: "#F87171", fontSize: 14 }}>{err}</div>}
-      <PrimaryBtn large className="w-full justify-center"><Send size={16} /> Send Message</PrimaryBtn>
+      <PrimaryBtn large className="w-full justify-center"><Send size={16} /> {sending ? "Sending…" : "Send Message"}</PrimaryBtn>
     </form>
   );
 }
 
 function Help() {
   const [open, setOpen] = useState<number | null>(null);
+  // Support email / phone from System → Settings → General (blank = defaults).
+  const { support } = usePlatform();
   const [category, setCategory] = useState(FPD_EMAIL_DIRECTORY[0].label);
   const startChat = () => {
     setCategory("Support");
@@ -1281,8 +1313,8 @@ function Help() {
   const faqs = [
     { q: "Who can access my vault?", a: "Only you and the contacts you specifically designate. Legacy Contacts must pass government-ID verification before any access is granted. You control exactly what each contact can see and when." },
     { q: "What happens to my data if I cancel?", a: "Your data is retained for 90 days after cancellation so you can export everything. After 90 days it is permanently and irreversibly deleted per our privacy policy." },
-    { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. If you exceed your plan limit, overage is billed at $0.50/GB on Starter or $0.40/GB on all other plans." },
-    { q: "What happens after you pass away?", a: "Your designated Legacy Contact initiates the release process. They submit an end of life certification, complete identity verification, and our compliance team reviews the request within 24–48 hours before granting access." },
+    { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. On paid plans, storage above your allowance is billed per GB at your plan's overage rate (shown on each plan), never more than the monthly limit you set. Starter has no overage — uploads stop at its limit." },
+    { q: "What happens after you pass away?", a: "Your designated Legacy Contact initiates the release process. They submit an end of life certification, complete identity verification, and our compliance team reviews the request — usually within 2–3 business days — before granting access." },
     { q: "Is Final Pass Down available on mobile?", a: "Yes. Final Pass Down is a Progressive Web App (PWA) that works on any device without an app store download." },
     { q: "Can I update my documents anytime?", a: "Yes. You can add, replace, or delete any document at any time. Your contacts only ever receive the most current version of your vault when access is triggered." },
     { q: "How do I verify my legacy contacts?", a: "You invite them via email. They click a secure link, create a limited account, and upload a government-issued photo ID. Our team verifies within 1–2 business days." },
@@ -1292,20 +1324,22 @@ function Help() {
     <>
     <PageBanner poster="/media/help-bg.jpg" tone="warm" overlay={0.6} minHeight="100vh"
       kicker="Get in touch" title={<>Contact Us</>}
-      sub="Our team is available 7 days a week. Average response time: under 2 hours." />
+      sub={`Our team answers ${CONTACT_HOURS}. Most messages get a reply within one business day.`} />
     <section id="help" className="relative py-16 sm:py-28 px-6" style={{ background: "linear-gradient(180deg,#070A12,#0A1020,#070A12)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto mb-16">
           <div className={topCard} style={topCardStyle}>
             {iconChip(<Mail size={20} />)}
             <div style={{ ...DISPLAY, color: TEXT, fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Email Us</div>
-            <a href={`mailto:${FPD_EMAIL.contact}`} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8, wordBreak: "break-all" }}>{FPD_EMAIL.contact}</a>
+            <a href={`mailto:${support.email || FPD_EMAIL.contact}`} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8, wordBreak: "break-all" }}>{support.email || FPD_EMAIL.contact}</a>
             <div style={{ color: MUTED, fontSize: 14.5 }}>For general inquiries — we'll route you to the right team</div>
           </div>
           <div className={topCard} style={topCardStyle}>
             {iconChip(<MessageSquare size={20} />)}
-            <div style={{ ...DISPLAY, color: TEXT, fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Chat Live</div>
-            <button onClick={startChat} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8 }}>Start a conversation</button>
+            <div style={{ ...DISPLAY, color: TEXT, fontSize: 20, fontWeight: 700, marginBottom: 6 }}>{support.phone ? "Call Us" : "Message Support"}</div>
+            {support.phone
+              ? <a href={`tel:${support.phone.replace(/[^\d+]/g, "")}`} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8 }}>{support.phone}</a>
+              : <button onClick={startChat} className="transition-colors hover:text-white" style={{ color: HILITE, fontSize: 16.5, fontWeight: 600, marginBottom: 8 }}>Write to our support team</button>}
             <div style={{ color: MUTED, fontSize: 14.5 }}>{CONTACT_HOURS}</div>
           </div>
         </div>
@@ -1358,11 +1392,14 @@ function Help() {
 }
 
 /* ── FOOTER ───────────────────────────────────────────────────── */
+/* Only links that lead somewhere real. Privacy Policy and Terms of Service
+   go back in as soon as those pages exist (the text comes from FPD's legal
+   review). */
 const FOOTER_COLS: [string, string[]][] = [
   ["Platform", ["Dashboard", "Document Vault", "Final Wishes", "Medical Info", "Financial Records", "Personal Assets", "Family & Memories", "Contacts Hub"]],
-  ["Programs", ["Affiliate Program", "Business Partnerships", "White Label Solutions", "Legacy Vault API"]],
-  ["Resources", ["Help Center", "Security Overview", "Privacy Policy", "Terms of Service", "Cookie Policy", "HIPAA Compliance"]],
-  ["Company", ["About Us", "Careers", "Press", "Contact", "Blog", "Investor Relations"]],
+  ["Programs", ["Affiliate Program", "Business Partnerships", "White Label Solutions", "White Glove Service"]],
+  ["Resources", ["Help Center", "Security Overview", "Pricing"]],
+  ["Company", ["About Us", "How It Works", "Contact"]],
 ];
 
 function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConciergeLogin }:
@@ -1372,7 +1409,8 @@ function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConcierg
     "Financial Records": "features", "Personal Assets": "features", "Family & Memories": "features",
     "Contacts Hub": "features", "Affiliate Program": "affiliates", "Business Partnerships": "partners",
     "White Label Solutions": "white-label", "Help Center": "help", "Security Overview": "security",
-    "About Us": "about", "Contact": "help",
+    "About Us": "about", "Contact": "help", "White Glove Service": "white-glove", "Pricing": "pricing",
+    "How It Works": "how-it-works",
   };
   return (
     <footer className="relative px-6 pt-16 pb-8" style={{ background: "#050810", borderTop: "1px solid rgba(91,110,225,0.14)" }}>

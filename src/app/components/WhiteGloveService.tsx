@@ -28,17 +28,16 @@ const STEPS = [
   { icon:<CheckCircle size={20}/>, title:"Review & Complete", desc:"We walk through everything together and ensure you're 100% satisfied with your complete legacy vault." },
 ];
 
-const PRICING = {
-  setupFee: 99,
-  sessionRate: 25,
-  sessionLength: 30, // minutes
-};
+/* Prices come from the billing catalog (Admin → Subscription Config), the
+   same numbers checkout charges; these are only the fallback while it loads. */
+const SESSION_MINUTES = 30;
+const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
 
-const INCLUDES = [
+const includesFor = (setup: number, block: number) => [
   "Dedicated personal legacy specialist assigned to you",
-  "One-time $99 setup fee — no surprises",
-  "$25 per 30-minute session — only pay for the time you use",
-  "Specialist uploads all your documents for you",
+  `One-time ${usd(setup)} setup fee — no surprises`,
+  `${usd(block)} per started ${SESSION_MINUTES}-minute session block`,
+  "Your specialist helps upload your documents",
   "Complete vault setup from start to finish",
   "Legacy contact designation and ID verification guidance",
   "Final wishes recorded exactly as you describe them",
@@ -46,15 +45,15 @@ const INCLUDES = [
   "Priority email and phone support — always a real person",
 ];
 
-const FAQS = [
-  { q:"How much does White Glove service cost?", a:"There is a one-time $99 setup fee to get started. After that, sessions are billed at $25 per 30 minutes. Most clients complete their full vault setup in 2–4 sessions, so the total cost is typically $99 + $50–$100 in session time." },
-  { q:"How am I billed for sessions?", a:"Sessions are billed at $25 per 30-minute block. If a session runs 45 minutes, that's $37.50 (1.5 × $25). You will receive a summary after each session with the time used and the amount due. You can pay by card or cryptocurrency." },
-  { q:"Do I need a computer or smartphone?", a:"No. All you need is a phone to talk with your specialist. They handle all the technology on your behalf. You can participate entirely by phone call." },
+const faqsFor = (setup: number, block: number) => [
+  { q:"How much does White Glove service cost?", a:`There is a one-time ${usd(setup)} setup fee to get started. After that, sessions are billed at ${usd(block)} per ${SESSION_MINUTES}-minute block. Most clients complete their vault setup in 2–4 sessions.` },
+  { q:"How am I billed for sessions?", a:`Each session is billed in ${SESSION_MINUTES}-minute blocks: ${usd(block)} for every block started, so a 45-minute session is 2 blocks (${usd(block * 2)}). The card you saved at setup is charged after the session, and you receive a receipt by email.` },
+  { q:"Do I need a computer or smartphone?", a:"No. All you need is a phone to talk with your specialist. They handle the technology with you. You can take part entirely by phone call." },
   { q:"How long does the full setup take?", a:"Most clients are fully set up in 2–3 sessions over 1–2 weeks. Each session is typically 30–60 minutes at your pace — we never rush." },
   { q:"What documents do I need to prepare?", a:"Your specialist will give you a simple checklist on your first call. Common items include: your will (if you have one), insurance policies, bank account info, and a list of family contacts. If you don't have some of these, we'll help you figure out what to do." },
   { q:"Can my family member set this up for me?", a:"Absolutely. We can coordinate with a family member or trusted person who calls on your behalf. They can be present on all sessions if you prefer." },
-  { q:"Is my information private and secure?", a:"Yes. Everything is encrypted with military-grade AES-256 encryption. Your specialist only assists with uploading — they cannot access your vault after sessions end. All activity is logged." },
-  { q:"What if I need help after setup is complete?", a:"White Glove clients have priority support access. Email " + FPD_EMAIL.support + " anytime and a real person will answer within 2 business hours." },
+  { q:"Is my information private and secure?", a:"Yes. Everything is encrypted in transit and at rest. You sign an authorization that sets exactly what your specialist may do, and every action they take is logged." },
+  { q:"What if I need help after setup is complete?", a:"White Glove clients have priority support. Email " + FPD_EMAIL.support + " anytime and a real person will answer." },
 ];
 
 function FaqItem({ faq }: { faq: { q: string; a: string } }) {
@@ -74,7 +73,7 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
   );
 }
 
-/* ── Getting started: the $99 setup ───────────────────────────────
+/* ── Getting started: the setup fee ─────────────────────────────────
    Paid on Stripe's hosted checkout, which also saves the card (with the
    client's consent) for per-session billing. The webhook then opens the
    White Glove client record, and a specialist calls within a business day. */
@@ -234,6 +233,11 @@ const WG_CSS = `
 /* ── Main page ───────────────────────────────────────────────────── */
 export function WhiteGloveService() {
   const [showModal, setShowModal] = useState(false);
+  const products = useProducts();
+  const setupFee = (products.wg_setup?.amountCents ?? 9900) / 100;
+  const sessionRate = (products.wg_session_block?.amountCents ?? 2500) / 100;
+  const INCLUDES = includesFor(setupFee, sessionRate);
+  const FAQS = faqsFor(setupFee, sessionRate);
 
   return (
     <div className="fpd-wg fpd-fade-in-up">
@@ -271,7 +275,7 @@ export function WhiteGloveService() {
         <div className="pricing-grid">
           <div className="card price-card featured">
             <div className="price-eyebrow">ONE-TIME SETUP FEE</div>
-            <div className="price-big">${PRICING.setupFee}</div>
+            <div className="price-big">{usd(setupFee)}</div>
             <div className="price-sub">Paid once · Gets you started</div>
             <div>
               {["Specialist assigned to your account","Intake call to understand your needs","Secure document upload link sent to you","Complete onboarding plan created"].map(f => (
@@ -282,8 +286,8 @@ export function WhiteGloveService() {
 
           <div className="card price-card">
             <div className="price-eyebrow" style={{ color: "#6FAE8B" }}>SESSION RATE</div>
-            <div className="price-big">${PRICING.sessionRate}</div>
-            <div className="price-sub">per {PRICING.sessionLength} minutes · Only pay for what you use</div>
+            <div className="price-big">{usd(sessionRate)}</div>
+            <div className="price-sub">per started {SESSION_MINUTES}-minute block</div>
             <div>
               {["Phone or video call with your specialist","Specialist uploads documents during the session","Session notes and progress tracking","Typical setup: 2–4 sessions total"].map(f => (
                 <div key={f} className="price-feat"><CheckCircle size={13} color="#FFFFFF"/><span>{f}</span></div>
@@ -291,8 +295,8 @@ export function WhiteGloveService() {
             </div>
             <div className="total-box">
               <div className="tb-lbl">Typical Total Cost</div>
-              <div className="tb-val">${PRICING.setupFee + PRICING.sessionRate * 4}–${PRICING.setupFee + PRICING.sessionRate * 6}</div>
-              <div className="tb-sub">$99 setup + 2–3 hours of sessions</div>
+              <div className="tb-val">{usd(setupFee + sessionRate * 4)}–{usd(setupFee + sessionRate * 6)}</div>
+              <div className="tb-sub">{usd(setupFee)} setup + 2–3 hours of sessions</div>
             </div>
           </div>
         </div>

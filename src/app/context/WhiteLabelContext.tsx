@@ -63,8 +63,9 @@ export const defaultConfig: WhiteLabelConfig = {
   },
   planNames: { starter: "Starter", essential: "Essential", premium: "Premium", legacyPro: "Legacy Pro", enterprise: "Enterprise" },
   footerText: "© 2026 Final Pass Down Inc. All rights reserved.",
-  termsUrl: "https://finalpassdown.com/terms",
-  privacyUrl: "https://finalpassdown.com/privacy",
+  // Set per white-label brand in White Label Config; blank until provided.
+  termsUrl: "",
+  privacyUrl: "",
 };
 
 interface DBWhiteLabelConfig {

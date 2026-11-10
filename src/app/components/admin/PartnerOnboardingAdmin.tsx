@@ -682,7 +682,7 @@ export function PartnerOnboardingAdmin() {
                   style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(91,110,225,0.1)" }}>
                   <Globe size={11} color="#8A9AB8"/>
                   <span style={{ color:"#8A9AB8", fontSize:14, ...MONO, flex:1 }} className="truncate">
-                    https://finalpassdown.com/partner/onboard?tier={pkg.id}&token=XXXXXX
+                    {`${window.location.origin}/partner/onboard?tier=${pkg.id}`}
                   </span>
                 </div>
                 <div className="flex gap-2">

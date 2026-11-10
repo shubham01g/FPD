@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "lucide-react";
+import { copyToClipboard } from "../utils/clipboard";
 import { toast } from "sonner";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -174,7 +175,8 @@ export function AffiliateProgram() {
 
   const affiliateCode = affiliate?.referral_code ?? "";
   const affiliateLink = affiliate
-    ? affiliate.referral_url || `https://finalpassdown.com/r/${affiliateCode}`
+    // Always this site's own /r/:code route (stored URLs may name an old domain).
+    ? `${window.location.origin}/r/${encodeURIComponent(affiliateCode)}`
     : "";
   const activeReferrals = referrals.filter(r => r.status === "active").length;
   const currentTier = activeReferrals < 5 ? null : activeReferrals < 25 ? tiers[0] : activeReferrals < 75 ? tiers[1] : tiers[2];
@@ -197,7 +199,7 @@ export function AffiliateProgram() {
 
   const handleCopy = () => {
     if (!affiliateLink || !linkLive) return;
-    navigator.clipboard?.writeText(affiliateLink).catch(() => {});
+    copyToClipboard(affiliateLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -334,7 +334,7 @@ export function EnterpriseAPI() {
             <span style={{ color: "#6E90C9", fontSize: 14, ...MONO, letterSpacing: "0.12em" }}>ENTERPRISE</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 35.5, color: "#E8EDF5", marginBottom: 6 }}>API Reference & Developer Hub</h1>
-          <p style={{ color: "#8A9AB8", fontSize: 17.5 }}>RESTful API · Laravel Sanctum Auth · JSON responses · Rate limited: 1000 req/min</p>
+          <p style={{ color: "#8A9AB8", fontSize: 17.5 }}>Planned REST API · API-key auth · JSON responses — reference only, not live yet</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={{ ...GLASS }}>
           <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8A9AB8" }} />
@@ -467,7 +467,7 @@ export function EnterpriseAPI() {
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { title:"Rate Limiting", desc:"1,000 requests/minute per API key. 10,000/minute for Enterprise plans.", color:"#6E90C9" },
+              { title:"Rate Limiting", desc:"Limits per API key will be published when the API goes live.", color:"#6E90C9" },
               { title:"Sandbox Mode", desc:"Test with sandbox API keys — all data is isolated and never charged.", color:"#D99A6B" },
               { title:"Versioning", desc:"API version is included in the base URL: /v1/. Breaking changes release on new versions.", color:"#6FAE8B" },
             ].map(info => (

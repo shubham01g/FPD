@@ -714,11 +714,12 @@ export function DigitalFileCabinet() {
   const subCount = (name: string) => currentFiles.filter(f => f.subCategory === name).length;
 
   const totalFiles = allCabinets.reduce((s,c) => s + c.files.length + docsForFolder(c.id).length, 0);
-  const protectedCount = themedCabinets.filter(c=>c.files.some(f=>f.locked)).length;
+  // Folders holding at least one locked document (plus the PIN-locked Secret Vault).
+  const protectedCount = allCabinets.filter(c => c.id === "secret" || docsForFolder(c.id).some(f => f.locked)).length;
 
   const kpis = [
     { label: "Folders", value: String(allCabinets.length), sub: "Categorized & organized", icon: <FolderOpen size={16}/>, dot: ACCENT2, tone: "sky" },
-    { label: "Total Files", value: `${totalFiles}+`, sub: "Across every folder", icon: <FileText size={16}/>, dot: ACCENT, tone: "violet" },
+    { label: "Total Files", value: String(totalFiles), sub: "Across every folder", icon: <FileText size={16}/>, dot: ACCENT, tone: "violet" },
     { label: "Protected Vaults", value: String(protectedCount), sub: "Locked or PIN-gated", icon: <Lock size={16}/>, dot: NEG, tone: "critical" },
     { label: "Encryption", value: "AES-256", icon: <Shield size={16}/>, sub: "Encrypted at rest", dot: POS, tone: "good" },
   ];

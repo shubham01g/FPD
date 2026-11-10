@@ -14,7 +14,7 @@ const ADMIN_KB: Record<string, string> = {
   "overview": `The **Command Center Overview** is your real-time platform health dashboard:\n\n**KPI Cards (top row):**\n• Total Active Users · Monthly Recurring Revenue (MRR) · Storage Used · Avg Vault Completion\n\n**Revenue trend chart:** 6-month MRR by plan tier (Starter → Legacy Vault)\n\n**Top Affiliates & Recent Activity:** Live feed of admin actions, system events, and user activity.\n\n**Quick stats:** New signups today, support tickets open, overdue ID verifications, and continuation fees pending.\n\nTo access: Admin Portal → Command Center → **Overview** tab.`,
 
   // ── Analytics ────────────────────────────────────────────────────
-  "analytics": `The **Analytics** tab is laid out for demographic and behavioral insights, but **most of it has no data source yet**:\n\n**Not collected today:** gender, date of birth, relationship status, address/country, device type, acquisition source, sessions/DAU, feature usage, retention cohorts, and NPS. The users table has no columns for these and no events table exists.\n\nEach chart shows a "not collected" notice explaining what is missing and what would populate it.\n\n**What is real:** total users and plan mix, which come from the live database.\n\nTo access: Command Center → **Analytics** tab.`,
+  "analytics": `The **Analytics** tab shows who your members are and how they use the app — all from live data:\n\n**Demographics:** gender, age, country, device and how people heard about FPD — from the optional questions at signup. Each panel shows how many members answered.\n\n**Engagement (last 30 days):** daily and monthly active users, average session length, and which screens people use — from in-app activity events.\n\n**Plans:** total users and the plan mix.\n\n**Not available:** churn and retention cohorts (account status keeps no history) and NPS (no survey is sent).\n\nTo access: Command Center → **Analytics** tab.`,
 
   // ── Users ────────────────────────────────────────────────────────
   "users": `The **Users Tab** gives you full visibility and control over all accounts:\n\n**Search:** By name, email, or user ID.\n\n**User table columns:** User ID · Name · Email · Plan · Storage Used · Joined Date · Status · Contacts · Referrals\n\n**Actions per user:** View profile, suspend, upgrade/downgrade plan, view audit trail.\n\n**Manually Onboarded Accounts:** Appears as a highlighted section showing accounts created by admins (not self-signed-up). Includes waiver reason, White Glove flag, and who onboarded them.\n\n**Onboard User button (top right):** 3-step wizard:\n1. Contact info + White Glove toggle\n2. Pick plan + optional subscription waiver (8 reasons: White Glove, Charity, Press, Partner, Beta, Employee, Influencer, Other)\n3. Review & create\n\nTo access: Command Center → **Users** tab.`,
@@ -38,7 +38,7 @@ const ADMIN_KB: Record<string, string> = {
   "audit log": `The **Audit Log** records every admin action with full accountability:\n\n**Logged events:** User suspended, plan changed, ID verified/rejected, payout processed, vault activated, email template edited, push notification sent, admin account created, storage config changed, continuation fee activated, and more.\n\n**Each entry:** Log ID · Timestamp · Admin actor · Action taken · Target (user/account) · Severity (Info/Warning/Critical)\n\n**Severity levels:**\n• 🟦 Info — routine actions\n• 🟨 Warning — significant changes\n• 🔴 Critical — irreversible actions (deletion, vault activation)\n\n**Export:** Full audit log available in Reports & Downloads → Audit Log Export.\n\n**Compliance:** Required for SOC 2 and HIPAA. Retain for minimum 7 years.\n\nTo access: Command Center → **Audit Log** tab.`,
 
   // ── Push Notifications ───────────────────────────────────────────
-  "push notifications": `The **Push Notification Center** lets you broadcast to users:\n\n**Compose fields:**\n• Notification Type: Marketing / Feature / Update / Alert / Reminder\n• Target Audience: All Users or filter by plan tier\n• Delivery Channel: 🔔 Push Only · ✉️ Email Only · 📡 Push & Email (both simultaneously)\n• Title (65 char limit)\n• Message body (240 char limit)\n• Schedule: Send now or pick a date/time\n\n**Live Preview:** Updates as you type — shows lock screen mockup + in-app banner.\n\n**Sent History:** Every notification with Delivered count, Opened count, and Open Rate %.\n\n**Best practices:**\n• Keep titles under 40 chars for full mobile display\n• Schedule marketing notifications for Tuesday–Thursday 10 AM–2 PM local time\n• Use "Push & Email" for critical alerts (fee reminders, expiring warranties)\n\nTo access: Command Center → **Push Notifications** tab.`,
+  "push notifications": `The **Push Notification Center** sends announcements to members:\n\n**Compose:** type (Marketing / Feature / Update / Alert / Reminder), audience (everyone, a plan, or White Glove clients), channel (in-app + device push, email, or both), title and message.\n\n**Send now or schedule:** a scheduled announcement goes out within the hour after the time you pick, and can be cancelled until then.\n\n**Delivery:** every recipient gets it in their Notifications tab; device push reaches people who turned it on; email skips anyone who opted out.\n\n**History:** each announcement with its status (scheduled / sent / cancelled / failed) and recipient count. Opens aren't tracked.\n\nTo access: Command Center → **Push Notifications** tab.`,
 
   // ── Admin Team ───────────────────────────────────────────────────
   "admin team": `The **Admin Team Tab** manages who has access to the Command Center:\n\n**6 Role Presets:**\n• 👑 **Super Admin** — unrestricted everything (cannot be limited)\n• 🟣 **Operations Manager** — view/edit users, WG, verification, notifications\n• 🟢 **Finance Manager** — revenue, payouts, $199 fee, crypto config\n• 🟠 **White Glove Manager** — WG clients, waivers, billing, staff only\n• 🔵 **Support Agent** — view/edit users and White Glove only\n• 🔴 **Content Admin** — email templates and push notifications only\n\n**Invite flow (3 steps):**\n1. Enter name, email, choose role → live permission preview shows which modules are unlocked\n2. Sending animation — account created, permissions assigned, login token generated, email sent\n3. Success screen — full email preview, copy one-time login link, account summary\n\n**Per-module permissions:** View / Edit / Delete can be toggled individually for 16 modules after account creation.\n\n**Account actions:** Suspend (immediate), Reactivate, Resend Invite.\n\nTo access: Command Center → **Admin Team** tab.`,
@@ -159,7 +159,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
     time: new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
   }]);
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState(false);
+  const typing = false;   // answers are instant; kept for the indicator markup
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, typing]);
@@ -173,11 +173,8 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
     const time = new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
     setMessages(prev => [...prev, { id:Date.now().toString(), role:"user", text, time }]);
     setInput("");
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getAdminResponse(text), time }]);
-    }, 700 + Math.random()*400);
+    // Answers come from the built-in guide, so they're shown straight away.
+    setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getAdminResponse(text), time }]);
   };
 
   const wrapStyle: React.CSSProperties = inline

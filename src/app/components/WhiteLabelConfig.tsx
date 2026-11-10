@@ -351,13 +351,9 @@ export function WhiteLabelConfig() {
                 <Field label="Company Name" value={config.companyName} onChange={v => update({ companyName: v })} placeholder="Your Company Name" />
                 <Field label="Tagline" value={config.tagline} onChange={v => update({ tagline: v })} placeholder="Your brand tagline" />
                 <Field label="Logo Text / Abbreviation" value={config.logoText} onChange={v => update({ logoText: v.slice(0, 3) })} placeholder="FPD" />
-                <div className="field">
-                  <label>LOGO UPLOAD</label>
-                  <div className="upload-box" onClick={() => toast.info("File upload available in production build")}>
-                    <Upload size={16} color="#FFFFFF" />
-                    <span>Upload logo (PNG, SVG) — Demo mode uses text</span>
-                  </div>
-                </div>
+                <p style={{ color: MUTED, fontSize: 14, margin: "0 0 12px" }}>
+                  The logo mark is the abbreviation above, shown in your brand colors across the app.
+                </p>
                 <Field label="Footer Text" value={config.footerText} onChange={v => update({ footerText: v })} />
               </div>
 
@@ -484,7 +480,7 @@ export function WhiteLabelConfig() {
               </div>
               <div className="warn-box">
                 <AlertTriangle size={13} color={WARN} style={{ display: "inline", marginRight: 8 }} />
-                Custom sending domain requires SPF/DKIM verification in production. Demo mode uses SendGrid shared domain.
+                Emails are sent from Final Pass Down's verified SendGrid sender. A custom sending domain needs SPF/DKIM set up with FPD support first.
               </div>
             </div>
           </div>
@@ -514,9 +510,6 @@ export function WhiteLabelConfig() {
             <div className="flex gap-3 flex-wrap">
               <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ opacity: saving ? 0.6 : 1 }}>
                 <Save size={14} /> {saving ? "Publishing…" : "Publish White Label Config"}
-              </button>
-              <button onClick={() => toast.info("Staging preview URL: https://preview-wl.finalpassdown.com")} className="btn-ghost" style={{ color: "#6FAE8B", background: "rgba(91,110,225,0.10)", borderColor: "rgba(91,110,225,0.3)" }}>
-                <ExternalLink size={14} /> Open Staging Preview
               </button>
               <button onClick={() => { copyToClipboard(JSON.stringify(config, null, 2)); toast.success("Config JSON copied") }} className="btn-ghost" style={{ color: MUTED, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
                 <Copy size={13} /> Export Config JSON

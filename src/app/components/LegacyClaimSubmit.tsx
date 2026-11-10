@@ -977,7 +977,7 @@ function ClaimForm({ t, token }: { t: ClaimToken; token: string }) {
             🔒 256-bit SSL encrypted · Documents stored in secure vault
           </div>
           <div style={{ fontSize: 11, color: "#5A6A88", marginTop: 4 }}>
-            finalpassdown.com · Privacy Policy · Terms of Service
+            Final Pass Down · Questions? claims@finalpassdown.com
           </div>
         </div>
       )}

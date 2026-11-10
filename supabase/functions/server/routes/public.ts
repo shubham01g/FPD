@@ -8,7 +8,7 @@ import stripeWebhook from "./stripeWebhook.ts";
 import { billingStatus } from "../lib/billingConfig.ts";
 import { openDeliveredMessage } from "../lib/messageDelivery.ts";
 import { safeEqual, sha256Hex } from "../lib/contactLink.ts";
-import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, sendEmail } from "../lib/email.ts";
+import { EMAIL_CONFIGURED, MAILBOX, claimAlertEmail, noticeEmail, sendEmail } from "../lib/email.ts";
 
 const pub = new Hono();
 
@@ -92,12 +92,20 @@ pub.get("/billing/status", (c) => c.json(billingStatus()));
 // GET /public/platform — maintenance mode and feature flags from System →
 // Settings, for the customer-facing app to enforce (services/platform.ts).
 pub.get("/platform", async (c) => {
-  const [general, flags, { data: rows }] = await Promise.all([
+  const [general, flags, { data: rows }, { data: products }] = await Promise.all([
     readPlatformSection("general"),
     readPlatformSection("flags"),
     adminClient().from("admin_settings").select("key, value")
       .in("key", ["starter_trial_days", "continuation_fee_amount", "continuation_fee_period_months"]),
+    adminClient().from("billing_products").select("slug, amount_cents")
+      .in("slug", ["wg_setup", "wg_session_block", "partner_setup", "dr_addon_month", "dr_addon_year"]),
   ]);
+  // Prices as checkout charges them (Admin → Subscription Config), so the
+  // landing page, help bot and add-on pages never quote a stale number.
+  const cents = (slug: string) => {
+    const v = products?.find((p: { slug: string }) => p.slug === slug)?.amount_cents;
+    return typeof v === "number" ? v / 100 : null;
+  };
   const setting = (key: string) => rows?.find((r) => r.key === key)?.value ?? "";
   const trialDays = parseInt(setting("starter_trial_days"), 10);
   const feeAmount = Number(setting("continuation_fee_amount"));
@@ -111,6 +119,15 @@ pub.get("/platform", async (c) => {
     // The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page,
     // so the customer page quotes what checkout will actually charge.
     continuationFee: { amount: feeAmount > 0 ? feeAmount : 199, months: feeMonths > 0 ? feeMonths : 24 },
+    prices: {
+      whiteGloveSetup: cents("wg_setup"), whiteGloveSession: cents("wg_session_block"),
+      partnerSetup: cents("partner_setup"), drMonthly: cents("dr_addon_month"), drYearly: cents("dr_addon_year"),
+    },
+    // System → Settings → General: shown on the Contact page.
+    support: {
+      email: typeof general.supportEmail === "string" ? general.supportEmail : "",
+      phone: typeof general.supportPhone === "string" ? general.supportPhone : "",
+    },
   });
 });
 
@@ -204,6 +221,65 @@ pub.get("/wl-packages", async (c) => {
 // from Stripe Checkout, routes/billing.ts wl_setup, migration 053). It used
 // to record total_paid = the setup fee without any payment, and numbered
 // rows count+1, which collided under concurrent submissions.
+// POST /public/contact { category, name, email, phone?, subject, message, website? }
+// The Contact Us form. Emails the department's mailbox (the sender's address
+// is the reply-to) and keeps a copy in contact_messages (migration 055).
+// The department is chosen from a fixed list here — the browser never picks
+// an address. `website` is a honeypot: real people leave it empty.
+const CONTACT_DEPARTMENTS: Record<string, string> = {
+  "General": "contact@finalpassdown.com", "Information": "info@finalpassdown.com",
+  "Support": MAILBOX.support, "Technical Support": "techsupport@finalpassdown.com",
+  "Sales": "sales@finalpassdown.com", "Partnerships": "partnerships@finalpassdown.com",
+  "Affiliates": "affiliates@finalpassdown.com", "Legacy Claims": MAILBOX.claims, "Verification": MAILBOX.verify,
+};
+pub.post("/contact", async (c) => {
+  const b = await c.req.json().catch(() => ({})) as Record<string, unknown>;
+  const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  if (str(b.website, 200)) return c.json({ sent: true });   // honeypot: pretend, store nothing
+  const category = CONTACT_DEPARTMENTS[str(b.category, 40)] ? str(b.category, 40) : "General";
+  const name = str(b.name, 120), email = str(b.email, 200).toLowerCase(), phone = str(b.phone, 40);
+  const subject = str(b.subject, 200), message = str(b.message, 5000);
+  if (!name || !subject || !message) return c.json({ error: "Please fill in your name, a subject and a message." }, 400);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return c.json({ error: "Enter a valid email address." }, 400);
+  if (!EMAIL_CONFIGURED) return c.json({ error: "Messages can't be sent right now. Please email us directly." }, 503);
+
+  const db = adminClient();
+  const ip = (c.req.header("x-forwarded-for") ?? "").split(",")[0].trim() || null;
+  const hourAgo = new Date(Date.now() - 3_600_000).toISOString();
+  const [{ count: byEmail }, { count: byIp }] = await Promise.all([
+    db.from("contact_messages").select("id", { count: "exact", head: true }).eq("email", email).gte("created_at", hourAgo),
+    ip ? db.from("contact_messages").select("id", { count: "exact", head: true }).eq("ip_address", ip).gte("created_at", hourAgo)
+       : Promise.resolve({ count: 0 }),
+  ]);
+  if ((byEmail ?? 0) >= 3 || (byIp ?? 0) >= 5) {
+    return c.json({ error: "You've sent several messages in the last hour. Please wait a little before sending another." }, 429);
+  }
+
+  const to = CONTACT_DEPARTMENTS[category];
+  const { data: row, error } = await db.from("contact_messages")
+    .insert({ category, name, email, phone: phone || null, subject, message, ip_address: ip, sent_to: to })
+    .select("id").single();
+  if (error) return c.json({ error: "Could not send your message. Please try again." }, 500);
+
+  try {
+    await sendEmail({
+      to,
+      ...noticeEmail({
+        name: "team",
+        heading: `Contact form (${category}): ${subject}`,
+        paragraphs: [message, `From: ${name} <${email}>${phone ? ` · ${phone}` : ""}`, `Reference: ${row.id}`],
+        replyTo: email,
+        category: "contact-form",
+      }),
+    });
+    await db.from("contact_messages").update({ delivered_at: new Date().toISOString() }).eq("id", row.id);
+  } catch (err) {
+    console.error("contact form email failed:", err);
+    return c.json({ error: "Your message was saved but the email could not be sent. Please also email us directly." }, 502);
+  }
+  return c.json({ sent: true });
+});
+
 pub.post("/wl-sales", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const { org, contact, email, packageId, subdomain } = body;

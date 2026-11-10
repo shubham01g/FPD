@@ -405,7 +405,7 @@ function RecorderPanel({ medium, onCapture }: { medium: Medium; onCapture: (dur:
       <div className="rec-hint" style={{ color: denied ? NEG : FAINT }}>
         {denied
           ? `${medium === "voice" ? "MICROPHONE" : "CAMERA"} BLOCKED — ENABLE IT IN YOUR BROWSER AND RETRY`
-          : "RECORDED LOCALLY IN YOUR BROWSER · NOT UPLOADED IN THIS DEMO"}
+          : "SAVED TO YOUR VAULT WHEN YOU SAVE THE MESSAGE"}
       </div>
     </div>
   );

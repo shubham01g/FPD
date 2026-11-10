@@ -18,6 +18,18 @@ export interface PlatformFlags {
   idVerification: boolean;
 }
 
+export interface PlatformPrices {
+  whiteGloveSetup: number | null; whiteGloveSession: number | null;
+  partnerSetup: number | null; drMonthly: number | null; drYearly: number | null;
+}
+const NO_PRICES: PlatformPrices = { whiteGloveSetup: null, whiteGloveSession: null, partnerSetup: null, drMonthly: null, drYearly: null };
+
+/** "$99" / "$4.99", or "—" while a price isn't known. */
+export function money(v: number | null | undefined): string {
+  if (v == null) return "—";
+  return `$${v.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(v) ? 0 : 2, maximumFractionDigits: 2 })}`;
+}
+
 export interface PlatformState {
   maintenance: boolean;
   maintenanceMsg: string;
@@ -26,6 +38,10 @@ export interface PlatformState {
   starterTrialDays: number;
   /** The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page. */
   continuationFee: { amount: number; months: number };
+  /** Add-on prices from the billing catalog (USD); null = not set. */
+  prices: PlatformPrices;
+  /** Support contact from System → Settings → General ("" when unset). */
+  support: { email: string; phone: string };
   /** False until the first response lands. */
   ready: boolean;
 }
@@ -57,7 +73,7 @@ export function hiddenPages(flags: PlatformFlags): Set<string> {
 
 export function usePlatform(): PlatformState {
   const { data, loading } = useAdminFetch(
-    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; starterTrialDays?: number; continuationFee?: { amount: number; months: number } }>("/platform"),
+    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; starterTrialDays?: number; continuationFee?: { amount: number; months: number }; prices?: Partial<PlatformPrices>; support?: { email: string; phone: string } }>("/platform"),
     [],
   );
   return {
@@ -66,6 +82,8 @@ export function usePlatform(): PlatformState {
     flags: { ...DEFAULT_FLAGS, ...(data?.flags ?? {}) },
     starterTrialDays: data?.starterTrialDays && data.starterTrialDays > 0 ? data.starterTrialDays : STARTER_PLAN_DAYS,
     continuationFee: data?.continuationFee && data.continuationFee.amount > 0 ? data.continuationFee : { amount: 199, months: 24 },
+    prices: { ...NO_PRICES, ...(data?.prices ?? {}) },
+    support: { email: data?.support?.email ?? "", phone: data?.support?.phone ?? "" },
     ready: !loading,
   };
 }

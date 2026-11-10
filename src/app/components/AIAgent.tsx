@@ -43,13 +43,13 @@ const KB: Record<string, string> = {
   "file cabinet": `The **Digital File Cabinet** is your organized document library with 18+ folders:\n\n⚖️ Legal Documents · 💰 Financial Records · 🏥 Medical Records\n📋 Tax Records · 🏠 Property & Real Estate · 🚗 Vehicles\n⚡ Utilities & Services · 🛡️ Insurance Policies · 🐾 Pet Records\n💌 Personal Letters · 📷 Photo Albums · 🎥 Video Messages\n💻 Digital Assets · ₿ Crypto & NFTs · 🔒 Firearms Registry\n⚔️ Weapons Locker · 🛡️ Warranties · 🔐 Secret Vault\n\n**To upload:** Open any folder → click Upload Files or drag & drop.\n**To scan:** Click the Scan button — uses your device camera.\n**Syncing from sidebar sections:** Many sidebar pages (Financial Records, Warranties, etc.) have a "Sync to File Cabinet" button to push records directly into the correct folder.\n\nAll files are stored encrypted at rest (AES-256) and only reach you through private, short-lived links.`,
 
   // ── Legacy Vault ─────────────────────────────────────────────────
-  "legacy vault": `The **Legacy Vault** is your encrypted master vault — the centerpiece of your account.\n\n**What it contains:** All uploaded documents across every life category.\n\n**Access is locked until TWO conditions are met:**\n1. The **Activate Legacy Access Fee** is paid\n2. **Confirmation of passing** is verified by FPD administrators\n\n**Accepted confirmation documents:** death certificates, obituaries, hospital notices, coroner reports, funeral home letters, probate filings, or any credible official record.\n\n**Legacy Vault Export:** Once both conditions are met, legacy contacts can download EVERYTHING — all 18+ folder categories, final wishes, medical records, financial records, digital diary, password manager contents, and more.\n\nTo set this up: Go to **Security → Activate Legacy Access** in the sidebar.`,
+  "legacy vault": `The **Legacy Vault Export** gathers everything in your account so it can be handed on.\n\n**While you're alive:** you can preview what each section holds and download your own copy any time.\n\n**After your passing:** your activated legacy contact downloads the full export from their own **Shared with me** page, once:\n1. A legacy claim is **approved** by FPD after reviewing confirmation of passing, and\n2. The **Activate Legacy Access Fee** is paid (by you in advance, or by them).\n\n**Accepted confirmation documents:** death certificate, obituary, hospital or coroner notice, funeral home letter, probate filing, or another credible official record.\n\n**What's included:** documents in every File Cabinet folder, final wishes, medical, financial and other records. Your **Secret Vault** (PIN-locked) is never shared. Password Manager entries stay encrypted with your vault passphrase.\n\nSet it up in **Security → Activate Legacy Access**.`,
 
   // ── Legacy Continuation Fee ───────────────────────────────────────
-  "199": `The **Activate Legacy Access Fee** is a one-time payment that unlocks your legacy contacts' ability to access and download your vault.\n\n**Why it exists:** Without it, your vault goes into archive mode after your subscription expires.\n\n**Two conditions required to unlock downloads:**\n1. ✅ $199 fee paid (by you or a legacy contact)\n2. ✅ Confirmation of passing verified by FPD admin\n\n**Payment options:** Card (Stripe) or cryptocurrency (BTC, ETH, USDC, USDT, SOL, BNB, XRP, LTC)\n\n**Who can pay:** You can pay now (anytime, even years before passing), or your legacy contact can pay after your passing.\n\n**Demo flow:** Go to **Security → Activate Legacy Access** → pay via the form → click "Simulate Admin Verification" to see the full unlocked state.\n\nThe fee is non-refundable once processed. Vault stays active for 24 months from the verified date of passing (admin-configurable).`,
+  "199": `The **Activate Legacy Access Fee** is a one-time payment that lets your legacy contact open and download your vault after your passing.\n\n**Two things must be true:**\n1. ✅ The fee is paid — by you now, or by your legacy contact later\n2. ✅ A legacy claim is approved by FPD after reviewing confirmation of passing\n\n**How to pay:** by card on Stripe's secure checkout, from **Security → Activate Legacy Access**.\n\nAccess then stays open for the period set by FPD (shown on that page). The fee is non-refundable once processed.`,
 
   // ── Legacy Contacts ───────────────────────────────────────────────
-  "legacy contact": `**Legacy Contacts** are the people who receive full access to your vault — but only after your passing or incapacitation and the proper documentation is verified.\n\n**Chain of Authority:**\n• Legacy Contact #1 = PRIMARY — notified first, has full control\n• Legacy Contact #2 = CONTINGENT — activates only if #1 is unable/deceased\n• Legacy Contact #3+ = further backups in order\n\n**Verification required:** Each legacy contact must submit a government-issued photo ID (driver's license, passport, or state ID). FPD compliance reviews within 1–2 business days.\n\n**ID Verification workflow (right on the contact card):**\n1. Send Verification Invite → contact receives email\n2. Simulate ID Submission → status changes to "ID Submitted"\n3. Simulate Verify → compliance marks as Verified ✅\n\n**Custom verification requirements:** When adding a legacy contact, you can require additional verification beyond the death certificate: security word, Q&A, notarized affidavit, attorney certification, hospital record, or obituary.\n\nTo add: Go to **People → Legacy Contacts** in the sidebar.`,
+  "legacy contact": `**Legacy Contacts** receive access to your vault only after your passing or incapacitation is confirmed.\n\n**Order of authority:**\n• Legacy Contact #1 = PRIMARY — notified first\n• Legacy Contact #2 = CONTINGENT — steps in if #1 can't\n• #3 and later = further backups, in order\n\n**Invite:** adding a Legacy Contact emails them an invite to create their own free login, linked to your account.\n\n**ID verification:** when enabled, the contact uploads a government photo ID and FPD reviews it — the status changes to Verified only after that review.\n\n**Extra checks you can require:** a preset security word, a security question, a notarized affidavit, an attorney letter, a hospital record or an obituary.\n\nAdd them in **People → Legacy Contacts**.`,
 
   // ── Guardian Contacts ─────────────────────────────────────────────
   "guardian contact": `**Guardian Contacts** have VIEW-ONLY access to the folders you personally assign them — they are never able to download files.\n\n**Perfect for:**\n• A spouse who may need to act if you're incapacitated\n• A trusted attorney who needs to see legal docs now\n• An adult child you want to keep informed\n\n**Key rules:**\n• Cannot download files — view only, always\n• You assign which specific folders they can see\n• Access is live immediately after they're added and verified\n\nTo add: Go to **People → Guardian Contacts** → click "Add Guardian Contact" → assign specific folders using the folder picker.`,
@@ -106,10 +106,10 @@ const KB: Record<string, string> = {
   "diary": `The **Digital Diary** lets you record text, audio, and video journal entries:\n\n**Entry types:** Written · Audio Recording · Video Recording\n\n**Privacy levels:** Private (only you), Legacy Contacts Only, or visible to all contacts\n\n**Mood tags, dates, and search** are all supported.\n\n**Recording:** Click Open Camera/Microphone — browser asks for permission. Videos are encrypted.\n\nTo access: **Life Records → Digital Diary** in the sidebar.`,
 
   // ── Password Manager ──────────────────────────────────────────────
-  "password": `The **Password Manager** stores all your account credentials securely:\n\n**Each entry:** Service name, username/email, password (masked with show/hide), URL, notes, strength indicator, copy-to-clipboard button.\n\n**Security:** All passwords encrypted with AES-256. Zero-knowledge — FPD cannot read them.\n\n**Add credentials:** Click "Add Password" → fill in details → appears immediately.\n\nTo access: **Security → Password Manager** in the sidebar.`,
+  "password": `The **Password Manager** stores your account logins:\n\n**Each entry:** service, username/email, password (hidden until you show it), website, notes, importance, two-step details and supporting documents.\n\n**Security:** passwords and security answers are encrypted in your browser with your vault passphrase before they're saved, so FPD can't read them. The passphrase can be reset by email link, which clears the encrypted entries.\n\nOpen it from **Security → Password Manager**.`,
 
   // ── White Glove ───────────────────────────────────────────────────
-  "white glove": `The **White Glove Concierge Service** provides hands-on help from a dedicated specialist:\n\n**How it works:**\n1. You submit a request (name + phone)\n2. A specialist calls you within 1 business day\n3. They handle everything over the phone — uploading docs, setting up contacts, recording wishes\n\n**Pricing:**\n• $99 one-time setup fee\n• $25 per 30-minute session block (any time used = full block)\n\n**Typical total:** $199–$249\n\n**Document Exchange:** Your specialist sends a secure upload link → you photograph documents on your phone → specialist receives them instantly and saves to your vault.\n\n**Video or Phone Sessions:** When your session starts, choose between a live video call (see each other on camera) or a traditional phone call.\n\nTo request: **Concierge → White Glove Service** in the sidebar.`,
+  "white glove": `The **White Glove Concierge Service** gives you a dedicated specialist who sets things up with you:\n\n**How it works:**\n1. You request White Glove from **Concierge → White Glove Service**\n2. A specialist contacts you and books sessions — you get each one by email with a calendar invite\n3. Sessions are by phone, video link or in person; your specialist can send you a secure upload link for documents\n\n**Pricing:** a one-time setup fee plus a charge per 30-minute session block (current prices are on the White Glove page).\n\nYou sign a short authorization so your specialist can work in your account.`,
 
   // ── Affiliate Program ─────────────────────────────────────────────
   "affiliate": `The **Affiliate Program** lets you earn recurring commissions for referrals:\n\n| Tier | Referrals | Commission | Duration |\n|------|-----------|------------|----------|\n| Tier 1 | 5–24 | 20% | 12 months |\n| Tier 2 | 25–74 | 25% | 12 months |\n| Tier 3 | 75+ | 30% | 12 months |\n\n**Your referral link** is in your Affiliate dashboard. Share it — when someone signs up, you earn 20–30% of their monthly fee for 12 months.\n\nTo access: **Earn → Affiliate Program** in the sidebar.`,
@@ -121,10 +121,10 @@ const KB: Record<string, string> = {
   "2fa": `**Two-Factor Authentication (2FA) options:**\n\n1. **SMS** — 6-digit code texted to your phone\n2. **Email OTP** — 6-digit code emailed to you (recommended)\n3. **Authenticator App** — Google Authenticator or Authy (most secure)\n\n**To enable:**\n1. Go to **Security → Account & Profile**\n2. Click the Security & 2FA tab\n3. Choose your preferred method\n4. Follow the setup steps\n5. Enter the 6-digit code you receive to confirm\n\n**Encryption:** Files are encrypted in transit (TLS) and at rest (AES-256). Password Manager and Auto Pay logins are also encrypted on your device with your vault passphrase (PBKDF2, 600,000 iterations), so FPD cannot read them.`,
 
   // ── Storage ───────────────────────────────────────────────────────
-  "storage": `**Storage & Billing:**\n\nYour plan includes a storage allowance. On paid plans, storage above it is $0.40/GB, measured as the peak over each month, and never more than the monthly overage limit you set (it starts at your plan's monthly price). Starter has no overage: uploads stop at 1 GB.\n\n**Alerts at:** 80% · 90% · 95% · 100%\n\n**Upgrade:** by card on Stripe's secure checkout\n\n**View your usage:** Go to **Storage & Billing → Usage & Billing** — shows breakdown by category (Legal, Financial, Media, etc.) and 6-month history chart.\n\n**Pro tip:** Delete old drafts and duplicate uploads to free space. Video messages use the most storage.`,
+  "storage": `**Storage & Billing:**\n\nYour plan includes a storage allowance. On paid plans, storage above it is billed per GB (the rate is on your plan card), measured as the peak over each month and never more than the monthly overage limit you set. Starter has no overage: uploads stop at its limit.\n\n**Alerts at:** 80% · 90% · 95% · 100%\n\n**See your usage:** **Billing & Earn → Usage & Billing** shows what you use, by category, and lets you change plan or limit.\n\n**Tip:** remove duplicates and large videos you no longer need to free space.`,
 
   // ── Document Scanner ──────────────────────────────────────────────
-  "scan": `The **Document Scanner** is available at every upload point across the platform:\n\n**How to use:**\n1. Click any "Scan" button\n2. Your camera opens with a scan frame overlay\n3. Capture the document\n4. Choose scan mode: Color / Grayscale / B&W / Document\n5. Name the document and choose the folder\n6. Uploads encrypted automatically\n\n**Available in:** File Cabinet (every folder), Legacy Vault, Digital Diary, ID Keeper, Password Manager, Subscription Manager, Pet Records, Daycare, Kids' Activities, and more.\n\n**Camera denied?** A file picker opens automatically as a fallback.`,
+  "scan": `The **Document Scanner** is available wherever you can attach a document:\n\n**How to use:**\n1. Click a **Scan** button\n2. Your camera opens with a frame — capture the page (or pick a file)\n3. Choose a scan style: Color / Grayscale / B&W / Document\n4. Name it — where offered, pick the File Cabinet folder too\n5. It's saved to your vault and attached to that record\n\nFiles are encrypted in transit and at rest. **Camera blocked?** Use the file option instead.`,
 
   // ── Sync to File Cabinet ──────────────────────────────────────────
   "sync": `The **Sync to File Cabinet** feature lets you push documents from any sidebar section directly into the correct File Cabinet folder:\n\n**Where you'll find it:** On every record in Financial Records, Medical Info, Personal Assets, Wills and Living Trusts, Warranties, Weapons Locker, Collectibles, and more.\n\n**How it works:**\n1. Click "Sync to File Cabinet" on any record\n2. A dropdown shows the relevant folders for that section\n3. Pick the folder — the document appears immediately in the File Cabinet\n4. A blue "🔗 [Section Name]" badge shows where it came from\n\n**Pre-synced examples** are already in the File Cabinet so you can see how it looks.`,
@@ -154,7 +154,7 @@ async function loadLivePlans() {
   try {
     const [{ plans }, platform] = await Promise.all([
       publicApi.get<{ plans: LivePlan[] }>("/plans"),
-      publicApi.get<{ starterTrialDays?: number; continuationFee?: { amount: number; months: number } }>("/platform"),
+      publicApi.get<{ starterTrialDays?: number; continuationFee?: { amount: number; months: number }; prices?: { whiteGloveSetup: number | null; whiteGloveSession: number | null } }>("/platform"),
     ]);
     if (!plans?.length) return;
     const gb = (n: number) => (n >= 1024 ? `${n / 1024} TB` : `${n} GB`);
@@ -165,6 +165,14 @@ async function loadLivePlans() {
     KB["plans"] = `**Final Pass Down Subscription Plans:**\n\n| Plan | Monthly | Yearly | Storage | Contacts | Overage |\n|------|---------|--------|---------|----------|---------|\n${rows.join("\n")}`
       + (fee ? `\n\n**Legacy Continuation Fee:** $${fee.amount} one-time, ${fee.months} months of legacy access after passing.` : "")
       + `\n\nChange plans any time in **Billing & Earn → Usage & Billing**.`;
+    if (fee) KB["199"] = KB["199"]
+      .replace("is a one-time payment", `is a one-time payment of **$${fee.amount}**`)
+      .replace("for the period set by FPD (shown on that page)", `for ${fee.months} months`);
+    const wg = platform.prices;
+    if (wg?.whiteGloveSetup != null && wg.whiteGloveSession != null) {
+      KB["white glove"] = KB["white glove"].replace("a one-time setup fee plus a charge per 30-minute session block (current prices are on the White Glove page)",
+        `$${wg.whiteGloveSetup} one-time setup fee plus $${wg.whiteGloveSession} per 30-minute session block`);
+    }
     livePlansLoaded = true;
   } catch { /* keep the built-in answer */ }
 }
@@ -582,7 +590,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
     time: new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}),
   }]);
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState(false);
+  const typing = false;   // answers are instant; kept for the indicator markup
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const popularRef = useRef<HTMLDivElement>(null);
@@ -598,11 +606,8 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
     const time = new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
     setMessages(prev => [...prev, { id:Date.now().toString(), role:"user", text, time }]);
     setInput("");
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getResponse(text), time }]);
-    }, 700 + Math.random()*500);
+    // Answers come from the built-in guide, so they're shown straight away.
+    setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getResponse(text), time }]);
   };
 
   /* ── Shared conversation pieces (used by both page and floating modes) ── */
