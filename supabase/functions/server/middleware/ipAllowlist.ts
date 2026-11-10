@@ -34,7 +34,14 @@ export function clearIpAllowlistCache() {
 }
 
 export async function ipAllowlist(c: Context, next: Next) {
-  const list = await allowlist();
+  let list: string[];
+  try {
+    list = await allowlist();
+  } catch (err) {
+    // Fail closed: an unreadable allowlist must not mean "no restriction".
+    console.error("ipAllowlist: security settings unreadable", err);
+    return c.json({ error: "Failed to read admin access settings" }, 500);
+  }
   if (list.length > 0) {
     const ip = clientIp(c.req.header("x-forwarded-for"));
     if (!ip || !ipAllowed(ip, list)) {

@@ -5,7 +5,7 @@
 // customer calls about their own account.
 import type { Context, Next } from "npm:hono";
 import { anonClient } from "../lib/supabaseAdmin.ts";
-import { tokenClaims } from "../lib/twoFactorGate.ts";
+import { secondFactorState, tokenClaims } from "../lib/twoFactorGate.ts";
 
 export interface AuthedUser {
   id: string;
@@ -42,4 +42,31 @@ export async function requireUser(c: Context, next: Next) {
   const user: AuthedUser = { id: data.user.id, email: data.user.email, sessionId, aal };
   c.set("user", user);
   await next();
+}
+
+/**
+ * Runs after requireUser. Refuses a session that has not passed the account's
+ * own second factor (an account without 2FA always passes). The app only lets
+ * a 2FA account past sign-in after the challenge, but the API is reachable
+ * directly with a password-only token, so sensitive account routes check it
+ * here too — the same rule password.ts and secretVault.ts already apply.
+ */
+export async function requireSecondFactor(c: Context, next: Next) {
+  const user = c.get("user") as AuthedUser;
+  const token = (c.req.header("Authorization") ?? "").slice(7);
+  let mfa;
+  try {
+    mfa = await secondFactorState(user.id, token);
+  } catch (err) {
+    console.error("requireSecondFactor: 2FA check failed", err);
+    return c.json({ error: "Failed to verify two-step verification" }, 500);
+  }
+  if (!mfa.passed) return c.json({ error: "Two-step verification required", code: "2fa_required" }, 403);
+  await next();
+}
+
+/** requireSecondFactor for anything that changes state; reads pass through. */
+export async function requireSecondFactorForWrites(c: Context, next: Next) {
+  if (c.req.method === "GET" || c.req.method === "HEAD" || c.req.method === "OPTIONS") return next();
+  return requireSecondFactor(c, next);
 }

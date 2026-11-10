@@ -39,6 +39,22 @@ function linkError(): string | null {
   return params.get("error_description")?.replace(/\+/g, " ") ?? "This reset link can't be used. Ask for a new one.";
 }
 
+/** True when this session was opened by a password-recovery link in the last
+ *  hour. Supabase records how a session was signed in in the access token's
+ *  "amr" claim; a recovery link adds { method: "recovery" }. Without this
+ *  check anyone already signed in (an unlocked laptop, a borrowed phone) could
+ *  open /reset-password and set a new password without the current one. */
+function isRecoverySession(accessToken: string): boolean {
+  try {
+    const part = accessToken.split(".")[1];
+    const payload = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/"))) as { amr?: { method?: string; timestamp?: number }[] };
+    const now = Date.now() / 1000;
+    return (payload.amr ?? []).some((a) => a.method === "recovery" && typeof a.timestamp === "number" && now - a.timestamp < 3600);
+  } catch {
+    return false;
+  }
+}
+
 export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => void; onBackToLogin: () => void }) {
   const [stage, setStage] = useState<Stage>({ kind: "checking" });
   const [pw, setPw] = useState("");
@@ -57,6 +73,10 @@ export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => voi
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       settled = true;
+      if (!isRecoverySession(data.session.access_token)) {
+        setStage({ kind: "invalid", reason: "Open the reset link from your email to choose a new password. To change it while signed in, use Account & Profile → Change password." });
+        return;
+      }
       // Fail closed: if two-step status can't be read, never show the
       // new-password form (that would skip an enrolled second factor).
       let native: Awaited<ReturnType<typeof getNativeChallengeState>>;
@@ -66,7 +86,13 @@ export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => voi
         return;
       }
       if (native.status === "challenge") {
-        const challengeId = native.type === "phone" ? await challengeFactor(native.factorId) : undefined;
+        let challengeId: string | undefined;
+        try {
+          challengeId = native.type === "phone" ? await challengeFactor(native.factorId) : undefined;
+        } catch {
+          setStage({ kind: "invalid", reason: "We couldn't send your verification code. Check your connection and open the reset link again." });
+          return;
+        }
         setStage({ kind: "challenge", type: native.type, factorId: native.factorId, challengeId });
       } else {
         setStage({ kind: "form" });

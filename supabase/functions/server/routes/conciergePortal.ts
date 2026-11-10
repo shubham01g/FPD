@@ -214,13 +214,28 @@ portal.patch("/sessions/:id", async (c) => {
   return c.json({ session: updated, emailed });
 });
 
+/** Longest single session a specialist can bill in one go. */
+const MAX_SESSION_HOURS = 8;
+
 portal.post("/sessions/:id/complete", async (c) => {
   const db = adminClient();
   const { data: s } = await db.from("wg_sessions").select("*").eq("id", c.req.param("id")).eq("specialist_id", me(c).id).maybeSingle();
   if (!s) return c.json({ error: "Session not found" }, 404);
   const body = await c.req.json().catch(() => ({})) as { startedAt?: string; endedAt?: string; notes?: string; charge?: boolean };
+  if (s.status === "completed" || s.status === "cancelled") {
+    return c.json({ error: `This session is already ${s.status}.` }, 409);
+  }
   const started = new Date(String(body.startedAt)), ended = new Date(String(body.endedAt));
   if (isNaN(started.getTime()) || isNaN(ended.getTime()) || ended <= started) return c.json({ error: "Enter when the session started and ended" }, 400);
+  // The duration is what the client's saved card is charged for, and the
+  // specialist types both times, so keep them to something a real session
+  // can be: already over, at most MAX_SESSION_HOURS long, and recent.
+  const now = Date.now();
+  if (ended.getTime() > now + 5 * 60_000) return c.json({ error: "The session can't end in the future" }, 400);
+  if (ended.getTime() - started.getTime() > MAX_SESSION_HOURS * 3600_000) {
+    return c.json({ error: `A session can be at most ${MAX_SESSION_HOURS} hours. Split longer work into separate sessions.` }, 400);
+  }
+  if (now - started.getTime() > 30 * 86400_000) return c.json({ error: "That start time is more than 30 days ago" }, 400);
   const minutes = Math.ceil((ended.getTime() - started.getTime()) / 60000);
   let billing: Record<string, unknown> | null = null;
   if (body.charge !== false) {
@@ -231,9 +246,15 @@ portal.post("/sessions/:id/complete", async (c) => {
     if (r.status >= 400) return c.json({ error: r.body.error ?? "The session could not be charged" }, r.status as 400);
     billing = r.body;
   }
-  const { data: updated } = await db.from("wg_sessions").update({
+  const { data: updated, error: updErr } = await db.from("wg_sessions").update({
     status: "completed", duration_minutes: minutes, notes: body.notes?.slice(0, 2000) ?? s.notes,
   }).eq("id", s.id).select().single();
+  if (updErr || !updated) {
+    // The charge (if any) already went through; say so rather than reporting
+    // a plain failure that invites a second charge attempt.
+    console.error("wg session complete: status update failed", updErr);
+    return c.json({ error: `The session was ${billing ? "charged" : "recorded"} but could not be marked completed. Refresh before trying again.`, billing }, 500);
+  }
   await refreshNextSession(s.client_id);
   await db.from("wg_clients").update({ status: "active" }).eq("id", s.client_id).eq("status", "intake");
   return c.json({ session: updated, billing });

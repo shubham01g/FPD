@@ -141,8 +141,25 @@ adminAccounts.patch("/:id", async (c) => {
 });
 
 // POST /admin/admin-accounts/:id/resend-invite — new token + expiry.
+// Only for an invite that hasn't been accepted: resending flips the row back
+// to "invited", which requireAdmin refuses, so on an active admin it was a
+// one-click lock-out that any admin_team member could aim at a super admin.
 adminAccounts.post("/:id/resend-invite", async (c) => {
   const id = c.req.param("id");
+  const actor = c.get("admin" as never) as AdminUser;
+  if (!canGrantSuperAdmin(actor)) {
+    return c.json({ error: "Only a super admin can resend admin invites" }, 403);
+  }
+  const { data: target, error: targetErr } = await adminClient()
+    .from("admin_accounts").select("email, status, user_id").eq("id", id).maybeSingle();
+  if (targetErr) return c.json({ error: targetErr.message }, 500);
+  if (!target) return c.json({ error: "Admin account not found" }, 404);
+  if (target.user_id === actor.id || String(target.email).toLowerCase() === actor.email.toLowerCase()) {
+    return c.json({ error: "You can't resend your own invite" }, 400);
+  }
+  if (target.status !== "invited") {
+    return c.json({ error: "This admin has already accepted their invite. Resending only applies to pending invites." }, 409);
+  }
   const inviteToken = randomToken();
   const inviteExpiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
 

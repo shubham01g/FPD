@@ -292,6 +292,17 @@ async function orgCheckout(c: Context<Env>, product: "partner_setup" | "wl_setup
       // ?ref=<code> from an admin-created (invited) partner record: the
       // webhook activates that record instead of creating a second one.
       const inviteCode = meta(body.inviteCode, 20).toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      if (inviteCode) {
+        // An invite belongs to the address the admin sent it to; anyone else
+        // holding the link must not be able to take over that partner record.
+        const { data: invited, error: invErr } = await db.from("partners")
+          .select("contact_email, status").eq("partner_code", inviteCode).maybeSingle();
+        if (invErr) return c.json({ error: invErr.message }, 500);
+        if (!invited || invited.status !== "invited") return c.json({ error: "This partner invite link is no longer valid. Ask Final Pass Down for a new one." }, 404);
+        if (invited.contact_email && String(invited.contact_email).toLowerCase() !== String(account.email).toLowerCase()) {
+          return c.json({ error: `This invite was sent to ${invited.contact_email}. Sign in with that address to accept it.` }, 403);
+        }
+      }
       metadata = { ...common, productSlug: row.slug, ...(inviteCode ? { inviteCode } : {}) };
       back = "/partner";
     } else {

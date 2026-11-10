@@ -26,13 +26,16 @@ export type SecondFactorState =
   | { enrolled: false; passed: true }
   | { enrolled: true; passed: boolean; method: string };
 
+/** Throws when any lookup fails: an error must never read as "not enrolled,
+ *  passed". Callers turn the throw into a 500 (fail closed). */
 export async function secondFactorState(userId: string, token: string): Promise<SecondFactorState> {
   const db = adminClient();
-  const { data: row } = await db
+  const { data: row, error: rowErr } = await db
     .from("account_2fa_settings")
     .select("enabled, method")
     .eq("user_id", userId)
     .maybeSingle();
+  if (rowErr) throw new Error(`2FA settings lookup failed: ${rowErr.message}`);
 
   const { sessionId, aal } = tokenClaims(token);
 
@@ -40,7 +43,8 @@ export async function secondFactorState(userId: string, token: string): Promise<
     // A native factor can be verified without the settings row saying so
     // (enrolled straight through Supabase). Supabase itself then only issues
     // aal1 until it is challenged, so honour that too.
-    const { data } = await db.auth.admin.mfa.listFactors({ userId });
+    const { data, error } = await db.auth.admin.mfa.listFactors({ userId });
+    if (error) throw new Error(`2FA factor lookup failed: ${error.message}`);
     const verified = (data?.factors ?? []).some((f: { status: string }) => f.status === "verified");
     if (verified) return { enrolled: true, passed: aal === "aal2", method: "native" };
     return { enrolled: false, passed: true };
@@ -48,12 +52,13 @@ export async function secondFactorState(userId: string, token: string): Promise<
 
   if (row.method === "email_otp") {
     if (!sessionId) return { enrolled: true, passed: false, method: row.method };
-    const { data: gate } = await db
+    const { data: gate, error: gateErr } = await db
       .from("two_factor_sessions")
       .select("session_id")
       .eq("session_id", sessionId)
       .gt("expires_at", new Date().toISOString())
       .maybeSingle();
+    if (gateErr) throw new Error(`2FA session lookup failed: ${gateErr.message}`);
     return { enrolled: true, passed: Boolean(gate), method: row.method };
   }
 

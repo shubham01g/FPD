@@ -54,14 +54,36 @@ export async function requireAdmin(c: Context, next: Next) {
     return c.json({ error: "Admin access required" }, 403);
   }
 
-  const { data: account, error: accountError } = await db
-    .from("admin_accounts")
-    .select("role, status, permissions")
-    .eq("email", row.email)
-    .maybeSingle();
-
-  if (accountError) {
-    return c.json({ error: "Failed to resolve admin permissions" }, 500);
+  // The permissions row is found by the sign-in's user id, never by email
+  // alone: an email can be changed (by the user, or by an admin), and a
+  // restricted admin whose email stopped matching their row used to fall
+  // through to "no row" = unrestricted super admin. Only a row that has no
+  // user_id yet (created before accept recorded it) is matched by email, and
+  // it is then bound to this user id so the email no longer matters.
+  type AccountRow = { id: string; role: string; status: string; permissions: unknown };
+  let account: AccountRow | null = null;
+  {
+    const { data, error } = await db
+      .from("admin_accounts")
+      .select("id, role, status, permissions")
+      .eq("user_id", authedUser.id)
+      .maybeSingle<AccountRow>();
+    if (error) return c.json({ error: "Failed to resolve admin permissions" }, 500);
+    account = data;
+  }
+  if (!account && row.email) {
+    const { data, error } = await db
+      .from("admin_accounts")
+      .select("id, role, status, permissions")
+      .ilike("email", row.email)
+      .is("user_id", null)
+      .maybeSingle<AccountRow>();
+    if (error) return c.json({ error: "Failed to resolve admin permissions" }, 500);
+    if (data) {
+      const { error: bindErr } = await db.from("admin_accounts").update({ user_id: authedUser.id }).eq("id", data.id);
+      if (bindErr) return c.json({ error: "Failed to resolve admin permissions" }, 500);
+    }
+    account = data;
   }
 
   if (account) {
@@ -94,7 +116,14 @@ export async function requireAdmin(c: Context, next: Next) {
   // not save the switch ON while any active admin is unenrolled.
   let enrollmentRequired = false;
   if (!mfa.enrolled) {
-    const security = await securitySettings().catch(() => ({} as Record<string, unknown>));
+    let security: Record<string, unknown>;
+    try {
+      security = await securitySettings();
+    } catch (err) {
+      // Fail closed: unreadable settings must not switch enforcement off.
+      console.error("requireAdmin: security settings unreadable", err);
+      return c.json({ error: "Failed to read security settings" }, 500);
+    }
     if (security.enforce2FA === true) {
       enrollmentRequired = true;
       const isMe = c.req.method === "GET" && /\/admin\/me\/?$/.test(c.req.path);

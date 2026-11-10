@@ -3,12 +3,17 @@
 // public /platform endpoint and the admin IP allowlist.
 import { adminClient } from "./supabaseAdmin.ts";
 
+/** Throws when the read itself fails. The IP allowlist and "Enforce 2FA" are
+ *  read through here, so a database error must not look like "no settings"
+ *  (that would silently switch both protections off). A missing or
+ *  unparseable document is still {} — that is the real "not set" state. */
 export async function readPlatformSection(section: string): Promise<Record<string, unknown>> {
-  const { data } = await adminClient()
+  const { data, error } = await adminClient()
     .from("admin_settings")
     .select("value")
     .eq("key", `platform.${section}`)
     .maybeSingle();
+  if (error) throw new Error(`Could not read platform.${section}: ${error.message}`);
   if (!data?.value) return {};
   try {
     const parsed = JSON.parse(data.value);

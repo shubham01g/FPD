@@ -1,5 +1,6 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
+import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const audit = new Hono();
 
@@ -30,10 +31,16 @@ audit.get("/", async (c) => {
   return c.json({ logs: data, total: count, page, pageSize });
 });
 
-// DELETE /admin/audit — wipes every entry. Gated to roles with 'delete' on the
-// audit module. The auditLog middleware runs after this handler, so the clear
-// itself is the first entry in the fresh log.
+// DELETE /admin/audit — wipes every entry. Super admins only: the log is the
+// record of what admins did, so an admin whose role merely has "delete" on the
+// audit module must not be able to erase their own tracks. The auditLog
+// middleware runs after this handler, so the clear itself is the first entry
+// in the fresh log.
 audit.delete("/", async (c) => {
+  const actor = c.get("admin" as never) as AdminUser;
+  if (!(actor.permissions === null || actor.role === "super_admin")) {
+    return c.json({ error: "Only a super admin can clear the audit log" }, 403);
+  }
   // PostgREST refuses an unfiltered delete; this filter matches every row.
   const { error, count } = await adminClient()
     .from("audit_logs")

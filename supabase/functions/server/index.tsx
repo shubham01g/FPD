@@ -6,7 +6,7 @@ import { isOurOrigin } from "./lib/origins.ts";
 import * as kv from "./kv_store.tsx";
 
 import { requireAdmin } from "./middleware/adminAuth.ts";
-import { requireUser } from "./middleware/userAuth.ts";
+import { requireSecondFactor, requireSecondFactorForWrites, requireUser } from "./middleware/userAuth.ts";
 import { auditLog } from "./middleware/auditLog.ts";
 import { requireAnyModulePermission, requireModulePermission } from "./middleware/modulePermission.ts";
 import { readPlatformSection } from "./lib/platformSettings.ts";
@@ -215,6 +215,16 @@ api.route("/admin", admin);
 // a user is always allowed to manage their own security settings.
 const account = new Hono();
 account.use("*", requireUser);
+// Second factor on everything sensitive. Not on /2fa (that is how a session
+// passes it); /password and /secret-vault already check it themselves.
+// Reading another owner's vault, emailing documents out and resetting the
+// vault need it for reads too; billing and contact invites for any change.
+for (const path of ["/receipts", "/receipts/*", "/vault", "/vault/*", "/access", "/access/*"]) {
+  account.use(path, requireSecondFactor);
+}
+for (const path of ["/billing", "/billing/*", "/contacts", "/contacts/*", "/partner", "/partner/*", "/affiliate", "/affiliate/*"]) {
+  account.use(path, requireSecondFactorForWrites);
+}
 account.route("/2fa", twoFactor);
 account.route("/password", password);
 account.route("/secret-vault", secretVault);

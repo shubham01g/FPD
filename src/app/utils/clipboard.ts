@@ -1,18 +1,19 @@
-/** Copy text to clipboard using execCommand fallback — works in restricted iframes */
-export function copyToClipboard(text: string): void {
+/** Copy text to the clipboard. Resolves to whether it actually worked, so a
+ *  caller can say "Copied" only when it is true. Tries the async Clipboard API
+ *  first and falls back to execCommand (works in restricted iframes). */
+export async function copyToClipboard(text: string): Promise<boolean> {
   try {
-    // Prefer the modern async API when available and allowed
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(() => execCommandCopy(text));
-    } else {
-      execCommandCopy(text);
+      await navigator.clipboard.writeText(text);
+      return true;
     }
   } catch {
-    execCommandCopy(text);
+    // Permission denied or not focused: try the fallback below.
   }
+  return execCommandCopy(text);
 }
 
-function execCommandCopy(text: string): void {
+function execCommandCopy(text: string): boolean {
   try {
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -20,9 +21,10 @@ function execCommandCopy(text: string): void {
     document.body.appendChild(ta);
     ta.focus();
     ta.select();
-    document.execCommand("copy");
+    const ok = document.execCommand("copy");
     document.body.removeChild(ta);
+    return ok;
   } catch {
-    // Silent fail — clipboard unavailable in this environment
+    return false;
   }
 }

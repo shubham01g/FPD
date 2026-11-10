@@ -26,7 +26,11 @@ users.get("/", async (c) => {
     .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (search) q = q.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
+  // The search text goes inside a PostgREST or=() filter, where , ( ) and "
+  // are syntax and % _ \ are LIKE wildcards. Keep only characters a name or
+  // email uses, so the text can't add filters of its own.
+  const term = (search ?? "").replace(/[^\p{L}\p{N}@.+\-' ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 100);
+  if (term) q = q.or(`email.ilike.*${term}*,full_name.ilike.*${term}*`);
   if (plan) q = q.eq("plan", plan);
   if (status) q = q.eq("plan_status", status);
 
@@ -226,7 +230,8 @@ users.patch("/:id", async (c) => {
   if ("full_name" in patch && !patch.full_name) return c.json({ error: "Name is required" }, 400);
 
   const db = adminClient();
-  const { data: current } = await db.from("users").select("plan, plan_status, email").eq("id", id).maybeSingle();
+  const { data: current, error: currentErr } = await db.from("users").select("plan, plan_status, email, is_admin").eq("id", id).maybeSingle();
+  if (currentErr) return c.json({ error: currentErr.message }, 500);
   if (!current) return c.json({ error: "User not found" }, 404);
 
   // The sign-in email is owned by Supabase Auth; change it there first so the
@@ -235,7 +240,11 @@ users.patch("/:id", async (c) => {
     const email = String(patch.email ?? "").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return c.json({ error: "Enter a valid email address" }, 400);
     if (email === String(current.email).toLowerCase()) delete patch.email;
-    else {
+    else if (current.is_admin || id === (c.get("admin" as never) as AdminUser).id) {
+      // Changing an admin's sign-in email from here would let a "users: edit"
+      // admin take over another admin's login (or their own permissions row).
+      return c.json({ error: "An admin's sign-in email can't be changed from the Users screen." }, 403);
+    } else {
       const { error: authErr } = await db.auth.admin.updateUserById(id, { email, email_confirm: true });
       if (authErr) return c.json({ error: `Could not change the sign-in email: ${authErr.message}` }, 400);
       patch.email = email;

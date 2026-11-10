@@ -29,6 +29,10 @@ export async function chargeWgSession(i: ChargeInput): Promise<{ status: number;
   const started = new Date(i.startedAt);
   const ended = new Date(i.endedAt);
   if (isNaN(started.getTime()) || isNaN(ended.getTime()) || ended <= started) return { status: 400, body: { error: "Enter a valid start and end time" } };
+  // The client's saved card is charged for this span without them seeing it
+  // first, so a typo (or worse) must not turn into a huge bill.
+  if (ended.getTime() - started.getTime() > 8 * 3600_000) return { status: 400, body: { error: "A single session can be at most 8 hours" } };
+  if (ended.getTime() > Date.now() + 5 * 60_000) return { status: 400, body: { error: "The session can't end in the future" } };
   const sessionType = ["phone", "video", "in_person"].includes(String(i.sessionType)) ? String(i.sessionType) : "video";
 
   const db = adminClient();

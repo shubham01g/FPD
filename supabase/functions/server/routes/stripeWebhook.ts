@@ -211,7 +211,11 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
     if (existing) return;
     // Paying through an admin's invite link activates that invited record.
     if (m.inviteCode) {
-      const { data: invited } = await db.from("partners")
+      // Same rule as checkout: only the invited address can claim the record.
+      const { data: target } = await db.from("partners").select("contact_email").eq("partner_code", m.inviteCode).eq("status", "invited").maybeSingle();
+      const { data: buyer } = await db.from("users").select("email").eq("id", userId).maybeSingle();
+      const sameEmail = !target?.contact_email || String(target.contact_email).toLowerCase() === String(buyer?.email ?? "").toLowerCase();
+      const { data: invited } = !sameEmail ? { data: null } : await db.from("partners")
         .update({
           user_id: userId, organization_name: m.orgName || "Partner", organization_type: m.orgType || "other",
           contact_name: m.contactName || "", contact_email: m.contactEmail || "", contact_phone: m.contactPhone || null,

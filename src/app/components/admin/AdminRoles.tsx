@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { copyToClipboard } from "../../utils/clipboard";
 import { TwoFactorSettingsCard } from "../twofa/TwoFactorSettingsCard";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
@@ -464,9 +465,16 @@ export function AdminRoles() {
   async function revokeAdmin(id: string) { return updateAdmin(id, { status:"suspended" }); }
   async function resendInvite(id: string) {
     try {
-      const res = await adminApi.post<{ account: DBAdminAccount; emailed?: boolean; emailError?: string }>(`/admin-accounts/${id}/resend-invite`);
+      const res = await adminApi.post<{ account: DBAdminAccount; inviteToken?: string; emailed?: boolean; emailError?: string }>(`/admin-accounts/${id}/resend-invite`);
       if (res.emailed) toast.success(`New invite emailed to ${res.account.email}`);
-      else toast.warning(`${res.emailError ?? "The invite email was not sent"} — open the account to copy the new link`);
+      else {
+        // The old link stopped working when the new token was issued, so the
+        // new one has to reach the admin here or it is lost for good.
+        const link = res.inviteToken ? `${window.location.origin}/admin/accept?id=${res.account.id}&token=${res.inviteToken}` : "";
+        const copied = link ? await copyToClipboard(link) : false;
+        if (link && !copied) window.prompt(`${res.emailError ?? "The invite email was not sent"}. Copy this invite link and send it yourself:`, link);
+        else toast.warning(`${res.emailError ?? "The invite email was not sent"}${copied ? " — the new invite link is on your clipboard" : ""}`);
+      }
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not resend the invite");
