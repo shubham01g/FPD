@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { type ConciergeEmployee, ROLE_LABELS, ROLE_COLORS } from "../services/conciergeStaff";
 import { TwoFactorSettingsCard } from "./twofa/TwoFactorSettingsCard";
-import { conciergeApi, type SessionType, type WgClientRow, type WgSession } from "../services/conciergeApi";
+import { conciergeApi, type ClientDocument, type SessionType, type WgClientRow, type WgSession } from "../services/conciergeApi";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -186,6 +186,47 @@ function EmailModal({ client, onClose }: { client: WgClientRow; onClose: () => v
   );
 }
 
+/* ── Documents the client sent from their White Glove page ───────── */
+function ClientDocuments({ client }: { client: WgClientRow }) {
+  const [docs, setDocs] = useState<ClientDocument[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try { setDocs((await conciergeApi.clientDocuments(client.id)).documents); }
+    catch (err) { setError((err as Error).message); }
+    setLoading(false);
+  }, [client.id]);
+  useEffect(() => { void load(); }, [load]);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <Label>DOCUMENTS FROM {nameOf(client).toUpperCase()}</Label>
+        <button onClick={() => void load()} disabled={loading} style={{ ...BTN, padding:"5px 10px", background:"rgba(91,167,214,0.1)", color:"#9CC7E6" }}>
+          <RefreshCw size={11}/> {loading ? "Loading…" : "Refresh"}
+        </button>
+      </div>
+      {error && <div style={{ color:"#FC8181", fontSize:14 }}>{error}</div>}
+      {!error && docs?.length === 0 && <div style={{ color:"#6B7FA8", fontSize:14 }}>Nothing sent yet. Clients can scan papers from their White Glove page.</div>}
+      <div className="space-y-2">
+        {docs?.map(d => (
+          <div key={d.id} className="flex items-center gap-3 p-3 rounded-2xl" style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)" }}>
+            <FileText size={14} color="#9CC7E6"/>
+            <div className="flex-1 min-w-0">
+              <div className="truncate" style={{ color:"#E8EDF5", fontSize:14.5 }}>{d.name}</div>
+              <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{d.category.toUpperCase()} · {new Date(d.uploaded_at).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}</div>
+            </div>
+            {d.url
+              ? <a href={d.url} target="_blank" rel="noopener noreferrer" style={{ ...BTN, padding:"5px 10px", background:"rgba(91,167,214,0.1)", color:"#9CC7E6", textDecoration:"none" }}><ExternalLink size={11}/> Open</a>
+              : <span style={{ color:"#6B7FA8", fontSize:13 }}>Unavailable</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Client card ─────────────────────────────────────────────────── */
 function ClientCard({ client, onChanged }: { client: WgClientRow; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
@@ -303,6 +344,8 @@ function ClientCard({ client, onChanged }: { client: WgClientRow; onChanged: () 
                 style={{ ...BTN, background:"rgba(91,167,214,0.12)", color:"#9CC7E6", opacity: pct === client.completion_pct ? 0.5 : 1 }}>Save</button>
             </div>
           </div>
+
+          {signed && <ClientDocuments client={client}/>}
 
           <div>
             <Label>UPLOAD TO {nameOf(client).toUpperCase()}'S VAULT</Label>

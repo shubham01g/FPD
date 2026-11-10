@@ -37,6 +37,8 @@ export interface WgClientRow {
   card: { card_brand: string | null; card_last4: string | null } | null;
 }
 
+export interface ClientDocument { id: string; name: string; category: string; file_type: string | null; uploaded_at: string; url: string | null }
+
 export const conciergeApi = {
   clients: () => request<{ clients: WgClientRow[] }>("/clients", "GET"),
   updateClient: (id: string, patch: { notes?: string; completionPct?: number; status?: string }) =>
@@ -49,6 +51,8 @@ export const conciergeApi = {
     request<{ session: WgSession; billing: { invoiceStatus?: string; message?: string | null; duplicate?: boolean; session?: { amount_charged?: number } } | null }>(`/sessions/${id}/complete`, "POST", b),
   email: (id: string, subject: string, message: string) => request<{ sent: true }>(`/clients/${id}/email`, "POST", { subject, message }),
   sendWaiver: (id: string) => request<{ waiver: WgWaiver }>(`/clients/${id}/waiver`, "POST"),
+  /** What the client sent from the White Glove page (waiver must be signed). */
+  clientDocuments: (id: string) => request<{ documents: ClientDocument[] }>(`/clients/${id}/documents`, "GET"),
 
   /** Uploads a file into the client's vault (their waiver must be signed). */
   async uploadDocument(id: string, file: File, category: string) {

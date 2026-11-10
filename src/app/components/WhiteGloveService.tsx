@@ -10,6 +10,7 @@ import { FPD_EMAIL } from "../utils/fpdEmails";
 import { useBillingSummary } from "../hooks/useBillingSummary";
 import { useProducts } from "../utils/planCatalog";
 import { CheckoutConsentModal } from "./billing/CheckoutConsentModal";
+import { ScanButton, type ScannedDocument } from "./DocumentScanner";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -77,6 +78,30 @@ function FaqItem({ faq }: { faq: { q: string; a: string } }) {
    Paid on Stripe's hosted checkout, which also saves the card (with the
    client's consent) for per-session billing. The webhook then opens the
    White Glove client record, and a specialist calls within a business day. */
+/* Paid clients scan papers with the camera. The scanner stores each one in
+   their File Cabinet tagged "White Glove", and that tag is what the
+   specialist's Concierge Portal lists (routes/conciergePortal.ts). */
+function SendDocuments() {
+  const [sent, setSent] = useState<ScannedDocument[]>([]);
+  return (
+    <div className="send-docs">
+      <h4>Send documents to your specialist</h4>
+      <p>Take a photo of a will, policy, statement or any paper. It's saved in your File Cabinet, and your specialist can see it once you've signed the authorization waiver.</p>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <ScanButton size="lg" label="Scan a document" store={{ sectionLabel: "White Glove" }}
+          onUpload={doc => { setSent(s => [doc, ...s]); toast.success(`"${doc.name}" sent to your specialist`); }}/>
+      </div>
+      {sent.length > 0 && (
+        <ul>
+          {sent.map((d, i) => (
+            <li key={`${d.path ?? d.name}-${i}`}><FileText size={13}/> {d.name}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function IntakeForm({ onClose }: { onClose?: () => void }) {
   const { summary } = useBillingSummary();
   const products = useProducts();
@@ -91,7 +116,8 @@ function IntakeForm({ onClose }: { onClose?: () => void }) {
         <div className="submitted-ico"><CheckCircle size={40} color="#FFFFFF"/></div>
         <h3>You're all set</h3>
         <p>Your White Glove setup is paid. A Final Pass Down specialist will call you within 1 business day. Sessions are billed to your <strong>{card.brand.toUpperCase()} ending {card.last4}</strong> after each one, at ${block.toFixed(2)} per 30 minutes.</p>
-        {onClose && <button onClick={onClose} className="btn-ghost">Close</button>}
+        <SendDocuments/>
+        {onClose && <button onClick={onClose} className="btn-ghost" style={{ marginTop: 20 }}>Close</button>}
       </div>
     );
   }
@@ -200,6 +226,11 @@ const WG_CSS = `
 .fpd-wg .submitted-ico > *{background:rgba(91,110,225,0.14);border:2px solid rgba(91,110,225,0.32);border-radius:99px;padding:18px;}
 .fpd-wg .submitted h3{font-family:var(--font-display);font-size:27.5px;color:${TEXT};margin-bottom:10px;}
 .fpd-wg .submitted p{color:${MUTED};font-size:17.5px;line-height:1.8;max-width:360px;margin:0 auto 22px;}
+.fpd-wg .send-docs{margin:8px auto 0;max-width:420px;padding:20px;border-radius:16px;background:rgba(91,110,225,0.06);border:1px solid rgba(91,110,225,0.2);}
+.fpd-wg .send-docs h4{font-family:var(--font-display);font-size:20px;color:${TEXT};margin-bottom:6px;}
+.fpd-wg .send-docs p{font-size:15px;line-height:1.6;margin:0 auto 14px;}
+.fpd-wg .send-docs ul{list-style:none;padding:0;margin:14px 0 0;text-align:left;}
+.fpd-wg .send-docs li{display:flex;align-items:center;gap:8px;color:${SOFT};font-size:15px;padding:6px 0;border-top:1px solid rgba(255,255,255,0.06);}
 .fpd-wg .ref-box{padding:16px 20px;border-radius:16px;margin-bottom:16px;background:rgba(91,110,225,0.08);border:1px solid rgba(91,110,225,0.22);}
 .fpd-wg .ref-lbl{color:#6FAE8B;font-size:14px;font-family:var(--font-mono);margin-bottom:4px;}
 .fpd-wg .ref-val{color:${TEXT};font-size:22.5px;font-family:var(--font-display);font-weight:700;}

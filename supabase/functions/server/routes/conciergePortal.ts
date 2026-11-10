@@ -311,6 +311,31 @@ async function hasSignedWaiver(userId: string): Promise<boolean> {
   return Boolean(data?.length);
 }
 
+/* Documents the client sent from the White Glove page (DocumentScanner with
+   sectionLabel "White Glove"). Only those — the rest of the vault stays
+   private. Each comes with a short-lived download link. */
+portal.get("/clients/:id/documents", async (c) => {
+  const client = await myClient(c, c.req.param("id"));
+  if (!client) return c.json({ error: "Client not found" }, 404);
+  if (!(await hasSignedWaiver(client.user_id))) return c.json({ error: "The client hasn't signed the authorization waiver yet." }, 403);
+  const db = adminClient();
+  const { data, error } = await db.from("vault_documents")
+    .select("id, name, category, file_type, uploaded_at, file_path")
+    .eq("user_id", client.user_id).eq("metadata->>source_section", "White Glove")
+    .order("uploaded_at", { ascending: false }).limit(100);
+  if (error) return c.json({ error: error.message }, 500);
+  const rows = data ?? [];
+  const paths = rows.map((d) => d.file_path).filter((p): p is string => Boolean(p));
+  const { data: signed } = paths.length
+    ? await db.storage.from("vault-documents").createSignedUrls(paths, 600)
+    : { data: [] as { path: string | null; signedUrl: string }[] };
+  const urlOf = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+  await log(c, "concierge.documents_viewed", client.id, { count: rows.length });
+  return c.json({
+    documents: rows.map(({ file_path, ...d }) => ({ ...d, url: file_path ? urlOf.get(file_path) ?? null : null })),
+  });
+});
+
 portal.post("/clients/:id/upload-url", async (c) => {
   const client = await myClient(c, c.req.param("id"));
   if (!client) return c.json({ error: "Client not found" }, 404);
