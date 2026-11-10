@@ -44,10 +44,10 @@ type SettingsTab =
 
 /* ─── Toggle row helper ───────────────────────────────────────────── */
 function ToggleRow({
-  label, desc, value, onChange, accent = "#9F7AEA",
+  label, desc, value, onChange, accent = "#9F7AEA", disabled = false,
 }: {
   label: string; desc?: string; value: boolean;
-  onChange: (v: boolean) => void; accent?: string;
+  onChange: (v: boolean) => void; accent?: string; disabled?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-6 py-3"
@@ -56,13 +56,13 @@ function ToggleRow({
         <div style={{ fontSize: 13, fontWeight: 600, color: "#E8EDF5" }}>{label}</div>
         {desc && <div style={{ fontSize: 12, color: "#8A9AB8", marginTop: 2 }}>{desc}</div>}
       </div>
-      <button onClick={() => onChange(!value)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0"
+      <button onClick={() => onChange(!value)} disabled={disabled}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 disabled:opacity-50"
         style={{
           background: value ? `${accent}18` : "rgba(139,154,184,0.1)",
           color: value ? accent : "#8A9AB8",
           border: `1px solid ${value ? `${accent}30` : "rgba(139,154,184,0.2)"}`,
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
         }}>
         {value ? <ToggleRight size={13} /> : <ToggleLeft size={13} />}
         {value ? "Enabled" : "Disabled"}
@@ -115,7 +115,7 @@ function StoredOnly({ children }: { children: React.ReactNode }) {
 }
 
 /* ─── Main component ─────────────────────────────────────────────── */
-type Saved = Partial<Record<"general" | "flags" | "security" | "notifications" | "smtp" | "backup", Record<string, unknown>>>;
+type Saved = Partial<Record<"general" | "flags" | "security" | "notifications", Record<string, unknown>>>;
 
 export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
@@ -260,7 +260,12 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   };
 
   /* ── Security state ── */
-  const [enforce2FA,     setEnforce2FA]     = useState(true);
+  // Off until saved ON: the server refuses ON while any active admin has no
+  // second factor (routes/settings.ts), and blocks unenrolled admins once it is.
+  const [enforce2FA,     setEnforce2FA]     = useState(false);
+  const { data: twofaData, refetch: refetchTwofa } = useAdminFetch(
+    () => adminApi.get<{ admins: { email: string; name: string | null; role: string; enrolled: boolean }[] }>("/settings/2fa-status"), []);
+  const unenrolled = (twofaData?.admins ?? []).filter(a => !a.enrolled);
   const [sessionTimeout, setSessionTimeout] = useState("60");
   const [ipAllowlist,    setIpAllowlist]    = useState<string[]>([]);
   const [newIp,          setNewIp]          = useState("");
@@ -295,21 +300,6 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     setNotifs(next);
     void save("notifications", { email: notifEmail, alerts: next }, "Notification preference saved");
   };
-
-  /* ── SMTP state (the password is deliberately not kept — nothing sends mail yet) ── */
-  const [smtpHost,    setSmtpHost]    = useState("");
-  const [smtpPort,    setSmtpPort]    = useState("587");
-  const [smtpUser,    setSmtpUser]    = useState("");
-  const [smtpFrom,    setSmtpFrom]    = useState("");
-  const [smtpFromName,setSmtpFromName]= useState("Final Pass Down");
-  const [smtpTLS,     setSmtpTLS]     = useState(true);
-
-  /* ── Backup state ── */
-  const [autoBackup,    setAutoBackup]    = useState(true);
-  const [backupFreq,    setBackupFreq]    = useState("daily");
-  const [backupRetain,  setBackupRetain]  = useState("30");
-  const saveBackup = (patch: { autoBackup?: boolean; backupFreq?: string; backupRetain?: string }) =>
-    void save("backup", { autoBackup, backupFreq, backupRetain, ...patch }, "Backup preference saved");
 
   /* Every export is a real list from an admin endpoint. `only` narrows the
      audit log to feature-flag changes for the Feature Flag History export. */
@@ -429,21 +419,6 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       if (typeof n.email === "string") setNotifEmail(n.email);
       if (n.alerts && typeof n.alerts === "object") setNotifs(v => ({ ...v, ...(n.alerts as Partial<typeof v>) }));
     }
-    const m = saved.smtp as Record<string, unknown> | undefined;
-    if (m) {
-      if (typeof m.host === "string") setSmtpHost(m.host);
-      if (typeof m.port === "string") setSmtpPort(m.port);
-      if (typeof m.user === "string") setSmtpUser(m.user);
-      if (typeof m.from === "string") setSmtpFrom(m.from);
-      if (typeof m.fromName === "string") setSmtpFromName(m.fromName);
-      if (typeof m.tls === "boolean") setSmtpTLS(m.tls);
-    }
-    const b = saved.backup as Record<string, unknown> | undefined;
-    if (b) {
-      if (typeof b.autoBackup === "boolean") setAutoBackup(b.autoBackup);
-      if (typeof b.backupFreq === "string") setBackupFreq(b.backupFreq);
-      if (typeof b.backupRetain === "string") setBackupRetain(b.backupRetain);
-    }
   }, [savedData]);
 
   const general = { platformName, tagline, supportEmail, supportPhone, timezone, maintenance, maintenanceMsg };
@@ -456,7 +431,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     { id: "security",     label: "Security",      icon: <Shield size={13} /> },
     { id: "audit-log",    label: "Audit Log",     icon: <Activity size={13} /> },
     { id: "notifications",label: "Notifications", icon: <Bell size={13} /> },
-    { id: "email-smtp",   label: "Email / SMTP",  icon: <Mail size={13} /> },
+    { id: "email-smtp",   label: "Email",         icon: <Mail size={13} /> },
     { id: "backup",       label: "Backup & Data", icon: <Database size={13} /> },
   ];
 
@@ -783,8 +758,26 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
 
           <Section title="Authentication" desc="Control how admins authenticate to the portal.">
             <ToggleRow label="Enforce 2FA for all admins"
-              desc="Admins without 2FA set up will be locked out until they configure it."
-              value={enforce2FA} onChange={v => { setEnforce2FA(v); saveSecurity({ enforce2FA: v }, v ? "2FA enforcement saved as ON" : "2FA enforcement saved as OFF"); }}/>
+              desc="While on, an admin with no two-step verification set up cannot use the portal until they set it up."
+              disabled={!enforce2FA && unenrolled.length > 0}
+              value={enforce2FA} onChange={v => {
+                setEnforce2FA(v);
+                void adminApi.put("/settings/security", { value: { enforce2FA: v, sessionTimeout, ipAllowlist } })
+                  .then(() => toast.success(v ? "2FA is now required for every admin" : "2FA enforcement turned off"))
+                  .catch(err => { setEnforce2FA(!v); toast.error(err instanceof Error ? err.message : "Could not save"); })
+                  .finally(() => refetchTwofa());
+              }}/>
+            {unenrolled.length > 0 && (
+              <div className="mt-3 px-4 py-3 rounded-xl" style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.2)" }}>
+                <div style={{ color: "#D9A55E", fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                  {unenrolled.length === 1 ? "1 admin has" : `${unenrolled.length} admins have`} not set up two-step verification{enforce2FA ? " and cannot use the portal" : ", so enforcement can't be turned on yet"}:
+                </div>
+                <ul style={{ color: "#E8EDF5", fontSize: 12, lineHeight: 1.7, paddingLeft: 16, listStyle: "disc" }}>
+                  {unenrolled.map(a => <li key={a.email}>{a.name ? `${a.name} · ` : ""}{a.email} <span style={{ color: "#8A9AB8" }}>({a.role})</span></li>)}
+                </ul>
+                <div style={{ color: "#8A9AB8", fontSize: 11, marginTop: 6 }}>Each of them signs in to the app and opens Account Settings → Two-Step Verification.</div>
+              </div>
+            )}
             <div className="mt-4">
               <label style={LABEL}>Session Timeout (minutes)</label>
               <select className="fpd-select-dark" value={sessionTimeout} onChange={e => { setSessionTimeout(e.target.value); saveSecurity({ sessionTimeout: e.target.value }, "Session timeout saved"); }} style={{ ...INPUT, width: 200 }}>
@@ -794,7 +787,9 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
                 Admin sessions expire after this period of inactivity.
               </p>
             </div>
-            <StoredOnly>The session timeout is applied in the admin portal (takes effect on the next page load). The 2FA switch is saved but not enforced yet — two-step verification is set per account under Account Settings.</StoredOnly>
+            <p style={{ color: "#8A9AB8", fontSize: 11, marginTop: 12, lineHeight: 1.6 }}>
+              Admins who have set up two-step verification must pass it on every sign-in. The 2FA switch takes effect within a minute; the session timeout on the next page load.
+            </p>
           </Section>
 
           <Section title="IP Allowlist"
@@ -965,56 +960,6 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       {/* ════════════════ EMAIL / SMTP ════════════════ */}
       {activeTab === "email-smtp" && (
         <div className="space-y-5">
-          <Section title="Outgoing Email (SMTP)"
-            desc="Platform emails — receipts, alerts, invites, password resets — are sent through this server.">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 md:col-span-1">
-                <label style={LABEL}>SMTP Host</label>
-                <input value={smtpHost} onChange={e => setSmtpHost(e.target.value)} style={INPUT}/>
-              </div>
-              <div className="col-span-2 md:col-span-1">
-                <label style={LABEL}>Port</label>
-                <select className="fpd-select-dark" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} style={INPUT}>
-                  <option value="587">587 (STARTTLS — recommended)</option>
-                  <option value="465">465 (SSL/TLS)</option>
-                  <option value="25">25 (SMTP — not recommended)</option>
-                </select>
-              </div>
-              <div>
-                <label style={LABEL}>Username</label>
-                <input value={smtpUser} onChange={e => setSmtpUser(e.target.value)} style={INPUT}/>
-              </div>
-              <div>
-                <label style={LABEL}>Password / API Key</label>
-                <div style={{ ...INPUT, color: "#8A9AB8" }}>Not stored here — the mail key is a server secret</div>
-              </div>
-              <div>
-                <label style={LABEL}>From Email</label>
-                <input value={smtpFrom} onChange={e => setSmtpFrom(e.target.value)} style={INPUT}/>
-              </div>
-              <div>
-                <label style={LABEL}>From Name</label>
-                <input value={smtpFromName} onChange={e => setSmtpFromName(e.target.value)} style={INPUT}/>
-              </div>
-              <div className="col-span-2">
-                <ToggleRow label="TLS / STARTTLS Encryption" desc="Strongly recommended for all production environments"
-                  value={smtpTLS} onChange={setSmtpTLS}/>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-5 flex-wrap">
-              <button onClick={() => void save("smtp", { host: smtpHost, port: smtpPort, user: smtpUser, from: smtpFrom, fromName: smtpFromName, tls: smtpTLS }, "SMTP settings saved")}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold"
-                style={{ background: "linear-gradient(135deg,#9F7AEA,#7C3AED)", color: "#fff", border: "none", cursor: "pointer" }}>
-                <Save size={13}/> Save Configuration
-              </button>
-              <button onClick={() => void sendTestEmail()} disabled={testingEmail}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(159,122,234,0.1)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
-                <RefreshCw size={13}/> Send Test Email
-              </button>
-            </div>
-          </Section>
-
           <Section title="Email Provider Status">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[
@@ -1031,8 +976,13 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               ))}
             </div>
             <StoredOnly>{emailOn
-              ? `Email is sent through ${emailStatus?.provider ?? "the mail provider"} from ${emailStatus?.from}. The provider is set up on the server, so the SMTP fields above are saved but not used. Delivery, bounce and open figures are in the provider's own dashboard — "Send Test Email" sends a real message to your address.`
+              ? `Email is sent through ${emailStatus?.provider ?? "the mail provider"} from ${emailStatus?.from}. The provider and sender are server secrets (SENDGRID_API_KEY, EMAIL_FROM), not settings here. Delivery, bounce and open figures are in the provider's own dashboard. "Send Test Email" sends a real message to your address.`
               : "Not connected. No mail key is set on the server, so the platform cannot send email and there are no delivery figures to show."}</StoredOnly>
+            <button onClick={() => void sendTestEmail()} disabled={testingEmail || !emailOn}
+              className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60"
+              style={{ background: "rgba(159,122,234,0.1)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
+              <RefreshCw size={13}/> {testingEmail ? "Sending…" : "Send Test Email"}
+            </button>
           </Section>
         </div>
       )}
@@ -1041,32 +991,14 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       {activeTab === "backup" && (
         <div className="space-y-5">
 
-          <Section title="Automated Backups" desc="Schedule regular full-platform backups to secure cloud storage.">
-            <ToggleRow label="Automatic Backups" desc="Run scheduled backups without manual intervention"
-              value={autoBackup} onChange={v => { setAutoBackup(v); saveBackup({ autoBackup: v }); }}/>
-            {autoBackup && (
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label style={LABEL}>Frequency</label>
-                  <select className="fpd-select-dark" value={backupFreq} onChange={e => { setBackupFreq(e.target.value); saveBackup({ backupFreq: e.target.value }); }} style={INPUT}>
-                    <option value="hourly">Hourly</option>
-                    <option value="daily">Daily (recommended)</option>
-                    <option value="weekly">Weekly</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={LABEL}>Retain for (days)</label>
-                  <select className="fpd-select-dark" value={backupRetain} onChange={e => { setBackupRetain(e.target.value); saveBackup({ backupRetain: e.target.value }); }} style={INPUT}>
-                    {["7","14","30","60","90","365"].map(d => <option key={d} value={d}>{d} days</option>)}
-                  </select>
-                </div>
-              </div>
-            )}
-            <StoredOnly>Database backups are taken by Supabase on the project's own schedule. These preferences are saved, but no backup job reads them, so there is no "last backup" to report here. "Run Backup Now" downloads a snapshot of the platform's data to your computer.</StoredOnly>
+          <Section title="Backups" desc="Database backups are taken by Supabase on the project's own schedule (Supabase dashboard → Database → Backups).">
+            <p style={{ color: "#8A9AB8", fontSize: 12, lineHeight: 1.6 }}>
+              "Download Snapshot" saves a copy of the platform's data to your computer.
+            </p>
             <button onClick={() => void exportSnapshot()} disabled={snapshotBusy}
               className="mt-4 flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold disabled:opacity-60"
               style={{ background: "linear-gradient(135deg,#9F7AEA,#7C3AED)", color: "#fff", border: "none", cursor: "pointer" }}>
-              <Database size={13}/> {snapshotBusy ? "Building snapshot…" : "Run Backup Now"}
+              <Database size={13}/> {snapshotBusy ? "Building snapshot…" : "Download Snapshot"}
             </button>
           </Section>
 

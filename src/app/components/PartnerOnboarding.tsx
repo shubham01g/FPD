@@ -16,6 +16,7 @@ import {
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { toast } from "sonner";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { money, usePlatform } from "../services/platform";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -27,8 +28,6 @@ const VOLUME_TIERS = [
   { tier:2, label:"Tier 2", range:"51 – 100 active accounts", rate:25, color:"#6E90C9", glow:"rgba(91,110,225,0.2)" },
   { tier:3, label:"Tier 3", range:"101+ active accounts",     rate:30, color:"#D99A6B", glow:"rgba(72,187,120,0.2)" },
 ];
-
-const SETUP_FEE = 599;
 
 /* ── Onboarding wizard ──────────────────────────────────────────── */
 type WizardStep = "overview" | "details" | "payment" | "complete";
@@ -67,6 +66,10 @@ function StepTracker({ step }: { step: WizardStep }) {
 }
 
 function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
+  /* The setup fee as checkout charges it (billing_products "partner_setup",
+     via /public/platform). Until it is known, nothing can be paid. */
+  const setupFee = usePlatform().prices.partnerSetup;
+  const feeLabel = money(setupFee);
   const { refresh: refreshEntitlement } = useWLEntitlement();
   const [step, setStep] = useState<WizardStep>("overview");
   const [org, setOrg] = useState({ name:"", type:"law_firm", email:"", phone:"", contact:"", website:"", why:"" });
@@ -149,7 +152,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             {/* Setup fee card */}
             <div className="rounded-2xl p-7 text-center" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)", background:"rgba(91,110,225,0.02)" }}>
               <div style={{ color:"#4A5A7A", fontSize:14, ...MONO, marginBottom:8 }}>ONE-TIME SETUP FEE</div>
-              <div style={{ ...DISPLAY, fontSize:70, color:"#6E90C9", lineHeight:1, marginBottom:4 }}>${SETUP_FEE}</div>
+              <div style={{ ...DISPLAY, fontSize:70, color:"#6E90C9", lineHeight:1, marginBottom:4 }}>{feeLabel}</div>
               <div style={{ color:"#8A9AB8", fontSize:17.5, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
@@ -282,7 +285,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                     <div style={{ ...DISPLAY, fontSize:22.5, color:"#E8EDF5" }}>Final Pass Down Partner Setup</div>
                     <div style={{ color:"#8A9AB8", fontSize:16 }}>{org.name || "Your Organization"} · {ORG_TYPES.find(t=>t.id===org.type)?.label}</div>
                   </div>
-                  <div style={{ ...DISPLAY, fontSize:40.5, color:"#6E90C9" }}>${SETUP_FEE}</div>
+                  <div style={{ ...DISPLAY, fontSize:40.5, color:"#6E90C9" }}>{feeLabel}</div>
                 </div>
                 <div className="space-y-2 pt-4 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
                   {[
@@ -343,7 +346,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                     <div style={{ ...DISPLAY, fontSize:22.5, color:"#E8EDF5" }}>Final Pass Down Partner Setup</div>
                     <div style={{ color:"#8A9AB8", fontSize:16 }}>{org.name || "Your Organization"} · {ORG_TYPES.find(t=>t.id===org.type)?.label}</div>
                   </div>
-                  <div style={{ ...DISPLAY, fontSize:40.5, color:"#6E90C9" }}>${SETUP_FEE}</div>
+                  <div style={{ ...DISPLAY, fontSize:40.5, color:"#6E90C9" }}>{feeLabel}</div>
                 </div>
                 <div className="space-y-2 pt-4 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
                   {[
@@ -403,12 +406,12 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                 <ArrowLeft size={15}/> Back
               </button>
-              <button onClick={submitPayment} disabled={paying} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
-                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 28px rgba(91,110,225,0.4)", opacity:paying?0.7:1 }}>
-                {paying ? "Opening checkout…" : session ? <><CheckCircle size={16}/> Pay ${SETUP_FEE} by Card</> : <>Sign in to continue</>}
+              <button onClick={submitPayment} disabled={paying || setupFee == null} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
+                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 28px rgba(91,110,225,0.4)", opacity:paying || setupFee == null ? 0.7 : 1 }}>
+                {paying ? "Opening checkout…" : session ? <><CheckCircle size={16}/> Pay {feeLabel} by Card</> : <>Sign in to continue</>}
               </button>
-              <button onClick={() => setShowCrypto(true)} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
-                style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)" }}>
+              <button onClick={() => setShowCrypto(true)} disabled={setupFee == null} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
+                style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)", opacity:setupFee == null ? 0.7 : 1 }}>
                 <span style={{ fontSize:22.5 }}>₿</span> Pay with Crypto
               </button>
             </div>
@@ -419,8 +422,8 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
 
     <CryptoPayment
       open={showCrypto}
-      amountUSD={SETUP_FEE}
-      label={`$${SETUP_FEE} Partner Program Setup Fee`}
+      amountUSD={setupFee ?? 0}
+      label={`${feeLabel} Partner Program Setup Fee`}
       onSuccess={() => { setShowCrypto(false); void refreshEntitlement(); setStep("complete"); }}
       onClose={() => setShowCrypto(false)}
     />

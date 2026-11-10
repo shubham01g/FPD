@@ -7,6 +7,7 @@ import {
 import fpdSquareLogo from "../../imports/FPD_mark_square.png";
 import heroQAPhoto from "../../imports/ai_hero_qa.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { usePlatform } from "../services/platform";
 import { publicApi } from "../services/publicApi";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard & calendar) ── */
@@ -149,13 +150,16 @@ const KB: Record<string, string> = {
    above is only the fallback until that loads. */
 interface LivePlan { id: string; name: string; price_monthly: number; price_annual: number; storage_gb: number; max_contacts: number; overage_rate: number; billable: boolean }
 let livePlansLoaded = false;
+/* System → Settings → General support email, once /public/platform loads. */
+let supportEmail: string = FPD_EMAIL.support;
 async function loadLivePlans() {
   if (livePlansLoaded) return;
   try {
     const [{ plans }, platform] = await Promise.all([
       publicApi.get<{ plans: LivePlan[] }>("/plans"),
-      publicApi.get<{ starterTrialDays?: number; continuationFee?: { amount: number; months: number }; prices?: { whiteGloveSetup: number | null; whiteGloveSession: number | null } }>("/platform"),
+      publicApi.get<{ starterTrialDays?: number; continuationFee?: { amount: number; months: number }; prices?: { whiteGloveSetup: number | null; whiteGloveSession: number | null }; support?: { email: string } }>("/platform"),
     ]);
+    if (platform.support?.email) supportEmail = platform.support.email;
     if (!plans?.length) return;
     const gb = (n: number) => (n >= 1024 ? `${n / 1024} TB` : `${n} GB`);
     const rows = plans.map(pl => pl.billable
@@ -286,7 +290,7 @@ function getResponse(query: string): string {
   if (q.match(/^(hi|hello|hey|howdy|good morning|good afternoon|start|help me|help\b|what can you|what do you)/)) return KB["default"];
 
   // Fallback — still helpful
-  return `I'm not sure I have a specific answer for "${query}", but I'm trained on every FPD feature.\n\nTry asking me about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nOr contact support at **${FPD_EMAIL.support}** for account-specific help.`;
+  return `I'm not sure I have a specific answer for "${query}", but I'm trained on every FPD feature.\n\nTry asking me about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nOr contact support at **${supportEmail}** for account-specific help.`;
 }
 
 /* ── Suggestion chips ───────────────────────────────────────────── */
@@ -582,6 +586,7 @@ const AI_CSS = `
 ═══════════════════════════════════════════════════════════════════ */
 export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
   useEffect(() => { void loadLivePlans(); }, []);
+  const { support: platformSupport } = usePlatform();
   const [open, setOpen] = useState(pageMode);
   const [minimized, setMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([{
@@ -733,7 +738,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
                 <div className="ft">
                   <b>This assistant knows the whole platform.</b> It only explains features and points you to the
                   right section — it never touches your data. For account-specific help, contact{" "}
-                  <b>{FPD_EMAIL.support}</b>.
+                  <b>{platformSupport.email || FPD_EMAIL.support}</b>.
                 </div>
               </div>
             </div>

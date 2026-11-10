@@ -12,6 +12,7 @@ import { useDemo } from "../context/DemoContext";
 import heroDisasterRecoveryPhoto from "../../imports/disasterrecovery_storm_photo.webp";
 import wildfireDisasterPhoto from "../../imports/disasterrecovery_wildfire_photo.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { usePlatform } from "../services/platform";
 import { useProducts } from "../utils/planCatalog";
 import { notifyBillingChanged, type Interval } from "../services/billing";
 import { CheckoutConsentModal } from "./billing/CheckoutConsentModal";
@@ -253,6 +254,7 @@ function categoriesFromDocs(docs: { category: string; size: number; sizeUnit: "M
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 export function DisasterRecovery() {
+  const { support } = usePlatform();
   const { session, bypassState, addonActive, refresh: refreshBypass } = useBypassState();
   const countdown = useCountdown(session?.expiresAt ?? null);
   // Disaster Recovery is bought through Stripe Checkout (monthly or yearly);
@@ -464,7 +466,7 @@ export function DisasterRecovery() {
                 lifts normal download restrictions on your vault. It requires Master Admin
                 authorization, MFA verification, and a documented reason. The window lasts
                 exactly 48 hours and cannot be extended. All bypass activity is logged and
-                audited. Contact <strong style={{ color:TEXT }}>{FPD_EMAIL.support}</strong> to request access.
+                audited. Contact <strong style={{ color:TEXT }}>{support.email || FPD_EMAIL.support}</strong> to request access.
               </p>
             </div>
           )}

@@ -94,9 +94,6 @@ import { WhiteGloveAdmin } from "./components/admin/WhiteGloveAdmin";
 import { WhiteGloveService } from "./components/WhiteGloveService";
 import { WaiverPublicPage } from "./components/WaiverForm";
 import { AccountSettings } from "./components/AccountSettings";
-import { WGClientSubmit } from "./components/WGClientSubmit";
-import { WGSchedulePage } from "./components/WGSchedulePage";
-import { createScheduleToken } from "./services/wgClientStore";
 import { CryptoMerchant } from "./components/admin/CryptoMerchant";
 import { AdminRoles } from "./components/admin/AdminRoles";
 import { ConciergeLogin } from "./components/ConciergeLogin";
@@ -108,152 +105,6 @@ import {
   // values written before that portal moved onto real Supabase auth.
   clearConciergeEmployeeId,
 } from "./services/authSession";
-
-/* ── Demo wrapper: pick which client to simulate ────────────────── */
-const WG_DEMO_CLIENTS = [
-  { token:"TOKEN_MARCUS_001", name:"Dorothy Henderson",      specialist:"Marcus Williams",  clientId:"WG-001" },
-  { token:"TOKEN_PATRICIA_002", name:"Walter & Edna Briggs", specialist:"Patricia Chen",   clientId:"WG-002" },
-  { token:"TOKEN_JAMES_003",  name:"Margaret Thompson",      specialist:"James Rivera",    clientId:"WG-003" },
-];
-
-function WGClientSubmitDemo() {
-  /* Dev-only, for the same reason as DemoBar: goToSpecialistInbox() below
-     establishes a Concierge session from a PUBLIC route (/documents/submit)
-     without asking for credentials, which would let anyone read client
-     document inboxes. Replaced at build time, so production drops it. */
-  if (!import.meta.env.DEV) return null;
-
-  const navigate = useNavigate();
-  const [selected, setSelected] = React.useState<string | null>(null);
-  const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
-
-  if (selected) {
-    const client = WG_DEMO_CLIENTS.find(c => c.token === selected)!;
-    const goToSpecialistInbox = () => {
-      // The Concierge Portal runs on real Supabase auth now, so there is no
-      // session to fabricate from here — send them to sign in properly.
-      navigate("/concierge/login");
-    };
-    return (
-      <div>
-        {/* Back bar */}
-        <div className="flex items-center justify-between px-5 py-2.5 border-b"
-          style={{ background:"#0A0F1A", borderColor:"rgba(91,167,214,0.2)" }}>
-          <button onClick={() => setSelected(null)}
-            className="flex items-center gap-2 text-sm font-semibold"
-            style={{ color:"#6FAE8B" }}>
-            ← Switch Client
-          </button>
-          <div style={{ color:"#8A9AB8", fontSize:15, ...MONO }}>
-            Simulating: {client.name} · Specialist: {client.specialist}
-          </div>
-          <button onClick={goToSpecialistInbox}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-            style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
-            View {client.specialist.split(" ")[0]}'s Inbox →
-          </button>
-        </div>
-        <WGClientSubmit token={selected}/>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6"
-      style={{ background:"#070A12", fontFamily:"var(--font-body)" }}>
-      <div style={{ maxWidth:520, width:"100%" }}>
-        <div className="text-center mb-8">
-          <div style={{ color:"#6FAE8B", fontSize:15, fontWeight:700, ...MONO, letterSpacing:"0.1em", marginBottom:8 }}>
-            📤 CLIENT DOCUMENT SUBMISSION — DEMO
-          </div>
-          <h2 style={{ fontFamily:"var(--font-display)", fontSize:30, color:"#E8EDF5", marginBottom:8 }}>
-            Which client are you simulating?
-          </h2>
-          <p style={{ color:"#8A9AB8", fontSize:16, lineHeight:1.7 }}>
-            Each client has a unique secure link. Select a client to see their submission page — then switch to the Concierge Portal to see the document appear live in their specialist's inbox.
-          </p>
-        </div>
-
-        <div className="space-y-3">
-          {WG_DEMO_CLIENTS.map(c => (
-            <button key={c.token} onClick={() => setSelected(c.token)}
-              className="w-full flex items-start gap-4 p-5 rounded-2xl text-left transition-all"
-              style={{ background:"linear-gradient(180deg,#0D1421 0%,#0A0F1A 100%)", border:"1.5px solid rgba(91,167,214,0.35)",
-                boxShadow:"0 0 0 1px rgba(91,167,214,0.1), 0 8px 24px rgba(0,0,0,0.35)" }}>
-              <div className="flex items-center justify-center rounded-full font-bold flex-shrink-0"
-                style={{ width:48, height:48, background:"rgba(91,167,214,0.1)", color:"#6FAE8B", fontFamily:"var(--font-display)", fontSize:22.5 }}>
-                {c.name.split(" ").map((w:string) => w[0]).join("").slice(0,2)}
-              </div>
-              <div className="flex-1">
-                <div style={{ color:"#E8EDF5", fontSize:19, fontWeight:600, marginBottom:3 }}>{c.name}</div>
-                <div style={{ color:"#8A9AB8", fontSize:15 }}>
-                  Specialist: <strong style={{ color:"#6FAE8B" }}>{c.specialist}</strong>
-                </div>
-                <div style={{ color:"#4A5A7A", fontSize:14, marginTop:2, ...MONO }}>
-                  Token: {c.token}
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl self-center flex-shrink-0"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B", fontSize:15, fontWeight:700 }}>
-                Open →
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-6 p-4 rounded-2xl text-center"
-          style={{ background:"rgba(91,110,225,0.06)", border:"1px solid rgba(91,110,225,0.2)" }}>
-          <div style={{ color:"#6E90C9", fontSize:15, fontWeight:700, ...MONO, marginBottom:6 }}>HOW TO TEST THE LIVE SYNC</div>
-          <ol style={{ color:"#8A9AB8", fontSize:15, lineHeight:2, textAlign:"left" }}>
-            <li>1. Select a client above (e.g. Dorothy Henderson)</li>
-            <li>2. Submit a document on their page</li>
-            <li>3. Switch Demo Mode → ⭐ Concierge Portal</li>
-            <li>4. Log in as {WG_DEMO_CLIENTS[0].specialist} (password: Concierge2026!)</li>
-            <li>5. Open Document Inbox tab → see the document appear ✅</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Client scheduling demo wrapper — creates a live token once per visit ── */
-function WGScheduleDemo() {
-  // Dev only, like /documents/submit: on the live site this page showed
-  // every visitor a made-up "Dorothy Henderson" booking. Real schedule
-  // links come with the Concierge Portal wiring.
-  if (!import.meta.env.DEV) return <Navigate to="/" replace/>;
-  return <WGScheduleDemoInner/>;
-}
-
-function WGScheduleDemoInner() {
-  const [demoToken] = useState(() => {
-    const today = new Date();
-    const fmt = (d: Date, t: string) =>
-      d.toLocaleDateString("en-US", { weekday:"long", month:"short", day:"numeric" }) + " · " + t;
-    const d1 = new Date(today); d1.setDate(today.getDate() + 1);
-    const d2 = new Date(today); d2.setDate(today.getDate() + 1);
-    const d3 = new Date(today); d3.setDate(today.getDate() + 2);
-    const d4 = new Date(today); d4.setDate(today.getDate() + 3);
-    const token = createScheduleToken(
-      "WG-001", "Dorothy Henderson", "Marcus Williams",
-      [fmt(d1,"10:00 AM"), fmt(d2,"2:00 PM"), fmt(d3,"11:00 AM"), fmt(d4,"3:00 PM")]
-    );
-    return token.token;
-  });
-
-  return (
-    <div className="size-full overflow-y-auto">
-      <div className="px-4 pt-3 pb-1 text-center" style={{ background:"rgba(91,110,225,0.05)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
-        <span style={{ color:"#8A9AB8", fontSize:14, fontFamily:"var(--font-mono)" }}>
-          📅 DEMO — Dorothy's callback scheduling page (as she sees it on her phone)
-        </span>
-      </div>
-      <WGSchedulePage token={demoToken}/>
-      <DemoBar/>
-    </div>
-  );
-}
 
 const TOASTER_STYLE = {
   background: "rgba(8,15,26,0.98)",
@@ -276,8 +127,6 @@ const DEMO_TABS: DemoTab[] = [
   { path: "/partner",           label: "🤝 Partner Portal" },
   { path: "/concierge/login",   label: "⭐ Concierge Login" },
   { path: "/concierge",         label: "⭐ Concierge Portal" },
-  { path: "/documents/submit",  label: "📤 Client Doc Submit" },
-  { path: "/schedule",          label: "📅 Client Schedule Page" },
 ];
 
 function DemoBar() {
@@ -868,18 +717,6 @@ function AccessRoute() {
   );
 }
 
-function DocSubmitRoute() {
-  // The real client flow is token-based and lives elsewhere; this route only
-  // ever hosted the demo client picker, so without it there is nothing here.
-  if (!import.meta.env.DEV) return <Navigate to="/" replace/>;
-  return (
-    <div className="size-full overflow-y-auto">
-      <WGClientSubmitDemo/>
-      <DemoBar/>
-    </div>
-  );
-}
-
 function AppShell() {
   return (
     <Routes>
@@ -895,8 +732,6 @@ function AppShell() {
       <Route path="/partner/onboard" element={<WhiteLabelOnboardRoute/>}/>
       <Route path="/concierge/login" element={<ConciergeLoginRoute/>}/>
       <Route path="/concierge" element={<ConciergeRoute/>}/>
-      <Route path="/documents/submit" element={<DocSubmitRoute/>}/>
-      <Route path="/schedule" element={<WGScheduleDemo/>}/>
       <Route path="/legacy-claim/:token" element={<LegacyClaimRoute/>}/>
       <Route path="/vault-reset/:token" element={<VaultResetRoute/>}/>
       <Route path="/reset-password" element={<ResetPasswordRoute/>}/>

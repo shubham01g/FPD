@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   CreditCard, Activity, Globe, Settings, Zap, ChevronDown, ChevronUp, ExternalLink,
   CheckCircle, Eye, EyeOff, ToggleLeft, ToggleRight, AlertCircle, Save, Info, Loader2, RefreshCw, Plus, Trash2, X, Copy, Lock,
@@ -59,10 +59,19 @@ const STRIPE_WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions
 const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fieldLabel = (key: string) => key.replace(/([A-Z])/g, " $1").toUpperCase();
 
-const DEFAULT_PAYMENT_SETTINGS = {
-  currency: "USD", retries: "3", retryWindowDays: "7",
-  failureEmail: true, receiptEmail: true, statementDescriptor: "FINAL PASS DOWN",
-};
+/* What the Settings tab used to offer as inputs. Stripe applies all of these
+   itself, so the tab now says where each one is set instead of storing a
+   preference nothing reads. */
+const STRIPE_MANAGED: { title: string; desc: string; where: string; href: string | null }[] = [
+  { title: "Currency", desc: "Every price in the billing catalog is in US dollars, so every charge settles in USD.",
+    where: "USD, set by the Stripe catalog", href: null },
+  { title: "Retry Failed Payments", desc: "Stripe retries failed subscription renewals before marking them past due.",
+    where: "Stripe → Billing → Revenue recovery", href: "https://dashboard.stripe.com/revenue_recovery/retries" },
+  { title: "Payment Failure & Receipt Emails", desc: "Stripe emails customers their receipts and failed-payment notices.",
+    where: "Stripe → Settings → Customer emails", href: "https://dashboard.stripe.com/settings/emails" },
+  { title: "Statement Descriptor", desc: "The name shown on the customer's bank or card statement.",
+    where: "Stripe → Settings → Public details", href: "https://dashboard.stripe.com/settings/public" },
+];
 
 /* ─── One processor ───────────────────────────────────────────────── */
 function ProcessorCard({ p, onChanged, onRequestActive }: { p: Processor; onChanged: () => void; onRequestActive: () => void }) {
@@ -319,8 +328,6 @@ export function PaymentProcessors() {
   const { data, loading, error, refetch } = useAdminFetch(() => adminApi.get<{ processors: ProcessorRow[] }>("/crypto"), []);
   const { data: payData, loading: payLoading, error: payError } = useAdminFetch(
     () => adminApi.get<{ payments: PaymentRow[] }>("/crypto/payments"), []);
-  const { data: settingsData } = useAdminFetch(
-    () => adminApi.get<{ settings: { payments?: Partial<typeof DEFAULT_PAYMENT_SETTINGS> } }>("/settings"), []);
 
   const processors: Processor[] = useMemo(() => {
     // Processors an admin added by hand (ids "custom_*") sit after the catalog.
@@ -349,11 +356,6 @@ export function PaymentProcessors() {
   const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
   const mtd = payments.filter(p => p.status === "succeeded" && new Date(p.created_at) >= monthStart);
 
-  const [settings, setSettings] = useState(DEFAULT_PAYMENT_SETTINGS);
-  useEffect(() => {
-    if (settingsData?.settings.payments) setSettings(s => ({ ...s, ...settingsData.settings.payments }));
-  }, [settingsData]);
-
   async function setActive(id: string) {
     setConfirmSwitch(null);
     try {
@@ -365,15 +367,6 @@ export function PaymentProcessors() {
     }
   }
 
-  async function saveSettings() {
-    try {
-      await adminApi.put("/settings/payments", { value: settings });
-      toast.success("Payment settings saved");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save payment settings");
-    }
-  }
-
   const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "processors",   label: "Processors",   icon: <CreditCard size={13}/> },
     { id: "transactions", label: "Transactions", icon: <Activity size={13}/> },
@@ -381,13 +374,6 @@ export function PaymentProcessors() {
     { id: "settings",     label: "Settings",     icon: <Settings size={13}/> },
   ];
 
-  const toggle = (on: boolean, onClick: () => void) => (
-    <button onClick={onClick} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
-      style={{ background: on ? "rgba(95,190,145,0.12)" : "rgba(139,154,184,0.1)", color: on ? "#5FBE91" : "#8A9AB8",
-        border: `1px solid ${on ? "rgba(95,190,145,0.3)" : "rgba(139,154,184,0.2)"}`, cursor: "pointer" }}>
-      {on ? <ToggleRight size={15}/> : <ToggleLeft size={15}/>} {on ? "Enabled" : "Disabled"}
-    </button>
-  );
   const notice = (text: string) => (
     <div className="flex items-start gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.2)" }}>
       <Info size={14} color="#D9A55E" style={{ marginTop: 2, flexShrink: 0 }}/>
@@ -567,58 +553,25 @@ export function PaymentProcessors() {
       {/* ── Settings tab ── */}
       {tab === "settings" && (
         <div className="space-y-5">
-          {[
-            {
-              title: "Default Currency", desc: "All transactions are processed and settled in this currency.",
-              control: (
-                <select className="fpd-select-dark" value={settings.currency} onChange={e => setSettings(s => ({ ...s, currency: e.target.value }))} style={{ ...INPUT, width: 200 }}>
-                  <option value="USD">USD — US Dollar</option><option value="EUR">EUR — Euro</option>
-                  <option value="GBP">GBP — British Pound</option><option value="CAD">CAD — Canadian Dollar</option>
-                </select>
-              ),
-            },
-            {
-              title: "Retry Failed Payments", desc: "Automatically retry failed subscription payments before marking as past due.",
-              control: (
-                <div className="flex items-center gap-3">
-                  <select className="fpd-select-dark" value={settings.retries} onChange={e => setSettings(s => ({ ...s, retries: e.target.value }))} style={{ ...INPUT, width: 120 }}>
-                    {["1", "2", "3", "5"].map(n => <option key={n} value={n}>{n} {n === "1" ? "retry" : "retries"}</option>)}
-                  </select>
-                  <span style={{ color: "#8A9AB8", fontSize: 13 }}>over</span>
-                  <select className="fpd-select-dark" value={settings.retryWindowDays} onChange={e => setSettings(s => ({ ...s, retryWindowDays: e.target.value }))} style={{ ...INPUT, width: 120 }}>
-                    {["3", "7", "14"].map(n => <option key={n} value={n}>{n} days</option>)}
-                  </select>
-                </div>
-              ),
-            },
-            {
-              title: "Payment Failure Email", desc: "Send an automatic email to the user when a payment fails.",
-              control: toggle(settings.failureEmail, () => setSettings(s => ({ ...s, failureEmail: !s.failureEmail }))),
-            },
-            {
-              title: "Receipt Emails", desc: "Automatically email a payment receipt to the customer after every successful charge.",
-              control: toggle(settings.receiptEmail, () => setSettings(s => ({ ...s, receiptEmail: !s.receiptEmail }))),
-            },
-            {
-              title: "Statement Descriptor", desc: "What appears on the customer's bank statement.",
-              control: <input value={settings.statementDescriptor} onChange={e => setSettings(s => ({ ...s, statementDescriptor: e.target.value }))} style={{ ...INPUT, width: 240 }}/>,
-            },
-          ].map(s => (
-            <div key={s.title} style={{ ...CARD, padding: 20 }}>
+          {STRIPE_MANAGED.map(row => (
+            <div key={row.title} style={{ ...CARD, padding: 20 }}>
               <div className="flex items-start justify-between gap-6 flex-wrap">
-                <div className="flex-1">
-                  <div style={{ fontWeight: 600, fontSize: 14, color: "#E8EDF5", marginBottom: 4 }}>{s.title}</div>
-                  <div style={{ color: "#8A9AB8", fontSize: 13 }}>{s.desc}</div>
+                <div className="flex-1 min-w-0">
+                  <div style={{ fontWeight: 600, fontSize: 14, color: "#E8EDF5", marginBottom: 4 }}>{row.title}</div>
+                  <div style={{ color: "#8A9AB8", fontSize: 13 }}>{row.desc}</div>
                 </div>
-                <div className="flex-shrink-0">{s.control}</div>
+                <div className="flex-shrink-0">
+                  {row.href
+                    ? <a href={row.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5"
+                        style={{ color: "#AEB9F5", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                        {row.where} <ExternalLink size={12}/>
+                      </a>
+                    : <span style={{ color: "#E8EDF5", fontSize: 13, fontWeight: 600 }}>{row.where}</span>}
+                </div>
               </div>
             </div>
           ))}
-          {notice("These preferences are saved, but nothing applies them yet: there is no live checkout to retry, and no email provider to send failure notices or receipts.")}
-          <button onClick={() => void saveSettings()} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold"
-            style={{ background: "linear-gradient(135deg,#5B6EE1,#7E6BD8)", color: "#fff", border: "none", cursor: "pointer" }}>
-            <Save size={13}/> Save Settings
-          </button>
+          {notice("Stripe applies these itself, so they are changed in the Stripe dashboard, not here. They apply to card payments through Stripe only.")}
         </div>
       )}
     </div>

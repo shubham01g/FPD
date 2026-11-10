@@ -59,3 +59,17 @@ export async function secondFactorState(userId: string, token: string): Promise<
 
   return { enrolled: true, passed: aal === "aal2", method: row.method ?? "native" };
 }
+
+/** Has this account set up any second factor (our settings row, or a verified
+ *  native Supabase factor)? Used by the admin "Enforce 2FA" switch. */
+export async function hasSecondFactor(userId: string): Promise<boolean> {
+  const db = adminClient();
+  const { data: row } = await db
+    .from("account_2fa_settings")
+    .select("enabled")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (row?.enabled) return true;
+  const { data } = await db.auth.admin.mfa.listFactors({ userId });
+  return (data?.factors ?? []).some((f: { status: string }) => f.status === "verified");
+}

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, X, Minimize2, Maximize2, RefreshCw, Crown, Bot } from "lucide-react";
+import { money, usePlatform } from "../services/platform";
 
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
 interface Message { id:string; role:"user"|"agent"; text:string; time:string; }
@@ -59,7 +60,7 @@ const ADMIN_KB: Record<string, string> = {
   "email templates": `The **Email Templates** panel manages all 16 transactional email templates:\n\n**Categories:**\n• Account: Welcome · OTP Verification · Password Reset\n• Storage: Warning 80% · Warning 90% · Warning 95% · Overage\n• Contacts: Legacy Contact Invite · Verified · Vault Access Activated\n• Payments: Continuation Fee Receipt\n• Affiliate: Welcome · Commission Earned · Payout Processed\n• Partnership: Partnership Welcome · WL Activated\n\n**Each template:** Editable subject line · {{variable}} placeholders · HTML body editor · Live preview · Copy HTML button · Reset to Default.\n\n**Common variables:** {{user_name}} · {{email}} · {{plan}} · {{amount}} · {{date}} · {{link}}\n\nTo access: Admin Portal → Email Templates.`,
 
   // ── Crypto Merchant ──────────────────────────────────────────────
-  "crypto": `The **Crypto Merchant Config** panel manages cryptocurrency payment processors:\n\n**Supported processors:** Coinbase Commerce · BitPay · NOWPayments · Stripe Crypto · Crypto.com Pay · Strike Lightning · Square · Braintree (disabled by default) · Custom Processor\n\n**Supported coins:** BTC · ETH · USDC · USDT · SOL · BNB · XRP · LTC\n\n**Where crypto is accepted:** $199 Legacy Continuation Fee · Plan upgrades · Partner $599 setup fee\n\n**Setting default:** Only one processor can be set as default. Others are available as alternatives.\n\n**All crypto settles to USD automatically** via the processor.\n\n**Webhook endpoints:** Each processor has its own webhook — register in the processor's dashboard pointing to /webhooks/[processor-name].\n\nTo access: Admin Portal → Crypto Merchant Config.`,
+  "crypto": `The **Crypto Merchant Config** panel manages cryptocurrency payment processors:\n\n**Supported processors:** Coinbase Commerce · BitPay · NOWPayments · Stripe Crypto · Crypto.com Pay · Strike Lightning · Square · Braintree (disabled by default) · Custom Processor\n\n**Supported coins:** BTC · ETH · USDC · USDT · SOL · BNB · XRP · LTC\n\n**Where crypto is accepted:** {CONTINUATION_FEE} Legacy Continuation Fee · Plan upgrades · Partner {PARTNER_FEE} setup fee\n\n**Setting default:** Only one processor can be set as default. Others are available as alternatives.\n\n**All crypto settles to USD automatically** via the processor.\n\n**Webhook endpoints:** Each processor has its own webhook — register in the processor's dashboard pointing to /webhooks/[processor-name].\n\nTo access: Admin Portal → Crypto Merchant Config.`,
 
   // ── Continuation Fee Admin ───────────────────────────────────────
   "continuation fee": `This is the same as the **Activate Legacy Access Tab** — see "199 fee" topic.\n\nKey admin responsibilities:\n1. Monitor the fee payment table daily\n2. When a user passes: verify the submitted documentation\n3. Click "Activate" to open vault access for legacy contacts\n4. Documentation accepted: death certificates, obituaries, hospital/hospice records, coroner reports, funeral home letters, probate filings, or any credible official record\n5. Verification and admin approval required — with a follow-up confirmation of death once received`,
@@ -68,7 +69,7 @@ const ADMIN_KB: Record<string, string> = {
   "new hire": `**Welcome to the Final Pass Down Command Center!** Here's a quick-start guide by department:\n\n**📊 Operations Manager:**\nStart with the Overview tab → Analytics tab → Users tab. Your key responsibility is monitoring vault completion rates, ID verification queue, and White Glove client health.\n\n**💰 Finance Manager:**\nStart with Revenue tab → Payouts tab → Continuation Vault tab. Run the MRR Summary and Payout History reports from Reports & Downloads to understand our revenue structure.\n\n**⭐ White Glove Manager:**\nGo to the White Glove admin section → review all 4 sub-tabs (Clients, Waivers, Staff, Billing). Learn the $99 setup + $25/30-min billing model. Each specialist sees only their assigned clients in the Concierge Portal.\n\n**🔔 Content Admin:**\nYour two areas: Push Notifications and Email Templates. Review the 16 existing email templates before making changes. Use the preview panel when composing push notifications.\n\n**🔐 Support Agent:**\nFocus on Users tab (search and assist users) and White Glove clients. You cannot access financial data — escalate revenue questions to the Finance Manager.\n\nAsk me about any specific tab or workflow!`,
 
   // ── Partner Program ──────────────────────────────────────────────
-  "partner": `**Partner Program** admin management:\n\n**Partner vs. Affiliate:**\n• Affiliates: 20–30% for 12 months per referral (time-capped)\n• Partners: 20–30% lifetime — no time cap (for businesses, $599 one-time setup fee)\n\n**Partner tiers:**\n• Tier 1 (1–50 accounts): 20% lifetime\n• Tier 2 (51–100): 25% lifetime\n• Tier 3 (101+): 30% lifetime\n\n**Admin view:** Partner performance table with active accounts, MRR, total paid, last payout date, and status.\n\n**Onboarding:** Partners complete a 4-step wizard with $599 payment (card or crypto). Appears in the Partnership Admin tab.\n\n**Commission payouts:** Processed through the Payouts tab with the same payout methods as affiliates.`,
+  "partner": `**Partner Program** admin management:\n\n**Partner vs. Affiliate:**\n• Affiliates: 20–30% for 12 months per referral (time-capped)\n• Partners: 20–30% lifetime — no time cap (for businesses, {PARTNER_FEE} one-time setup fee)\n\n**Partner tiers:**\n• Tier 1 (1–50 accounts): 20% lifetime\n• Tier 2 (51–100): 25% lifetime\n• Tier 3 (101+): 30% lifetime\n\n**Admin view:** Partner performance table with active accounts, MRR, total paid, last payout date, and status.\n\n**Onboarding:** Partners complete a 4-step wizard with the {PARTNER_FEE} setup payment (card or crypto). Appears in the Partnership Admin tab.\n\n**Commission payouts:** Processed through the Payouts tab with the same payout methods as affiliates.`,
 
   // ── ID Verification Process ──────────────────────────────────────
   "verify id": `**ID Verification Step-by-Step (Admin):**\n\n1. Check the **ID Verification** tab — badge shows pending count\n2. Click on a pending submission to review\n3. Examine the submitted ID photo for:\n   • Legibility (text must be readable)\n   • Match between name on ID and contact name in system\n   • ID expiry date (must be valid)\n   • Photo match (if available)\n4. If approved → click **Verify** → contact status changes to VERIFIED\n5. If rejected → click **Reject** → select reason → contact receives resubmit email\n6. SLA: Process within 1–2 business days\n7. Log your action — automatically recorded in Audit Log\n\n**Edge cases:**\n• Expired ID: Request renewal ID\n• Name mismatch: Request explanation or additional documentation\n• Photo unclear: Request resubmission with better lighting`,
@@ -77,7 +78,17 @@ const ADMIN_KB: Record<string, string> = {
   "default": `I'm **Josh** — the FPD Admin AI Assistant, trained on every feature of the Command Center.\n\nI can help you with:\n\n📊 **Analytics & Reporting** — interpreting dashboards, running reports\n👥 **User Management** — searching users, onboarding, suspensions\n💰 **Revenue & Payouts** — MRR, commissions, affiliate tiers\n⭐ **White Glove Program** — clients, sessions, billing, staff\n🔔 **Push Notifications** — composing, targeting, delivery channels\n🛡️ **ID Verification** — queue management, approval workflow\n🔐 **Vault Activation** — $199 fee, confirmation of passing, admin activation\n👑 **Admin Team** — roles, permissions, inviting new admins\n📋 **Reports** — live exports, formats, date ranges\n🆕 **New Hire Onboarding** — department-specific guidance\n\nJust ask — what do you need help with?`,
 };
 
-function getAdminResponse(query: string): string {
+/* Prices in the answers come from the live catalog (/public/platform) so
+   they always match what checkout charges. */
+interface LivePrices { partnerFee: string; continuationFee: string }
+
+function getAdminResponse(query: string, prices: LivePrices): string {
+  return answerFor(query)
+    .split("{PARTNER_FEE}").join(prices.partnerFee)
+    .split("{CONTINUATION_FEE}").join(prices.continuationFee);
+}
+
+function answerFor(query: string): string {
   const q = query.toLowerCase();
 
   if (q.match(/overview|dashboard|kpi|health|recent activity/)) return ADMIN_KB["overview"];
@@ -97,7 +108,7 @@ function getAdminResponse(query: string): string {
   if (q.match(/subscription.*config|plan.*price|price.*plan|storage.*config|config.*storage/)) return ADMIN_KB["subscription config"];
   if (q.match(/email.*template|template.*email|transactional.*email/)) return ADMIN_KB["email templates"];
   if (q.match(/crypto.*merchant|crypto.*config|bitcoin.*admin|coinbase|bitpay|nowpay|crypto.*processor/)) return ADMIN_KB["crypto"];
-  if (q.match(/partner.*program|partner.*tier|partner.*commission|\$599/)) return ADMIN_KB["partner"];
+  if (q.match(/partner.*program|partner.*tier|partner.*commission|setup fee/)) return ADMIN_KB["partner"];
   if (q.match(/verify.*step|how.*verify|approve.*id|id.*approve|id.*process|process.*id/)) return ADMIN_KB["verify id"];
   if (q.match(/new hire|onboard.*me|i.*new|getting start|where.*start|first day|just started|department/)) return ADMIN_KB["new hire"];
   if (q.match(/^(hi|hello|hey|help|what can|what do|start)/)) return ADMIN_KB["default"];
@@ -151,6 +162,11 @@ function TypingIndicator() {
 }
 
 export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
+  const platform = usePlatform();
+  const livePrices: LivePrices = {
+    partnerFee: platform.prices.partnerSetup != null ? money(platform.prices.partnerSetup) : "(price not set yet)",
+    continuationFee: money(platform.continuationFee.amount),
+  };
   const [open, setOpen] = useState(inline);
   const [minimized, setMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([{
@@ -174,7 +190,7 @@ export function AdminAIAgent({ inline = false }: { inline?: boolean }) {
     setMessages(prev => [...prev, { id:Date.now().toString(), role:"user", text, time }]);
     setInput("");
     // Answers come from the built-in guide, so they're shown straight away.
-    setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getAdminResponse(text), time }]);
+    setMessages(prev => [...prev, { id:(Date.now()+1).toString(), role:"agent", text:getAdminResponse(text, livePrices), time }]);
   };
 
   const wrapStyle: React.CSSProperties = inline

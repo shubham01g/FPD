@@ -3,6 +3,7 @@
 import type { Context, Next } from "npm:hono";
 import { adminClient, anonClient } from "../lib/supabaseAdmin.ts";
 import { secondFactorState } from "../lib/twoFactorGate.ts";
+import { securitySettings } from "./ipAllowlist.ts";
 
 export interface ModulePermission {
   module: string;
@@ -86,8 +87,26 @@ export async function requireAdmin(c: Context, next: Next) {
   if (!mfa.passed) {
     return c.json({ error: "Two-step verification required", code: "2fa_required" }, 403);
   }
+  // System → Settings → Security → "Enforce 2FA for all admins". While it is
+  // on, an admin with no factor at all is refused everywhere except GET
+  // /admin/me, which tells the login screen why (twoFactorEnrollmentRequired)
+  // so it can send them to Account Settings to enrol. routes/settings.ts will
+  // not save the switch ON while any active admin is unenrolled.
+  let enrollmentRequired = false;
   if (!mfa.enrolled) {
-    console.warn(`requireAdmin: admin ${row.email} has no two-step verification enrolled`);
+    const security = await securitySettings().catch(() => ({} as Record<string, unknown>));
+    if (security.enforce2FA === true) {
+      enrollmentRequired = true;
+      const isMe = c.req.method === "GET" && /\/admin\/me\/?$/.test(c.req.path);
+      if (!isMe) {
+        return c.json({
+          error: "Two-step verification must be set up before using the admin portal. Sign in to the app, open Account Settings → Two-Step Verification, then sign in here again.",
+          code: "2fa_enrollment_required",
+        }, 403);
+      }
+    } else {
+      console.warn(`requireAdmin: admin ${row.email} has no two-step verification enrolled`);
+    }
   }
 
   const admin: AdminUser = {
@@ -98,5 +117,6 @@ export async function requireAdmin(c: Context, next: Next) {
     permissions: account ? (account.permissions as ModulePermission[]) : null,
   };
   c.set("admin", admin);
+  c.set("twoFactorEnrollmentRequired", enrollmentRequired);
   await next();
 }

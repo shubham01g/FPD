@@ -34,6 +34,11 @@ export function toPlan(p: DBPlan): Plan {
 let cache: Plan[] | null = null;
 let inflight: Promise<Plan[]> | null = null;
 
+/** The catalog as last loaded (the fallback until the first load lands). */
+export function cachedPlans(): Plan[] {
+  return cache ?? FALLBACK_PLANS;
+}
+
 export function loadPlans(): Promise<Plan[]> {
   if (cache) return Promise.resolve(cache);
   inflight ??= publicApi.get<{ plans: DBPlan[] }>("/plans")

@@ -14,6 +14,7 @@ import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { downloadCSV } from "../../utils/exportCsv";
+import { findAdminPlan, useAdminPlans } from "./adminPlans";
 import {
   Users, DollarSign, HardDrive, TrendingUp, TrendingDown, Globe, Crown,
   Activity, Search, Filter, Eye, CheckCircle, Clock, Edit, Download,
@@ -213,15 +214,6 @@ function VertBar({ label, pct, color, topLabel }: { label:string; pct:number; co
   );
 }
 
-/* Display only — prices are charged from the catalog (subscription_plans). */
-const PLANS = [
-  { id:"starter",    name:"Starter",    price:0,     storage:"1 GB",   color:"#8A9AB8" },
-  { id:"foundation",  name:"Foundation",  price:9.99,  storage:"50 GB",   color:"#6FAE8B" },
-  { id:"family_archive",    name:"Legacy Archive",    price:24.99, storage:"250 GB",  color:"#6E90C9" },
-  { id:"legacy_pro", name:"Legacy Pro", price:49.99, storage:"500 GB", color:"#6FAE8B" },
-  { id:"legacy_vault", name:"Legacy Vault", price:129.99, storage:"1 TB", color:"#D99A6B" },
-];
-
 const WAIVE_REASONS = [
   { id:"white_glove",  label:"White Glove Service client" },
   { id:"partner",      label:"Strategic partner / referral" },
@@ -235,6 +227,7 @@ const WAIVE_REASONS = [
 
 function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const { authUser } = useAuth();
+  const PLANS = useAdminPlans();
   const [step, setStep] = useState<"info"|"plan"|"review">("info");
   const [form, setForm] = useState({
     name:"", email:"", phone:"", plan:"foundation",
@@ -243,7 +236,7 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
   });
   const [saving, setSaving] = useState(false);
 
-  const selectedPlan = PLANS.find(p => p.id === form.plan)!;
+  const selectedPlan = findAdminPlan(PLANS, form.plan);
 
   async function submit() {
     if (!form.name.trim() || !form.email.trim()) { toast.error("Name and email are required"); return; }
@@ -961,6 +954,7 @@ interface DBUserRow {
 }
 
 export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
+  const PLANS = useAdminPlans();
   const [tab, setTab] = useState<AdminTab>("overview");
   const [userSearch, setUserSearch] = useState("");
   const [userPlanFilter, setUserPlanFilter] = useState("");
@@ -1760,7 +1754,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
             </button>
           </div>
           {manuallyOnboarded.map((u, i) => {
-            const plan = PLANS.find(p => p.id === u.plan) ?? PLANS[2];
+            const plan = findAdminPlan(PLANS, u.plan);
             return (
               <div key={u.id} className="flex items-center gap-4 px-5 py-4 border-b"
                 style={{ background:i%2===0?"transparent":"rgba(255,255,255,0.025)", borderColor:"rgba(91,110,225,0.06)" }}>

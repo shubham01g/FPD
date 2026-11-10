@@ -9,7 +9,7 @@ import { adminApi } from "../../services/adminApi";
 import { AdminUserBillingPanel } from "./AdminUserBillingPanel";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { supabase } from "../../services/supabase";
-import { usePlans } from "../../utils/planCatalog";
+import { adminPlansNow, findAdminPlan, useAdminPlans } from "./adminPlans";
 
 /* ── Design tokens — matches the admin panel's white/Royal Vault Blue theme ── */
 const T = {
@@ -58,15 +58,6 @@ const INPUT: React.CSSProperties = {
   width: "100%",
   fontSize: 16,
 };
-
-/* ── Plans — single source of truth for prices ──────────────────── */
-export const PLANS = [
-  { id:"starter",        name:"Starter",       price:0,      storage:"1 GB",   color:"#5A6A88" },
-  { id:"foundation",     name:"Foundation",    price:9.99,   storage:"50 GB",  color:"#6E90C9" },
-  { id:"family_archive", name:"Legacy Archive",price:24.99,  storage:"250 GB", color:"#5B6EE1" },
-  { id:"legacy_pro",     name:"Legacy Pro",    price:49.99,  storage:"500 GB", color:"#7E6BD8" },
-  { id:"legacy_vault",   name:"Legacy Vault",  price:129.99, storage:"1 TB",   color:"#6FAE8B" },
-];
 
 const WAIVE_REASONS = [
   { id:"white_glove", label:"White Glove Service client" },
@@ -185,11 +176,10 @@ function billingSummary(d: DBUserDetail): Pick<AdminUser, "nextBilling" | "autoR
 }
 
 function mapDbUserDetail(d: DBUserDetail): AdminUser {
-  const planDef = PLANS.find((p) => p.id === d.user.plan);
+  const planDef = adminPlansNow().find((p) => p.id === d.user.plan);
   const guardians = d.contacts.filter((c) => c.contact_type === "guardian").length;
   const usedGb = d.storage ? Math.round((d.storage.used_bytes / 1024 ** 3) * 10) / 10 : 0;
-  // storage_gb from the plan definition, TB plans stored as "1 TB" — parse either unit.
-  const planStorageGb = planDef ? (planDef.storage.includes("TB") ? parseFloat(planDef.storage) * 1024 : parseFloat(planDef.storage)) : 1;
+  const planStorageGb = planDef?.storageGb || 1;
   const totalGb = d.storage?.plan_limit_gb ?? planStorageGb;
 
   return {
@@ -303,10 +293,9 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [eNotes,   setENotes]   = useState(user.adminNotes);
   const [saving,   setSaving]   = useState(false);
 
-  const plan        = PLANS.find(p => p.id === user.planId) ?? PLANS[2];
-  const catalogPlan = usePlans().find(p => p.id === user.planId);
+  const plan        = findAdminPlan(useAdminPlans(), user.planId, user.plan);
   const yearly      = user.billingInterval === "year";
-  const price       = yearly ? (catalogPlan?.priceAnnual ?? plan.price * 12) : (catalogPlan?.priceMonthly ?? plan.price);
+  const price       = yearly ? plan.priceAnnual : plan.price;
   const initials    = user.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
   const [photoFailed, setPhotoFailed] = useState(false);
   const storagePct  = Math.round((user.storage / user.storageTotal) * 100);

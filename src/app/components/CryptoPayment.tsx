@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { copyToClipboard } from "../utils/clipboard";
 import { FPD_EMAIL } from "../utils/fpdEmails";
+import { usePlatform } from "../services/platform";
 
 /* ── Supported coins ────────────────────────────────────────────── */
 interface Coin {
@@ -116,6 +117,7 @@ interface CryptoPaymentProps {
 type PayStep = "select" | "awaiting" | "confirming" | "success" | "expired";
 
 export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, processor }: CryptoPaymentProps) {
+  const { support } = usePlatform();
   const [step, setStep] = useState<PayStep>("select");
   const [selectedCoin, setSelectedCoin] = useState<Coin>(COINS[0]);
   const [copied, setCopied] = useState(false);
@@ -408,7 +410,7 @@ export function CryptoPayment({ open, amountUSD, label, onSuccess, onClose, proc
               <div>
                 <div style={{ color:"#E8EDF5", fontSize:25, fontWeight:600, marginBottom:6 }}>Payment Window Expired</div>
                 <div style={{ color:"#6B7FA8", fontSize:16, lineHeight:1.8 }}>
-                  The 30-minute payment window has closed. If you already sent payment, contact {FPD_EMAIL.support} with your transaction hash.
+                  The 30-minute payment window has closed. If you already sent payment, contact {support.email || FPD_EMAIL.support} with your transaction hash.
                 </div>
               </div>
               <button onClick={() => setStep("select")}

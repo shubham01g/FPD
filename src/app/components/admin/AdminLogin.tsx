@@ -3,6 +3,10 @@ import { Shield, Eye, EyeOff, Lock, Crown, AlertCircle } from "lucide-react";
 import fpdFullLogo from "../../../imports/FPD_full_logo.png";
 import { supabase } from "../../services/supabase";
 import { getNativeChallengeState, challengeFactor, verifyChallenge, verifyFactor } from "../../services/twoFactor";
+import { adminApi } from "../../services/adminApi";
+
+const ENROL_FIRST =
+  "Two-step verification is required for admins. Sign in to the app, open Account Settings → Two-Step Verification and set it up, then sign in here again.";
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -23,6 +27,25 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   // Non-null only for a phone factor, where the SMS is tied to one challenge.
   const [mfaChallengeId, setMfaChallengeId] = useState<string | null>(null);
+
+  /* System → Settings → Security → "Enforce 2FA": while it is on, an admin
+     with no second factor is refused by every admin route except /me, which
+     says why. Check it here so they get a clear message, not a broken portal. */
+  const finishLogin = async () => {
+    try {
+      const me = await adminApi.get<{ twoFactorEnrollmentRequired?: boolean }>("/me");
+      if (me.twoFactorEnrollmentRequired) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        setError(ENROL_FIRST);
+        return;
+      }
+    } catch {
+      // The portal's own requests report anything else (IP allowlist, etc.).
+    }
+    setLoading(false);
+    onLogin();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,8 +96,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
       return;
     }
 
-    setLoading(false);
-    onLogin();
+    await finishLogin();
   };
 
   const handleMfa = async (e: React.FormEvent) => {
@@ -92,8 +114,7 @@ export function AdminLogin({ onLogin, onBackToSite }: AdminLoginProps) {
       return;
     }
 
-    setLoading(false);
-    onLogin();
+    await finishLogin();
   };
 
   return (

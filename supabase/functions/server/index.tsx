@@ -108,7 +108,12 @@ admin.use("*", auditLog);
 admin.get("/me", async (c) => {
   const me = c.get("admin") as { email: string; role: string; permissions: unknown[] | null };
   const security = await readPlatformSection("security").catch(() => null) as { sessionTimeout?: string } | null;
-  return c.json({ email: me.email, role: me.role, permissions: me.permissions, sessionTimeout: security?.sessionTimeout ?? null });
+  return c.json({
+    email: me.email, role: me.role, permissions: me.permissions, sessionTimeout: security?.sessionTimeout ?? null,
+    // True while "Enforce 2FA" is on and this admin has no factor: every
+    // other /admin route refuses them (middleware/adminAuth.ts).
+    twoFactorEnrollmentRequired: c.get("twoFactorEnrollmentRequired") === true,
+  });
 });
 
 // Analytics: the Overview, Revenue and Storage permissions each open their

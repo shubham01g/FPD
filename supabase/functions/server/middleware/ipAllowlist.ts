@@ -9,20 +9,26 @@ import type { Context, Next } from "npm:hono";
 import { clientIp, ipAllowed, readPlatformSection } from "../lib/platformSettings.ts";
 
 const CACHE_MS = 30_000;
-let cached: { list: string[]; at: number } | null = null;
+let cached: { security: Record<string, unknown>; at: number } | null = null;
 
-async function allowlist(): Promise<string[]> {
-  if (cached && Date.now() - cached.at < CACHE_MS) return cached.list;
+/** The platform.security document, cached for CACHE_MS. requireAdmin reads
+ *  enforce2FA from it too, so one cache serves both checks. */
+export async function securitySettings(): Promise<Record<string, unknown>> {
+  if (cached && Date.now() - cached.at < CACHE_MS) return cached.security;
   const security = await readPlatformSection("security");
-  const list = Array.isArray(security.ipAllowlist)
-    ? security.ipAllowlist.filter((x): x is string => typeof x === "string" && x.trim() !== "")
-    : [];
-  cached = { list, at: Date.now() };
-  return list;
+  cached = { security, at: Date.now() };
+  return security;
 }
 
-/** Called by routes/settings.ts after a save so the new list applies at once
- *  in this instance. */
+async function allowlist(): Promise<string[]> {
+  const security = await securitySettings();
+  return Array.isArray(security.ipAllowlist)
+    ? security.ipAllowlist.filter((x): x is string => typeof x === "string" && x.trim() !== "")
+    : [];
+}
+
+/** Called by routes/settings.ts after a save so the new list (and the 2FA
+ *  enforcement switch) apply at once in this instance. */
 export function clearIpAllowlistCache() {
   cached = null;
 }
