@@ -10,6 +10,7 @@ import { downloadCSV } from "../../utils/exportCsv";
 import type { AdminPageId } from "./AdminLayout";
 import { ROLE_PRESETS, toStoredPermissions, type AdminRole } from "./AdminRoles";
 import { copyToClipboard } from "../../utils/clipboard";
+import { InactivePurge, RotateEncryptionKey, TestAccountCleanup } from "./DangerZoneTools";
 
 /* ─── Shared styles ───────────────────────────────────────────────── */
 const CARD: React.CSSProperties = {
@@ -150,7 +151,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     receiptOCR:           true,
     aiAssistant:          true,
     disasterProtection:   true,
-    idVerification:       false,
+    idVerification:       true,   // same default as services/platform.ts
     betaFeatures:         false,
     publicSignup:         true,
     emailReferrals:       true,
@@ -313,7 +314,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   /* Every export is a real list from an admin endpoint. `only` narrows the
      audit log to feature-flag changes for the Feature Flag History export. */
   const EXPORTS: { label: string; desc: string; path: string; file: string; only?: string }[] = [
-    { label:"All Users & Profiles",    desc:"Full user database including plans and metadata",   path:"/users?pageSize=1000", file:"users.csv" },
+    { label:"All Users & Profiles",    desc:"Full user database including plans and metadata",   path:"/users?pageSize=100", file:"users.csv" },
     { label:"Transaction History",     desc:"All payment records (latest 1,000)",                path:"/analytics/payments",  file:"transactions.csv" },
     { label:"Affiliate & Partner Data", desc:"Referral links, commissions, and payouts",         path:"/affiliates",          file:"affiliates.csv" },
     { label:"Payouts",                  desc:"Affiliate and partner payout records",             path:"/payouts",             file:"payouts.csv" },
@@ -321,9 +322,18 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     { label:"Feature Flag History",     desc:"Log of all flag changes with timestamps",          path:"/audit?pageSize=200",  file:"feature-flag-history.csv", only:"/settings/flags" },
   ];
 
+  /* Paged endpoints (users caps at 100 a page) are read to the end. */
   async function fetchRows(path: string, only?: string): Promise<Record<string, unknown>[]> {
-    const res = await adminApi.get<Record<string, unknown>>(path);
-    const rows = (Object.values(res).find(Array.isArray) as Record<string, unknown>[] | undefined) ?? [];
+    const rows: Record<string, unknown>[] = [];
+    const paged = path.startsWith("/users");
+    for (let page = 1; page <= (paged ? 200 : 1); page++) {
+      const url = paged ? `${path}${path.includes("?") ? "&" : "?"}page=${page}` : path;
+      const res = await adminApi.get<Record<string, unknown>>(url);
+      const batch = (Object.values(res).find(Array.isArray) as Record<string, unknown>[] | undefined) ?? [];
+      rows.push(...batch);
+      const total = Number(res.total ?? 0);
+      if (!paged || batch.length === 0 || rows.length >= total) break;
+    }
     return only ? rows.filter(r => String(r.action ?? "").includes(only)) : rows;
   }
 
@@ -617,7 +627,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
             style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.2)" }}>
             <Info size={14} color="#D9A55E"/>
             <p style={{ color: "#D9A55E", fontSize: 13 }}>
-              Turning a flag off hides that feature for everyone (it can take a page reload) and does not delete any data. ID Verification, Email Referrals and Beta Features are saved only — there is no separate feature for them to switch.
+              Turning a flag off hides that feature for everyone (it can take a page reload) and does not delete any data. ID Verification turns the contact ID-upload step on or off. Email Referrals and Beta Features are not connected to any feature yet, so switching them changes nothing.
             </p>
           </div>
         </div>
@@ -817,18 +827,8 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
             </div>
           </Section>
 
-          <Section title="API Secret Key" desc="Used to sign admin API requests. Rotate immediately if compromised.">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-3"
-              style={{ background: "rgba(159,122,234,0.04)", border: "1px solid rgba(159,122,234,0.1)" }}>
-              <Key size={13} color="#8A9AB8"/>
-              <span style={{ flex: 1, fontSize: 13, color: "#8A9AB8" }}>No admin API key is issued</span>
-            </div>
-            <button onClick={() => toast.error("There is no admin API key to rotate — admin requests are signed by each admin's own login session")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: "rgba(252,129,129,0.07)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.2)", cursor: "pointer" }}>
-              <RefreshCw size={12}/> Rotate Key
-            </button>
-            <StoredOnly>The admin portal does not use a shared secret key. Every admin request is authorised by the signed-in admin's session, so access is removed by suspending that admin, not by rotating a key. Keys for partner integrations are managed under Developer → Enterprise API.</StoredOnly>
+          <Section title="Stored Secrets Encryption Key" desc="Encrypts payment-processor credentials and Enterprise API key secrets at rest.">
+            <RotateEncryptionKey/>
           </Section>
 
           <Section title="Password Policy" desc="Minimum requirements enforced for all admin account passwords.">
@@ -1102,12 +1102,12 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           </Section>
 
           <Section title="Danger Zone" desc="Irreversible operations. Proceed with extreme caution.">
+            <div className="space-y-3" style={{ marginBottom: 12 }}>
+              <TestAccountCleanup/>
+              <InactivePurge/>
+            </div>
             {[
-              { label:"Clear All Demo Data",  desc:"Remove all seeded demo users and transactions",       color:"#D9A55E",
-                run: () => toast.info("There is no demo data to clear — the platform holds real accounts only") },
               { label:"Reset Feature Flags",  desc:"Restore all feature flags to their default values",    color:"#D9A55E", run: resetFlags },
-              { label:"Purge Inactive Users", desc:"Permanently delete accounts inactive for 12+ months",  color:"#FC8181",
-                run: () => toast.error("Action requires secondary confirmation — contact the system owner") },
             ].map(d => (
               <div key={d.label} className="flex items-center justify-between gap-4 py-3"
                 style={{ borderBottom: "1px solid rgba(252,129,129,0.08)" }}>

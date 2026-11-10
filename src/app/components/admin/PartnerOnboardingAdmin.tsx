@@ -7,8 +7,8 @@ import {
 import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
-  getPackages, updatePackage, createPackage,
-  getSales, getProcessors, updateProcessor, calcMonthlyCharge,
+  getAdminPackages, updatePackage, createPackage,
+  getSales, updateSaleStatus, getProcessors, updateProcessor, calcMonthlyCharge,
 } from "../../services/wlPackages";
 import type { WLPackage, WLSale, PaymentProcessor, BillingModel } from "../../services/wlPackages";
 import { FPD_EMAIL } from "../../utils/fpdEmails";
@@ -393,7 +393,7 @@ export function PartnerOnboardingAdmin() {
   const [sendPkgId, setSendPkgId] = useState("agency");
 
   async function reload() {
-    setPackages(await getPackages());
+    setPackages(await getAdminPackages());
     setSales(await getSales());
     await reloadProcessors();
   }
@@ -531,9 +531,13 @@ export function PartnerOnboardingAdmin() {
                         <Edit2 size={11}/> Edit
                       </button>
                       <button onClick={async () => {
-                        await updatePackage(pkg.id, { active:!pkg.active });
-                        reload();
-                        toast.success(pkg.active ? "Package deactivated" : "Package activated — live on website");
+                        try {
+                          await updatePackage(pkg.id, { active:!pkg.active });
+                          await reload();
+                          toast.success(pkg.active ? "Package deactivated — hidden from the website" : "Package activated — live on website");
+                        } catch (err) {
+                          toast.error(`Could not update the package: ${(err as Error).message}`);
+                        }
                       }} className="px-3 py-1.5 rounded-xl text-xs font-semibold"
                         style={{ background:pkg.active?"rgba(229,62,62,0.08)":"rgba(72,187,120,0.08)", color:pkg.active?"#FC8181":"#D99A6B" }}>
                         {pkg.active ? "Deactivate" : "Activate"}
@@ -630,10 +634,21 @@ export function PartnerOnboardingAdmin() {
                         <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:14 }}>{s.processor}</td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-bold"
-                            style={{ background:`${statusColor}18`, color:statusColor, ...MONO }}>
-                            {s.status.toUpperCase()}
-                          </span>
+                          <select value={s.status} aria-label={`Status of ${s.org}`}
+                            onChange={async e => {
+                              const next = e.target.value as typeof s.status;
+                              try {
+                                await updateSaleStatus(s.id, next);
+                                setSales(await getSales());
+                                toast.success(`${s.org} is now ${next}`);
+                              } catch (err) {
+                                toast.error(`Could not update the sale: ${(err as Error).message}`);
+                              }
+                            }}
+                            className="px-2 py-0.5 rounded text-xs font-bold"
+                            style={{ background:`${statusColor}18`, color:statusColor, border:`1px solid ${statusColor}40`, ...MONO }}>
+                            {(["pending", "active", "suspended", "cancelled"] as const).map(st => <option key={st} value={st}>{st.toUpperCase()}</option>)}
+                          </select>
                         </td>
                       </tr>
                     );

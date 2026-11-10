@@ -171,8 +171,10 @@ const PROCESSOR_CATALOG: { id: string; name: string; logo: string; fields: strin
 type Listener = (packages: WLPackage[]) => void;
 const _listeners: Set<Listener> = new Set();
 
+/* Public listeners (landing page, onboarding) only ever see active tiers,
+   even right after an admin write in this browser. */
 function notify() {
-  _listeners.forEach(fn => fn([..._packages]));
+  _listeners.forEach(fn => fn(_packages.filter(p => p.active)));
 }
 
 /* ── API methods ────────────────────────────────────────────────────── */
@@ -180,7 +182,7 @@ function notify() {
 /** Subscribe to package updates — fetches once on subscribe, then re-emits after every write below. */
 export function subscribeToPackages(fn: Listener): () => void {
   _listeners.add(fn);
-  fn([..._packages]); // emit whatever's cached immediately, then refresh
+  fn(_packages.filter(p => p.active)); // emit whatever's cached immediately, then refresh
   getPackages().then(notify).catch(() => {});
   return () => _listeners.delete(fn);
 }
@@ -189,6 +191,12 @@ export async function getPackages(): Promise<WLPackage[]> {
   const res = await publicApi.get<{ packages: DBPackage[] }>("/wl-packages");
   _packages = res.packages.map(packageFromDB);
   return [..._packages];
+}
+
+/** Admin view: every tier, including deactivated ones, so they can be reactivated. */
+export async function getAdminPackages(): Promise<WLPackage[]> {
+  const res = await adminApi.get<{ packages: DBPackage[] }>("/white-label/packages");
+  return res.packages.map(packageFromDB);
 }
 
 export async function updatePackage(id: string, updates: Partial<WLPackage>): Promise<WLPackage> {
@@ -217,6 +225,11 @@ export async function deletePackage(id: string): Promise<void> {
 export async function getSales(): Promise<WLSale[]> {
   const res = await adminApi.get<{ sales: DBSale[] }>("/white-label/sales");
   return res.sales.map(saleFromDB);
+}
+
+/** Admin: move a sale on (pending → active once provisioned, suspended, cancelled). */
+export async function updateSaleStatus(id: string, status: WLSale["status"]): Promise<void> {
+  await adminApi.patch(`/white-label/sales/${id}`, { status });
 }
 
 /** Records a new WL application submitted through the public onboarding wizard. Starts "pending" until an admin provisions the instance. */

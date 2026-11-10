@@ -46,13 +46,13 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<StaffRole>("junior_concierge");
   const [sending, setSending] = useState(false);
-  const [created, setCreated] = useState<{ employee: ConciergeEmployee; tempPassword: string } | null>(null);
+  const [created, setCreated] = useState<{ employee: ConciergeEmployee; tempPassword: string; emailed: boolean } | null>(null);
 
   async function send() {
     if (!name.trim() || !email.trim()) { toast.error("Name and email are required"); return; }
     setSending(true);
     try {
-      const res = await adminApi.post<{ employee: ConciergeEmployee; tempPassword: string }>("/concierge", { name, email, phone: phone || undefined, role });
+      const res = await adminApi.post<{ employee: ConciergeEmployee; tempPassword: string; emailed: boolean }>("/concierge", { name, email, phone: phone || undefined, role });
       setCreated(res);
       onInvited();
     } catch (err) {
@@ -62,7 +62,8 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
     }
   }
 
-  const portalLink = created ? `https://finalpassdown.com/concierge?token=${created.employee.invite_token}` : null;
+  // Staff sign in at /concierge/login on this same site.
+  const portalLink = created ? `${window.location.origin}/concierge/login` : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(8px)" }}>
@@ -80,7 +81,9 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
             <div className="flex items-start gap-2 p-3 rounded-2xl" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.2)" }}>
               <Shield size={12} color="#FFFFFF" style={{ marginTop:1 }}/>
               <p style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.6 }}>
-                No email was sent — this app has no email delivery set up. Copy these credentials and the portal link, and send them to {created.employee.name} yourself. The temporary password is shown only once.
+                {created.emailed
+                  ? `The sign-in details were emailed to ${created.employee.email}. They're also shown below once, in case the email doesn't arrive.`
+                  : `The invitation email could not be sent. Copy these credentials and the portal link and send them to ${created.employee.name} yourself. The temporary password is shown only once.`}
               </p>
             </div>
             <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
@@ -148,7 +151,7 @@ function EmployeeCard({ emp, clients, onUpdate }: { emp: ConciergeEmployee; clie
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const roleColor = ROLE_COLORS[emp.role];
-  const portalLink = `https://finalpassdown.com/concierge?token=${emp.invite_token}`;
+  const portalLink = `${window.location.origin}/concierge/login`;
   const assigned = clients.filter(c => c.concierge_employees?.id === emp.id);
   const unassigned = clients.filter(c => !c.concierge_employees || c.concierge_employees.id === emp.id);
 
@@ -180,9 +183,11 @@ function EmployeeCard({ emp, clients, onUpdate }: { emp: ConciergeEmployee; clie
   async function resetPassword() {
     setBusy(true);
     try {
-      const res = await adminApi.post<{ tempPassword: string }>(`/concierge/${emp.id}/reset-password`);
+      const res = await adminApi.post<{ tempPassword: string; emailed: boolean }>(`/concierge/${emp.id}/reset-password`);
       copyToClipboard(`Login: ${emp.email}\nPassword: ${res.tempPassword}\nPortal: ${portalLink}`);
-      toast.success("New password generated and copied to clipboard — this is the only time it's shown.");
+      toast.success(res.emailed
+        ? `New password emailed to ${emp.email} (also copied to your clipboard).`
+        : "New password copied to your clipboard — the email could not be sent, so pass it on yourself. It is shown only this once.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to reset password");
     } finally {

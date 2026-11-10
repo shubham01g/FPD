@@ -83,8 +83,8 @@ export const billing = {
   continuationFeeCheckout: (payerType: "account_owner" | "legacy_contact" = "account_owner") =>
     post<{ url: string }>("/checkout/one-time", { product: "continuation_fee", payerType }),
   /** Partner Program setup ($599) — migration 053. */
-  partnerCheckout: (org: { name: string; type: string; contact: string; email: string; phone: string; website: string }) =>
-    post<{ url: string }>("/checkout/one-time", { product: "partner_setup", org }),
+  partnerCheckout: (org: { name: string; type: string; contact: string; email: string; phone: string; website: string }, inviteCode?: string) =>
+    post<{ url: string }>("/checkout/one-time", { product: "partner_setup", org, inviteCode }),
   /** White Label setup fee for a package — migration 053. */
   whiteLabelCheckout: (packageId: string, org: { name: string; contact: string; email: string }, subdomain: string) =>
     post<{ url: string }>("/checkout/one-time", { product: "wl_setup", packageId, org, subdomain }),

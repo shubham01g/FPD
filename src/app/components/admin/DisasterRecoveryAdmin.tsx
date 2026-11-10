@@ -46,12 +46,36 @@ interface AuditEntry {
 
 type ModalStep = "acknowledge" | "mfa" | "complete";
 
-/* The bypass roster is every real account from GET /admin/users. Live bypass
-   state lives in disaster_recovery_state and is only mutated through the
-   service-role backend, so a freshly-loaded row always starts at "none" and
-   flips locally once a grant/revoke call succeeds. */
+/* The bypass roster is every real account from GET /admin/users (paged).
+   Bypass state comes from disaster_recovery_state via GET
+   /admin/disaster-recovery and is only changed through the service-role
+   backend; the history is the audit log's disaster-recovery entries. */
 interface DBUserRow {
   id: string; email: string; full_name: string; plan: string;
+}
+
+interface DBStateRow {
+  user_id: string; addon_active: boolean; bypass_granted: boolean;
+  bypass_granted_at: string | null; bypass_expires_at: string | null; bypass_reason: string | null;
+}
+interface DBAuditRow {
+  id: string; created_at: string; actor_email: string | null; action: string; target_id: string | null;
+}
+
+/* Status from the saved row: a granted window that has run out is "expired". */
+function withState(u: UserBypass, s: DBStateRow | undefined, grantedBy?: string): UserBypass {
+  if (!s || !s.bypass_granted || !s.bypass_expires_at) {
+    return s?.bypass_granted_at ? { ...u, status: "expired" } : u;
+  }
+  const expires = new Date(s.bypass_expires_at).getTime();
+  return {
+    ...u,
+    status: expires > Date.now() ? "active" : "expired",
+    activatedAt: s.bypass_granted_at ? new Date(s.bypass_granted_at).getTime() : null,
+    expiresAt: expires,
+    activatedBy: grantedBy ?? "an administrator",
+    reason: s.bypass_reason,
+  };
 }
 
 function rowToBypass(u: DBUserRow): UserBypass {
@@ -107,13 +131,15 @@ function GrantModal({
 }: {
   user: UserBypass;
   onClose: () => void;
-  onGrant: (userId: string, reason: string) => void;
+  /** Resolves to whether the holder was emailed, or null if the grant failed. */
+  onGrant: (userId: string, reason: string, notes: string) => Promise<boolean | null>;
 }) {
   const [step, setStep] = useState<ModalStep>("acknowledge");
   const [reason, setReason] = useState("natural_disaster");
   const [mfaCode, setMfaCode] = useState("");
   const [notes, setNotes] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [notified, setNotified] = useState(false);
 
   // The code is checked for real against the admin's own second factor.
   // Before, any six characters opened a 48-hour bypass.
@@ -170,10 +196,12 @@ function GrantModal({
       toast.error(err instanceof Error ? err.message : "That code isn't right");
       return;
     }
-    setBusy(false);
-    setStep("complete");
     const reasonLabel = REASON_CODES.find(r => r.id === reason)?.label ?? reason;
-    onGrant(user.userId, reasonLabel);
+    const result = await onGrant(user.userId, reasonLabel, notes);
+    setBusy(false);
+    if (result === null) return;   // the error was shown; stay on this step
+    setNotified(result);
+    setStep("complete");
   };
 
   return (
@@ -323,7 +351,7 @@ function GrantModal({
                   autoFocus
                 />
                 <p style={{ fontSize:12, color:"#8A9AB8", textAlign:"center", marginTop:6 }}>
-                  Demo: any 6 digits
+                  The code from your own two-step verification
                 </p>
               </div>
 
@@ -357,12 +385,12 @@ function GrantModal({
                   Bypass Activated
                 </div>
                 <p style={{ fontSize:13, color:"#A3ADC9" }}>
-                  {user.userName} has been notified and now has 48 hours of emergency export access.
-                  This action has been logged.
+                  {user.userName} now has 48 hours of emergency export access.
+                  {notified ? " They were emailed about it." : " The notification email could not be sent — tell them directly."} This action has been logged.
                 </p>
               </div>
               <div style={{ display:"flex", gap:8, ...MONO }}>
-                {["48h window", "Notified ✓", "Audit logged"].map(badge => (
+                {["48h window", notified ? "Emailed ✓" : "Not emailed", "Audit logged"].map(badge => (
                   <span key={badge} style={{ fontSize:11, padding:"4px 10px", borderRadius:6,
                     background:"rgba(72,187,120,0.12)", color:"#48BB78", border:"1px solid rgba(72,187,120,0.3)" }}>
                     {badge}
@@ -390,25 +418,45 @@ export function DisasterRecoveryAdmin() {
   const { authUser } = useAuth();
   const actingAdmin = authUser?.email ?? "unknown admin";
 
-  const { data: usersData, loading: usersLoading, error: usersError } = useAdminFetch(
-    () => adminApi.get<{ users: DBUserRow[] }>("/users?pageSize=200"),
+  // Every account (the users endpoint pages at 100), every saved add-on /
+  // bypass row, and the grant/revoke history from the real audit log.
+  const { data: usersData, loading: usersLoading, error: usersError, refetch } = useAdminFetch(
+    async () => {
+      const rows: DBUserRow[] = [];
+      for (let page = 1; page <= 50; page++) {
+        const res = await adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?pageSize=100&page=${page}`);
+        rows.push(...res.users);
+        if (rows.length >= res.total || res.users.length === 0) break;
+      }
+      const [{ states }, { logs }] = await Promise.all([
+        adminApi.get<{ states: DBStateRow[] }>("/disaster-recovery"),
+        adminApi.get<{ logs: DBAuditRow[] }>("/audit?targetType=disaster-recovery&pageSize=200"),
+      ]);
+      return { users: rows, states, logs };
+    },
     [],
     ADMIN_LIVE_POLL_MS,
   );
 
   const [users, setUsers] = useState<UserBypass[]>([]);
-  // The audit trail starts empty because no bypass-history table exists yet;
-  // it accumulates this session's own grants and revokes only.
   const [audit, setAudit] = useState<AuditEntry[]>([]);
 
   useEffect(() => {
-    if (!usersData?.users) return;
-    // Re-seed from the server, but keep any bypass this session already granted
-    // so a background refetch cannot blank out an open window.
-    setUsers(prev => {
-      const byId = new Map(prev.map(u => [u.userId, u]));
-      return usersData.users.map(row => byId.get(row.id) ?? rowToBypass(row));
-    });
+    if (!usersData) return;
+    const stateById = new Map(usersData.states.map(s => [s.user_id, s]));
+    const nameById = new Map(usersData.users.map(u => [u.id, u.full_name || u.email]));
+    setUsers(usersData.users.map(row => withState(rowToBypass(row), stateById.get(row.id))));
+    setAudit(usersData.logs.map(l => {
+      const revoke = l.action.startsWith("DELETE");
+      return {
+        id: l.id.slice(0, 8).toUpperCase(),
+        ts: new Date(l.created_at).getTime(),
+        admin: l.actor_email ?? "admin",
+        action: revoke ? "Bypass revoked" : "Bypass granted / updated",
+        target: `${l.target_id ?? "?"} (${nameById.get(l.target_id ?? "") ?? "deleted account"})`,
+        severity: revoke ? "warning" : "critical",
+      } as AuditEntry;
+    }));
   }, [usersData]);
   const [grantTarget, setGrantTarget] = useState<UserBypass | null>(null);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
@@ -416,42 +464,29 @@ export function DisasterRecoveryAdmin() {
   const [filterStatus, setFilterStatus] = useState<"all"|BypassStatus>("all");
   const [showAudit, setShowAudit] = useState(false);
 
-  const handleGrant = async (userId: string, reason: string) => {
-    const now = Date.now();
-    const expiresAt = now + 48 * 3600_000;
+  const handleGrant = async (userId: string, reason: string, notes: string): Promise<boolean | null> => {
     const targetUser = users.find(u => u.userId === userId);
-
     // Persist first: if the backend refuses (restricted role, or a row that is
     // not a real account) the window must not appear open in the console.
     try {
-      await adminApi.put(`/disaster-recovery/${userId}`, { grant_bypass: true, reason });
+      const res = await adminApi.put<{ state: DBStateRow; notified: boolean }>(`/disaster-recovery/${userId}`, { grant_bypass: true, reason, notes });
+      setUsers(us => us.map(u => u.userId === userId ? withState(u, res.state, actingAdmin) : u));
+      toast.success(`Emergency bypass activated for ${targetUser?.userName}`);
+      refetch();
+      return res.notified;
     } catch (e) {
       const msg = e instanceof AdminApiError ? e.message : "Could not reach the admin backend";
       toast.error(`Bypass not granted for ${targetUser?.userName ?? userId}: ${msg}`);
-      return;
+      return null;
     }
-
-    setUsers(us => us.map(u =>
-      u.userId === userId
-        ? { ...u, status:"active", activatedAt:now, expiresAt, activatedBy:actingAdmin, reason }
-        : u
-    ));
-
-    setAudit(a => [{
-      id: `DR-${Math.floor(Math.random()*9000)+1000}`,
-      ts: now, admin:actingAdmin, action:"Bypass granted",
-      target:`${targetUser?.userId} (${targetUser?.userName})`, severity:"critical"
-    }, ...a]);
-
-    toast.success(`Emergency bypass activated for ${targetUser?.userName}`);
-    setGrantTarget(null);
   };
 
   const handleRevoke = async (userId: string) => {
     const targetUser = users.find(u => u.userId === userId);
 
+    let notified = false;
     try {
-      await adminApi.del(`/disaster-recovery/${userId}`);
+      notified = (await adminApi.del<{ notified: boolean }>(`/disaster-recovery/${userId}`)).notified;
     } catch (e) {
       const msg = e instanceof AdminApiError ? e.message : "Could not reach the admin backend";
       toast.error(`Bypass not revoked for ${targetUser?.userName ?? userId}: ${msg}`);
@@ -463,14 +498,8 @@ export function DisasterRecoveryAdmin() {
         ? { ...u, status:"expired", activatedAt:null, expiresAt:null, activatedBy:null, reason:null }
         : u
     ));
-
-    setAudit(a => [{
-      id: `DR-${Math.floor(Math.random()*9000)+1000}`,
-      ts: Date.now(), admin:actingAdmin, action:"Bypass revoked",
-      target:`${targetUser?.userId} (${targetUser?.userName})`, severity:"warning"
-    }, ...a]);
-
-    toast.success("Bypass revoked — user notified");
+    refetch();
+    toast.success(notified ? "Bypass revoked — the user was emailed" : "Bypass revoked (the notification email could not be sent)");
   };
 
   const filtered = users.filter(u => {
@@ -716,8 +745,8 @@ export function DisasterRecoveryAdmin() {
                         background:"rgba(246,173,85,0.1)", borderRadius:8, border:"1px solid rgba(246,173,85,0.3)" }}>
                         <Zap size={13} color="#F6AD55" />
                         <span style={{ fontSize:12, color:"#EAC793" }}>
-                          User has been notified. They can access the Emergency Recovery dashboard in their vault.
-                          Revoking bypass will immediately lock access and send a notification.
+                          They can open the Emergency Recovery dashboard in their vault until the window ends.
+                          Revoking closes it immediately and emails them.
                         </span>
                       </div>
                     )}

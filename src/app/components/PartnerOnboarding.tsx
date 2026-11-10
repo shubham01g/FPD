@@ -80,11 +80,13 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
      partner record once Stripe confirms; the dashboard then shows it.
      Paying needs a (free) Final Pass Down account to attach it to. */
   const submitPayment = async () => {
-    if (!session) { navigate("/login?next=/partner"); return; }
+    if (!session) { navigate(`/login?next=${encodeURIComponent("/partner" + window.location.search)}`); return; }
     if (org.name.trim().length < 2) { toast.error("Enter your organization's name"); setStep("details"); return; }
     setPaying(true);
     try {
-      const { url } = await billing.partnerCheckout(org);
+      // An admin invite link (/partner?ref=<code>) activates that partner record.
+      const inviteCode = new URLSearchParams(window.location.search).get("ref") ?? undefined;
+      const { url } = await billing.partnerCheckout(org, inviteCode);
       window.location.href = url;
     } catch (err) {
       setPaying(false);

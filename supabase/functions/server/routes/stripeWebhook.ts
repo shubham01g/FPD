@@ -209,6 +209,22 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
   if (purchase === "partner_setup") {
     const { data: existing } = await db.from("partners").select("id").eq("stripe_checkout_session_id", session.id).maybeSingle();
     if (existing) return;
+    // Paying through an admin's invite link activates that invited record.
+    if (m.inviteCode) {
+      const { data: invited } = await db.from("partners")
+        .update({
+          user_id: userId, organization_name: m.orgName || "Partner", organization_type: m.orgType || "other",
+          contact_name: m.contactName || "", contact_email: m.contactEmail || "", contact_phone: m.contactPhone || null,
+          status: "active", stripe_checkout_session_id: session.id,
+        })
+        .eq("partner_code", m.inviteCode).eq("status", "invited").is("stripe_checkout_session_id", null)
+        .select("partner_code").maybeSingle();
+      if (invited) {
+        await notifyTeam(`Partner activated: ${m.orgName}`, [`${m.orgName} paid the $${paid.toFixed(2)} Partner Program setup fee through their invite link.`,
+          `Contact: ${m.contactName} <${m.contactEmail}>. Partner code ${invited.partner_code}.`], "partnerships@finalpassdown.com");
+        return;
+      }
+    }
     let code = "";
     for (let i = 0; i < 5 && !code; i++) {
       const candidate = `P${Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[b % 31]).join("")}`;

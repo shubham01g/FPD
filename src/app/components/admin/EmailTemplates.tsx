@@ -17,7 +17,13 @@ interface EmailTemplate {
   trigger_event: string;
   variables: string[];
   html: string;
+  is_active: boolean;
 }
+
+/* The standard email: {{subject}} / {{content}} stand for the subject and
+   body the server would send without a custom template (migration 052). */
+const STANDARD_SUBJECT = "{{subject}}";
+const STANDARD_HTML = "{{content}}";
 
 const categories = ["All","Account","Storage","Contacts","Subscriptions","Affiliate","Partnership","Security","White Label"];
 
@@ -32,8 +38,14 @@ export function EmailTemplates() {
   const [saved, setSaved] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { data, loading, error } = useAdminFetch(
+  const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ templates: EmailTemplate[] }>("/email-templates"),
+    [],
+  );
+  // Whether the server can send mail at all (SendGrid key set). Admins
+  // without the admin_team module can't read it; the badge is then hidden.
+  const { data: emailStatus } = useAdminFetch(
+    () => adminApi.get<{ configured: boolean; provider: string | null; from: string }>("/settings/email-status").catch(() => null),
     [],
   );
 
@@ -74,12 +86,32 @@ export function EmailTemplates() {
     }
   };
 
+  /* Puts the standard email back in the editor; Save makes it live. */
   const handleReset = () => {
     if (!selected) return;
-    setEditSubject(selected.subject);
-    setEditBody(selected.html);
-    setEditing(false);
-    toast.info("Template reset to default");
+    setEditSubject(STANDARD_SUBJECT);
+    setEditBody(STANDARD_HTML);
+    toast.info("Standard email restored in the editor — Save to apply it");
+  };
+
+  const toggleActive = async () => {
+    if (!selected) return;
+    const next = !selected.is_active;
+    try {
+      await adminApi.put(`/email-templates/${selected.id}`, { is_active: next });
+      setSelected({ ...selected, is_active: next });
+      refetch();
+      toast.success(next ? `"${selected.name}" is on — emails use this template` : `"${selected.name}" is off — emails use the standard text`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not change the template");
+    }
+  };
+
+  /* Clicking a variable puts it into the body (or copies it when not editing). */
+  const insertVariable = (v: string) => {
+    const token = v.startsWith("{{") ? v : `{{${v}}}`;
+    if (editing) { setEditBody(b => `${b}${token}`); toast.success(`${token} added to the body`); }
+    else { copyToClipboard(token); toast.success(`${token} copied`); }
   };
 
   const filtered = templates.filter(t =>
@@ -142,10 +174,14 @@ export function EmailTemplates() {
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "#E8EDF5" }}>Email Template Manager</h1>
           <p style={{ color: "#8A9AB8", fontSize: 16, marginTop: 4 }}>{templates.length} templates across {categories.length - 1} categories. Edits apply to the emails sent from now on: in the subject, {"{{subject}}"} is the standard subject; in the body, {"{{content}}"} is the standard message (keep it, or the standard body is used). Turn a template off to go back to the standard email.</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8A9AB8" }} />
-          <span style={{ color: "#8A9AB8", fontSize: 14, ...MONO }}>NO EMAIL PROVIDER CONNECTED</span>
-        </div>
+        {emailStatus && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={GLASS} title={emailStatus.configured ? `Sending from ${emailStatus.from}` : undefined}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: emailStatus.configured ? "#48BB78" : "#FC8181" }} />
+            <span style={{ color: emailStatus.configured ? "#48BB78" : "#FC8181", fontSize: 14, ...MONO }}>
+              {emailStatus.configured ? `${(emailStatus.provider ?? "EMAIL").toUpperCase()} CONNECTED` : "NO EMAIL PROVIDER CONNECTED"}
+            </span>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -209,6 +245,12 @@ export function EmailTemplates() {
                 <div style={{ color: "#8A9AB8", fontSize: 14, marginTop: 2 }}>Trigger: {selected.trigger_event}</div>
               </div>
               <div className="flex items-center gap-2">
+                <button onClick={() => void toggleActive()} title="When off, this email uses the standard text"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
+                  style={{ background: selected.is_active ? "rgba(72,187,120,0.1)" : "rgba(252,129,129,0.08)", color: selected.is_active ? "#48BB78" : "#FC8181",
+                    border: `1px solid ${selected.is_active ? "rgba(72,187,120,0.3)" : "rgba(252,129,129,0.25)"}` }}>
+                  {selected.is_active ? "On" : "Off"}
+                </button>
                 <button onClick={() => setPreviewMode(!previewMode)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm"
                   style={{ background: previewMode ? "rgba(91,110,225,0.15)" : "rgba(91,110,225,0.06)", color: previewMode ? "#6E90C9" : "#8A9AB8", border: `1px solid ${previewMode ? "rgba(91,110,225,0.4)" : "rgba(91,110,225,0.15)"}` }}>
@@ -228,7 +270,7 @@ export function EmailTemplates() {
                     </button>
                     <button onClick={handleReset} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm disabled:opacity-50"
                       style={{ background: "rgba(246,173,85,0.08)", color: "#F6AD55", border: "1px solid rgba(246,173,85,0.2)" }}>
-                      <RefreshCw size={12} /> Reset
+                      <RefreshCw size={12} /> Reset to standard
                     </button>
                   </>
                 )}
@@ -241,7 +283,7 @@ export function EmailTemplates() {
             <div className="px-5 py-2 border-b flex flex-wrap gap-2" style={{ borderColor: "rgba(91,110,225,0.06)", background: "rgba(91,110,225,0.04)" }}>
               <span style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, alignSelf: "center" }}>VARIABLES:</span>
               {selected.variables.map(v => (
-                <span key={v} className="px-2 py-0.5 rounded cursor-pointer" onClick={() => toast.info(`Variable: ${v}`)}
+                <span key={v} className="px-2 py-0.5 rounded cursor-pointer" onClick={() => insertVariable(v)} title={editing ? "Add to the body" : "Copy"}
                   style={{ background: "rgba(91,110,225,0.08)", color: "#6E90C9", fontSize: 12.5, ...MONO }}>
                   {v}
                 </span>

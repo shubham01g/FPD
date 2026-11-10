@@ -199,9 +199,11 @@ function ClientCard({ client, onChanged }: { client: WgClientRow; onChanged: () 
 
   const signed = client.waiver?.status === "signed";
   const sessions = [...(client.wg_sessions ?? [])].sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at));
-  const run = async (fn: () => Promise<unknown>, ok?: string) => {
+  /* `ok` is the success message, or a function of the server's answer (so a
+     toast can say "emailed" only when the email really went out). */
+  const run = async <R,>(fn: () => Promise<R>, ok?: string | ((r: R) => string)) => {
     setBusy(true);
-    try { await fn(); if (ok) toast.success(ok); onChanged(); } catch (err) { toast.error((err as Error).message); }
+    try { const r = await fn(); if (ok) toast.success(typeof ok === "function" ? ok(r) : ok); onChanged(); } catch (err) { toast.error((err as Error).message); }
     setBusy(false);
   };
 
@@ -275,7 +277,7 @@ function ClientCard({ client, onChanged }: { client: WgClientRow; onChanged: () 
                       <StartButton session={s} client={client}/>
                       <button onClick={() => setModal({ kind: "complete", s })} style={{ ...BTN, padding:"5px 10px", background:"rgba(72,187,120,0.12)", color:"#7FD6A0" }}><CheckCircle size={11}/> Complete</button>
                       <button onClick={() => setModal({ kind: "move", s })} style={{ ...BTN, padding:"5px 10px", background:"rgba(255,255,255,0.05)", color:"#C7D0E3" }}>Reschedule</button>
-                      <button onClick={() => run(() => conciergeApi.updateSession(s.id, { status: "cancelled" }), "Cancelled — client emailed")} style={{ ...BTN, padding:"5px 10px", background:"rgba(252,129,129,0.08)", color:"#FC8181" }}>Cancel</button>
+                      <button onClick={() => run(() => conciergeApi.updateSession(s.id, { status: "cancelled" }), (r: { emailed?: boolean }) => r?.emailed ? "Cancelled — client emailed" : "Cancelled (the email to the client could not be sent)")} style={{ ...BTN, padding:"5px 10px", background:"rgba(252,129,129,0.08)", color:"#FC8181" }}>Cancel</button>
                     </div>
                   )}
                 </div>

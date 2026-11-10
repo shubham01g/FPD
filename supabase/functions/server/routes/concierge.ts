@@ -2,12 +2,40 @@ import { Hono } from "npm:hono";
 import bcrypt from "npm:bcryptjs@2.4.3";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
+import { EMAIL_CONFIGURED, MAILBOX, linkOrigin, noticeEmail, sendEmail } from "../lib/email.ts";
+
+/* Emails a staff member their sign-in. Returns whether it went out, so the
+   admin screen only says "emailed" when it really was. */
+async function emailCredentials(origin: string | undefined, to: { name: string; email: string }, tempPassword: string, reset: boolean): Promise<boolean> {
+  if (!EMAIL_CONFIGURED) return false;
+  try {
+    await sendEmail({
+      to: to.email,
+      ...noticeEmail({
+        name: to.name,
+        heading: reset ? "Your Concierge Portal password was reset" : "You're invited to the Final Pass Down Concierge Portal",
+        paragraphs: [
+          reset ? "An administrator issued you a new temporary password." : "An administrator added you as White Glove concierge staff.",
+          `Sign in with this email address and the temporary password: ${tempPassword}`,
+          "Keep it private. If you lose it, ask your administrator to issue a new one.",
+        ],
+        button: { href: `${linkOrigin(origin)}/concierge/login`, label: "Open the Concierge Portal" },
+        replyTo: MAILBOX.support,
+        category: "concierge-staff",
+      }),
+    });
+    return true;
+  } catch (err) {
+    console.error("concierge credentials email failed:", err);
+    return false;
+  }
+}
 
 const concierge = new Hono();
 
 function genTempPassword(): string {
-  // Readable-enough one-time credential the admin hands to the employee
-  // themselves — there's no email delivery wired up to send it automatically.
+  // Readable-enough one-time credential, emailed to the employee (and shown
+  // once to the admin as a fallback if the email can't be sent).
   // crypto.getRandomValues, not Math.random: 12 characters from a 32-letter
   // alphabet without look-alikes (0/O, 1/I/L) = 60 bits.
   const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -75,7 +103,8 @@ concierge.post("/", async (c) => {
     return c.json({ error: error.message }, 500);
   }
 
-  return c.json({ employee: data, tempPassword }, 201);
+  const emailed = await emailCredentials(c.req.header("origin"), { name, email }, tempPassword, false);
+  return c.json({ employee: data, tempPassword, emailed }, 201);
 });
 
 // PATCH /admin/concierge/:id — role/status
@@ -121,7 +150,7 @@ concierge.post("/:id/reset-password", async (c) => {
 
   const { data: row, error: lookupError } = await db
     .from("concierge_employees")
-    .select("id, user_id")
+    .select("id, user_id, name, email")
     .eq("id", id)
     .maybeSingle();
 
@@ -140,7 +169,8 @@ concierge.post("/:id/reset-password", async (c) => {
     if (error) return c.json({ error: error.message }, 500);
   }
 
-  return c.json({ tempPassword });
+  const emailed = await emailCredentials(c.req.header("origin"), { name: row.name, email: row.email }, tempPassword, true);
+  return c.json({ tempPassword, emailed });
 });
 
 export default concierge;

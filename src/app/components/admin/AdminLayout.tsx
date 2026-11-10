@@ -88,11 +88,13 @@ const DANGER   = "#FC8181";
 interface AdminLayoutProps {
   currentPage: AdminPageId;
   onNavigate: (page: AdminPageId) => void;
+  /** Screens the signed-in admin's role can open; others are not listed. */
+  canOpen?: (page: AdminPageId) => boolean;
   onSignOut: () => void;
   children: React.ReactNode;
 }
 
-export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: AdminLayoutProps) {
+export function AdminLayout({ currentPage, onNavigate, canOpen = () => true, onSignOut, children }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { authUser } = useAuth();
   const adminEmail = authUser?.email ?? "";
@@ -180,7 +182,7 @@ export function AdminLayout({ currentPage, onNavigate, onSignOut, children }: Ad
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto fpd-scroll" style={{ padding: collapsed ? "8px 12px" : "6px 12px 12px" }}>
-          {adminGroups.map(group => (
+          {adminGroups.map(g => ({ ...g, items: g.items.filter(i => canOpen(i.id)) })).filter(g => g.items.length > 0).map(group => (
             <div key={group.label} style={{ marginBottom: collapsed ? 6 : 14 }}>
               {!collapsed && (
                 <div style={{ fontSize: 13, fontWeight: 600, color: FAINT, padding: "0 11px 8px" }}>

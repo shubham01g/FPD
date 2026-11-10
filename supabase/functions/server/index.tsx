@@ -1,4 +1,5 @@
 import { Hono } from "npm:hono";
+import type { Context, Next } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { isOurOrigin } from "./lib/origins.ts";
@@ -7,7 +8,8 @@ import * as kv from "./kv_store.tsx";
 import { requireAdmin } from "./middleware/adminAuth.ts";
 import { requireUser } from "./middleware/userAuth.ts";
 import { auditLog } from "./middleware/auditLog.ts";
-import { requireModulePermission } from "./middleware/modulePermission.ts";
+import { requireAnyModulePermission, requireModulePermission } from "./middleware/modulePermission.ts";
+import { readPlatformSection } from "./lib/platformSettings.ts";
 import { ipAllowlist } from "./middleware/ipAllowlist.ts";
 
 import analytics from "./routes/analytics.ts";
@@ -101,8 +103,22 @@ admin.use("*", auditLog);
 // routers already hold their handlers by the time this file runs, and a
 // middleware added after a handler never runs for it — which left every
 // role able to call every admin route.
-admin.use("/analytics", requireModulePermission("analytics"));
-admin.use("/analytics/*", requireModulePermission("analytics"));
+// GET /admin/me — who is signed in and what they may open (the portal hides
+// screens from it), plus the idle timeout every admin is held to.
+admin.get("/me", async (c) => {
+  const me = c.get("admin") as { email: string; role: string; permissions: unknown[] | null };
+  const security = await readPlatformSection("security").catch(() => null) as { sessionTimeout?: string } | null;
+  return c.json({ email: me.email, role: me.role, permissions: me.permissions, sessionTimeout: security?.sessionTimeout ?? null });
+});
+
+// Analytics: the Overview, Revenue and Storage permissions each open their
+// own part; "analytics" opens all of it.
+admin.use("/analytics/overview", requireAnyModulePermission(["analytics", "overview"]));
+admin.use("/analytics/revenue-trend", requireAnyModulePermission(["analytics", "revenue"]));
+admin.use("/analytics/payments", requireAnyModulePermission(["analytics", "revenue"]));
+admin.use("/analytics/storage", requireAnyModulePermission(["analytics", "storage"]));
+admin.use("/analytics/demographics", requireModulePermission("analytics"));
+admin.use("/analytics/engagement", requireModulePermission("analytics"));
 admin.use("/users", requireModulePermission("users"));
 admin.use("/users/*", requireModulePermission("users"));
 admin.use("/verification", requireModulePermission("verification"));
@@ -122,9 +138,12 @@ admin.use("/pricing/*", requireModulePermission("subscription"));
 // Stripe setup (catalog sync, portal, webhook check) sits with plan pricing.
 admin.use("/billing", requireModulePermission("subscription"));
 admin.use("/billing/*", requireModulePermission("subscription"));
-// One account's billing (refunds, comps, plan changes) sits with user management.
-admin.use("/user-billing", requireModulePermission("users"));
-admin.use("/user-billing/*", requireModulePermission("users"));
+// One account's billing: viewing it is user management; refunds, comps and
+// plan changes move money, so they need Subscription Config edit rights.
+const userBillingGate = (c: Context, next: Next) =>
+  (c.req.method === "GET" ? requireModulePermission("users") : requireModulePermission("subscription"))(c, next);
+admin.use("/user-billing", userBillingGate);
+admin.use("/user-billing/*", userBillingGate);
 admin.use("/email-templates", requireModulePermission("email_templates"));
 admin.use("/email-templates/*", requireModulePermission("email_templates"));
 admin.use("/white-label", requireModulePermission("white_label"));
@@ -151,8 +170,12 @@ admin.use("/white-glove/*", requireModulePermission("white_glove"));
 // paywall under white_label, the per-user emergency bypass under users.
 admin.use("/wl-entitlements", requireModulePermission("white_label"));
 admin.use("/wl-entitlements/*", requireModulePermission("white_label"));
-admin.use("/disaster-recovery", requireModulePermission("users"));
-admin.use("/disaster-recovery/*", requireModulePermission("users"));
+// Viewing bypass state is user management; opening or closing a 48-hour
+// emergency vault bypass needs Legacy Management edit rights.
+const drGate = (c: Context, next: Next) =>
+  (c.req.method === "GET" ? requireModulePermission("users") : requireModulePermission("legacy_management"))(c, next);
+admin.use("/disaster-recovery", drGate);
+admin.use("/disaster-recovery/*", drGate);
 
 admin.route("/analytics", analytics);
 admin.route("/users", users);

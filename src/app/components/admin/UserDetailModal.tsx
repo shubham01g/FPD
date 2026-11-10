@@ -151,7 +151,9 @@ interface DBUserDetail {
   user: {
     id: string; full_name: string; email: string; phone: string | null; avatar_url: string | null;
     plan: string; plan_status: "active" | "paused" | "cancelled" | "past_due"; created_at: string;
+    admin_notes: string | null; subscription_waived: boolean | null; waive_reason: string | null;
   };
+  lastSignInAt: string | null;
   storage: { used_bytes: number; plan_limit_gb: number } | null;
   payments: { id: string; type: string; description: string | null; amount_usd: number; status: string; created_at: string }[];
   contacts: { contact_type: string }[];
@@ -195,14 +197,16 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
     name: d.user.full_name,
     email: d.user.email,
     photoUrl: d.user.avatar_url ?? "",
-    phone: d.user.phone ?? "—",
+    phone: d.user.phone ?? "",
     plan: planDef?.name ?? d.user.plan,
     planId: d.user.plan,
     status: d.user.plan_status === "paused" ? "suspended" : d.user.plan_status === "cancelled" ? "cancelled" : "active",
     mfa: d.twoFa.enabled,
     mfaMethod: d.twoFa.method,
     joined: new Date(d.user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    lastLogin: "Not tracked",
+    lastLogin: d.lastSignInAt
+      ? new Date(d.lastSignInAt).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
+      : "Never signed in",
     ...billingSummary(d),
     storage: usedGb,
     storageTotal: totalGb,
@@ -211,9 +215,9 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
     guardians,
     referrals: d.referralCount,
     legacyFeePaid: d.legacyFeePaid,
-    subscriptionWaived: false, waiveMonths: 0, waiveReason: "", // waivers not tracked — no column yet
+    subscriptionWaived: !!d.user.subscription_waived, waiveMonths: 0, waiveReason: d.user.waive_reason ?? "",
     cardBrand: "On file", cardLast4: "••••", cardExpiry: "—", cardHolder: d.user.full_name, billingZip: "—",
-    adminNotes: "",
+    adminNotes: d.user.admin_notes ?? "",
     billingHistory: d.payments.map((p) => ({
       id: p.id.slice(0, 8).toUpperCase(),
       date: new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
@@ -299,21 +303,6 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   const [eNotes,   setENotes]   = useState(user.adminNotes);
   const [saving,   setSaving]   = useState(false);
 
-  /* card state */
-  const [cardNum,     setCardNum]    = useState("");
-  const [cardExp,     setCardExp]    = useState("");
-  const [cardCvv,     setCardCvv]    = useState("");
-  const [cardName,    setCardName]   = useState(user.cardHolder);
-  const [cardZip,     setCardZip]    = useState(user.billingZip);
-  const [showCvv,     setShowCvv]    = useState(false);
-  const [savingCard,  setSavingCard] = useState(false);
-
-  /* waive state */
-  const [wMonths,    setWMonths]   = useState(1);
-  const [wReason,    setWReason]   = useState("");
-  const [wNote,      setWNote]     = useState("");
-  const [savingWaive,setSavingWaive] = useState(false);
-
   const plan        = PLANS.find(p => p.id === user.planId) ?? PLANS[2];
   const catalogPlan = usePlans().find(p => p.id === user.planId);
   const yearly      = user.billingInterval === "year";
@@ -332,10 +321,10 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
     if (!eName.trim() || !eEmail.trim()) { toast.error("Name and email are required"); return; }
     setSaving(true);
     try {
-      // Only the plan is a real column this endpoint can change today — name/
-      // email/phone edits aren't wired (email changes need Supabase Auth admin
-      // APIs, phone/notes have no column) so they only update local view state.
-      setUser(u => ({ ...u, name:eName, email:eEmail, phone:ePhone, adminNotes:eNotes }));
+      await adminApi.patch(`/users/${user.id}`, {
+        full_name: eName.trim(), email: eEmail.trim(), phone: ePhone.trim(), admin_notes: eNotes.trim(),
+      });
+      setUser(u => ({ ...u, name:eName.trim(), email:eEmail.trim(), phone:ePhone.trim(), adminNotes:eNotes.trim() }));
       toast.success("Account updated");
       setTab("overview");
       onRefetch();
@@ -344,18 +333,6 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
     } finally {
       setSaving(false);
     }
-  }
-
-  function saveCard() {
-    // Card numbers never pass through Final Pass Down: the customer changes
-    // their card in Stripe's billing portal (Usage & Billing → Manage billing).
-    toast.info("Cards are changed by the customer in Usage & Billing → Manage billing (Stripe). Admins can't see or edit card numbers.");
-  }
-
-  function applyWaive() {
-    // Free access is given with a comped subscription, which billing honours
-    // everywhere (no invoices, plan stays active).
-    toast.info("To waive charges, open the Billing tab and use \"Comp a plan\".");
   }
 
   async function toggleSuspend() {
@@ -443,7 +420,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                 </span>
               )}
             </div>
-            <div style={{ color:T.sub, fontSize:16 }}>{user.email} · {user.phone} · {user.id}</div>
+            <div style={{ color:T.sub, fontSize:16 }}>{user.email}{user.phone ? ` · ${user.phone}` : ""} · {user.id}</div>
             <div style={{ color:T.muted, fontSize:14, marginTop:2, ...MONO }}>
               Joined {user.joined} · Last login: {user.lastLogin}
             </div>
@@ -495,7 +472,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                   <SLabel>Account Details</SLabel>
                   <DRow label="User ID"          value={user.id}/>
                   <DRow label="Email"            value={user.email}/>
-                  <DRow label="Phone"            value={user.phone}/>
+                  <DRow label="Phone"            value={user.phone || "—"}/>
                   <DRow label="Status"           value={
                     <span style={{ color:statusColor, fontWeight:700 }}>{user.status.toUpperCase()}</span>}/>
                   <DRow label="Two-Factor Auth"  value={user.mfa

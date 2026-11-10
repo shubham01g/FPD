@@ -1,30 +1,10 @@
 import { Hono } from "npm:hono";
-import webpush from "npm:web-push@3.6.7";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
-import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, noticeEmail, sendEmail, testEmail } from "../lib/email.ts";
+import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, sendEmail, testEmail } from "../lib/email.ts";
+import { PUSH_CONFIGURED, TYPE_MAP, deliverCampaign, type CampaignRow } from "../lib/campaigns.ts";
 
 const notifications = new Hono();
-
-// Real device push. Keys are generated once and held as Edge Function
-// secrets (never in the repo) — set with:
-//   npx supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com --project-ref <ref>
-// Until those are set, PUSH_CONFIGURED is false and sends fall back to
-// in-app-only exactly like before, no error.
-const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY");
-const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY");
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || `mailto:${MAILBOX.support}`;
-const PUSH_CONFIGURED = Boolean(VAPID_PUBLIC && VAPID_PRIVATE);
-if (PUSH_CONFIGURED) {
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC!, VAPID_PRIVATE!);
-}
-
-// push_notifications.notification_type -> the personal notifications.type
-// CHECK constraint (info/warning/success/error) so a campaign also lands in
-// each recipient's own Notification tab, not just the admin's send log.
-const TYPE_MAP: Record<string, "info" | "warning" | "success" | "error"> = {
-  marketing: "info", feature: "success", update: "info", alert: "error", reminder: "warning",
-};
 
 // GET /admin/notifications — sent campaign history
 // POST /admin/notifications/test-email { to? }
@@ -55,14 +35,9 @@ notifications.get("/", async (c) => {
   return c.json({ notifications: data });
 });
 
-// POST /admin/notifications { title, body, type, target, scheduled?, scheduledFor? }
-// Resolves the target segment to real user ids and writes three things:
-// the campaign row (push_notifications), a per-recipient delivery receipt
-// (push_notification_receipts), and a row in each recipient's own
-// `notifications` table so it shows up in their Notification tab. If VAPID
-// secrets are configured it also fans out a real device push to every
-// subscribed browser among those recipients (see PUSH_CONFIGURED above).
-// Email is still unwired — there is no provider integrated anywhere.
+// POST /admin/notifications { title, body, type, target, channel, scheduled?, scheduledFor? }
+// Saves the campaign, then either delivers it now (lib/campaigns.ts) or, when
+// scheduled for a future time, leaves it for the hourly job to send.
 notifications.post("/", async (c) => {
   const admin = c.get("admin") as AdminUser;
   const body = await c.req.json().catch(() => ({}));
@@ -75,109 +50,47 @@ notifications.post("/", async (c) => {
   if (!message?.trim()) return c.json({ error: "Message body is required" }, 400);
   if (!(type in TYPE_MAP)) return c.json({ error: "Invalid notification type" }, 400);
 
+  let sendAt: Date | null = null;
+  if (scheduled) {
+    sendAt = scheduledFor ? new Date(scheduledFor) : null;
+    if (!sendAt || Number.isNaN(sendAt.getTime())) return c.json({ error: "Pick a valid date and time to send" }, 400);
+    if (sendAt.getTime() < Date.now() - 60_000) return c.json({ error: "The scheduled time is in the past" }, 400);
+  }
+  const isScheduled = !!sendAt && sendAt.getTime() > Date.now() + 60_000;
+
   const db = adminClient();
-  const segment = target || "all";
-
-  let userQuery = db.from("users").select("id");
-  if (segment === "white_glove") userQuery = userQuery.eq("white_glove", true);
-  else if (segment !== "all") userQuery = userQuery.eq("plan", segment);
-
-  const { data: targetUsers, error: usersError } = await userQuery;
-  if (usersError) return c.json({ error: usersError.message }, 500);
-  const userIds = (targetUsers ?? []).map((u: { id: string }) => u.id as string);
-
   const { data: campaign, error: campaignError } = await db
     .from("push_notifications")
     .insert({
-      title, body: message, notification_type: type, target_segment: segment,
-      sent_by: admin.id, scheduled_for: scheduled ? (scheduledFor || null) : null,
-      is_scheduled: !!scheduled, delivered_count: userIds.length,
+      title: String(title).trim(), body: String(message).trim(), notification_type: type,
+      target_segment: target || "all", channel, sent_by: admin.id,
+      scheduled_for: isScheduled ? sendAt!.toISOString() : null,
+      is_scheduled: isScheduled, status: isScheduled ? "scheduled" : "sending", delivered_count: 0,
     })
     .select("*, sender:sent_by(email, full_name)")
     .single();
-
   if (campaignError) return c.json({ error: campaignError.message }, 500);
 
-  // There's no scheduler/cron worker yet to fire a future-dated send later,
-  // so delivery always happens now regardless of `scheduled` — is_scheduled
-  // and scheduled_for are recorded for the log but don't delay anything.
-  if (userIds.length > 0) {
-    const now = new Date().toISOString();
-    const notifType = TYPE_MAP[type];
-
-    const [receipts, personal] = await Promise.all([
-      db.from("push_notification_receipts").insert(
-        userIds.map((uid) => ({ notification_id: campaign.id, user_id: uid, delivered_at: now })),
-      ),
-      db.from("notifications").insert(
-        userIds.map((uid) => ({ user_id: uid, title, message, type: notifType })),
-      ),
-    ]);
-
-    if (receipts.error) return c.json({ error: receipts.error.message }, 500);
-    if (personal.error) return c.json({ error: personal.error.message }, 500);
+  if (isScheduled) {
+    return c.json({ notification: campaign, scheduled: true, pushConfigured: PUSH_CONFIGURED, channel }, 201);
   }
-
-  // Real device push, best-effort: the in-app row above already landed, so a
-  // push failure here must never fail the request. A 404/410 means the
-  // browser dropped the subscription (uninstalled, cleared data, expired) —
-  // that row is deleted so it stops being retried on every future send.
-  let pushSent = 0;
-  if (PUSH_CONFIGURED && userIds.length > 0) {
-    const { data: subs } = await db
-      .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth")
-      .in("user_id", userIds);
-
-    const payload = JSON.stringify({ title, body: message, type, url: "/" });
-    const stale: string[] = [];
-
-    await Promise.all((subs ?? []).map(async (s: { id: string; endpoint: string; p256dh: string; auth: string }) => {
-      try {
-        await webpush.sendNotification(
-          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          payload,
-        );
-        pushSent++;
-      } catch (err) {
-        const status = (err as { statusCode?: number }).statusCode;
-        if (status === 404 || status === 410) stale.push(s.id);
-      }
-    }));
-
-    if (stale.length > 0) {
-      await db.from("push_subscriptions").delete().in("id", stale);
-    }
+  try {
+    const result = await deliverCampaign(campaign as CampaignRow);
+    return c.json({ notification: { ...campaign, status: "sent", delivered_count: result.recipients }, pushConfigured: PUSH_CONFIGURED, channel, ...result }, 201);
+  } catch (err) {
+    await db.from("push_notifications").update({ status: "failed" }).eq("id", campaign.id);
+    return c.json({ error: err instanceof Error ? err.message : "Delivery failed" }, 500);
   }
+});
 
-  // Email, for "email"/"both": skips anyone who turned email notifications
-  // off in Account Settings (notification_preferences, migration 050).
-  let emailSent = 0, emailSkipped = 0;
-  if (channel !== "push" && userIds.length > 0) {
-    const [{ data: people }, { data: prefs }] = await Promise.all([
-      db.from("users").select("id, email, full_name").in("id", userIds),
-      db.from("notification_preferences").select("user_id, email").in("user_id", userIds),
-    ]);
-    const optedOut = new Set((prefs ?? []).filter((p: { email: boolean }) => p.email === false).map((p: { user_id: string }) => p.user_id));
-    for (const p of (people ?? []).slice(0, 2000) as { id: string; email: string | null; full_name: string | null }[]) {
-      if (!p.email || optedOut.has(p.id)) { emailSkipped++; continue; }
-      try {
-        await sendEmail({
-          to: p.email,
-          ...noticeEmail({
-            name: p.full_name ?? "", heading: String(title).slice(0, 120), category: "announcement",
-            paragraphs: [String(message).slice(0, 5000)],
-            footnote: "You can turn these emails off in Account Settings → Notifications.",
-          }),
-        });
-        emailSent++;
-      } catch (err) {
-        console.error("announcement email failed:", err);
-      }
-    }
-  }
-
-  return c.json({ notification: campaign, pushConfigured: PUSH_CONFIGURED, pushSent, channel, emailSent, emailSkipped }, 201);
+// POST /admin/notifications/:id/cancel — stop a scheduled campaign before it goes out.
+notifications.post("/:id/cancel", async (c) => {
+  const { data, error } = await adminClient().from("push_notifications")
+    .update({ status: "cancelled" }).eq("id", c.req.param("id")).eq("status", "scheduled")
+    .select("*, sender:sent_by(email, full_name)").maybeSingle();
+  if (error) return c.json({ error: error.message }, 500);
+  if (!data) return c.json({ error: "Only a campaign that is still scheduled can be cancelled" }, 409);
+  return c.json({ notification: data });
 });
 
 export default notifications;

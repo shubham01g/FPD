@@ -533,6 +533,8 @@ interface SentNotification {
   id: string; title: string; body: string; type: NotifType; target: NotifTarget;
   sentAt: string; sentBy: string; delivered: number; opened: number; openRate: number;
   scheduled: boolean; scheduledFor?: string;
+  /** sent | scheduled | sending | cancelled | failed (migration 054) */
+  status: string;
 }
 
 const NOTIF_TYPE_COLORS: Record<NotifType, string> = {
@@ -567,7 +569,7 @@ function targetCounts(usersByPlan: Record<string, number>, totalUsers: number): 
 interface DBCampaign {
   id: string; title: string; body: string; notification_type: NotifType; target_segment: NotifTarget;
   sent_at: string; delivered_count: number; opened_count: number;
-  is_scheduled: boolean; scheduled_for: string | null;
+  is_scheduled: boolean; scheduled_for: string | null; status: string | null;
   sender: { email: string; full_name: string } | null;
 }
 
@@ -578,15 +580,19 @@ function mapCampaign(n: DBCampaign): SentNotification {
       + " · " + new Date(n.sent_at).toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit" }),
     sentBy: n.sender?.email ?? n.sender?.full_name ?? "—",
     delivered: n.delivered_count, opened: n.opened_count, openRate: 0,
-    scheduled: n.is_scheduled, scheduledFor: n.scheduled_for ?? undefined,
+    scheduled: n.is_scheduled,
+    scheduledFor: n.scheduled_for
+      ? new Date(n.scheduled_for).toLocaleString("en-US", { month:"short", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit" })
+      : undefined,
+    status: n.status ?? "sent",
   };
 }
 
 function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Record<string, number>; totalUsers: number }) {
-  /* Open rates aren't reported back by any provider yet. A send writes
-     push_notifications + a `notifications` row per recipient (real in-app
-     delivery) and, when a recipient has push enabled on a device, a real
-     web-push notification too — see routes/notifications.ts. */
+  /* A send writes push_notifications + a `notifications` row per recipient
+     (real in-app delivery), device push when enabled, and email for the
+     email channels (lib/campaigns.ts). A scheduled campaign is sent by the
+     hourly job once its time comes. Opens are not tracked. */
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useAdminFetch(
     () => adminApi.get<{ notifications: DBCampaign[] }>("/notifications"),
     [],
@@ -617,10 +623,20 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
     if (!body.trim()) { toast.error("Message body is required"); return; }
     setSending(true);
     try {
-      const res = await adminApi.post<{ pushConfigured: boolean; pushSent: number; emailSent?: number; emailSkipped?: number }>("/notifications", {
+      if (scheduleMode && !scheduleDate) { toast.error("Pick when to send it"); setSending(false); return; }
+      const res = await adminApi.post<{ scheduled?: boolean; pushConfigured: boolean; pushSent?: number; emailSent?: number; emailSkipped?: number; recipients?: number }>("/notifications", {
         title, body, type, target, channel,
-        scheduled: scheduleMode, scheduledFor: scheduleMode ? scheduleDate : undefined,
+        scheduled: scheduleMode,
+        // datetime-local has no zone; send the admin's local time as an instant.
+        scheduledFor: scheduleMode ? new Date(scheduleDate).toISOString() : undefined,
       });
+      if (res.scheduled) {
+        toast.success(`🗓️ Scheduled for ${new Date(scheduleDate).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })} — it goes out within the hour after that time.`);
+        setTitle(""); setBody(""); setType("marketing"); setTarget("all"); setScheduleMode(false); setScheduleDate("");
+        setView("history");
+        refetchHistory();
+        return;
+      }
       // In-app always lands. Real device push only reaches users who've
       // enabled it on a device (AccountSettings > Notifications) — report
       // the true count rather than implying every recipient got a push.
@@ -629,10 +645,10 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
         : "";
       const pushNote = channel === "email" ? emailNote : (!res.pushConfigured
         ? " (in-app only — device push isn't configured on the server yet)"
-        : res.pushSent > 0
+        : (res.pushSent ?? 0) > 0
           ? ` — ${res.pushSent} device${res.pushSent === 1 ? "" : "s"} got a real push`
           : " (no recipients have push notifications enabled yet)") + emailNote;
-      toast.success(`🔔 Notification ${scheduleMode ? "scheduled" : "sent"} to ${recipientLabel} users!${pushNote}`);
+      toast.success(`🔔 Notification sent to ${(res.recipients ?? 0).toLocaleString()} users${pushNote}`);
       setTitle(""); setBody(""); setType("marketing"); setTarget("all"); setScheduleMode(false); setScheduleDate("");
       setView("history");
       refetchHistory();
@@ -651,10 +667,10 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label:"Campaigns Sent",        value:history.length,                  color:"#6E90C9" },
+          { label:"Campaigns Sent",        value:history.filter(n=>n.status==="sent").length, color:"#6E90C9" },
           { label:"Total Delivered",       value:totalDelivered.toLocaleString(), color:"#D99A6B" },
           { label:"Avg Open Rate",         value:"—",                             color:"#6FAE8B" },
-          { label:"Scheduled / Pending",   value:history.filter(n=>n.scheduled).length, color:"#F6AD55" },
+          { label:"Scheduled / Pending",   value:history.filter(n=>n.status==="scheduled" || n.status==="sending").length, color:"#F6AD55" },
         ].map(s => (
           <div key={s.label} className="p-4 rounded-2xl" style={CARD}>
             <div style={{ fontFamily:"var(--font-display)", fontSize:32.5, color:s.color }}>{s.value}</div>
@@ -846,10 +862,9 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
               <ul className="space-y-1.5">
                 {[
                   "Keep titles under 50 characters for full display on all devices",
-                  "Include an emoji at the start of the title to increase open rates by ~20%",
-                  "Messages under 100 chars get 35% higher engagement",
-                  "Best send times: 9–11 AM and 6–8 PM in user's timezone",
-                  "Tuesday and Thursday have the highest open rates",
+                  "Short, specific messages are easier to read on a phone lock screen",
+                  "Say what the reader should do next, and where to find it",
+                  "Schedule announcements for daytime in your members' time zone",
                 ].map(tip => (
                   <li key={tip} className="flex items-start gap-2">
                     <div style={{ width:4, height:4, borderRadius:"50%", background:"#5B6EE1", marginTop:6, flexShrink:0 }}/>
@@ -888,16 +903,26 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
                         style={{ background:`${NOTIF_TYPE_COLORS[n.type]}15`, color:NOTIF_TYPE_COLORS[n.type], fontFamily:"var(--font-mono)" }}>
                         {n.type}
                       </span>
-                      {n.scheduled && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold"
-                          style={{ background:"rgba(246,173,85,0.12)", color:"#F6AD55", fontFamily:"var(--font-mono)" }}>
-                          SCHEDULED
+                      {n.status !== "sent" && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold uppercase"
+                          style={{ background: n.status === "failed" || n.status === "cancelled" ? "rgba(252,129,129,0.12)" : "rgba(246,173,85,0.12)",
+                            color: n.status === "failed" || n.status === "cancelled" ? "#FC8181" : "#F6AD55", fontFamily:"var(--font-mono)" }}>
+                          {n.status}
                         </span>
+                      )}
+                      {n.status === "scheduled" && (
+                        <button onClick={async () => {
+                          try { await adminApi.post(`/notifications/${n.id}/cancel`); toast.success("Scheduled notification cancelled"); refetchHistory(); }
+                          catch (err) { toast.error(err instanceof Error ? err.message : "Could not cancel"); }
+                        }} className="px-2 py-0.5 rounded-full text-xs font-bold"
+                          style={{ background:"rgba(252,129,129,0.1)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.3)", fontFamily:"var(--font-mono)", cursor:"pointer" }}>
+                          CANCEL
+                        </button>
                       )}
                     </div>
                     <div style={{ color:"#8A9AB8", fontSize:15, marginTop:3, lineHeight:1.5 }}>{n.body}</div>
                     <div style={{ color:"#8A9AB8", fontSize:14, marginTop:4 }}>
-                      Sent: {n.sentAt} · Target: {TARGET_LABELS[n.target]}
+                      {n.status === "scheduled" || n.status === "cancelled" ? `Scheduled for: ${n.scheduledFor ?? "—"}` : `Sent: ${n.sentAt}`} · Target: {TARGET_LABELS[n.target]}
                     </div>
                   </div>
                 </div>
@@ -1701,7 +1726,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
             </div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:27.5, color:"#E8EDF5" }}>Push Notification Center</h2>
             <p style={{ color:"#8A9AB8", fontSize:16, marginTop:4 }}>
-              Send in-app and device push notifications to all users or specific plan segments. Track delivery and open rates.
+              Send in-app, device push and email announcements to all users or specific plan segments — now or at a scheduled time. Delivery is tracked.
             </p>
           </div>
           <PushNotificationCenter

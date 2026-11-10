@@ -35,6 +35,10 @@ async function fetchAllPages(path: string, key: string, pageSize: number): Promi
 const listOf = (path: string, key: string) => async () =>
   ((await adminApi.get<Record<string, unknown>>(path))[key] as Row[] | undefined) ?? [];
 
+/* Payments (latest 1,000) narrowed by a test on each row. */
+const paymentsWhere = (keep: (p: Row) => boolean) => async () =>
+  ((await adminApi.get<{ payments: Row[] }>("/analytics/payments")).payments ?? []).filter(keep);
+
 const users = async () => (await fetchAllPages("/users", "users", 100)).map((u): Row => ({
   ...u, used_gb: Math.round((Number(u.used_bytes ?? 0) / 1024 ** 3) * 100) / 100,
 }));
@@ -66,11 +70,11 @@ const REPORTS: ReportDef[] = [
     description:"Legacy Continuation Fee records: account, amount, status, activation and expiry.",
     source: listOf("/subscriptions", "fees"), dateField:"created_at" },
   { id:"overage_billing", name:"Overage Billing Report", category:"financial", icon:<HardDrive size={16}/>, color:"#D99A6B",
-    description:"Storage overage charges by user.", source:null,
-    unavailable:"Nothing writes rows to storage_usage yet, so there are no overage charges to report." },
+    description:"Storage overage charges by user, from recorded payments.",
+    source: paymentsWhere(p => p.type === "overage"), dateField:"created_at" },
   { id:"white_glove_billing", name:"White Glove Billing Report", category:"financial", icon:<Star size={16}/>, color:"#D99A6B",
-    description:"Setup fees and session charges per White Glove client.", source:null,
-    unavailable:"White Glove billing isn't stored in the database yet." },
+    description:"White Glove setup fees and session charges, from recorded payments.",
+    source: paymentsWhere(p => /white\s*glove|wg_/i.test(`${p.type ?? ""} ${p.description ?? ""}`)), dateField:"created_at" },
 
   // Users
   { id:"user_roster", name:"Full User Roster", category:"users", icon:<Users size={16}/>, color:"#6FAE8B",
@@ -82,10 +86,12 @@ const REPORTS: ReportDef[] = [
     dateField:"created_at" },
   { id:"churn_report", name:"Churn & Cancellation Report", category:"users", icon:<Users size={16}/>, color:"#6FAE8B",
     description:"Cancelled accounts with reason and lifetime value.", source:null,
-    unavailable:"plan_status keeps no history and no cancellation reason is captured." },
+    unavailable:"Account status keeps no history and no cancellation reason is collected, so churn can't be reported yet." },
   { id:"manually_onboarded", name:"Manually Onboarded Accounts", category:"users", icon:<Users size={16}/>, color:"#6FAE8B",
-    description:"Accounts created by an admin.", source:null,
-    unavailable:"The users table has no \"onboarded by admin\" flag to filter on." },
+    description:"Accounts an admin created from Users → Onboard, with who onboarded them.",
+    source: async () => (await users()).filter(u => u.onboarded_by)
+      .map(({ id, email, full_name, plan, plan_status, onboarded_by, created_at }) => ({ id, email, full_name, plan, plan_status, onboarded_by, created_at })),
+    dateField:"created_at" },
 
   // Storage
   { id:"storage_usage", name:"Storage Usage by User", category:"storage", icon:<HardDrive size={16}/>, color:"#6FAE8B",
@@ -93,7 +99,7 @@ const REPORTS: ReportDef[] = [
     source: async () => (await users()).map(({ id, email, full_name, plan, used_gb }) => ({ id, email, full_name, plan, used_gb })) },
   { id:"storage_alerts", name:"Storage Alert History", category:"storage", icon:<AlertTriangle size={16}/>, color:"#6FAE8B",
     description:"80% / 90% / 95% storage alerts sent.", source:null,
-    unavailable:"Sent alerts aren't recorded anywhere." },
+    unavailable:"Storage alerts are shown in the app but not stored as a history, so there is nothing to export yet." },
 
   // Operations
   { id:"id_verification", name:"ID Verification Report", category:"operations", icon:<UserCheck size={16}/>, color:"#ED8936",
@@ -106,8 +112,13 @@ const REPORTS: ReportDef[] = [
     description:"Partners with organization, tier, accounts, monthly recurring and total earned.",
     source: listOf("/partnerships", "partners"), dateField:"joined_at" },
   { id:"wg_client_status", name:"White Glove Client Status", category:"operations", icon:<Star size={16}/>, color:"#ED8936",
-    description:"White Glove clients with specialist and progress.", source:null,
-    unavailable:"White Glove clients aren't stored in the database yet." },
+    description:"White Glove clients with their specialist, sessions and status.",
+    source: async () => (((await adminApi.get<{ clients: Row[] }>("/white-glove/clients")).clients) ?? []).map(c => {
+      const u = (c.users ?? {}) as Row; const s = (c.concierge_employees ?? {}) as Row;
+      const sessions = Array.isArray(c.wg_sessions) ? c.wg_sessions as Row[] : [];
+      return { id: c.id, client: u.full_name, email: u.email, specialist: s.name ?? "Unassigned",
+        status: c.status, sessions: sessions.length, reason: c.reason, created_at: c.created_at };
+    }), dateField:"created_at" },
 
   // Compliance
   { id:"audit_log_export", name:"Audit Log Export", category:"compliance", icon:<Shield size={16}/>, color:"#FC8181",
@@ -119,11 +130,14 @@ const REPORTS: ReportDef[] = [
 
   // Marketing
   { id:"push_notification_stats", name:"Push Notification Performance", category:"marketing", icon:<BarChart3 size={16}/>, color:"#6E90C9",
-    description:"Delivered, opened and open rate per notification.", source:null,
-    unavailable:"No push provider is integrated and sent notifications aren't recorded." },
+    description:"Every announcement from the Push Notification Center: channel, audience, status and recipients.",
+    source: async () => (((await adminApi.get<{ notifications: Row[] }>("/notifications")).notifications) ?? []).map(n => ({
+      id: n.id, title: n.title, type: n.notification_type, audience: n.target_segment, channel: n.channel ?? "push",
+      status: n.status ?? "sent", recipients: n.delivered_count, scheduled_for: n.scheduled_for, sent_at: n.sent_at,
+    })), dateField:"sent_at" },
   { id:"email_delivery", name:"Transactional Email Report", category:"marketing", icon:<Send size={16}/>, color:"#6E90C9",
     description:"Delivery, open and bounce rates per email template.", source:null,
-    unavailable:"No email provider is integrated, so there are no delivery events." },
+    unavailable:"Emails are sent through SendGrid; delivery, open and bounce figures are in SendGrid's Activity Feed, not in this app." },
 ];
 
 const CATEGORY_META: Record<ReportDef["category"], { label: string; color: string; icon: React.ReactNode }> = {

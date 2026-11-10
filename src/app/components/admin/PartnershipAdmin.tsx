@@ -49,7 +49,8 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
     { id:"bank", label:"Bank / Credit Union" }, { id:"other", label:"Other" },
   ];
 
-  const onboardingLink = created ? `https://finalpassdown.com/partner/onboard?ref=${created.partner_code}` : null;
+  // The Partner Program signup page; ?ref= credits this partner record.
+  const onboardingLink = created ? `${window.location.origin}/partner?ref=${created.partner_code}` : null;
 
   const send = async () => {
     if (!email.trim()) { toast.error("Email address is required"); return; }
@@ -77,8 +78,8 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>{created ? "Partner Added" : "Add a Pending Partner"}</h3>
             <p style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>
               {created
-                ? "No email was sent — this app has no email delivery set up yet. Copy the link below and send it to them yourself."
-                : "Creates a pending partner record with a real onboarding link. There is no email sending configured, so nothing is emailed automatically."}
+                ? "Send them this link. When they sign up and pay the setup fee through it, this partner record is activated."
+                : "Creates a pending partner record and an invite link. Signing up and paying through the link activates it."}
             </p>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>

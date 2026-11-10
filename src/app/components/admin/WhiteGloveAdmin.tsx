@@ -109,7 +109,7 @@ function SessionRow({ session }: { session: WGSession }) {
 }
 
 /* ── Client card ─────────────────────────────────────────────────── */
-function ClientCard({ client, specialists, onUpdate }: { client: WGClient; specialists: ReturnType<typeof toSpecialists>; onUpdate: (id: string, changes: Partial<WGClient>) => void }) {
+function ClientCard({ client, specialists, onUpdate }: { client: WGClient; specialists: ReturnType<typeof toSpecialists>; onUpdate: (id: string, changes: Partial<WGClient>) => Promise<boolean> }) {
   const [expanded, setExpanded] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -205,11 +205,11 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
           <div>
             <div className="flex items-center justify-between mb-3">
               <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>SESSION LOG ({client.sessions.length})</div>
-              <button onClick={() => toast.info("Sessions are booked by the assigned specialist in the Concierge Portal (/concierge), which emails the client a calendar invite.")}
-                className="flex items-center gap-1 text-xs px-3 py-1 rounded-xl"
-                style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
-                <Plus size={10}/> Schedule Session
-              </button>
+              {/* Sessions are booked by the assigned specialist in the Concierge
+                  Portal, which emails the client a calendar invite. */}
+              <span className="text-xs px-3 py-1 rounded-xl" style={{ background:"rgba(91,167,214,0.06)", color:"#8A9AB8" }}>
+                Booked by the specialist in the Concierge Portal
+              </span>
             </div>
             <div className="space-y-2">
               {client.sessions.map(s => <SessionRow key={s.id} session={s}/>)}
@@ -232,12 +232,12 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
               <textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={2} placeholder="Add specialist note…"
                 className="w-full resize-none" style={INPUT}/>
               <div className="flex gap-2">
-                <button onClick={() => {
-                  if (noteText.trim()) {
-                    onUpdate(client.id, { notes: client.notes ? client.notes + "\n\n" + noteText.trim() : noteText.trim() });
+                <button onClick={async () => {
+                  if (!noteText.trim()) { setAddingNote(false); return; }
+                  if (await onUpdate(client.id, { notes: client.notes ? client.notes + "\n\n" + noteText.trim() : noteText.trim() })) {
                     toast.success("Note added");
+                    setNoteText(""); setAddingNote(false);
                   }
-                  setNoteText(""); setAddingNote(false);
                 }} className="flex-1 py-2 rounded-2xl text-xs font-semibold"
                   style={{ background:"#5BA7D6", color:"#fff" }}>Save Note</button>
                 <button onClick={() => { setNoteText(""); setAddingNote(false); }}
@@ -259,7 +259,7 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Send size={11}/> Send Check-in
             </button>
-            <button onClick={() => { onUpdate(client.id, { completionPct:100, status:"completed", nextSession:undefined }); toast.success(`${client.name} marked as complete`); }}
+            <button onClick={async () => { if (await onUpdate(client.id, { completionPct:100, status:"completed", nextSession:undefined })) toast.success(`${client.name} marked as complete`); }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(72,187,120,0.1)", color:"#D99A6B" }}>
               <CheckCircle size={11}/> Mark Complete
@@ -301,7 +301,7 @@ export function WhiteGloveAdmin() {
 
   function refreshAll() { refetchEmployees(); refetchClients(); }
 
-  async function updateClient(id: string, changes: Partial<WGClient>) {
+  async function updateClient(id: string, changes: Partial<WGClient>): Promise<boolean> {
     const patch: Record<string, unknown> = {};
     if ("status" in changes) patch.status = changes.status;
     if ("completionPct" in changes) patch.completion_pct = changes.completionPct;
@@ -311,8 +311,10 @@ export function WhiteGloveAdmin() {
     try {
       await adminApi.patch(`/white-glove/clients/${id}`, patch);
       refetchClients();
+      return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update client");
+      return false;
     }
   }
 

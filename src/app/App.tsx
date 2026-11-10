@@ -387,7 +387,7 @@ function UserLoginRoute() {
  *  link, a contact invite (migration 046) and the Access Portal. */
 function safeNext(search: string): string | null {
   const next = new URLSearchParams(search).get("next");
-  return next && /^(\/vault-reset\/[0-9a-f]{64}|\/contact-accept\/[0-9a-f]{64}|\/access|\/partner|\/partner\/onboard(\?tier=[\w-]{1,60})?)$/.test(next) ? next : null;
+  return next && /^(\/vault-reset\/[0-9a-f]{64}|\/contact-accept\/[0-9a-f]{64}|\/access|\/partner(\?ref=[A-Za-z0-9-]{1,20})?|\/partner\/onboard(\?tier=[\w-]{1,60})?)$/.test(next) ? next : null;
 }
 
 function UserSignupRoute() {
@@ -599,20 +599,44 @@ function AdminLoginRoute() {
 }
 
 /* ── Admin portal (gated — redirects to /admin/login without a session) ── */
+interface AdminMe {
+  email: string; role: string; sessionTimeout: string | null;
+  permissions: { module: string; canView: boolean }[] | null;
+}
+/* Which permission module(s) each admin screen needs (any one is enough).
+   Mirrors the server's requireModulePermission gates in index.tsx. */
+const ADMIN_PAGE_MODULES: Partial<Record<AdminPageId, string[]>> = {
+  "admin-roles": ["admin_team"], "admin-settings": ["admin_team"],
+  "admin-affiliate": ["affiliates"], "admin-partnership": ["partners"],
+  "white-glove-admin": ["white_glove"], "id-verification": ["verification"],
+  "payout-management": ["payouts"], "subscription-config": ["subscription"],
+  "enterprise-api": ["enterprise_api"], "email-templates": ["email_templates"],
+  "white-label": ["white_label"], "partner-onboarding-admin": ["white_label"],
+  "continuation-fee-admin": ["continuation", "subscription"],
+  "crypto-merchant": ["crypto"], "payment-processors": ["crypto"],
+};
+function canOpenAdminPage(me: AdminMe | null, page: AdminPageId): boolean {
+  if (!me || me.permissions === null || me.role === "super_admin") return true;
+  const needs = ADMIN_PAGE_MODULES[page];
+  if (!needs) return true;   // Master Admin: its tabs show what the role can read
+  return needs.some(m => me.permissions!.some(p => p.module === m && p.canView));
+}
+
 function AdminRoute() {
   const navigate = useNavigate();
   const [adminPage, setAdminPage] = useState<AdminPageId>("master-admin");
   const { session, loading: authLoading, twoFactorPending } = useAuth();
 
-  // System → Settings → Security → Session Timeout: sign an idle admin out.
+  // Who is signed in (role + module permissions, which decide the sidebar)
+  // and System → Settings → Security → Session Timeout, applied to every admin.
   const authed = isAdminAuthed();
-  const { data: settingsData } = useAdminFetch(
+  const { data: me } = useAdminFetch(
     () => authed && !twoFactorPending
-      ? adminApi.get<{ settings: { security?: { sessionTimeout?: string } } }>("/settings")
-      : Promise.resolve({ settings: {} as { security?: { sessionTimeout?: string } } }),
+      ? adminApi.get<AdminMe>("/me")
+      : Promise.resolve(null),
     [authed, twoFactorPending],
   );
-  const timeoutMinutes = Number(settingsData?.settings.security?.sessionTimeout);
+  const timeoutMinutes = Number(me?.sessionTimeout);
   useEffect(() => {
     if (!authed || !Number.isFinite(timeoutMinutes) || timeoutMinutes <= 0) return;
     let timer: ReturnType<typeof setTimeout>;
@@ -635,6 +659,8 @@ function AdminRoute() {
   }
 
   const renderAdminPage = () => {
+    // A screen this role can't open (e.g. a stale selection) falls back home.
+    if (!canOpenAdminPage(me ?? null, adminPage)) return <MasterAdmin onNavigate={setAdminPage}/>;
     switch (adminPage) {
       case "master-admin":        return <MasterAdmin onNavigate={setAdminPage}/>;
       case "admin-affiliate":     return <AffiliateAdmin/>;
@@ -661,6 +687,7 @@ function AdminRoute() {
       <AdminLayout
         currentPage={adminPage}
         onNavigate={setAdminPage}
+        canOpen={page => canOpenAdminPage(me ?? null, page)}
         onSignOut={() => { supabase.auth.signOut(); clearAdminAuthed(); navigate("/"); }}
       >
         {renderAdminPage()}

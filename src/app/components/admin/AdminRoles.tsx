@@ -91,7 +91,7 @@ export const ROLE_PRESETS: Record<AdminRole, { label: string; color: string; des
   support_agent: {
     label: "Support Agent",
     color: "#6FAE8B",
-    description: "View users and white glove only. No financial data, no config access.",
+    description: "Edit users and White Glove clients, view ID verification. Can't refund, comp, change plans or grant emergency access; no config access.",
     permissions: MODULE_DEFS.map(m => ({
       ...m,
       canView: ["overview","users","white_glove","verification"].includes(m.module),
@@ -445,9 +445,6 @@ export function AdminRoles() {
   /* The page an invited admin opens to accept (App.tsx /admin/accept). */
   const inviteLink = `${window.location.origin}/admin/accept?id=${createdAdmin?.id ?? ""}&token=${createdInviteToken ?? ""}`;
   const [linkCopied, setLinkCopied] = useState(false);
-  // No real session lookup wired to this screen yet — nothing in `admins`
-  // is flagged "you" until admin auth carries the caller's own account id through.
-  const SELF_ID = "";
 
   async function updateAdmin(id: string, changes: Partial<AdminAccount>) {
     const patch: Record<string, unknown> = {};
@@ -621,7 +618,7 @@ export function AdminRoles() {
           <div className="text-center py-10" style={{ color:"#8A9AB8" }}>No admin accounts match your filter.</div>
         )}
         {filtered.map(admin => (
-          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} onResend={resendInvite} isSelf={admin.id === SELF_ID}/>
+          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} onResend={resendInvite} isSelf={!!authUser?.email && admin.email?.toLowerCase() === authUser.email.toLowerCase()}/>
         ))}
       </div>
 

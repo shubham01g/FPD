@@ -61,7 +61,22 @@ export function PayoutManagement() {
 
   const pendingTotal = payouts.filter(p => p.status === "pending").reduce((sum, p) => sum + Number(p.amount), 0);
   const processingTotal = payouts.filter(p => p.status === "processing").reduce((sum, p) => sum + Number(p.amount), 0);
-  const paidTotal = payouts.filter(p => p.status === "paid").reduce((sum, p) => sum + Number(p.amount), 0);
+  // "Paid This Month" = payouts marked paid since the 1st of this month.
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+  const paidThisMonth = payouts.filter(p => p.status === "paid" && p.processed_at && new Date(p.processed_at).getTime() >= monthStart);
+  const paidTotal = paidThisMonth.reduce((sum, p) => sum + Number(p.amount), 0);
+
+  /* Pending/processing payouts can be moved on by hand: processing (sent,
+     not settled), failed or cancelled. Paid goes through Mark Paid. */
+  async function setStatus(id: string, status: "processing" | "failed" | "cancelled") {
+    try {
+      await adminApi.patch(`/payouts/${id}`, { status });
+      toast.success(`Payout marked ${status}`);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update the payout");
+    }
+  }
 
   const toggleSelect = (id: string) => {
     const next = new Set(selected);
@@ -153,7 +168,7 @@ export function PayoutManagement() {
             <span style={{ color: "var(--muted-foreground)", fontSize: 15 }}>Paid This Month</span>
           </div>
           <div style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "#D99A6B" }}>${paidTotal.toFixed(2)}</div>
-          <div style={{ color: "var(--muted-foreground)", fontSize: 15, marginTop: 2 }}>{payouts.filter(p => p.status === "paid").length} recipients</div>
+          <div style={{ color: "var(--muted-foreground)", fontSize: 15, marginTop: 2 }}>{paidThisMonth.length} recipients</div>
         </div>
       </div>
 
@@ -255,9 +270,21 @@ export function PayoutManagement() {
               <div style={{ color: "var(--muted-foreground)", fontSize: 16 }}>{payout.billing_period}</div>
               <div style={{ color: "var(--foreground)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{payout.payment_method}</div>
               <div style={{ color: "var(--gold)", fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 600 }}>${Number(payout.amount).toFixed(2)}</div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl" style={{ background: statusCfg.bg, color: statusCfg.color, width: "fit-content" }}>
-                {statusCfg.icon}
-                <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{statusCfg.label}</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl" style={{ background: statusCfg.bg, color: statusCfg.color, width: "fit-content" }}>
+                  {statusCfg.icon}
+                  <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", fontWeight: 600 }}>{statusCfg.label}</span>
+                </div>
+                {(payout.status === "pending" || payout.status === "processing") && (
+                  <select value="" onChange={e => { if (e.target.value) void setStatus(payout.id, e.target.value as "processing" | "failed" | "cancelled"); }}
+                    aria-label="Change payout status"
+                    style={{ background: "var(--card)", color: "var(--muted-foreground)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, padding: "3px 6px" }}>
+                    <option value="">Change…</option>
+                    {payout.status === "pending" && <option value="processing">Processing</option>}
+                    <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                )}
               </div>
             </div>
           );

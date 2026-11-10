@@ -1,6 +1,6 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
-import { stripe, stripeMode } from "../lib/stripe.ts";
+import { deleteUserCompletely } from "../lib/deleteUser.ts";
 import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const users = new Hono();
@@ -93,6 +93,15 @@ users.post("/", async (c) => {
     .eq("id", created.user.id);
   if (profileError) return c.json({ error: profileError.message }, 500);
 
+  // "White Glove" at onboarding enrols the account for real, so it shows up in
+  // White Glove admin (a users.white_glove flag alone never did).
+  if (whiteGlove) {
+    const { error: wgError } = await db.from("wg_clients").insert({
+      user_id: created.user.id, reason: "Enrolled at onboarding", notes: notes || null,
+    });
+    if (wgError) return c.json({ error: `Account created, but White Glove enrolment failed: ${wgError.message}` }, 500);
+  }
+
   if (subscriptionWaived && plan && plan !== "starter") {
     const { error: compError } = await db.rpc("provision_subscription", { p: {
       id: `comp_${created.user.id}`, user_id: created.user.id, product_line: "plan", plan_id: plan, status: "active",
@@ -142,10 +151,13 @@ users.get("/:id", async (c) => {
     const { count } = await db.from("affiliate_referrals").select("id", { count: "exact", head: true }).eq("affiliate_id", affiliate.id);
     referralCount = count ?? 0;
   }
+  // Last sign-in lives on the auth user, not in public.users.
+  const { data: authUser } = await db.auth.admin.getUserById(id);
 
   return c.json({
     user, storage: storage?.[0] ?? null, payments, contacts,
     legacyFeePaid: !!legacyFee, referralCount,
+    lastSignInAt: authUser?.user?.last_sign_in_at ?? null,
     twoFa: twoFa ?? { enabled: false, method: null },
     subscription: planSubs?.[0] ?? null,
   });
@@ -185,7 +197,9 @@ users.post("/:id/reset-mfa", async (c) => {
   return c.json({ ok: true });
 });
 
-// PATCH /admin/users/:id — admin edit (plan_status, email_verified).
+// PATCH /admin/users/:id — admin edit: suspend/lift (plan_status),
+// email_verified, and the account details from Edit Account (full_name,
+// phone, admin_notes, email). An email change goes through Supabase Auth.
 // is_admin is deliberately NOT editable here: an admin with only "users: edit"
 // could otherwise promote an account they control to an unrestricted admin
 // (no admin_accounts row = permissions null = everything). Admins are made
@@ -196,17 +210,37 @@ users.patch("/:id", async (c) => {
   if ("is_admin" in body) {
     return c.json({ error: "Admin access is granted from Admin Team & Roles, not here." }, 400);
   }
-  const allowed = ["plan", "plan_status", "email_verified"] as const;
+  const allowed = ["plan", "plan_status", "email_verified", "full_name", "phone", "admin_notes", "email"] as const;
   const patch: Record<string, unknown> = {};
   for (const key of allowed) if (key in body) patch[key] = body[key];
 
   if (Object.keys(patch).length === 0) {
     return c.json({ error: "No updatable fields provided" }, 400);
   }
+  for (const key of ["full_name", "phone", "admin_notes", "email"] as const) {
+    if (key in patch) {
+      if (patch[key] !== null && typeof patch[key] !== "string") return c.json({ error: `${key} must be text` }, 400);
+      patch[key] = typeof patch[key] === "string" ? (patch[key] as string).trim().slice(0, key === "admin_notes" ? 4000 : 200) || null : null;
+    }
+  }
+  if ("full_name" in patch && !patch.full_name) return c.json({ error: "Name is required" }, 400);
 
   const db = adminClient();
-  const { data: current } = await db.from("users").select("plan, plan_status").eq("id", id).maybeSingle();
+  const { data: current } = await db.from("users").select("plan, plan_status, email").eq("id", id).maybeSingle();
   if (!current) return c.json({ error: "User not found" }, 404);
+
+  // The sign-in email is owned by Supabase Auth; change it there first so the
+  // login and the profile never disagree. The admin vouches for the address.
+  if ("email" in patch) {
+    const email = String(patch.email ?? "").toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return c.json({ error: "Enter a valid email address" }, 400);
+    if (email === String(current.email).toLowerCase()) delete patch.email;
+    else {
+      const { error: authErr } = await db.auth.admin.updateUserById(id, { email, email_confirm: true });
+      if (authErr) return c.json({ error: `Could not change the sign-in email: ${authErr.message}` }, 400);
+      patch.email = email;
+    }
+  }
 
   // A plan is changed through billing (Users → Billing: change plan, comp,
   // refund & end), so what the account has always matches what it pays.
@@ -233,36 +267,6 @@ users.patch("/:id", async (c) => {
   return c.json({ user: data });
 });
 
-// Columns that point at a user without ON DELETE CASCADE/SET NULL — mostly
-// "who did this" stamps (reviewer, granter, actor). They would block the
-// delete, so they are cleared first; the record itself stays.
-const USER_STAMPS: [table: string, column: string][] = [
-  ["legacy_continuation_fees", "paid_by_user_id"], ["admin_settings", "updated_by"], ["contacts", "id_verified_by"],
-  ["partners", "user_id"], ["audit_logs", "actor_id"], ["id_verifications", "reviewed_by"],
-  ["concierge_employees", "invited_by"], ["wg_waivers", "sent_by"], ["crypto_transactions", "user_id"],
-  ["push_notifications", "sent_by"], ["crypto_processor_configs", "updated_by"], ["email_templates", "updated_by"],
-  ["enterprise_api_keys", "created_by"], ["admin_accounts", "invited_by"], ["admin_accounts", "user_id"],
-  ["wl_entitlements", "granted_by"], ["disaster_recovery_state", "bypass_granted_by"], ["legacy_claims", "reviewed_by"],
-];
-
-// Every object under a storage prefix, folders included (id-verifications
-// nests owner/contact/file).
-async function listAll(bucket: string, prefix: string): Promise<string[]> {
-  const store = adminClient().storage.from(bucket);
-  const paths: string[] = [];
-  for (let offset = 0; ; offset += 1000) {
-    const { data, error } = await store.list(prefix, { limit: 1000, offset });
-    if (error || !data?.length) break;
-    for (const item of data) {
-      const path = `${prefix}/${item.name}`;
-      if (item.id === null) paths.push(...await listAll(bucket, path));
-      else paths.push(path);
-    }
-    if (data.length < 1000) break;
-  }
-  return paths;
-}
-
 // DELETE /admin/users/:id?confirmEmail= — permanently removes the account:
 // cancels any paid Stripe subscription, deletes the user's files, then the
 // auth user and the profile (every owned table cascades from users).
@@ -271,62 +275,14 @@ async function listAll(bucket: string, prefix: string): Promise<string[]> {
 users.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const admin = c.get("admin") as AdminUser;
-  const db = adminClient();
-
-  const { data: target } = await db.from("users").select("id, email, is_admin").eq("id", id).maybeSingle();
+  const { data: target } = await adminClient().from("users").select("email").eq("id", id).maybeSingle();
   if (!target) return c.json({ error: "User not found" }, 404);
-  if (id === admin.id) return c.json({ error: "You cannot delete your own account." }, 400);
-  if (target.is_admin) return c.json({ error: "This is an admin account. Remove its admin access first." }, 409);
   if (String(c.req.query("confirmEmail") ?? "").trim().toLowerCase() !== String(target.email).toLowerCase()) {
     return c.json({ error: "Type the account's email address to confirm." }, 400);
   }
-
-  const { count: payoutCount } = await db.from("payouts").select("id", { count: "exact", head: true }).eq("recipient_user_id", id);
-  if (payoutCount) return c.json({ error: "This account has payout records, which must be kept. It cannot be deleted; suspend it instead." }, 409);
-
-  const { data: liveSubs } = await db.from("subscriptions").select("id")
-    .eq("user_id", id).in("status", ["active", "trialing", "past_due", "incomplete", "unpaid"]);
-  const paidSubs = (liveSubs ?? []).filter((s) => !s.id.startsWith("comp_"));
-  if (paidSubs.length && !stripeMode()) {
-    return c.json({ error: "This account has a paid subscription and Stripe is not configured, so it cannot be cancelled." }, 503);
-  }
-  try {
-    for (const sub of paidSubs) {
-      await stripe("DELETE", `/subscriptions/${sub.id}`, { prorate: false, invoice_now: false }).catch((err) => {
-        if (!(err instanceof Error && /canceled|No such subscription/i.test(err.message))) throw err;
-      });
-    }
-  } catch (err) {
-    return c.json({ error: `Could not cancel the Stripe subscription: ${err instanceof Error ? err.message : err}` }, 502);
-  }
-
-  // Files: user-owned buckets are keyed by user id; legacy-claims by claim id.
-  const { data: claims } = await db.from("legacy_claims").select("id").eq("owner_user_id", id);
-  const prefixes: [string, string][] = [
-    ["vault-documents", id], ["record-photos", id], ["id-verifications", id],
-    ...(claims ?? []).map((cl): [string, string] => ["legacy-claims", cl.id]),
-  ];
-  for (const [bucket, prefix] of prefixes) {
-    const paths = await listAll(bucket, prefix);
-    for (let i = 0; i < paths.length; i += 100) {
-      const { error } = await db.storage.from(bucket).remove(paths.slice(i, i + 100));
-      if (error) return c.json({ error: `Could not delete files in ${bucket}: ${error.message}` }, 500);
-    }
-  }
-
-  for (const [table, column] of USER_STAMPS) {
-    const { error } = await db.from(table).update({ [column]: null }).eq(column, id);
-    if (error) return c.json({ error: `Could not clear ${table}.${column}: ${error.message}` }, 500);
-  }
-
-  // Auth first: if the profile delete then failed, a profile with no login is
-  // harmless, whereas a login with no profile is not.
-  const { error: authError } = await db.auth.admin.deleteUser(id);
-  if (authError && !/not found/i.test(authError.message)) return c.json({ error: authError.message }, 500);
-
-  const { error } = await db.from("users").delete().eq("id", id);
-  if (error) return c.json({ error: error.message }, 500);
-  return c.json({ ok: true, cancelledSubscriptions: paidSubs.length });
+  const result = await deleteUserCompletely(id, admin.id);
+  if (!result.ok) return c.json({ error: result.error }, result.status as 400);
+  return c.json(result);
 });
 
 export default users;

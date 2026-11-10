@@ -13,6 +13,7 @@ import type { AdminUser } from "../middleware/adminAuth.ts";
 import { clientIp, ipAllowed } from "../lib/platformSettings.ts";
 import { clearIpAllowlistCache } from "../middleware/ipAllowlist.ts";
 import { EMAIL_CONFIGURED, EMAIL_FROM_ADDRESS } from "../lib/email.ts";
+import danger from "./dangerZone.ts";
 
 const settings = new Hono();
 
@@ -78,5 +79,8 @@ settings.put("/:section", async (c) => {
   if (section === "security") clearIpAllowlistCache();
   return c.json({ section, value });
 });
+
+// Danger Zone tools (super admin only) — routes/dangerZone.ts
+settings.route("/danger", danger);
 
 export default settings;

@@ -45,3 +45,24 @@ export async function decryptSecret(stored: string): Promise<string> {
   const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   return new TextDecoder().decode(plainBuf);
 }
+
+/* ── Key rotation (Settings → Danger Zone) ───────────────────────────
+   The same AES-256-GCM format with an explicitly given secret, so stored
+   values can be re-encrypted from the current secret to a new one. */
+async function keyFrom(secret: string): Promise<CryptoKey> {
+  const keyBytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+/** Decrypts with `oldSecret` and re-encrypts with `newSecret`. */
+export async function reencryptSecret(stored: string, oldSecret: string, newSecret: string): Promise<string> {
+  const [oldKey, newKey] = await Promise.all([keyFrom(oldSecret), keyFrom(newSecret)]);
+  const combined = fromBase64(stored);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: combined.slice(0, 12) }, oldKey, combined.slice(12));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, newKey, plain));
+  const out = new Uint8Array(iv.length + ct.length);
+  out.set(iv, 0);
+  out.set(ct, iv.length);
+  return toBase64(out);
+}

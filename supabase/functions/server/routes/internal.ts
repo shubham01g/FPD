@@ -8,6 +8,7 @@ import { safeEqual, stripeMode } from "../lib/stripe.ts";
 import { billingPaused } from "../lib/billingConfig.ts";
 import { runRollover } from "../lib/billing/usage.ts";
 import { runMessageDelivery } from "../lib/messageDelivery.ts";
+import { runScheduledCampaigns } from "../lib/campaigns.ts";
 
 const internal = new Hono();
 
@@ -34,15 +35,18 @@ internal.post("/billing/rollover", async (c) => {
   }
 });
 
-// POST /internal/messages/deliver — hourly: email Messages to Loved Ones
-// that are due (migration 050, lib/messageDelivery.ts).
+// POST /internal/messages/deliver — hourly (the messages-delivery cron):
+// email Messages to Loved Ones that are due (migration 050) and send admin
+// announcements whose scheduled time has passed (migration 054). Each job
+// runs even if the other fails.
 internal.post("/messages/deliver", async (c) => {
-  try {
-    return c.json(await runMessageDelivery());
-  } catch (err) {
-    console.error("message delivery failed:", err);
-    return c.json({ error: err instanceof Error ? err.message : "Delivery failed" }, 500);
-  }
+  const out: Record<string, unknown> = {};
+  let failed = false;
+  try { out.messages = await runMessageDelivery(); }
+  catch (err) { failed = true; console.error("message delivery failed:", err); out.messagesError = err instanceof Error ? err.message : "Delivery failed"; }
+  try { out.campaigns = await runScheduledCampaigns(); }
+  catch (err) { failed = true; console.error("scheduled campaigns failed:", err); out.campaignsError = err instanceof Error ? err.message : "Campaigns failed"; }
+  return c.json(out, failed ? 500 : 200);
 });
 
 export default internal;

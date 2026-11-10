@@ -289,7 +289,10 @@ async function orgCheckout(c: Context<Env>, product: "partner_setup" | "wl_setup
       if (existing?.length) return c.json({ error: "This account is already a partner." }, 409);
       const { product: row, priceId } = await productPrice("partner_setup");
       lineItem = { price: priceId, quantity: 1 };
-      metadata = { ...common, productSlug: row.slug };
+      // ?ref=<code> from an admin-created (invited) partner record: the
+      // webhook activates that record instead of creating a second one.
+      const inviteCode = meta(body.inviteCode, 20).toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      metadata = { ...common, productSlug: row.slug, ...(inviteCode ? { inviteCode } : {}) };
       back = "/partner";
     } else {
       const packageId = meta(body.packageId, 60);

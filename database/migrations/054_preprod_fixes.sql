@@ -80,3 +80,25 @@ UPDATE public.admin_accounts
    SET invite_token_hash = encode(extensions.digest(invite_token, 'sha256'), 'hex'),
        invite_token = NULL
  WHERE invite_token IS NOT NULL;
+
+-- 5 ── scheduled admin announcements (Push Notification Center) ─────────────
+--    "Schedule for later" used to send immediately. A scheduled campaign now
+--    waits with status 'scheduled'; the hourly messages-delivery cron (050)
+--    sends it once scheduled_for has passed (lib/campaigns.ts).
+ALTER TABLE public.push_notifications ADD COLUMN IF NOT EXISTS status  TEXT NOT NULL DEFAULT 'sent';
+ALTER TABLE public.push_notifications ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'push';
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'push_notifications_status_check') THEN
+    ALTER TABLE public.push_notifications
+      ADD CONSTRAINT push_notifications_status_check CHECK (status IN ('scheduled', 'sending', 'sent', 'cancelled', 'failed'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'push_notifications_channel_check') THEN
+    ALTER TABLE public.push_notifications
+      ADD CONSTRAINT push_notifications_channel_check CHECK (channel IN ('push', 'email', 'both'));
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_push_notifications_due
+  ON public.push_notifications (scheduled_for) WHERE status = 'scheduled';
+
+-- 6 ── Disaster Recovery: the admin's internal note on a bypass grant ───────
+ALTER TABLE public.disaster_recovery_state ADD COLUMN IF NOT EXISTS bypass_notes TEXT;
