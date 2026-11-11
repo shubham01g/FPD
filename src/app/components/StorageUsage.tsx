@@ -254,7 +254,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
   const capBarColor = capPct >= 100 ? "#E53E3E" : capPct >= 80 ? NEG : capPct >= 50 ? WARN : POS;
   const resetsOn = usage?.period_end ? longDate(usage.period_end) : longDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString());
 
-  const usageByCategory = deriveStorageBreakdown(docs).map(c => ({ category: c.label, gb: c.gb, color: c.color }));
+  const usageByCategory = deriveStorageBreakdown(docs, usage ? used : undefined).map(c => ({ category: c.label, gb: c.gb, color: c.color }));
   const usageByMonth = deriveMonthlyUsage(docs);
   const projectedEOM = projectEndOfMonth(docs, used);
   const projectedOverGb = Math.max(0, projectedEOM - total);

@@ -19,6 +19,7 @@ import {
   Shield, Users, Lock, LoaderCircle, FileText, Eye, Download, ArrowLeft, Clock, TriangleAlert, LogOut, LayoutDashboard,
 } from "lucide-react";
 import { signOut } from "../services/auth";
+import { buildContactExport } from "../services/contactExport";
 import {
   documentUrl, getOwnerSections, getSection, listOwnerDocuments, listSharedOwners,
   type GrantStatus, type OwnerSections, type PortalDocument, type SectionData, type SharedOwner,
@@ -132,6 +133,21 @@ export function AccessPortal() {
     } catch (e) { win?.close(); setErr((e as Error).message); }
   };
 
+  const [exporting, setExporting] = useState("");
+  const downloadAll = async () => {
+    if (!open || exporting) return;
+    setErr(""); setExporting("Starting");
+    try {
+      const r = await buildContactExport(open.owner.id, (text, pct) => setExporting(`${text}${pct ? ` · ${pct}%` : ""}`));
+      const url = URL.createObjectURL(r.blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = r.fileName; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      if (r.skipped.length) setErr(`Downloaded ${r.records} records and ${r.files} documents. ${r.skipped.length} item(s) could not be included; they are listed in README.txt inside the archive.`);
+    } catch (e) { setErr((e as Error).message); }
+    setExporting("");
+  };
+
   const kindChip = (kind: "legacy" | "guardian") => {
     const c = kind === "legacy" ? LEGACY : GUARDIAN;
     return (
@@ -156,6 +172,15 @@ export function AccessPortal() {
               ? `Read-only Legacy Vault access${open.expiresAt ? `, open until ${fmtDate(open.expiresAt)}` : ""}.`
               : "View-only access to the folders they chose for you. Files can be viewed but not downloaded."}
           </p>
+          {open.canDownload && (
+            <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <button className="btn" onClick={downloadAll} disabled={!!exporting}>
+                {exporting ? <LoaderCircle size={14} className="animate-spin" /> : <Download size={14} />}
+                {exporting ? "Preparing archive…" : "Download everything (ZIP)"}
+              </button>
+              {exporting && <span style={{ color: MUTED, fontSize: 14 }}>{exporting}</span>}
+            </div>
+          )}
         </div>
         <div className="tabs">
           {open.sections.map(s => (

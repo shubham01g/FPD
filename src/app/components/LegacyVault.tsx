@@ -15,6 +15,8 @@ import {
   BookOpen, Key, Users, PawPrint, AlertTriangle, ChevronDown, ChevronUp, Info,
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
+import { usePlatform } from "../services/platform";
+import { goToPage } from "../utils/goToPage";
 import { toast } from "sonner";
 import { VaultClone } from "./VaultClone";
 import { downloadBlob } from "../utils/zip";
@@ -85,7 +87,7 @@ const PACKAGE_SECTIONS = [
   {
     icon: <Key size={18}/>,
     label: "Password Manager",
-    desc: "All saved credentials and account information — encrypted until delivered",
+    desc: "Saved accounts and credentials — passwords stay encrypted with your vault passphrase",
     itemCount: "All credentials",
   },
   {
@@ -151,7 +153,10 @@ function SectionPreview({ label, uid, onClose }: { label: string; uid: string; o
   const spec = SECTION_TABLES[label];
   useEffect(() => {
     if (!spec?.tables.length) { setGroups([]); return; }
-    previewRecords(uid, spec.tables).then(setGroups).catch(() => setGroups([]));
+    previewRecords(uid, spec.tables).then(setGroups).catch(() => {
+      setGroups([]);
+      toast.error("Couldn't load this section's records. Try again in a moment.");
+    });
   }, [uid, spec]);
   const total = groups?.reduce((n, g) => n + g.rows.length, 0) ?? 0;
   return (
@@ -293,12 +298,13 @@ function ConditionRow({ num, met, title, desc }: { num:string; met:boolean; titl
 }
 
 export function LegacyVault() {
-  const { continuationFeePaid, user, docs, deathVerified } = useDemo();
+  const { continuationFeePaid, user, docs } = useDemo();
+  const { continuationFee } = usePlatform();
+  const fee = `$${continuationFee.amount % 1 === 0 ? continuationFee.amount : continuationFee.amount.toFixed(2)}`;
   const [showVaultClone, setShowVaultClone] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const sectionsRef = React.useRef<HTMLDivElement>(null);
 
-  const fullyUnlocked = continuationFeePaid && deathVerified;
 
   const { authUser } = useAuth();
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
@@ -307,7 +313,11 @@ export function LegacyVault() {
 
   useEffect(() => {
     if (!authUser) return;
-    countRecords(authUser.id, ALL_TABLES).then(setCounts).catch(() => setCounts({}));
+    // A failed count must not read as "0 records" (as if nothing was saved).
+    countRecords(authUser.id, ALL_TABLES).then(setCounts).catch(() => {
+      setCounts(null);
+      toast.error("Couldn't count your records right now. Refresh to try again.");
+    });
   }, [authUser]);
 
   /* The real number of records each section holds. */
@@ -360,13 +370,13 @@ export function LegacyVault() {
           <div className="hcontent">
             <span className="heyebrow">Sealed Until It's Needed</span>
             <h1>Everything you'd want them <span className="accent">to find, kept safe.</span></h1>
-            <p>A complete, encrypted preview of what your verified legacy contacts receive — locked behind two conditions until the day it's needed.</p>
+            <p>A preview of what your legacy contacts receive — opened to them only once a claim is approved and the Legacy Continuation Fee is activated.</p>
             <div className="hactions">
               <button className="hbtn primary" onClick={() => sectionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
                 <Eye size={15}/> See What's Included
               </button>
-              <button className="hbtn ghost" onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Export.")}>
-                <Download size={15}/> Download Vault Export
+              <button className="hbtn ghost" onClick={() => continuationFeePaid ? downloadFullPackage() : toast.error(`Pay the ${fee} Legacy Continuation Fee to download your vault.`)}>
+                <Download size={15}/> Download My Vault
               </button>
             </div>
           </div>
@@ -377,45 +387,39 @@ export function LegacyVault() {
           <div className="eyebrow"><Lock size={12}/> AES-256 Encrypted at Rest</div>
           <h1 className="pg-h1">Your Legacy Package</h1>
           <div className="pg-sub">
-            This is a preview of everything your verified legacy contacts will receive. All content is stored across
-            your platform sections — organized, encrypted, and ready to be delivered. Use the sections in the sidebar
-            to add or update any information.
+            This is a preview of everything your legacy contacts will receive. It is gathered from your sections in the
+            sidebar — add or update anything there and it appears here.
           </div>
         </div>
 
         {/* ── Two-condition gate ── */}
         <div className="card pad">
-          <h3 className="sec-title" style={{ marginBottom: 14 }}><span className="tick"/>Two Conditions Required to Unlock Downloads</h3>
+          <h3 className="sec-title" style={{ marginBottom: 14 }}><span className="tick"/>Two Conditions Before Your Legacy Contacts Get Access</h3>
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             <ConditionRow
               num="1"
               met={continuationFeePaid}
-              title="$199 Legacy Continuation Fee"
+              title={`${fee} Legacy Continuation Fee`}
               desc="One-time fee paid by you or a legacy contact. Go to Security → Activate Legacy Access in the sidebar."
             />
             <ConditionRow
               num="2"
-              met={deathVerified}
+              met={false}
               title="Confirmation of Passing — Verified by FPD Admin"
-              desc={deathVerified
-                ? "A record of passing was reviewed and accepted by Final Pass Down."
-                : "Accepted documents: death certificate, obituary, hospital notice, coroner report, funeral home letter, probate filing, or any credible official record. Submitted by a legacy contact after your passing."}
+              desc="Accepted documents: death certificate, obituary, hospital notice, coroner report, funeral home letter, probate filing, or any credible official record. Submitted by a legacy contact after your passing."
             />
-            {!deathVerified && (
+            {(
               <p style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.6, margin: 0 }}>
                 <FileText size={13} style={{ verticalAlign: -2, marginRight: 6 }}/>
                 How this happens: your Legacy Contact tells Final Pass Down, we email them a secure claim link,
                 they upload the record there, and our team reviews it. Nothing is submitted from your own account.
               </p>
             )}
-            <div className={`status-row ${fullyUnlocked ? "ok" : "no"}`}>
-              {fullyUnlocked
-                ? <><CheckCircle size={15} color="#FFFFFF"/><span style={{ color:"#D99A6B", fontSize:16, fontWeight:600 }}>Both conditions met — Legacy Vault Export is fully unlocked.</span></>
-                : <><AlertTriangle size={15} color={NEG}/><span style={{ color:NEG, fontSize:16 }}>Downloads are locked until <strong>both</strong> conditions are met.</span></>
-              }
+            <div className="status-row no">
+              <Info size={15} color={MUTED}/><span style={{ color:MUTED, fontSize:16 }}>When both are met, each Legacy Contact signs in with their own Final Pass Down login, opens <strong>Shared with me</strong>, and downloads everything from there.</span>
             </div>
             {!continuationFeePaid && (
-              <button className="btn-primary" onClick={() => toast.info("Go to Security → Activate Legacy Access in the sidebar to pay.")}>
+              <button className="btn-primary" onClick={() => goToPage("legacy-continuation")}>
                 Go to Activate Legacy Access <ArrowRight size={15}/>
               </button>
             )}
@@ -428,7 +432,7 @@ export function LegacyVault() {
             <div>
               <h3 className="sec-title"><span className="tick"/>What Your Legacy Contacts Receive</h3>
               <div className="sec-sub">
-                Everything below is included in the Legacy Vault Export — a complete encrypted download of your entire account.
+                Everything below is included in the Legacy Vault — every section, file and record (your Secret Vault is never shared).
               </div>
             </div>
             <button className="btn-link" onClick={() => setExpanded(e => !e)}>
@@ -453,14 +457,14 @@ export function LegacyVault() {
                   <button
                     onClick={() => continuationFeePaid
                       ? setPreviewing(section.label)
-                      : toast.error("Pay the $199 fee to preview content")}
+                      : toast.error(`Pay the ${fee} fee to preview content`)}
                     title={continuationFeePaid ? "Preview" : "Locked"}>
                     <Eye size={14}/>
                   </button>
                   <button
                     onClick={() => continuationFeePaid
                       ? downloadSection(section)
-                      : toast.error("Pay the $199 fee to download")}
+                      : toast.error(`Pay the ${fee} fee to download`)}
                     title={continuationFeePaid ? "Download" : "Locked"}>
                     <Download size={14}/>
                   </button>
@@ -476,32 +480,23 @@ export function LegacyVault() {
           )}
         </div>
 
-        {/* ── Legacy Vault Export CTA ── */}
+        {/* ── How the Legacy Vault reaches them ── */}
         <div className="card cta">
-          <div className="cta-ico" style={{ background: fullyUnlocked ? "rgba(95,190,145,0.12)" : "rgba(91,110,225,0.10)", border:`1px solid ${fullyUnlocked?"rgba(95,190,145,0.32)":"rgba(91,110,225,0.26)"}` }}>
-            {fullyUnlocked ? <Unlock size={26} color="#FFFFFF"/> : <Lock size={26} color="#FFFFFF"/>}
+          <div className="cta-ico" style={{ background: "rgba(91,110,225,0.10)", border:"1px solid rgba(91,110,225,0.26)" }}>
+            <Lock size={26} color="#FFFFFF"/>
           </div>
-          <div className="cta-title">
-            {fullyUnlocked ? "Legacy Vault Export — Ready to Download" : "Legacy Vault Export — Locked"}
-          </div>
+          <div className="cta-title">How Your Legacy Contacts Receive It</div>
           <div className="cta-desc">
-            {fullyUnlocked
-              ? "Both conditions are met. Your legacy contacts can now download a complete encrypted copy of your entire account — all sections, all files, all records."
-              : "When both the $199 fee is paid and your passing is verified, legacy contacts can download everything — all sections, all files, all records — in one complete encrypted package."}
+            After your passing is verified and the Legacy Continuation Fee is activated, each Legacy Contact signs in
+            with their own login, opens <b>Shared with me</b>, and can view everything or download it all as one ZIP
+            archive. The archive is a plain ZIP file, not encrypted. Your Secret Vault is never included.
           </div>
           <div className="cta-btns">
-            <button
-              className="cta-primary"
-              onClick={() => fullyUnlocked ? downloadFullPackage() : toast.error("Both conditions must be met to access the Legacy Vault Export.")}
-              style={{
-                background: fullyUnlocked ? "linear-gradient(180deg,#6BCB9C,#4CAE7C)" : "rgba(255,255,255,0.05)",
-                color: fullyUnlocked ? "#0A1712" : MUTED,
-                boxShadow: fullyUnlocked ? "0 8px 22px -8px rgba(95,190,145,0.55)" : "none",
-                cursor: fullyUnlocked ? "pointer" : "not-allowed",
-              }}>
-              {fullyUnlocked ? <><Download size={16}/> Download Legacy Vault Export (.zip)</> : <><Lock size={14}/> Locked — Conditions Not Met</>}
+            <button className="cta-primary" onClick={() => continuationFeePaid ? downloadFullPackage() : goToPage("legacy-continuation")}
+              style={{ background: "rgba(255,255,255,0.05)", color: "#E8EDF5", boxShadow: "none" }}>
+              {continuationFeePaid ? <><Download size={16}/> Download My Own Copy (.zip)</> : <>Activate Legacy Access <ArrowRight size={15}/></>}
             </button>
-            {fullyUnlocked && (
+            {continuationFeePaid && (
               <button className="cta-secondary" onClick={() => setShowVaultClone(true)}>
                 <Eye size={15}/> Browse Contents
               </button>

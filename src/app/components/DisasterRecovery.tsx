@@ -508,7 +508,7 @@ export function DisasterRecovery() {
           <div className="hcontent">
             <span className="heyebrow">Why It Matters</span>
             <h1 style={{ fontSize: 26 }}>Disasters don't send <span className="accent">a warning.</span></h1>
-            <p>Wildfires, storms, and outages can take your devices — and your records — in minutes. Your bypass window, encrypted export, and audit trail are ready the moment you need them, not after.</p>
+            <p>Wildfires, storms, and outages can take your devices — and your records — in minutes. Your bypass window, full export, and audit trail are ready the moment you need them, not after.</p>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:14 }}>
               {["48-HR WINDOW","100 GB EXPORT","BUILT ON YOUR DEVICE"].map(chip => (
                 <span key={chip} style={{

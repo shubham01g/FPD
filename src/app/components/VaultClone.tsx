@@ -5,6 +5,7 @@ import {
   X, Shield, BookOpen, Key, PawPrint
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
+import { usePlatform } from "../services/platform";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { buildVaultExport, type ExportResult } from "../services/vaultExport";
@@ -153,6 +154,8 @@ const VCLONE_CSS = `
 
 export function VaultClone({ onClose, mode }: VaultCloneProps) {
   const { continuationFeePaid, docs, wishes, allergies, medications, memories, contacts, user } = useDemo();
+  const { continuationFee } = usePlatform();
+  const fee = `$${continuationFee.amount % 1 === 0 ? continuationFee.amount : continuationFee.amount.toFixed(2)}`;
   const { authUser } = useAuth();
   const [phase, setPhase] = useState("");
   const [result, setResult] = useState<ExportResult | null>(null);
@@ -162,8 +165,10 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
   const [progress, setProgress] = useState(0);
   const [downloadId, setDownloadId] = useState("");
 
-  // In real app, also check deathCertificateVerified from backend
-  // For demo: fee paid = unlocked
+  // This is the account holder downloading their OWN copy, which the
+  // Legacy Continuation Fee unlocks. Legacy Contacts never use this screen:
+  // they download from Shared with me (/access), where the server checks the
+  // approved claim and the activated fee (routes/contactAccess.ts /export).
   const isUnlocked = continuationFeePaid;
 
   /* Builds the real archive (services/vaultExport.ts): every section's
@@ -207,7 +212,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
           <div className="head-ico"><Copy size={18}/></div>
           <div>
             <div className="head-title">Legacy Vault Export</div>
-            <div className="head-sub">Complete download of all account data for verified legacy contacts</div>
+            <div className="head-sub">Your own complete copy of everything in your account, as one ZIP file</div>
           </div>
         </div>
 
@@ -219,11 +224,10 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
               <div className="panel panel-locked">
                 <AlertTriangle size={32} color={NEG} style={{ margin:"0 auto" }}/>
                 <div className="lock-title">Legacy Vault Export Locked</div>
-                <p>Downloads are locked until <strong style={{ color: TEXT }}>both</strong> conditions are met:</p>
+                <p>Your own full download unlocks once this is done:</p>
                 <div className="flex flex-col gap-2" style={{ marginTop: 14, textAlign: "left" }}>
                   {[
-                    { label:"Legacy Continuation Fee paid ($199)", done:false },
-                    { label:"Death certificate submitted and verified by FPD admin", done:false },
+                    { label:`Legacy Continuation Fee paid (${fee})`, done:false },
                   ].map(c => (
                     <div key={c.label} className="cond-row">
                       <X size={12} color={NEG} style={{ flexShrink:0 }}/>
@@ -235,7 +239,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
 
               <div className="panel panel-info">
                 <div className="panel-info-lbl">WHAT GETS UNLOCKED</div>
-                <p>Once both conditions are met, legacy contacts can click this button to download a complete, encrypted package of <strong style={{ color: TEXT }}>everything</strong> in this account{totalItems > 0 ? ` — ${totalItems}+ items across all 30+ life categories` : ", across all 30+ life categories"}.</p>
+                <p>A complete ZIP archive of <strong style={{ color: TEXT }}>everything</strong> in this account{totalItems > 0 ? ` — ${totalItems} items across every section` : ", across every section"}. Your Legacy Contacts receive the same archive from their own sign-in (Shared with me) once a claim is approved and the fee is activated.</p>
                 <div className="preview-grid">
                   {[...contents, ...OTHER_SECTIONS].slice(0,8).map(item => (
                     <div key={item.label} className="preview-chip">
@@ -257,7 +261,7 @@ export function VaultClone({ onClose, mode }: VaultCloneProps) {
                 <Shield size={16} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
                 <div>
                   <div className="panel-unlocked-title">Legacy Vault Export Unlocked</div>
-                  <p>Legacy Continuation Fee paid and confirmation of passing verified by FPD administrators. This download contains <strong style={{ color: TEXT }}>everything</strong> in the account — {totalItems}+ items across all categories.</p>
+                  <p>Legacy Continuation Fee paid. This download is your own copy of <strong style={{ color: TEXT }}>everything</strong> in the account — {totalItems} items across all sections. It is a plain ZIP file, not encrypted, so keep it somewhere safe.</p>
                 </div>
               </div>
 

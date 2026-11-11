@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "../context/DemoContext";
 import { useAuth } from "../context/AuthContext";
+import { countRecords } from "../services/vaultExport";
 import { db } from "../services/supabase";
 import { deriveStorageBreakdown } from "../utils/storageBreakdown";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
@@ -192,13 +193,23 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   /* ── The six estate essentials — still drive the header's readiness
      figure and "finish your vault" CTA, just no longer rendered as their
      own checklist card. ── */
+  // Each essential counts when its own screen has an entry (or a matching
+  // document is filed). It used to look only at File Cabinet categories, so a
+  // will entered on Wills & Trusts never counted.
+  const { authUser: me } = useAuth();
+  const [recordCounts, setRecordCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!me) return;
+    countRecords(me.id, ["wills_trusts", "financial_records", "digital_assets", "password_vault"]).then(setRecordCounts).catch(() => {});
+  }, [me, docs.length]);
+  const has = (t: string) => (recordCounts[t] ?? 0) > 0;
   const essentials = [
-    { label: "Will or trust", done: docs.some(d => d.category === "legal"), page: "wills-trusts" },
+    { label: "Will or trust", done: has("wills_trusts") || docs.some(d => d.category === "legal"), page: "wills-trusts" },
     { label: "Legacy contact", done: legacyVerified > 0, page: "contacts-legacy" },
-    { label: "Financial records", done: docs.some(d => d.category === "financial"), page: "financial-records" },
+    { label: "Financial records", done: has("financial_records") || docs.some(d => d.category === "financial"), page: "financial-records" },
     { label: "Final wishes", done: wishes.length > 0, page: "final-wishes" },
-    { label: "Guardian assigned", done: guardianContacts.length > 0, page: "contacts-legacy" },
-    { label: "Digital assets", done: docs.some(d => d.category === "digital"), page: "password-manager" },
+    { label: "Guardian assigned", done: guardianContacts.length > 0, page: "contacts-guardian" },
+    { label: "Digital assets", done: has("digital_assets") || has("password_vault") || docs.some(d => d.category === "digital"), page: "password-manager" },
   ];
   const doneCount = essentials.filter(e => e.done).length;
   const readyPct = Math.round((doneCount / essentials.length) * 100);

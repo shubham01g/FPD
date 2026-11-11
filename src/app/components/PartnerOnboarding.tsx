@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../utils/clipboard";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
@@ -472,7 +472,7 @@ function PartnerDashboard({ data, onSignOut }: { data: PartnerData; onSignOut: (
           <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:8 }}>YOUR REFERRAL LINK</div>
           <div className="flex gap-2 flex-wrap items-center">
             <code style={{ color:"#9CC7E6", fontSize:15, wordBreak:"break-all", flex:1 }}>{link}</code>
-            <button onClick={() => { copyToClipboard(link); toast.success("Link copied"); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.12)", color:"#AEB9F5" }}><Copy size={13}/> Copy</button>
+            <button onClick={() => { void copyWithToast(link, "Link copied"); }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm" style={{ background:"rgba(91,110,225,0.12)", color:"#AEB9F5" }}><Copy size={13}/> Copy</button>
           </div>
           <div style={{ color:"#8A9AB8", fontSize:13.5, marginTop:8 }}>Partner code <strong>{p.partner_code}</strong>. Anyone who signs up through this link is credited to you.</div>
         </div>

@@ -3,7 +3,7 @@ import { CheckCircle, AlertTriangle, RefreshCw, Loader2, CreditCard, Copy, Activ
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 
 /* Stripe billing setup and health (Admin → Subscription Config).
    Keys are never shown or entered here: they are edge-function secrets
@@ -100,7 +100,7 @@ export function StripeBillingPanel({ onSynced }: { onSynced?: () => void }) {
         <div style={{ color: "var(--muted-foreground)", fontSize: 13, ...MONO, marginBottom: 6 }}>WEBHOOK ENDPOINT URL ({status.webhookEvents.length} EVENTS · API {status.apiVersion})</div>
         <div className="flex items-center gap-2">
           <code style={{ fontSize: 13.5, color: "var(--foreground)", wordBreak: "break-all", flex: 1 }}>{status.webhookUrl}</code>
-          <button onClick={() => { copyToClipboard(status.webhookUrl); toast.success("Copied"); }} style={{ color: "var(--muted-foreground)" }}><Copy size={14}/></button>
+          <button onClick={() => { void copyWithToast(status.webhookUrl, "Copied"); }} style={{ color: "var(--muted-foreground)" }}><Copy size={14}/></button>
         </div>
         <div style={{ color: "var(--muted-foreground)", fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>{status.webhookEvents.join(" · ")}</div>
       </div>

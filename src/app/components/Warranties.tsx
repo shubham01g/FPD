@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName, DetachButton } from "./AttachDocumentField";
 import heroWarrantyPhoto from "../../imports/warranties_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -473,9 +473,16 @@ export function Warranties() {
                     <div className="doclbl">Documents ({w.documents.length})</div>
                     <div className="docs">
                       {w.documents.map(d => (
-                        <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
-                          <FileText size={12} /> {attachmentDisplayName(d)}
-                        </button>
+                        <span key={d} style={{ display: "inline-flex", alignItems: "center" }}>
+                          <button className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
+                            <FileText size={12} /> {attachmentDisplayName(d)}
+                          </button>
+                          <DetachButton name={attachmentDisplayName(d)} onDetach={async () => {
+                              const { error } = await tables.warranties.update(w.id, { document_urls: w.documents.filter(x => x !== d) });
+                              if (error) { toast.error(`Could not remove: ${error.message}`); return false; }
+                              await reload(); return true;
+                            }}/>
+                        </span>
                       ))}
                       <ScanButton folder="warranties" store={{ sectionLabel: "Warranties" }} onUpload={async doc => {
                         // Stored + filed by the scanner; link the stored path.
@@ -540,7 +547,7 @@ export function Warranties() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={wDoc} onChange={setWDoc} folder="personal" sectionId="warranties" sectionLabel="Warranties" label="Attach Document (receipt, warranty card, protection plan)" />
+                <AttachDocumentField value={wDoc} onChange={setWDoc} folder="warranties" sectionId="warranties" sectionLabel="Warranties" label="Attach Document (receipt, warranty card, protection plan)" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={guard(saveWarranty)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Warranty"}</button>

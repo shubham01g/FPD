@@ -17,7 +17,7 @@
 import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Copy } from "lucide-react";
 import { toast } from "sonner";
-import { copyToClipboard } from "../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../utils/clipboard";
 import { encryptField, decryptField } from "../services/vaultCrypto";
 
 export type TwoFaMethod = "sms" | "email" | "authenticator" | "phone_call" | "security_key" | "other";
@@ -137,7 +137,7 @@ export function TwoFactorSummary({ info }: { info: TwoFactorInfo }) {
           </div>
           <div className="tfa-btns">
             <button type="button" onClick={() => setShowCodes(s => !s)}>{showCodes ? <EyeOff size={12} /> : <Eye size={12} />}</button>
-            <button type="button" onClick={() => { copyToClipboard(info.backupCodes!); toast.success("Backup codes copied to clipboard"); }}><Copy size={12} /></button>
+            <button type="button" onClick={() => { void copyWithToast(info.backupCodes!, "Backup codes copied to clipboard"); }}><Copy size={12} /></button>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Copy, TrendingUp, DollarSign, CheckCircle, Share2, Link, Info } from "lucide-react";
-import { copyToClipboard } from "../utils/clipboard";
+import { copyWithToast } from "../utils/clipboard";
 import { toast } from "sonner";
 import { db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -32,7 +32,7 @@ interface ReferralRow {
 const tiers = [
   { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#6FAE8B" },
   { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: "#6E90C9" },
-  { tier: 3, label: "Tier 3", range: "74+ accounts", rate: 30, color: "#D99A6B" },
+  { tier: 3, label: "Tier 3", range: "75+ accounts", rate: 30, color: "#D99A6B" },
 ];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
@@ -165,8 +165,9 @@ export function AffiliateProgram() {
       }
       if (!aff) { setLoading(false); return; }
       setAffiliate(aff);
-      const { data: rows } = await db.listAffiliateReferrals(aff.id);
+      const { data: rows, error: refErr } = await db.listAffiliateReferrals(aff.id);
       if (cancelled) return;
+      if (refErr) setLoadError(`Your referrals couldn't be loaded: ${refErr.message}`);
       setReferrals((rows ?? []) as unknown as ReferralRow[]);
       setLoading(false);
     })();
@@ -199,9 +200,12 @@ export function AffiliateProgram() {
 
   const handleCopy = () => {
     if (!affiliateLink || !linkLive) return;
-    copyToClipboard(affiliateLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    // "Copied!" only when it really was.
+    void copyWithToast(affiliateLink, "Referral link copied").then(ok => {
+      if (!ok) return;
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const kpis = [

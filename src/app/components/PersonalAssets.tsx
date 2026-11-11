@@ -1203,7 +1203,7 @@ export function PersonalAssets() {
                     <input value={(cForm as any)[key]} onChange={e => setCForm(p => ({ ...p, [key]: e.target.value }))} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={cDoc} onChange={setCDoc} folder="personal" sectionId="collectibles" sectionLabel="Collectibles" label="Attach Document (appraisal, certificate of authenticity)" />
+                <AttachDocumentField value={cDoc} onChange={setCDoc} folder="keepsakes" sectionId="collectibles" sectionLabel="Collectibles" label="Attach Document (appraisal, certificate of authenticity)" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={guard(addCollectible)} disabled={saving}>{editingId !== null ? "Save Changes" : "Add Collectible"}</button>

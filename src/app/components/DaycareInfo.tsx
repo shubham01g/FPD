@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName, DetachButton } from "./AttachDocumentField";
 import heroDaycarePhoto from "../../imports/daycare_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -189,19 +189,36 @@ export function DaycareInfo() {
   const { authUser } = useAuth();
   const [records, setRecords] = useState<DaycareRecord[]>([]);
 
-  /* Adds an authorized pickup person to the record (authorized_pickups);
-     this used to show a "(demo)" toast. */
+  /* Authorized pickups (authorized_pickups): added through a small form
+     (it used to be four browser prompts) and removable. */
+  const NO_PHOTO_ID = "Photo ID not recorded";
+  const [pickupForm, setPickupForm] = useState<{ recId: string; name: string; relationship: string; phone: string; photoId: string } | null>(null);
+  const savePickups = async (recId: string, next: AuthorizedPerson[], done: string) => {
+    const { error } = await tables.daycareRecords.update(recId, { authorized_pickups: next });
+    if (error) { toast.error(`Could not save: ${error.message}`); return false; }
+    await reload();
+    toast.success(done);
+    return true;
+  };
   const addPickup = async (rec: { id: string; authorizedPickups: AuthorizedPerson[] }) => {
-    const name = window.prompt("Full name of the person allowed to pick up?")?.trim();
-    if (!name) return;
-    const relationship = window.prompt(`How is ${name} related to the child? (e.g. Grandmother)`)?.trim() ?? "";
-    const phone = window.prompt(`${name}'s phone number?`)?.trim() ?? "";
-    const photoId = window.prompt("Photo ID on file with the daycare? (e.g. Driver's license on file)")?.trim() || "Photo ID not recorded";
-    const next = [...rec.authorizedPickups, { name, relationship, phone, photoId }];
-    const { error } = await tables.daycareRecords.update(rec.id, { authorized_pickups: next });
+    if (!pickupForm || pickupForm.recId !== rec.id) return;
+    const name = pickupForm.name.trim();
+    if (!name) { toast.error("Enter the person's full name"); return; }
+    const person = { name, relationship: pickupForm.relationship.trim(), phone: pickupForm.phone.trim(), photoId: pickupForm.photoId.trim() || NO_PHOTO_ID };
+    if (await savePickups(rec.id, [...rec.authorizedPickups, person], `${name} added as an authorized pickup`)) setPickupForm(null);
+  };
+  const removePickup = (rec: { id: string; authorizedPickups: AuthorizedPerson[] }, index: number) => {
+    const person = rec.authorizedPickups[index];
+    if (!person || !window.confirm(`Remove ${person.name} from the authorized pickups?`)) return;
+    void savePickups(rec.id, rec.authorizedPickups.filter((_, i) => i !== index), `${person.name} removed`);
+  };
+  /* Active / inactive: shown on every card but could never be changed. */
+  const toggleStatus = async (rec: { id: string; status: string }) => {
+    const next = rec.status === "active" ? "inactive" : "active";
+    const { error } = await tables.daycareRecords.update(rec.id, { status: next });
     if (error) { toast.error(`Could not save: ${error.message}`); return; }
     await reload();
-    toast.success(`${name} added as an authorized pickup`);
+    toast.success(`Marked ${next}`);
   };
 
   const reload = useCallback(async () => {
@@ -368,7 +385,7 @@ export function DaycareInfo() {
                   <div>
                     <div className="rtitle">
                       <span className="rname">{rec.facilityName}</span>
-                      <span className="stat-badge" style={{ background: rec.status === "active" ? "rgba(95,190,145,0.14)" : "rgba(140,151,180,0.14)", color: statusColor[rec.status] }}>{rec.status.toUpperCase()}</span>
+                      <button className="stat-badge" title={`Mark ${rec.status === "active" ? "inactive" : "active"}`} onClick={(e) => { e.stopPropagation(); void toggleStatus(rec); }} style={{ background: rec.status === "active" ? "rgba(95,190,145,0.14)" : "rgba(140,151,180,0.14)", color: statusColor[rec.status], border: "none", cursor: "pointer" }}>{rec.status.toUpperCase()}</button>
                     </div>
                     <div className="rchild">Child: {rec.childName}</div>
                     <div className="rmeta">
@@ -453,14 +470,36 @@ export function DaycareInfo() {
                                 <b>{p.name}</b>
                                 <span>{p.relationship}</span>
                               </div>
-                              <div className="pinfo-row"><Phone size={10} />{p.phone}</div>
-                              <div className="pinfo-row ok"><CheckCircle size={10} />{p.photoId}</div>
+                              {p.phone && <div className="pinfo-row"><Phone size={10} />{p.phone}</div>}
+                              {p.photoId && p.photoId !== NO_PHOTO_ID
+                                ? <div className="pinfo-row ok"><CheckCircle size={10} />{p.photoId}</div>
+                                : <div className="pinfo-row" style={{ color: "#D9A55E" }}>⚠ Photo ID not recorded</div>}
                             </div>
+                            <button className="btn-sec" onClick={() => removePickup(rec, i)} title={`Remove ${p.name}`} style={{ padding: "6px 10px", alignSelf: "flex-start" }}>
+                              <X size={13} />
+                            </button>
                           </div>
                         ))}
-                        <button className="adddash" onClick={() => void addPickup(rec)}>
-                          <Plus size={13} /> Add Authorized Pickup Person
-                        </button>
+                        {pickupForm?.recId === rec.id ? (
+                          <div className="pcard" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+                            {([["name", "Full name *", ""], ["relationship", "Relationship to the child", "e.g. Grandmother"], ["phone", "Phone", ""], ["photoId", "Photo ID on file with the daycare", "e.g. Driver's license on file"]] as const).map(([key, label, ph]) => (
+                              <label key={key} style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13.5, color: MUTED }}>
+                                {label}
+                                <input value={pickupForm[key]} placeholder={ph} onChange={e => setPickupForm(f => f && ({ ...f, [key]: e.target.value }))}
+                                  style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)", color: "#E8EDF5", fontSize: 15 }} />
+                              </label>
+                            ))}
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <button onClick={guard(() => addPickup(rec))} disabled={saving}
+                                style={{ flex: 1, padding: "9px 12px", borderRadius: 12, border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer", background: "linear-gradient(135deg,#5B6EE1,#4A5BC9)", color: "#fff" }}>Add</button>
+                              <button className="btn-sec" onClick={() => setPickupForm(null)}>Cancel</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button className="adddash" onClick={() => setPickupForm({ recId: rec.id, name: "", relationship: "", phone: "", photoId: "" })}>
+                            <Plus size={13} /> Add Authorized Pickup Person
+                          </button>
+                        )}
                       </>
                     )}
 
@@ -468,9 +507,16 @@ export function DaycareInfo() {
                       <>
                         <div className="docrow">
                           {rec.documents.map(d => (
-                            <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
-                              <FileText size={12} /> {attachmentDisplayName(d)}
-                            </button>
+                            <span key={d} style={{ display: "inline-flex", alignItems: "center" }}>
+                              <button className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
+                                <FileText size={12} /> {attachmentDisplayName(d)}
+                              </button>
+                              <DetachButton name={attachmentDisplayName(d)} onDetach={async () => {
+                              const { error } = await tables.daycareRecords.update(rec.id, { document_urls: rec.documents.filter(x => x !== d) });
+                              if (error) { toast.error(`Could not remove: ${error.message}`); return false; }
+                              await reload(); return true;
+                            }}/>
+                            </span>
                           ))}
                         </div>
                         <ScanButton folder="daycare" store={{ sectionLabel: "Daycare Information" }} onUpload={async doc => {
@@ -505,7 +551,7 @@ export function DaycareInfo() {
                     <input value={(form as any)[key]} onChange={F(key)} placeholder={ph} />
                   </div>
                 ))}
-                <AttachDocumentField value={dDoc} onChange={setDDoc} folder="personal" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
+                <AttachDocumentField value={dDoc} onChange={setDDoc} folder="daycare" label="Attach Document (enrollment agreement, immunization records)" sectionId="daycare-info" sectionLabel="Daycare Information" />
               </div>
               <div className="modal-foot">
                 <button className="save" onClick={guard(saveRecord)} disabled={saving}>{editingRecord ? "Save Changes" : "Add Daycare"}</button>

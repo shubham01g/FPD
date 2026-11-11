@@ -13,9 +13,9 @@
  * `storage_usage` is deliberately NOT the source: nothing in the app or the
  * Edge functions ever writes a row to it, so it reports 0 for everyone.
  *
- * Known gap: photos uploaded through PhotoPicker go to the `record-photos`
- * bucket and never create a vault_documents row, so they are outside both
- * this breakdown and `user.storageUsed`.
+ * Photos (record-photos bucket) and recordings have no vault_documents row.
+ * Usage & Billing passes the server's measured total, and the difference is
+ * shown as "Photos, recordings & other files" so the slices add up.
  */
 
 export interface StorageCategory {
@@ -53,7 +53,19 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
   crypto:    { label: "Crypto & NFTs",         color: "#F6AD55" },
   education: { label: "Education & Awards",    color: "#6FAE8B" },
   military:  { label: "Military Records",      color: "#ED8936" },
+  // The rest of the File Cabinet's folders (DocumentScanner CABINET_FOLDERS),
+  // which all used to land in "Other Documents".
+  keepsakes:      { label: "Keepsakes & Collectibles", color: "#D68FA8" },
+  awards:         { label: "Awards",                   color: "#6FAE8B" },
+  weapons_locker: { label: "Knives & Blades",          color: "#929CBC" },
+  firearms:       { label: "Firearms",                 color: "#ED8936" },
+  warranties:     { label: "Warranties",               color: "#6E90C9" },
+  ids:            { label: "IDs",                      color: "#D99A6B" },
+  daycare:        { label: "Daycare",                  color: "#F6AD55" },
+  places:         { label: "Places",                   color: "#6FAE8B" },
+  secret:         { label: "Secret Vault",             color: "#A98CC7" },
   other:     { label: "Other Documents",       color: "#929CBC" },
+  unitemized: { label: "Photos, recordings & other files", color: "#7A85A6" },
 };
 
 const toGb = (d: SizedDoc) => (d.sizeUnit === "GB" ? d.size : d.size / 1024);
@@ -63,7 +75,7 @@ const toGb = (d: SizedDoc) => (d.sizeUnit === "GB" ? d.size : d.size / 1024);
  * Returns [] for an account with no documents — the correct state for a new
  * user, and what the callers render their empty state from.
  */
-export function deriveStorageBreakdown(docs: SizedDoc[]): StorageCategory[] {
+export function deriveStorageBreakdown(docs: SizedDoc[], measuredTotalGb?: number): StorageCategory[] {
   const totals = new Map<string, { gb: number; files: number }>();
 
   for (const doc of docs) {
@@ -72,6 +84,15 @@ export function deriveStorageBreakdown(docs: SizedDoc[]): StorageCategory[] {
     entry.gb += toGb(doc);
     entry.files += 1;
     totals.set(key, entry);
+  }
+
+  // The server's meter also counts record photos, recordings and other files
+  // that have no File Cabinet row. Show that difference as its own slice so
+  // the categories add up to the headline figure instead of falling short.
+  if (measuredTotalGb !== undefined) {
+    const docsGb = [...totals.values()].reduce((s, t) => s + t.gb, 0);
+    const rest = measuredTotalGb - docsGb;
+    if (rest > 0.005) totals.set("unitemized", { gb: rest, files: 0 });
   }
 
   return [...totals.entries()]

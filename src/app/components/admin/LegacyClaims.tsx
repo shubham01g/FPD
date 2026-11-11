@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { claimLink } from "./MarkDeceasedModal";
 
 /* ─── Types ───────────────────────────────────────────────────────── */
@@ -726,8 +726,9 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
       if (res.emailed) {
         toast.success(`New claim link emailed to ${recipientEmail}`);
       } else {
-        copyToClipboard(fullMessage(claimLink(res.claim.token)));
-        toast.warning(`${res.emailError ?? "The email was not sent"} — the message and link were copied for you to send`);
+        const message = fullMessage(claimLink(res.claim.token));
+        if (await copyToClipboard(message)) toast.warning(`${res.emailError ?? "The email was not sent"} — the message and link were copied for you to send`);
+        else window.prompt(`${res.emailError ?? "The email was not sent"}. Copy this message and send it yourself:`, message);
       }
       onChanged();
     } catch (err) {
@@ -738,8 +739,7 @@ function SendClaimLinkModal({ claim, onClose, onChanged }: { claim: DeathClaim; 
   }
 
   function copyLink() {
-    copyToClipboard(link);
-    toast.success("Claim link copied to clipboard");
+    void copyWithToast(link, "Claim link copied to clipboard");
   }
 
   return (

@@ -237,7 +237,8 @@ export function IDKeeper() {
       issue_date: form.issueDate,
       expiry_date: form.expiryDate,
       notes: form.notes,
-      ...(form.photo ? { document_url: form.photo } : {}),
+      // Always written, so removing the image clears it.
+      document_url: form.photo || null,
     };
 
     const { error } = editingID

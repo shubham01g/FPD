@@ -251,6 +251,10 @@ const rowToEmergencyInfo = (r: DBEmergencyInfo): EmergencyInfo => ({
 /* ─── Context ───────────────────────────────────────────────────── */
 interface DemoCtx {
   user: UserProfile;
+  /* Set when the account's data could not be loaded. Screens would otherwise
+     show an empty account (and a "Foundation" plan) as if nothing was saved. */
+  loadError: string | null;
+  retryLoad: () => void;
   continuationFeePaid: boolean;
   setContinuationFeePaid: (paid: boolean) => void;
   /* True once Final Pass Down has marked the account holder deceased
@@ -342,6 +346,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   /* Storage allowance per plan, from subscription_plans. */
   const planGb = useRef<Record<string, number>>({ ...PLAN_STORAGE_GB });
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadKey, setLoadKey] = useState(0);
+  const retryLoad = useCallback(() => setLoadKey(k => k + 1), []);
+
   /* Load everything for the signed-in user, and keep notifications live. */
   useEffect(() => {
     if (!uid) {
@@ -376,6 +384,15 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         supabase.from("subscription_plans").select("id, storage_gb"),
       ]);
       if (cancelled) return;
+      // Any part that failed is reported once, instead of rendering as empty.
+      const failed = [
+        ["your profile", userRes], ["documents", docsRes], ["contacts", contactsRes], ["ID checks", idvRes],
+        ["final wishes", wishesRes], ["allergies", allergiesRes], ["medications", medsRes], ["reminders", remindersRes],
+        ["memories", memoriesRes], ["occasions", occasionsRes], ["notifications", notifsRes], ["the Legacy fee", feeRes],
+        ["funeral plan", funeralPlanRes], ["emergency info", emergencyInfoRes], ["folders", foldersRes],
+      ].filter(([, r]) => (r as { error?: unknown }).error).map(([label]) => label as string);
+      if (!userRes.data && !userRes.error) failed.unshift("your profile");
+      setLoadError(failed.length ? `Some of your account couldn't be loaded (${[...new Set(failed)].join(", ")}). What you see may be incomplete — nothing has been deleted.` : null);
       for (const p of (plansRes.data ?? []) as { id: string; storage_gb: number }[]) planGb.current[p.id] = p.storage_gb;
 
       if (userRes.data) {
@@ -419,7 +436,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
-  }, [uid]);
+  }, [uid, loadKey]);
 
   /* There is deliberately no way to "submit a record of passing" from the
      owner's own session. It used to accept any file name locally and toast
@@ -634,7 +651,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       access_level: updates.accessLevel, notes: updates.notes,
       // Only sent when the edit actually touched the photo — spreading an
       // undefined would blank the column on every other kind of save.
-      ...(updates.photo === undefined ? {} : { photo_url: updates.photo ?? null }),
+      // "" means the photo was removed.
+      ...(updates.photo === undefined ? {} : { photo_url: updates.photo || null }),
     });
     if (error || !data) { toast.error("Could not save contact", { id: tid }); return false; }
     // Merge only the edited fields — rowToContact would also reset idVerificationStatus/
@@ -903,14 +921,28 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, [uid]);
 
   /* Notifications */
+  // Shown as read at once; put back (and said so) if the save fails, so a
+  // notification never silently comes back as unread on the next visit.
   const markNotifRead = useCallback((id: string) => {
-    db.markNotificationRead(id);
     setNotifs(n => n.map(x => x.id === id ? { ...x, read:true } : x));
+    Promise.resolve(db.markNotificationRead(id)).then((res) => {
+      if ((res as { error?: unknown } | undefined)?.error) {
+        setNotifs(n => n.map(x => x.id === id ? { ...x, read:false } : x));
+        toast.error("Couldn't mark that notification as read");
+      }
+    });
   }, []);
   const markAllRead = useCallback(() => {
-    if (uid) db.markAllNotificationsRead(uid);
+    if (!uid) return;
+    const before = notifications;
     setNotifs(n => n.map(x => ({ ...x, read:true })));
-  }, [uid]);
+    Promise.resolve(db.markAllNotificationsRead(uid)).then((res) => {
+      if ((res as { error?: unknown } | undefined)?.error) {
+        setNotifs(before);
+        toast.error("Couldn't mark notifications as read");
+      }
+    });
+  }, [uid, notifications]);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -925,6 +957,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       markNotifRead, markAllRead, unreadCount,
       continuationFeePaid, setContinuationFeePaid,
       deathVerified: Boolean(user.deceasedAt),
+      loadError, retryLoad,
     }}>
       {children}
     </DemoContext.Provider>

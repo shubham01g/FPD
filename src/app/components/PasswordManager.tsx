@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../utils/clipboard";
 import { useEscapeKey } from "../hooks/useEscapeKey";
 import React, { useState, useEffect, useCallback } from "react";
 import { AttachDocumentsList, AttachmentChips } from "./AttachDocumentField";
@@ -460,7 +460,7 @@ export function PasswordManager() {
     })
     .sort((a, b) => rankOf(a) - rankOf(b));
 
-  const copy = (text: string, label: string) => { copyToClipboard(text); toast.success(`${label} copied to clipboard`) };
+  const copy = (text: string, label: string) => { void copyWithToast(text, `${label} copied to clipboard`); };
 
   const kpis = [
     { label: "Total Entries", value: String(passwords.length), sub: "Stored credentials", icon: <Key size={14} />, dot: ACCENT2 },

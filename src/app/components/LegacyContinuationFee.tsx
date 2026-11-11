@@ -349,7 +349,7 @@ export function LegacyContinuationFee() {
             {showCoverage ? <ChevronUp size={16} color={MUTED}/> : <ChevronDown size={16} color={MUTED}/>}
           </button>
           <div className="cov-desc">
-            When conditions are met and a legacy contact clicks <strong>LEGACY VAULT CLONE</strong>, they receive a complete, encrypted download of <em>everything</em> the account holder ever saved — across all 30+ life categories.
+            When both conditions are met, each legacy contact signs in, opens <strong>Shared with me</strong>, and can download <em>everything</em> the account holder saved as one ZIP archive (the Secret Vault is never shared).
           </div>
           {showCoverage && (
             <div className="cgrid">
@@ -403,7 +403,7 @@ export function LegacyContinuationFee() {
               <div className="card pad">
                 <div className="price-hero">
                   <div className="price-val">{feeLabel}</div>
-                  <div className="price-sub">One-time · Never expires · Non-refundable</div>
+                  <div className="price-sub">One-time · Access lasts {feeMonths} months once activated · Non-refundable</div>
                   <div className="price-badge">
                     <Star size={13} fill={POS} color="#FFFFFF"/>
                     <span>Covers complete download of all account data</span>

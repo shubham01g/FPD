@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { tables } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName, DetachButton } from "./AttachDocumentField";
 import heroJobPhoto from "../../imports/jobhistory_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -394,9 +394,16 @@ export function JobHistory() {
                       <div className="docs-lbl">DOCUMENTS ({job.documents.length})</div>
                       <div className="flex flex-wrap gap-2">
                         {job.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
-                            📄 {attachmentDisplayName(d)}
-                          </button>
+                          <span key={d} style={{ display: "inline-flex", alignItems: "center" }}>
+                            <button className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
+                              📄 {attachmentDisplayName(d)}
+                            </button>
+                            <DetachButton name={attachmentDisplayName(d)} onDetach={async () => {
+                              const { error } = await tables.jobHistory.update(job.id, { document_urls: job.documents.filter(x => x !== d) });
+                              if (error) { toast.error(`Could not remove: ${error.message}`); return false; }
+                              await reload(); return true;
+                            }}/>
+                          </span>
                         ))}
                         <ScanButton folder="legal" store={{ sectionLabel: "Job History" }} onUpload={async doc => {
                           // Stored + filed by the scanner; link it to this record.

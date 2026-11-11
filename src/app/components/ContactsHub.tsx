@@ -149,7 +149,7 @@ function FolderSelector({ selected, onChange }: { selected:string[]; onChange:(i
 /* ── Add / Edit Contact Modal ────────────────────────────────────── */
 function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveFolders, onSaveVerification }: {
   defaultType: ContactType; editing?: Contact | null; onClose:()=>void;
-  onAdd:(c:Omit<Contact,"id">, verification?:ContactVerificationInput)=>Promise<void>; onSave?:(id:string, updates:Partial<Contact>)=>void;
+  onAdd:(c:Omit<Contact,"id">, verification?:ContactVerificationInput)=>Promise<boolean>; onSave?:(id:string, updates:Partial<Contact>)=>Promise<boolean>;
   onSaveFolders?:(id:string, folderIds:string[])=>Promise<void>;
   onSaveVerification?:(id:string, v:ContactVerificationInput)=>Promise<boolean>;
 }) {
@@ -221,12 +221,16 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
         setLoading(false);
         return;
       }
-      onSave?.(editing.id, {
+      // Wait for the save: the modal used to close at once, so a failed save
+      // looked like it worked and the edits were lost.
+      const saved = await onSave?.(editing.id, {
         name: form.name, email: form.email, phone: form.phone, relationship: form.relationship,
-        notes: form.notes, photo: form.photo || undefined,
+        // Always sent, so removing the photo ("") clears it.
+        notes: form.notes, photo: form.photo ?? "",
         accessLevel: isGuardian ? `View Only — ${guardianFolders.length} folder${guardianFolders.length===1?"":"s"} assigned` : form.accessLevel,
         avatar: form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),
       });
+      if (saved === false) { setLoading(false); return; }
       if (isGuardian) await onSaveFolders?.(editing.id, guardianFolders);
       onClose();
       return;
@@ -237,10 +241,12 @@ function AddContactModal({ defaultType, editing, onClose, onAdd, onSave, onSaveF
     // Legacy/Guardian start un-invited; the server marks them sent once the email goes out.
     // Only sent when the owner ticked something beyond the always-required
     // documents, so plain contacts don't depend on migration 047.
-    await onAdd(
+    const added = await onAdd(
       { ...form, accessLevel:accessDesc, verificationStatus:(isLegacy || isGuardian) ? "not_sent" : "pending", allowedFolderIds:isGuardian?guardianFolders:undefined, avatar:form.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(), photo:form.photo || undefined },
       showVerifications && selectedVerifications.length > 1 ? verification : undefined,
     );
+    // Keep the form open (with what was typed) when the save failed.
+    if (!added) { setLoading(false); return; }
     onClose();
   };
 
@@ -998,7 +1004,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
           <AddContactModal
             defaultType={addingType}
             onClose={() => setAddingType(null)}
-            onAdd={async (c, verification) => { await addContact(c, { verification }); setAddingType(null); }}
+            onAdd={async (c, verification) => { const ok = await addContact(c, { verification }); if (ok) setAddingType(null); return ok; }}
           />
         )}
 
@@ -1007,10 +1013,11 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             defaultType={editingContact.type}
             editing={editingContact}
             onClose={() => setEditingContact(null)}
-            onAdd={async () => {}}
-            onSave={(id, updates) => {
-              updateContact(id, updates);
-              setEditingContact(null);
+            onAdd={async () => false}
+            onSave={async (id, updates) => {
+              const ok = await updateContact(id, updates);
+              if (ok) setEditingContact(null);
+              return ok;
             }}
             onSaveFolders={updateGuardianFolders}
             onSaveVerification={saveContactVerification}

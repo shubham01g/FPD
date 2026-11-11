@@ -6,7 +6,7 @@ import {
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { FPD_EMAIL } from "../../utils/fpdEmails";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
@@ -88,8 +88,7 @@ export function MarkDeceasedModal({ user, onClose, onConfirm }: Props) {
      contact's link appended, for a contact whose email didn't go out or who
      should also get it another way. */
   function copyMessage(claim: IssuedClaim) {
-    copyToClipboard(`${noteToFamily}\n\n${claimLink(claim.token)}\n\nThis link is unique to you and expires in 30 days. Do not share it.`);
-    toast.success(`Message and link for ${claim.claimant_name} copied`);
+    void copyWithToast(`${noteToFamily}\n\n${claimLink(claim.token)}\n\nThis link is unique to you and expires in 30 days. Do not share it.`, `Message and link for ${claim.claimant_name} copied`);
   }
 
   return (

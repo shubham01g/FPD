@@ -202,7 +202,7 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, onOpenSh
   const notifRef = useRef<HTMLDivElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
-  const { unreadCount, user, notifications, markAllRead, markNotifRead } = useDemo();
+  const { unreadCount, user, notifications, markAllRead, markNotifRead, loadError, retryLoad } = useDemo();
   const online = useOnline();
 
   const isActive = (id: PageId) => currentPage === id;
@@ -546,6 +546,14 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, onOpenSh
           </div>
         </header>
         <OfflineBanner />
+        {loadError && (
+          <div role="alert" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "10px 16px",
+            background: "rgba(208,107,107,0.12)", borderBottom: "1px solid rgba(208,107,107,0.35)", color: "#F2C6C6", fontSize: 15 }}>
+            <span style={{ flex: 1, minWidth: 220 }}>{loadError}</span>
+            <button onClick={retryLoad} style={{ padding: "6px 14px", borderRadius: 10, border: "1px solid rgba(242,198,198,0.4)",
+              background: "transparent", color: "#F2C6C6", fontWeight: 600, cursor: "pointer" }}>Try again</button>
+          </div>
+        )}
 
         {/* Page */}
         <main className="fpd-main flex-1 overflow-y-auto fpd-scroll relative" style={{ background: BG }}>

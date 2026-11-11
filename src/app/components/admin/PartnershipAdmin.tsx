@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import React, { useMemo, useState } from "react";
 import { Handshake, Building, Search, Eye, Edit, CheckCircle, XCircle, Send, X, Copy, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -90,7 +90,7 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,110,225,0.05)", border:"1px solid rgba(91,110,225,0.12)" }}>
               <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flexShrink:0 }}>ONBOARDING LINK:</span>
               <span style={{ color:"#6E90C9", fontSize:12.5, flex:1 }} className="truncate">{onboardingLink}</span>
-              <button onClick={() => { copyToClipboard(onboardingLink!); toast.success("Link copied!"); }}
+              <button onClick={() => { void copyWithToast(onboardingLink!, "Link copied!"); }}
                 style={{ color:"#6E90C9", flexShrink:0 }}><Copy size={12}/></button>
             </div>
             <button onClick={onClose} className="w-full py-3 rounded-2xl font-semibold text-sm"

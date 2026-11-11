@@ -3,7 +3,7 @@ import {
   Star, Plus, X, CheckCircle, Shield, Send, Copy, Key,
 } from "lucide-react";
 import { toast } from "sonner";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
@@ -94,9 +94,9 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flex:1 }} className="truncate">{portalLink}</span>
-              <button onClick={() => { copyToClipboard(portalLink!); toast.success("Link copied"); }} style={{ color:"#6FAE8B", flexShrink:0 }}><Copy size={12}/></button>
+              <button onClick={() => { void copyWithToast(portalLink!, "Link copied"); }} style={{ color:"#6FAE8B", flexShrink:0 }}><Copy size={12}/></button>
             </div>
-            <button onClick={() => { copyToClipboard(`Login: ${created.employee.email}\nPassword: ${created.tempPassword}\nPortal: ${portalLink}`); toast.success("Credentials copied"); }}
+            <button onClick={() => { void copyWithToast(`Login: ${created.employee.email}\nPassword: ${created.tempPassword}\nPortal: ${portalLink}`, "Credentials copied"); }}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold"
               style={{ background:"rgba(91,167,214,0.08)", color:"#6FAE8B" }}>
               <Key size={13}/> Copy Full Credentials
@@ -184,8 +184,7 @@ function EmployeeCard({ emp, clients, onUpdate }: { emp: ConciergeEmployee; clie
     setBusy(true);
     try {
       const res = await adminApi.post<{ tempPassword: string; emailed: boolean }>(`/concierge/${emp.id}/reset-password`);
-      copyToClipboard(`Login: ${emp.email}\nPassword: ${res.tempPassword}\nPortal: ${portalLink}`);
-      toast.success(res.emailed
+      void copyWithToast(`Login: ${emp.email}\nPassword: ${res.tempPassword}\nPortal: ${portalLink}`, res.emailed
         ? `New password emailed to ${emp.email} (also copied to your clipboard).`
         : "New password copied to your clipboard — the email could not be sent, so pass it on yourself. It is shown only this once.");
     } catch (err) {
@@ -268,7 +267,7 @@ function EmployeeCard({ emp, clients, onUpdate }: { emp: ConciergeEmployee; clie
             <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:6 }}>CONCIERGE PORTAL LOGIN LINK</div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.15)" }}>
               <span style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, flex:1 }} className="truncate">{portalLink}</span>
-              <button onClick={() => { copyToClipboard(portalLink); toast.success("Portal link copied"); }} style={{ color:"#6FAE8B", flexShrink:0 }}><Copy size={12}/></button>
+              <button onClick={() => { void copyWithToast(portalLink, "Portal link copied"); }} style={{ color:"#6FAE8B", flexShrink:0 }}><Copy size={12}/></button>
             </div>
           </div>
 

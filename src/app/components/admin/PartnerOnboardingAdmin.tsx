@@ -5,7 +5,7 @@ import {
   ToggleLeft, ToggleRight, AlertCircle, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import {
   getAdminPackages, updatePackage, createPackage,
   getSales, updateSaleStatus, setSaleUnlocked, getProcessors, updateProcessor, calcMonthlyCharge,
@@ -415,10 +415,11 @@ export function PartnerOnboardingAdmin() {
     // This site's own address (finalpassdown.com isn't serving the app yet),
     // and no made-up "token": the onboarding page needs only the tier.
     const link = `${window.location.origin}/partner/onboard?tier=${encodeURIComponent(tierId)}`;
-    copyToClipboard(link);
-    setCopiedId(tierId);
-    toast.success("Onboarding link copied");
-    setTimeout(() => setCopiedId(null), 3000);
+    void copyWithToast(link, "Onboarding link copied").then(ok => {
+      if (!ok) return;
+      setCopiedId(tierId);
+      setTimeout(() => setCopiedId(null), 3000);
+    });
   }
 
   const activeSales = sales.filter(s => s.status === "active");
@@ -755,7 +756,7 @@ export function PartnerOnboardingAdmin() {
               <div style={{ color:"#8A9AB8", fontSize:15, marginBottom:12 }}>
                 Contact {FPD_EMAIL.partnerships} to add a processor or integrate a WL partner's existing payment system.
               </div>
-              <button onClick={() => { copyToClipboard(FPD_EMAIL.partnerships); toast.success(`${FPD_EMAIL.partnerships} copied`); }}
+              <button onClick={() => { void copyWithToast(FPD_EMAIL.partnerships, `${FPD_EMAIL.partnerships} copied`); }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold"
                 style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
                 <Plus size={13}/> Request Custom Integration

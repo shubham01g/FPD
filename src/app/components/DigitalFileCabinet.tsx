@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo, type Doc, type VaultFolder } from "../context/DemoContext";
+import { usePlatform } from "../services/platform";
 import { checkUpload, showQuotaRefusal } from "../utils/storageQuota";
 import { db } from "../services/supabase";
 import { ScanButton } from "./DocumentScanner";
@@ -542,6 +543,8 @@ const CAB_CSS = `
 `;
 
 export function DigitalFileCabinet() {
+  const { continuationFee } = usePlatform();
+  const feeText = `$${continuationFee.amount % 1 === 0 ? continuationFee.amount : continuationFee.amount.toFixed(2)}`;
   const {
     continuationFeePaid, docs, addDoc, deleteDoc,
     folders, addFolder, renameFolder, deleteFolder, pendingFolderId, setPendingFolderId,
@@ -773,7 +776,7 @@ export function DigitalFileCabinet() {
               </div>
               <h1 className="pg-h1">{current ? current.label : "Digital File Cabinet"}</h1>
               <div className="pg-sub">
-                {current ? current.description : `${allCabinets.length} folders · ${totalFiles}+ files, stored encrypted at rest.`}
+                {current ? current.description : `${allCabinets.length} folders · ${totalFiles} file${totalFiles === 1 ? "" : "s"}, stored encrypted at rest.`}
               </div>
             </div>
           </div>
@@ -1006,7 +1009,7 @@ export function DigitalFileCabinet() {
                   {file.starred && <Star size={13} fill="#D9A55E" color="#D9A55E"/>}
                   {file.locked && <Lock size={13} color={NEG}/>}
                   <div className="facts">
-                    <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? void downloadFile(file) : toast.error("Pay the $199 Legacy Continuation Fee to download files");}}><Download size={13}/></button>
+                    <button onClick={e=>{e.stopPropagation(); (continuationFeePaid || current.id === "taxes") ? void downloadFile(file) : toast.error(`Pay the ${feeText} Legacy Continuation Fee to download files`);}}><Download size={13}/></button>
                     <button onClick={e=>{e.stopPropagation(); void previewFile(file);}}><Eye size={13}/></button>
                     <button className="del" onClick={e=>{
                       e.stopPropagation();
@@ -1054,7 +1057,7 @@ export function DigitalFileCabinet() {
             ))}
           </div>
           <div className="dbtns">
-            <button className="dbtn ghost" onClick={() => (continuationFeePaid || current?.id === "taxes") ? void downloadFile(selected) : toast.error("Pay the $199 Legacy Continuation Fee to download")}>
+            <button className="dbtn ghost" onClick={() => (continuationFeePaid || current?.id === "taxes") ? void downloadFile(selected) : toast.error(`Pay the ${feeText} Legacy Continuation Fee to download`)}>
               <Download size={13}/> Download
             </button>
             <button className="dbtn solid" onClick={() => void previewFile(selected)}>

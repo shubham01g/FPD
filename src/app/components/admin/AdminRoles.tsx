@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { TwoFactorSettingsCard } from "../twofa/TwoFactorSettingsCard";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
@@ -508,10 +508,11 @@ export function AdminRoles() {
 
   function copyLink() {
     const link = inviteLink;
-    try { navigator.clipboard.writeText(link); } catch { /* fallback */ }
-    setLinkCopied(true);
-    toast.success("Invite link copied");
-    setTimeout(() => setLinkCopied(false), 3000);
+    void copyWithToast(link, "Invite link copied").then(ok => {
+      if (!ok) return;
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 3000);
+    });
   }
 
   const filtered = admins.filter(a =>

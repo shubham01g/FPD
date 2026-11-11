@@ -191,8 +191,9 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       if (res.emailed) {
         toast.success(`Invite emailed to ${newAdminEmail.trim()}`);
       } else {
-        copyToClipboard(`${window.location.origin}/admin/accept?id=${res.account.id}&token=${res.inviteToken}`);
-        toast.warning(`${res.emailError ?? "The invite email was not sent"} — the invite link was copied for you to send`);
+        const link = `${window.location.origin}/admin/accept?id=${res.account.id}&token=${res.inviteToken}`;
+        if (await copyToClipboard(link)) toast.warning(`${res.emailError ?? "The invite email was not sent"} — the invite link was copied for you to send`);
+        else window.prompt(`${res.emailError ?? "The invite email was not sent"}. Copy this invite link and send it yourself:`, link);
       }
       setNewName(""); setNewEmail(""); setNewRole("support_agent"); setAddAdmin(false);
       refetchAdmins();

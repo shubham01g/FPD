@@ -10,6 +10,8 @@
 //   GET  /:ownerId/section/:key   that section's rows, read-only
 //   GET  /:ownerId/documents   the documents open to them
 //   GET  /:ownerId/documents/:docId/url[?download=1]   a short-lived signed URL
+//   GET  /:ownerId/export      Legacy only: every section + document links,
+//                              for the "Download everything" archive
 //
 // Every data call re-checks the grant with the service role:
 //   guardian  contact verified; only the folders in allowed_folder_ids
@@ -230,14 +232,11 @@ access.get("/:ownerId/sections", async (c) => {
   });
 });
 
-access.get("/:ownerId/section/:key", async (c) => {
-  const user = c.get("user") as AuthedUser;
-  const db = adminClient();
-  const grant = await openGrant(db, user.id, c.req.param("ownerId"));
-  if (!grant) return notOpen(c);
-  const spec = sectionsFor(grant.kind, grant.folders).find((s) => s.key === c.req.param("key"));
-  if (!spec) return notOpen(c);
+type SectionSpecT = ReturnType<typeof sectionsFor>[number];
 
+/** One section's rows for this grant, formatted, with photo URLs signed for
+ *  `photoSeconds`. Shared by the portal view and the Legacy export. */
+async function loadSection(db: DB, grant: Grant, spec: SectionSpecT, photoSeconds: number) {
   const groups: { label: string; rows: PortalRow[] }[] = [];
   for (const t of spec.tables) {
     let q = db.from(t.table).select("*").eq(ownerColumn(t.table), grant.ownerId);
@@ -256,15 +255,60 @@ access.get("/:ownerId/section/:key", async (c) => {
   const paths = [...new Set(groups.flatMap((g) => g.rows.flatMap((r) => r.photoPaths)))];
   const photos: Record<string, string> = {};
   if (paths.length) {
-    const { data } = await db.storage.from("record-photos").createSignedUrls(paths, VIEW_URL_SECONDS * 12);
+    const { data } = await db.storage.from("record-photos").createSignedUrls(paths, photoSeconds);
     for (const s of data ?? []) if (s.path && s.signedUrl) photos[s.path] = s.signedUrl;
   }
-
-  return c.json({
+  return {
     section: { key: spec.key, label: spec.label },
     groups: groups.map((g) => ({
       label: g.label,
       rows: g.rows.map(({ photoPaths, ...r }) => ({ ...r, photos: photoPaths.map((p) => photos[p]).filter(Boolean) })),
+    })),
+  };
+}
+
+access.get("/:ownerId/section/:key", async (c) => {
+  const user = c.get("user") as AuthedUser;
+  const db = adminClient();
+  const grant = await openGrant(db, user.id, c.req.param("ownerId"));
+  if (!grant) return notOpen(c);
+  const spec = sectionsFor(grant.kind, grant.folders).find((s) => s.key === c.req.param("key"));
+  if (!spec) return notOpen(c);
+  return c.json(await loadSection(db, grant, spec, VIEW_URL_SECONDS * 12));
+});
+
+// GET /:ownerId/export — everything an activated Legacy Contact receives, in
+// one call, for the "Download everything" archive the portal builds in the
+// browser (services/contactExport.ts): every section's records and a
+// download link for every document. Legacy only (guardians are view-only);
+// the Secret Vault is never included (documentsFor drops it). Links last an
+// hour so a large archive can finish downloading.
+access.get("/:ownerId/export", async (c) => {
+  const user = c.get("user" as never) as AuthedUser;
+  const db = adminClient();
+  const grant = await openGrant(db, user.id, c.req.param("ownerId"));
+  if (!grant) return notOpen(c);
+  if (grant.kind !== "legacy") return c.json({ error: "Only a Legacy Contact with active access can download the vault." }, 403);
+
+  const EXPORT_SECONDS = 3600;
+  const sections = [];
+  for (const spec of sectionsFor(grant.kind, grant.folders)) sections.push(await loadSection(db, grant, spec, EXPORT_SECONDS));
+
+  const [docs, folders] = await Promise.all([documentsFor(db, grant), ownerFolders(db, grant.ownerId)]);
+  const folderName = new Map(folders.map((f) => [f.id, f.name]));
+  const urls = new Map<string, string>();
+  // Signed per document so each carries its own download filename.
+  for (const d of docs) {
+    const { data } = await db.storage.from("vault-documents").createSignedUrl(d.file_path, EXPORT_SECONDS, { download: d.name });
+    if (data?.signedUrl) urls.set(d.id, data.signedUrl);
+  }
+  return c.json({
+    owner: { id: grant.ownerId, name: grant.ownerName },
+    exportedAt: new Date().toISOString(),
+    sections,
+    documents: docs.map((d) => ({
+      id: d.id, name: d.name, folder: (d.folder_id && folderName.get(d.folder_id)) || d.category,
+      sizeBytes: d.file_size_bytes, url: urls.get(d.id) ?? null,
     })),
   });
 });

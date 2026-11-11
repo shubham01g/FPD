@@ -6,7 +6,7 @@ import {
   Eye, EyeOff, Zap, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import {
   getProcessorConfigs, patchProcessor, revealProcessor, saveCryptoSettings,
@@ -309,7 +309,7 @@ function ProcessorCard({ meta, row, busy, onSave, onToggle }: {
               {saving && <Loader2 size={11} className="animate-spin"/>}
               {saving ? "Saving…" : "Save Credentials"}
             </button>
-            <button onClick={() => { copyToClipboard(`https://api.finalpassdown.com/webhooks/${meta.id}`); toast.success("Webhook URL copied"); }}
+            <button onClick={() => { void copyWithToast(`https://api.finalpassdown.com/webhooks/${meta.id}`, "Webhook URL copied"); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-semibold"
               style={{ background:"rgba(91,110,225,0.08)", color:"#6E90C9" }}>
               <Copy size={11}/> Copy Webhook URL

@@ -91,3 +91,15 @@ export async function documentUrl(ownerId: string, docId: string, download = fal
   const q = download ? "?download=1" : "";
   return (await request<{ url: string }>(`/${encodeURIComponent(ownerId)}/documents/${encodeURIComponent(docId)}/url${q}`)).url;
 }
+
+export interface OwnerExport {
+  owner: { id: string; name: string };
+  exportedAt: string;
+  sections: SectionData[];
+  documents: { id: string; name: string; folder: string; sizeBytes: number; url: string | null }[];
+}
+
+/** Legacy Contacts with active access only: everything, for the archive. */
+export function getOwnerExport(ownerId: string) {
+  return request<OwnerExport>(`/${encodeURIComponent(ownerId)}/export`);
+}

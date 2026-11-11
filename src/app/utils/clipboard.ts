@@ -28,3 +28,17 @@ function execCommandCopy(text: string): boolean {
     return false;
   }
 }
+
+/** Copy, then say what really happened. On failure the text is shown in a
+ *  prompt so it can still be copied by hand (nothing is silently lost — an
+ *  invite link or temporary password may exist nowhere else). */
+export async function copyWithToast(text: string, successMessage: string): Promise<boolean> {
+  const { toast } = await import("sonner");
+  const ok = await copyToClipboard(text);
+  if (ok) toast.success(successMessage);
+  else {
+    toast.error("Couldn't copy automatically — copy it from the box instead.");
+    window.prompt("Copy this:", text);
+  }
+  return ok;
+}

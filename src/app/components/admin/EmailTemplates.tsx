@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import React, { useEffect, useState } from "react";
 import { Mail, Edit2, Save, CheckCircle, Eye, Search, Copy, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -111,7 +111,7 @@ export function EmailTemplates() {
   const insertVariable = (v: string) => {
     const token = v.startsWith("{{") ? v : `{{${v}}}`;
     if (editing) { setEditBody(b => `${b}${token}`); toast.success(`${token} added to the body`); }
-    else { copyToClipboard(token); toast.success(`${token} copied`); }
+    else { void copyWithToast(token, `${token} copied`); }
   };
 
   const filtered = templates.filter(t =>
@@ -274,7 +274,7 @@ export function EmailTemplates() {
                     </button>
                   </>
                 )}
-                <button onClick={() => { copyToClipboard(editBody); toast.success("HTML copied to clipboard") }}
+                <button onClick={() => { void copyWithToast(editBody, "HTML copied to clipboard"); }}
                   style={{ color: "#8A9AB8" }}><Copy size={14} /></button>
               </div>
             </div>

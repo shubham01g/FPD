@@ -9,7 +9,7 @@ import { SERVER_FUNCTION } from "../../services/serverBase";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
 import { CARD_PROCESSORS, type CatalogProcessor } from "./processorCatalog";
 import { StripeBillingPanel } from "./StripeBillingPanel";
-import { copyToClipboard } from "../../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 
 /* Developer → Payment Processors. The card-processor counterpart of Crypto
    Payments: both read and write crypto_processor_configs through /admin/crypto
@@ -538,7 +538,7 @@ export function PaymentProcessors() {
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "rgba(91,110,225,0.04)", border: "1px solid rgba(91,110,225,0.1)" }}>
               <Lock size={13} color="#8A9AB8"/>
               <span style={{ flex: 1, ...MONO, fontSize: 12, color: "#E8EDF5", wordBreak: "break-all" }}>{STRIPE_WEBHOOK_URL}</span>
-              <button onClick={() => { copyToClipboard(STRIPE_WEBHOOK_URL); toast.success("URL copied"); }}
+              <button onClick={() => { void copyWithToast(STRIPE_WEBHOOK_URL, "URL copied"); }}
                 style={{ color: "#8A9AB8", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
                 <Copy size={13}/>
               </button>

@@ -159,7 +159,14 @@ const WILLS_CSS = `
 .fpd-wills .modal-foot .save:hover{filter:brightness(1.08);}
 `;
 
-const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"", documentUrl: null as string | null };
+const blankDoc = { type: DOCUMENT_TYPES[0], attorney:"", dateExecuted:"", location:"", notes:"", documentUrl: null as string | null, status: "current" };
+/* Saved in wills_trusts.status. It was always "current" with no way to change
+   it, so the "Status" tile showed every document as current forever. */
+const DOC_STATUSES: { value: string; label: string }[] = [
+  { value: "current", label: "Current" },
+  { value: "needs_review", label: "Needs review" },
+  { value: "superseded", label: "Superseded / revoked" },
+];
 
 export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
   /* "View in Vault" opens the File Cabinet's Legal Documents folder, where
@@ -207,7 +214,8 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
   }
 
   function openEdit(will: WillRow) {
-    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: will.notes, documentUrl: will.documentUrl });
+    setNewDoc({ type: will.type, attorney: will.attorney, dateExecuted: will.dateExecuted, location: will.location, notes: will.notes, documentUrl: will.documentUrl,
+      status: DOC_STATUSES.some(s => s.value === will.status) ? will.status : "current" });
     setEditingId(will.id);
     setShowAdd(true);
   }
@@ -217,18 +225,18 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
     if (!authUser) { toast.error("Sign in to save legal documents."); return; }
 
     const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-    const existing = editingId != null ? wills.find(w => w.id === editingId) : undefined;
 
     const row = {
       doc_type: newDoc.type,
       attorney_name: newDoc.attorney,
       // Left blank = not recorded; a legal record must never invent a date or place.
-      date_executed: newDoc.dateExecuted || existing?.dateExecuted || null,
+      // Clearing the field clears the date.
+      date_executed: newDoc.dateExecuted || null,
       last_reviewed: today,
       location: newDoc.location.trim() || null,
       notes: newDoc.notes,
       document_url: newDoc.documentUrl,
-      ...(editingId == null ? { status: "current" } : {}),
+      status: newDoc.status,
     };
 
     const { error } = editingId != null
@@ -248,7 +256,7 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
   const attorneyCount = new Set(wills.map(w => w.attorney)).size;
   const kpis = [
     { label: "Documents on File", value: String(wills.length), sub: "Legal instruments on record", icon: <FileText size={14} />, dot: ACCENT2 },
-    { label: "Status", value: `${currentCount}/${wills.length}`, sub: "Verified current", icon: <CheckCircle size={14} />, dot: POS },
+    { label: "Status", value: `${currentCount}/${wills.length}`, sub: "Marked current", icon: <CheckCircle size={14} />, dot: POS },
     { label: "Attorneys of Record", value: String(attorneyCount), sub: attorneyCount === 1 ? "Law firm on file" : "Law firms on file", icon: <Users size={14} />, dot: ACCENT2 },
     { label: "Last Reviewed", value: wills[0]?.lastReviewed?.split(",")[0] ?? "—", sub: "Most recent record", icon: <Clock size={14} />, dot: ACCENT2 },
   ];
@@ -340,7 +348,9 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
                     <div className="dattorney">Prepared by {will.attorney}</div>
                   </div>
                 </div>
-                <span className="dbadge"><CheckCircle size={11} /> CURRENT</span>
+                <span className="dbadge" style={will.status === "current" ? undefined : { color: "#D9A55E", borderColor: "rgba(217,165,94,0.4)", background: "rgba(217,165,94,0.1)" }}>
+                  <CheckCircle size={11} /> {(DOC_STATUSES.find(s => s.value === will.status)?.label ?? "Current").toUpperCase()}
+                </span>
               </div>
 
               <div className="dgrid">
@@ -412,6 +422,12 @@ export function WillsAndTrusts({ onNavigate }: { onNavigate?: (page: string) => 
                   <label>ATTORNEY / LAW FIRM *</label>
                   <input value={newDoc.attorney} onChange={e => setNewDoc(p=>({...p,attorney:e.target.value}))}
                     placeholder="e.g. Jane Smith, Esq. / Smith & Associates" />
+                </div>
+                <div className="field">
+                  <label>STATUS</label>
+                  <select value={newDoc.status} onChange={e => setNewDoc(p=>({...p,status:e.target.value}))}>
+                    {DOC_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
                 </div>
                 <div className="field">
                   <label>DATE EXECUTED</label>

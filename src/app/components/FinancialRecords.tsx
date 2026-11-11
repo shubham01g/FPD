@@ -298,7 +298,8 @@ export function FinancialRecords({ insuranceOnly = false, onNavigate }: { insura
     setBizList(bySection.business);
 
     if (insuranceOnly) return;
-    const { data: receipts } = await tables.receipts.list(authUser.id);
+    const { data: receipts, error: receiptsErr } = await tables.receipts.list(authUser.id);
+    if (receiptsErr) toast.error("Couldn't load your receipts, so the tax-deductible totals may be missing.");
     const byYear: Record<string, { total: number; count: number }> = {};
     for (const r of receipts ?? []) {
       if (!r.tax_deductible || r.tax_year == null) continue;

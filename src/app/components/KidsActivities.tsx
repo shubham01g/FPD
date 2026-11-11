@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { tables, db } from "../services/supabase";
 import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName, useAttachUpload, DetachButton } from "./AttachDocumentField";
 import heroKidsPhoto from "../../imports/kidsactivities_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -279,10 +279,14 @@ export function KidsActivities() {
 
   /* The inline "Add Document" pushed a name into React state and stopped
      there, so it was gone on refresh. It now uploads and writes the row. */
+  // Same path as the modal's attach field: storage quota checked, and the
+  // file is filed in the File Cabinet too (it used to skip both).
+  const inlineAttach = useAttachUpload("personal", "Kids Activities");
   async function attachDocToActivity(act: Activity, file: File) {
     if (!authUser) { toast.error("Sign in to attach documents."); return; }
     try {
-      const path = await db.uploadVaultFile(authUser.id, file);
+      const path = await inlineAttach.store(file);
+      if (!path) return;
       const documents = [...act.documents.filter(d => d !== path), path];
       const { error } = await tables.kidsActivities.update(act.id, { document_urls: documents });
       if (error) { toast.error(`Could not attach: ${error.message}`); return; }
@@ -488,9 +492,16 @@ export function KidsActivities() {
                       <div className="doclbl">DOCUMENTS ({act.documents.length})</div>
                       <div className="docrow">
                         {act.documents.map(d => (
-                          <button key={d} className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
-                            <FileText size={12} /> {attachmentDisplayName(d)}
-                          </button>
+                          <span key={d} style={{ display: "inline-flex", alignItems: "center" }}>
+                            <button className="docchip" onClick={() => void openStoredFile(d, attachmentDisplayName(d))}>
+                              <FileText size={12} /> {attachmentDisplayName(d)}
+                            </button>
+                            <DetachButton name={attachmentDisplayName(d)} onDetach={async () => {
+                              const { error } = await tables.kidsActivities.update(act.id, { document_urls: act.documents.filter(x => x !== d) });
+                              if (error) { toast.error(`Could not remove: ${error.message}`); return false; }
+                              await reload(); return true;
+                            }}/>
+                          </span>
                         ))}
                         <ScanButton folder="personal" onUpload={doc => { void attachDocToActivity(act, doc.file); }} size="sm" label="Add Document" />
                       </div>

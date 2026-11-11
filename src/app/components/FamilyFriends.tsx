@@ -124,7 +124,7 @@ const groupConfig = {
 };
 
 function AddContactModal({ editing, onClose, onAdd, onSave }: {
-  editing?: Contact | null; onClose: () => void; onAdd: (c: Contact) => Promise<boolean | void> | void; onSave?: (id: string, updates: Partial<Contact>) => void;
+  editing?: Contact | null; onClose: () => void; onAdd: (c: Contact) => Promise<boolean | void> | void; onSave?: (id: string, updates: Partial<Contact>) => Promise<boolean>;
 }) {
   useEscapeKey(true, onClose);
   const [form, setForm] = useState(() => editing
@@ -138,7 +138,9 @@ function AddContactModal({ editing, onClose, onAdd, onSave }: {
     setLoading(true);
     const initials = form.name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
     if (editing) {
-      onSave?.(editing.id, { ...form, initials, photo: photo || undefined });
+      // Wait for the save and keep the form open if it failed ("" clears the photo).
+      const ok = await onSave?.(editing.id, { ...form, initials, photo });
+      if (ok === false) { setLoading(false); return; }
     } else {
       // Confirm only after the database accepted it (the toast used to come first).
       const ok = await onAdd({ ...form, id:`cf-${Date.now()}`, initials, color: COLORS[Math.floor(Math.random() * COLORS.length)], photo: photo || undefined });
@@ -956,14 +958,15 @@ export function FamilyFriends() {
           editing={editingContact}
           onClose={() => setEditingContact(null)}
           onAdd={() => {}}
-          onSave={(id, updates) => { void (async () => {
+          onSave={async (id, updates) => {
             const { error } = await tables.familyFriends.update(id, toRow(updates));
-            if (error) { toast.error(`Could not update: ${error.message}`); return; }
+            if (error) { toast.error(`Could not update: ${error.message}`); return false; }
             await reload();
-            setSelected(prev => prev && prev.id === id ? { ...prev, ...updates } : prev);
+            setSelected(prev => prev && prev.id === id ? { ...prev, ...updates, photo: updates.photo || undefined } : prev);
             setEditingContact(null);
             toast.success("Contact updated");
-          })(); }}
+            return true;
+          }}
         />
       )}
       {showImport && <BulkImportModal onClose={() => setShowImport(false)} onImport={async imported => {

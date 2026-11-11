@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { ScanButton } from "./DocumentScanner";
 import { PhotoPicker } from "./PhotoPicker";
 import { StoredImage } from "./StoredImage";
-import { AttachDocumentField, attachmentDisplayName } from "./AttachDocumentField";
+import { AttachDocumentField, attachmentDisplayName, useAttachUpload, DetachButton } from "./AttachDocumentField";
 import heroTravelPhoto from "../../imports/travel_hero_photo.webp";
 import { openStoredFile } from "../services/storedFiles";
 import { useSingleFlight } from "../hooks/useSingleFlight";
@@ -253,10 +253,13 @@ export function TravelPlanner() {
   /* The inline "Add Document" on an expanded trip used to push a name into
      React state and stop there, so it vanished on refresh. It now uploads
      and writes the row, same as the modal's attach field. */
+  // Quota-checked and filed in the File Cabinet, like the modal's field.
+  const inlineAttach = useAttachUpload("personal", "Travel Planner");
   async function attachDocToTrip(trip: Trip, file: File) {
     if (!authUser) { toast.error("Sign in to attach documents."); return; }
     try {
-      const path = await db.uploadVaultFile(authUser.id, file);
+      const path = await inlineAttach.store(file);
+      if (!path) return;
       const documents = [...trip.documents.filter(d => d.path !== path),
                          { name: file.name, type: "Document", path }];
       const { error } = await tables.travelTrips.update(trip.id, { document_urls: documents });
@@ -446,9 +449,16 @@ export function TravelPlanner() {
                       <div className="docs-lbl">TRAVEL DOCUMENTS ({trip.documents.length})</div>
                       <div className="flex flex-wrap gap-2">
                         {trip.documents.map(d => (
-                          <button key={d.name} className="docchip" onClick={() => void openStoredFile(d.path, d.name)}>
-                            📄 {d.name} <span style={{ color: MUTED, marginLeft: 4 }}>({d.type})</span>
-                          </button>
+                          <span key={d.path || d.name} style={{ display: "inline-flex", alignItems: "center" }}>
+                            <button className="docchip" onClick={() => void openStoredFile(d.path, d.name)}>
+                              📄 {d.name} <span style={{ color: MUTED, marginLeft: 4 }}>({d.type})</span>
+                            </button>
+                            <DetachButton name={d.name} onDetach={async () => {
+                              const { error } = await tables.travelTrips.update(trip.id, { document_urls: trip.documents.filter(x => x !== d) });
+                              if (error) { toast.error(`Could not remove: ${error.message}`); return false; }
+                              await reload(); return true;
+                            }}/>
+                          </span>
                         ))}
                         <ScanButton folder="personal" onUpload={doc => { void attachDocToTrip(trip, doc.file); }} size="sm" label="Add Document"/>
                       </div>

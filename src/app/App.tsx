@@ -281,6 +281,13 @@ function UserRoute() {
     return (p as PageId) || "dashboard";
   });
 
+  // Any screen can move to another page with goToPage() (utils/goToPage.ts).
+  useEffect(() => {
+    const onNav = (e: Event) => { const p = (e as CustomEvent<string>).detail; if (p) setUserPage(p as PageId); };
+    window.addEventListener("fpd:navigate", onNav);
+    return () => window.removeEventListener("fpd:navigate", onNav);
+  }, []);
+
   // Product-usage telemetry (migration 021) — every screen funnels through
   // this one `userPage` state, so this is the single place to log a page
   // view rather than instrumenting ~30 individual screen components.

@@ -184,6 +184,27 @@ export function AttachDocumentsList({
   );
 }
 
+/** A small × next to a record's document chip. It only unlinks the file
+ *  from the record (document_urls); the file itself stays in the File
+ *  Cabinet, so nothing is lost by a mis-click. Attachments could only ever
+ *  be added before. */
+export function DetachButton({ name, onDetach }: { name: string; onDetach: () => Promise<boolean> }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button type="button" disabled={busy} title={`Remove "${name}" from this record`} aria-label={`Remove ${name}`}
+      onClick={async (e) => {
+        e.stopPropagation();
+        if (!window.confirm(`Remove "${name}" from this record? The file stays in your File Cabinet.`)) return;
+        setBusy(true);
+        try { if (await onDetach()) toast.success(`"${name}" removed from this record`); }
+        finally { setBusy(false); }
+      }}
+      style={{ marginLeft: -4, padding: "2px 6px", borderRadius: 8, border: "none", background: "transparent", color: "#8A9AB8", cursor: "pointer", fontSize: 15, lineHeight: 1 }}>
+      ×
+    </button>
+  );
+}
+
 /** Read-only chips that open stored files, for record cards. */
 export function AttachmentChips({ paths }: { paths: string[] | null | undefined }) {
   if (!paths?.length) return null;

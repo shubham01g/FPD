@@ -1,4 +1,4 @@
-import { copyToClipboard } from "../utils/clipboard";
+import { copyToClipboard, copyWithToast } from "../utils/clipboard";
 import React, { useState } from "react";
 import {
   Layers, Palette, Globe, Eye, Save, CheckCircle,
@@ -511,7 +511,7 @@ export function WhiteLabelConfig() {
               <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ opacity: saving ? 0.6 : 1 }}>
                 <Save size={14} /> {saving ? "Publishing…" : "Publish White Label Config"}
               </button>
-              <button onClick={() => { copyToClipboard(JSON.stringify(config, null, 2)); toast.success("Config JSON copied") }} className="btn-ghost" style={{ color: MUTED, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
+              <button onClick={() => { void copyWithToast(JSON.stringify(config, null, 2), "Config JSON copied"); }} className="btn-ghost" style={{ color: MUTED, background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
                 <Copy size={13} /> Export Config JSON
               </button>
             </div>

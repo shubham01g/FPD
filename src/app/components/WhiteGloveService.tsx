@@ -89,7 +89,7 @@ function SendDocuments() {
       <p>Take a photo of a will, policy, statement or any paper. It's saved in your File Cabinet, and your specialist can see it once you've signed the authorization waiver.</p>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <ScanButton size="lg" label="Scan a document" store={{ sectionLabel: "White Glove" }}
-          onUpload={doc => { setSent(s => [doc, ...s]); toast.success(`"${doc.name}" sent to your specialist`); }}/>
+          onUpload={doc => { setSent(s => [doc, ...s]); toast.success(`"${doc.name}" saved — your specialist can open it once the authorization waiver is signed`); }}/>
       </div>
       {sent.length > 0 && (
         <ul>

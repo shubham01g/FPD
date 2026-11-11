@@ -335,7 +335,9 @@ export function AccountSettings() {
   useEffect(() => {
     if (!authUser) return;
     supabase.from("notification_preferences").select("*").eq("user_id", authUser.id).maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        // Otherwise the switches show their defaults as if they were saved.
+        if (error) { toast.error("Couldn't load your notification settings. Refresh to try again."); return; }
         if (!data) return;
         setNotifEmail(data.email); setNotifSMS(data.sms); setNotifStorage(data.storage_alerts);
         setNotifContact(data.contact_updates); setNotifMarketing(data.marketing);
