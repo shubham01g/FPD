@@ -12,6 +12,7 @@ import { WGCardOnFile } from "../WGCardOnFile";
 import { WGBillingHistory } from "../WGSessionTimer";
 import { ROLE_LABELS, ROLE_COLORS } from "./ConciergeStaffAdmin";
 import { adminApi } from "../../services/adminApi";
+import { usePlatform } from "../../services/platform";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
@@ -110,6 +111,7 @@ function SessionRow({ session }: { session: WGSession }) {
 
 /* ── Client card ─────────────────────────────────────────────────── */
 function ClientCard({ client, specialists, onUpdate }: { client: WGClient; specialists: ReturnType<typeof toSpecialists>; onUpdate: (id: string, changes: Partial<WGClient>) => Promise<boolean> }) {
+  const { prices: wgPrices } = usePlatform();
   const [expanded, setExpanded] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -155,10 +157,10 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
           </div>
         </div>
 
-        {/* Billing summary */}
+        {/* Billing summary — at the prices set in Subscription Config */}
         {(() => {
-          const SETUP_FEE = 99;
-          const RATE_PER_30 = 25;
+          const SETUP_FEE = wgPrices.whiteGloveSetup ?? 0;
+          const RATE_PER_30 = wgPrices.whiteGloveSession ?? 0;
           const completedSessions = client.sessions.filter(s => s.status === "completed");
           const totalMins = completedSessions.reduce((sum, s) => {
             const m = parseInt(s.duration);
@@ -169,9 +171,9 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
           return (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
               {[
-                { label:"Setup Fee", value:"$99", color:"#6FAE8B", sub:"one-time" },
-                { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`$${sessionCost} billed` },
-                { label:"Est. Total", value:`$${totalCost}`, color:"#D99A6B", sub:"setup + sessions" },
+                { label:"Setup Fee", value:`$${SETUP_FEE}`, color:"#6FAE8B", sub:"one-time" },
+                { label:"Session Time", value:`${totalMins} min`, color:"#6E90C9", sub:`≈ $${sessionCost} at $${RATE_PER_30}/30 min` },
+                { label:"Est. Total", value:`$${totalCost}`, color:"#D99A6B", sub:"estimate — see Billing for charges" },
               ].map(s => (
                 <div key={s.label} className="px-3 py-2 rounded-2xl text-center" style={{ background:"rgba(91,167,214,0.05)", border:"1px solid rgba(91,167,214,0.1)" }}>
                   <div style={{ color:s.color, fontSize:17.5, fontWeight:700, fontFamily:"var(--font-display)" }}>{s.value}</div>
@@ -282,6 +284,7 @@ function ClientCard({ client, specialists, onUpdate }: { client: WGClient; speci
 
 /* ── Main component ──────────────────────────────────────────────── */
 export function WhiteGloveAdmin() {
+  const { prices: wgPrices } = usePlatform();
   const [mainTab, setMainTab] = useState<"clients"|"waivers"|"staff"|"billing">("clients");
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<ClientStatus | "all">("all");
@@ -375,7 +378,7 @@ export function WhiteGloveAdmin() {
             </div>
             <h2 style={{ fontFamily:"var(--font-display)", fontSize:25, color:"#E8EDF5" }}>Session Billing</h2>
             <p style={{ color:"#8A9AB8", fontSize:15, marginTop:4 }}>
-              $99 one-time setup fee · $25 per 30-minute block · Cards charged automatically after each session.
+              {wgPrices.whiteGloveSetup != null ? `$${wgPrices.whiteGloveSetup}` : "Setup"} one-time setup fee · {wgPrices.whiteGloveSession != null ? `$${wgPrices.whiteGloveSession}` : "a set price"} per 30-minute block · Cards charged automatically after each session.
             </p>
           </div>
           {/* Cards on file per client */}

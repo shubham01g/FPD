@@ -20,6 +20,7 @@
 import { Hono, type Context, type Next } from "npm:hono";
 import { adminClient, anonClient } from "../lib/supabaseAdmin.ts";
 import { secondFactorState } from "../lib/twoFactorGate.ts";
+import { readPlatformSection } from "../lib/platformSettings.ts";
 import { EMAIL_CONFIGURED, EMAIL_NOT_CONFIGURED_MESSAGE, MAILBOX, noticeEmail, sendEmail } from "../lib/email.ts";
 import { defaultOrigin } from "../lib/origins.ts";
 import { chargeWgSession } from "../lib/wgBilling.ts";
@@ -51,6 +52,14 @@ async function requireConcierge(c: Context, next: Next) {
     .select("id, user_id, name, email, role, status").eq("user_id", data.user.id).maybeSingle<Employee>();
   if (!emp) return c.json({ error: "This account is not a concierge specialist" }, 403);
   if (emp.status === "suspended" || emp.status === "inactive") return c.json({ error: "This staff account is not active" }, 403);
+  // System → Settings → Feature Flags → White Glove Concierge also closes the
+  // staff portal (it used to hide only the customer pages).
+  let flags: Record<string, unknown>;
+  try { flags = await readPlatformSection("flags"); }
+  catch { return c.json({ error: "Could not read platform settings" }, 500); }
+  if (flags.whiteGloveConcierge === false) {
+    return c.json({ error: "The White Glove Concierge program is currently turned off.", code: "white_glove_off" }, 403);
+  }
   const mfa = await secondFactorState(data.user.id, token);
   if (!mfa.passed) return c.json({ error: "Two-step verification required", code: "2fa_required" }, 403);
   c.set("employee" as never, emp as never);

@@ -271,7 +271,12 @@ export function WaiverPublicPage({ token }: { token: string }) {
   useEffect(() => {
     publicApi.get<PublicWaiver>(`/waiver/${encodeURIComponent(token)}`)
       .then(setW)
-      .catch(() => setProblem("This waiver link isn't valid. Ask your White Glove specialist for a new one."));
+      // Only a 4xx means the link itself is bad; a network or server error
+      // used to tell the client their (valid) link was invalid.
+      .catch((err: { status?: number }) => setProblem(
+        err?.status && err.status >= 400 && err.status < 500
+          ? "This waiver link isn't valid. Ask your White Glove specialist for a new one."
+          : "We couldn't load your waiver just now. Check your connection and reload this page."));
   }, [token]);
 
   const sign = async () => {

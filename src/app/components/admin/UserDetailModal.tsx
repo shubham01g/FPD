@@ -348,7 +348,9 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
   }
 
   async function sendPasswordReset() {
-    const { error } = await supabase.auth.resetPasswordForEmail(user.email);
+    // Land on the app's reset page (as Forgot password does); without it the
+    // email went to the Site URL and the user never got a new-password form.
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: `${window.location.origin}/reset-password` });
     if (error) toast.error(error.message);
     else toast.success(`Password reset email sent to ${user.email}`);
   }
@@ -399,7 +401,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
               {user.subscriptionWaived && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{ background:T.amberBg, color:T.amber, border:`1px solid ${T.amberBd}`, ...MONO }}>
-                  FEE WAIVED · {user.waiveMonths}MO
+                  FEE WAIVED
                 </span>
               )}
               {user.mfa && (
@@ -526,7 +528,7 @@ function UserDetailModalBody({ user: init, onClose, onRefetch }: { user: AdminUs
                   {user.subscriptionWaived && (
                     <DRow label="Active Waiver" value={
                       <span style={{ color:T.amber }}>
-                        {user.waiveMonths}mo · {WAIVE_REASONS.find(r=>r.id===user.waiveReason)?.label ?? "—"}
+                        {WAIVE_REASONS.find(r=>r.id===user.waiveReason)?.label ?? user.waiveReason ?? "Waived"}
                       </span>}/>
                   )}
 

@@ -33,6 +33,8 @@ interface UserBypass {
   expiresAt:   number | null;
   activatedBy: string | null;
   reason:      string | null;
+  /** The grant note (disaster_recovery_state.bypass_notes); saved before but never shown. */
+  notes?:      string | null;
 }
 
 interface AuditEntry {
@@ -57,6 +59,7 @@ interface DBUserRow {
 interface DBStateRow {
   user_id: string; addon_active: boolean; bypass_granted: boolean;
   bypass_granted_at: string | null; bypass_expires_at: string | null; bypass_reason: string | null;
+  bypass_notes?: string | null;
 }
 interface DBAuditRow {
   id: string; created_at: string; actor_email: string | null; action: string; target_id: string | null;
@@ -75,6 +78,7 @@ function withState(u: UserBypass, s: DBStateRow | undefined, grantedBy?: string)
     expiresAt: expires,
     activatedBy: grantedBy ?? "an administrator",
     reason: s.bypass_reason,
+    notes: s.bypass_notes ?? null,
   };
 }
 
@@ -723,6 +727,12 @@ export function DisasterRecoveryAdmin() {
                         <div style={{ fontSize:11, color:"#8A9AB8", ...MONO, marginBottom:4 }}>REASON</div>
                         <div style={{ fontSize:13, color:"#E8EDF5" }}>{user.reason ?? "—"}</div>
                       </div>
+                      {user.notes && (
+                        <div style={{ gridColumn: "1 / -1" }}>
+                          <div style={{ fontSize:11, color:"#8A9AB8", ...MONO, marginBottom:4 }}>NOTES</div>
+                          <div style={{ fontSize:13, color:"#E8EDF5", whiteSpace:"pre-wrap" }}>{user.notes}</div>
+                        </div>
+                      )}
                       {user.activatedAt && (
                         <>
                           <div>

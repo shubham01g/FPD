@@ -540,7 +540,7 @@ function ClaimModal({ claim, onClose, onApprove, onReject, onRequestDocs, onChan
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
                     "All submitted documents are permanently stored and archived in the secure vault",
-                    `The account's $199 Legacy Continuation Fee becomes "Ready to Activate" in the Continuation Vault tab`,
+                    `The account's Legacy Continuation Fee becomes "Ready to Activate" in the Continuation Vault tab`,
                     `Activating the fee opens ${claim.deceasedName}'s Legacy Vault to verified legacy contacts for the activation window`,
                     `${claim.claimantName} is emailed the outcome automatically`,
                     "A full audit record of this decision is saved in the claim timeline and the Audit Log",
@@ -954,7 +954,7 @@ export function LegacyClaims() {
 
   function handleApprove(id: string) {
     void act(`/legacy/claims/${id}/approve`, undefined,
-      () => toast.success("Claim approved — the $199 fee is now ready to activate"));
+      () => toast.success("Claim approved — the Legacy Continuation Fee is now ready to activate"));
   }
 
   function handleReject(id: string, reason: string) {

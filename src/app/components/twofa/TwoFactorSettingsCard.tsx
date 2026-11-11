@@ -45,7 +45,11 @@ export function TwoFactorSettingsCard({
   const [enrolling, setEnrolling] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const load = () => getTwoFactorState().then(setState).catch(() => setState(null));
+  // A failed check used to leave the card spinning on "Checking…" forever.
+  const [loadError, setLoadError] = useState("");
+  const load = () => getTwoFactorState()
+    .then(s => { setState(s); setLoadError(""); })
+    .catch(err => setLoadError(err instanceof Error ? err.message : "Could not check two-step verification"));
   useEffect(() => { load(); }, []);
 
   const enabled = state?.enabled ?? false;
@@ -89,7 +93,7 @@ export function TwoFactorSettingsCard({
     <div className="p-5 rounded-2xl" style={CARD}>
       <div className="flex items-start gap-4 flex-wrap">
         <div style={{ color: enabled ? "#6FAE8B" : "#D9A55E", flexShrink: 0, marginTop: 2 }}>
-          {state === null ? <Loader2 size={20} className="animate-spin" />
+          {state === null ? (loadError ? <ShieldAlert size={20} /> : <Loader2 size={20} className="animate-spin" />)
             : enabled ? <ShieldCheck size={20} /> : <ShieldAlert size={20} />}
         </div>
 
@@ -101,9 +105,14 @@ export function TwoFactorSettingsCard({
             </span>
           </div>
           <h3 style={{ fontFamily: "var(--font-display)", fontSize: 19, color: "#E8EDF5", marginBottom: 4 }}>
-            {state === null ? "Checking two-step verification…"
+            {state === null ? (loadError ? "Couldn't check two-step verification" : "Checking two-step verification…")
               : enabled ? "Two-step verification is on" : "Two-step verification is off"}
           </h3>
+          {loadError && state === null && (
+            <p style={{ color: "#FC8181", fontSize: 15, marginBottom: 6 }}>
+              {loadError} <button onClick={() => { setLoadError(""); load(); }} style={{ color: "#6E90C9", textDecoration: "underline", background: "none", border: "none", cursor: "pointer" }}>Try again</button>
+            </p>
+          )}
           <p style={{ color: "#8A9AB8", fontSize: 15.5, lineHeight: 1.6 }}>
             {enabled
               ? `Signing in to the ${portalName} as ${authUser?.email ?? "this account"} requires a code from your authenticator app.`

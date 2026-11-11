@@ -510,6 +510,7 @@ export function PartnerOnboarding() {
   const [data, setData] = useState<PartnerData | null | undefined>(undefined);
   const returning = new URLSearchParams(window.location.search).get("payment");
 
+  const [loadErr, setLoadErr] = useState("");
   useEffect(() => {
     if (loading) return;
     if (!session) { setData(null); return; }
@@ -522,7 +523,12 @@ export function PartnerOnboarding() {
         // Right after paying, the webhook may still be on its way.
         if (!d.partner && returning === "success" && tries++ < 10) { setTimeout(load, 3000); setData(undefined); return; }
         setData(d);
-      } catch { if (alive) setData(null); }
+        setLoadErr("");
+      } catch (err) {
+        // Shown above the wizard: an existing partner whose dashboard failed
+        // to load must not be told to sign up (and pay) again.
+        if (alive) { setData(null); setLoadErr(err instanceof Error ? err.message : "Could not load your partner account"); }
+      }
     };
     void load();
     return () => { alive = false; };
@@ -538,6 +544,11 @@ export function PartnerOnboarding() {
   }
   return (
     <div className="min-h-screen" style={{ fontFamily:"var(--font-body)" }}>
+      {loadErr && (
+        <div className="px-6 py-2" style={{ background:"rgba(252,129,129,0.1)", color:"#FC8181", fontSize:14 }}>
+          We couldn't load your partner account ({loadErr}). If you are already a partner, reload this page instead of signing up again.
+        </div>
+      )}
       {returning === "cancelled" && (
         <div className="px-6 py-2" style={{ background:"rgba(246,173,85,0.08)", color:"#F6AD55", fontSize:14 }}>Checkout was cancelled — nothing was charged.</div>
       )}

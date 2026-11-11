@@ -194,7 +194,9 @@ function notify() {
 export function subscribeToPackages(fn: Listener): () => void {
   _listeners.add(fn);
   fn(_packages.filter(p => p.active)); // emit whatever's cached immediately, then refresh
-  getPackages().then(notify).catch(() => {});
+  // Logged, not thrown: listeners keep the cached list; the landing page
+  // and onboarding show their own "no packages" state.
+  getPackages().then(notify).catch(err => console.error("White Label packages could not be loaded:", err));
   return () => _listeners.delete(fn);
 }
 

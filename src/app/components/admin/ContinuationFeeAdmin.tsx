@@ -241,7 +241,7 @@ export function ContinuationFeeAdmin({ view }: { view: "config" | "payments" }) 
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border" style={{ background:"rgba(91,110,225,0.05)", borderColor:"rgba(91,110,225,0.18)" }}>
         <Shield size={15} color="#AEB9F5" style={{ marginTop:2, flexShrink:0 }}/>
         <p style={{ color:"#8A9AB8", fontSize:15, lineHeight:1.7 }}>
-          <strong style={{ color:"#E8EDF5" }}>Activation process:</strong> A legacy contact pays the $199 fee →
+          <strong style={{ color:"#E8EDF5" }}>Activation process:</strong> A legacy contact pays the Legacy Continuation Fee →
           submits a death claim (death cert or override) → admin approves the claim in the Legacy Claims tab →
           come back here and click <strong style={{ color:"#E8EDF5" }}>Activate</strong> to start the vault access window.
           Fee configuration (amount &amp; window length) is managed in the sidebar <strong style={{ color:"#E8EDF5" }}>Legacy Vaults</strong> page.

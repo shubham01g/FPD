@@ -310,10 +310,13 @@ export function WhiteLabelConfig() {
         {config.enabled && (
           <div className="status-banner">
             <div className="status-dot" />
-            <span>White label mode is <strong>ACTIVE</strong> — platform displaying as "<strong>{config.companyName}</strong>" on {config.domain}</span>
-            <button className="btn-ghost" style={{ marginLeft: "auto", color: "#6FAE8B", background: "rgba(91,110,225,0.14)", borderColor: "rgba(91,110,225,0.3)", padding: "6px 12px", fontSize: 14 }}>
-              <ExternalLink size={11} /> Visit Site
-            </button>
+            <span>White label settings saved as <strong>ON</strong> for "<strong>{config.companyName}</strong>"{config.domain ? <> at {config.domain}</> : null}. They are applied when the partner's own site is set up; this site keeps the Final Pass Down branding.</span>
+            {config.domain && (
+              <a className="btn-ghost" href={/^https?:\/\//.test(config.domain) ? config.domain : `https://${config.domain}`} target="_blank" rel="noreferrer"
+                style={{ marginLeft: "auto", color: "#6FAE8B", background: "rgba(91,110,225,0.14)", borderColor: "rgba(91,110,225,0.3)", padding: "6px 12px", fontSize: 14 }}>
+                <ExternalLink size={11} /> Visit Site
+              </a>
+            )}
           </div>
         )}
 
@@ -405,7 +408,7 @@ export function WhiteLabelConfig() {
         {tab === "features" && (
           <div className="space-y-3">
             <div className="info-strip">
-              <p>Toggle features on/off for this white label instance. Disabled features are completely hidden from end users. Changes take effect immediately.</p>
+              <p>Choose which features this white label instance offers. These choices are saved with the partner's configuration and applied when their branded site is set up — they do not change this Final Pass Down site.</p>
             </div>
             <div className="grid md:grid-cols-2 gap-3">
               {featureList.map(f => (

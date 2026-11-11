@@ -124,12 +124,14 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
      "platform.<section>" — see routes/settings.ts. */
   const { data: savedData, error: loadError } = useAdminFetch(() => adminApi.get<{ settings: Saved }>("/settings"), []);
 
-  async function save(section: keyof Saved, value: Record<string, unknown>, message: string) {
+  async function save(section: keyof Saved, value: Record<string, unknown>, message: string): Promise<boolean> {
     try {
       await adminApi.put(`/settings/${section}`, { value });
       toast.success(message);
+      return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save settings");
+      return false;
     }
   }
 
@@ -160,13 +162,17 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     if (!window.confirm("Reset every feature flag to its default (all on except ID Verification and Beta Features)?")) return;
     const defaults = { ...flags };
     (Object.keys(defaults) as (keyof typeof flags)[]).forEach(k => { defaults[k] = k !== "idVerification" && k !== "betaFeatures"; });
+    const before = flags;
     setFlags(defaults);
-    void save("flags", defaults, "Feature flags reset to defaults");
+    void save("flags", defaults, "Feature flags reset to defaults").then(ok => { if (!ok) setFlags(before); });
   };
+  // The switch flips at once and flips back if the save fails, so it never
+  // shows a state that isn't actually saved.
   const toggleFlag = (k: keyof typeof flags, label: string) => {
+    const before = flags;
     const next = { ...flags, [k]: !flags[k] };
     setFlags(next);
-    void save("flags", next, `${label} ${next[k] ? "enabled" : "disabled"}`);
+    void save("flags", next, `${label} ${next[k] ? "enabled" : "disabled"}`).then(ok => { if (!ok) setFlags(before); });
   };
 
   /* ── Admin users (real accounts; invited and edited in Admin Team & Roles) ── */
@@ -270,8 +276,15 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   const [sessionTimeout, setSessionTimeout] = useState("60");
   const [ipAllowlist,    setIpAllowlist]    = useState<string[]>([]);
   const [newIp,          setNewIp]          = useState("");
-  const saveSecurity = (patch: { enforce2FA?: boolean; sessionTimeout?: string; ipAllowlist?: string[] }, message: string) =>
-    void save("security", { enforce2FA, sessionTimeout, ipAllowlist, ...patch }, message);
+  // If the server refuses (e.g. Enforce 2FA while an admin is unenrolled, or
+  // an allowlist without your own IP), put the screen back to what is saved.
+  const saveSecurity = (patch: { enforce2FA?: boolean; sessionTimeout?: string; ipAllowlist?: string[] }, message: string) => {
+    const before = { enforce2FA, sessionTimeout, ipAllowlist };
+    void save("security", { enforce2FA, sessionTimeout, ipAllowlist, ...patch }, message).then(ok => {
+      if (ok) return;
+      setEnforce2FA(before.enforce2FA); setSessionTimeout(before.sessionTimeout); setIpAllowlist(before.ipAllowlist);
+    });
+  };
   const addIp = () => {
     if (!newIp.trim()) return;
     const next = [...ipAllowlist, newIp.trim()];
@@ -476,7 +489,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       {/* ════════════════ GENERAL ════════════════ */}
       {activeTab === "general" && (
         <div className="space-y-5">
-          <Section title="Platform Identity" desc="Core details shown across the platform and in emails.">
+          <Section title="Platform Identity" desc="Support email and phone are shown on the Contact page. Platform name, tagline and timezone are saved for reference only — the app and emails don't use them yet.">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 md:col-span-1">
                 <label style={LABEL}>Platform Name</label>
@@ -513,7 +526,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           <Section title="Maintenance Mode"
             desc="When enabled, non-admin users see a maintenance message instead of the platform.">
             <ToggleRow label="Maintenance Mode" desc="Blocks all non-admin access immediately"
-              value={maintenance} onChange={v => { setMaintenance(v); void save("general", { ...general, maintenance: v }, v ? "Maintenance mode saved as ON" : "Maintenance mode saved as OFF"); }} accent="#FC8181"/>
+              value={maintenance} onChange={v => { setMaintenance(v); void save("general", { ...general, maintenance: v }, v ? "Maintenance mode saved as ON" : "Maintenance mode saved as OFF").then(ok => { if (!ok) setMaintenance(!v); }); }} accent="#FC8181"/>
             {maintenance && (
               <div className="mt-4">
                 <label style={LABEL}>Maintenance Message</label>
@@ -603,7 +616,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
             style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.2)" }}>
             <Info size={14} color="#D9A55E"/>
             <p style={{ color: "#D9A55E", fontSize: 13 }}>
-              Turning a flag off hides that feature for everyone (it can take a page reload) and does not delete any data. ID Verification turns the contact ID-upload step on or off. Email Referrals and Beta Features are not connected to any feature yet, so switching them changes nothing.
+              Turning a flag off hides that feature for everyone (it can take a page reload) and does not delete any data. ID Verification turns the contact ID-upload step on or off. Email Referrals, Beta Features and Crypto Payments are not connected to any feature yet, so switching them changes nothing.
             </p>
           </div>
         </div>

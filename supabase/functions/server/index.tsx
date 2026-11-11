@@ -3,7 +3,6 @@ import type { Context, Next } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { isOurOrigin } from "./lib/origins.ts";
-import * as kv from "./kv_store.tsx";
 
 import { requireAdmin } from "./middleware/adminAuth.ts";
 import { requireSecondFactor, requireSecondFactorForWrites, requireUser } from "./middleware/userAuth.ts";

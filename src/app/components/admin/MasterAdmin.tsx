@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AdminRoles } from "./AdminRoles";
 import { ReportsDownloads } from "./ReportsDownloads";
 import { UserDetailModal } from "./UserDetailModal";
@@ -11,7 +11,7 @@ import { DeleteUserModal } from "./DeleteUserModal";
 import type { AdminPageId } from "./AdminLayout";
 import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
-import { adminApi } from "../../services/adminApi";
+import { adminApi, fetchAllAdminPages } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { downloadCSV } from "../../utils/exportCsv";
 import { findAdminPlan, useAdminPlans } from "./adminPlans";
@@ -798,9 +798,7 @@ function PushNotificationCenter({ usersByPlan, totalUsers }: { usersByPlan: Reco
                 style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA",
                   boxShadow:"0 0 20px rgba(91,110,225,0.3)", opacity:sending?0.7:1 }}>
                 <Bell size={15}/>
-                {sending ? "Sending…" : scheduleMode
-                  ? `Schedule Push to ${recipientLabel} Users`
-                  : `Send Push → ${recipientLabel} Users`}
+                {sending ? "Sending…" : `${scheduleMode ? "Schedule" : "Send"} ${channel === "email" ? "Email" : channel === "both" ? "Push & Email" : "Push"} → ${recipientLabel} Users`}
               </button>
             </div>
           </div>
@@ -953,9 +951,24 @@ interface DBUserRow {
   deceased_at: string | null;
 }
 
+/* Permission module(s) each Command Center tab reads (any one is enough).
+   Tabs with no entry (System Health, Reports) carry their own per-item
+   checks. Keep in step with the gates in supabase/functions/server/index.tsx. */
+const TAB_MODULES: Partial<Record<AdminTab, string[]>> = {
+  overview: ["analytics", "overview"], analytics: ["analytics"], users: ["users"],
+  revenue: ["analytics", "revenue"], storage: ["analytics", "storage"],
+  legacy_claims: ["legacy_management"], payouts: ["payouts"], continuation: ["continuation"],
+  audit: ["audit"], disaster_recovery: ["users"], notifications: ["notifications"],
+  admin_roles: ["admin_team"],
+};
+
 export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
   const PLANS = useAdminPlans();
   const [tab, setTab] = useState<AdminTab>("overview");
+  const { data: adminMe } = useAdminFetch(
+    () => adminApi.get<{ role: string; permissions: { module: string; canView: boolean }[] | null }>("/me"),
+    [],
+  );
   const [userSearch, setUserSearch] = useState("");
   const [userPlanFilter, setUserPlanFilter] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState("");
@@ -967,17 +980,23 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
   const [showOnboard, setShowOnboard] = useState(false);
 
   const userQueryString = `search=${encodeURIComponent(userSearch)}&plan=${userPlanFilter}&status=${userStatusFilter}`;
+  // Paged: the list used to stop at the first 50 accounts with no way on.
+  const USERS_PAGE = 50;
+  const [usersPage, setUsersPage] = useState(1);
+  useEffect(() => { setUsersPage(1); }, [userSearch, userPlanFilter, userStatusFilter]);
   const { data: usersData, loading: usersLoading, error: usersError, updatedAt: usersUpdatedAt, refetch: refetchUsers } = useAdminFetch(
-    () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?${userQueryString}&pageSize=50`),
-    [userSearch, userPlanFilter, userStatusFilter],
+    () => adminApi.get<{ users: DBUserRow[]; total: number }>(`/users?${userQueryString}&pageSize=${USERS_PAGE}&page=${usersPage}`),
+    [userSearch, userPlanFilter, userStatusFilter, usersPage],
     ADMIN_LIVE_POLL_MS,
   );
+  const usersPages = Math.max(1, Math.ceil((usersData?.total ?? 0) / USERS_PAGE));
 
   async function exportUsersCsv() {
     setExportingUsers(true);
     try {
-      const res = await adminApi.get<{ users: DBUserRow[] }>(`/users?${userQueryString}&pageSize=100`);
-      const rows = res.users.map(u => ({
+      // Every matching account, not just the first 100.
+      const all = await fetchAllAdminPages<DBUserRow>(`/users?${userQueryString}`, "users");
+      const rows = all.map(u => ({
         id: u.id, name: u.full_name, email: u.email, phone: u.phone ?? "",
         plan: u.plan, status: u.plan_status, storage_gb: Math.round((u.used_bytes / 1024 ** 3) * 10) / 10,
         contacts: u.contact_count, white_glove: u.white_glove, is_admin: u.is_admin, created_at: u.created_at,
@@ -1010,11 +1029,14 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     [],
     ADMIN_LIVE_POLL_MS,
   );
+  const AUDIT_PAGE = 100;
+  const [auditPage, setAuditPage] = useState(1);
   const { data: auditData, loading: auditLoading, error: auditError, refetch: refetchAudit } = useAdminFetch(
-    () => adminApi.get<{ logs: AuditLogRow[]; total: number }>("/audit?pageSize=100"),
-    [],
+    () => adminApi.get<{ logs: AuditLogRow[]; total: number }>(`/audit?pageSize=${AUDIT_PAGE}&page=${auditPage}`),
+    [auditPage],
     ADMIN_LIVE_POLL_MS,
   );
+  const auditPages = Math.max(1, Math.ceil((auditData?.total ?? 0) / AUDIT_PAGE));
   const [clearingAudit, setClearingAudit] = useState(false);
   async function clearAudit() {
     if (!window.confirm("Clear the entire audit log? Every entry is permanently deleted for all admins and cannot be recovered. Export first if you need a copy.")) return;
@@ -1062,7 +1084,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     storageData?.totals.avgPerUserGb ?? null,
   );
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+  const allTabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id:"overview",     label:"Overview",        icon:<BarChart3 size={13}/> },
     { id:"analytics",    label:"Analytics",       icon:<Globe size={13}/> },
     { id:"users",        label:"Users",           icon:<Users size={13}/> },
@@ -1078,6 +1100,17 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     { id:"admin_roles",  label:"Admin Team",          icon:<Shield size={13}/> },
     { id:"reports",      label:"Reports & Downloads", icon:<Download size={13}/> },
   ];
+  // Only the tabs this admin's role can read (same modules the server gates
+  // on in index.tsx). Every tab used to show for every role, so a restricted
+  // admin met a wall of 403s and saw screens like Admin Team that the sidebar
+  // hides from them.
+  const canView = (mods: string[] | undefined) =>
+    !mods || !adminMe || adminMe.permissions === null || adminMe.role === "super_admin"
+    || mods.some(m => adminMe.permissions!.some(p => p.module === m && p.canView));
+  const tabs = allTabs.filter(t => canView(TAB_MODULES[t.id]));
+  useEffect(() => {
+    if (tabs.length && !tabs.some(t => t.id === tab)) setTab(tabs[0].id);
+  }, [tabs.map(t => t.id).join(","), tab]);
 
   return (
     <div className="p-7 space-y-6 relative" style={{ maxWidth:1360, margin:"0 auto" }}>
@@ -1541,7 +1574,16 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
               );
             })}
           </div>
-          <div style={{color:"#8A9AB8",fontSize:15,...MONO}}>Showing {filteredUsers.length} of {usersData?.total ?? 0} users</div>
+          <div className="flex items-center justify-between gap-3 flex-wrap" style={{color:"#8A9AB8",fontSize:15,...MONO}}>
+            <span>Showing {filteredUsers.length ? (usersPage - 1) * USERS_PAGE + 1 : 0}–{(usersPage - 1) * USERS_PAGE + filteredUsers.length} of {usersData?.total ?? 0} users</span>
+            {usersPages > 1 && (
+              <span className="flex items-center gap-2">
+                <button disabled={usersPage <= 1} onClick={() => setUsersPage(p => Math.max(1, p - 1))} className="px-3 py-1 rounded-lg" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:usersPage<=1?0.4:1}}>‹ Prev</button>
+                <span>Page {usersPage} of {usersPages}</span>
+                <button disabled={usersPage >= usersPages} onClick={() => setUsersPage(p => Math.min(usersPages, p + 1))} className="px-3 py-1 rounded-lg" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:usersPage>=usersPages?0.4:1}}>Next ›</button>
+              </span>
+            )}
+          </div>
 
           {/* User detail modal — Overview / Edit Account / Billing / Security */}
           {selectedUserId && (
@@ -1673,7 +1715,11 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
           <div className="px-5 py-3 border-b flex items-center justify-between" style={{background:"rgba(10,10,15,0.9)",borderColor:"rgba(91,110,225,0.1)"}}>
             <h3 style={{fontFamily:"var(--font-display)",fontSize:19,color:"#E8EDF5"}}>System Audit Log</h3>
             <div className="flex items-center gap-3">
-              <span style={{color:"#8A9AB8",fontSize:14,...MONO}}>{auditData?.total ?? 0} entries</span>
+              <span style={{color:"#8A9AB8",fontSize:14,...MONO}}>{auditData?.total ?? 0} entries{auditPages > 1 ? ` · page ${auditPage} of ${auditPages}` : ""}</span>
+              {auditPages > 1 && <>
+                <button disabled={auditPage <= 1} onClick={() => setAuditPage(p => Math.max(1, p - 1))} className="px-2 py-1 rounded-lg text-xs" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:auditPage<=1?0.4:1}}>‹ Newer</button>
+                <button disabled={auditPage >= auditPages} onClick={() => setAuditPage(p => Math.min(auditPages, p + 1))} className="px-2 py-1 rounded-lg text-xs" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:auditPage>=auditPages?0.4:1}}>Older ›</button>
+              </>}
               <button onClick={() => void clearAudit()} disabled={clearingAudit || logs.length === 0}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
                 style={{background:"rgba(252,129,129,0.08)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)",

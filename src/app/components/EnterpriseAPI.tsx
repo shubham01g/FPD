@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Code, Play, Copy, Key, Zap, ChevronDown, ChevronRight, Terminal, Book, Webhook, Plus, XCircle, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { adminApi } from "../services/adminApi";
+import { copyWithToast } from "../utils/clipboard";
 import { useAdminFetch } from "../hooks/useAdminFetch";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1px solid rgba(255,255,255,0.06)", boxShadow:"0 10px 34px -18px rgba(0,0,0,0.6)", borderRadius:22 };
@@ -183,17 +184,17 @@ echo "Used: {$storage->used_gb} GB of {$storage->limit_gb} GB";
 // Upgrade subscription
 $fpd->subscriptions->upgrade('legacy_pro');`,
   curl: `# Authenticate
-curl -X POST https://api.finalpassdown.com/api/auth/login \\
+curl -X POST https://<api-host-when-live>/api/auth/login \\
   -H "Content-Type: application/json" \\
   -d '{"email":"james@example.com","password":"••••••••"}'
 
 # Get vault documents (with auth token)
-curl https://api.finalpassdown.com/api/vault/documents \\
+curl https://<api-host-when-live>/api/vault/documents \\
   -H "Authorization: Bearer YOUR_TOKEN" \\
   -H "X-API-Key: fpd_live_your_api_key"
 
 # Upload a document
-curl -X POST https://api.finalpassdown.com/api/vault/documents \\
+curl -X POST https://<api-host-when-live>/api/vault/documents \\
   -H "Authorization: Bearer YOUR_TOKEN" \\
   -F "file=@will.pdf" \\
   -F "category=legal" \\
@@ -360,7 +361,7 @@ export function EnterpriseAPI() {
           <div className="rounded-2xl overflow-hidden" style={GLASS}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(91,110,225,0.1)" }}>
               <div style={{ color: "#8A9AB8", fontSize: 12.5, ...MONO, letterSpacing: "0.1em" }}>BASE URL</div>
-              <div style={{ color: "#6E90C9", fontSize: 14, ...MONO, marginTop: 2 }}>https://api.finalpassdown.com</div>
+              <div style={{ color: "#6E90C9", fontSize: 14, ...MONO, marginTop: 2 }}>Planned — not live yet</div>
             </div>
             <div className="overflow-y-auto" style={{ maxHeight: 700 }}>
               {apiGroups.map((group, gi) => (
@@ -459,7 +460,7 @@ export function EnterpriseAPI() {
               <div style={{ color: "#8A9AB8", fontSize: 14, ...MONO }}>
                 {sdkLang === "javascript" ? "npm install @finalpassdown/sdk" : sdkLang === "python" ? "pip install finalpassdown" : sdkLang === "php" ? "composer require finalpassdown/sdk" : "curl / HTTP"}
               </div>
-              <button style={{ color: "#6E90C9", fontSize: 15 }}>Copy</button>
+              <button onClick={() => void copyWithToast(sdkExamples[sdkLang], "Example copied")} style={{ color: "#6E90C9", fontSize: 15 }}>Copy</button>
             </div>
             <pre className="overflow-x-auto" style={{ color: "#E8EDF5", fontSize: 16, ...MONO, lineHeight: 1.8, whiteSpace: "pre-wrap", margin: 0 }}>
               {sdkExamples[sdkLang]}
@@ -468,7 +469,7 @@ export function EnterpriseAPI() {
           <div className="grid md:grid-cols-3 gap-4">
             {[
               { title:"Rate Limiting", desc:"Limits per API key will be published when the API goes live.", color:"#6E90C9" },
-              { title:"Sandbox Mode", desc:"Test with sandbox API keys — all data is isolated and never charged.", color:"#D99A6B" },
+              { title:"Sandbox Mode", desc:"A sandbox will be offered when the API goes live.", color:"#D99A6B" },
               { title:"Versioning", desc:"API version is included in the base URL: /v1/. Breaking changes release on new versions.", color:"#6FAE8B" },
             ].map(info => (
               <div key={info.title} className="p-5 rounded-2xl" style={GLASS}>
@@ -486,17 +487,11 @@ export function EnterpriseAPI() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl" style={GLASS}>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, color: "#E8EDF5", marginBottom: 16 }}>Configured Webhooks</h3>
-              <div className="space-y-3">
-                <div className="p-4 rounded-2xl" style={{ background: "rgba(91,110,225,0.06)", border: "1px solid rgba(91,110,225,0.2)" }}>
-                  <div style={{ color: "#E8EDF5", fontSize: 16, marginBottom: 4 }}>https://yourapp.com/fpd-webhook</div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {["vault.document.uploaded","contact.verified","storage.warning.80"].map(ev => (
-                      <span key={ev} className="px-2 py-0.5 rounded text-xs" style={{ background: "rgba(91,110,225,0.1)", color: "#6E90C9", ...MONO, fontSize: 11 }}>{ev}</span>
-                    ))}
-                  </div>
-                  <div style={{ color: "#D99A6B", fontSize: 14, marginTop: 8 }}>● Active · 0 failures</div>
-                </div>
-                <button className="w-full py-3 rounded-2xl text-sm" style={{ border: "1px dashed rgba(91,110,225,0.3)", color: "#6E90C9" }}>+ Add Webhook Endpoint</button>
+              {/* There is no Enterprise API server yet, so nothing can be
+                  registered or delivered. This used to show a made-up
+                  "Active · 0 failures" endpoint and a dead Add button. */}
+              <div className="p-4 rounded-2xl" style={{ background: "rgba(217,165,94,0.07)", border: "1px solid rgba(217,165,94,0.25)", color: "#D9A55E", fontSize: 15, lineHeight: 1.6 }}>
+                Webhooks are not available yet. The Enterprise API is planned but not live, so no endpoints can be registered and no events are sent. The signature example on the right shows how verification will work.
               </div>
             </div>
             <div className="p-6 rounded-2xl" style={GLASS}>
@@ -570,7 +565,7 @@ app.post('/fpd-webhook', (req, res) => {
                 <Key size={13} color="#68D391" />
                 <span style={{ color: "#E8EDF5", fontSize: 15, ...MONO, flex: 1 }}>{secretVisible ? issuedSecret : "•".repeat(issuedSecret.length)}</span>
                 <button onClick={() => setSecretVisible(v => !v)} style={{ color: "#8A9AB8" }}>{secretVisible ? <EyeOff size={13} /> : <Eye size={13} />}</button>
-                <button onClick={() => { navigator.clipboard?.writeText(issuedSecret); toast.success("Copied to clipboard"); }} style={{ color: "#6E90C9" }}><Copy size={13} /></button>
+                <button onClick={() => { void copyWithToast(issuedSecret, "Copied to clipboard"); }} style={{ color: "#6E90C9" }}><Copy size={13} /></button>
               </div>
               <button onClick={() => setIssuedSecret(null)} className="mt-3 text-sm" style={{ color: "#8A9AB8" }}>Dismiss</button>
             </div>
@@ -680,7 +675,7 @@ app.post('/fpd-webhook', (req, res) => {
                 <div className="flex items-center gap-2 px-4 py-3 rounded-2xl" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(217,154,107,0.3)" }}>
                   <Key size={13} color="#D99A6B" />
                   <span style={{ color: "#E8EDF5", fontSize: 15, ...MONO, flex: 1, wordBreak: "break-all" }}>{revealedKey.secret}</span>
-                  <button onClick={() => { navigator.clipboard?.writeText(revealedKey.secret); toast.success("Copied to clipboard"); }} style={{ color: "#6E90C9", flexShrink: 0 }}><Copy size={13} /></button>
+                  <button onClick={() => { void copyWithToast(revealedKey.secret, "Copied to clipboard"); }} style={{ color: "#6E90C9", flexShrink: 0 }}><Copy size={13} /></button>
                 </div>
                 <p style={{ color: "#8A9AB8", fontSize: 14, marginTop: 10 }}>This reveal was recorded in the audit log.</p>
               </div>

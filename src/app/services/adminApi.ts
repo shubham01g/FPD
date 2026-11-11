@@ -81,3 +81,18 @@ export const adminApi = {
   patch: <T>(path: string, data?: unknown) => request<T>(path, { method: "PATCH", body: data ? JSON.stringify(data) : undefined }),
   del: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
+
+/** Every row of a paged admin list (the server caps pageSize at 100), for
+ *  exports. `key` is the array field in the response, e.g. "users". */
+export async function fetchAllAdminPages<T>(path: string, key: string, max = 20_000): Promise<T[]> {
+  const out: T[] = [];
+  const sep = path.includes("?") ? "&" : "?";
+  for (let page = 1; out.length < max; page++) {
+    const res = await adminApi.get<Record<string, unknown>>(`${path}${sep}pageSize=100&page=${page}`);
+    const rows = (res[key] as T[] | undefined) ?? [];
+    out.push(...rows);
+    const total = typeof res.total === "number" ? res.total : null;
+    if (rows.length < 100 || (total !== null && out.length >= total)) break;
+  }
+  return out;
+}

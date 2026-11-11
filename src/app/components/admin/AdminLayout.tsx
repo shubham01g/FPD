@@ -241,10 +241,7 @@ export function AdminLayout({ currentPage, onNavigate, canOpen = () => true, onS
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: DANGER, boxShadow: `0 0 6px ${DANGER}` }}/>
               <span style={{ color: DANGER, fontSize: 13.5, fontWeight: 600 }}>Restricted Access</span>
             </div>
-            {/* No admin notification feed exists, so the bell carries no count. */}
-            <button className="relative flex items-center justify-center rounded-lg" title="No admin notifications" style={{ width: 34, height: 34, background: "rgba(91,110,225,0.1)", border: `1px solid ${BORDER}`, color: "#6FAE8B" }}>
-              <Bell size={16}/>
-            </button>
+            {/* There is no admin notification feed, so no bell (it was a dead button). */}
             <div className="flex items-center justify-center rounded-full" title={adminEmail} style={{ width: 34, height: 34, background: `linear-gradient(135deg,${ACCENT},${ACCENT2})`, color: "#fff", fontSize: 14.5, fontWeight: 700 }}>{(adminEmail[0] ?? "A").toUpperCase()}</div>
           </div>
         </header>
