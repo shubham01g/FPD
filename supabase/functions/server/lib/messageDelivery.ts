@@ -84,6 +84,21 @@ export async function runMessageDelivery(): Promise<{ checked: number; sent: num
   for (const m of due) {
     const token = newToken();
     const expires = new Date(Date.now() + LINK_DAYS * 86_400_000).toISOString();
+    const yearly = m.trigger_type === "birthday" || m.trigger_type === "anniversary";
+    // Claim first, send second. Marking the row delivered only after the
+    // email meant a failed write re-sent the same message every hour; the
+    // claim is also conditional on delivered_at being unchanged, so two runs
+    // can't both send it.
+    let claim = db.from("messages_to_loved_ones").update({
+      delivered_at: new Date().toISOString(),
+      delivery_token_hash: await sha256Hex(token), delivery_token_expires_at: expires, delivery_error: null,
+      ...(yearly ? {} : { status: "delivered" }),
+    }).eq("id", m.id).eq("status", "sealed");
+    claim = m.delivered_at ? claim.eq("delivered_at", m.delivered_at) : claim.is("delivered_at", null);
+    const { data: claimed, error: claimErr } = await claim.select("id");
+    if (claimErr) { failed++; console.error(`message ${m.id}: claim failed`, claimErr.message); continue; }
+    if (!claimed?.length) continue; // another run took it
+
     try {
       await sendEmail({
         to: m.recipient_email!,
@@ -93,16 +108,15 @@ export async function runMessageDelivery(): Promise<{ checked: number; sent: num
           link: `${defaultOrigin()}/message/${token}`, days: LINK_DAYS, afterPassing: m.trigger_type === "on_passing",
         }),
       });
-      const yearly = m.trigger_type === "birthday" || m.trigger_type === "anniversary";
-      await db.from("messages_to_loved_ones").update({
-        delivered_at: new Date().toISOString(),
-        delivery_token_hash: await sha256Hex(token), delivery_token_expires_at: expires, delivery_error: null,
-        ...(yearly ? {} : { status: "delivered" }),
-      }).eq("id", m.id);
       sent++;
     } catch (err) {
       failed++;
-      await db.from("messages_to_loved_ones").update({ delivery_error: String((err as Error).message).slice(0, 300) }).eq("id", m.id);
+      // Not sent: put the row back so the next run tries again.
+      const { error: undoErr } = await db.from("messages_to_loved_ones").update({
+        delivered_at: m.delivered_at, status: "sealed",
+        delivery_error: String((err as Error).message).slice(0, 300),
+      }).eq("id", m.id);
+      if (undoErr) console.error(`message ${m.id}: could not undo the claim after a failed send`, undoErr.message);
     }
   }
   return { checked: msgs.length, sent, failed };

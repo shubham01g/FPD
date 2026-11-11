@@ -90,6 +90,14 @@ async function handle(event: StripeEvent) {
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
+/** Throws when a side write fails, so the event returns 500 and Stripe
+ *  retries it. Every write below is idempotent, so a retry is safe; before,
+ *  these errors were dropped and the account silently stayed wrong. */
+async function must(write: PromiseLike<{ error: { message: string } | null }>, what: string) {
+  const { error } = await write;
+  if (error) throw new Error(`${what} failed: ${error.message}`);
+}
+
 async function subscriptionRow(subId: string | null) {
   if (!subId) return null;
   const { data } = await adminClient().from("subscriptions").select("*").eq("id", subId).maybeSingle();
@@ -190,14 +198,15 @@ async function onCheckoutCompleted(sessionId: string) {
       cardholder_name: pm.billing_details?.name ?? null, livemode: isLivemode(), consent_id: consent?.id ?? null, updated_at: nowIso(),
     }, { onConflict: "user_id" });
     if (error) throw new Error(`wg_payment_methods upsert failed: ${error.message}`);
-    await db.from("users").update({ white_glove: true }).eq("id", userId);
-    const { data: client } = await db.from("wg_clients").select("id").eq("user_id", userId).limit(1);
-    if (!client?.length) await db.from("wg_clients").insert({ user_id: userId, status: "intake", reason: "White Glove setup paid" });
+    await must(db.from("users").update({ white_glove: true }).eq("id", userId), "users.white_glove update");
+    const { data: client, error: clientErr } = await db.from("wg_clients").select("id").eq("user_id", userId).limit(1);
+    if (clientErr) throw new Error(`wg_clients lookup failed: ${clientErr.message}`);
+    if (!client?.length) await must(db.from("wg_clients").insert({ user_id: userId, status: "intake", reason: "White Glove setup paid" }), "wg_clients insert");
   }
 
   if (purchase === "partner_setup" || purchase === "wl_setup") await onOrgSetupPaid(session, userId, purchase);
 
-  await db.from("billing_consents").update({ completed_at: nowIso() }).eq("checkout_session_id", session.id).is("completed_at", null);
+  await must(db.from("billing_consents").update({ completed_at: nowIso() }).eq("checkout_session_id", session.id).is("completed_at", null), "billing_consents update");
 }
 
 /* Partner Program / White Label setup paid (migration 053). Idempotent on
@@ -244,6 +253,15 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
     await notifyTeam(`New partner: ${m.orgName}`, [`${m.orgName} (${m.orgType || "organisation"}) paid the $${paid.toFixed(2)} Partner Program setup fee.`,
       `Contact: ${m.contactName} <${m.contactEmail}>${m.contactPhone ? `, ${m.contactPhone}` : ""}. Partner code ${code}.`], "partnerships@finalpassdown.com");
   } else {
+    // Paying unlocks White Label at once (wl_entitlements, read by the app's
+    // WLEntitlementContext). payment_ref is the PaymentIntent, which is what a
+    // refund carries, so a full refund can take the unlock back. Done before
+    // the sale-exists check so a retry after a failed grant still grants.
+    const paymentRef = idOf(session.payment_intent) ?? session.id;
+    await must(db.from("wl_entitlements").upsert({
+      user_id: userId, entitled: true, package_id: m.packageId || null, payment_ref: paymentRef,
+      granted_at: nowIso(), granted_by: null, updated_at: nowIso(),
+    }, { onConflict: "user_id" }), "wl_entitlements grant");
     const { data: existing } = await db.from("wl_sales").select("id").eq("stripe_checkout_session_id", session.id).maybeSingle();
     if (existing) return;
     const id = `WL-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
@@ -254,7 +272,7 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
     });
     if (error && error.code !== "23505") throw new Error(`wl_sales insert failed: ${error.message}`);
     await notifyTeam(`White Label setup paid: ${m.orgName}`, [`${m.orgName} paid $${paid.toFixed(2)} for White Label package ${m.packageId}.`,
-      `Contact: ${m.contactName} <${m.contactEmail}>. Requested subdomain: ${m.subdomain || "none"}. Sale ${id} is pending provisioning in Admin → White Label.`], "sales@finalpassdown.com");
+      `Contact: ${m.contactName} <${m.contactEmail}>. Requested subdomain: ${m.subdomain || "none"}. White Label is unlocked on their account; sale ${id} is pending provisioning (subdomain, branding) in Admin → White Label.`], "sales@finalpassdown.com");
   }
 }
 
@@ -343,19 +361,20 @@ async function onInvoicePaid(invoiceId: string) {
 
   // Overage on this invoice is paid; lift the overage block once nothing
   // declined is left.
-  await db.from("usage_period_closures").update({ paid_at: nowIso(), payment_failed_at: null }).eq("stripe_invoice_id", inv.id);
-  const { data: stillFailed } = await db.from("usage_period_closures").select("id")
+  await must(db.from("usage_period_closures").update({ paid_at: nowIso(), payment_failed_at: null }).eq("stripe_invoice_id", inv.id), "usage_period_closures paid");
+  const { data: stillFailed, error: failedErr } = await db.from("usage_period_closures").select("id")
     .eq("user_id", userId).not("payment_failed_at", "is", null).is("paid_at", null).limit(1);
+  if (failedErr) throw new Error(`usage_period_closures lookup failed: ${failedErr.message}`);
   if (!stillFailed?.length) {
-    await db.from("users").update({ overage_blocked: false, overage_blocked_at: null }).eq("id", userId).eq("overage_blocked", true);
+    await must(db.from("users").update({ overage_blocked: false, overage_blocked_at: null }).eq("id", userId).eq("overage_blocked", true), "overage unblock");
   }
 
   if (type === "wg_session") {
-    await db.from("wg_session_billing").update({
+    await must(db.from("wg_session_billing").update({
       status: "charged", charged_at: unixToIso(inv.status_transitions?.paid_at) ?? nowIso(),
       stripe_payment_intent: invoicePaymentIntentId(inv), failure_message: null,
     })
-      .eq("stripe_invoice_id", inv.id);
+      .eq("stripe_invoice_id", inv.id), "wg_session_billing charged");
   }
   if (type === "subscription" || type === "upgrade") await recordCommission(inv, userId);
 
@@ -466,10 +485,10 @@ async function onChargeRefunded(chargeId: string) {
   if (!payment && invoiceId) ({ data: payment } = await db.from("payments").select("id, user_id").eq("stripe_invoice_id", invoiceId).maybeSingle());
   if (!payment && pi) ({ data: payment } = await db.from("payments").select("id, user_id").eq("stripe_payment_intent", pi).maybeSingle());
   if (payment) {
-    await db.from("payments").update({
+    await must(db.from("payments").update({
       refunded_amount_usd: (charge.amount_refunded ?? 0) / 100, stripe_charge_id: chargeId,
       ...(fully ? { status: "refunded" } : {}),
-    }).eq("id", payment.id);
+    }).eq("id", payment.id), "payments refund");
   }
   const userId = payment?.user_id ?? await userForCustomer(idOf(charge.customer));
 
@@ -485,8 +504,18 @@ async function onChargeRefunded(chargeId: string) {
   }
 
   if (fully) {
-    if (pi) await db.from("legacy_continuation_fees").update({ status: "refunded" }).eq("stripe_payment_intent_id", pi);
-    if (invoiceId) await db.from("wg_session_billing").update({ status: "refunded" }).eq("stripe_invoice_id", invoiceId);
+    if (pi) await must(db.from("legacy_continuation_fees").update({ status: "refunded" }).eq("stripe_payment_intent_id", pi), "continuation fee refund");
+    if (invoiceId) await must(db.from("wg_session_billing").update({ status: "refunded" }).eq("stripe_invoice_id", invoiceId), "wg session refund");
+    if (pi) {
+      // A refunded White Label setup takes the unlock back (the row stays,
+      // for history) and closes the sale.
+      const { data: revoked, error: wlErr } = await db.from("wl_entitlements")
+        .update({ entitled: false, updated_at: nowIso() }).eq("payment_ref", pi).eq("entitled", true).select("user_id");
+      if (wlErr) throw new Error(`wl_entitlements revoke failed: ${wlErr.message}`);
+      for (const r of revoked ?? []) {
+        await must(db.from("wl_sales").update({ status: "cancelled" }).eq("user_id", r.user_id).in("status", ["pending", "active"]), "wl_sales cancel");
+      }
+    }
   }
 }
 

@@ -7,6 +7,7 @@
 // those panels remain "NotCollected" in MasterAdmin.tsx — NPS needs an
 // actual survey feature built from scratch, not covered here.
 import { Hono } from "npm:hono";
+import { fetchAll } from "../lib/fetchAll.ts";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import { isLivemode } from "../lib/stripe.ts";
 
@@ -27,7 +28,12 @@ analytics.get("/overview", async (c) => {
     db.from("users").select("id", { count: "exact", head: true }),
     db.from("users").select("plan, plan_status"),
     db.from("subscription_plans").select("id, price_monthly, price_annual"),
-    db.from("payments").select("amount_usd, status, type, created_at").order("created_at", { ascending: false }).limit(1000),
+    // Every succeeded payment in the current Stripe mode (test payments made
+    // while setting up must not show as revenue), read in pages.
+    fetchAll<{ amount_usd: number; status: string; type: string; created_at: string }>((from, to) =>
+      db.from("payments").select("amount_usd, status, type, created_at").eq("livemode", isLivemode()).eq("status", "succeeded")
+        .order("created_at", { ascending: false }).order("id").range(from, to))
+      .then((data) => ({ data, error: null }), (e: Error) => ({ data: null, error: { message: e.message } })),
     // MRR counts paying Stripe subscriptions in the current mode only: not
     // users.plan (unpaid accounts keep a plan id), not comps, not test data.
     db.from("subscriptions").select("product_line, plan_id, product_slug, interval")
@@ -78,17 +84,21 @@ analytics.get("/overview", async (c) => {
   });
 });
 
-// GET /admin/analytics/payments — the raw payment records (latest 1,000), for
-// the Transaction History export in System → Settings → Backup & Data.
+// GET /admin/analytics/payments — every payment record (test and live, with
+// livemode shown), for the Transaction History export in System → Settings.
 analytics.get("/payments", async (c) => {
-  const { data, error } = await adminClient()
-    .from("payments")
-    .select("id, user_id, type, amount_usd, status, description, stripe_payment_intent, stripe_invoice_id, paid_at, created_at, users:user_id(email, full_name)")
-    .order("created_at", { ascending: false })
-    .limit(1000);
-  if (error) return c.json({ error: error.message }, 500);
+  let data;
+  try {
+    data = await fetchAll<Record<string, unknown> & { users: unknown }>((from, to) => adminClient()
+      .from("payments")
+      .select("id, user_id, type, amount_usd, status, livemode, description, stripe_payment_intent, stripe_invoice_id, paid_at, created_at, users:user_id(email, full_name)")
+      .order("created_at", { ascending: false }).order("id")
+      .range(from, to));
+  } catch (err) {
+    return c.json({ error: (err as Error).message }, 500);
+  }
   return c.json({
-    payments: (data ?? []).map(({ users, ...p }) => {
+    payments: data.map(({ users, ...p }) => {
       const u = users as { email?: string; full_name?: string } | null;
       return { ...p, user_email: u?.email ?? null, user_name: u?.full_name ?? null };
     }),
@@ -109,7 +119,10 @@ analytics.get("/revenue-trend", async (c) => {
   const since = sixMonthsAgo.toISOString();
 
   const [{ data: payments, error: paymentsErr }, { data: payouts, error: payoutsErr }] = await Promise.all([
-    db.from("payments").select("amount_usd, type, status, created_at").eq("status", "succeeded").gte("created_at", since),
+    fetchAll<{ amount_usd: number; type: string; status: string; created_at: string }>((from, to) =>
+      db.from("payments").select("amount_usd, type, status, created_at").eq("status", "succeeded").eq("livemode", isLivemode())
+        .gte("created_at", since).order("created_at").order("id").range(from, to))
+      .then((data) => ({ data, error: null }), (e: Error) => ({ data: null, error: { message: e.message } })),
     db.from("payouts").select("amount, payout_type, status, processed_at").eq("status", "paid").gte("processed_at", since),
   ]);
 
@@ -270,7 +283,10 @@ analytics.get("/engagement", async (c) => {
 
   const [{ count: totalUsers, error: usersErr }, { data: events, error: eventsErr }] = await Promise.all([
     db.from("users").select("id", { count: "exact", head: true }),
-    db.from("app_events").select("user_id, session_id, path, created_at").gte("created_at", since30.toISOString()),
+    fetchAll<{ user_id: string; session_id: string; path: string | null; created_at: string }>((from, to) =>
+      db.from("app_events").select("user_id, session_id, path, created_at").gte("created_at", since30.toISOString())
+        .order("created_at").order("id").range(from, to))
+      .then((data) => ({ data, error: null }), (e: Error) => ({ data: null, error: { message: e.message } })),
   ]);
 
   if (usersErr) return c.json({ error: usersErr.message }, 500);

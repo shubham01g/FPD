@@ -1,5 +1,6 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
+import { isLivemode } from "../lib/stripe.ts";
 
 const partnerships = new Hono();
 
@@ -85,6 +86,7 @@ partnerships.get("/mrr-trend", async (c) => {
       .from("payments")
       .select("amount_usd, type, status, created_at, user_id")
       .eq("status", "succeeded")
+      .eq("livemode", isLivemode())
       .in("type", ["subscription", "upgrade"])
       .in("user_id", referredUserIds)
       .gte("created_at", since);

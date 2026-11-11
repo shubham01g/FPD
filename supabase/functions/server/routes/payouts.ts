@@ -19,18 +19,35 @@ payouts.get("/", async (c) => {
   return c.json({ payouts: data });
 });
 
-// POST /admin/payouts/:id/mark-paid
+// POST /admin/payouts/generate { type: "affiliate"|"partnership", period? }
+// Turns every unpaid commission balance into a pending payout (migration 056
+// create_commission_payouts). Nothing created payouts before, so earned
+// commissions could never be paid. FPD records the payout; the money itself
+// is sent outside the app, then the payout is marked paid here.
+payouts.post("/generate", async (c) => {
+  const body = await c.req.json().catch(() => ({})) as { type?: string; period?: string };
+  if (body.type !== "affiliate" && body.type !== "partnership") {
+    return c.json({ error: "type must be 'affiliate' or 'partnership'" }, 400);
+  }
+  const period = /^\d{4}-\d{2}$/.test(String(body.period ?? "")) ? String(body.period) : new Date().toISOString().slice(0, 7);
+  const { data, error } = await adminClient().rpc("create_commission_payouts", { p_type: body.type, p_period: period });
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ created: Number(data ?? 0), period });
+});
+
+// POST /admin/payouts/:id/mark-paid — only an open payout (pending/processing).
 payouts.post("/:id/mark-paid", async (c) => {
   const id = c.req.param("id");
   const { data, error } = await adminClient()
     .from("payouts")
     .update({ status: "paid", processed_at: new Date().toISOString() })
     .eq("id", id)
+    .in("status", ["pending", "processing"])
     .select()
     .maybeSingle();
 
   if (error) return c.json({ error: error.message }, 500);
-  if (!data) return c.json({ error: "Payout not found" }, 404);
+  if (!data) return c.json({ error: "Payout not found, or it is already paid, failed or cancelled" }, 404);
   return c.json({ payout: data });
 });
 
@@ -46,9 +63,19 @@ payouts.patch("/:id", async (c) => {
     return c.json({ error: "No updatable fields provided" }, 400);
   }
 
-  const { data, error } = await adminClient().from("payouts").update(patch).eq("id", id).select().maybeSingle();
+  if ("status" in patch && !["processing", "failed", "cancelled"].includes(String(patch.status))) {
+    return c.json({ error: "Status can be set to processing, failed or cancelled here (use Mark paid for paid)" }, 400);
+  }
+  const db = adminClient();
+  // A paid payout is final; changing it would double-count the commissions.
+  const { data, error } = await db.from("payouts").update(patch).eq("id", id).neq("status", "paid").select().maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
-  if (!data) return c.json({ error: "Payout not found" }, 404);
+  if (!data) return c.json({ error: "Payout not found, or it is already paid" }, 404);
+  if (patch.status === "failed" || patch.status === "cancelled") {
+    // Its commissions go back into the balance, to be paid in a later payout.
+    const { error: relErr } = await db.rpc("release_payout", { p_payout: id });
+    if (relErr) return c.json({ error: `Status saved, but the commissions could not be released: ${relErr.message}` }, 500);
+  }
   return c.json({ payout: data });
 });
 

@@ -96,15 +96,42 @@ export function PayoutManagement() {
     toast.success(count === 0 ? "No matching payouts — downloaded an empty file" : `Exported ${count} payouts`);
   }
 
+  const [generating, setGenerating] = useState<"affiliate" | "partnership" | null>(null);
+  async function generatePayouts(type: "affiliate" | "partnership") {
+    const who = type === "affiliate" ? "affiliate" : "partner";
+    if (!window.confirm(`Create a pending payout for every ${who} with an unpaid commission balance?`)) return;
+    setGenerating(type);
+    try {
+      const { created, period } = await adminApi.post<{ created: number; period: string }>("/payouts/generate", { type });
+      toast.success(created === 0 ? `No unpaid ${who} balances to pay` : `${created} ${who} payout${created === 1 ? "" : "s"} created for ${period}`);
+      refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not create payouts");
+    } finally {
+      setGenerating(null);
+    }
+  }
+
   async function processSelected() {
     setProcessing(true);
     try {
-      await Promise.all(selectedPending.map(p => adminApi.post(`/payouts/${p.id}/mark-paid`)));
-      toast.success(`${selectedPending.length} payout${selectedPending.length === 1 ? "" : "s"} marked paid`);
-      setSelected(new Set());
+      // One result per payout: with Promise.all a single failure reported the
+      // whole batch as failed even though the others had been marked paid.
+      // This records the payment only; the money itself is sent outside FPD.
+      const results = await Promise.allSettled(selectedPending.map(p => adminApi.post(`/payouts/${p.id}/mark-paid`)));
+      const failedIds = new Set<string>();
+      let firstError = "";
+      results.forEach((r, i) => {
+        if (r.status === "rejected") {
+          failedIds.add(selectedPending[i].id);
+          if (!firstError) firstError = r.reason instanceof Error ? r.reason.message : String(r.reason);
+        }
+      });
+      const ok = results.length - failedIds.size;
+      if (ok > 0) toast.success(`${ok} payout${ok === 1 ? "" : "s"} marked paid`);
+      if (failedIds.size > 0) toast.error(`${failedIds.size} could not be marked paid and are still selected: ${firstError}`);
+      setSelected(failedIds);
       refetch();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to process payouts");
     } finally {
       setProcessing(false);
     }
@@ -119,8 +146,20 @@ export function PayoutManagement() {
             <span style={{ color: "var(--gold)", fontSize: 15, fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>ADMIN · PAYOUTS</span>
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32.5, color: "var(--foreground)" }}>Payout Management</h1>
-          <p style={{ color: "var(--muted-foreground)", fontSize: 17.5, marginTop: 4 }}>Manage affiliate and partnership commission payouts. Payouts cycle on the 1st of each month.</p>
+          <p style={{ color: "var(--muted-foreground)", fontSize: 17.5, marginTop: 4 }}>Affiliate and partner commissions are earned automatically from referred accounts' Stripe payments. Create payouts to turn unpaid balances into payouts, send the money outside FPD, then mark them paid.</p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+        {(["affiliate", "partnership"] as const).map(t => (
+          <button key={t}
+            onClick={() => void generatePayouts(t)}
+            disabled={generating !== null}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
+            style={{ background: "var(--secondary)", color: "var(--foreground)", fontSize: 17.5, opacity: generating && generating !== t ? 0.5 : 1 }}
+          >
+            {generating === t ? <Loader2 size={14} className="animate-spin" /> : <DollarSign size={14} />}
+            Create {t === "affiliate" ? "affiliate" : "partner"} payouts
+          </button>
+        ))}
         <button
           onClick={exportCsv}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
@@ -128,6 +167,7 @@ export function PayoutManagement() {
         >
           <Download size={14} /> Export CSV
         </button>
+        </div>
       </div>
 
       {error && (

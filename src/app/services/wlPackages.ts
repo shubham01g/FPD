@@ -57,12 +57,20 @@ export interface WLSale {
   subdomain:  string;
   processor:  string;
   lastPayout: string;
+  /** The buyer's account (null for an enquiry made before sign-in). */
+  userId:     string | null;
+  /** Whether White Label is unlocked on that account right now. */
+  unlocked:   boolean;
+  paymentRef: string | null;
 }
 
 interface DBSale {
   id: string; org: string; contact: string; email: string; package_id: string;
   status: WLSale["status"]; users_count: number; mrr: number; total_paid: number;
   subdomain: string | null; processor: string | null; last_payout_at: string | null; created_at: string;
+  user_id?: string | null;
+  stripe_checkout_session_id?: string | null;
+  entitlement?: { entitled: boolean; payment_ref: string | null } | null;
 }
 
 function saleFromDB(row: DBSale): WLSale {
@@ -72,6 +80,9 @@ function saleFromDB(row: DBSale): WLSale {
     startDate: new Date(row.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     subdomain: row.subdomain ?? "", processor: row.processor ?? "",
     lastPayout: row.last_payout_at ? new Date(row.last_payout_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—",
+    userId: row.user_id ?? null,
+    unlocked: row.entitlement?.entitled === true,
+    paymentRef: row.entitlement?.payment_ref ?? row.stripe_checkout_session_id ?? null,
   };
 }
 
@@ -230,6 +241,18 @@ export async function getSales(): Promise<WLSale[]> {
 /** Admin: move a sale on (pending → active once provisioned, suspended, cancelled). */
 export async function updateSaleStatus(id: string, status: WLSale["status"]): Promise<void> {
   await adminApi.patch(`/white-label/sales/${id}`, { status });
+}
+
+/** Admin: turn White Label on for the buyer's account. The grant needs a
+ *  payment reference; a Stripe sale has one, a manual grant is tagged with
+ *  the sale id so it is clear who unlocked it and why. */
+export async function setSaleUnlocked(sale: WLSale, unlocked: boolean): Promise<void> {
+  if (!sale.userId) throw new Error("This sale isn't linked to an account, so there is nothing to unlock");
+  if (unlocked) {
+    await adminApi.put(`/wl-entitlements/${sale.userId}`, { package_id: sale.packageId, payment_ref: sale.paymentRef ?? `admin:${sale.id}` });
+  } else {
+    await adminApi.del(`/wl-entitlements/${sale.userId}`);
+  }
 }
 
 /** Records a new WL application submitted through the public onboarding wizard. Starts "pending" until an admin provisions the instance. */

@@ -76,7 +76,15 @@ async function recordConsent(c: Context, row: {
     ip: c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     user_agent: c.req.header("user-agent")?.slice(0, 400) ?? null,
   });
-  if (error) console.error("billing_consents insert failed:", error.message);
+  if (error) {
+    // The renewal consent is the record that the buyer agreed to recurring
+    // charges; without it we must not let the payment go ahead. Expire the
+    // session just created so its URL can't be used, then fail the request.
+    console.error("billing_consents insert failed:", error.message);
+    await stripe("POST", `/checkout/sessions/${row.sessionId}/expire`, {}).catch((e) =>
+      console.error("could not expire checkout session after consent failure:", e));
+    throw new Error("We couldn't record your agreement to the renewal terms, so checkout was stopped. Please try again.");
+  }
 }
 
 /** Checkout session fields every purchase shares. */

@@ -127,6 +127,9 @@ interface FileCategory {
   sizeGB: number;
   count: number;
   selected: boolean;
+  /** The real vault_documents categories this tile stands for. "Other"
+   *  gathers every category without its own tile (warranties, ids, …). */
+  members: string[];
 }
 
 /* ── server-authoritative bypass state ───────────────────────────── */
@@ -230,16 +233,18 @@ const CATEGORY_META: Record<string, { label: string; icon: string }> = {
 };
 
 function categoriesFromDocs(docs: { category: string; size: number; sizeUnit: "MB" | "GB" }[]): FileCategory[] {
-  const totals = new Map<string, { gb: number; count: number }>();
+  const totals = new Map<string, { gb: number; count: number; members: Set<string> }>();
   for (const doc of docs) {
     const key = CATEGORY_META[doc.category] ? doc.category : "other";
-    const entry = totals.get(key) ?? { gb: 0, count: 0 };
+    const entry = totals.get(key) ?? { gb: 0, count: 0, members: new Set<string>() };
     entry.gb += doc.sizeUnit === "GB" ? doc.size : doc.size / 1024;
     entry.count += 1;
+    entry.members.add(doc.category);
     totals.set(key, entry);
   }
   return [...totals.entries()]
-    .map(([id, { gb, count }]) => ({
+    .map(([id, { gb, count, members }]) => ({
+      members: [...members],
       id,
       label: CATEGORY_META[id].label,
       icon: CATEGORY_META[id].icon,
@@ -315,7 +320,10 @@ export function DisasterRecovery() {
     try {
       const r = await buildVaultExport(
         { id: authUser.id, name: user.name, email: authUser.email ?? "" },
-        { includeFiles: true, docCategories: selectedCats.map(c => c.id) },
+        // Send the real categories behind each tile (the "Other" tile used to
+        // send "other", which matched no document, so those files were dropped).
+        // Recordings, photos and attachments always come along.
+        { includeFiles: true, includeMedia: true, docCategories: selectedCats.flatMap(c => c.members) },
         (pr) => { setPhaseText(pr.phase); setProgress(pr.total ? Math.round((pr.done / pr.total) * 100) : 0); },
       );
       setArchive(r);

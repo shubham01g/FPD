@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   getAdminPackages, updatePackage, createPackage,
-  getSales, updateSaleStatus, getProcessors, updateProcessor, calcMonthlyCharge,
+  getSales, updateSaleStatus, setSaleUnlocked, getProcessors, updateProcessor, calcMonthlyCharge,
 } from "../../services/wlPackages";
 import type { WLPackage, WLSale, PaymentProcessor, BillingModel } from "../../services/wlPackages";
 import { FPD_EMAIL } from "../../utils/fpdEmails";
@@ -607,14 +607,14 @@ export function PartnerOnboardingAdmin() {
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background:"rgba(255,255,255,0.08)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
-                    {["ID","Organization","Package","Users","MRR","Total Paid","Processor","Status"].map(h => (
+                    {["ID","Organization","Package","Users","MRR","Total Paid","Processor","Unlocked","Status"].map(h => (
                       <th key={h} className="px-4 py-3 text-left" style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {sales.length === 0 && (
-                    <tr><td colSpan={8} className="px-4 py-10 text-center" style={{ color:"#8A9AB8", fontSize:15 }}>
+                    <tr><td colSpan={9} className="px-4 py-10 text-center" style={{ color:"#8A9AB8", fontSize:15 }}>
                       No white-label sales yet. Applications submitted through the public onboarding wizard appear here.
                     </td></tr>
                   )}
@@ -633,6 +633,28 @@ export function PartnerOnboardingAdmin() {
                         <td className="px-4 py-3" style={{ color:"#6FAE8B", fontSize:15, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:14 }}>{s.processor}</td>
+                        <td className="px-4 py-3">
+                          {!s.userId ? (
+                            <span style={{ color:"#8A9AB8", fontSize:13 }} title="Enquiry made without an account">No account</span>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                const next = !s.unlocked;
+                                if (!next && !window.confirm(`Turn White Label off for ${s.org}? They lose access to White Label Studio until it is turned on again.`)) return;
+                                try {
+                                  await setSaleUnlocked(s, next);
+                                  setSales(await getSales());
+                                  toast.success(next ? `White Label unlocked for ${s.org}` : `White Label turned off for ${s.org}`);
+                                } catch (err) {
+                                  toast.error(`Could not change access: ${(err as Error).message}`);
+                                }
+                              }}
+                              className="px-2 py-0.5 rounded text-xs font-bold"
+                              style={{ background: s.unlocked ? "rgba(72,187,120,0.12)" : "rgba(138,154,184,0.12)", color: s.unlocked ? "#48BB78" : "#8A9AB8", border:`1px solid ${s.unlocked ? "#48BB7840" : "#8A9AB840"}`, ...MONO }}>
+                              {s.unlocked ? "ON · REVOKE" : "OFF · ACTIVATE"}
+                            </button>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <select value={s.status} aria-label={`Status of ${s.org}`}
                             onChange={async e => {

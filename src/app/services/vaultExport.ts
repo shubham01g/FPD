@@ -78,8 +78,10 @@ export interface ExportOptions {
   includeFiles?: boolean;        // stored documents, photos, recordings (default true)
   includeSecretVault?: boolean;  // only if it is unlocked in this session
   /** Only File Cabinet documents in these categories (folder ids); other
-   *  stored files (photos, recordings) are then left out. */
+   *  stored files (photos, recordings) are then left out unless includeMedia. */
   docCategories?: string[];
+  /** With docCategories: still include recordings, photos and attachments. */
+  includeMedia?: boolean;
 }
 
 export interface ExportProgress { phase: string; done: number; total: number }
@@ -163,12 +165,14 @@ export async function buildVaultExport(
 
   // 2. Stored files.
   if (includeFiles) {
-    const { data: docs } = await supabase.from("vault_documents")
+    const { data: docs, error: docsErr } = await supabase.from("vault_documents")
       .select("name, category, sub_category, file_path").eq("user_id", owner.id);
+    // Without this the archive silently came out with no cabinet files.
+    if (docsErr) skipped.push(`File Cabinet documents (${docsErr.message})`);
     const allDocs = (docs ?? []).filter((d) => d.file_path && !String(d.file_path).includes("/manual-"));
     const docPaths = new Set(allDocs.map((d) => d.file_path as string));
     const docRows = opts.docCategories ? allDocs.filter((d) => opts.docCategories!.includes(String(d.category))) : allDocs;
-    const [vaultObjects, photoObjects] = opts.docCategories
+    const [vaultObjects, photoObjects] = opts.docCategories && !opts.includeMedia
       ? [[], []] as string[][]
       : await Promise.all([listOwnFiles("vault-documents", owner.id), listOwnFiles("record-photos", owner.id)]);
     const loose = vaultObjects.filter((p) => !docPaths.has(p)); // recordings and attachments

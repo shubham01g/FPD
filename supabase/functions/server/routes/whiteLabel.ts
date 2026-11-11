@@ -132,10 +132,19 @@ whiteLabel.patch("/packages/:id", async (c) => {
 });
 
 // GET /admin/white-label/sales
+// Each sale carries the buyer's unlock state (wl_entitlements), so the Sales
+// tab can show and change whether White Label is actually on for them.
 whiteLabel.get("/sales", async (c) => {
-  const { data, error } = await adminClient().from("wl_sales").select("*").order("created_at", { ascending: false });
+  const db = adminClient();
+  const { data, error } = await db.from("wl_sales").select("*").order("created_at", { ascending: false });
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ sales: data });
+  const userIds = [...new Set((data ?? []).map((s) => s.user_id).filter(Boolean))];
+  const { data: ents, error: entErr } = userIds.length
+    ? await db.from("wl_entitlements").select("user_id, entitled, package_id, payment_ref, granted_at").in("user_id", userIds)
+    : { data: [], error: null };
+  if (entErr) return c.json({ error: entErr.message }, 500);
+  const byUser = new Map((ents ?? []).map((e) => [e.user_id, e]));
+  return c.json({ sales: (data ?? []).map((s) => ({ ...s, entitlement: s.user_id ? byUser.get(s.user_id) ?? null : null })) });
 });
 
 // PATCH /admin/white-label/sales/:id — status/users/mrr updates as an admin provisions or reviews an account
