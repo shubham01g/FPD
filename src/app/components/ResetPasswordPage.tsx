@@ -39,17 +39,21 @@ function linkError(): string | null {
   return params.get("error_description")?.replace(/\+/g, " ") ?? "This reset link can't be used. Ask for a new one.";
 }
 
-/** True when this session was opened by a password-recovery link in the last
- *  hour. Supabase records how a session was signed in in the access token's
- *  "amr" claim; a recovery link adds { method: "recovery" }. Without this
- *  check anyone already signed in (an unlocked laptop, a borrowed phone) could
- *  open /reset-password and set a new password without the current one. */
-function isRecoverySession(accessToken: string): boolean {
+/** True when this session was opened from an emailed link in the last hour.
+ *  Supabase records how a session was signed in in the access token's "amr"
+ *  claim. A password-reset link is recorded as "otp" (there is no separate
+ *  "recovery" method), the same as other one-time email links, which prove
+ *  the person controls the mailbox just as well. A session that only signed
+ *  in with a password (an unlocked laptop, a borrowed phone) is refused, so
+ *  nobody can set a new password without the current one. */
+const EMAIL_LINK_METHODS = new Set(["otp", "recovery", "magiclink"]);
+function isEmailLinkSession(accessToken: string): boolean {
   try {
     const part = accessToken.split(".")[1];
-    const payload = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/"))) as { amr?: { method?: string; timestamp?: number }[] };
+    const payload = JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/"))) as { amr?: ({ method?: string; timestamp?: number } | string)[] };
     const now = Date.now() / 1000;
-    return (payload.amr ?? []).some((a) => a.method === "recovery" && typeof a.timestamp === "number" && now - a.timestamp < 3600);
+    return (payload.amr ?? []).some((a) => typeof a === "object" && !!a.method && EMAIL_LINK_METHODS.has(a.method)
+      && typeof a.timestamp === "number" && now - a.timestamp < 3600);
   } catch {
     return false;
   }
@@ -68,12 +72,14 @@ export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => voi
     if (bad) { setStage({ kind: "invalid", reason: bad }); return; }
 
     let settled = false;
+    // Supabase fires PASSWORD_RECOVERY for a reset link; that alone is proof.
+    let recoveryEvent = false;
     const decide = async () => {
       if (settled) return;
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       settled = true;
-      if (!isRecoverySession(data.session.access_token)) {
+      if (!recoveryEvent && !isEmailLinkSession(data.session.access_token)) {
         setStage({ kind: "invalid", reason: "Open the reset link from your email to choose a new password. To change it while signed in, use Account & Profile → Change password." });
         return;
       }
@@ -100,6 +106,7 @@ export function ResetPasswordPage({ onDone, onBackToLogin }: { onDone: () => voi
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") recoveryEvent = true;
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") decide();
     });
     decide();
