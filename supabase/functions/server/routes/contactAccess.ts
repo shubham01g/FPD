@@ -27,6 +27,10 @@ import { adminClient } from "../lib/supabaseAdmin.ts";
 import type { AuthedUser } from "../middleware/userAuth.ts";
 import { sha256Hex } from "../lib/contactLink.ts";
 import { formatRow, ownerColumn, sectionsFor, type PortalRow } from "../lib/accessSections.ts";
+import { stripe, stripeMode } from "../lib/stripe.ts";
+import { billingPaused, returnOrigin } from "../lib/billingConfig.ts";
+import { CatalogError, productPrice } from "../lib/billing/catalog.ts";
+import { getOrCreateCustomer } from "../lib/billing/customers.ts";
 
 const access = new Hono();
 
@@ -44,6 +48,8 @@ interface Grant {
   status: Status;
   folders: string[];
   expiresAt: string | null;
+  /** Legacy only: the owner's continuation fee is paid (it may still await activation). */
+  feePaid?: boolean;
 }
 
 interface ContactRow {
@@ -64,7 +70,7 @@ async function grantsFor(db: DB, userId: string): Promise<Grant[]> {
 
   const legacyIds = contacts.filter((r) => r.contact_type === "legacy").map((r) => r.id);
   const legacyOwners = [...new Set(contacts.filter((r) => r.contact_type === "legacy").map((r) => r.owner_user_id))];
-  const [claims, fees] = await Promise.all([
+  const [claims, fees, paidFees] = await Promise.all([
     legacyIds.length
       ? db.from("legacy_claims").select("contact_id, status").in("contact_id", legacyIds)
       : Promise.resolve({ data: [] as { contact_id: string; status: string }[] }),
@@ -73,7 +79,13 @@ async function grantsFor(db: DB, userId: string): Promise<Grant[]> {
         .in("user_id", legacyOwners).eq("status", "paid").not("activated_at", "is", null)
         .order("activated_at", { ascending: false })
       : Promise.resolve({ data: [] as { user_id: string; expires_at: string | null }[] }),
+    // Paid at all (activated or not): decides whether the contact is offered
+    // "pay the fee" or told it's waiting for Final Pass Down to activate it.
+    legacyOwners.length
+      ? db.from("legacy_continuation_fees").select("user_id").in("user_id", legacyOwners).eq("status", "paid")
+      : Promise.resolve({ data: [] as { user_id: string }[] }),
   ]);
+  const ownersWithPaidFee = new Set((paidFees.data ?? []).map((f) => f.user_id));
 
   const now = Date.now();
   return contacts.map((r) => {
@@ -90,7 +102,7 @@ async function grantsFor(db: DB, userId: string): Promise<Grant[]> {
     const mine = (claims.data ?? []).filter((c) => c.contact_id === r.id);
     if (!mine.some((c) => c.status === "approved")) return { ...base, folders: [], status: "awaiting_claim" as Status };
     const fee = (fees.data ?? []).find((f) => f.user_id === r.owner_user_id);
-    if (!fee) return { ...base, folders: [], status: "awaiting_activation" as Status };
+    if (!fee) return { ...base, folders: [], status: "awaiting_activation" as Status, feePaid: ownersWithPaidFee.has(r.owner_user_id) };
     const expired = fee.expires_at !== null && new Date(fee.expires_at).getTime() <= now;
     return { ...base, folders: [], expiresAt: fee.expires_at, status: (expired ? "expired" : "active") as Status };
   });
@@ -202,6 +214,59 @@ access.post("/invite/:token", async (c) => {
   if (error) return c.json({ error: error.message }, 500);
   if (!linked?.length) return c.json({ ok: false, problem: "linked_other" }, 400);
   return c.json({ ok: true });
+});
+
+// ── The legacy contact pays the continuation fee ────────────────────────
+// POST /account/access/:ownerId/checkout-fee
+// Only for a legacy contact whose claim on this owner is APPROVED and whose
+// owner has no paid fee. The fee is the owner's (metadata userId = owner, so
+// the webhook writes the legacy_continuation_fees row for the owner, exactly
+// as when the owner pays); the contact pays with their own card and is
+// recorded as paid_by_user_id. An admin then activates it as usual.
+access.post("/:ownerId/checkout-fee", async (c) => {
+  const user = c.get("user" as never) as AuthedUser;
+  const ownerId = c.req.param("ownerId");
+  if (!stripeMode()) return c.json({ error: "Card payments are being set up. Please try again shortly." }, 503);
+  if (billingPaused()) return c.json({ error: "Billing is being updated. Please try again in a few minutes." }, 503);
+  const origin = returnOrigin(c);
+  if (!origin) return c.json({ error: "Billing return address is not configured (APP_URL)" }, 500);
+
+  const db = adminClient();
+  try {
+    const grant = (await grantsFor(db, user.id)).find((g) => g.ownerId === ownerId && g.kind === "legacy");
+    if (!grant) return c.json({ error: "You aren't a legacy contact for this account." }, 403);
+    if (grant.status !== "awaiting_activation") {
+      return c.json({ error: grant.status === "awaiting_claim" ? "The fee can be paid once a claim is approved." : "Nothing to pay for this account." }, 409);
+    }
+    if (grant.feePaid) return c.json({ error: "The Legacy Continuation Fee is already paid. Final Pass Down will activate access shortly." }, 409);
+
+    const { data: payer } = await db.from("users").select("email, full_name").eq("id", user.id).maybeSingle();
+    const { product: row, priceId } = await productPrice("continuation_fee");
+    const customer = await getOrCreateCustomer(user.id, payer?.email ?? user.email, payer?.full_name ?? null);
+    const metadata = {
+      userId: ownerId, payerUserId: user.id, productSlug: row.slug,
+      purchaseType: "continuation_fee", paidByType: "legacy_contact",
+    };
+    const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
+      customer,
+      client_reference_id: ownerId,
+      adaptive_pricing: { enabled: false },
+      payment_method_types: ["card", "link"],
+      allow_promotion_codes: false,
+      mode: "payment",
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata,
+      payment_intent_data: { metadata },
+      invoice_creation: { enabled: true, invoice_data: { metadata } },
+      success_url: `${origin}/access?payment=success`,
+      cancel_url: `${origin}/access?payment=cancelled`,
+    });
+    return c.json({ url: session.url });
+  } catch (err) {
+    if (err instanceof CatalogError) return c.json({ error: err.message }, err.status);
+    console.error("contact fee checkout:", err);
+    return c.json({ error: err instanceof Error ? err.message : "Couldn't open checkout" }, 502);
+  }
 });
 
 // ── Portal ──────────────────────────────────────────────────────────────

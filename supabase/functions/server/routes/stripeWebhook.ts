@@ -175,7 +175,9 @@ async function onCheckoutCompleted(sessionId: string) {
     if (!existing?.length) {
       const { data: months } = await db.from("admin_settings").select("value").eq("key", "continuation_fee_period_months").maybeSingle();
       const { error } = await db.from("legacy_continuation_fees").insert({
-        user_id: userId, paid_by_user_id: userId,
+        // A legacy contact paying for the owner (POST /account/access/:ownerId/checkout-fee)
+        // is the payer; the fee itself always belongs to the owner (userId).
+        user_id: userId, paid_by_user_id: (session.metadata?.payerUserId as string | undefined) || userId,
         paid_by_type: session.metadata?.paidByType === "legacy_contact" ? "legacy_contact" : "account_owner",
         amount_usd: (session.amount_total ?? 0) / 100, stripe_payment_intent_id: pi,
         stripe_charge_id: idOf(session.payment_intent?.latest_charge),

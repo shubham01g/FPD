@@ -19,6 +19,8 @@ export type InviteCheck =
 export type GrantStatus = "active" | "awaiting_verification" | "awaiting_claim" | "awaiting_activation" | "expired" | "rejected";
 export interface SharedOwner {
   ownerId: string; ownerName: string; kind: "legacy" | "guardian"; status: GrantStatus; expiresAt: string | null;
+  /** Legacy only: the owner's continuation fee is paid (it may still await activation). */
+  feePaid?: boolean;
 }
 
 export interface OwnerSections {
@@ -68,6 +70,11 @@ export function checkContactInvite(token: string) {
 
 export function acceptContactInvite(token: string) {
   return request<{ ok: true } | { ok: false; problem: InviteProblem }>(`/invite/${encodeURIComponent(token)}`, "POST");
+}
+
+/** A legacy contact pays the owner's continuation fee: returns the Stripe Checkout URL. */
+export async function startContactFeeCheckout(ownerId: string) {
+  return (await request<{ url: string }>(`/${encodeURIComponent(ownerId)}/checkout-fee`, "POST")).url;
 }
 
 export async function listSharedOwners() {

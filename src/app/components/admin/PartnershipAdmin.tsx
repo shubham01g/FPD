@@ -18,6 +18,10 @@ interface PartnerRow {
   status: "active" | "inactive" | "suspended" | "invited";
   joined_at: string;
   partner_code?: string;
+  /** From the partner application (migration 057). */
+  contact_phone?: string | null;
+  website?: string | null;
+  application_notes?: string | null;
 }
 
 interface PartnerAccountRow {
@@ -405,6 +409,12 @@ export function PartnershipAdmin() {
               <div>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22.5, color: "var(--foreground)" }}>{detailPartner.organization_name}</h3>
                 <div style={{ color: "var(--muted-foreground)", fontSize: 15 }}>{detailPartner.contact_email} · {detailPartner.organization_type}</div>
+                {(detailPartner.contact_phone || detailPartner.website) && (
+                  <div style={{ color: "var(--muted-foreground)", fontSize: 14 }}>{[detailPartner.contact_phone, detailPartner.website].filter(Boolean).join(" · ")}</div>
+                )}
+                {detailPartner.application_notes && (
+                  <div style={{ color: "var(--foreground)", fontSize: 14, marginTop: 6, lineHeight: 1.5 }}>&ldquo;{detailPartner.application_notes}&rdquo;</div>
+                )}
               </div>
               <button onClick={() => setDetailPartner(null)} style={{ color: "var(--muted-foreground)" }}>✕</button>
             </div>

@@ -21,9 +21,10 @@ import {
 import { signOut } from "../services/auth";
 import { buildContactExport } from "../services/contactExport";
 import {
-  documentUrl, getOwnerSections, getSection, listOwnerDocuments, listSharedOwners,
+  documentUrl, getOwnerSections, getSection, listOwnerDocuments, listSharedOwners, startContactFeeCheckout,
   type GrantStatus, type OwnerSections, type PortalDocument, type SectionData, type SharedOwner,
 } from "../services/contactAccess";
+import { usePlatform } from "../services/platform";
 
 const TEXT = "#EFF2F9";
 const SOFT = "#BCC5DA";
@@ -81,7 +82,9 @@ function statusLine(o: SharedOwner): { text: string; color: string } {
       : { text: "View-only access is open", color: GUARDIAN },
     awaiting_verification: { text: "Waiting for Final Pass Down to verify you", color: WARN },
     awaiting_claim: { text: "Nothing is shared yet. Opens only after a claim on their passing is approved.", color: MUTED },
-    awaiting_activation: { text: "Claim approved. Waiting for the Legacy Continuation Fee to be activated.", color: WARN },
+    awaiting_activation: o.feePaid
+      ? { text: "Claim approved and the Legacy Continuation Fee is paid. Final Pass Down is opening access.", color: WARN }
+      : { text: "Claim approved. Access opens once the Legacy Continuation Fee is paid. You can pay it below.", color: WARN },
     expired: { text: `The access window ended${o.expiresAt ? ` on ${fmtDate(o.expiresAt)}` : ""}`, color: NEG },
     rejected: { text: "Your verification was not approved. Contact Final Pass Down support.", color: NEG },
   };
@@ -103,6 +106,20 @@ export function AccessPortal() {
   useEffect(() => {
     listSharedOwners().then(setOwners).catch(e => setErr((e as Error).message));
   }, []);
+
+  // Back from Stripe: the webhook records the fee within seconds.
+  const payment = new URLSearchParams(window.location.search).get("payment");
+  const { continuationFee } = usePlatform();
+  const [paying, setPaying] = useState<string | null>(null);
+  const payFee = async (o: SharedOwner) => {
+    setErr(""); setPaying(o.ownerId);
+    try {
+      window.location.href = await startContactFeeCheckout(o.ownerId);
+    } catch (e) {
+      setErr((e as Error).message);
+      setPaying(null);
+    }
+  };
 
   const openOwner = async (o: SharedOwner) => {
     setErr(""); setBusy(true);
@@ -261,12 +278,19 @@ export function AccessPortal() {
     body = (
       <>
         {err && <p className="err" style={{ marginBottom: 12 }}>{err}</p>}
+        {payment === "success" && (
+          <p style={{ marginBottom: 12, color: "#9AD7B5", fontSize: 15 }}>
+            Thank you. Stripe has your payment and emails your receipt. Final Pass Down will open access once it's activated.
+          </p>
+        )}
         <div className="owners">
           {owners.map(o => {
             const s = statusLine(o);
             const live = o.status === "active";
+            const canPay = o.kind === "legacy" && o.status === "awaiting_activation" && !o.feePaid;
             return (
-              <button key={`${o.ownerId}-${o.kind}`} className={`card owner${live ? " open" : ""}`} disabled={!live || busy} onClick={() => openOwner(o)}>
+              <div key={`${o.ownerId}-${o.kind}`} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className={`card owner${live ? " open" : ""}`} disabled={!live || busy} onClick={() => openOwner(o)}>
                 <div style={{ marginBottom: 10 }}>{kindChip(o.kind)}</div>
                 <div style={{ fontSize: 18, fontWeight: 650, marginBottom: 6 }}>{o.ownerName}</div>
                 <div style={{ display: "flex", gap: 7, alignItems: "flex-start", color: s.color, fontSize: 14.5, lineHeight: 1.5 }}>
@@ -276,6 +300,12 @@ export function AccessPortal() {
                   <span>{s.text}</span>
                 </div>
               </button>
+              {canPay && (
+                <button className="btn" disabled={paying !== null} onClick={() => void payFee(o)}>
+                  {paying === o.ownerId ? "Opening checkout…" : `Pay the Legacy Continuation Fee ($${continuationFee.amount})`}
+                </button>
+              )}
+              </div>
             );
           })}
         </div>

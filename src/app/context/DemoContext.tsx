@@ -612,7 +612,12 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       contact_type: c.type, access_level: c.accessLevel,
       notes: c.notes, allowed_folder_ids: c.allowedFolderIds ?? [], photo_url: c.photo ?? null,
     });
-    if (error || !data) { toast.error("Could not add contact", { id: tid }); return false; }
+    if (error || !data) {
+      // The database refuses contacts past the plan's limit (migration 058).
+      const limit = /plan_contact_limit:\s*(.*)/.exec(error?.message ?? "");
+      toast.error(limit ? limit[1] : "Could not add contact", { id: tid, duration: limit ? 8000 : undefined });
+      return false;
+    }
     setContacts(prev => [rowToContact(data), ...prev]);
     // Saved before the invite goes out, so a contact is never invited without
     // the protection the owner asked for. On failure the invite waits.

@@ -53,6 +53,11 @@ export interface WLSale {
   users:      number;
   mrr:        number;
   totalPaid:  number;
+  /** Application details (migration 057). */
+  orgType:    string;
+  phone:      string;
+  website:    string;
+  notes:      string;
   startDate:  string;
   subdomain:  string;
   processor:  string;
@@ -71,12 +76,14 @@ interface DBSale {
   user_id?: string | null;
   stripe_checkout_session_id?: string | null;
   entitlement?: { entitled: boolean; payment_ref: string | null } | null;
+  org_type?: string | null; contact_phone?: string | null; website?: string | null; application_notes?: string | null;
 }
 
 function saleFromDB(row: DBSale): WLSale {
   return {
     id: row.id, org: row.org, contact: row.contact, email: row.email, packageId: row.package_id,
     status: row.status, users: row.users_count, mrr: Number(row.mrr), totalPaid: Number(row.total_paid),
+    orgType: row.org_type ?? "", phone: row.contact_phone ?? "", website: row.website ?? "", notes: row.application_notes ?? "",
     startDate: new Date(row.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     subdomain: row.subdomain ?? "", processor: row.processor ?? "",
     lastPayout: row.last_payout_at ? new Date(row.last_payout_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—",

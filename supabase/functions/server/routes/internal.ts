@@ -9,6 +9,7 @@ import { billingPaused } from "../lib/billingConfig.ts";
 import { runRollover } from "../lib/billing/usage.ts";
 import { runMessageDelivery } from "../lib/messageDelivery.ts";
 import { runScheduledCampaigns } from "../lib/campaigns.ts";
+import { runReminderDelivery, runStorageAlerts } from "../lib/reminderDelivery.ts";
 
 const internal = new Hono();
 
@@ -36,9 +37,10 @@ internal.post("/billing/rollover", async (c) => {
 });
 
 // POST /internal/messages/deliver — hourly (the messages-delivery cron):
-// email Messages to Loved Ones that are due (migration 050) and send admin
-// announcements whose scheduled time has passed (migration 054). Each job
-// runs even if the other fails.
+// email Messages to Loved Ones that are due (migration 050), send admin
+// announcements whose scheduled time has passed (migration 054), and send
+// reminder and storage-alert emails (migration 058). Each job runs even if
+// another fails.
 internal.post("/messages/deliver", async (c) => {
   const out: Record<string, unknown> = {};
   let failed = false;
@@ -46,6 +48,11 @@ internal.post("/messages/deliver", async (c) => {
   catch (err) { failed = true; console.error("message delivery failed:", err); out.messagesError = err instanceof Error ? err.message : "Delivery failed"; }
   try { out.campaigns = await runScheduledCampaigns(); }
   catch (err) { failed = true; console.error("scheduled campaigns failed:", err); out.campaignsError = err instanceof Error ? err.message : "Campaigns failed"; }
+  // Reminder and storage-alert emails (migration 058); each item goes out once.
+  try { out.reminders = await runReminderDelivery(); }
+  catch (err) { failed = true; console.error("reminder emails failed:", err); out.remindersError = err instanceof Error ? err.message : "Reminders failed"; }
+  try { out.storageAlerts = await runStorageAlerts(); }
+  catch (err) { failed = true; console.error("storage alerts failed:", err); out.storageAlertsError = err instanceof Error ? err.message : "Storage alerts failed"; }
   return c.json(out, failed ? 500 : 200);
 });
 

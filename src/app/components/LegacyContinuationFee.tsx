@@ -263,7 +263,8 @@ export function LegacyContinuationFee() {
         toast.error(`Card payments are not connected yet. Please contact ${FPD_EMAIL.support}.`, { id: tid });
         return;
       }
-      const { url } = await billing.continuationFeeCheckout(payerType === "legacy_contact" ? "legacy_contact" : "account_owner");
+      // Only the owner pays here; a contact pays from their own login.
+      const { url } = await billing.continuationFeeCheckout("account_owner");
       window.location.assign(url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start checkout", { id: tid });
@@ -415,7 +416,7 @@ export function LegacyContinuationFee() {
                 <div className="payer-label">WHO IS PAYING?</div>
                 {[
                   { id:"user",           label:"I'm paying now (account owner)", sub:"Pay at any time — even years before passing" },
-                  { id:"legacy_contact", label:"Legacy contact paying after passing", sub:"Contact pays after confirmation of passing is submitted" },
+                  { id:"legacy_contact", label:"Legacy contact paying after passing", sub:"Nothing to pay now. Your contact pays from their own login once a claim is approved" },
                 ].map(opt => (
                   <button key={opt.id} onClick={() => setPayerType(opt.id as any)}
                     className={`payer${payerType===opt.id ? " on" : ""}`}>
@@ -427,6 +428,19 @@ export function LegacyContinuationFee() {
                   </button>
                 ))}
 
+                {/* "Contact pays later" charges nobody now: once a claim is
+                    approved, the contact pays from their Shared-with-me page
+                    (POST /account/access/:ownerId/checkout-fee). */}
+                {payerType === "legacy_contact" ? (
+                  <div className="doc-box" style={{ marginTop: 14 }}>
+                    <div className="dk">NOTHING TO PAY NOW</div>
+                    <div className="dv">
+                      After a claim on your passing is approved, each Legacy Contact sees a button to pay the {feeLabel} fee
+                      on their own &ldquo;Shared with me&rdquo; page, with their own card. Access opens once it's paid and
+                      activated. You can still pay it yourself at any time by choosing &ldquo;I'm paying now&rdquo;.
+                    </div>
+                  </div>
+                ) : (
                 <div className="pay-acts">
                   <button onClick={() => void startCheckout()} className="btn-primary">
                     <CreditCard size={16}/>
@@ -450,6 +464,7 @@ export function LegacyContinuationFee() {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             ) : (
               <div className="card pad paid-panel">

@@ -379,8 +379,9 @@ async function oneTimeCheckout(c: Context<Env>, product: string, body: Record<st
     }
 
     const customer = await getOrCreateCustomer(user.id, account.email, account.full_name);
-    // Who the owner says is paying the $199 fee (recorded on the fee row).
-    const paidByType = product === "continuation_fee" && body.payerType === "legacy_contact" ? "legacy_contact" : "account_owner";
+    // This route charges the signed-in owner, so the owner is the payer. A
+    // legacy contact pays through /account/access/:ownerId/checkout-fee.
+    const paidByType = "account_owner";
     const metadata = { userId: user.id, productSlug: row.slug, purchaseType: product, paidByType };
     const session = await stripe<{ id: string; url: string }>("POST", "/checkout/sessions", {
       ...sessionBase(origin, page, customer, user.id),

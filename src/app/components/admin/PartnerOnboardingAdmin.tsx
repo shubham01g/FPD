@@ -43,8 +43,12 @@ function BillingEditor({
 
   return (
     <div className="space-y-4">
+      <div className="px-3 py-2 rounded-xl" style={{ background:"rgba(246,173,85,0.07)", border:"1px solid rgba(246,173,85,0.25)", color:"#F3D9B8", fontSize:13.5, lineHeight:1.5 }}>
+        Only the <strong>setup fee</strong> is charged in the app (Stripe Checkout on the White Label application).
+        The monthly terms below are the agreed price list; invoice them outside the app.
+      </div>
       <div>
-        <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>BILLING MODEL</label>
+        <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:8 }}>BILLING MODEL (CONTRACT TERMS)</label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {modelTypes.map(t => (
             <button key={t.id} onClick={() => switchModel(t.id)}
@@ -423,9 +427,10 @@ export function PartnerOnboardingAdmin() {
   }
 
   const activeSales = sales.filter(s => s.status === "active");
-  const totalMRR = activeSales.reduce((s, a) => s + a.mrr, 0);
-  const totalUsers = activeSales.reduce((s, a) => s + a.users, 0);
-  const totalRevenue = sales.reduce((s, a) => s + a.totalPaid, 0);
+  // Only setup fees are charged in the app (Stripe), so revenue is what was
+  // actually paid; nothing records monthly WL billing or end-user counts.
+  const paidSales = sales.filter(s => s.processor === "stripe" && s.totalPaid > 0);
+  const totalRevenue = paidSales.reduce((s, a) => s + a.totalPaid, 0);
 
   const TABS: { id: Tab; label: string }[] = [
     { id:"packages",   label:"📦 Packages" },
@@ -468,9 +473,9 @@ export function PartnerOnboardingAdmin() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { label:"Active WL Accounts",  value:activeSales.length,                  color:"#6E90C9" },
-            { label:"Total WL Users",       value:totalUsers.toLocaleString(),         color:"#D99A6B" },
-            { label:"WL Platform MRR",      value:`$${totalMRR.toLocaleString()}`,     color:"#6FAE8B" },
-            { label:"Total WL Revenue",     value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
+            { label:"Paid Setups (Stripe)", value:paidSales.length,                    color:"#D99A6B" },
+            { label:"Applications",         value:sales.length,                        color:"#6FAE8B" },
+            { label:"Setup Fees Collected", value:`$${totalRevenue.toLocaleString()}`, color:"#F6AD55" },
           ].map(s => (
             <div key={s.label} className="p-5 rounded-2xl" style={CARD}>
               <div style={{ fontFamily:"var(--font-display)", fontSize:30, color:s.color }}>{s.value}</div>
@@ -556,9 +561,9 @@ export function PartnerOnboardingAdmin() {
                       <div style={{ color:"#E8EDF5", fontSize:15, fontWeight:700, marginTop:2 }}>${b.setupFee.toLocaleString()}</div>
                     </div>
                     <div className="px-3 py-2 rounded-2xl" style={{ background:"rgba(255,255,255,0.06)" }}>
-                      <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>STRIPE PRODUCT</div>
-                      <div style={{ color:pkg.stripeProductId?"#6E90C9":"#FC8181", fontSize:14, ...MONO, marginTop:2 }}>
-                        {pkg.stripeProductId ?? "⚠ Not linked"}
+                      <div style={{ color:"#8A9AB8", fontSize:11, ...MONO }}>CHECKOUT</div>
+                      <div style={{ color:"#6E90C9", fontSize:14, ...MONO, marginTop:2 }}>
+                        Setup fee via Stripe
                       </div>
                     </div>
                   </div>
@@ -566,7 +571,7 @@ export function PartnerOnboardingAdmin() {
                   <div className="flex gap-3 mt-3">
                     {[50, 200, 1000].map(n => (
                       <div key={n} className="flex-1 text-center px-2 py-1.5 rounded-xl" style={{ background:"rgba(91,110,225,0.05)" }}>
-                        <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{n} USERS</div>
+                        <div style={{ color:"#8A9AB8", fontSize:10, ...MONO }}>{n} USERS · CONTRACT</div>
                         <div style={{ color:pkg.color, fontSize:15, fontWeight:700 }}>
                           ${calcMonthlyCharge(pkg.billing, n).toLocaleString()}/mo
                         </div>
@@ -583,17 +588,17 @@ export function PartnerOnboardingAdmin() {
         {tab === "sales" && (
           <div className="space-y-4">
             <div className="p-5 rounded-2xl" style={CARD}>
-              <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:14 }}>Revenue by Package</div>
+              <div style={{ fontFamily:"var(--font-display)", fontSize:19, color:"#E8EDF5", marginBottom:14 }}>Setup Fees Paid by Package</div>
               <div className="space-y-3">
                 {packages.map(pkg => {
-                  const pkgMRR = activeSales.filter(s => s.packageId === pkg.id).reduce((s, a) => s + a.mrr, 0);
-                  const count = activeSales.filter(s => s.packageId === pkg.id).length;
-                  const maxMRR = Math.max(...packages.map(p => activeSales.filter(s=>s.packageId===p.id).reduce((s,a)=>s+a.mrr,0)), 1);
+                  const pkgMRR = paidSales.filter(s => s.packageId === pkg.id).reduce((s, a) => s + a.totalPaid, 0);
+                  const count = paidSales.filter(s => s.packageId === pkg.id).length;
+                  const maxMRR = Math.max(...packages.map(p => paidSales.filter(s=>s.packageId===p.id).reduce((s,a)=>s+a.totalPaid,0)), 1);
                   return (
                     <div key={pkg.id}>
                       <div className="flex items-center justify-between mb-1">
                         <span style={{ color:"#E8EDF5", fontSize:16 }}>{pkg.name}</span>
-                        <span style={{ color:pkg.color, fontSize:15, fontWeight:700, ...MONO }}>${pkgMRR.toLocaleString()}/mo · {count} accounts</span>
+                        <span style={{ color:pkg.color, fontSize:15, fontWeight:700, ...MONO }}>${pkgMRR.toLocaleString()} · {count} paid</span>
                       </div>
                       <div className="h-2 rounded-full" style={{ background:"rgba(255,255,255,0.08)" }}>
                         <div className="h-2 rounded-full" style={{ width:`${(pkgMRR/maxMRR)*100}%`, background:pkg.color }}/>
@@ -608,7 +613,7 @@ export function PartnerOnboardingAdmin() {
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background:"rgba(255,255,255,0.08)", borderBottom:"1px solid rgba(91,110,225,0.1)" }}>
-                    {["ID","Organization","Package","Users","MRR","Total Paid","Processor","Unlocked","Status"].map(h => (
+                    {["ID","Organization","Package","Contact","Application","Total Paid","Processor","Unlocked","Status"].map(h => (
                       <th key={h} className="px-4 py-3 text-left" style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>{h}</th>
                     ))}
                   </tr>
@@ -630,8 +635,14 @@ export function PartnerOnboardingAdmin() {
                           <div style={{ color:"#8A9AB8", fontSize:12.5 }}>{s.subdomain}</div>
                         </td>
                         <td className="px-4 py-3" style={{ color:pkg?.color ?? "#8A9AB8", fontSize:14, fontWeight:600 }}>{pkg?.name ?? s.packageId}</td>
-                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>{s.users.toLocaleString()}</td>
-                        <td className="px-4 py-3" style={{ color:"#6FAE8B", fontSize:15, fontWeight:700, ...MONO }}>${s.mrr.toLocaleString()}</td>
+                        <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:14 }}>
+                          <div>{s.contact}</div>
+                          <div style={{ color:"#8A9AB8", fontSize:13 }}>{s.email}{s.phone ? ` · ${s.phone}` : ""}</div>
+                        </td>
+                        <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:13, maxWidth:260 }} title={s.notes || undefined}>
+                          {[s.orgType.replace(/_/g, " "), s.website].filter(Boolean).join(" · ") || "—"}
+                          {s.notes && <div style={{ color:"#C7D0E3", marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.notes}</div>}
+                        </td>
                         <td className="px-4 py-3" style={{ color:"#E8EDF5", fontSize:15, ...MONO }}>${s.totalPaid.toLocaleString()}</td>
                         <td className="px-4 py-3" style={{ color:"#8A9AB8", fontSize:14 }}>{s.processor}</td>
                         <td className="px-4 py-3">
@@ -731,7 +742,7 @@ export function PartnerOnboardingAdmin() {
             <div className="p-4 rounded-2xl" style={{ background:"rgba(91,110,225,0.03)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <p style={{ color:"#8A9AB8", fontSize:15 }}>
                 Enable processors for WL billing. The <strong>default</strong> is used for new WL accounts.
-                WL partners can also bring their own processor — configure a per-package override in the package editor.
+                Card setup fees always go through Stripe.
               </p>
               <p style={{ color:"#8A9AB8", fontSize:14, marginTop:6 }}>
                 Credentials are stored encrypted and shared with the Crypto Payments screen — a processor enabled here is enabled there too.

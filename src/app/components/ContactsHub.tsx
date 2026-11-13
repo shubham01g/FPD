@@ -16,6 +16,7 @@ import heroGuardianPhoto from "../../imports/guardiancontacts_hero_photo.webp";
 import heroEmergencyPhoto from "../../imports/emergencycontacts_hero_photo.webp";
 import { FPD_EMAIL } from "../utils/fpdEmails";
 import { usePlatform } from "../services/platform";
+import { usePlans } from "../utils/planCatalog";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
 const TEXT    = "#EFF2F9";
@@ -879,6 +880,7 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   const platform = usePlatform();
+
   async function handleScanId(id: string, name: string, doc: ScannedDocument) {
     // Admin → Settings → "ID Verification" switch.
     if (platform.ready && !platform.flags.idVerification) {
@@ -893,6 +895,16 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
   // Only show contacts for the active section — never mix types
   const activeType: ContactType = initialSection;
   const visibleContacts = contacts.filter(c => c.type === activeType);
+
+  // Per-plan limit on Legacy and Guardian contacts (Admin → Subscription
+  // Config); the database enforces it too (migration 058).
+  const { user } = useDemo();
+  const planLimit = usePlans().find(p => p.id === user.plan)?.maxContacts ?? -1;
+  const limited = (activeType === "legacy" || activeType === "guardian") && planLimit >= 0;
+  const atLimit = limited && contacts.filter(c => c.type === activeType).length >= planLimit;
+  const limitText = `Your plan includes ${planLimit} ${activeType} contact${planLimit === 1 ? "" : "s"}. Upgrade in Usage & Billing to add more.`;
+  const requestAdd = () => { if (atLimit) toast.error(limitText); else setAddingType(activeType); };
+  const requestImport = () => { if (atLimit) toast.error(limitText); else setImportingType(activeType); };
   const legacyContacts = contacts.filter(c => c.type === "legacy");
 
   const cfg = typeConfig[activeType];
@@ -927,8 +939,8 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
             <h1>{hero.title}</h1>
             <p>{hero.sub}</p>
             <div className="hactions">
-              <button className="hbtn primary" onClick={() => setAddingType(activeType)}><Plus size={15} /> Add Contact</button>
-              <button className="hbtn ghost" onClick={() => setImportingType(activeType)}><FileUp size={15} /> Import Contacts</button>
+              <button className="hbtn primary" onClick={requestAdd}><Plus size={15} /> Add Contact</button>
+              <button className="hbtn ghost" onClick={requestImport}><FileUp size={15} /> Import Contacts</button>
             </div>
           </div>
         </div>
@@ -991,8 +1003,8 @@ export function ContactsHub({ initialSection = "legacy" }: { initialSection?: Co
         <ContactSection
           type={activeType}
           contacts={visibleContacts}
-          onAdd={() => setAddingType(activeType)}
-          onImport={() => setImportingType(activeType)}
+          onAdd={requestAdd}
+          onImport={requestImport}
           onRemove={id => removeContact(id)}
           onEdit={c => setEditingContact(c)}
           onSendInvite={sendVerificationInvite}
