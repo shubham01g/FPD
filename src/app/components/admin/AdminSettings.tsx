@@ -165,6 +165,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     aiAssistant:          true,
     disasterProtection:   true,
     idVerification:       true,   // same default as services/platform.ts
+    vitalClone:           true,
     betaFeatures:         false,
     publicSignup:         true,
     emailReferrals:       true,
@@ -616,6 +617,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               { key:"receiptOCR",           label:"Receipts & OCR Scanning", desc:"Enable receipt scanning in the user file cabinet" },
               { key:"disasterProtection",   label:"Disaster Protection",     desc:"Show disaster protection plan upsell and features" },
               { key:"idVerification",       label:"ID Verification",         desc:"Require identity verification for high-value accounts" },
+              { key:"vitalClone",           label:"Vital Clone",             desc:"Show the Vital Clone page and its one-click sign-in" },
               { key:"emailReferrals",       label:"Email Referrals",         desc:"Allow users to invite contacts via email referral" },
               { key:"betaFeatures",         label:"Beta Features",           desc:"Expose experimental in-development features to users" },
             ] as { key: keyof typeof flags; label: string; desc: string }[]).map(f => (

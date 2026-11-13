@@ -16,6 +16,8 @@ export interface PlatformFlags {
   disasterProtection: boolean;
   /** Contacts can submit a photo ID for review (ContactsHub). */
   idVerification: boolean;
+  /** The Vital Clone launcher page and its one-click sign-in. */
+  vitalClone: boolean;
 }
 
 export interface PlatformPrices {
@@ -51,6 +53,7 @@ export interface PlatformState {
 const DEFAULT_FLAGS: PlatformFlags = {
   publicSignup: true, aiAssistant: true, whiteGloveConcierge: true, affiliateProgram: true,
   partnerPortal: true, cryptoPayments: true, receiptOCR: true, disasterProtection: true, idVerification: true,
+  vitalClone: true,
 };
 
 /* Which portal pages each flag switches off. */
@@ -61,6 +64,7 @@ const FLAG_PAGES: Partial<Record<keyof PlatformFlags, string[]>> = {
   // receiptOCR switches off only the automatic reading of scans
   // (ReceiptsExpenses), not the whole Receipts page.
   disasterProtection: ["disaster-recovery"],
+  vitalClone: ["vital-clone"],
 };
 
 export function hiddenPages(flags: PlatformFlags): Set<string> {
