@@ -1,50 +1,36 @@
 /**
- * VitalClone — third-party product embedded in an iframe.
+ * VitalClone — launcher for the Vital Clone app, with one-click sign-in.
  *
  * NOT the same thing as VaultClone.tsx (that is the Legacy Vault Clone
- * download package). VitalClone is an external application; this page only
- * hosts it.
+ * download package). Vital Clone is a separate application with its own
+ * accounts, billing and privacy policy.
  *
- * ── CONFIGURATION ────────────────────────────────────────────────────────
- * Set VITALCLONE_URL to the live https:// address VitalClone is served from.
- * Until it is set, the page renders a "not configured" state rather than a
- * broken frame.
+ * Why a launcher and not an iframe: Vital Clone refuses to be framed
+ * (X-Frame-Options: DENY, frame-ancestors 'none'), Stripe Checkout refuses to
+ * load inside a frame, and Vital Clone Live needs camera and microphone access
+ * that does not survive being nested. A new tab keeps every feature working.
  *
- * Two things must be true on the VitalClone server or the frame stays blank
- * no matter what this file does:
- *   1. It must NOT send `X-Frame-Options: DENY|SAMEORIGIN`.
- *   2. Its CSP `frame-ancestors` must allow this app's origin.
- * Both are response headers on their side — unfixable from here. If the frame
- * is blank but the URL loads fine in a normal tab, that is the cause.
+ * Sign-in: "Open Vital Clone" asks our server for a 60-second, single-use
+ * token (services/vitalCloneApi.ts) and opens Vital Clone's /sso page with it,
+ * which signs the member in there — creating their Vital Clone account on the
+ * first visit.
  *
- * Auth note: if VitalClone requires a login, its session cookie must be set
- * with `SameSite=None; Secure` to survive being framed cross-site. Otherwise
- * users will see a login screen inside the frame that can never succeed.
+ * The address lives in services/vitalCloneApi.ts (VITE_VITALCLONE_URL).
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import {
-  Activity, ExternalLink, RefreshCw, Maximize2, Minimize2,
-  TriangleAlert, Settings2, ShieldCheck, Loader2,
+  Activity, ExternalLink, MessageSquare, Mic, Video, ShieldCheck, Loader2, LogIn,
 } from "lucide-react";
+import { useDemo } from "../context/DemoContext";
+import { VITALCLONE_URL, vitalCloneSignInUrl } from "../services/vitalCloneApi";
 
-/* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant, file cabinet, legacy vault, folders & final wishes) ── */
+/* ── Royal Vault Blue palette (matched to the redesigned dashboard) ── */
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#A3ADC9";
-const FAINT   = "#929CBC";
 const ACCENT  = "#5B6EE1";
 const ACCENT2 = "#5BA7D6";
-const POS     = "#5FBE91";
-const WARN    = "#D9A55E";
-const NEG     = "#D06B6B";
-
-/** ← Replace with the real VitalClone URL. Empty string = not configured. */
-export const VITALCLONE_URL = "";
-
-/** How long to wait before assuming the frame is being blocked. */
-const LOAD_TIMEOUT_MS = 12000;
-
-type FrameState = "loading" | "ready" | "timeout";
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
 const GRAIN =
@@ -55,211 +41,134 @@ const VITAL_CSS = `
 .fpd-vital{position:relative;min-height:100%;background:radial-gradient(1200px 460px at 60% -140px,rgba(91,110,225,0.10),transparent 70%);}
 .fpd-vital *{box-sizing:border-box;}
 .fpd-vital-grain{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.03;mix-blend-mode:overlay;background-image:${GRAIN};}
-.fpd-vital .wrap{max-width:1240px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
-.fpd-vital .wrap.wide{max-width:1900px;}
+.fpd-vital .wrap{max-width:1040px;margin:0 auto;padding:24px 30px 42px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1;}
 
 .fpd-vital .card{background:#101728;border:1px solid rgba(255,255,255,0.06);border-radius:22px;}
-.fpd-vital .card.pad{padding:28px;}
 .fpd-vital .eyebrow{font-size:12.5px;font-weight:600;color:${MUTED};display:flex;align-items:center;gap:7px;}
-.fpd-vital .sec-title{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-size:17.5px;font-weight:600;color:${TEXT};margin-bottom:16px;}
-.fpd-vital .sec-title .tick{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,${ACCENT2},${ACCENT});}
-
-/* header */
-.fpd-vital .pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .fpd-vital .pg-h1{font-size:30px;color:${TEXT};font-weight:600;margin:9px 0 5px;letter-spacing:-0.02em;font-family:var(--font-display);}
 .fpd-vital .pg-sub{color:${MUTED};font-size:16px;max-width:640px;line-height:1.6;}
-.fpd-vital .head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.fpd-vital .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,#5B6EE1);color:#fff;font-size:15.5px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
-.fpd-vital .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.fpd-vital .btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:${MUTED};font-size:15.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .18s,color .18s;}
-.fpd-vital .btn-sec:hover{background:rgba(91,110,225,0.1);color:#6FAE8B;}
 
-/* empty state */
-.fpd-vital .empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;gap:8px;}
-.fpd-vital .empty-ico{width:52px;height:52px;border-radius:18px;background:rgba(91,110,225,0.10);border:1px solid rgba(91,110,225,0.24);color:#FFFFFF;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
-.fpd-vital .empty-title{color:${TEXT};font-size:19px;font-weight:600;}
-.fpd-vital .empty-desc{color:${MUTED};font-size:15.5px;max-width:440px;line-height:1.6;}
+/* hero */
+.fpd-vital .hero{padding:34px;display:flex;flex-direction:column;gap:26px;overflow:hidden;position:relative;}
+.fpd-vital .hero::before{content:"";position:absolute;right:-120px;top:-120px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(126,107,216,0.22),transparent 70%);pointer-events:none;}
+.fpd-vital .hero-title{font-family:var(--font-display);font-size:24px;font-weight:600;color:${TEXT};letter-spacing:-0.01em;max-width:560px;line-height:1.3;}
+.fpd-vital .hero-body{color:${MUTED};font-size:16px;line-height:1.7;max-width:600px;margin-top:8px;}
 
-/* requirement rows */
-.fpd-vital .reqs{display:flex;flex-direction:column;gap:10px;}
-.fpd-vital .req-row{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);}
-.fpd-vital .req-ico{width:32px;height:32px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.fpd-vital .req-title{color:${TEXT};font-size:16px;font-weight:600;margin-bottom:4px;}
-.fpd-vital .req-body{color:${MUTED};font-size:15px;line-height:1.7;}
-.fpd-vital .req-body code{font-family:var(--font-mono);color:${SOFT};}
+.fpd-vital .feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.fpd-vital .feat{padding:16px;border-radius:16px;background:#0F1624;border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:8px;}
+.fpd-vital .feat-ico{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(91,110,225,0.12);color:${ACCENT2};}
+.fpd-vital .feat-title{color:${TEXT};font-size:15.5px;font-weight:600;}
+.fpd-vital .feat-body{color:${MUTED};font-size:14.5px;line-height:1.6;}
 
-/* frame */
-.fpd-vital .frame-wrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#0B111D;}
-.fpd-vital .frame-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0B111D;}
-.fpd-vital .frame-overlay .url{font-family:var(--font-mono);font-size:14px;color:${FAINT};opacity:.8;}
+.fpd-vital .cta-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.fpd-vital .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:99px;background:linear-gradient(180deg,#7E6BD8,${ACCENT});color:#fff;font-size:16px;font-weight:600;box-shadow:0 8px 20px -8px rgba(91,110,225,0.7),inset 0 1px 0 rgba(255,255,255,0.035);transition:filter .18s,transform .18s;border:none;cursor:pointer;font-family:var(--font-body);min-height:44px;}
+.fpd-vital .btn-primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px);}
+.fpd-vital .btn-primary:disabled{opacity:.7;cursor:progress;}
+.fpd-vital .btn-link{background:none;border:none;padding:6px 2px;color:${MUTED};font-size:14.5px;font-weight:500;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:var(--font-body);}
+.fpd-vital .btn-link:hover{color:${SOFT};}
+.fpd-vital .signed-as{color:${MUTED};font-size:14.5px;display:flex;align-items:center;gap:7px;}
+.fpd-vital .signed-as b{color:${SOFT};font-weight:600;}
 .fpd-vital .spin{animation:fpdvitalspin 1s linear infinite;}
 @keyframes fpdvitalspin{to{transform:rotate(360deg);}}
 
 /* footer note */
 .fpd-vital .note{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:18px;background:rgba(91,110,225,0.05);border:1px solid rgba(91,110,225,0.18);color:${MUTED};font-size:15px;line-height:1.7;}
+
+@media (max-width:720px){
+  .fpd-vital .wrap{padding:18px 16px 32px;}
+  .fpd-vital .hero{padding:24px 20px;}
+  .fpd-vital .feats{grid-template-columns:1fr;}
+  .fpd-vital .cta-row .btn-primary{width:100%;}
+}
 `;
 
+const FEATURES = [
+  { icon: <MessageSquare size={16} />, title: "Text", body: "Your family can message your clone and hear your stories in your words." },
+  { icon: <Mic size={16} />, title: "Voice", body: "Trained on your own recordings, so it sounds like you." },
+  { icon: <Video size={16} />, title: "Face to face", body: "Vital Clone Live lets them talk to you on a video call." },
+];
+
+/** Opens a URL in a tab opened earlier (pop-up safe), or in this tab if that was blocked. */
+function sendTab(tab: Window | null, url: string) {
+  if (tab) { tab.opener = null; tab.location.href = url; } else window.location.href = url;
+}
+
 export function VitalClone() {
-  const [state, setState] = useState<FrameState>("loading");
-  const [fullscreen, setFullscreen] = useState(false);
-  const [nonce, setNonce] = useState(0);
-  const timer = useRef<number | null>(null);
+  const { user } = useDemo();
+  const [opening, setOpening] = useState(false);
 
-  const configured = VITALCLONE_URL.trim().length > 0;
-
-  /* A blocked frame never fires onLoad, so fall back to a timeout. */
-  useEffect(() => {
-    if (!configured) return;
-    setState("loading");
-    timer.current = window.setTimeout(() => {
-      setState(s => (s === "loading" ? "timeout" : s));
-    }, LOAD_TIMEOUT_MS);
-    return () => {
-      if (timer.current) window.clearTimeout(timer.current);
-    };
-  }, [configured, nonce]);
-
-  const onFrameLoad = () => {
-    if (timer.current) window.clearTimeout(timer.current);
-    setState("ready");
+  const open = async () => {
+    if (opening) return;
+    setOpening(true);
+    // Open the tab first (synchronously) so pop-up blockers allow it.
+    const tab = window.open("", "_blank");
+    try {
+      sendTab(tab, await vitalCloneSignInUrl());
+    } catch (err) {
+      tab?.close();
+      toast.error((err as Error).message, {
+        action: { label: "Open anyway", onClick: () => openWithoutSignIn() },
+      });
+    } finally {
+      setOpening(false);
+    }
   };
 
-  const reload = () => {
-    setNonce(n => n + 1);
+  const openWithoutSignIn = () => {
+    window.open(`${VITALCLONE_URL}/signin`, "_blank", "noopener,noreferrer");
   };
-
-  /* ── Not configured: explain rather than render a dead frame ── */
-  if (!configured) {
-    const reqs = [
-      {
-        icon: <ExternalLink size={15} />, color: "#6FAE8B", title: "A live https:// URL",
-        body: "The running VitalClone web app — not a GitHub repository. An iframe loads a served page, not source code. GitHub also refuses to be framed, so a repo URL can never work here.",
-      },
-      {
-        icon: <ShieldCheck size={15} />, color: "#D99A6B", title: "Permissive framing headers",
-        body: <>VitalClone must not send X-Frame-Options: DENY or SAMEORIGIN, and its Content-Security-Policy frame-ancestors must list this app's origin. Both are set on VitalClone's server — this page cannot override them.</>,
-      },
-      {
-        icon: <TriangleAlert size={15} />, color: WARN, title: "Cross-site cookies, if it needs a login",
-        body: "A session cookie without SameSite=None; Secure is dropped inside a cross-origin iframe, so users would hit a login screen that can never succeed. Worth testing before launch.",
-      },
-    ];
-
-    return (
-      <div className="fpd-vital">
-        <style dangerouslySetInnerHTML={{ __html: VITAL_CSS }} />
-        <div className="fpd-vital-grain" />
-        <div className="wrap">
-          <div className="pg-head">
-            <div style={{ minWidth: 0 }}>
-              <div className="eyebrow"><Activity size={12} /> External Integration</div>
-              <h1 className="pg-h1">Vital Clone</h1>
-              <div className="pg-sub">Vital Clone runs as a separate application embedded inside Final Pass Down. The embed is built and ready — it just needs the address Vital Clone is served from.</div>
-            </div>
-          </div>
-
-          <div className="card pad empty">
-            <div className="empty-ico"><Settings2 size={22} /></div>
-            <div className="empty-title">Vital Clone isn't available yet</div>
-            <div className="empty-desc">This page opens once Vital Clone is live. Nothing to do on your side.</div>
-          </div>
-
-          <div className="card pad">
-            <div className="sec-title"><span className="tick" />What the integration needs</div>
-            <div className="reqs">
-              {reqs.map(r => (
-                <div key={r.title} className="req-row">
-                  <div className="req-ico" style={{ background: `${r.color}1A`, color: r.color }}>{r.icon}</div>
-                  <div>
-                    <div className="req-title">{r.title}</div>
-                    <div className="req-body">{r.body}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Configured: render the frame ── */
-  const frame = (
-    // dvh rather than vh so the frame does not sit under the mobile address
-    // bar; a flat 720px is taller than most phone viewports, so cap it.
-    <div className="frame-wrap" style={{ height: fullscreen ? "calc(100dvh - 96px)" : "min(720px, 70dvh)" }}>
-      {state !== "ready" && (
-        <div className="frame-overlay">
-          {state === "loading" ? (
-            <>
-              <Loader2 size={26} color="#FFFFFF" className="spin" />
-              <div style={{ color: MUTED, fontSize: 16 }}>Loading Vital Clone…</div>
-              <div className="url">{VITALCLONE_URL}</div>
-            </>
-          ) : (
-            <div style={{ textAlign: "center", maxWidth: 460, padding: 24 }}>
-              <TriangleAlert size={26} color={WARN} style={{ margin: "0 auto 12px" }} />
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, color: TEXT, marginBottom: 8 }}>
-                Vital Clone didn't load
-              </div>
-              <p style={{ color: MUTED, fontSize: 15.5, lineHeight: 1.75, marginBottom: 16 }}>
-                No response after {LOAD_TIMEOUT_MS / 1000} seconds. The most common cause is Vital Clone refusing to be framed
-                (<span style={{ fontFamily: "var(--font-mono)" }}>X-Frame-Options</span> or a restrictive <span style={{ fontFamily: "var(--font-mono)" }}>frame-ancestors</span> policy).
-                Open it in a new tab to check whether the site itself is up.
-              </p>
-              <div className="flex items-center justify-center gap-2">
-                <button className="btn-sec" onClick={reload}><RefreshCw size={13} /> Retry</button>
-                <button className="btn-primary" onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
-                  <ExternalLink size={13} /> Open in new tab
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <iframe
-        key={nonce}
-        src={VITALCLONE_URL}
-        title="Vital Clone"
-        onLoad={onFrameLoad}
-        referrerPolicy="strict-origin-when-cross-origin"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
-        allow="clipboard-write; fullscreen"
-        style={{ width: "100%", height: "100%", border: "none", display: "block", background: "#0B111D" }}
-      />
-    </div>
-  );
 
   return (
     <div className="fpd-vital">
       <style dangerouslySetInnerHTML={{ __html: VITAL_CSS }} />
       <div className="fpd-vital-grain" />
-      <div className={`wrap${fullscreen ? " wide" : ""}`}>
-        <div className="pg-head">
-          <div style={{ minWidth: 0 }}>
-            <div className="eyebrow"><Activity size={12} /> External Integration · Embedded</div>
-            <h1 className="pg-h1">Vital Clone</h1>
-            <div className="pg-sub">Vital Clone runs inside Final Pass Down as an embedded application. Your session here stays separate from theirs.</div>
-          </div>
-          <div className="head-actions">
-            <button className="btn-sec" onClick={reload}><RefreshCw size={13} /> Reload</button>
-            <button className="btn-sec" onClick={() => setFullscreen(f => !f)}>
-              {fullscreen ? <><Minimize2 size={13} /> Exit Fullscreen</> : <><Maximize2 size={13} /> Fullscreen</>}
-            </button>
-            <button className="btn-primary" onClick={() => window.open(VITALCLONE_URL, "_blank", "noopener,noreferrer")}>
-              <ExternalLink size={13} /> Open in New Tab
-            </button>
-          </div>
+      <div className="wrap">
+        <div style={{ minWidth: 0 }}>
+          <div className="eyebrow"><Activity size={12} /> Partner App</div>
+          <h1 className="pg-h1">Vital Clone</h1>
+          <div className="pg-sub">Create your living legacy: an AI clone your family can talk to.</div>
         </div>
 
-        <div style={{ borderRadius: 15 }}>{frame}</div>
+        <div className="card hero">
+          <div>
+            <div className="hero-title">Preserve your voice, stories and wisdom.</div>
+            <div className="hero-body">
+              Vital Clone turns your recordings and memories into a clone your loved ones can talk to for years to come.
+              Your Final Pass Down account signs you straight in, so there's no extra password to remember.
+            </div>
+          </div>
+
+          <div className="feats">
+            {FEATURES.map(f => (
+              <div key={f.title} className="feat">
+                <div className="feat-ico">{f.icon}</div>
+                <div className="feat-title">{f.title}</div>
+                <div className="feat-body">{f.body}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="cta-row">
+            <button className="btn-primary" onClick={open} disabled={opening}>
+              {opening
+                ? <><Loader2 size={16} className="spin" /> Opening…</>
+                : <><ExternalLink size={16} /> Open Vital Clone</>}
+            </button>
+            {user.email && (
+              <div className="signed-as"><LogIn size={14} /> Signs you in as <b>{user.email}</b></div>
+            )}
+          </div>
+          <div style={{ marginTop: -14 }}>
+            <button className="btn-link" onClick={openWithoutSignIn}>Use a different Vital Clone account</button>
+          </div>
+        </div>
 
         <div className="note">
           <ShieldCheck size={15} color="#FFFFFF" style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
-            Vital Clone is a third-party service loaded in a sandboxed frame. It cannot read your Final Pass Down vault,
-            and anything you enter there is governed by Vital Clone's own privacy policy.
+            Vital Clone opens in a new tab and is a separate service. It can't see your Final Pass Down vault, and its
+            own plans and privacy policy apply to anything you create there. The first time you open it, a Vital Clone
+            account is created with your email; if you already have one, you're signed in to it.
           </div>
         </div>
       </div>

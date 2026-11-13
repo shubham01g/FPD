@@ -16,7 +16,6 @@ import { StoredImage } from "./StoredImage";
 import { useOnline } from "../hooks/useNetStatus";
 import { useDemo } from "../context/DemoContext";
 import { usePlatform, hiddenPages } from "../services/platform";
-import { VITALCLONE_URL } from "./VitalClone";
 
 export type PageId =
   | "dashboard"
@@ -220,8 +219,6 @@ export function Layout({ currentPage, onNavigate, onGoAdmin, onSignOut, onOpenSh
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
     const hidden = hiddenPages(flags);
-    // Vital Clone has no address yet; its page would only show setup notes.
-    if (!VITALCLONE_URL.trim()) hidden.add("vital-clone");
     return navGroups
       .map(g => ({ ...g, items: g.items.filter(i => !hidden.has(i.id) && (!q || i.label.toLowerCase().includes(q))) }))
       .filter(g => g.items.length > 0);

@@ -47,6 +47,7 @@ import secretVault from "./routes/secretVault.ts";
 import receiptsRoute from "./routes/receipts.ts";
 import conciergePortal from "./routes/conciergePortal.ts";
 import partnerAccount from "./routes/partnerAccount.ts";
+import vitalCloneHandoff from "./routes/vitalCloneHandoff.ts";
 
 const app = new Hono();
 // Supabase hands the function the full path INCLUDING the function's own name,
@@ -218,7 +219,8 @@ account.use("*", requireUser);
 // passes it); /password and /secret-vault already check it themselves.
 // Reading another owner's vault, emailing documents out and resetting the
 // vault need it for reads too; billing and contact invites for any change.
-for (const path of ["/receipts", "/receipts/*", "/vault", "/vault/*", "/access", "/access/*"]) {
+// Signing into Vital Clone hands over the account, so it needs it as well.
+for (const path of ["/receipts", "/receipts/*", "/vault", "/vault/*", "/access", "/access/*", "/vital-clone", "/vital-clone/*"]) {
   account.use(path, requireSecondFactor);
 }
 for (const path of ["/billing", "/billing/*", "/contacts", "/contacts/*", "/partner", "/partner/*", "/affiliate", "/affiliate/*"]) {
@@ -229,6 +231,7 @@ account.route("/password", password);
 account.route("/secret-vault", secretVault);
 account.route("/receipts", receiptsRoute);
 account.route("/partner", partnerAccount);
+account.route("/vital-clone/handoff", vitalCloneHandoff);
 account.route("/billing", billing);
 account.route("/contacts", contacts);
 account.route("/affiliate", affiliateJoin);
