@@ -83,10 +83,10 @@ export const billing = {
   continuationFeeCheckout: (payerType: "account_owner" | "legacy_contact" = "account_owner") =>
     post<{ url: string }>("/checkout/one-time", { product: "continuation_fee", payerType }),
   /** Partner Program setup (billing_products "partner_setup") — migration 053. */
-  partnerCheckout: (org: { name: string; type: string; contact: string; email: string; phone: string; website: string }, inviteCode?: string) =>
+  partnerCheckout: (org: { name: string; type: string; contact: string; email: string; phone: string; website: string; why?: string }, inviteCode?: string) =>
     post<{ url: string }>("/checkout/one-time", { product: "partner_setup", org, inviteCode }),
   /** White Label setup fee for a package — migration 053. */
-  whiteLabelCheckout: (packageId: string, org: { name: string; contact: string; email: string }, subdomain: string) =>
+  whiteLabelCheckout: (packageId: string, org: { name: string; type: string; contact: string; email: string; phone: string; website: string; why: string }, subdomain: string) =>
     post<{ url: string }>("/checkout/one-time", { product: "wl_setup", packageId, org, subdomain }),
   changePlan: (planId: string, interval: Interval) => post<PlanChangeResult>("/change-plan", { planId, interval }),
   cancelPendingChange: () => post<{ ok: true }>("/change-plan/cancel-pending"),

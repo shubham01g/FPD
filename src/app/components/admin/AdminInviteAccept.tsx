@@ -31,8 +31,12 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 export function AdminInviteAccept({ id, token, onSignIn }: { id: string; token: string; onSignIn: () => void }) {
+  // A link missing its id or token (cut off when copied) never reaches the
+  // server, so the person sees a plain explanation rather than a raw 404.
   const { data, loading, error } = useAdminFetch(
-    () => publicApi.get<{ invite: Invite }>(`/admin-invite/${encodeURIComponent(id)}?token=${encodeURIComponent(token)}`),
+    () => !id || !token
+      ? Promise.reject(new Error("This invitation link is incomplete. Open the full link from the invite email, or ask an admin to send a new one."))
+      : publicApi.get<{ invite: Invite }>(`/admin-invite/${encodeURIComponent(id)}?token=${encodeURIComponent(token)}`),
     [id, token],
   );
   const [password, setPassword] = useState("");

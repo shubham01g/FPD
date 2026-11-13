@@ -48,7 +48,7 @@ export function ContinuationFeeAdmin({ view }: { view: "config" | "payments" }) 
   const [filter, setFilter] = useState<"all"|"pending"|"activated"|"awaiting">("all");
   const [activatingId, setActivatingId] = useState<string | null>(null);
 
-  const { data: pricingData } = useAdminFetch(
+  const { data: pricingData, error: pricingError } = useAdminFetch(
     () => adminApi.get<{ thresholds: ThresholdSetting[] }>("/pricing"),
     [],
   );
@@ -121,7 +121,15 @@ export function ContinuationFeeAdmin({ view }: { view: "config" | "payments" }) 
             </p>
           </div>
 
-          {/* Config card */}
+          {/* The fee lives in Subscription Config (/pricing). Without that
+              permission the defaults below would look like the saved values. */}
+          {pricingError ? (
+            <div className="p-6 rounded-2xl" style={{ ...CARD, color:"#F6AD55", fontSize:15.5 }}>
+              The saved fee couldn't be loaded: {pricingError}
+            </div>
+          ) : !pricingData ? (
+            <div className="p-6 rounded-2xl" style={{ ...CARD, color:"#8A9AB8", fontSize:15.5 }}>Loading the saved fee…</div>
+          ) : (
           <div className="p-6 rounded-2xl" style={CARD}>
             <div className="flex items-center gap-2 mb-5 flex-wrap">
               <Settings size={16} color="#FFFFFF"/>
@@ -170,6 +178,7 @@ export function ContinuationFeeAdmin({ view }: { view: "config" | "payments" }) 
               {savedConfig ? "Saved!" : saving ? "Saving…" : "Save Configuration"}
             </button>
           </div>
+          )}
 
           {/* Info note */}
           <div className="px-5 py-4 rounded-2xl border flex items-start gap-3"

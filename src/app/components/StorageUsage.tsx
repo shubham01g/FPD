@@ -622,7 +622,9 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
                   <div style={{ fontSize: 11, color: MUTED, ...MONO, marginBottom: 4 }}>FROM</div>
                   <div className="addon-price" style={{ color: TEXT }}>{usd(drYearly / 1200)}<span style={{ fontSize: 12, fontWeight: 400, color: MUTED }}>/mo yearly</span></div>
                   <div style={{ fontSize: 11, color: MUTED, marginBottom: 10 }}>or {usd(drMonthly / 100)}/mo monthly</div>
-                  {user.plan === "starter" || user.planStatus === "cancelled" ? (
+                  {!platform.flags.disasterProtection ? (
+                    <div style={{ fontSize: 12.5, color: MUTED, maxWidth: 180 }}>Not available right now.</div>
+                  ) : user.plan === "starter" || user.planStatus === "cancelled" ? (
                     <div style={{ fontSize: 12.5, color: MUTED, maxWidth: 180 }}>Available with a paid plan.</div>
                   ) : (
                     <div className="flex gap-2 justify-end">

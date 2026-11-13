@@ -277,7 +277,7 @@ export function SystemHealth() {
             { what:"Incidents", how:"There is no incidents table, so incidents can't be recorded or shared between admins." },
             { what:"Performance (p50/p95/p99, error rate, requests/sec)", how:"Needs server-side request metrics or an APM tool — nothing collects them today." },
             { what:"Long-term uptime history", how:"Needs a scheduled monitor that stores results; these checks only run while this page is open." },
-            { what:"On-call team & alert recipients", how:"No roster table and no email/SMS provider, so alerts can't be sent." },
+            { what:"On-call team & alert recipients", how:"No on-call roster or uptime monitor is set up, so nothing pages anyone when a check fails. (Email itself works through SendGrid.)" },
           ].map(item => (
             <div key={item.what} className="px-4 py-3 rounded-2xl" style={{ background:"rgba(255,255,255,0.03)", border:`1px solid ${T.border}` }}>
               <div className="flex items-center gap-1.5" style={{ color:T.text, fontSize:15, fontWeight:600 }}>

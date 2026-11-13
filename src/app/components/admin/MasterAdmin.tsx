@@ -12,6 +12,7 @@ import type { AdminPageId } from "./AdminLayout";
 import { PayoutManagement } from "./PayoutManagement";
 import { ContinuationFeeAdmin } from "./ContinuationFeeAdmin";
 import { adminApi, fetchAllAdminPages } from "../../services/adminApi";
+import { useAdminMe } from "../../hooks/useAdminMe";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { downloadCSV } from "../../utils/exportCsv";
 import { findAdminPlan, useAdminPlans } from "./adminPlans";
@@ -965,10 +966,8 @@ const TAB_MODULES: Partial<Record<AdminTab, string[]>> = {
 export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
   const PLANS = useAdminPlans();
   const [tab, setTab] = useState<AdminTab>("overview");
-  const { data: adminMe } = useAdminFetch(
-    () => adminApi.get<{ role: string; permissions: { module: string; canView: boolean }[] | null }>("/me"),
-    [],
-  );
+  // Shared, cached GET /admin/me: decides which tabs and buttons this role sees.
+  const { me: adminMe, can } = useAdminMe();
   const [userSearch, setUserSearch] = useState("");
   const [userPlanFilter, setUserPlanFilter] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState("");
@@ -1014,7 +1013,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
   // derived from onboarded_by, not a session-only shadow list.
   const manuallyOnboarded = filteredUsers.filter(u => u.onboarded_by);
 
-  const { data: revenueTrendData } = useAdminFetch(
+  const { data: revenueTrendData, error: revenueTrendError } = useAdminFetch(
     () => adminApi.get<{ trend: { month: string; mrr: number; overage: number; affiliates: number }[] }>("/analytics/revenue-trend"),
     [],
     ADMIN_LIVE_POLL_MS,
@@ -1024,7 +1023,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
     [],
     ADMIN_LIVE_POLL_MS,
   );
-  const { data: verificationData } = useAdminFetch(
+  const { data: verificationData, error: verificationError } = useAdminFetch(
     () => adminApi.get<{ verifications: PendingVerification[] }>("/verification?status=pending"),
     [],
     ADMIN_LIVE_POLL_MS,
@@ -1125,11 +1124,11 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
           <p style={{ color:"#8A9AB8", fontSize:15.5, marginTop:5 }}>Real-time metrics · User management · Revenue · Compliance · Audit trail</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowOnboard(true)}
+          {can("users", "edit") && <button onClick={() => setShowOnboard(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm transition-transform"
             style={{ background:"linear-gradient(180deg,#7E6BD8,#5B6EE1)", color:"#fff", boxShadow:"0 8px 20px -8px rgba(91,110,225,0.7)" }}>
             <UserPlus size={14}/> Onboard User
-          </button>
+          </button>}
           <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{ background:"rgba(95,190,145,0.08)", border:"1px solid rgba(95,190,145,0.22)" }}>
             <div style={{ width:6, height:6, borderRadius:"50%", background:"#5FBE91", boxShadow:"0 0 6px #5FBE91" }}/>
             <span style={{ color:"#D99A6B", fontSize:13.5, fontWeight:600, ...MONO }}>
@@ -1236,7 +1235,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
           {/* ── What the schema can actually answer ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatChip label="Total Users" value={overviewData ? overviewData.totalUsers.toLocaleString() : "—"} sub="All accounts" color="#E8EDF5"/>
-            <StatChip label="Paying Plans" value={planRows.length} sub="Plans with at least one account" color="#6E90C9"/>
+            <StatChip label="Plans in Use" value={planRows.length} sub="Plans with at least one account (Starter included)" color="#6E90C9"/>
             <StatChip label="Total Data Stored" value={totals ? `${totals.totalStorageGb.toLocaleString()} GB` : "—"} sub="Current billing period" color="#6FAE8B"/>
             <StatChip label="Avg per User" value={totals ? `${totals.avgPerUserGb} GB` : "—"} sub="Current billing period" color="#D99A6B"/>
           </div>
@@ -1391,7 +1390,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
               </div>
               {trend.length === 0 ? (
                 <div style={{ color:"#8A9AB8", fontSize:15, textAlign:"center", padding:"56px 0" }}>
-                  No succeeded payments in the last 6 months.
+                  {revenueTrendError ? `Revenue isn't available: ${revenueTrendError}` : "No succeeded payments in the last 6 months."}
                 </div>
               ) : (
               <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180 }}>
@@ -1456,7 +1455,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                 </div>
               )}
               {pending.length === 0 ? (
-                <div style={{ color:"#8A9AB8", fontSize:15, textAlign:"center", padding:"32px 0" }}>No IDs are waiting for review.</div>
+                <div style={{ color:"#8A9AB8", fontSize:15, textAlign:"center", padding:"32px 0" }}>{verificationError ? `The ID queue isn't available: ${verificationError}` : "No IDs are waiting for review."}</div>
               ) : (
               <div className="space-y-2">
                 {pending.slice(0,5).map(v=>(
@@ -1561,12 +1560,12 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                   <button onClick={()=>setSelectedUserId(user.id)} style={{color:"#8A9AB8"}}><Edit size={13}/></button>
                   {user.deceased_at ? (
                     <span style={{fontSize:11,...MONO,fontWeight:700,padding:"2px 7px",borderRadius:99,background:"rgba(252,129,129,0.12)",color:"#FC8181"}}>DECEASED</span>
-                  ) : (
+                  ) : can("legacy_management", "edit") && (
                     <button onClick={()=>setDeceasedModal(user)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold" style={{background:"rgba(252,129,129,0.08)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)"}}>
                       <Heart size={11}/> Deceased
                     </button>
                   )}
-                  {!user.is_admin && (
+                  {!user.is_admin && can("users", "delete") && (
                     <button onClick={()=>setDeleteModal(user)} title="Delete account" style={{color:"#FC8181"}}><Trash2 size={13}/></button>
                   )}
                 </div>
@@ -1720,12 +1719,12 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                 <button disabled={auditPage <= 1} onClick={() => setAuditPage(p => Math.max(1, p - 1))} className="px-2 py-1 rounded-lg text-xs" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:auditPage<=1?0.4:1}}>‹ Newer</button>
                 <button disabled={auditPage >= auditPages} onClick={() => setAuditPage(p => Math.min(auditPages, p + 1))} className="px-2 py-1 rounded-lg text-xs" style={{background:"rgba(255,255,255,0.06)",color:"#E8EDF5",opacity:auditPage>=auditPages?0.4:1}}>Older ›</button>
               </>}
-              <button onClick={() => void clearAudit()} disabled={clearingAudit || logs.length === 0}
+              {can("audit", "delete") && <button onClick={() => void clearAudit()} disabled={clearingAudit || logs.length === 0}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
                 style={{background:"rgba(252,129,129,0.08)",color:"#FC8181",border:"1px solid rgba(252,129,129,0.2)",
                   cursor:clearingAudit || logs.length === 0 ? "not-allowed" : "pointer",opacity:clearingAudit || logs.length === 0 ? 0.5 : 1}}>
                 <Trash2 size={12}/> {clearingAudit ? "Clearing…" : "Clear"}
-              </button>
+              </button>}
             </div>
           </div>
           {auditLoading && <div className="px-5 py-8 text-center" style={{color:"#8A9AB8"}}>Loading audit trail…</div>}

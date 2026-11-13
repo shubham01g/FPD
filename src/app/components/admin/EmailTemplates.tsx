@@ -25,7 +25,6 @@ interface EmailTemplate {
 const STANDARD_SUBJECT = "{{subject}}";
 const STANDARD_HTML = "{{content}}";
 
-const categories = ["All","Account","Storage","Contacts","Subscriptions","Affiliate","Partnership","Security","White Label"];
 
 export function EmailTemplates() {
   const [search, setSearch] = useState("");
@@ -50,6 +49,8 @@ export function EmailTemplates() {
   );
 
   const templates = data?.templates ?? [];
+  // The chips are the categories the templates really have (migration 052).
+  const categories = ["All", ...Array.from(new Set(templates.map(t => t.category).filter(Boolean))).sort()];
 
   // Select the first template once the list loads (or after the active
   // selection is edited/replaced) — mirrors the old templates[0] default.

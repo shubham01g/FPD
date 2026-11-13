@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminMe } from "../../hooks/useAdminMe";
 import { copyToClipboard, copyWithToast } from "../../utils/clipboard";
 import { TwoFactorSettingsCard } from "../twofa/TwoFactorSettingsCard";
 
@@ -223,13 +224,17 @@ function PermissionRow({
 
 /* ── Admin account card ──────────────────────────────────────────── */
 function AdminCard({
-  admin, onUpdate, onRevoke, onResend, isSelf
+  admin, onUpdate, onRevoke, onResend, isSelf, viewerIsSuper, viewerCanEdit
 }: {
   admin: AdminAccount;
   onUpdate: (id: string, changes: Partial<AdminAccount>) => Promise<boolean>;
   onRevoke: (id: string) => Promise<boolean>;
   onResend: (id: string) => Promise<void>;
   isSelf: boolean;
+  /** Only a super admin may change roles/permissions or resend invites, never on themselves (adminAccounts.ts). */
+  viewerIsSuper: boolean;
+  /** admin_team edit: suspend / reactivate a non-super admin. */
+  viewerCanEdit: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingPerms, setEditingPerms] = useState(false);
@@ -237,6 +242,7 @@ function AdminCard({
   const preset = ROLE_PRESETS[admin.role];
   const statusColor = { active:"#48BB78", invited:"#F6AD55", suspended:"#FC8181" }[admin.status];
   const isSuper = admin.role === "super_admin";
+  const canChangeAccess = viewerIsSuper && !isSelf && !isSuper;
 
   // Success is shown only after the server accepts the change; a refusal
   // (e.g. a non-super admin) already shows its own error.
@@ -283,21 +289,21 @@ function AdminCard({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!isSelf && !isSuper && admin.status !== "suspended" && (
+            {viewerCanEdit && !isSelf && !isSuper && admin.status !== "suspended" && (
               <button onClick={async () => { if (await onRevoke(admin.id)) toast.success(`${admin.name} suspended`); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(252,129,129,0.08)", color:"#FC8181", border:"1px solid rgba(252,129,129,0.2)" }}>
                 <UserX size={11}/> Suspend
               </button>
             )}
-            {admin.status === "suspended" && (
+            {viewerCanEdit && (viewerIsSuper || !isSuper) && admin.status === "suspended" && (
               <button onClick={async () => { if (await onUpdate(admin.id, { status:"active" })) toast.success(`${admin.name} reactivated`); }}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(72,187,120,0.08)", color:"#D99A6B", border:"1px solid rgba(72,187,120,0.2)" }}>
                 <Unlock size={11}/> Reactivate
               </button>
             )}
-            {admin.status === "invited" && (
+            {viewerIsSuper && admin.status === "invited" && (
               <button onClick={() => void onResend(admin.id)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs"
                 style={{ background:"rgba(246,173,85,0.08)", color:"#F6AD55", border:"1px solid rgba(246,173,85,0.2)" }}>
@@ -342,7 +348,7 @@ function AdminCard({
           )}
 
           {/* Role preset selector */}
-          {!isSuper && (
+          {canChangeAccess && (
             <div>
               <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:8 }}>APPLY ROLE PRESET</div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -368,7 +374,7 @@ function AdminCard({
           <div>
             <div className="flex items-center justify-between mb-3">
               <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO }}>PERMISSIONS — VIEW · EDIT · DELETE</div>
-              {!isSuper && (
+              {canChangeAccess && (
                 <div className="flex gap-2">
                   {editingPerms ? (
                     <>
@@ -429,6 +435,7 @@ function AdminCard({
 /* ── Main component ──────────────────────────────────────────────── */
 export function AdminRoles() {
   const { authUser } = useAuth();
+  const { isSuper: viewerIsSuper, can } = useAdminMe();
   const { data, loading, error, refetch } = useAdminFetch(
     () => adminApi.get<{ accounts: DBAdminAccount[] }>("/admin-accounts"),
     [],
@@ -546,11 +553,11 @@ export function AdminRoles() {
             Create administrator accounts for your team. Control exactly what each person can view, edit, and delete across every module.
           </p>
         </div>
-        <button onClick={() => setShowInvite(true)}
+        {viewerIsSuper && <button onClick={() => setShowInvite(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm"
           style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 20px rgba(91,110,225,0.3)" }}>
           <Plus size={14}/> Invite Admin
-        </button>
+        </button>}
       </div>
 
       {/* The caller's own second factor. AdminLogin has always challenged for
@@ -627,7 +634,7 @@ export function AdminRoles() {
           <div className="text-center py-10" style={{ color:"#8A9AB8" }}>No admin accounts match your filter.</div>
         )}
         {filtered.map(admin => (
-          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} onResend={resendInvite} isSelf={!!authUser?.email && admin.email?.toLowerCase() === authUser.email.toLowerCase()}/>
+          <AdminCard key={admin.id} admin={admin} onUpdate={updateAdmin} onRevoke={revokeAdmin} onResend={resendInvite} isSelf={!!authUser?.email && admin.email?.toLowerCase() === authUser.email.toLowerCase()} viewerIsSuper={viewerIsSuper} viewerCanEdit={can("admin_team", "edit")}/>
         ))}
       </div>
 

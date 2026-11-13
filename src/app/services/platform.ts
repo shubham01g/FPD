@@ -56,7 +56,7 @@ const DEFAULT_FLAGS: PlatformFlags = {
 /* Which portal pages each flag switches off. */
 const FLAG_PAGES: Partial<Record<keyof PlatformFlags, string[]>> = {
   aiAssistant: ["fpd-ai"],
-  whiteGloveConcierge: ["white-glove", "waiver-sign"],
+  whiteGloveConcierge: ["white-glove"],
   affiliateProgram: ["affiliate"],
   // receiptOCR switches off only the automatic reading of scans
   // (ReceiptsExpenses), not the whole Receipts page.

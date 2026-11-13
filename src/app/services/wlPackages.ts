@@ -260,6 +260,7 @@ export async function setSaleUnlocked(sale: WLSale, unlocked: boolean): Promise<
 /** Records a new WL application submitted through the public onboarding wizard. Starts "pending" until an admin provisions the instance. */
 export async function createSale(input: {
   org: string; contact: string; email: string; packageId: string; subdomain: string; processor: string;
+  orgType?: string; phone?: string; website?: string; why?: string;
 }): Promise<WLSale> {
   const res = await publicApi.post<{ sale: DBSale }>("/wl-sales", input);
   return saleFromDB(res.sale);

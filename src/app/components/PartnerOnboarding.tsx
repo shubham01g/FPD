@@ -75,6 +75,8 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
   const [org, setOrg] = useState({ name:"", type:"law_firm", email:"", phone:"", contact:"", website:"", why:"" });
   const [paying, setPaying] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
+  // Admin → Settings → Feature flags → Crypto Payments.
+  const cryptoOn = usePlatform().flags.cryptoPayments;
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -319,89 +321,6 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             <div className="flex justify-between mt-6">
-              <button onClick={() => setStep("overview")} className="flex items-center gap-2 px-6 py-3 rounded-2xl"
-                style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
-                <ArrowLeft size={15}/> Back
-              </button>
-              <button onClick={() => setStep("payment")} className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold"
-                style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 24px rgba(91,110,225,0.35)" }}>
-                Continue to Payment <ArrowRight size={16}/>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 3: Payment ── */}
-        {step === "payment" && (
-          <div>
-            <div className="mb-8">
-              <h1 style={{ ...DISPLAY, fontSize:35.5, color:"#E8EDF5", marginBottom:6 }}>One-Time Setup Fee</h1>
-              <p style={{ color:"#8A9AB8", fontSize:17.5 }}>Pay once. No recurring charges. Your commission account is activated immediately after payment.</p>
-            </div>
-            <div className="space-y-4">
-              {/* Summary */}
-              <div className="rounded-2xl p-6" style={{ ...GLASS, border:"2px solid rgba(91,110,225,0.2)" }}>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <div style={{ ...DISPLAY, fontSize:22.5, color:"#E8EDF5" }}>Final Pass Down Partner Setup</div>
-                    <div style={{ color:"#8A9AB8", fontSize:16 }}>{org.name || "Your Organization"} · {ORG_TYPES.find(t=>t.id===org.type)?.label}</div>
-                  </div>
-                  <div style={{ ...DISPLAY, fontSize:40.5, color:"#6E90C9" }}>{feeLabel}</div>
-                </div>
-                <div className="space-y-2 pt-4 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
-                  {[
-                    "Partner dashboard with referral tracking",
-                    "Unique referral link + tracking pixel",
-                    "Custom subdomain (yourname.finalpassdown.com)",
-                    "Volume-based commission tiers (20% → 25% → 30%)",
-                    "Monthly auto-payouts via ACH",
-                    "Marketing kit & onboarding materials",
-                  ].map(f => (
-                    <div key={f} className="flex items-center gap-2">
-                      <CheckCircle size={12} color="#FFFFFF"/>
-                      <span style={{ color:"#8A9AB8", fontSize:15 }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Payment form */}
-              <div className="rounded-2xl p-6 space-y-4" style={GLASS}>
-                <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>PAYMENT DETAILS — STRIPE SECURE CHECKOUT</div>
-                <div>
-                  <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CARDHOLDER NAME</label>
-                  <input defaultValue={org.contact} placeholder="Name on card"
-                    className="w-full px-4 py-3 rounded-2xl"
-                    style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none" }}/>
-                </div>
-                <div>
-                  <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CARD NUMBER</label>
-                  <input placeholder="4242 4242 4242 4242" maxLength={19}
-                    className="w-full px-4 py-3 rounded-2xl"
-                    style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>EXPIRY</label>
-                    <input placeholder="MM / YY" maxLength={7}
-                      className="w-full px-4 py-3 rounded-2xl"
-                      style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                  </div>
-                  <div>
-                    <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>CVC</label>
-                    <input placeholder="•••" maxLength={4}
-                      className="w-full px-4 py-3 rounded-2xl"
-                      style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:17.5, outline:"none", ...MONO }}/>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-                  <Shield size={12} color="#FFFFFF"/>
-                  <span style={{ color:"#D99A6B", fontSize:14 }}>256-bit SSL encryption · Processed by Stripe · No card data stored</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between mt-6">
               <button onClick={() => setStep("details")} className="flex items-center gap-2 px-6 py-3 rounded-2xl"
                 style={{ background:"rgba(91,110,225,0.06)", color:"#8A9AB8" }}>
                 <ArrowLeft size={15}/> Back
@@ -410,10 +329,12 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 28px rgba(91,110,225,0.4)", opacity:paying || setupFee == null ? 0.7 : 1 }}>
                 {paying ? "Opening checkout…" : session ? <><CheckCircle size={16}/> Pay {feeLabel} by Card</> : <>Sign in to continue</>}
               </button>
+              {cryptoOn && (
               <button onClick={() => setShowCrypto(true)} disabled={setupFee == null} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
                 style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)", opacity:setupFee == null ? 0.7 : 1 }}>
                 <span style={{ fontSize:22.5 }}>₿</span> Pay with Crypto
               </button>
+              )}
             </div>
           </div>
         )}

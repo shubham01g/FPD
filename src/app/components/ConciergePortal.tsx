@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { type ConciergeEmployee, ROLE_LABELS, ROLE_COLORS } from "../services/conciergeStaff";
 import { TwoFactorSettingsCard } from "./twofa/TwoFactorSettingsCard";
+import { changePassword } from "../services/auth";
 import { conciergeApi, type ClientDocument, type SessionType, type WgClientRow, type WgSession } from "../services/conciergeApi";
 
 const GLASS: React.CSSProperties = { background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)", boxShadow:"0 0 0 1px rgba(91,167,214,0.12), 0 8px 24px rgba(0,0,0,0.35)", borderRadius:22 };
@@ -404,6 +405,59 @@ function StartButton({ session, client }: { session: WgSession; client: WgClient
   return null;
 }
 
+/* ── Change password ─────────────────────────────────────────────────
+   Staff sign in with the temporary password an admin emailed them; this is
+   how they replace it. Same server route as a member's Account page
+   (routes/password.ts: checks the current password and the second factor). */
+function ChangePasswordCard() {
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  const field: React.CSSProperties = { width:"100%", padding:"9px 12px", borderRadius:12, background:"#0A0F1C", border:"1px solid rgba(91,167,214,0.3)", color:"#E8EDF5", fontSize:15, outline:"none" };
+
+  const submit = async () => {
+    if (next.length < 8) { toast.error("The new password must be at least 8 characters"); return; }
+    if (next !== confirm) { toast.error("The new passwords don't match"); return; }
+    setBusy(true);
+    try {
+      await changePassword(current, next);
+      toast.success("Password changed");
+      setCurrent(""); setNext(""); setConfirm(""); setOpen(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't change the password");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="p-5 mb-5" style={GLASS}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div style={{ color:"#E8EDF5", fontSize:16.5, fontWeight:600 }}>Password</div>
+          <div style={{ color:"#8A9AB8", fontSize:14 }}>Signed in with a temporary password? Replace it with your own.</div>
+        </div>
+        {!open && <button onClick={() => setOpen(true)} style={{ ...BTN, background:"rgba(91,167,214,0.15)", color:"#9CC7E6" }}>Change password</button>}
+      </div>
+      {open && (
+        <div className="grid gap-3 mt-4" style={{ maxWidth:420 }}>
+          <input type="password" autoComplete="current-password" placeholder="Current password" value={current} onChange={e => setCurrent(e.target.value)} style={field}/>
+          <input type="password" autoComplete="new-password" placeholder="New password (8+ characters)" value={next} onChange={e => setNext(e.target.value)} style={field}/>
+          <input type="password" autoComplete="new-password" placeholder="Confirm new password" value={confirm} onChange={e => setConfirm(e.target.value)} style={field}/>
+          <div className="flex gap-2">
+            <button onClick={() => void submit()} disabled={busy || !current || !next} style={{ ...BTN, background:"linear-gradient(135deg,#5BA7D6,#6F9E94)", color:"#04080F", opacity: busy || !current || !next ? 0.6 : 1 }}>
+              {busy ? "Saving…" : "Save new password"}
+            </button>
+            <button onClick={() => { setOpen(false); setCurrent(""); setNext(""); setConfirm(""); }} style={{ ...BTN, background:"rgba(255,255,255,0.05)", color:"#8A9AB8" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main portal ─────────────────────────────────────────────────── */
 export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEmployee; onSignOut: () => void }) {
   const [tab, setTab] = useState<PortalTab>("clients");
@@ -478,6 +532,7 @@ export function ConciergePortal({ employee, onSignOut }: { employee: ConciergeEm
               <TwoFactorSettingsCard eyebrow="YOUR STAFF ACCOUNT" portalName="Concierge Portal"
                 rationale="This portal opens your clients' records. Protect it with an authenticator app — a password on its own is not enough."
                 downloadName="final-pass-down-concierge-backup-codes.txt"/>
+              <ChangePasswordCard/>
               {myClients.length === 0 && !error && (
                 <div className="py-16 text-center rounded-2xl" style={GLASS}>
                   <Star size={40} color="rgba(91,167,214,0.2)" style={{ margin:"0 auto 12px" }}/>

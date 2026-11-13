@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useWLEntitlement } from "../context/WLEntitlementContext";
+import { usePlatform } from "../services/platform";
 import { useSearchParams, useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { billing } from "../services/billing";
@@ -72,7 +74,26 @@ export function WhiteLabelOnboarding() {
   const [subdomainTouched, setSubdomainTouched] = useState(false);
   const [paying, setPaying] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
+  // Admin → Settings → Feature flags → Crypto Payments.
+  const cryptoOn = usePlatform().flags.cryptoPayments;
   const [applicationId, setApplicationId] = useState<string | null>(null);
+
+  /* Back from Stripe with ?payment=success: that URL proves nothing by
+     itself. The webhook grants wl_entitlements once Stripe confirms the
+     payment, so wait for that (about 20s) before saying it went through. */
+  const { isEntitled, refresh: refreshEntitlement } = useWLEntitlement();
+  const [confirm, setConfirm] = useState<"checking" | "confirmed" | "unconfirmed">("checking");
+  useEffect(() => {
+    if (returning !== "success") return;
+    if (isEntitled) { setConfirm("confirmed"); return; }
+    let tries = 0;
+    const t = setInterval(() => {
+      tries += 1;
+      void refreshEntitlement();
+      if (tries >= 8) { clearInterval(t); setConfirm(c => c === "checking" ? "unconfirmed" : c); }
+    }, 2500);
+    return () => clearInterval(t);
+  }, [returning, isEntitled, refreshEntitlement]);
 
   const active = packages.filter(p => p.active);
   const selected = active.find(p => p.id === selectedId) ?? null;
@@ -88,7 +109,7 @@ export function WhiteLabelOnboarding() {
     if (!session) { navigate(`/login?next=${encodeURIComponent(`/partner/onboard?tier=${selected.id}`)}`); return; }
     setPaying(true);
     try {
-      const { url } = await billing.whiteLabelCheckout(selected.id, { name: org.name, contact: org.contact, email: org.email }, org.subdomain);
+      const { url } = await billing.whiteLabelCheckout(selected.id, { name: org.name, type: org.type, contact: org.contact, email: org.email, phone: org.phone, website: org.website, why: org.why }, org.subdomain);
       window.location.href = url;
     } catch (err) {
       setPaying(false);
@@ -105,6 +126,7 @@ export function WhiteLabelOnboarding() {
       const sale = await createSale({
         org: org.name, contact: org.contact, email: org.email,
         packageId: selected.id, subdomain: `${org.subdomain}.finalpassdown.com`, processor,
+        orgType: org.type, phone: org.phone, website: org.website, why: org.why,
       });
       setApplicationId(sale.id);
       setStep("complete");
@@ -125,7 +147,11 @@ export function WhiteLabelOnboarding() {
           </div>
           <h2 style={{ ...DISPLAY, fontSize:40.5, color:"#E8EDF5", marginBottom:8 }}>Application Received!</h2>
           <p style={{ color:"#8A9AB8", fontSize:19, lineHeight:1.9, marginBottom:8 }}>
-            {returning === "success"
+            {returning === "success" && confirm === "checking"
+              ? <>Confirming your payment with Stripe…</>
+              : returning === "success" && confirm === "unconfirmed"
+              ? <>We haven't had Stripe's confirmation yet. If your card was charged, Stripe emails your receipt and our white label team will follow up within <strong>1 business day</strong>. If it wasn't, you can go back and try again.</>
+              : returning === "success"
               ? <>Thank you — your payment went through on Stripe and Stripe has emailed your receipt. A member of our white label team will reach out within <strong>1 business day</strong> to begin provisioning your instance.</>
               : <>We've received your application. A member of our white label team will reach out within <strong>1 business day</strong> to confirm payment and begin provisioning "{org.name}".</>}
           </p>
@@ -331,10 +357,12 @@ export function WhiteLabelOnboarding() {
                 style={{ background:"linear-gradient(135deg,#5B6EE1,#5B6EE1)", color:"#F0F4FA", boxShadow:"0 0 28px rgba(91,110,225,0.4)", opacity:paying?0.7:1 }}>
                 {paying ? "Opening checkout…" : session ? <><CheckCircle size={16}/> Pay ${selected.billing.setupFee.toLocaleString()} by Card</> : <>Sign in to continue</>}
               </button>
+              {cryptoOn && (
               <button onClick={() => setShowCrypto(true)} className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold text-base"
                 style={{ background:"linear-gradient(135deg,#F7931A,#E8780C)", color:"#fff", boxShadow:"0 0 20px rgba(247,147,26,0.3)" }}>
                 <span style={{ fontSize:22.5 }}>₿</span> Pay with Crypto
               </button>
+              )}
             </div>
           </div>
         )}

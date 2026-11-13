@@ -198,6 +198,7 @@ function DemoBar() {
 /* ── Landing ─────────────────────────────────────────────────────── */
 function LandingRoute() {
   const navigate = useNavigate();
+  const platform = usePlatform();
   return (
     <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
       <LandingPage
@@ -207,7 +208,7 @@ function LandingRoute() {
         onConciergeLogin={() => navigate("/concierge/login")}
         onApplyWhiteLabel={tier => navigate(`/partner/onboard?tier=${tier}`)}
       />
-      <AIAgent/>
+      {platform.flags.aiAssistant && <AIAgent/>}
       <DemoBar/>
     </div>
   );
@@ -472,7 +473,10 @@ const ADMIN_PAGE_MODULES: Partial<Record<AdminPageId, string[]>> = {
   "crypto-merchant": ["crypto"], "payment-processors": ["crypto"],
 };
 function canOpenAdminPage(me: AdminMe | null, page: AdminPageId): boolean {
-  if (!me || me.permissions === null || me.role === "super_admin") return true;
+  // Until /me answers (or if it failed) only the home screen is offered, so a
+  // restricted role never sees the full sidebar flash up.
+  if (!me) return page === "master-admin";
+  if (me.permissions === null || me.role === "super_admin") return true;
   const needs = ADMIN_PAGE_MODULES[page];
   if (!needs) return true;   // Master Admin: its tabs show what the role can read
   return needs.some(m => me.permissions!.some(p => p.module === m && p.canView));

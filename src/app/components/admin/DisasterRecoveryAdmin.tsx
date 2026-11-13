@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { adminApi, AdminApiError } from "../../services/adminApi";
 import { useAdminFetch, ADMIN_LIVE_POLL_MS } from "../../hooks/useAdminFetch";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminMe } from "../../hooks/useAdminMe";
 import { supabase } from "../../services/supabase";
 import {
   challengeFactor, checkEmailCode, getLocalTwoFactorSettings, startEmailCode, verifyChallenge, verifyFactor,
@@ -421,6 +422,11 @@ export function DisasterRecoveryAdmin() {
   // Audit entries must name whoever is actually signed in, not a placeholder.
   const { authUser } = useAuth();
   const actingAdmin = authUser?.email ?? "unknown admin";
+  // Grant is a PUT and Revoke a DELETE on legacy_management (server index.tsx);
+  // the screen itself opens on `users`, so not every viewer may act.
+  const { can } = useAdminMe();
+  const canGrant = can("legacy_management", "edit");
+  const canRevoke = can("legacy_management", "delete");
 
   // Every account (the users endpoint pages at 100), every saved add-on /
   // bypass row, and the grant/revoke history from the real audit log.
@@ -432,11 +438,15 @@ export function DisasterRecoveryAdmin() {
         rows.push(...res.users);
         if (rows.length >= res.total || res.users.length === 0) break;
       }
-      const [{ states }, { logs }] = await Promise.all([
+      const [{ states }, audit] = await Promise.all([
         adminApi.get<{ states: DBStateRow[] }>("/disaster-recovery"),
-        adminApi.get<{ logs: DBAuditRow[] }>("/audit?targetType=disaster-recovery&pageSize=200"),
+        // The history needs the Audit permission; without it the roster
+        // still works and the history panel says why it's empty.
+        adminApi.get<{ logs: DBAuditRow[] }>("/audit?targetType=disaster-recovery&pageSize=200")
+          .then(r => ({ logs: r.logs, auditDenied: false }))
+          .catch(e => { if (e instanceof AdminApiError && e.status === 403) return { logs: [] as DBAuditRow[], auditDenied: true }; throw e; }),
       ]);
-      return { users: rows, states, logs };
+      return { users: rows, states, logs: audit.logs, auditDenied: audit.auditDenied };
     },
     [],
     ADMIN_LIVE_POLL_MS,
@@ -517,7 +527,7 @@ export function DisasterRecoveryAdmin() {
   const stats = {
     active:   users.filter(u => u.status === "active").length,
     expired:  users.filter(u => u.status === "expired").length,
-    today:    audit.filter(a => a.ts > Date.now() - 24*3600_000 && a.action === "Bypass granted").length,
+    today:    audit.filter(a => a.ts > Date.now() - 24*3600_000 && a.action === "Bypass granted / updated").length,
   };
 
   return (
@@ -589,8 +599,9 @@ export function DisasterRecoveryAdmin() {
             <div className="space-y-1">
               {audit.length === 0 && (
                 <div style={{ padding:"18px 0", color:"#8A9AB8", fontSize:14.5 }}>
-                  No bypass activity this session. Grants and revokes are not yet persisted to
-                  a history table, so this log starts empty each time the console is opened.
+                  {usersData?.auditDenied
+                    ? "Your role can't read the audit log, so the grant/revoke history isn't shown."
+                    : "No bypass has been granted or revoked yet. Every grant and revoke is kept in the audit log and listed here."}
                 </div>
               )}
               {audit.map(entry => (
@@ -695,14 +706,14 @@ export function DisasterRecoveryAdmin() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {user.status === "none" || user.status === "expired" ? (
+                    {user.status === "none" || user.status === "expired" ? (canGrant &&
                       <button onClick={e => { e.stopPropagation(); setGrantTarget(user); }}
                         style={{ fontSize:11, fontWeight:700, padding:"6px 11px", borderRadius:8,
                           background:"linear-gradient(135deg,#D9A55E,#B4842E)", border:"none", color:"#1C1608",
                           cursor:"pointer", display:"flex", alignItems:"center", gap:4 }}>
                         <Unlock size={11} /> Grant
                       </button>
-                    ) : (
+                    ) : (canRevoke &&
                       <button onClick={e => { e.stopPropagation(); handleRevoke(user.userId); }}
                         style={{ fontSize:11, fontWeight:700, padding:"6px 11px", borderRadius:8,
                           background:"rgba(252,129,129,0.12)", border:"1px solid rgba(252,129,129,0.3)",

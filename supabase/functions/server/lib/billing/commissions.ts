@@ -70,14 +70,18 @@ export async function recordCommission(invoice: Obj, userId: string): Promise<vo
   const db = adminClient();
 
   const { data: referral, error: refErr } = await db.from("affiliate_referrals")
-    .select("id, affiliate_id, commission_rate, status, expires_at, affiliates!inner(status)")
+    .select("id, affiliate_id, commission_rate, status, expires_at, affiliates!inner(status, commission_rate)")
     .eq("referred_user_id", userId).eq("status", "active").maybeSingle();
   if (refErr) throw new Error(`affiliate_referrals lookup failed: ${refErr.message}`);
   // deno-lint-ignore no-explicit-any
   if (referral && (referral as any).affiliates?.status === "active") {
     const paidAt = (invoice.status_transitions?.paid_at ?? Math.floor(Date.now() / 1000)) * 1000;
     if (new Date(referral.expires_at).getTime() >= paidAt) {
-      const rate = Number(referral.commission_rate);
+      // The affiliate's CURRENT rate, so a tier upgrade (migration 057) pays
+      // out on every referral from then on. The rate stored on the referral
+      // row is only what applied when they signed up.
+      // deno-lint-ignore no-explicit-any
+      const rate = Number((referral as any).affiliates?.commission_rate ?? referral.commission_rate);
       await insert(AFFILIATE, {
         affiliate_id: referral.affiliate_id, referral_id: referral.id, referred_user_id: userId, kind: "earned",
         stripe_invoice_id: invoice.id, source_key: `inv:${invoice.id}`,

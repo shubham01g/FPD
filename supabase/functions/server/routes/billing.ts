@@ -288,6 +288,8 @@ async function orgCheckout(c: Context<Env>, product: "partner_setup" | "wl_setup
     const common = {
       userId: user.id, purchaseType: product, orgName, orgType: meta(org.type, 40), contactName: meta(org.contact) || (account.full_name ?? ""),
       contactEmail: meta(org.email) || account.email, contactPhone: meta(org.phone, 40), website: meta(org.website),
+      // Stripe caps a metadata value at 500 characters.
+      why: meta(org.why, 450),
     };
     let lineItem: Record<string, unknown>;
     let metadata: Record<string, string>;

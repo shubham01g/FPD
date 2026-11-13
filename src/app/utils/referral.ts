@@ -5,7 +5,9 @@
    blocked site data) — then the referral simply isn't remembered. */
 const KEY = "fpd_ref";
 const TTL_MS = 60 * 24 * 60 * 60 * 1000;
-const CODE = /^[A-Za-z0-9]{4,32}$/;
+// Affiliate codes are alphanumeric; admin-created partner codes look like
+// ACME-AB12, so a single inner hyphen is allowed.
+const CODE = /^(?=.{4,32}$)[A-Za-z0-9]+(-[A-Za-z0-9]+)?$/;
 
 /** Reads a referral code from the current URL, if there is one. */
 export function captureReferral(): string | null {

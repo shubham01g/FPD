@@ -6,6 +6,7 @@ import { SERVICES as HEALTH_SERVICES } from "./SystemHealth";
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAdminFetch } from "../../hooks/useAdminFetch";
+import { useAdminMe } from "../../hooks/useAdminMe";
 import { downloadCSV } from "../../utils/exportCsv";
 import type { AdminPageId } from "./AdminLayout";
 import { ROLE_PRESETS, toStoredPermissions, type AdminRole } from "./AdminRoles";
@@ -123,8 +124,18 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   /* Every tab's preferences are one JSON document under admin_settings
      "platform.<section>" — see routes/settings.ts. */
   const { data: savedData, error: loadError } = useAdminFetch(() => adminApi.get<{ settings: Saved }>("/settings"), []);
+  // Invites, the Danger Zone and key rotation are super-admin only on the
+  // server; clearing the audit log needs Audit delete.
+  const { isSuper, can } = useAdminMe();
 
   async function save(section: keyof Saved, value: Record<string, unknown>, message: string): Promise<boolean> {
+    // Each section is saved as a whole document. Until the saved values have
+    // loaded, the screen holds defaults, and saving them would overwrite what
+    // is really stored.
+    if (!savedData) {
+      toast.error(loadError ? "Settings couldn't be loaded, so nothing was saved. Refresh and try again." : "Settings are still loading. Try again in a moment.");
+      return false;
+    }
     try {
       await adminApi.put(`/settings/${section}`, { value });
       toast.success(message);
@@ -310,9 +321,10 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
   });
   const [notifEmail, setNotifEmail] = useState("");
   const toggleNotif = (k: keyof typeof notifs) => {
+    const before = notifs;
     const next = { ...notifs, [k]: !notifs[k] };
     setNotifs(next);
-    void save("notifications", { email: notifEmail, alerts: next }, "Notification preference saved");
+    void save("notifications", { email: notifEmail, alerts: next }, "Notification preference saved").then(ok => { if (!ok) setNotifs(before); });
   };
 
   /* Every export is a real list from an admin endpoint. `only` narrows the
@@ -658,11 +670,11 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
 
             {!showAddAdmin && (
               <div className="flex gap-2 mb-4 flex-wrap">
-                <button onClick={() => setAddAdmin(true)}
+                {isSuper && <button onClick={() => setAddAdmin(true)}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
                   style={{ background: "rgba(159,122,234,0.1)", color: "#C4A9F5", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
                   <Plus size={13}/> Invite Admin
-                </button>
+                </button>}
                 <button onClick={() => onNavigate?.("admin-roles")}
                   className="px-4 py-2 rounded-xl text-sm font-semibold"
                   style={{ background: "transparent", color: "#8A9AB8", border: "1px solid rgba(159,122,234,0.15)", cursor: "pointer" }}>
@@ -837,7 +849,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           </Section>
 
           <Section title="Stored Secrets Encryption Key" desc="Encrypts payment-processor credentials and Enterprise API key secrets at rest.">
-            <RotateEncryptionKey/>
+            {isSuper && <RotateEncryptionKey/>}
           </Section>
 
           <Section title="Password Policy" desc="Minimum requirements enforced for all admin account passwords.">
@@ -879,12 +891,12 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               style={{ background: "rgba(159,122,234,0.08)", color: "#9F7AEA", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
               <Download size={12}/> Export
             </button>
-            <button onClick={() => void clearAudit()} disabled={clearingAudit || auditLogs.length === 0}
+            {can("audit", "delete") && <button onClick={() => void clearAudit()} disabled={clearingAudit || auditLogs.length === 0}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold flex-shrink-0"
               style={{ background: "rgba(252,129,129,0.08)", color: "#FC8181", border: "1px solid rgba(252,129,129,0.2)",
                 cursor: clearingAudit || auditLogs.length === 0 ? "not-allowed" : "pointer", opacity: clearingAudit || auditLogs.length === 0 ? 0.5 : 1 }}>
               <Trash2 size={12}/> {clearingAudit ? "Clearing…" : "Clear"}
-            </button>
+            </button>}
           </div>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -1048,10 +1060,14 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           </Section>
 
           <Section title="Danger Zone" desc="Irreversible operations. Proceed with extreme caution.">
-            <div className="space-y-3" style={{ marginBottom: 12 }}>
-              <TestAccountCleanup/>
-              <InactivePurge/>
-            </div>
+            {isSuper ? (
+              <div className="space-y-3" style={{ marginBottom: 12 }}>
+                <TestAccountCleanup/>
+                <InactivePurge/>
+              </div>
+            ) : (
+              <div style={{ fontSize: 12.5, color: "#8A9AB8", marginBottom: 12 }}>Account clean-up tools are for super admins only.</div>
+            )}
             {[
               { label:"Reset Feature Flags",  desc:"Restore all feature flags to their default values",    color:"#D9A55E", run: resetFlags },
             ].map(d => (

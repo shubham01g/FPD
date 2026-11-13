@@ -219,6 +219,8 @@ export function LegacyContinuationFee() {
   const [status, setStatus] = useState<ContinuationStatus>(initStatus);
   const [processing, setProcessing] = useState(false);
   const [showCrypto, setShowCrypto] = useState(false);
+  // Admin → Settings → Feature flags → Crypto Payments.
+  const cryptoOn = usePlatform().flags.cryptoPayments;
   const [payerType, setPayerType] = useState<"user"|"legacy_contact">("user");
   const [showCoverage, setShowCoverage] = useState(false);
   const { authUser } = useAuth();
@@ -430,10 +432,12 @@ export function LegacyContinuationFee() {
                     <CreditCard size={16}/>
                     Pay {feeLabel} with Card (Stripe)
                   </button>
+                  {cryptoOn && (
                   <button onClick={() => setShowCrypto(true)} className="btn-crypto">
                     <span style={{ fontSize: 20 }}>₿</span>
                     Pay {feeLabel} with Cryptocurrency
                   </button>
+                  )}
                   <div className="secure-row">
                     <div className="secure-item">
                       <Lock size={11}/>

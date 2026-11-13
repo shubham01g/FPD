@@ -228,6 +228,7 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
         .update({
           user_id: userId, organization_name: m.orgName || "Partner", organization_type: m.orgType || "other",
           contact_name: m.contactName || "", contact_email: m.contactEmail || "", contact_phone: m.contactPhone || null,
+          website: m.website || null, application_notes: m.why || null,
           status: "active", stripe_checkout_session_id: session.id,
         })
         .eq("partner_code", m.inviteCode).eq("status", "invited").is("stripe_checkout_session_id", null)
@@ -247,6 +248,7 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
     const { error } = await db.from("partners").insert({
       user_id: userId, organization_name: m.orgName || "Partner", organization_type: m.orgType || "other",
       contact_name: m.contactName || "", contact_email: m.contactEmail || "", contact_phone: m.contactPhone || null,
+      website: m.website || null, application_notes: m.why || null,
       partner_code: code, tier: 1, commission_rate: 0.20, status: "active", stripe_checkout_session_id: session.id,
     });
     if (error && error.code !== "23505") throw new Error(`partner insert failed: ${error.message}`);
@@ -269,6 +271,7 @@ async function onOrgSetupPaid(session: Obj, userId: string, purchase: "partner_s
       id, org: m.orgName || "White Label partner", contact: m.contactName || "", email: m.contactEmail || "",
       package_id: m.packageId, status: "pending", total_paid: paid, subdomain: m.subdomain || null, processor: "stripe",
       user_id: userId, stripe_checkout_session_id: session.id,
+      org_type: m.orgType || null, contact_phone: m.contactPhone || null, website: m.website || null, application_notes: m.why || null,
     });
     if (error && error.code !== "23505") throw new Error(`wl_sales insert failed: ${error.message}`);
     await notifyTeam(`White Label setup paid: ${m.orgName}`, [`${m.orgName} paid $${paid.toFixed(2)} for White Label package ${m.packageId}.`,
@@ -388,7 +391,7 @@ async function onInvoicePaid(invoiceId: string) {
       const disputes = await stripe<{ data: Obj[] }>("GET", "/disputes", { charge: chargeId, limit: 1 });
       const dispute = disputes.data[0];
       if (dispute && !["won", "warning_closed"].includes(dispute.status)) {
-        await db.from("payments").update({ status: "disputed" }).eq("stripe_charge_id", chargeId).eq("status", "succeeded");
+        await must(db.from("payments").update({ status: "disputed" }).eq("stripe_charge_id", chargeId).eq("status", "succeeded"), "payment dispute status");
         await reverseForDispute({ invoiceId: inv.id, chargeId, disputeId: dispute.id });
       }
     }
@@ -430,8 +433,8 @@ async function onInvoicePaymentFailed(invoiceId: string) {
   }
 
   if (purpose === "usage_overage") {
-    await db.from("usage_period_closures").update({ payment_failed_at: nowIso() }).eq("stripe_invoice_id", inv.id).is("paid_at", null);
-    await db.from("users").update({ overage_blocked: true, overage_blocked_at: nowIso() }).eq("id", userId);
+    await must(db.from("usage_period_closures").update({ payment_failed_at: nowIso() }).eq("stripe_invoice_id", inv.id).is("paid_at", null), "overage closure failure");
+    await must(db.from("users").update({ overage_blocked: true, overage_blocked_at: nowIso() }).eq("id", userId), "overage block");
     await notifyOnce({
       userId, kind: "overage_declined", dedupeKey: `overage_declined:${inv.id}`,
       email: overageDeclinedEmail({ amount: usd(inv.amount_due ?? 0), manageUrl: manageBillingUrl() }),
@@ -443,7 +446,7 @@ async function onInvoicePaymentFailed(invoiceId: string) {
   if (purpose === "wg_session") {
     const pi = invoicePaymentIntentId(inv);
     const failure = pi ? (await stripe<Obj>("GET", `/payment_intents/${pi}`).catch(() => null))?.last_payment_error?.message : null;
-    await db.from("wg_session_billing").update({ status: "failed", failure_message: failure ?? "Card declined" }).eq("stripe_invoice_id", inv.id);
+    await must(db.from("wg_session_billing").update({ status: "failed", failure_message: failure ?? "Card declined" }).eq("stripe_invoice_id", inv.id), "wg session failure");
     await alertAdmin(`wg_failed:${inv.id}`, "White Glove session charge failed", [
       `Account ${userId}: ${usd(inv.amount_due ?? 0)} for a White Glove session was declined.`,
       failure ? `Reason: ${failure}` : "Stripe will retry; the client can update the card in Manage billing.",
@@ -495,11 +498,11 @@ async function onChargeRefunded(chargeId: string) {
   for (const refund of charge.refunds?.data ?? []) {
     if (refund.status === "failed" || refund.status === "canceled") continue;
     // Admin refunds were recorded when made; anything else came from the dashboard.
-    await db.from("billing_refunds").upsert({
+    await must(db.from("billing_refunds").upsert({
       user_id: userId, stripe_refund_id: refund.id, stripe_charge_id: chargeId, stripe_invoice_id: invoiceId,
       amount_cents: refund.amount, reason: refund.reason ?? refund.metadata?.reason ?? null,
       source: refund.metadata?.source ?? "dashboard", livemode: isLivemode(),
-    }, { onConflict: "stripe_refund_id", ignoreDuplicates: true });
+    }, { onConflict: "stripe_refund_id", ignoreDuplicates: true }), "billing_refunds record");
     await reverseForRefund({ invoiceId, chargeId, refundId: refund.id, refundCents: refund.amount, chargeCents: charge.amount });
   }
 
@@ -528,8 +531,8 @@ async function onDispute(disputeId: string, closed: boolean) {
   const userId = await userForCustomer(idOf(charge.customer));
 
   if (!closed) {
-    await db.from("payments").update({ status: "disputed", stripe_charge_id: chargeId })
-      .or(`stripe_charge_id.eq.${chargeId}${invoiceId ? `,stripe_invoice_id.eq.${invoiceId}` : ""}`);
+    await must(db.from("payments").update({ status: "disputed", stripe_charge_id: chargeId })
+      .or(`stripe_charge_id.eq.${chargeId}${invoiceId ? `,stripe_invoice_id.eq.${invoiceId}` : ""}`), "payment dispute status");
     await reverseForDispute({ invoiceId, chargeId, disputeId });
     await alertAdmin(`dispute:${disputeId}`, "A payment was disputed", [
       `${usd(dispute.amount ?? 0)} on charge ${chargeId} (account ${userId ?? "unknown"}).`,
@@ -539,7 +542,7 @@ async function onDispute(disputeId: string, closed: boolean) {
   }
 
   if (dispute.status === "won") {
-    await db.from("payments").update({ status: "succeeded" }).eq("stripe_charge_id", chargeId).eq("status", "disputed");
+    await must(db.from("payments").update({ status: "succeeded" }).eq("stripe_charge_id", chargeId).eq("status", "disputed"), "payment dispute won");
     await restoreForWonDispute({ invoiceId, disputeId });
   }
   await alertAdmin(`dispute-closed:${disputeId}`, `Dispute closed: ${dispute.status}`, [

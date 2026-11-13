@@ -11,12 +11,18 @@ export function isAdminAuthed(): boolean {
   try { return sessionStorage.getItem(ADMIN_KEY) === "1"; } catch { return false; }
 }
 
+/* hooks/useAdminMe caches who the admin is; it listens for this event so a
+   different admin signing in on the same tab never sees the last one's rights. */
+const ADMIN_AUTH_EVENT = "fpd:admin-auth";
+
 export function setAdminAuthed(): void {
   try { sessionStorage.setItem(ADMIN_KEY, "1"); } catch { /* private mode / quota */ }
+  window.dispatchEvent(new Event(ADMIN_AUTH_EVENT));
 }
 
 export function clearAdminAuthed(): void {
   try { sessionStorage.removeItem(ADMIN_KEY); } catch { /* private mode / quota */ }
+  window.dispatchEvent(new Event(ADMIN_AUTH_EVENT));
 }
 
 export function getConciergeEmployeeId(): string | null {

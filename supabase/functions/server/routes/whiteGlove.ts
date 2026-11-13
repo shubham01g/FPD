@@ -5,6 +5,8 @@ import { billingPaused } from "../lib/billingConfig.ts";
 import { CatalogError, productPrice } from "../lib/billing/catalog.ts";
 import { findCustomer } from "../lib/billing/customers.ts";
 import { chargeWgSession } from "../lib/wgBilling.ts";
+import { liveSubscriptionRow } from "../lib/billing/planChange.ts";
+import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const whiteGlove = new Hono();
 
@@ -31,6 +33,26 @@ whiteGlove.post("/clients", async (c) => {
   const { data: existing } = await db.from("wg_clients").select("id").eq("user_id", userId).maybeSingle();
   if (existing) return c.json({ error: "This user is already enrolled in White Glove" }, 409);
 
+  // "Waive subscription fee" is a real comped plan (the same comp_<id> row
+  // Admin → User billing → Comp makes), so it needs the same permission.
+  // Checked before anything is written.
+  let compPlan: string | null = null;
+  if (subscriptionWaived) {
+    const admin = c.get("admin" as never) as AdminUser;
+    const canComp = admin.permissions === null || admin.role === "super_admin"
+      || Boolean(admin.permissions.find((p) => p.module === "subscription")?.canEdit);
+    if (!canComp) {
+      return c.json({ error: "Waiving the subscription comps a plan, which needs Subscription edit access. Enrol without the waiver, or ask an admin who has it." }, 403);
+    }
+    const live = await liveSubscriptionRow(userId, "plan");
+    if (live && !live.id.startsWith("comp_")) {
+      return c.json({ error: "This account pays for a plan. Use Refund & end in User billing before waiving it." }, 409);
+    }
+    const { data: u } = await db.from("users").select("plan").eq("id", userId).maybeSingle();
+    const { data: plan } = await db.from("subscription_plans").select("id, billable, is_active").eq("id", u?.plan ?? "").maybeSingle();
+    compPlan = plan?.billable && plan.is_active ? plan.id : "foundation";
+  }
+
   const { data, error } = await db
     .from("wg_clients")
     .insert({ user_id: userId, specialist_id: specialistId || null, reason: reason || null, notes: notes || null })
@@ -39,7 +61,19 @@ whiteGlove.post("/clients", async (c) => {
 
   if (error) return c.json({ error: error.message }, 500);
 
-  await db.from("users").update({ white_glove: true, ...(subscriptionWaived ? { subscription_waived: true } : {}) }).eq("id", userId);
+  const { error: flagError } = await db.from("users")
+    .update({ white_glove: true, ...(compPlan ? { subscription_waived: true, waive_reason: "White Glove enrolment" } : {}) })
+    .eq("id", userId);
+  if (flagError) return c.json({ error: `Enrolled, but the account flag failed: ${flagError.message}` }, 500);
+
+  if (compPlan) {
+    const admin = c.get("admin" as never) as AdminUser;
+    const { error: compError } = await db.rpc("provision_subscription", { p: {
+      id: `comp_${userId}`, user_id: userId, product_line: "plan", plan_id: compPlan, status: "active",
+      canceled_at: null, ended_at: null, comp_reason: "White Glove enrolment", comp_granted_by: admin.email,
+    } });
+    if (compError) return c.json({ error: `Enrolled, but the plan waiver failed: ${compError.message}` }, 500);
+  }
 
   return c.json({ client: data }, 201);
 });

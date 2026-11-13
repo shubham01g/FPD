@@ -282,7 +282,8 @@ pub.post("/contact", async (c) => {
 
 pub.post("/wl-sales", async (c) => {
   const body = await c.req.json().catch(() => ({}));
-  const { org, contact, email, packageId, subdomain } = body;
+  const { org, contact, email, packageId, subdomain, orgType, phone, website, why } = body;
+  const opt = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
   if (!org?.trim() || !contact?.trim() || !email?.trim() || !packageId) {
     return c.json({ error: "'org', 'contact', 'email' and 'packageId' are required" }, 400);
   }
@@ -302,6 +303,7 @@ pub.post("/wl-sales", async (c) => {
     org: String(org).trim().slice(0, 200), contact: String(contact).trim().slice(0, 200), email: String(email).trim().toLowerCase(),
     package_id: packageId, subdomain: subdomain ? String(subdomain).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) : null,
     processor: null, total_paid: 0, status: "pending",
+    org_type: opt(orgType, 40), contact_phone: opt(phone, 40), website: opt(website, 200), application_notes: opt(why, 2000),
   }).select().single();
   if (error) return c.json({ error: error.message }, 500);
   return c.json({ sale: data }, 201);

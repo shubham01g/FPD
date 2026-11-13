@@ -388,11 +388,11 @@ export function WhiteGloveAdmin() {
               <div key={c.id} className="p-4 rounded-2xl" style={{ background:"#101728", border:"1.5px solid rgba(91,167,214,0.35)" }}>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:17.5, color:"#E8EDF5", marginBottom:10 }}>{c.name}</div>
                 <WGCardOnFile clientId={c.id} clientName={c.name}/>
+                {/* Each client's own charges (the history is per client). */}
+                <div style={{ marginTop:12 }}><WGBillingHistory clientId={c.id}/></div>
               </div>
             ))}
           </div>
-          {/* All billing history */}
-          <WGBillingHistory/>
         </div>
       )}
 
@@ -483,7 +483,7 @@ function AddClientModal({ specialists, onClose, onAdded }: { specialists: Return
   const [selected, setSelected] = useState<UserSearchResult | null>(null);
   const [specialistId, setSpecialistId] = useState("");
   const [reason, setReason] = useState("");
-  const [subscriptionWaived, setSubscriptionWaived] = useState(true);
+  const [subscriptionWaived, setSubscriptionWaived] = useState(false);
   const [adding, setAdding] = useState(false);
 
   async function search() {
@@ -582,7 +582,7 @@ function AddClientModal({ specialists, onClose, onAdded }: { specialists: Return
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-            <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee</span>
+            <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee <span style={{ color:"#8A9AB8", fontSize:13 }}>(comps their plan free; needs Subscription edit access)</span></span>
             <button onClick={() => setSubscriptionWaived(v => !v)} style={{ color:subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
               {subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}
             </button>

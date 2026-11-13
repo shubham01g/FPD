@@ -30,9 +30,9 @@ interface ReferralRow {
 }
 
 const tiers = [
-  { tier: 1, label: "Tier 1", range: "5–24 accounts", rate: 20, color: "#6FAE8B" },
-  { tier: 2, label: "Tier 2", range: "25–74 accounts", rate: 25, color: "#6E90C9" },
-  { tier: 3, label: "Tier 3", range: "75+ accounts", rate: 30, color: "#D99A6B" },
+  { tier: 1, label: "Tier 1", range: "Up to 24 active referrals", rate: 20, color: "#6FAE8B" },
+  { tier: 2, label: "Tier 2", range: "25–74 active referrals", rate: 25, color: "#6E90C9" },
+  { tier: 3, label: "Tier 3", range: "75+ active referrals", rate: 30, color: "#D99A6B" },
 ];
 
 /* Whisper-fine matte grain (data-URI so nothing loads over the network). */
@@ -143,7 +143,7 @@ export function AffiliateProgram() {
      A member who has never joined the programme has no affiliates row, which
      is the enrolment state — not an error. */
   const [affiliate, setAffiliate] = useState<{
-    referral_code: string; referral_url?: string; commission_rate: number;
+    referral_code: string; referral_url?: string; commission_rate: number; tier: number;
     total_earned: number; pending_payout: number; status: string;
   } | null>(null);
   const [joining, setJoining] = useState(false);
@@ -180,7 +180,9 @@ export function AffiliateProgram() {
     ? `${window.location.origin}/r/${encodeURIComponent(affiliateCode)}`
     : "";
   const activeReferrals = referrals.filter(r => r.status === "active").length;
-  const currentTier = activeReferrals < 5 ? null : activeReferrals < 25 ? tiers[0] : activeReferrals < 75 ? tiers[1] : tiers[2];
+  // The tier is the database's (migration 057 raises it automatically as
+  // active referrals grow; an admin can also set it). Never guessed here.
+  const currentTier = affiliate ? (tiers.find(t => t.tier === Number(affiliate.tier)) ?? tiers[0]) : null;
   const nextTier = currentTier?.tier === 1 ? tiers[1] : currentTier?.tier === 2 ? tiers[2] : null;
   const currentRate = affiliate ? Math.round(Number(affiliate.commission_rate) * 100) : (currentTier?.rate ?? 20);
   const totalEarned = Number(affiliate?.total_earned ?? 0);

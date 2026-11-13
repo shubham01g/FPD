@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { countRecords } from "../services/vaultExport";
 import { db } from "../services/supabase";
 import { deriveStorageBreakdown } from "../utils/storageBreakdown";
+import { hiddenPages, usePlatform } from "../services/platform";
 import heroFamilyPhoto from "../../imports/dashboard_hero_family.webp";
 
 interface UserDashboardProps { onNavigate: (page: string) => void; }
@@ -168,6 +169,7 @@ const DASH_CSS = `
 
 export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const { user, docs, contacts, wishes, notifications } = useDemo();
+  const platform = usePlatform();
 
   const firstName = user.name.split(" ")[0];
   const used = user.storageUsed, total = user.storageLimit;
@@ -235,19 +237,22 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
     : affiliate === null ? "Join the affiliate program"
     : affiliate.status === "active" ? "Total earned" : "Awaiting approval";
 
+  // Tiles and shortcuts for a page an admin switched off are left out
+  // rather than silently landing back on the dashboard.
+  const hidden = hiddenPages(platform.flags);
   const statCards = [
     { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN },
     { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS },
     { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2 },
     { label: "Referral Earnings", value: referralValue, sub: referralSub, icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: ACCENT },
-  ];
+  ].filter(c => !hidden.has(c.page));
 
   const quickActions = [
     { icon: <Plus size={16} />, label: "Add document", page: "file-cabinet", hue: ACCENT },
     { icon: <Users size={16} />, label: "Add contact", page: "contacts-legacy", hue: POS },
     { icon: <HardDrive size={16} />, label: "Check storage", page: "storage-usage", hue: ACCENT2 },
     { icon: <TrendingUp size={16} />, label: "Refer & earn", page: "affiliate", hue: MINT },
-  ];
+  ].filter(a => !hidden.has(a.page));
 
   /* ── 6-month trend area chart ── */
 

@@ -201,7 +201,7 @@ function mapDbUserDetail(d: DBUserDetail): AdminUser {
     storage: usedGb,
     storageTotal: totalGb,
     storageVideos: 0, storagePhotos: 0, storageDocs: 0, storageOther: 0, // breakdown not tracked — see JSX below
-    contacts: d.contacts.length,
+    contacts: d.contacts.filter(c => c.contact_type === "legacy").length,
     guardians,
     referrals: d.referralCount,
     legacyFeePaid: d.legacyFeePaid,
