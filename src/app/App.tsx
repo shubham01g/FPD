@@ -203,6 +203,7 @@ function LandingRoute() {
     <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
       <LandingPage
         onGetStarted={() => navigate("/signup")}
+        onSignIn={() => navigate("/login")}
         onPartnerPortal={() => navigate("/partner")}
         onApplyWhiteLabel={tier => navigate(`/partner/onboard?tier=${tier}`)}
       />

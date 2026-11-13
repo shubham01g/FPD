@@ -161,7 +161,7 @@ const NAV_LINKS: [string, string][] = [
   ["Partners", "partners"], ["White Label", "white-label"],
 ];
 
-function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: string; onNavigate: (id: string) => void }) {
+function TopNav({ onStart, onSignIn, page, onNavigate }: { onStart: () => void; onSignIn: () => void; page: string; onNavigate: (id: string) => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -190,7 +190,7 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
           <button onClick={() => go("help")} className={`fpd-shine hidden md:flex items-center gap-1.5 px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white ${page === "help" ? "fpd-underline-on" : ""}`} style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>
             <Mail size={14} /> Contact Us
           </button>
-          <button onClick={onStart} className="fpd-shine hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
+          <button onClick={onSignIn} className="fpd-shine hidden sm:block px-2 py-2 rounded-lg font-semibold transition-colors hover:text-white" style={{ color: SOFT, whiteSpace: "nowrap", fontSize: 15 }}>Sign In</button>
           <PrimaryBtn onClick={onStart} compact>Get Started</PrimaryBtn>
           <button className="xl:hidden p-2 rounded-lg" style={{ color: TEXT }} onClick={() => setOpen(o => !o)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
@@ -202,6 +202,7 @@ function TopNav({ onStart, page, onNavigate }: { onStart: () => void; page: stri
           ))}
           <button onClick={() => go("white-glove")} className="text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: "#A98CC7", background: page === "white-glove" ? "rgba(126,107,216,0.16)" : "transparent", fontSize: 17.5 }}>White Glove Concierge</button>
           <button onClick={() => go("help")} className="text-left flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: page === "help" ? "#FFFFFF" : SOFT, background: page === "help" ? "rgba(91,110,225,0.2)" : "transparent", fontSize: 17.5 }}><Mail size={16} /> Contact Us</button>
+          <button onClick={() => { setOpen(false); onSignIn(); }} className="sm:hidden text-left px-3 py-2.5 rounded-lg transition-colors active:bg-[rgba(91,110,225,0.28)]" style={{ color: SOFT, fontSize: 17.5 }}>Sign In</button>
         </div>
       )}
     </nav>
@@ -1466,8 +1467,8 @@ function Footer({ onStart, onNavigate, onAdminLogin, onPartnerPortal, onConcierg
 }
 
 /* ── ROOT EXPORT ──────────────────────────────────────────────── */
-export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onConciergeLogin, onApplyWhiteLabel }:
-  { onGetStarted: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void; onApplyWhiteLabel?: (tier: string) => void }) {
+export function LandingPage({ onGetStarted, onSignIn, onAdminLogin, onPartnerPortal, onConciergeLogin, onApplyWhiteLabel }:
+  { onGetStarted: () => void; onSignIn?: () => void; onAdminLogin?: () => void; onPartnerPortal?: () => void; onConciergeLogin?: () => void; onApplyWhiteLabel?: (tier: string) => void }) {
   if (typeof window !== "undefined") (window as any).__adminLogin = onAdminLogin;
   const [page, setPage] = useState("home");
   const navigate = (id: string) => { setPage(id); scrollToTop(); };
@@ -1488,7 +1489,7 @@ export function LandingPage({ onGetStarted, onAdminLogin, onPartnerPortal, onCon
   return (
     <div className="fpd-landing" style={{ fontFamily: "var(--font-body)", background: BG, color: TEXT, overflowX: "hidden" }}>
       <style>{LANDING_CSS}</style>
-      <TopNav onStart={onGetStarted} page={page} onNavigate={navigate} />
+      <TopNav onStart={onGetStarted} onSignIn={onSignIn ?? onGetStarted} page={page} onNavigate={navigate} />
       <main>
         <div key={page} className="fpd-stagger">
           {pageContent}
