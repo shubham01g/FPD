@@ -46,6 +46,8 @@ interface PetRecord {
   gender: string;
   breed: string;
   colour: string;
+  /** pet_records.microchip_number */
+  microchip: string;
   documents: string[];
   medicalHistory: string;
   vaccinations: PetVaccination[];
@@ -208,6 +210,7 @@ export function PetRecords() {
       gender: String(r.gender ?? ""),
       breed: String(r.breed ?? ""),
       colour: String(r.color ?? ""),
+      microchip: String(r.microchip_number ?? ""),
       medicalHistory: String(r.medical_history ?? ""),
       vetName: String(r.vet_name ?? ""),
       vetPhone: String(r.vet_phone ?? ""),
@@ -241,7 +244,7 @@ export function PetRecords() {
   const [petCaretakers, setPetCaretakers] = useState<PetCaretaker[]>([{name:"",phone:""}]);
   const [petProviders, setPetProviders] = useState<PetProvider[]>([{name:"",phone:""}]);
   const [petInstructions, setPetInstructions] = useState<PetInstruction[]>([{name:"",phone:"",description:""}]);
-  const [petAbout, setPetAbout] = useState({name:"",dateOfBirth:"",gender:"",breed:"",colour:""});
+  const [petAbout, setPetAbout] = useState({name:"",dateOfBirth:"",gender:"",breed:"",colour:"",microchip:""});
   const [petDocs, setPetDocs] = useState<string[]>([]);
   const [petMedHistory, setPetMedHistory] = useState("");
   const [petVaccinations, setPetVaccinations] = useState<PetVaccination[]>([{type:"",date:""}]);
@@ -254,7 +257,7 @@ export function PetRecords() {
 
   function resetPetForm() {
     setPetPhotos([]); setPetCaretakers([{name:"",phone:""}]); setPetProviders([{name:"",phone:""}]);
-    setPetInstructions([{name:"",phone:"",description:""}]); setPetAbout({name:"",dateOfBirth:"",gender:"",breed:"",colour:""});
+    setPetInstructions([{name:"",phone:"",description:""}]); setPetAbout({name:"",dateOfBirth:"",gender:"",breed:"",colour:"",microchip:""});
     setPetDocs([]); setPetMedHistory(""); setPetVaccinations([{type:"",date:""}]);
     setPetVet({vetName:"",vetPhone:"",vetEmail:""}); setPetFeedings([{foodType:"",timeType:"Morning",quantity:"",locationOfFood:""}]);
     setPetExtras(EMPTY_EXTRAS); setPetMeds([EMPTY_MED]);
@@ -282,7 +285,7 @@ export function PetRecords() {
     setPetCaretakers(pet.caretakers.length ? pet.caretakers : [{name:"",phone:""}]);
     setPetProviders(pet.providers.length ? pet.providers : [{name:"",phone:""}]);
     setPetInstructions(pet.instructions.length ? pet.instructions : [{name:"",phone:"",description:""}]);
-    setPetAbout({ name: pet.name, dateOfBirth: pet.dateOfBirth, gender: pet.gender, breed: pet.breed, colour: pet.colour });
+    setPetAbout({ name: pet.name, dateOfBirth: pet.dateOfBirth, gender: pet.gender, breed: pet.breed, colour: pet.colour, microchip: pet.microchip });
     setPetDocs(pet.documents);
     setPetMedHistory(pet.medicalHistory);
     setPetVaccinations(pet.vaccinations.length ? pet.vaccinations : [{type:"",date:""}]);
@@ -310,6 +313,7 @@ export function PetRecords() {
       gender: petAbout.gender,
       breed: petAbout.breed,
       color: petAbout.colour,
+      microchip_number: petAbout.microchip.trim() || null,
       medical_history: petMedHistory,
       vet_name: petVet.vetName,
       vet_phone: petVet.vetPhone,
@@ -422,7 +426,7 @@ export function PetRecords() {
                     <div className="r-icon" style={{ width: 52, height: 52, borderRadius: 16 }}><PawPrint size={24}/></div>
                     <div>
                       <div className="petname">{pet.name}</div>
-                      <div className="petmeta">{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}</div>
+                      <div className="petmeta">{pet.breed} · {pet.gender} · {pet.colour} · Born {pet.dateOfBirth}{pet.microchip ? ` · Chip ${pet.microchip}` : ""}</div>
                     </div>
                   </div>
                   <button className="btn-mini" onClick={() => openEditPet(pet)}><Edit2 size={13}/> Edit</button>
@@ -706,6 +710,7 @@ export function PetRecords() {
                     </select>
                     <input className="fin" value={petAbout.breed} onChange={e=>setPetAbout(p=>({...p,breed:e.target.value}))} placeholder="Breed"/>
                     <input className="fin" value={petAbout.colour} onChange={e=>setPetAbout(p=>({...p,colour:e.target.value}))} placeholder="Colour"/>
+                    <input className="fin" value={petAbout.microchip} onChange={e=>setPetAbout(p=>({...p,microchip:e.target.value}))} placeholder="Microchip number"/>
                     {/* Upload Documents */}
                     <div className="dropzone sm">
                       <span style={{ fontSize: 35.5 }}>📄</span>

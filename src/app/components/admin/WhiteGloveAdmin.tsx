@@ -490,7 +490,7 @@ function AddClientModal({ specialists, onClose, onAdded }: { specialists: Return
     if (!query.trim()) return;
     setSearching(true);
     try {
-      const res = await adminApi.get<{ users: UserSearchResult[] }>(`/users?search=${encodeURIComponent(query)}&pageSize=10`);
+      const res = await adminApi.get<{ users: UserSearchResult[] }>(`/white-glove/user-search?q=${encodeURIComponent(query)}`);
       setResults(res.users);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Search failed");

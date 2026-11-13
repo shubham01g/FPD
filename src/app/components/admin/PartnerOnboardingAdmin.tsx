@@ -394,11 +394,22 @@ export function PartnerOnboardingAdmin() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showSend, setShowSend] = useState(false);
   const [sendEmail, setSendEmail] = useState("");
-  const [sendPkgId, setSendPkgId] = useState("agency");
+  const [sendPkgId, setSendPkgId] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
+  // A failed load says so, instead of showing empty lists as if there were no
+  // packages or sales.
   async function reload() {
-    setPackages(await getAdminPackages());
-    setSales(await getSales());
+    try {
+      const [pkgs, sls] = await Promise.all([getAdminPackages(), getSales()]);
+      setPackages(pkgs);
+      setSales(sls);
+      setLoadError(null);
+      // The invite defaults to the first real package, not a made-up id.
+      setSendPkgId(id => id || pkgs.find(p => p.active)?.id || pkgs[0]?.id || "");
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Couldn't load White Label data");
+    }
     await reloadProcessors();
   }
 
@@ -468,6 +479,12 @@ export function PartnerOnboardingAdmin() {
             </button>
           </div>
         </div>
+
+        {loadError && (
+          <div className="p-4 rounded-2xl" style={{ background:"rgba(252,129,129,0.08)", border:"1px solid rgba(252,129,129,0.3)", color:"#FC8181", fontSize:15 }}>
+            White Label packages and sales couldn't be loaded: {loadError}
+          </div>
+        )}
 
         {/* KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

@@ -57,10 +57,24 @@ users.get("/", async (c) => {
 // the previous frontend flow faked this with a setTimeout and created nothing.
 users.post("/", async (c) => {
   const body = await c.req.json().catch(() => ({}));
-  const { name, email, phone, plan, subscriptionWaived, waiveReason, whiteGlove, notes, sendWelcome, onboardedBy } = body;
+  const { name, email, phone, plan, subscriptionWaived, waiveReason, whiteGlove, notes, sendWelcome } = body;
+  // Who onboarded the account is the signed-in admin, never what the browser says.
+  const admin = c.get("admin" as never) as AdminUser;
+  const onboardedBy = admin.email;
 
   if (!name?.trim() || !email?.trim()) {
     return c.json({ error: "Name and email are required" }, 400);
+  }
+
+  // Waiving the fee comps a paid plan (a comp_ subscription), which needs the
+  // same Subscription edit access as Admin → User billing → Comp. Checked
+  // before the account is created.
+  if (subscriptionWaived && plan && plan !== "starter") {
+    const canComp = admin.permissions === null || admin.role === "super_admin"
+      || Boolean(admin.permissions.find((p) => p.module === "subscription")?.canEdit);
+    if (!canComp) {
+      return c.json({ error: "Waiving the subscription comps a paid plan, which needs Subscription edit access. Onboard without the waiver, or ask an admin who has it." }, 403);
+    }
   }
 
   const db = adminClient();

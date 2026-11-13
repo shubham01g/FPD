@@ -10,6 +10,20 @@ import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const whiteGlove = new Hono();
 
+// GET /admin/white-glove/user-search?q= — find an account to enrol. Only the
+// fields the enrol dialog shows; deceased accounts and admins are left out.
+whiteGlove.get("/user-search", async (c) => {
+  const term = (c.req.query("q") ?? "").replace(/[^\p{L}\p{N}@.+\-' ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 100);
+  if (term.length < 2) return c.json({ users: [] });
+  const { data, error } = await adminClient().from("users")
+    .select("id, full_name, email, plan, white_glove")
+    .or(`email.ilike.*${term}*,full_name.ilike.*${term}*`)
+    .is("deceased_at", null).eq("is_admin", false)
+    .order("created_at", { ascending: false }).limit(10);
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ users: data ?? [] });
+});
+
 // GET /admin/white-glove/clients
 whiteGlove.get("/clients", async (c) => {
   const { data, error } = await adminClient()

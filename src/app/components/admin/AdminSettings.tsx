@@ -331,7 +331,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
      audit log to feature-flag changes for the Feature Flag History export. */
   const EXPORTS: { label: string; desc: string; path: string; file: string; only?: string }[] = [
     { label:"All Users & Profiles",    desc:"Full user database including plans and metadata",   path:"/users?pageSize=100", file:"users.csv" },
-    { label:"Transaction History",     desc:"All payment records (latest 1,000)",                path:"/analytics/payments",  file:"transactions.csv" },
+    { label:"Transaction History",     desc:"Every payment record (test and live)",                path:"/analytics/payments",  file:"transactions.csv" },
     { label:"Affiliate & Partner Data", desc:"Referral links, commissions, and payouts",         path:"/affiliates",          file:"affiliates.csv" },
     { label:"Payouts",                  desc:"Affiliate and partner payout records",             path:"/payouts",             file:"payouts.csv" },
     { label:"Audit Log",                desc:"Admin activity history (latest 200 events)",       path:"/audit?pageSize=200",  file:"audit-log.csv" },

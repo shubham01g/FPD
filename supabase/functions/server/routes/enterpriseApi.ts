@@ -17,6 +17,14 @@ async function sha256Hex(input: string): Promise<string> {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// GET /admin/enterprise-api/partners — names for the "issue a key to" picker.
+enterpriseApi.get("/partners", async (c) => {
+  const { data, error } = await adminClient().from("partners")
+    .select("id, organization_name").neq("status", "suspended").order("organization_name");
+  if (error) return c.json({ error: error.message }, 500);
+  return c.json({ partners: data ?? [] });
+});
+
 // GET /admin/enterprise-api/keys?ownerUserId=&partnerId=
 enterpriseApi.get("/keys", async (c) => {
   const { ownerUserId, partnerId } = c.req.query();

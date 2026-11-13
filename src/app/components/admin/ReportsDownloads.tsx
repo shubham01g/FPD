@@ -6,6 +6,17 @@ import {
 import { toast } from "sonner";
 import { adminApi } from "../../services/adminApi";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminMe } from "../../hooks/useAdminMe";
+
+/* The permission each report's data needs (the server gates the endpoint
+   the same way); a role sees only the reports it can actually run. */
+const REPORT_MODULES: Record<string, string[]> = {
+  revenue_trend: ["analytics", "revenue"], overage_billing: ["analytics", "revenue"], white_glove_billing: ["analytics", "revenue"],
+  payout_history: ["payouts"], continuation_fees: ["continuation"],
+  user_roster: ["users"], new_signups: ["users"], manually_onboarded: ["users"], storage_usage: ["users"],
+  id_verification: ["verification"], affiliate_performance: ["affiliates"], partner_activity: ["partners"],
+  wg_client_status: ["white_glove"], audit_log_export: ["audit"], push_notification_stats: ["notifications"],
+};
 
 const CARD: React.CSSProperties = { background:"#101728", border:"1px solid rgba(91,110,225,0.16)", borderRadius:20 };
 const MONO: React.CSSProperties = { fontFamily:"var(--font-mono)" };
@@ -35,7 +46,7 @@ async function fetchAllPages(path: string, key: string, pageSize: number): Promi
 const listOf = (path: string, key: string) => async () =>
   ((await adminApi.get<Record<string, unknown>>(path))[key] as Row[] | undefined) ?? [];
 
-/* Payments (latest 1,000) narrowed by a test on each row. */
+/* Every payment record, narrowed by a test on each row. */
 const paymentsWhere = (keep: (p: Row) => boolean) => async () =>
   ((await adminApi.get<{ payments: Row[] }>("/analytics/payments")).payments ?? []).filter(keep);
 
@@ -323,13 +334,16 @@ export function ReportsDownloads() {
     }
   }
 
+  const { can, loading: meLoading } = useAdminMe();
+  const allowed = (r: ReportDef) => !r.source || !REPORT_MODULES[r.id] || REPORT_MODULES[r.id].some(m => can(m));
   const filtered = REPORTS.filter(r =>
+    !meLoading && allowed(r) &&
     (activeCategory === "all" || r.category === activeCategory) &&
     (search === "" || r.name.toLowerCase().includes(search.toLowerCase()) || r.description.toLowerCase().includes(search.toLowerCase()))
   );
 
   const stats = [
-    { label:"Reports With Live Data", value:REPORTS.filter(r => r.source).length, color:"#6E90C9" },
+    { label:"Reports You Can Run", value:REPORTS.filter(r => r.source && allowed(r)).length, color:"#6E90C9" },
     { label:"No Data Source Yet",     value:REPORTS.filter(r => !r.source).length, color:"#8A9AB8" },
     { label:"Exported This Session",  value:exports.length, color:"#D99A6B" },
     { label:"Export Formats",         value:2, color:"#ED8936" },

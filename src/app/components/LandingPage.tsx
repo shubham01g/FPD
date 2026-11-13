@@ -1006,7 +1006,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
   ];
   const included = [
     "Dedicated personal specialist assigned to you",
-    "Up to 4 one-on-one phone or video sessions",
+    "One-on-one phone or video sessions, billed per 30 minutes (most people need 2–4)",
     "All documents uploaded on your behalf",
     "Legacy contacts set up and verified for you",
     "Final wishes recorded exactly as you describe",
@@ -1106,8 +1106,8 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
               <div className="flex flex-col gap-2 mb-8 fpd-stagger">
                 {perfectFor.map(p => (<div key={p} style={{ color: SOFT, fontSize: 16 }}>· {p}</div>))}
               </div>
-              <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 32.5, fontWeight: 700, marginBottom: 4 }}>Just Leave Your Number.</div>
-              <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>A specialist calls within 1 business day. No apps. No computers. Just a phone call.</div>
+              <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 32.5, fontWeight: 700, marginBottom: 4 }}>Sign Up, Then We Call You.</div>
+              <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>Create your free account and choose White Glove. Once the setup fee is paid, a specialist calls within 1 business day.</div>
               <div className="flex justify-center gap-4 mb-5">
                 <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
                   <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>{usd(wgSetup)}</div>
@@ -1120,7 +1120,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
                 </div>
               </div>
               <button onClick={onStart} className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base fpd-btn-lift" style={{ background: `linear-gradient(135deg,${VIOLET},${VIOLET_SOFT})`, color: "#0A0820", boxShadow: "0 0 32px rgba(126,107,216,0.4)" }}>
-                <Phone size={18} /> Request My White Glove Call
+                <Phone size={18} /> Get Started with White Glove
               </button>
               <div style={{ color: FAINT, fontSize: 14, marginTop: 12 }}>No obligation · Available {CONTACT_HOURS}</div>
             </div>

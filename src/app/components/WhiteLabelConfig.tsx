@@ -9,6 +9,10 @@ import { useWhiteLabel, type WhiteLabelConfig } from "../context/WhiteLabelConte
 import { toast } from "sonner";
 
 /* ── Royal Vault Blue palette (matched to the redesigned dashboard, calendar, AI assistant) ── */
+/* The real plan each renameable slot stands for. */
+const DEFAULT_PLAN_NAME: Record<keyof WhiteLabelConfig["planNames"], string> = {
+  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive", legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
+};
 const TEXT    = "#EFF2F9";
 const SOFT    = "#BCC5DA";
 const MUTED   = "#A3ADC9";
@@ -105,7 +109,7 @@ function LivePreview({ config }: { config: WhiteLabelConfig }) {
                 { label: "Final Wishes" },
                 { label: "Medical Info" },
                 ...(config.features.medicalInfo ? [] : []),
-                { label: config.planNames.essential + " Plan" },
+                { label: config.planNames.foundation + " Plan" },
               ].map((item, i) => (
                 <div key={i} style={{ padding: "6px 8px", borderRadius: 8, marginBottom: 2, background: item.active ? `${pc}18` : "transparent", borderLeft: item.active ? `2px solid ${pc}` : "2px solid transparent", color: item.active ? "#0D1428" : "#8A9AB8", fontSize: 14 }}>
                   {item.label}
@@ -119,7 +123,7 @@ function LivePreview({ config }: { config: WhiteLabelConfig }) {
             <div style={{ background: `linear-gradient(135deg,${pc}18,${ac}08)`, borderRadius: 12, padding: 14, border: `1px solid ${pc}20` }}>
               <div style={{ fontSize: 12.5, color: "#5A6A88", marginBottom: 4 }}>WELCOME BACK</div>
               <div style={{ color: "#0D1428", fontSize: 19, fontWeight: 700 }}>James Doe</div>
-              <div style={{ color: pc, fontSize: 11, marginTop: 2 }}>{config.companyName} · {config.planNames.premium}</div>
+              <div style={{ color: pc, fontSize: 11, marginTop: 2 }}>{config.companyName} · {config.planNames.family_archive}</div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {["14 Documents", "3 Contacts", "16.9 GB Used", "$284 Earned"].map((stat, i) => (
@@ -236,7 +240,7 @@ const WL_CSS = `
 `;
 
 export function WhiteLabelConfig() {
-  const { config, update, updateFeature, updatePlanName, reset, publish, saving, dirty } = useWhiteLabel();
+  const { config, update, updateFeature, updatePlanName, reset, publish, saving, dirty, error: loadError, loading } = useWhiteLabel();
   const [tab, setTab] = useState<Tab>("brand");
   const [saved, setSaved] = useState(false);
 
@@ -305,6 +309,14 @@ export function WhiteLabelConfig() {
             </button>
           </div>
         </div>
+
+        {/* The saved settings couldn't be read: say so, rather than showing
+            the built-in defaults as if they were saved. */}
+        {loadError && !loading && (
+          <div className="status-banner" style={{ borderColor: "rgba(252,129,129,0.35)", background: "rgba(252,129,129,0.08)" }}>
+            <span style={{ color: "#FC8181" }}>The saved White Label settings couldn't be loaded ({loadError}). What you see are defaults; refresh before publishing.</span>
+          </div>
+        )}
 
         {/* ── Status banner ── */}
         {config.enabled && (
@@ -436,9 +448,9 @@ export function WhiteLabelConfig() {
               <p>Customize plan names to match your brand. Pricing and features are managed separately in Subscription Config.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-5">
-              {([["starter",POS],["essential","#5BA7D6"],["premium",ACCENT],["legacyPro",ACCENT2],["enterprise","#ED8936"]] as const).map(([key, color], planIdx) => (
+              {([["starter",POS],["foundation","#5BA7D6"],["family_archive",ACCENT],["legacy_pro",ACCENT2],["legacy_vault","#ED8936"]] as const).map(([key, color], planIdx) => (
                 <div key={key} className="plan-card" style={{ borderColor: `${color}40` }}>
-                  <div className="plan-badge" style={{ color }}>PLAN {planIdx+1} — {key.toUpperCase()}</div>
+                  <div className="plan-badge" style={{ color }}>PLAN {planIdx+1} — {DEFAULT_PLAN_NAME[key].toUpperCase()}</div>
                   <input value={config.planNames[key]} onChange={e => updatePlanName(key, e.target.value)}
                     className="plan-input" style={{ background: `${color}14`, border: `1px solid ${color}40` }} />
                   <div className="plan-displayed" style={{ color }}>Displayed as: {config.planNames[key]}</div>
@@ -449,7 +461,7 @@ export function WhiteLabelConfig() {
             <div className="card pad">
               <div className="preset-lbl">HOW PLAN NAMES APPEAR</div>
               <div className="flex gap-4 flex-wrap">
-                {(["essential", "premium", "legacyPro"] as const).map((k, i) => (
+                {(["foundation", "family_archive", "legacy_pro"] as const).map((k, i) => (
                   <div key={k} className="plan-tag" style={{ background: ["rgba(91,167,214,0.16)","rgba(91,110,225,0.16)","rgba(91,167,214,0.16)"][i], color: ["#6FAE8B","#6E90C9","#6FAE8B"][i] }}>
                     {config.planNames[k]}
                   </div>
@@ -501,8 +513,8 @@ export function WhiteLabelConfig() {
                 { label: "Primary Color", value: config.primaryColor, color: config.primaryColor },
                 { label: "Domain", value: config.domain, color: "#6E90C9" },
                 { label: "Features Active", value: `${Object.values(config.features).filter(Boolean).length}/${featureList.length}`, color: "#D99A6B" },
-                { label: "Plan Names", value: `${config.planNames.starter} → ${config.planNames.essential} → ${config.planNames.premium} → ${config.planNames.legacyPro} → ${config.planNames.enterprise}`, color: WARN },
-                { label: "Status", value: config.enabled ? "LIVE" : "DRAFT", color: config.enabled ? "#D99A6B" : WARN },
+                { label: "Plan Names", value: `${config.planNames.starter} → ${config.planNames.foundation} → ${config.planNames.family_archive} → ${config.planNames.legacy_pro} → ${config.planNames.legacy_vault}`, color: WARN },
+                { label: "Status", value: config.enabled ? "SAVED AS ON" : "OFF", color: config.enabled ? "#D99A6B" : WARN },
               ].map(item => (
                 <div key={item.label} className="card summary-tile">
                   <div className="summary-lbl">{item.label.toUpperCase()}</div>

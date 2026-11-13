@@ -762,18 +762,7 @@ export function AdminRoles() {
                   Creating Administrator Account…
                 </div>
                 <div style={{ color:"#8A9AB8", fontSize:16, textAlign:"center", lineHeight:1.6 }}>
-                  Sending invite to <strong style={{ color:"#6E90C9" }}>{newAdmin.email}</strong>
-                </div>
-                <div className="w-full max-w-xs space-y-2.5 mt-2">
-                  {["Creating account record","Assigning role permissions","Generating one-time login token","Sending invite email"].map(step => (
-                    <div key={step} className="flex items-center gap-3">
-                      <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                        style={{ width:20, height:20, background:"rgba(72,187,120,0.15)" }}>
-                        <CheckCircle size={11} color="#FFFFFF"/>
-                      </div>
-                      <span style={{ fontSize:15, color:"#8A9AB8" }}>{step}</span>
-                    </div>
-                  ))}
+                  Creating the account and emailing the invite to <strong style={{ color:"#6E90C9" }}>{newAdmin.email}</strong>
                 </div>
               </div>
             )}

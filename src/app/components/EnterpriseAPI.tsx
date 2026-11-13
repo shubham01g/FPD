@@ -246,7 +246,7 @@ export function EnterpriseAPI() {
   // ── API Keys tab state ──
   const { data: keysData, loading: keysLoading, error: keysError, refetch: refetchKeys } =
     useAdminFetch(() => adminApi.get<{ keys: EnterpriseKey[] }>("/enterprise-api/keys"), []);
-  const { data: partnersData } = useAdminFetch(() => adminApi.get<{ partners: PartnerOption[] }>("/partnerships"), []);
+  const { data: partnersData } = useAdminFetch(() => adminApi.get<{ partners: PartnerOption[] }>("/enterprise-api/partners"), []);
   const keys = keysData?.keys ?? [];
   const partners = partnersData?.partners ?? [];
 
@@ -446,6 +446,9 @@ export function EnterpriseAPI() {
       {/* SDK TAB */}
       {activeTab === "sdk" && (
         <div className="space-y-5">
+          <div className="px-4 py-3 rounded-2xl" style={{ background:"rgba(246,173,85,0.07)", border:"1px solid rgba(246,173,85,0.25)", color:"#F3D9B8", fontSize:14.5 }}>
+            Reference only: these SDK packages aren't published and the public API isn't live yet, so these commands won't work today.
+          </div>
           <div className="flex gap-2">
             {Object.keys(sdkExamples).map(lang => (
               <button key={lang} onClick={() => setSdkLang(lang)}

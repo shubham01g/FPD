@@ -247,7 +247,6 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
         name: form.name, email: form.email, phone: form.phone || undefined, plan: form.plan,
         subscriptionWaived: form.subscriptionWaived, waiveReason: form.waiveReason, whiteGlove: form.whiteGlove,
         notes: form.notes || undefined, sendWelcome: form.sendWelcome,
-        onboardedBy: authUser?.email ?? "unknown admin",
       });
       onCreated();
       toast.success(`${form.name} onboarded${form.subscriptionWaived ? " · Subscription waived" : ""}${form.whiteGlove ? " · White Glove assigned" : ""}${form.sendWelcome ? " · Invite emailed" : ""}`);
@@ -426,7 +425,11 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   { label:"Name",    value:form.name },
                   { label:"Email",   value:form.email },
                   { label:"Phone",   value:form.phone || "—" },
-                  { label:"Package", value:`${selectedPlan.name} · ${selectedPlan.storage}` },
+                  // A paid plan is only given free (comped) when the fee is waived;
+                  // otherwise the account starts on Starter and buys its own plan.
+                  { label:"Package", value: form.subscriptionWaived || selectedPlan.id === "starter"
+                    ? `${selectedPlan.name} · ${selectedPlan.storage}${form.subscriptionWaived && selectedPlan.id !== "starter" ? " (free — waived)" : ""}`
+                    : `Starts on Starter — they choose ${selectedPlan.name} at checkout` },
                   // Without a waiver the account starts on free Starter and buys its own plan by card.
                   { label:"Monthly", value:form.subscriptionWaived ? "$0.00 (WAIVED)" : "Starter; they pay by card" },
                   { label:"Waiver",  value:form.subscriptionWaived ? (WAIVE_REASONS.find(r=>r.id===form.waiveReason)?.label ?? "—") : "None" },

@@ -26,7 +26,8 @@ export interface WhiteLabelConfig {
     videoMessages: boolean;
     secretVault: boolean;
   };
-  planNames: { starter: string; essential: string; premium: string; legacyPro: string; enterprise: string };
+  /** Keyed by the real plan ids (subscription_plans.id). */
+  planNames: { starter: string; foundation: string; family_archive: string; legacy_pro: string; legacy_vault: string };
   footerText: string;
   termsUrl: string;
   privacyUrl: string;
@@ -61,7 +62,7 @@ export const defaultConfig: WhiteLabelConfig = {
     personalAssets: true, familyMemories: true, contacts: true,
     affiliate: true, partnership: true, videoMessages: true, secretVault: true,
   },
-  planNames: { starter: "Starter", essential: "Essential", premium: "Premium", legacyPro: "Legacy Pro", enterprise: "Enterprise" },
+  planNames: { starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive", legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault" },
   footerText: "© 2026 Final Pass Down Inc. All rights reserved.",
   // Set per white-label brand in White Label Config; blank until provided.
   termsUrl: "",
@@ -79,7 +80,7 @@ interface DBWhiteLabelConfig {
   support_email: string | null;
   sender_name: string | null;
   features: Partial<WhiteLabelConfig["features"]>;
-  plan_names: Partial<WhiteLabelConfig["planNames"]>;
+  plan_names: Partial<WhiteLabelConfig["planNames"]> & Record<string, string | undefined>;
   footer_text: string | null;
   terms_url: string | null;
   privacy_url: string | null;
@@ -98,11 +99,27 @@ function fromDB(row: DBWhiteLabelConfig): WhiteLabelConfig {
     supportEmail: row.support_email ?? defaultConfig.supportEmail,
     senderName: row.sender_name ?? defaultConfig.senderName,
     features: { ...defaultConfig.features, ...row.features },
-    planNames: { ...defaultConfig.planNames, ...row.plan_names },
+    planNames: { ...defaultConfig.planNames, ...legacyPlanNames(row.plan_names ?? {}), ...pickPlanNames(row.plan_names ?? {}) },
     footerText: row.footer_text ?? defaultConfig.footerText,
     termsUrl: row.terms_url ?? defaultConfig.termsUrl,
     privacyUrl: row.privacy_url ?? defaultConfig.privacyUrl,
   };
+}
+
+/* Rows saved before 2026-11-13 used made-up plan keys; carry their names
+   over to the real plan ids. */
+const OLD_PLAN_KEYS: Record<string, keyof WhiteLabelConfig["planNames"]> = {
+  essential: "foundation", premium: "family_archive", legacyPro: "legacy_pro", enterprise: "legacy_vault",
+};
+function legacyPlanNames(saved: Record<string, string | undefined>) {
+  const out: Partial<WhiteLabelConfig["planNames"]> = {};
+  for (const [old, id] of Object.entries(OLD_PLAN_KEYS)) if (saved[old]) out[id] = saved[old];
+  return out;
+}
+function pickPlanNames(saved: Record<string, string | undefined>) {
+  const out: Partial<WhiteLabelConfig["planNames"]> = {};
+  for (const id of Object.keys(defaultConfig.planNames) as (keyof WhiteLabelConfig["planNames"])[]) if (saved[id]) out[id] = saved[id];
+  return out;
 }
 
 function toDB(config: WhiteLabelConfig) {
@@ -170,8 +187,12 @@ export function WhiteLabelProvider({ children }: { children: React.ReactNode }) 
     setError(null);
     try {
       const body = toDB(config);
-      const res = configId
-        ? await adminApi.patch<{ config: DBWhiteLabelConfig }>(`/white-label/configs/${configId}`, body)
+      // The public read can come back empty on an error, so before creating a
+      // row ask the admin API whether one exists: never publish a duplicate.
+      let id = configId;
+      if (!id) id = (await adminApi.get<{ configs: DBWhiteLabelConfig[] }>("/white-label/configs")).configs?.[0]?.id ?? null;
+      const res = id
+        ? await adminApi.patch<{ config: DBWhiteLabelConfig }>(`/white-label/configs/${id}`, body)
         : await adminApi.post<{ config: DBWhiteLabelConfig }>("/white-label/configs", body);
       const loaded = fromDB(res.config);
       setConfig(loaded);

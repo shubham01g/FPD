@@ -87,7 +87,8 @@ export const SERVICES: ServiceDef[] = [
   {
     id:"admin_api", name:"Admin API (authorized)", icon:<Shield size={16}/>,
     description:"An admin-only request, proving your session passes the admin check end to end.",
-    probe: async () => { await adminApi.get("/analytics/overview"); },
+    // /me answers for every admin role, so a restricted role doesn't see a false "failing".
+    probe: async () => { await adminApi.get("/me"); },
   },
 ];
 

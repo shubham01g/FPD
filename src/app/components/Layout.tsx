@@ -25,7 +25,7 @@ export type PageId =
   | "final-wishes" | "wills-trusts" | "medical-info" | "financial-records" | "insurance-policies" | "receipts-expenses"
   | "personal-assets" | "family-memories" | "organize" | "calendar"
   | "family-friends"
-  | "contacts-legacy" | "contacts-guardian" | "contacts-emergency"
+  | "contacts-legacy" | "contacts-guardian" | "contacts-emergency" | "contacts-pet"
   | "affiliate" | "digital-diary" | "password-manager" | "subscription-manager"
   | "messages-loved-ones" | "vital-clone"
   | "legacy-continuation" | "white-glove" | "waiver-sign" | "account-settings"
@@ -95,6 +95,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "family-friends",     label: "Family & Friends",   icon: <Users size={16}/> },
       { id: "contacts-emergency", label: "Emergency Contacts", icon: <AlertCircle size={16}/> },
+      { id: "contacts-pet",       label: "Pet Emergency Contacts", icon: <PawPrint size={16}/> },
     ],
   },
   {

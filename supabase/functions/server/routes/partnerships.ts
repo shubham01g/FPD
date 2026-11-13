@@ -1,6 +1,7 @@
 import { Hono } from "npm:hono";
 import { adminClient } from "../lib/supabaseAdmin.ts";
 import { isLivemode } from "../lib/stripe.ts";
+import { EMAIL_CONFIGURED, linkOrigin, noticeEmail, sendEmail } from "../lib/email.ts";
 
 const partnerships = new Hono();
 
@@ -19,10 +20,11 @@ partnerships.get("/", async (c) => {
   return c.json({ partners: data });
 });
 
-// POST /admin/partnerships — invite a prospective referral partner. There is
-// no email delivery wired up anywhere in this backend yet, so this creates a
-// real 'invited' partner record and hands back a real onboarding link for the
-// admin to send themselves — it does not claim to have emailed anyone.
+// POST /admin/partnerships — invite a prospective referral partner: creates
+// an 'invited' partner record and emails the contact their onboarding link
+// (/partner?ref=<code>) with the admin's note. If email isn't configured or
+// fails, the record still stands and the response says emailed:false so the
+// admin copies the link instead.
 partnerships.post("/", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const { organizationName, organizationType, contactEmail, note } = body;
@@ -50,7 +52,30 @@ partnerships.post("/", async (c) => {
     .maybeSingle();
 
   if (error) return c.json({ error: error.message }, 500);
-  return c.json({ partner: data }, 201);
+
+  let emailed = false;
+  if (EMAIL_CONFIGURED && data) {
+    const link = `${linkOrigin(c.req.header("origin"))}/partner?ref=${encodeURIComponent(partnerCode)}`;
+    const paragraphs = [
+      `You're invited to join the Final Pass Down Partner Program on behalf of ${String(organizationName).trim()}.`,
+      ...(note?.trim() ? [String(note).trim().slice(0, 2000)] : []),
+      "Open the link below to see how the program works, sign in (or create a free sign-in), and pay the one-time setup fee. Your partner dashboard and referral link go live as soon as it's paid.",
+    ];
+    try {
+      await sendEmail({
+        to: String(contactEmail).trim(),
+        ...noticeEmail({
+          name: "", heading: "Your Partner Program invitation", paragraphs,
+          button: { href: link, label: "Open my invitation" }, category: "partner_invite",
+          replyTo: "partnerships@finalpassdown.com",
+        }),
+      });
+      emailed = true;
+    } catch (err) {
+      console.error("partner invite email failed:", err);
+    }
+  }
+  return c.json({ partner: data, emailed }, 201);
 });
 
 function monthKey(iso: string): string {

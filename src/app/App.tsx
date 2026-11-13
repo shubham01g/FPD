@@ -415,6 +415,7 @@ function UserRoute() {
       case "contacts-legacy":    return <ContactsHub initialSection="legacy"/>;
       case "contacts-guardian":  return <ContactsHub initialSection="guardian"/>;
       case "contacts-emergency": return <ContactsHub initialSection="emergency"/>;
+      case "contacts-pet":       return <ContactsHub initialSection="pet_emergency"/>;
       // legacy-verification merged into contacts-legacy
       case "organize":            return <OrganizeHub onNavigate={nav}/>;
       case "calendar":            return <LifeCalendar onNavigate={nav}/>;
@@ -608,6 +609,9 @@ function ConciergeRoute() {
   const navigate = useNavigate();
   const { session, loading, twoFactorPending } = useAuth();
   const [employee, setEmployee] = useState<ConciergeEmployee | null | undefined>(undefined);
+  // Admin → Settings → Feature flags → White Glove Concierge. The server
+  // refuses every /concierge call while it's off; say why here.
+  const platform = usePlatform();
 
   // The roster row is the authorization check: a valid Supabase session proves
   // who you are, not that you are concierge staff. RLS returns nothing for a
@@ -625,6 +629,16 @@ function ConciergeRoute() {
   if (!session) return <Navigate to="/concierge/login" replace/>;
   if (twoFactorPending) return <TwoFactorGate onCancelled={() => navigate("/concierge/login")}/>;
   if (!employee || employee.status === "suspended") return <Navigate to="/concierge/login" replace/>;
+  if (platform.ready && !platform.flags.whiteGloveConcierge) {
+    return (
+      <div className="size-full flex items-center justify-center px-6" style={{ background:"#070A12", color:"#C7D0E3", fontFamily:"var(--font-body)" }}>
+        <div style={{ maxWidth:440, textAlign:"center" }}>
+          <h1 style={{ fontFamily:"var(--font-display)", fontSize:26, color:"#EFF2F9", marginBottom:10 }}>The Concierge Portal is switched off</h1>
+          <p style={{ fontSize:16, lineHeight:1.6 }}>White Glove is turned off in the admin settings right now. Your clients and notes are kept; the portal opens again when it's turned back on.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="size-full">

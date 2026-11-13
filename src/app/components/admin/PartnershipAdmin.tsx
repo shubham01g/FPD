@@ -45,6 +45,7 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [created, setCreated] = useState<{ partner_code: string } | null>(null);
+  const [emailed, setEmailed] = useState(false);
 
   const orgTypes = [
     { id:"law_firm", label:"Law Firm" }, { id:"financial", label:"Financial Advisor" },
@@ -61,12 +62,13 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
     if (!orgName.trim()) { toast.error("Organization name is required"); return; }
     setSending(true);
     try {
-      const res = await adminApi.post<{ partner: { partner_code: string } }>("/partnerships", {
+      const res = await adminApi.post<{ partner: { partner_code: string }; emailed?: boolean }>("/partnerships", {
         organizationName: orgName, organizationType: orgType, contactEmail: email, note: note || undefined,
       });
       setCreated(res.partner);
+      setEmailed(Boolean(res.emailed));
       onCreated();
-      toast.success(`${orgName} added as a pending partner`);
+      toast.success(res.emailed ? `Invite emailed to ${email.trim()}` : `${orgName} added — the email couldn't be sent, so copy the link below`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to create the partner");
     } finally {
@@ -82,8 +84,10 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <h3 style={{ fontFamily:"var(--font-display)", fontSize:22.5, color:"#E8EDF5" }}>{created ? "Partner Added" : "Add a Pending Partner"}</h3>
             <p style={{ color:"#8A9AB8", fontSize:15, marginTop:2 }}>
               {created
-                ? "Send them this link. When they sign up and pay the setup fee through it, this partner record is activated."
-                : "Creates a pending partner record and an invite link. Signing up and paying through the link activates it."}
+                ? (emailed
+                  ? `We emailed this link to ${email.trim()}. When they sign up and pay the setup fee through it, this partner record is activated.`
+                  : "The invite email couldn't be sent. Send them this link yourself. When they sign up and pay the setup fee through it, this partner record is activated.")
+                : "Creates a pending partner record and emails them an invite link with your note. Signing up and paying through the link activates it."}
             </p>
           </div>
           <button onClick={onClose} style={{ color:"#8A9AB8" }}><X size={16}/></button>
@@ -132,7 +136,7 @@ function SendInviteModal({ onClose, onCreated }: { onClose: () => void; onCreate
           <div>
             <label style={{ color:"#8A9AB8", fontSize:14, ...MONO, display:"block", marginBottom:6 }}>PERSONAL NOTE (optional)</label>
             <textarea value={note} onChange={e=>setNote(e.target.value)} rows={2}
-              placeholder="e.g. Hi Rebecca, we'd love to have your firm as a white label partner..."
+              placeholder="e.g. Hi Rebecca, we'd love to have your firm as a referral partner..."
               className="w-full px-4 py-3 rounded-2xl resize-none"
               style={{ background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#FFFFFF", fontSize:16, outline:"none" }}/>
           </div>
