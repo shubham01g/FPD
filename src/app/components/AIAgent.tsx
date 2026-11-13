@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Send, X, Minimize2, Maximize2, Sparkles, RefreshCw, Plus, Info, ArrowUpRight,
+  Send, X, Minimize2, Maximize2, RefreshCw, Plus, Info, ArrowUpRight,
   Compass, Users, DollarSign, Shield, Layers, Star,
   BookOpen, LayoutGrid, Zap, Clock, List,
 } from "lucide-react";
@@ -38,7 +38,7 @@ interface Message { id: string; role: "user"|"agent"; text: string; time: string
 const KB: Record<string, string> = {
 
   // ── Navigation & Getting Started ─────────────────────────────────
-  "navigate": `Here's a map of every section in Final Pass Down:\n\n**Vault & Files**\n• **Legacy Vault** — your encrypted master vault\n• **File Cabinet** — 18+ categorized folders for all documents\n• **Folders & Reminders** — custom folders and calendar reminders\n\n**Wishes & Legal**\n• **Final Wishes** — bequests, burial preferences, estate instructions\n• **Wills and Living Trusts** — legal documents with attorney details\n\n**Life Records**\n• Medical Info · Financial Records · Assets & Property · Utilities\n• Memories & Media · Pet Records · Digital Diary · Job History\n• ID Keeper · Warranties · Travel Planner · Favorite Places\n\n**Family Life**\n• Daycare Information · Kids' Activities\n\n**People / Contacts**\n• Legacy Contacts · Guardian Contacts · Emergency Contacts\n\n**Security**\n• Password Manager · Auto Pay & Subs · Activate Legacy Access\n\n**Billing & Earn**\n• Account & Profile · Usage & Billing · Affiliate Program · White Glove Service\n\n**Assistant**\n• Ask Carlos (that's me!)\n\nJust click any section in the left sidebar to get started.`,
+  "navigate": `Here's a map of every section in Final Pass Down:\n\n**Vault & Files**\n• **Legacy Vault** — your encrypted master vault\n• **File Cabinet** — 18+ categorized folders for all documents\n• **Folders & Reminders** — custom folders and calendar reminders\n\n**Wishes & Legal**\n• **Final Wishes** — bequests, burial preferences, estate instructions\n• **Wills and Living Trusts** — legal documents with attorney details\n\n**Life Records**\n• Medical Info · Financial Records · Assets & Property · Utilities\n• Family & Memories · Pet Records · Messages to Loved Ones · Digital Diary · Job History\n• ID Keeper · Warranties · Travel Planner · Favorite Places\n\n**Family Life**\n• Daycare Information · Kids' Activities\n\n**People / Contacts**\n• Legacy Contacts · Guardian Contacts · Emergency Contacts\n\n**Security & Account**\n• Password Manager · Auto Pay & Subs · Activate Legacy Access · Disaster Protection\n\n**Billing & Earn**\n• Account & Profile · Usage & Billing · Affiliate Program · White Glove Service\n\n**Assistant**\n• Ask Carlos (that's me!)\n\nJust click any section in the left sidebar to get started.`,
 
   // ── File Cabinet ─────────────────────────────────────────────────
   "file cabinet": `The **Digital File Cabinet** is your organized document library with 18+ folders:\n\n⚖️ Legal Documents · 💰 Financial Records · 🏥 Medical Records\n📋 Tax Records · 🏠 Property & Real Estate · 🚗 Vehicles\n⚡ Utilities & Services · 🛡️ Insurance Policies · 🐾 Pet Records\n💌 Personal Letters · 📷 Photo Albums · 🎥 Video Messages\n💻 Digital Assets · ₿ Crypto & NFTs · 🔒 Firearms Registry\n⚔️ Weapons Locker · 🛡️ Warranties · 🔐 Secret Vault\n\n**To upload:** Open any folder → click Upload Files or drag & drop.\n**To scan:** Click the Scan button — uses your device camera.\n**Syncing from sidebar sections:** Many sidebar pages (Financial Records, Warranties, etc.) file attached documents into the matching File Cabinet folder automatically.\n\nAll files are stored encrypted at rest (AES-256) and only reach you through private, short-lived links.`,
@@ -56,7 +56,10 @@ const KB: Record<string, string> = {
   "guardian contact": `**Guardian Contacts** have VIEW-ONLY access to the folders you personally assign them — they are never able to download files.\n\n**Perfect for:**\n• A spouse who may need to act if you're incapacitated\n• A trusted attorney who needs to see legal docs now\n• An adult child you want to keep informed\n\n**Key rules:**\n• Cannot download files — view only, always\n• You assign which specific folders they can see\n• Access is live immediately after they're added and verified\n\nTo add: Go to **People → Guardian Contacts** → click "Add Guardian Contact" → assign specific folders using the folder picker.`,
 
   // ── Emergency Contacts ────────────────────────────────────────────
-  "emergency contact": `**Emergency Contacts** are people notified by first responders in an emergency. They have NO vault access — purely informational.\n\nTo add: Go to **People → Emergency Contacts** in the sidebar.\n\nYou can store their name, phone, email, and relationship. This information appears on your profile for emergency services.`,
+  "emergency contact": `**Emergency Contacts** are the people to call first in an emergency. They have NO vault access — the list is information for you and the people you trust.\n\nYou can store their name, phone, email, and relationship.\n\nTo add: Go to **People → Emergency Contacts** in the sidebar.`,
+
+  // ── Messages to Loved Ones ────────────────────────────────────────
+  "messages": `**Messages to Loved Ones** lets you write messages that are emailed to someone later.\n\n**When a message is sent:**\n• On a date you choose\n• Every year on a birthday or anniversary\n• After your passing — once it's confirmed and the Activate Legacy Access Fee is paid\n\nSeal a message and give it a recipient email; they receive a private link to read it (valid 30 days).\n\nTo access: **Life Records → Messages to Loved Ones** in the sidebar.`,
 
   // ── Final Wishes ──────────────────────────────────────────────────
   "final wishes": `The **Final Wishes** section has 2 tabs:\n\n1. **Family Wishes** — specific bequests (who gets what item/asset), written instructions to family\n2. **Funeral Planning** — service type, location, music, readings, flowers, special requests, obituary draft\n\nTo access: **Wishes & Trusts → Final Wishes** in the sidebar.`,
@@ -98,10 +101,10 @@ const KB: Record<string, string> = {
   "kids": `The **Kids' Activities** section tracks every activity for every child:\n\n**Each activity:** Type (Soccer, Dance, Swimming, Piano, etc.), child's name, organization/team, coach/instructor with phone, schedule, season dates, cost, payment due date, uniform/equipment needed, **Transportation & Pickup Notes** (who drives, carpool), emergency contact, and documents.\n\n**Filter by child** using the buttons at the top.\n\nTo access: **Family Life → Kids' Activities** in the sidebar.`,
 
   // ── Memories ─────────────────────────────────────────────────────
-  "memories": `The **Family & Memories** section has 6 tabs:\n\n📷 **Memories** — Photo and video memories with date, description, tags\n🎥 **Video Messages** — Private messages to specific recipients, delivered after passing\n❤️ **Kids & Family** — Children's info, school, activities, notes\n🎯 **Goals** — Life goals with status (Soon / In Progress / Achieved), start and completion dates, steps and a picture\n🏆 **Awards** — Achievements, military service, professional recognition\n\nKeepsakes now live under **Assets & Property → Collectibles & Keepsakes**.\n\nPet records live in their own **Life Records → Pet Records** section — see "pet records" for details.\n\nTo access: **Life Records → Family & Memories** in the sidebar.`,
+  "memories": `The **Family & Memories** section has 6 tabs:\n\n📷 **Memories** — Photo and video memories with date, description, tags\n🎥 **Video Memories** — Home videos and family films, with when and where they were filmed\n❤️ **Kids & Family** — Children's info, school, activities, notes\n🎯 **Goals** — Life goals with status (Soon / In Progress / Achieved), start and completion dates, steps and a picture\n🏆 **Awards** — Achievements, military service, professional recognition\n\nKeepsakes now live under **Assets & Property → Collectibles & Keepsakes**.\n\nMessages you want delivered to someone later are in **Messages to Loved Ones**.\n\nPet records live in their own **Life Records → Pet Records** section — see "pet records" for details.\n\nTo access: **Life Records → Family & Memories** in the sidebar.`,
 
   // ── Pet Records ───────────────────────────────────────────────────
-  "pet": `**Pet Records** is its own section under Life Records, with a form that matches the official app design exactly:\n\n**11 sections:**\n1. Upload Images/Videos (up to 10)\n2. Emergency Pet Caretaker (Name + Phone, add multiple)\n3. Long Term Pet Provider (Name + Phone, add multiple)\n4. Special Care Instructions (Instructions + Description, add multiple)\n5. Favorites (Favorite Toy, Bedding, Treats)\n6. Travel Instructions\n7. Medications (Medication, Dose, How Often, Notes, add multiple)\n8. About Your Beloved Pet (Name, Date of Birth, Gender, Breed, Colour, Upload Documents)\n9. Health Info (Medical History, Vaccination Type + Date pairs, add multiple)\n10. Vet Info (Name, Phone, Email)\n11. Feeding (Food Type, Time of Day, Quantity, Location of Food, add multiple)\n\nTo add a pet: **Life Records → Pet Records → Add Pet Record**`,
+  "pet": `**Pet Records** is its own section under Life Records. Each pet's record has **11 sections:**\n1. Upload Images/Videos (up to 10)\n2. Emergency Pet Caretaker (Name + Phone, add multiple)\n3. Long Term Pet Provider (Name + Phone, add multiple)\n4. Special Care Instructions (Instructions + Description, add multiple)\n5. Favorites (Favorite Toy, Bedding, Treats)\n6. Travel Instructions\n7. Medications (Medication, Dose, How Often, Notes, add multiple)\n8. About Your Beloved Pet (Name, Date of Birth, Gender, Breed, Colour, Upload Documents)\n9. Health Info (Medical History, Vaccination Type + Date pairs, add multiple)\n10. Vet Info (Name, Phone, Email)\n11. Feeding (Food Type, Time of Day, Quantity, Location of Food, add multiple)\n\nTo add a pet: **Life Records → Pet Records → Add Pet Record**`,
 
   // ── Digital Diary ─────────────────────────────────────────────────
   "diary": `The **Digital Diary** lets you record text, audio, and video journal entries:\n\n**Entry types:** Written · Audio Recording · Video Recording\n\n**Privacy levels:** Private (only you), Legacy Contacts Only, or visible to all contacts\n\n**Mood tags, dates, and search** are all supported.\n\n**Recording:** Click Open Camera/Microphone — browser asks for permission. Videos are encrypted.\n\nTo access: **Life Records → Digital Diary** in the sidebar.`,
@@ -113,13 +116,13 @@ const KB: Record<string, string> = {
   "white glove": `The **White Glove Concierge Service** gives you a dedicated specialist who sets things up with you:\n\n**How it works:**\n1. You request White Glove from **Concierge → White Glove Service**\n2. A specialist contacts you and books sessions — you get each one by email with a calendar invite\n3. Sessions are by phone, video link or in person; your specialist can send you a secure upload link for documents\n\n**Pricing:** a one-time setup fee plus a charge per 30-minute session block (current prices are on the White Glove page).\n\nYou sign a short authorization so your specialist can work in your account.`,
 
   // ── Affiliate Program ─────────────────────────────────────────────
-  "affiliate": `The **Affiliate Program** lets you earn recurring commissions for referrals:\n\n| Tier | Referrals | Commission | Duration |\n|------|-----------|------------|----------|\n| Tier 1 | 5–24 | 20% | 12 months |\n| Tier 2 | 25–74 | 25% | 12 months |\n| Tier 3 | 75+ | 30% | 12 months |\n\n**Your referral link** is in your Affiliate dashboard. Share it — when someone signs up, you earn 20–30% of their monthly fee for 12 months.\n\nTo access: **Earn → Affiliate Program** in the sidebar.`,
+  "affiliate": `The **Affiliate Program** lets you earn recurring commissions for referrals:\n\n| Tier | Active referrals | Commission | Duration |\n|------|-----------|------------|----------|\n| Tier 1 | Up to 24 | 20% | 12 months |\n| Tier 2 | 25–74 | 25% | 12 months |\n| Tier 3 | 75+ | 30% | 12 months |\n\n**Your referral link** is in your Affiliate dashboard once your application is approved. When someone signs up through it, you earn your tier's rate on what they pay for their plan, for 12 months. Your tier rises automatically as active referrals grow. Payouts are reviewed and sent by the FPD team.\n\nTo access: **Earn → Affiliate Program** in the sidebar.`,
 
   // ── Plans & Pricing ───────────────────────────────────────────────
   "plans": `**Final Pass Down Subscription Plans:**\n\n| Plan | Monthly | Storage | Contacts | Overage |\n|------|---------|---------|----------|---------|\n| Starter | Free for 14 days | 1 GB | 1 each | None |\n| Foundation | $9.99 | 50 GB | 3 each | $0.40/GB |\n| Legacy Archive | $24.99 | 250 GB | Unlimited | $0.40/GB |\n| Legacy Pro | $49.99 | 500 GB | Unlimited | $0.40/GB |\n| Legacy Vault | $129.99 | 1 TB | Unlimited | $0.40/GB |\n\n**Yearly billing:** about 20% less than paying monthly (Legacy Vault $1,247.90/yr).\n\n**All plans include:** Every platform feature.\n\n**To upgrade:** Go to **Usage & Billing** and choose a plan. Upgrades apply right away (prorated); downgrades start when your current period ends. You pay by card on Stripe's secure checkout.`,
 
   // ── 2FA & Security ────────────────────────────────────────────────
-  "2fa": `**Two-Factor Authentication (2FA) options:**\n\n1. **SMS** — 6-digit code texted to your phone\n2. **Email OTP** — 6-digit code emailed to you (recommended)\n3. **Authenticator App** — Google Authenticator or Authy (most secure)\n\n**To enable:**\n1. Go to **Security → Account & Profile**\n2. Click the Security & 2FA tab\n3. Choose your preferred method\n4. Follow the setup steps\n5. Enter the 6-digit code you receive to confirm\n\n**Encryption:** Files are encrypted in transit (TLS) and at rest (AES-256). Password Manager and Auto Pay logins are also encrypted on your device with your vault passphrase (PBKDF2, 600,000 iterations), so FPD cannot read them.`,
+  "2fa": `**Two-Factor Authentication (2FA) options:**\n\n1. **SMS** — 6-digit code texted to your phone\n2. **Email OTP** — 6-digit code emailed to you (recommended)\n3. **Authenticator App** — Google Authenticator or Authy (most secure)\n\n**To enable:**\n1. Go to **Billing & Earn → Account & Profile**\n2. Click the Security & 2FA tab\n3. Choose your preferred method\n4. Follow the setup steps\n5. Enter the 6-digit code you receive to confirm\n\n**Encryption:** Files are encrypted in transit (TLS) and at rest (AES-256). Password Manager and Auto Pay logins are also encrypted on your device with your vault passphrase (PBKDF2, 600,000 iterations), so FPD cannot read them.`,
 
   // ── Storage ───────────────────────────────────────────────────────
   "storage": `**Storage & Billing:**\n\nYour plan includes a storage allowance. On paid plans, storage above it is billed per GB (the rate is on your plan card), measured as the peak over each month and never more than the monthly overage limit you set. Starter has no overage: uploads stop at its limit.\n\n**Alerts at:** 80% · 90% · 95% · 100%\n\n**See your usage:** **Billing & Earn → Usage & Billing** shows what you use, by category, and lets you change plan or limit.\n\n**Tip:** remove duplicates and large videos you no longer need to free space.`,
@@ -134,7 +137,7 @@ const KB: Record<string, string> = {
   "family friends": `The **Family & Friends** section is your personal contact book:\n\n**Contact groups:** Create named groups (e.g. "Immediate Family", "Work Colleagues") with colors and descriptions.\n\n**Add All button:** Instantly selects every contact for a new group.\n\n**Email Blast (BCC):** Click "Blast Email" on any group → compose subject + message → all members with email are BCC'd. Each person sees only themselves.\n\n**Contacts:** Name, email, phone, relationship, birthday — you can add as many as you want.\n\nTo access: **People → Family & Friends** in the sidebar.`,
 
   // ── Account Settings ──────────────────────────────────────────────
-  "account": `**Account Settings** has 4 tabs:\n\n👤 **Profile** — Upload profile photo, edit name, email, phone\n🔐 **Security & 2FA** — Enable SMS/Email OTP/Authenticator 2FA, change password\n🔒 **Encryption** — How your files and passwords are encrypted\n🔔 **Notifications** — Toggle Email, SMS, Push, Storage Alerts, Contact Updates, Marketing\n\nTo access: **Billing & Earn → Account & Profile** in the sidebar.`,
+  "account": `**Account Settings** has 4 tabs:\n\n👤 **Profile** — Upload profile photo, edit name, email, phone\n🔐 **Security & 2FA** — Enable SMS/Email OTP/Authenticator 2FA, change password\n🔒 **Encryption** — How your files and passwords are encrypted\n🔔 **Notifications** — Email, Push, Storage Alerts, and Marketing & Product Updates\n\nTo access: **Billing & Earn → Account & Profile** in the sidebar.`,
 
   // ── Confirmation of Passing ───────────────────────────────────────
   "confirmation of passing": `**Confirmation of Passing** — what FPD needs to activate legacy access:\n\nAccepted documents include:\n• Death certificates\n• Obituaries from recognized publications\n• Hospital or hospice records\n• Coroner reports\n• Funeral home letters\n• Probate filings\n• Any credible official record\n\n**Process:** Legacy contact submits documentation → FPD admin reviews → admin verifies → admin clicks "Activate" → vault opens for all verified legacy contacts.\n\n**Important:** Verification and admin approval are required, with a follow-up confirmation of death once received. The Legacy Continuation Fee must ALSO be paid — paying the fee alone does not unlock access.`,
@@ -181,116 +184,54 @@ async function loadLivePlans() {
   } catch { /* keep the built-in answer */ }
 }
 
+/* Topics in priority order: the first rule whose pattern matches wins, so
+   the specific topics come before the generic ones ("insurance card" is the
+   ID Keeper, not Financial Records; "change my password" is Account, not the
+   Password Manager). Every key is a whole word (\b) so "Carlos" never reads
+   as "car", "coffee" as "fee", or "how will I…" as a will. */
+const RULES: [RegExp, string][] = [
+  [/\b(death cert\w*|coroner|probate|funeral home|proof of (death|passing)|confirm\w* (of )?(passing|death))\b/, "confirmation of passing"],
+  [/\b(id keeper|id cards?|insurance cards?|passports?|driver'?s? licen[cs]e|social security|medicare|green card|identification)\b/, "id keeper"],
+  [/\b(2fa|two.?factor|two.?step|authenticator|otp|verification codes?|encryption|encrypted|aes)\b/, "2fa"],
+  [/\b(change|reset|forgot|update)\b.*\bpassword\b|\b(account settings?|my account|my profile|profile photo|notifications?|change (my )?email|edit (my )?name)\b/, "account"],
+  [/\b(password manager|passwords?|credentials?|usernames?|logins?)\b/, "password"],
+  [/\b(attachments?|sync\w*)\b/, "sync"],
+  [/\b(scan|scanner|scanning)\b/, "scan"],
+  [/\b(white glove|concierge|specialists?|not (good with )?tech\w*|set (it|everything) up for me)\b/, "white glove"],
+  [/\b(legacy contacts?|primary contact|contingent|chain of authority)\b/, "legacy contact"],
+  [/\b(guardian contacts?|guardians?|view.?only|incapacitat\w*)\b/, "guardian contact"],
+  [/\b(emergency contacts?|in case of emergency|ice contact)\b/, "emergency contact"],
+  [/\$?\b199\b|\b(continuation fee|legacy access fee|activate legacy access|legacy fee|fees?)\b/, "199"],
+  [/\b(legacy vault|vault export|export (my|the) vault|download everything|after i (pass|die)|when i (pass|die))\b/, "legacy vault"],
+  [/\b(messages? to loved ones|letters? to|sealed messages?|deliver\w* (a |my )?messages?)\b/, "messages"],
+  [/\b(final wish\w*|funerals?|burial|cremation|bequests?|estate instructions?|obituar\w*)\b/, "final wishes"],
+  [/\b(wills|my will|last will|living will|testament|trusts?|power of attorney|advance directives?)\b/, "wills"],
+  [/\b(medical|allerg\w*|medications?|prescriptions?|blood type|dnr|organ donor|doctors?|physicians?)\b/, "medical"],
+  [/\b(warrant\w*)\b/, "warranties"],
+  [/\b(utilit\w*|electric\w*|gas bill|water bill|internet bill|hoa)\b/, "utilities"],
+  [/\b(financial|bank\w*|investments?|retirement|401k|ira|tax(es)?|insurance|business records?)\b/, "financial"],
+  [/\b(assets?|vehicles?|cars?|trucks?|suvs?|firearms?|guns?|weapons?( locker)?|knives|swords|collectibles?|keepsakes?|jewelry|real estate|propert(y|ies)|house|home deed)\b/, "assets"],
+  [/\b(jobs?|employ\w*|careers?|employers?|work history|salary|supervisors?|resume)\b/, "job"],
+  [/\b(travel\w*|trips?|vacations?|destinations?|hotels?|flights?|itinerar\w*)\b/, "travel"],
+  [/\b(favorite places?|restaurants?|coffee shops?|parks?|places? i love)\b/, "favorite places"],
+  [/\b(daycare|day care|childcare|child care|pick.?ups?|drop.?offs?)\b/, "daycare"],
+  [/\b(kids'? activit\w*|activit\w*|soccer|dance|swim\w*|piano|coach\w*|sports?)\b/, "kids"],
+  [/\b(pets?|dogs?|cats?|animals?|vets?|veterinar\w*|vaccin\w*|feeding|pet care)\b/, "pet"],
+  [/\b(memor\w*|home videos?|video memories|goals?|awards?|achievements?|bucket list|photos?)\b/, "memories"],
+  [/\b(diary|journal\w*|audio entr\w*|voice notes?)\b/, "diary"],
+  [/\b(affiliat\w*|earn\w*|referrals?|refer|commissions?)\b/, "affiliate"],
+  [/\b(storage|gb|tb|overage|metering|usage|allowance|space|full)\b/, "storage"],
+  [/\b(plans?|pric\w*|subscriptions?|cost\w*|starter|foundation|legacy archive|legacy pro|upgrade\w*|downgrade\w*|bill(ed|ing)?|pay(ing|ment)?|cancel\w*|cards?|card on file)\b/, "plans"],
+  [/\b(family (and|&) friends|contact book|groups?|blast email|bcc)\b/, "family friends"],
+  [/\b(cabinet|folders?|documents?|upload\w*|files?)\b/, "file cabinet"],
+  [/\b(navigate|where is|where do i|how do i find|menu|sidebar|sections?|map|find)\b/, "navigate"],
+  [/^(hi|hello|hey|howdy|good (morning|afternoon|evening))\b|\b(help|what can you|what do you|carlos|who are you)\b/, "default"],
+];
+
 function getResponse(query: string): string {
   const q = query.toLowerCase();
-
-  // Navigation
-  if (q.match(/navigate|where is|where do i|how do i find|menu|sidebar|sections|overview|map/)) return KB["navigate"];
-
-  // File Cabinet
-  if (q.match(/file cabinet|cabinet|folder|folders|18 folder|document folder/)) return KB["file cabinet"];
-
-  // Legacy Vault
-  if (q.match(/legacy vault|vault\b|unlock vault|vault clone|download everything/)) return KB["legacy vault"];
-
-  // $199 Fee
-  if (q.match(/\$?199|continuation fee|fee|unlock download|locked vault|pay.*death|death.*pay/)) return KB["199"];
-
-  // Legacy Contacts
-  if (q.match(/legacy contact|primary contact|contingent|chain of authority|who gets vault|vault access/)) return KB["legacy contact"];
-
-  // Guardian
-  if (q.match(/guardian contact|guardian|view.?only|incapacitated|folder access/)) return KB["guardian contact"];
-
-  // Emergency
-  if (q.match(/emergency contact|first responder|emergency/)) return KB["emergency contact"];
-
-  // Final Wishes / Funeral
-  if (q.match(/final wish|funeral|burial|bequest|estate instruction|obituary/)) return KB["final wishes"];
-
-  // Wills
-  if (q.match(/will\b|wills|trust|living trust|power of attorney|advance directive/)) return KB["wills"];
-
-  // Medical
-  if (q.match(/medical|allergy|allergies|medication|blood type|dnr|organ donor|doctor|physician/)) return KB["medical"];
-
-  // Financial
-  if (q.match(/financial|insurance|real estate|investment|retirement|401k|ira|tax|business record/)) return KB["financial"];
-
-  // Utilities
-  if (q.match(/utilit|electric bill|gas bill|water bill|internet bill|hoa/)) return KB["utilities"];
-
-  // Personal Assets
-  if (q.match(/asset|vehicle|car|truck|suv|digital asset|firearm|gun|weapon|collectible|real estate|property/)) return KB["assets"];
-
-  // Warranties
-  if (q.match(/warrant|product.*cover|cover.*product|expir.*warrant|warrant.*expir/)) return KB["warranties"];
-
-  // ID Keeper
-  if (q.match(/id keeper|id card|identification|passport|driver.*licen|licens.*driver|social security|medicare|insurance card/)) return KB["id keeper"];
-
-  // Job History
-  if (q.match(/job|employment|career|employer|work history|salary|supervisor/)) return KB["job"];
-
-  // Travel
-  if (q.match(/travel|trip|vacation|destination|hotel|flight|passport.*travel/)) return KB["travel"];
-
-  // Favorite Places
-  if (q.match(/favorite place|restaurant|coffee|park|location|place i love/)) return KB["favorite places"];
-
-  // Daycare
-  if (q.match(/daycare|day care|childcare|child care|pickup|drop.?off|caretaker|provider/)) return KB["daycare"];
-
-  // Kids Activities
-  if (q.match(/kids? activit|children.*sport|sport.*children|soccer|dance|swim|piano|coach|activity/)) return KB["kids"];
-
-  // Memories / Family Memories
-  if (q.match(/memor|keepsake|video message|goal|award|achievement|bucket list/)) return KB["memories"];
-
-  // Pet Records
-  if (q.match(/pet|dog|cat|biscuit|animal|vet|vaccination|feeding|pet record|pet caretaker/)) return KB["pet"];
-
-  // Digital Diary
-  if (q.match(/diary|journal|audio|voice.*record|private.*entry|entry.*private/)) return KB["diary"];
-
-  // Password Manager
-  if (q.match(/password|credential|login.*store|store.*login|username/)) return KB["password"];
-
-  // White Glove
-  if (q.match(/white glove|concierge|specialist|helping me|not tech|someone.*help|help me.*upload/)) return KB["white glove"];
-
-  // Affiliate
-  if (q.match(/affiliat|earn|referral|commission|refer/)) return KB["affiliate"];
-
-  // Plans & Pricing
-  if (q.match(/plan|price|pricing|subscription|cost|starter|foundation|legacy archive|legacy pro|legacy vault plan|upgrade plan/)) return KB["plans"];
-
-  // 2FA / Security / Encryption
-  if (q.match(/2fa|two.?factor|authenticator|otp|sms.*code|encryption|aes|zero.?knowledge|security setting/)) return KB["2fa"];
-
-  // Storage
-  if (q.match(/storage|gb|overage|billing|metering|usage|allowance|space/)) return KB["storage"];
-
-  // Scanner
-  if (q.match(/scan|camera.*scan|scan.*camera|photograph.*doc|doc.*photograph/)) return KB["scan"];
-
-  // Sync
-  if (q.match(/sync|sync.*cabinet|cabinet.*sync|push.*file|file.*push|attachments? reach|attachment.*cabinet/)) return KB["sync"];
-
-  // Family & Friends
-  if (q.match(/family.?friend|contact book|group.*email|email.*group|blast email|bcc/)) return KB["family friends"];
-
-  // Account Settings
-  if (q.match(/account setting|profile|notification|my account|edit.*name|change.*email/)) return KB["account"];
-
-  // Confirmation of Passing
-  if (q.match(/confirm.*pass|pass.*confirm|death cert|death certif|obituar|coroner|funeral home|probate/)) return KB["confirmation of passing"];
-
-  // Greetings
-  if (q.match(/^(hi|hello|hey|howdy|good morning|good afternoon|start|help me|help\b|what can you|what do you)/)) return KB["default"];
-
-  // Fallback — still helpful
-  return `I'm not sure I have a specific answer for "${query}", but I'm trained on every FPD feature.\n\nTry asking me about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nOr contact support at **${supportEmail}** for account-specific help.`;
+  for (const [pattern, key] of RULES) if (pattern.test(q)) return KB[key];
+  return `I don't have an answer for "${query}" in my guide.\n\nTry asking about:\n• A specific section (e.g. "How does the File Cabinet work?")\n• A feature (e.g. "How do I set up White Glove?")\n• Contacts and permissions\n• Plans and storage\n• The Activate Legacy Access Fee\n\nFor anything about your own account, email support at **${supportEmail}** — a person will answer.`;
 }
 
 /* ── Suggestion chips ───────────────────────────────────────────── */
@@ -319,11 +260,13 @@ const POPULAR: { q: string; Icon: IconCmp; tone: string }[] = [
 ];
 
 /* ── Page-mode KPI band (mirrors the Dashboard / Calendar stat cards) ── */
+/* What the guide really is: a fixed set of written answers, matched by
+   keywords. Not AI, not a person, and it never reads the account. */
 const STATS: { label: string; value: string; sub: string; Icon: IconCmp; tone: string; dot: string }[] = [
-  { label: "Topics Covered",    value: "35+",  sub: "Every feature & workflow", Icon: BookOpen,   tone: "violet", dot: PURPLE  },
-  { label: "Platform Sections", value: "30+",  sub: "Fully mapped",             Icon: LayoutGrid, tone: "sky",    dot: ACCENT2 },
-  { label: "Response Time",     value: "<1s",  sub: "Instant answers",          Icon: Zap,        tone: "mint",   dot: GREEN   },
-  { label: "Availability",      value: "24/7", sub: "Always on",                Icon: Clock,      tone: "good",   dot: POS     },
+  { label: "Help Topics",    value: String(Object.keys(KB).length - 1), sub: "Written answers", Icon: BookOpen,   tone: "violet", dot: PURPLE  },
+  { label: "How It Answers", value: "Guide",   sub: "Matched by keywords",     Icon: LayoutGrid, tone: "sky",    dot: ACCENT2 },
+  { label: "Your Data",      value: "Private", sub: "Never read by the guide", Icon: Zap,        tone: "mint",   dot: GREEN   },
+  { label: "Need a Person?", value: "Email",   sub: "Support answers",         Icon: Clock,      tone: "good",   dot: POS     },
 ];
 
 /* ── Markdown renderer — styled through the scoped .fpd-ai classes ───
@@ -658,9 +601,9 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             <div className="art" style={{ backgroundImage: `linear-gradient(160deg, rgba(91,110,225,0.38), rgba(111,174,139,0.2)), url(${heroQAPhoto})` }} />
             <div className="scrim" />
             <div className="hcontent">
-              <span className="heyebrow">Ask Anything, Anytime</span>
-              <h1>Every question, <span className="accent">answered instantly.</span></h1>
-              <p>Your always-on guide to Final Pass Down — ask about any section, fee, or feature and get a specific, instant answer.</p>
+              <span className="heyebrow">Help Guide</span>
+              <h1>How Final Pass Down <span className="accent">works, explained.</span></h1>
+              <p>A built-in guide to every section, fee, and feature. Ask a question and Carlos finds the matching answer.</p>
               <div className="hactions">
                 <button className="hbtn primary" onClick={() => inputRef.current?.focus()}>
                   <Send size={15} /> Start a Conversation
@@ -675,12 +618,12 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
           {/* Header */}
           <div className="pg-head">
             <div style={{ minWidth:0 }}>
-              <div className="eyebrow"><Sparkles size={12}/> Your Concierge · Trained on Every Feature</div>
+              <div className="eyebrow"><BookOpen size={12}/> Help Guide · Written Answers</div>
               <h1 className="pg-h1">Ask Carlos</h1>
               <div className="pg-sub">
-                Your always-on guide to Final Pass Down. Ask about any section, contact type, the Activate
-                Legacy Access fee, security, plans, or how to get something done — answers are instant and
-                specific to the platform.
+                A guide to Final Pass Down. Ask about any section, contact type, the Activate Legacy Access
+                fee, security, plans, or how to get something done. Carlos answers from a written guide, not
+                from your account, and isn't a person or an AI.
               </div>
             </div>
             <div className="head-r">
@@ -710,7 +653,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
             <div className="card chatcard">
               <div className="chat-hd">
                 <h3 className="sec-title"><span className="tick"/>Conversation</h3>
-                <div className="chat-status"><span className="d"/> Online</div>
+                <div className="chat-status"><span className="d"/> Help guide</div>
               </div>
               {messagesEl}
               {inputEl}
@@ -736,8 +679,8 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
               <div className="foot">
                 <Info size={16} color="#FFFFFF" style={{ flexShrink:0, marginTop:1 }}/>
                 <div className="ft">
-                  <b>This assistant knows the whole platform.</b> It only explains features and points you to the
-                  right section — it never touches your data. For account-specific help, contact{" "}
+                  <b>Carlos is a written help guide.</b> It explains features and points you to the right
+                  section. It can't see or change your data. For account-specific help, contact{" "}
                   <b>{platformSupport.email || FPD_EMAIL.support}</b>.
                 </div>
               </div>
@@ -753,7 +696,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
     <>
       <style dangerouslySetInnerHTML={{ __html: AI_CSS }} />
       <button className="fpd-ai-launch" onClick={() => setOpen(true)} title="Ask Carlos" aria-label="Ask Carlos">
-        <Sparkles size={22}/>
+        <BookOpen size={22}/>
       </button>
     </>
   );
@@ -772,7 +715,7 @@ export function AIAgent({ pageMode = false }: { pageMode?: boolean }) {
               <div className="hd-title">Carlos</div>
               <div className="hd-status">
                 <span className="d"/>
-                <span>Trained on every FPD feature</span>
+                <span>Help guide · written answers</span>
               </div>
             </div>
           </div>

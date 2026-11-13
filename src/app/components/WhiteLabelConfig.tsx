@@ -466,8 +466,8 @@ export function WhiteLabelConfig() {
               <h3 className="sec-title">Domain Configuration</h3>
               <Field label="Custom Domain" value={config.domain} onChange={v => update({ domain: v })} placeholder="app.yourcompany.com" />
               <div className="dns-box">
-                <div className="dl">DNS RECORD REQUIRED</div>
-                <div className="dv">CNAME {config.domain} → proxy.finalpassdown.com</div>
+                <div className="dl">DNS SETUP</div>
+                <div className="dv">Custom domains are connected by the Final Pass Down team during provisioning. They'll send the exact DNS record to add.</div>
               </div>
               <Field label="Terms of Service URL" value={config.termsUrl} onChange={v => update({ termsUrl: v })} placeholder="https://yourcompany.com/terms" />
               <Field label="Privacy Policy URL" value={config.privacyUrl} onChange={v => update({ privacyUrl: v })} placeholder="https://yourcompany.com/privacy" />

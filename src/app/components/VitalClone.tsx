@@ -160,8 +160,8 @@ export function VitalClone() {
 
           <div className="card pad empty">
             <div className="empty-ico"><Settings2 size={22} /></div>
-            <div className="empty-title">Vital Clone URL not configured</div>
-            <div className="empty-desc">Set VITALCLONE_URL in src/app/components/VitalClone.tsx to the live https:// address. The page will then render Vital Clone inline, with loading, reload and fullscreen controls already wired.</div>
+            <div className="empty-title">Vital Clone isn't available yet</div>
+            <div className="empty-desc">This page opens once Vital Clone is live. Nothing to do on your side.</div>
           </div>
 
           <div className="card pad">

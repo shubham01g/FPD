@@ -177,7 +177,6 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   const freeGb = Math.max(0, total - used);
 
   const docsTotal = docs.length;
-  const docsPending = docs.filter(d => d.status === "pending").length;
   const docCategories = Array.from(new Set(docs.map(d => d.category)));
 
   const legacyContacts = contacts.filter(c => c.type === "legacy");
@@ -241,7 +240,8 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
   // rather than silently landing back on the dashboard.
   const hidden = hiddenPages(platform.flags);
   const statCards = [
-    { label: "Legacy Documents", value: String(docsTotal), sub: `${docsPending} pending review`, icon: <Archive size={16} />, page: "file-cabinet", tone: "warn", dot: WARN },
+    // Uploads have no review step, so "pending review" was never true.
+    { label: "Legacy Documents", value: String(docsTotal), sub: `in ${docCategories.length} folder${docCategories.length === 1 ? "" : "s"}`, icon: <Archive size={16} />, page: "file-cabinet", tone: "good", dot: POS },
     { label: "Legacy Contacts", value: String(legacyContacts.length), sub: `${legacyVerified} verified`, icon: <Users size={16} />, page: "contacts-legacy", tone: "good", dot: POS },
     { label: "Storage Used", value: `${used} GB`, sub: `${pct}% of ${total} GB`, icon: <HardDrive size={16} />, page: "storage-usage", tone: "sky", dot: ACCENT2 },
     { label: "Referral Earnings", value: referralValue, sub: referralSub, icon: <TrendingUp size={16} />, page: "affiliate", tone: "accent", dot: ACCENT },

@@ -203,9 +203,7 @@ function LandingRoute() {
     <div className="w-full" style={{ fontFamily:"var(--font-body)" }}>
       <LandingPage
         onGetStarted={() => navigate("/signup")}
-        onAdminLogin={() => navigate("/admin/login")}
         onPartnerPortal={() => navigate("/partner")}
-        onConciergeLogin={() => navigate("/concierge/login")}
         onApplyWhiteLabel={tier => navigate(`/partner/onboard?tier=${tier}`)}
       />
       {platform.flags.aiAssistant && <AIAgent/>}
@@ -303,6 +301,15 @@ function UserRoute() {
   useEffect(() => {
     if (!authUser) return;
     listSharedOwners().then(o => setHasShared(o.length > 0)).catch(() => setHasShared(false));
+  }, [authUser]);
+
+  // The header shortcut to the admin portal is for admins only; customers
+  // never see it. (The server decides admin access; this only hides a button.)
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    if (!authUser) { setIsAdmin(false); return; }
+    supabase.from("users").select("is_admin").eq("id", authUser.id).maybeSingle()
+      .then(({ data }) => setIsAdmin(Boolean((data as { is_admin?: boolean } | null)?.is_admin)), () => setIsAdmin(false));
   }, [authUser]);
 
   useEffect(() => {
@@ -425,7 +432,7 @@ function UserRoute() {
       <Layout
         currentPage={userPage}
         onNavigate={setUserPage}
-        onGoAdmin={() => navigate("/admin/login")}
+        onGoAdmin={isAdmin ? () => navigate("/admin/login") : undefined}
         onSignOut={() => { signOut(); navigate("/"); }}
         onOpenShared={hasShared ? () => navigate("/access") : undefined}
       >

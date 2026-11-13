@@ -86,9 +86,13 @@ export async function deliverCampaign(campaign: CampaignRow): Promise<DeliveryRe
   if (channel !== "push" && userIds.length > 0) {
     const [{ data: people }, { data: prefs }] = await Promise.all([
       db.from("users").select("id, email, full_name").in("id", userIds),
-      db.from("notification_preferences").select("user_id, email").in("user_id", userIds),
+      db.from("notification_preferences").select("user_id, email, marketing").in("user_id", userIds),
     ]);
-    const optedOut = new Set((prefs ?? []).filter((p: { email: boolean }) => p.email === false).map((p: { user_id: string }) => p.user_id));
+    // Announcements are what Account Settings calls "Marketing & Product
+    // Updates", so either switch off means no email.
+    const optedOut = new Set((prefs ?? [])
+      .filter((p: { email: boolean; marketing: boolean }) => p.email === false || p.marketing === false)
+      .map((p: { user_id: string }) => p.user_id));
     for (const p of (people ?? []).slice(0, 2000) as { id: string; email: string | null; full_name: string | null }[]) {
       if (!p.email || optedOut.has(p.id)) { emailSkipped++; continue; }
       try {
@@ -97,7 +101,7 @@ export async function deliverCampaign(campaign: CampaignRow): Promise<DeliveryRe
           ...noticeEmail({
             name: p.full_name ?? "", heading: String(title).slice(0, 120), category: "announcement",
             paragraphs: [String(message).slice(0, 5000)],
-            footnote: "You can turn these emails off in Account Settings → Notifications.",
+            footnote: "You can turn these emails off in Account Settings → Notifications → Marketing & Product Updates.",
           }),
         });
         emailSent++;

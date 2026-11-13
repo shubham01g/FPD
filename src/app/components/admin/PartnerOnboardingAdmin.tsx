@@ -641,7 +641,7 @@ export function PartnerOnboardingAdmin() {
                             <button
                               onClick={async () => {
                                 const next = !s.unlocked;
-                                if (!next && !window.confirm(`Turn White Label off for ${s.org}? They lose access to White Label Studio until it is turned on again.`)) return;
+                                if (!next && !window.confirm(`Turn White Label off for ${s.org}? This marks their White Label purchase as not active until it is turned on again.`)) return;
                                 try {
                                   await setSaleUnlocked(s, next);
                                   setSales(await getSales());
@@ -689,7 +689,7 @@ export function PartnerOnboardingAdmin() {
               style={{ background:"rgba(91,110,225,0.04)", border:"1px solid rgba(91,110,225,0.15)" }}>
               <AlertCircle size={14} color="#FFFFFF" style={{ marginTop:1, flexShrink:0 }}/>
               <p style={{ color:"#8A9AB8", fontSize:15 }}>
-                Each link includes a one-time token. When a prospect clicks it, the onboarding wizard opens pre-set to that package. Copy and share directly, or use Email Invite.
+                Each link opens the onboarding wizard pre-set to that package. Anyone with the link can use it, so share it directly, or use Email Invite.
               </p>
             </div>
 
@@ -712,7 +712,7 @@ export function PartnerOnboardingAdmin() {
                   <button onClick={() => doCopy(pkg.id)}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold flex-1"
                     style={{ background:copiedId===pkg.id?"rgba(72,187,120,0.12)":`${pkg.color}12`, color:copiedId===pkg.id?"#D99A6B":pkg.color }}>
-                    {copiedId===pkg.id ? <><CheckCircle size={11}/>Copied!</> : <><Copy size={11}/>Copy Unique Link</>}
+                    {copiedId===pkg.id ? <><CheckCircle size={11}/>Copied!</> : <><Copy size={11}/>Copy Package Link</>}
                   </button>
                   <button onClick={() => { setSendPkgId(pkg.id); setShowSend(true); }}
                     className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-semibold"

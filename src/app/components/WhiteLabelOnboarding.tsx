@@ -156,7 +156,7 @@ export function WhiteLabelOnboarding() {
               : <>We've received your application. A member of our white label team will reach out within <strong>1 business day</strong> to confirm payment and begin provisioning "{org.name}".</>}
           </p>
           <p style={{ color:"#8A9AB8", fontSize:17.5, lineHeight:1.8, marginBottom:32 }}>
-            There's nothing you need to log in to yet — we'll set up your branding, domain, and admin access, then send you an invite once your instance is live.
+            Our team sets up your branding, domain, and admin access with you, and emails you when your instance is ready.
           </p>
           <div className="p-5 rounded-2xl mb-6" style={{ ...GLASS, border:"1px solid rgba(72,187,120,0.2)" }}>
             <div style={{ color:"#8A9AB8", fontSize:12.5, ...MONO, marginBottom:6 }}>APPLICATION REFERENCE</div>
@@ -195,7 +195,7 @@ export function WhiteLabelOnboarding() {
             <div className="text-center mb-2">
               <h1 style={{ ...DISPLAY, fontSize:37.5, color:"#E8EDF5", marginBottom:8 }}>Resell Final Pass Down — Powered By You</h1>
               <p style={{ color:"#8A9AB8", fontSize:19, maxWidth:560, margin:"0 auto" }}>
-                No existing Final Pass Down account required. This is a business application — choose the package that fits how many end-user accounts you expect to run under your brand.
+                This is a business application — choose the package that fits how many end-user accounts you expect to run under your brand. To pay by card you'll sign in (or create a free sign-in) so the purchase is tied to you.
               </p>
             </div>
 

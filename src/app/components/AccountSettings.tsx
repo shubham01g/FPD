@@ -949,8 +949,7 @@ export function AccountSettings() {
                 { label:"SMS Notifications",          sub:"Not available yet — text messages are used only for sign-in codes", value:false, set:setNotifSMS },
                 { label:"Push Notifications",         sub:"In-app and device push notifications",                  value:notifPush,           set:setNotifPush },
                 { label:"Storage Alerts",             sub:"Alerts when storage reaches 80%, 90%, and 95%",         value:notifStorageAlerts,  set:setNotifStorage },
-                { label:"Contact Updates",            sub:"When legacy contacts verify their ID or access changes", value:notifContactUpdates, set:setNotifContact },
-                { label:"Marketing & Product Updates",sub:"News about new features and FPD announcements",         value:notifMarketing,      set:setNotifMarketing },
+                { label:"Marketing & Product Updates",sub:"Announcements and news emails from Final Pass Down",    value:notifMarketing,      set:setNotifMarketing },
               ].map(n => (
                 <div key={n.label} className="nrow">
                   <div>

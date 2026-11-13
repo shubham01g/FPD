@@ -17,6 +17,7 @@ import fpdFullLogo from "../../imports/FPD_full_logo.png";
 import { toast } from "sonner";
 import { FPD_EMAIL } from "../utils/fpdEmails";
 import { money, usePlatform } from "../services/platform";
+import { usePlans } from "../utils/planCatalog";
 
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 const DISPLAY: React.CSSProperties = { fontFamily: "var(--font-display)" };
@@ -69,6 +70,9 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
   /* The setup fee as checkout charges it (billing_products "partner_setup",
      via /public/platform). Until it is known, nothing can be paid. */
   const setupFee = usePlatform().prices.partnerSetup;
+  // The earnings example uses a real plan from the live catalog.
+  const examplePlan = usePlans().find(p => p.id === "family_archive");
+  const examplePrice = examplePlan?.priceMonthly ?? 24.99;
   const feeLabel = money(setupFee);
   const { refresh: refreshEntitlement } = useWLEntitlement();
   const [step, setStep] = useState<WizardStep>("overview");
@@ -158,7 +162,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
               <div style={{ color:"#8A9AB8", fontSize:17.5, marginBottom:20 }}>Paid once. No monthly fees. Ever.</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { icon:<Globe size={16}/>,    label:"Custom subdomain" },
+                  { icon:<Globe size={16}/>,    label:"Your referral link" },
                   { icon:<Shield size={16}/>,   label:"Partner dashboard" },
                   { icon:<Zap size={16}/>,      label:"Referral tracking" },
                 ].map(f => (
@@ -196,7 +200,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   { accounts:75,  tier:2, rate:25 },
                   { accounts:150, tier:3, rate:30 },
                 ].map(row => {
-                  const est = Math.round(row.accounts * 24.99 * row.rate / 100);
+                  const est = Math.round(row.accounts * examplePrice * row.rate / 100);
                   return (
                     <div key={row.accounts}>
                       <div style={{ color:"#4A5A7A", fontSize:12.5, ...MONO }}>{row.accounts} ACCOUNTS · TIER {row.tier}</div>
@@ -205,7 +209,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                   );
                 })}
               </div>
-              <p style={{ color:"#4A5A7A", fontSize:12.5, textAlign:"center", marginTop:8 }}>Based on avg Premium plan ($24.99/mo). Actual earnings vary by plan mix.</p>
+              <p style={{ color:"#4A5A7A", fontSize:12.5, textAlign:"center", marginTop:8 }}>Example only: every account on {examplePlan?.name ?? "Legacy Archive"} ({money(examplePrice)}/mo). Actual earnings depend on the plans your referrals choose.</p>
             </div>
 
             <div className="flex justify-end">
@@ -292,11 +296,11 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 <div className="space-y-2 pt-4 border-t" style={{ borderColor:"rgba(91,110,225,0.1)" }}>
                   {[
                     "Partner dashboard with referral tracking",
-                    "Unique referral link + tracking pixel",
-                    "Custom subdomain (yourname.finalpassdown.com)",
-                    "Volume-based commission tiers (20% → 25% → 30%)",
-                    "Monthly auto-payouts via ACH",
-                    "Marketing kit & onboarding materials",
+                    "Your own referral link and code",
+                    "Commission on every referred account, for as long as it stays",
+                    "Volume-based commission tiers (20% → 25% → 30%), raised automatically",
+                    "Earnings tracked on your partner dashboard",
+                    "Payouts reviewed and sent by the Final Pass Down team",
                   ].map(f => (
                     <div key={f} className="flex items-center gap-2">
                       <CheckCircle size={12} color="#FFFFFF"/>

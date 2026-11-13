@@ -876,12 +876,12 @@ function Affiliates({ onStart }: { onStart: () => void }) {
   const { data: planData } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
   const exampleRate = Number(planData?.plans?.find(p => p.id === "family_archive")?.price_monthly ?? 24.99);
   const tiers = [
-    { tier: "Tier 1", range: "5–24 active accounts", rate: "20%", note: "12-month cap per referral" },
-    { tier: "Tier 2", range: "25–74 active accounts", rate: "25%", note: "12-month cap per referral" },
-    { tier: "Tier 3", range: "75+ active accounts", rate: "30%", note: "12-month cap per referral" },
+    { tier: "Tier 1", range: "Up to 24 active referrals", rate: "20%", note: "12-month cap per referral" },
+    { tier: "Tier 2", range: "25–74 active referrals", rate: "25%", note: "12-month cap per referral" },
+    { tier: "Tier 3", range: "75+ active referrals", rate: "30%", note: "12-month cap per referral" },
   ];
   const benefits: [string, string][] = [
-    ["Commission paid monthly", "Commissions hit your account on the 1st of each month"],
+    ["Commission tracked for you", "Every payment a referral makes adds to your balance on your dashboard"],
     ["12-month earning window", "Each referral earns you commission for their full first 12 months"],
     ["Automatic tier upgrades", "Hit 25+ referrals and your rate jumps automatically"],
     ["No cap on referrals", "Refer as many people as you want — more referrals, more income"],
@@ -899,7 +899,7 @@ function Affiliates({ onStart }: { onStart: () => void }) {
             Earn Up to <span style={{ color: "#6FAE8B" }}>30%</span><br />Referring Friends
           </h2>
           <p className="fpd-seq" style={{ color: SOFT, fontSize: 20, lineHeight: 1.85, marginBottom: 28, ...seq(2) }}>
-            Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a monthly commission for 12 months — automatically, no invoices needed.
+            Share your unique affiliate link. Every time someone signs up through your link and stays subscribed, you earn a commission on what they pay for 12 months. It's tracked for you, with no invoices to send.
           </p>
           <div className="flex flex-col gap-3 mb-8">
             {benefits.map(([bold, rest], i) => (
