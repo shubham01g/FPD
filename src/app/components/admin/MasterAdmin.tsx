@@ -425,13 +425,13 @@ function OnboardUserModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   { label:"Name",    value:form.name },
                   { label:"Email",   value:form.email },
                   { label:"Phone",   value:form.phone || "—" },
-                  // A paid plan is only given free (comped) when the fee is waived;
-                  // otherwise the account starts on Starter and buys its own plan.
-                  { label:"Package", value: form.subscriptionWaived || selectedPlan.id === "starter"
-                    ? `${selectedPlan.name} · ${selectedPlan.storage}${form.subscriptionWaived && selectedPlan.id !== "starter" ? " (free — waived)" : ""}`
-                    : `Starts on Starter — they choose ${selectedPlan.name} at checkout` },
-                  // Without a waiver the account starts on free Starter and buys its own plan by card.
-                  { label:"Monthly", value:form.subscriptionWaived ? "$0.00 (WAIVED)" : "Starter; they pay by card" },
+                  // A plan is only given without payment when an admin comps it (fee
+                  // waived). Otherwise the account has no plan until it pays by card
+                  // (there is no free plan, migration 059).
+                  { label:"Package", value: form.subscriptionWaived
+                    ? `${selectedPlan.name} · ${selectedPlan.storage} (comped by admin)`
+                    : `No plan until they pay — they choose ${selectedPlan.name} or another plan at checkout` },
+                  { label:"Monthly", value:form.subscriptionWaived ? "Comped (fee waived)" : `$${selectedPlan.price.toFixed(2)}/mo, paid by card` },
                   { label:"Waiver",  value:form.subscriptionWaived ? (WAIVE_REASONS.find(r=>r.id===form.waiveReason)?.label ?? "—") : "None" },
                   { label:"White Glove", value:form.whiteGlove ? "✓ Assigned" : "No" },
                   { label:"Welcome Email", value:form.sendWelcome ? "Will be sent" : "Skip" },
@@ -524,7 +524,7 @@ function buildTopMetrics(
    ───────────────────────────────────────────────────────────────── */
 
 type NotifType = "marketing" | "feature" | "update" | "alert" | "reminder";
-type NotifTarget = "all" | "starter" | "foundation" | "family_archive" | "legacy_pro" | "legacy_vault" | "white_glove";
+type NotifTarget = "all" | "none" | "foundation" | "family_archive" | "legacy_pro" | "legacy_vault" | "white_glove";
 
 interface SentNotification {
   id: string; title: string; body: string; type: NotifType; target: NotifTarget;
@@ -543,7 +543,7 @@ const NOTIF_TYPE_COLORS: Record<NotifType, string> = {
    no longer exist ("essential"/"premium"/"enterprise"), so three segments
    silently rendered as undefined. */
 const TARGET_LABELS: Record<NotifTarget, string> = {
-  all:"All Users", starter:"Starter", foundation:"Foundation",
+  all:"All Users", none:"No plan yet", foundation:"Foundation",
   family_archive:"Legacy Archive", legacy_pro:"Legacy Pro",
   legacy_vault:"Legacy Vault", white_glove:"White Glove Clients",
 };
@@ -553,7 +553,7 @@ const TARGET_LABELS: Record<NotifTarget, string> = {
 function targetCounts(usersByPlan: Record<string, number>, totalUsers: number): Record<NotifTarget, number | null> {
   return {
     all: totalUsers,
-    starter: usersByPlan["starter"] ?? 0,
+    none: usersByPlan["none"] ?? 0,
     foundation: usersByPlan["foundation"] ?? 0,
     family_archive: usersByPlan["family_archive"] ?? 0,
     legacy_pro: usersByPlan["legacy_pro"] ?? 0,
@@ -1238,7 +1238,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
           {/* ── What the schema can actually answer ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatChip label="Total Users" value={overviewData ? overviewData.totalUsers.toLocaleString() : "—"} sub="All accounts" color="#E8EDF5"/>
-            <StatChip label="Plans in Use" value={planRows.length} sub="Plans with at least one account (Starter included)" color="#6E90C9"/>
+            <StatChip label="Plans in Use" value={planRows.length} sub="Paid plans with at least one account" color="#6E90C9"/>
             <StatChip label="Total Data Stored" value={totals ? `${totals.totalStorageGb.toLocaleString()} GB` : "—"} sub="Current billing period" color="#6FAE8B"/>
             <StatChip label="Avg per User" value={totals ? `${totals.avgPerUserGb} GB` : "—"} sub="Current billing period" color="#D99A6B"/>
           </div>
@@ -1500,7 +1500,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                   <label style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>PLAN</label>
                   <select value={userPlanFilter} onChange={e=>setUserPlanFilter(e.target.value)} style={{ width:"100%", marginBottom:10, background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", borderRadius:8, padding:"6px 8px", fontSize:15 }}>
                     <option value="">All Plans</option>
-                    {["starter","foundation","family_archive","legacy_pro","legacy_vault"].map(p=>(
+                    {["none","foundation","family_archive","legacy_pro","legacy_vault"].map(p=>(
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>

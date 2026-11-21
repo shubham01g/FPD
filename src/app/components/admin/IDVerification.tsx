@@ -24,7 +24,7 @@ interface RecordExtra {
 }
 
 const PLAN_LABEL: Record<string, string> = {
-  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
+  none: "No plan", foundation: "Foundation", family_archive: "Legacy Archive",
   legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
 };
 const pretty = (s: string | null | undefined) => s ? s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "—";

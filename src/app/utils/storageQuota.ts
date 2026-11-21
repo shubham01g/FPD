@@ -1,12 +1,13 @@
 /* Upload limits are decided by the database (migration 040): the plan's
    allowance, the overage limit, and whether overage is blocked after a
-   declined payment. The app asks first (storage_upload_check) so it can say
+   declined payment, and whether the account has a plan at all (059). The
+   app asks first (storage_upload_check) so it can say
    what to do; the insert trigger refuses anything that slips past, with an
    error starting "STORAGE_QUOTA:<reason>". */
 import { toast } from "sonner";
 import { supabase } from "../services/supabase";
 
-export type QuotaReason = "ok" | "limit_reached" | "cap_reached" | "overage_blocked";
+export type QuotaReason = "ok" | "no_plan" | "limit_reached" | "cap_reached" | "overage_blocked";
 
 export interface QuotaCheck {
   allowed: boolean;
@@ -26,6 +27,11 @@ export async function checkUpload(bytes: number): Promise<QuotaCheck | null> {
 }
 
 const COPY: Record<Exclude<QuotaReason, "ok">, { title: string; body: string; action: string }> = {
+  no_plan: {
+    title: "Choose a plan to upload",
+    body: "Uploads need an active plan. Pick a plan to keep adding to your vault; nothing stored is lost.",
+    action: "See plans",
+  },
   limit_reached: {
     title: "Your plan's storage is full",
     body: "This plan doesn't include extra storage. Upgrade for more room, or free up space.",

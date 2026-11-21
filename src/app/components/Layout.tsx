@@ -140,7 +140,7 @@ const SUCCESS  = "#48BB78";
 const WARN     = "#F6AD55";
 
 const PLAN_LABEL: Record<string, string> = {
-  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
+  none: "No plan", foundation: "Foundation", family_archive: "Legacy Archive",
   legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
 };
 

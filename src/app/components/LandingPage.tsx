@@ -718,17 +718,15 @@ interface DBPlan { id: string; name: string; price_monthly: number; price_annual
  * it stays here, keyed by the same plan id as subscription_plans, and is merged with the
  * live pricing/storage/contacts/overage numbers fetched from /public/plans. */
 const PLAN_META: Record<string, Pick<Plan, "color" | "popular" | "features">> = {
-  starter: { color: "#D99A6B", popular: false, features: ["Legacy Storage", "Legacy Contact", "Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
   foundation: { color: "#6E90C9", popular: false, features: ["Legacy Storage", "Legacy Contacts", "Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
   family_archive: { color: "#A98CC7", popular: true, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
   legacy_pro: { color: "#A98CC7", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
   legacy_vault: { color: "#ED8936", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
 };
 
-/* Same 5 plans, same numbers, kept as a fallback so the pricing page still
+/* Same 4 plans, same numbers, kept as a fallback so the pricing page still
  * renders if the backend isn't reachable (no project connected yet, etc). */
 const FALLBACK_PLANS: Plan[] = [
-  { id: "starter", name: "Starter", price: 0, priceAnnual: 0, storage: "1 GB", contacts: 1, overage: 0, ...PLAN_META.starter },
   { id: "foundation", name: "Foundation", price: 9.99, priceAnnual: 95.90, storage: "50 GB", contacts: 3, overage: 0.40, ...PLAN_META.foundation },
   { id: "family_archive", name: "Legacy Archive", price: 24.99, priceAnnual: 239.90, storage: "250 GB", contacts: -1, overage: 0.40, ...PLAN_META.family_archive },
   { id: "legacy_pro", name: "Legacy Pro", price: 49.99, priceAnnual: 479.90, storage: "500 GB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_pro },
@@ -740,7 +738,6 @@ function formatStorage(gb: number): string {
 }
 
 function Pricing({ onStart }: { onStart: () => void }) {
-  const { starterTrialDays } = usePlatform();
   const [annual, setAnnual] = useState(false);
   // Disaster Recovery add-on prices (cents), from the catalog.
   const products = useProducts();
@@ -748,8 +745,10 @@ function Pricing({ onStart }: { onStart: () => void }) {
   const drYear = products.dr_addon_year?.amountCents ?? 4788;
 
   const { data } = useAdminFetch(() => publicApi.get<{ plans: DBPlan[] }>("/plans"), []);
-  const PLANS: Plan[] = data?.plans?.length
-    ? data.plans.map(p => ({
+  // Only plans that are sold: there is no free plan (migration 059).
+  const sold = (data?.plans ?? []).filter(p => Number(p.price_monthly) > 0);
+  const PLANS: Plan[] = sold.length
+    ? sold.map(p => ({
         id: p.id, name: p.name, price: Number(p.price_monthly), priceAnnual: Number(p.price_annual),
         storage: formatStorage(p.storage_gb), contacts: p.max_contacts, overage: Number(p.overage_rate),
         ...(PLAN_META[p.id] ?? { color: "#6E90C9", popular: false, features: [] }),
@@ -760,7 +759,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
     <>
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
       kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
-      sub={`Start free for ${starterTrialDays} days. Paid plans include their storage; anything above it is $${(PLANS.find(p => p.overage > 0)?.overage ?? 0.4).toFixed(2)}/GB (the peak each month), never more than the monthly limit you set.`} />
+      sub={`Pick a plan and pay by card, monthly or yearly. Every plan includes its storage; anything above it is $${(PLANS.find(p => p.overage > 0)?.overage ?? 0.4).toFixed(2)}/GB (the peak each month), never more than the monthly limit you set.`} />
     <section id="pricing" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-12">
@@ -770,19 +769,11 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </button>
           <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save up to 20%</span></span>
         </div>
-        {/* Plan cards: only what differs between plans. 5 across on wide screens,
-            3 + 2 (centred) on laptops, 2 on tablets, 1 on phones. Every card has the
-            same rows in the same order so prices, rows and buttons line up. */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-5 gap-5 pt-3 fpd-stagger">
-          {PLANS.map((plan, i) => {
-            // Each card spans 2 of 4 (tablet) / 2 of 6 (laptop) columns; a short last row is
-            // centred by pushing its first card over one column.
-            const n = PLANS.length;
-            const place = [
-              "sm:col-span-2 xl:col-span-1 xl:col-start-auto",
-              n % 2 === 1 && i === n - 1 ? "sm:col-start-2" : "",
-              n % 3 === 2 && i === n - 2 ? "lg:col-start-2" : n % 3 === 1 && i === n - 1 ? "lg:col-start-3" : "lg:col-start-auto",
-            ].join(" ");
+        {/* Plan cards: only what differs between plans. 4 across on wide screens,
+            2 + 2 on tablets and laptops, 1 on phones. Every card has the same rows in
+            the same order so prices, rows and buttons line up. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 pt-3 fpd-stagger">
+          {PLANS.map((plan) => {
             const contacts = plan.contacts === -1 ? "Unlimited" : String(plan.contacts);
             const priority = plan.features.includes("Priority Support");
             const rows: { label: string; value: string; accent?: boolean }[] = [
@@ -791,12 +782,10 @@ function Pricing({ onStart }: { onStart: () => void }) {
               { label: "Overage", value: plan.overage > 0 ? `$${plan.overage.toFixed(2)}/GB` : "Stops at limit", accent: plan.overage > 0 },
               { label: "Support", value: priority ? "Priority" : "Email" },
             ];
-            const note = plan.price === 0
-              ? `${starterTrialDays}-day trial · no card needed`
-              : annual ? `Billed $${plan.priceAnnual.toFixed(2)}/yr` : "Billed monthly";
+            const note = annual ? `Billed $${plan.priceAnnual.toFixed(2)}/yr` : "Billed monthly";
             return (
               <div key={plan.id}
-                className={`relative rounded-2xl flex flex-col glow-surface fpd-hover-lift p-6 ${place}`}
+                className="relative rounded-2xl flex flex-col glow-surface fpd-hover-lift p-6"
                 style={{ background: plan.popular ? "linear-gradient(180deg, rgba(126,107,216,0.10), rgba(16,23,40,0) 45%), #101728" : CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none", containerType: "inline-size" }}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap", letterSpacing: "0.08em" }}>MOST POPULAR</div>
@@ -805,11 +794,11 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
                 <div className="flex items-baseline gap-1 mt-4 whitespace-nowrap">
                   <span style={{ ...DISPLAY, fontSize: "clamp(30px, 18cqi, 44px)", lineHeight: 1, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>
-                    {plan.price === 0 ? "Free" : `$${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}`}
+                    {`$${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}`}
                   </span>
-                  {plan.price > 0 && <span style={{ color: MUTED, fontSize: 15 }}>/mo</span>}
+                  <span style={{ color: MUTED, fontSize: 15 }}>/mo</span>
                 </div>
-                <div className="mt-2 truncate" style={{ color: plan.price === 0 ? plan.color : MUTED, fontSize: 13.5 }}>{note}</div>
+                <div className="mt-2 truncate" style={{ color: MUTED, fontSize: 13.5 }}>{note}</div>
 
                 <dl className="mt-5 mb-6 flex-1" style={{ borderTop: "1px solid rgba(91,110,225,0.14)" }}>
                   {rows.map(r => (
@@ -822,7 +811,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
 
                 <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold text-sm fpd-btn-lift"
                   style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.25)" }}>
-                  {plan.price === 0 ? "Start Free Trial" : "Get Started"}
+                  Get Started
                 </button>
               </div>
             );
@@ -1145,7 +1134,7 @@ function WhiteGlove({ onStart }: { onStart: () => void }) {
                 {perfectFor.map(p => (<div key={p} style={{ color: SOFT, fontSize: 16 }}>· {p}</div>))}
               </div>
               <div style={{ ...DISPLAY, color: "#A98CC7", fontSize: 32.5, fontWeight: 700, marginBottom: 4 }}>Sign Up, Then We Call You.</div>
-              <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>Create your free account and choose White Glove. Once the setup fee is paid, a specialist calls within 1 business day.</div>
+              <div style={{ color: MUTED, fontSize: 16, marginBottom: 20 }}>Create your account and choose White Glove. Once the setup fee is paid, a specialist calls within 1 business day.</div>
               <div className="flex justify-center gap-4 mb-5">
                 <div className="px-4 py-2 rounded-xl" style={{ background: "rgba(126,107,216,0.12)", border: `1px solid ${vBorder}` }}>
                   <div style={{ ...DISPLAY, color: TEXT, fontSize: 22.5, fontWeight: 700 }}>{usd(wgSetup)}</div>
@@ -1351,7 +1340,7 @@ function Help() {
   const faqs = [
     { q: "Who can access my vault?", a: "Only you and the contacts you specifically designate. Legacy Contacts must pass government-ID verification before any access is granted. You control exactly what each contact can see and when." },
     { q: "What happens to my data if I cancel?", a: "Your data stays in your account after you cancel, so you can come back and pick up where you left off. To have your account and everything in it permanently deleted, write to our support team and we will do it for you." },
-    { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. On paid plans, storage above your allowance is billed per GB at your plan's overage rate (shown on each plan), never more than the monthly limit you set. Starter has no overage — uploads stop at its limit." },
+    { q: "How does storage metering work?", a: "Every file you upload is counted toward your monthly storage allowance in gigabytes. Unused storage does not carry forward — it resets each billing cycle. On paid plans, storage above your allowance is billed per GB at your plan's overage rate (shown on each plan), never more than the monthly limit you set." },
     { q: "What happens after you pass away?", a: "Your designated Legacy Contact initiates the release process. They submit an end of life certification, complete identity verification, and our compliance team reviews the request — usually within 2–3 business days — before granting access." },
     { q: "Is Final Pass Down available on mobile?", a: "Yes. Final Pass Down is a Progressive Web App (PWA) that works on any device without an app store download." },
     { q: "Can I update my documents anytime?", a: "Yes. You can add, replace, or delete any document at any time. Your contacts only ever receive the most current version of your vault when access is triggered." },

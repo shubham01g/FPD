@@ -77,7 +77,7 @@ interface ClaimToken {
 const NO_SECURITY: ClaimSecurity = { required: false, word: false, question: null, passed: true, locked: false, attemptsLeft: 5 };
 
 const PLAN_LABEL: Record<string, string> = {
-  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
+  none: "No plan", foundation: "Foundation", family_archive: "Legacy Archive",
   legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
 };
 

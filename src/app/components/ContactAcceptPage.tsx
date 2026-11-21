@@ -4,7 +4,7 @@
  *
  * Accepting links the contact row to the signed-in Final Pass Down login, so
  * the person named can later open what was shared at /access. Signed out, the
- * page offers sign in or a free sign-up and comes back here afterwards.
+ * page offers sign in or sign-up and comes back here afterwards.
  */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -38,7 +38,7 @@ const CSS = `
 const PROBLEM_TEXT: Record<InviteProblem, { title: string; body: string }> = {
   invalid:      { title: "This invite link isn't valid", body: "It may have been copied incompletely, or a newer invite replaced it. Open the most recent email, or ask the person who named you to send the invite again." },
   expired:      { title: "This invite has expired", body: "Invite links work for 30 days. Ask the person who named you to send the invite again from their Contacts page." },
-  own_account:  { title: "This is your own account", body: "You're signed in to the account that sent this invite. Sign out, then sign in as the person who was invited (or create their free sign-in)." },
+  own_account:  { title: "This is your own account", body: "You're signed in to the account that sent this invite. Sign out, then sign in as the person who was invited (or create their sign-in)." },
   linked_other: { title: "Already accepted on another sign-in", body: "This invitation was accepted by a different Final Pass Down sign-in. If that wasn't you, contact Final Pass Down support." },
 };
 
@@ -82,9 +82,9 @@ export function ContactAcceptPage({ token }: { token: string }) {
       <>
         {icon(ACCENT, <LogIn size={22} />)}
         <h2>Accept your invitation</h2>
-        <p>You were named as a trusted contact on Final Pass Down. Sign in, or create a free sign-in, to connect this invitation to you. You won't be asked to pay.</p>
+        <p>You were named as a trusted contact on Final Pass Down. Sign in, or create a sign-in, to connect this invitation to you. You won't be asked to pay.</p>
         <button className="go" onClick={() => navigate(`/login?next=${here}`)}><LogIn size={16} /> Sign in</button>
-        <button className="go alt" onClick={() => navigate(`/signup?next=${here}`)}><UserPlus size={16} /> Create a free sign-in</button>
+        <button className="go alt" onClick={() => navigate(`/signup?next=${here}`)}><UserPlus size={16} /> Create a sign-in</button>
         <p style={{ fontSize: 13.5, margin: "8px 0 0" }}>If sign-up asks you to confirm your email, open this invite link again afterwards.</p>
       </>
     );

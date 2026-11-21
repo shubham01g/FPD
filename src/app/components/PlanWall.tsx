@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { AlertTriangle, Clock, CreditCard, LogOut, RotateCcw, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, CreditCard, LogOut, RotateCcw, Shield, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "../context/DemoContext";
-import { usePlatform } from "../services/platform";
 import { billing, type Interval } from "../services/billing";
 import { annualSavingPct, formatPrice, formatStorage, usePlans } from "../utils/planCatalog";
 import { CheckoutConsentModal, type Purchase } from "./billing/CheckoutConsentModal";
@@ -10,30 +9,8 @@ import { CheckoutConsentModal, type Purchase } from "./billing/CheckoutConsentMo
 const TEXT   = "#EFF2F9";
 const MUTED  = "#A3ADC9";
 const ACCENT = "#5B6EE1";
-const WARN   = "#D9A55E";
 const NEG    = "#D06B6B";
 const POS    = "#5FBE91";
-
-/** Thin strip shown above every page while an account is still inside its
- *  14 Starter days. */
-export function StarterCountdownBanner({ daysLeft, onUpgrade }: { daysLeft: number; onUpgrade: () => void }) {
-  const { starterTrialDays } = usePlatform();
-  return (
-    <div className="flex items-center justify-between gap-3 flex-wrap px-5 py-2.5"
-      style={{ background: "rgba(217,165,94,0.1)", borderBottom: "1px solid rgba(217,165,94,0.25)" }}>
-      <div className="flex items-center gap-2" style={{ color: WARN, fontSize: 15 }}>
-        <Clock size={14}/>
-        <span>
-          Starter plan: <strong>{daysLeft} day{daysLeft === 1 ? "" : "s"} left</strong>. Starter is free for {starterTrialDays} days, then a paid plan is required.
-        </span>
-      </div>
-      <button onClick={onUpgrade} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
-        style={{ background: "rgba(217,165,94,0.16)", color: WARN, fontSize: 14, fontWeight: 600, border: "1px solid rgba(217,165,94,0.3)" }}>
-        <TrendingUp size={13}/> Choose a plan
-      </button>
-    </div>
-  );
-}
 
 /** Strip shown while a renewal payment is failing and Stripe is retrying. */
 export function PastDueBanner() {
@@ -58,30 +35,39 @@ export function PastDueBanner() {
   );
 }
 
-/** Replaces the whole portal when the account has no plan to use: the 14
- *  Starter days are up ("starter"), or a paid plan ended — cancelled, or the
- *  card kept failing ("cancelled"). Everything stored is kept either way. */
-export function StarterUpgradeWall({ onSignOut, reason = "starter" }: { onSignOut: () => void; reason?: "starter" | "cancelled" }) {
+/** Replaces the whole portal when the account has no plan to use: it hasn't
+ *  bought one yet ("choose"), or a paid plan ended — cancelled, or the card
+ *  kept failing ("cancelled"). There is no free plan (migration 059), so the
+ *  vault opens only once Stripe confirms a payment or an admin comps a plan.
+ *  Everything stored is kept. Someone who is also a Legacy/Guardian Contact
+ *  can still open "Shared with me", which never needs a plan. */
+export function PlanWall({ onSignOut, reason = "choose", onOpenShared }: {
+  onSignOut: () => void;
+  reason?: "choose" | "cancelled";
+  onOpenShared?: () => void;
+}) {
   const { user } = useDemo();
-  const { starterTrialDays } = usePlatform();
   const [interval, setBillingInterval] = useState<Interval>("month");
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const plans = usePlans().filter(p => p.billable);
-  const first = user.name ? `${user.name.split(" ")[0]}, everything` : "Everything";
+  const firstName = user.name ? user.name.split(" ")[0] : "";
   const bestSaving = Math.max(0, ...plans.map(annualSavingPct));
+  const choosing = reason === "choose";
 
   return (
     <div className="size-full overflow-y-auto" style={{ background: "#070A12", fontFamily: "var(--font-body)" }}>
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 16px" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div className="flex items-center justify-center gap-2" style={{ color: reason === "starter" ? WARN : NEG, fontSize: 14, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", marginBottom: 12 }}>
-            {reason === "starter" ? <><Clock size={14}/> STARTER PLAN ENDED</> : <><RotateCcw size={14}/> PLAN ENDED</>}
+          <div className="flex items-center justify-center gap-2" style={{ color: choosing ? ACCENT : NEG, fontSize: 14, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", marginBottom: 12 }}>
+            {choosing ? <><Shield size={14}/> CHOOSE YOUR PLAN</> : <><RotateCcw size={14}/> PLAN ENDED</>}
           </div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 34, color: TEXT, marginBottom: 10 }}>
-            {reason === "starter" ? `Your ${starterTrialDays} free days on Starter are up` : "Reactivate your vault"}
+            {choosing ? `${firstName ? `Welcome, ${firstName}. ` : ""}Choose a plan to open your vault` : "Reactivate your vault"}
           </h1>
           <p style={{ color: MUTED, fontSize: 17, lineHeight: 1.6, maxWidth: 620, margin: "0 auto" }}>
-            {first} you stored is safe. Choose a plan to keep using your vault.
+            {choosing
+              ? "Every plan includes the full vault. Pay by card; you can change or cancel any time in Usage & Billing."
+              : `${firstName ? `${firstName}, everything` : "Everything"} you stored is safe. Choose a plan to keep using your vault.`}
           </p>
         </div>
 
@@ -122,7 +108,12 @@ export function StarterUpgradeWall({ onSignOut, reason = "starter" }: { onSignOu
           })}
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 28 }}>
+        <div className="flex items-center justify-center gap-6 flex-wrap" style={{ marginTop: 28 }}>
+          {onOpenShared && (
+            <button onClick={onOpenShared} className="inline-flex items-center gap-2" style={{ color: TEXT, fontSize: 15 }}>
+              <Users size={14}/> Open what's shared with me
+            </button>
+          )}
           <button onClick={onSignOut} className="inline-flex items-center gap-2" style={{ color: MUTED, fontSize: 15 }}>
             <LogOut size={14}/> Sign out
           </button>
