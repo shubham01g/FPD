@@ -582,7 +582,7 @@ function AddClientModal({ specialists, onClose, onAdded }: { specialists: Return
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-2xl" style={{ background:"rgba(72,187,120,0.06)", border:"1px solid rgba(72,187,120,0.2)" }}>
-            <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee <span style={{ color:"#8A9AB8", fontSize:13 }}>(comps their plan free; needs Subscription edit access)</span></span>
+            <span style={{ color:"#E8EDF5", fontSize:16 }}>Waive subscription fee <span style={{ color:"#8A9AB8", fontSize:13 }}>(comps their plan, no card charged; needs Subscription edit access)</span></span>
             <button onClick={() => setSubscriptionWaived(v => !v)} style={{ color:subscriptionWaived?"#D99A6B":"#8A9AB8" }}>
               {subscriptionWaived ? <CheckCircle size={20}/> : <div style={{ width:20, height:20, borderRadius:"50%", border:"2px solid #8A9AB8" }}/>}
             </button>

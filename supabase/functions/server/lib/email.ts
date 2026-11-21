@@ -315,8 +315,8 @@ export function contactInviteEmail(o: {
     ? `A Legacy Contact is the person trusted to receive access to their vault after their passing. Nothing is shared with you today.`
     : `A Guardian Contact is someone trusted with view-only access to the folders they choose to share, such as medical or household records.`;
   const next = o.type === "legacy"
-    ? `Accept the invitation by signing in to ${APP_NAME}, or creating a free sign-in. ${o.ownerName} may also ask you for a government-issued photo ID so our team can verify your identity ahead of time. If the time comes, your access opens on that same sign-in.`
-    : `Accept the invitation by signing in to ${APP_NAME}, or creating a free sign-in. Once our team has verified you, what ${o.ownerName} shared appears under "Shared with me".`;
+    ? `Accept the invitation by signing in to ${APP_NAME}, or creating a sign-in. ${o.ownerName} may also ask you for a government-issued photo ID so our team can verify your identity ahead of time. If the time comes, your access opens on that same sign-in.`
+    : `Accept the invitation by signing in to ${APP_NAME}, or creating a sign-in. Once our team has verified you, what ${o.ownerName} shared appears under "Shared with me".`;
   const closing = `This link is unique to you and works for ${o.days} days. If you don't know ${o.ownerName}, you can ignore this email.`;
   return {
     subject: `${o.ownerName} named you as their ${role} — ${APP_NAME}`,
@@ -341,7 +341,7 @@ export function accessLiveEmail(o: {
 }): Omit<EmailMessage, "to"> {
   const lead = `Your Legacy Contact access to ${o.ownerName}'s ${APP_NAME} vault is now open. You can view what they left for you until ${o.until}.`;
   const how = o.needsAccept
-    ? `Open the link below, then sign in to ${APP_NAME} or create a free sign-in. That connects your access to your sign-in, and from then on it is under "Shared with me".`
+    ? `Open the link below, then sign in to ${APP_NAME} or create a sign-in. That connects your access to your sign-in, and from then on it is under "Shared with me".`
     : `Sign in to ${APP_NAME} with your usual sign-in and open "Shared with me".`;
   const closing = "Saved passwords stay encrypted with the owner's own passphrase and can't be shown yet. Everything else is view-only.";
   return {

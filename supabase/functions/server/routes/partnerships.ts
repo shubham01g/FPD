@@ -59,7 +59,7 @@ partnerships.post("/", async (c) => {
     const paragraphs = [
       `You're invited to join the Final Pass Down Partner Program on behalf of ${String(organizationName).trim()}.`,
       ...(note?.trim() ? [String(note).trim().slice(0, 2000)] : []),
-      "Open the link below to see how the program works, sign in (or create a free sign-in), and pay the one-time setup fee. Your partner dashboard and referral link go live as soon as it's paid.",
+      "Open the link below to see how the program works, sign in (or create a sign-in), and pay the one-time setup fee. Your partner dashboard and referral link go live as soon as it's paid.",
     ];
     try {
       await sendEmail({

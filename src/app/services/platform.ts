@@ -3,7 +3,6 @@
    works before sign-in (the signup page needs it too). */
 import { publicApi } from "./publicApi";
 import { useAdminFetch } from "../hooks/useAdminFetch";
-import { STARTER_PLAN_DAYS } from "../utils/starterPlan";
 
 export interface PlatformFlags {
   publicSignup: boolean;
@@ -36,8 +35,6 @@ export interface PlatformState {
   maintenance: boolean;
   maintenanceMsg: string;
   flags: PlatformFlags;
-  /** How long an account may stay on Starter (Admin → Subscription Config). */
-  starterTrialDays: number;
   /** The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page. */
   continuationFee: { amount: number; months: number };
   /** Add-on prices from the billing catalog (USD); null = not set. */
@@ -77,14 +74,13 @@ export function hiddenPages(flags: PlatformFlags): Set<string> {
 
 export function usePlatform(): PlatformState {
   const { data, loading } = useAdminFetch(
-    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; starterTrialDays?: number; continuationFee?: { amount: number; months: number }; prices?: Partial<PlatformPrices>; support?: { email: string; phone: string } }>("/platform"),
+    () => publicApi.get<{ maintenance: boolean; maintenanceMsg: string; flags: Partial<PlatformFlags>; continuationFee?: { amount: number; months: number }; prices?: Partial<PlatformPrices>; support?: { email: string; phone: string } }>("/platform"),
     [],
   );
   return {
     maintenance: data?.maintenance ?? false,
     maintenanceMsg: data?.maintenanceMsg ?? "",
     flags: { ...DEFAULT_FLAGS, ...(data?.flags ?? {}) },
-    starterTrialDays: data?.starterTrialDays && data.starterTrialDays > 0 ? data.starterTrialDays : STARTER_PLAN_DAYS,
     continuationFee: data?.continuationFee && data.continuationFee.amount > 0 ? data.continuationFee : { amount: 199, months: 24 },
     prices: { ...NO_PRICES, ...(data?.prices ?? {}) },
     support: { email: data?.support?.email ?? "", phone: data?.support?.phone ?? "" },

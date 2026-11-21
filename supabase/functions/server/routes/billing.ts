@@ -234,8 +234,8 @@ billing.post("/checkout/addon", async (c) => {
   const account = await loadAccount(user.id);
   if (!account) return c.json({ error: "Account not found" }, 404);
   if (account.deceased_at) return c.json({ error: "This account is frozen" }, 403);
-  // A paid or comped plan (or one from before billing) — not Starter, not cancelled.
-  if (account.plan === "starter" || account.plan_status === "cancelled") {
+  // A paid or comped plan — not an account with no plan, not a cancelled one.
+  if (account.plan === "none" || account.plan_status === "cancelled") {
     return c.json({ error: "Disaster Recovery needs a paid plan. Choose a plan first." }, 409);
   }
   const { data: dr } = await adminClient().from("disaster_recovery_state").select("addon_active").eq("user_id", user.id).maybeSingle();

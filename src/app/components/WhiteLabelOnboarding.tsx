@@ -195,7 +195,7 @@ export function WhiteLabelOnboarding() {
             <div className="text-center mb-2">
               <h1 style={{ ...DISPLAY, fontSize:37.5, color:"#E8EDF5", marginBottom:8 }}>Resell Final Pass Down — Powered By You</h1>
               <p style={{ color:"#8A9AB8", fontSize:19, maxWidth:560, margin:"0 auto" }}>
-                This is a business application — choose the package that fits how many end-user accounts you expect to run under your brand. To pay by card you'll sign in (or create a free sign-in) so the purchase is tied to you.
+                This is a business application — choose the package that fits how many end-user accounts you expect to run under your brand. To pay by card you'll sign in (or create a sign-in) so the purchase is tied to you.
               </p>
             </div>
 
@@ -343,7 +343,7 @@ export function WhiteLabelOnboarding() {
               <div className="rounded-2xl p-6 space-y-3" style={GLASS}>
                 <div style={{ color:"#8A9AB8", fontSize:14, ...MONO }}>PAYMENT — STRIPE SECURE CHECKOUT</div>
                 <p style={{ color:"#C7D0E3", fontSize:16, lineHeight:1.7 }}>You'll pay on Stripe's secure page; Final Pass Down never sees your card number.</p>
-                {!session && <p style={{ color:"#F6AD55", fontSize:15 }}>Sign in or create a free Final Pass Down account first, so we can link the purchase to you.</p>}
+                {!session && <p style={{ color:"#F6AD55", fontSize:15 }}>Sign in or create a Final Pass Down sign-in first, so we can link the purchase to you.</p>}
                 {returning === "cancelled" && <p style={{ color:"#F6AD55", fontSize:15 }}>Checkout was cancelled — nothing was charged.</p>}
               </div>
             </div>

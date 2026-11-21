@@ -158,11 +158,11 @@ interface DBUserDetail {
 }
 
 /* What the Subscription card says about billing, from the plan subscription
- * that currently gives access (none = no card plan: free Starter, or a paid
- * plan that was never bought by card and so sees Reactivate). */
+ * that currently gives access (none = the account hasn't bought a plan, or a
+ * paid plan that was never bought by card and so sees Reactivate). */
 function billingSummary(d: DBUserDetail): Pick<AdminUser, "nextBilling" | "autoRenew" | "billingInterval" | "comped"> {
   const sub = d.subscription;
-  if (!sub) return { nextBilling: d.user.plan === "starter" ? "Free plan" : "No card subscription", autoRenew: false, billingInterval: null, comped: false };
+  if (!sub) return { nextBilling: d.user.plan === "none" ? "No plan yet" : "No card subscription", autoRenew: false, billingInterval: null, comped: false };
   if (sub.id.startsWith("comp_")) return { nextBilling: "Comped (no billing)", autoRenew: false, billingInterval: null, comped: true };
   const date = sub.current_period_end
     ? new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })

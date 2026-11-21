@@ -96,7 +96,7 @@ pub.get("/platform", async (c) => {
     readPlatformSection("general"),
     readPlatformSection("flags"),
     adminClient().from("admin_settings").select("key, value")
-      .in("key", ["starter_trial_days", "continuation_fee_amount", "continuation_fee_period_months"]),
+      .in("key", ["continuation_fee_amount", "continuation_fee_period_months"]),
     adminClient().from("billing_products").select("slug, amount_cents")
       .in("slug", ["wg_setup", "wg_session_block", "partner_setup", "dr_addon_month", "dr_addon_year"]),
   ]);
@@ -107,15 +107,12 @@ pub.get("/platform", async (c) => {
     return typeof v === "number" ? v / 100 : null;
   };
   const setting = (key: string) => rows?.find((r) => r.key === key)?.value ?? "";
-  const trialDays = parseInt(setting("starter_trial_days"), 10);
   const feeAmount = Number(setting("continuation_fee_amount"));
   const feeMonths = parseInt(setting("continuation_fee_period_months"), 10);
   return c.json({
     maintenance: general.maintenance === true,
     maintenanceMsg: typeof general.maintenanceMsg === "string" ? general.maintenanceMsg : "",
     flags,
-    // Length of the Starter plan (Admin → Subscription Config); 14 until set.
-    starterTrialDays: trialDays > 0 ? trialDays : 14,
     // The Legacy Continuation Fee as set on the admin "$199 Legacy Fee" page,
     // so the customer page quotes what checkout will actually charge.
     continuationFee: { amount: feeAmount > 0 ? feeAmount : 199, months: feeMonths > 0 ? feeMonths : 24 },

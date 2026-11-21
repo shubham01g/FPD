@@ -5,6 +5,9 @@ import type { AdminUser } from "../middleware/adminAuth.ts";
 
 const users = new Hono();
 
+/** The plans an admin can comp (everything sold; see migration 059). */
+const PAID_PLANS: unknown[] = ["foundation", "family_archive", "legacy_pro", "legacy_vault"];
+
 // GET /admin/users?search=&plan=&status=&page=&pageSize=
 users.get("/", async (c) => {
   const { search, plan, status } = c.req.query();
@@ -58,6 +61,9 @@ users.get("/", async (c) => {
 users.post("/", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const { name, email, phone, plan, subscriptionWaived, waiveReason, whiteGlove, notes, sendWelcome } = body;
+  // Only a paid plan can be comped; without a waiver the account has no plan
+  // until it buys one by card (migration 059).
+  const compPlan = subscriptionWaived && PAID_PLANS.includes(plan) ? (plan as string) : null;
   // Who onboarded the account is the signed-in admin, never what the browser says.
   const admin = c.get("admin" as never) as AdminUser;
   const onboardedBy = admin.email;
@@ -69,7 +75,7 @@ users.post("/", async (c) => {
   // Waiving the fee comps a paid plan (a comp_ subscription), which needs the
   // same Subscription edit access as Admin → User billing → Comp. Checked
   // before the account is created.
-  if (subscriptionWaived && plan && plan !== "starter") {
+  if (compPlan) {
     const canComp = admin.permissions === null || admin.role === "super_admin"
       || Boolean(admin.permissions.find((p) => p.module === "subscription")?.canEdit);
     if (!canComp) {
@@ -96,10 +102,10 @@ users.post("/", async (c) => {
     return c.json({ error: authError?.message ?? "Failed to create the account" }, 500);
   }
 
-  // The signup trigger creates the public.users row (on Starter) from auth
-  // metadata; fill in the fields it doesn't know about. A paid plan is only
-  // given here as a waived (comped) plan, recorded as a comp_ subscription;
-  // otherwise the account starts on Starter and buys a plan itself.
+  // The signup trigger creates the public.users row (with no plan) from
+  // auth metadata; fill in the fields it doesn't know about. A paid plan is
+  // only given here as a waived (comped) plan, recorded as a comp_
+  // subscription; otherwise the account buys its own plan by card.
   const { error: profileError } = await db
     .from("users")
     .update({
@@ -120,9 +126,9 @@ users.post("/", async (c) => {
     if (wgError) return c.json({ error: `Account created, but White Glove enrolment failed: ${wgError.message}` }, 500);
   }
 
-  if (subscriptionWaived && plan && plan !== "starter") {
+  if (compPlan) {
     const { error: compError } = await db.rpc("provision_subscription", { p: {
-      id: `comp_${created.user.id}`, user_id: created.user.id, product_line: "plan", plan_id: plan, status: "active",
+      id: `comp_${created.user.id}`, user_id: created.user.id, product_line: "plan", plan_id: compPlan, status: "active",
       comp_reason: waiveReason || "Waived at onboarding", comp_granted_by: onboardedBy || null,
     } });
     if (compError) return c.json({ error: compError.message }, 500);

@@ -27,7 +27,7 @@ interface ThresholdSetting { key: string; value: string; updated_at: string; }
 
 const PAID_BY_LABEL: Record<FeeRow["paid_by_type"], string> = { account_owner: "Account Owner", legacy_contact: "Legacy Contact" };
 const PLAN_LABEL: Record<string, string> = {
-  starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive",
+  none: "No plan", foundation: "Foundation", family_archive: "Legacy Archive",
   legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault",
 };
 

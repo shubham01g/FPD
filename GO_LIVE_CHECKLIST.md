@@ -13,14 +13,14 @@ and the commit that fixed it.
 
 | Slug | What | Kind | Price | Notes |
 |---|---|---|---|---|
-| `starter` | Starter | not billed | free | First 14 days of a new account. No card, no Stripe customer. 1 GB, hard block, no overage. |
+| ~~`starter`~~ | ~~Starter~~ | **removed 2026-11-21** | — | Owner: nothing is offered at $0. Was free for 14 days (decided Oct 24 on a misleadingly worded question; it had been $1.99). Migration 059: new signups have no plan (`none`, 0 GB, uploads refused) and see Choose your plan; Foundation is the entry plan. |
 | `foundation` | Foundation | plan | $9.99 / mo · $95.90 / yr | 50 GB, 3 contacts |
 | `family_archive` | Legacy Archive | plan | $24.99 / mo · $239.90 / yr | 250 GB, unlimited contacts |
 | `legacy_pro` | Legacy Pro | plan | $49.99 / mo · $479.90 / yr | 500 GB, unlimited contacts |
 | `legacy_vault` | Legacy Vault | plan | $129.99 / mo · $1,247.90 / yr | 1 TB, unlimited contacts. The annual price was $1,559.90; now 20% off like the others. |
 | `dr_addon_month` / `dr_addon_year` | Disaster Recovery add-on | recurring | $4.99 / mo · $47.88 / yr | Needs a paid (or comped) plan. |
-| `continuation_fee` | Legacy Continuation Fee | one-time | $199.00 | 24 months of legacy access after an admin activates it. Starter users can buy it. |
-| `wg_setup` | White Glove setup | one-time | $99.00 | Saves the card for session billing. Starter users can buy it. |
+| `continuation_fee` | Legacy Continuation Fee | one-time | $199.00 | 24 months of legacy access after an admin activates it. An account with no plan can buy it. |
+| `wg_setup` | White Glove setup | one-time | $99.00 | Saves the card for session billing. An account with no plan can buy it. |
 | `wg_session_block` | White Glove session | charged after a session | $25.00 per 30-minute block | `ceil(minutes / 30)` blocks, charged to the saved card when an admin ends the session. |
 | storage overage | Storage over the plan allowance | invoice items | $0.40 per GB | Per-plan `subscription_plans.overage_rate`. |
 
@@ -33,7 +33,7 @@ by hand through Stripe Invoicing, never "automatic"); crypto payments.
   allowance during a usage period, times the plan's rate.
 - The default monthly cap is the plan's monthly price. The owner can raise it
   (Usage & Billing → "Raise my limit"); raising it never back-charges.
-- At the cap, uploads pause. Starter and comped accounts can't create overage
+- At the cap, uploads pause. Comped accounts can't create overage
   at all; they are blocked at the allowance.
 - **Monthly plans:** overage rides on the renewal invoice (added on
   `invoice.created`).
@@ -167,7 +167,7 @@ declined · `4000 0000 0000 0259` disputed. Use test clocks for renewals
 Small-file overage: `/admin/billing/test/set-meter` (1 MB units, 5 MB included).
 
 **Plans**
-- [x] Starter: new signup is on free Starter; 1 GB hard block; wall after 14 days.
+- [x] Starter: new signup is on free Starter; 1 GB hard block; wall after 14 days. *(Superseded 2026-11-21 by migration 059: no free plan; a new signup sees Choose your plan and can't upload until it pays.)*
 - [x] Foundation monthly: consent box required; `billing_consents` row has the session id; plan active.
 - [x] Advance clock 1 month: renewal invoice correct; usage period rolled.
 - [x] Legacy Vault yearly at $1,247.90; monthly usage slices; renewal reminder email ~30 days before renewal.
