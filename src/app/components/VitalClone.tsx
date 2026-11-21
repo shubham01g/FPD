@@ -7,7 +7,7 @@
  *
  * Final Pass Down is a partner in Vital Clone's partner program. Vital Clone
  * runs in a frame on this page, loaded through FPD's partner link, so Vital
- * Clone counts every visit and credits every member to FPD (its master admin
+ * Clone credits every member to FPD and counts visits (its master admin
  * → Partners). Vital Clone allows only FPD's addresses to frame it
  * (frame-ancestors), opens Stripe in a new tab (Stripe refuses frames), and
  * gets camera and microphone through the frame's `allow` list.

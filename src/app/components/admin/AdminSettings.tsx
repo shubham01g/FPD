@@ -648,7 +648,7 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
           </Section>
 
           <Section title="Vital Clone Partner Link"
-            desc="Final Pass Down is a Vital Clone partner. Members open Vital Clone through this link, so Vital Clone counts every visit and credits every member to Final Pass Down in its Admin → Partners.">
+            desc="Final Pass Down is a Vital Clone partner. Members open Vital Clone through this link, so Vital Clone credits every member to Final Pass Down and counts their visits (once per visitor per day) in its Admin → Partners.">
             <input value={vcPartnerUrl} onChange={e => setVcPartnerUrl(e.target.value)}
               placeholder="https://vital-clone.vercel.app/r/final-pass-down" style={{ ...INPUT, ...MONO }}
               aria-label="Vital Clone partner link"/>
