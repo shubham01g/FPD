@@ -108,13 +108,15 @@ export function SubscriptionConfig() {
   };
 
   const handleSave = async () => {
-    // Nothing is offered at $0; Stripe's minimum charge is $0.50.
-    const tooLow = plans.find(p => !(p.price >= 0.5) || !(p.annualPrice >= 0.5));
+    // Nothing is offered at $0; Stripe's minimum charge is $0.50. Only prices
+    // being changed are checked, so an old row can't block an unrelated save.
+    const tooLow = plans.find(p => (original[p.id]?.price !== p.price || original[p.id]?.annualPrice !== p.annualPrice)
+      && (!(p.price >= 0.5) || !(p.annualPrice >= 0.5)));
     if (tooLow) {
       toast.error(`${tooLow.name}: monthly and annual prices must be at least $0.50.`);
       return;
     }
-    if (products.some(p => !(p.amount_cents >= 50))) {
+    if (products.some(p => originalProducts[p.slug] !== p.amount_cents && !(p.amount_cents >= 50))) {
       toast.error("Add-on and one-time prices must be at least $0.50.");
       return;
     }

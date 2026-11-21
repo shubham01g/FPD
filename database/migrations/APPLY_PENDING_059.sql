@@ -222,6 +222,69 @@ BEGIN
 END; $$;
 REVOKE EXECUTE ON FUNCTION public.storage_check_for(UUID, BIGINT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.storage_check_for(UUID, BIGINT) TO service_role;
+
+-- ── Entitlements (040's body): a paid plan nobody pays for is cancelled ──
+-- Before, an account with no live plan subscription was marked 'cancelled'
+-- only if it had ever had one. A paid plan held without any subscription
+-- (the three accounts above, or one an admin suspends and then lifts) stayed
+-- 'active' and so was free. Now any plan other than 'none' with no live
+-- subscription (Stripe or comp) is 'cancelled' and sees Reactivate.
+CREATE OR REPLACE FUNCTION public.apply_user_entitlements(p_user UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_plan  public.subscriptions%ROWTYPE;
+  v_dr    public.subscriptions%ROWTYPE;
+  v_user  public.users%ROWTYPE;
+  v_ever  BOOLEAN;
+BEGIN
+  SELECT * INTO v_user FROM public.users WHERE id = p_user FOR UPDATE;
+  IF NOT FOUND THEN RETURN; END IF;
+
+  SELECT * INTO v_plan FROM public.subscriptions
+   WHERE user_id = p_user AND product_line = 'plan' AND status IN ('active','trialing','past_due')
+   ORDER BY (id LIKE 'comp\_%') DESC, updated_at DESC
+   LIMIT 1;
+
+  IF FOUND THEN
+    UPDATE public.users SET
+      plan                   = v_plan.plan_id,
+      plan_status            = CASE WHEN v_user.plan_status = 'paused' THEN 'paused'
+                                    WHEN v_plan.status = 'past_due' THEN 'past_due'
+                                    ELSE 'active' END,
+      stripe_subscription_id = CASE WHEN v_plan.id LIKE 'comp\_%' THEN NULL ELSE v_plan.id END,
+      subscription_waived    = (v_plan.id LIKE 'comp\_%'),
+      waive_reason           = CASE WHEN v_plan.id LIKE 'comp\_%' THEN v_plan.comp_reason ELSE NULL END
+    WHERE id = p_user;
+  ELSE
+    SELECT EXISTS (SELECT 1 FROM public.subscriptions WHERE user_id = p_user AND product_line = 'plan') INTO v_ever;
+    IF v_ever OR v_user.plan <> 'none' THEN
+      UPDATE public.users SET
+        plan_status            = CASE WHEN v_user.plan_status = 'paused' THEN 'paused' ELSE 'cancelled' END,
+        stripe_subscription_id = NULL,
+        subscription_waived    = FALSE
+      WHERE id = p_user;
+    END IF;
+  END IF;
+
+  SELECT * INTO v_dr FROM public.subscriptions
+   WHERE user_id = p_user AND product_line = 'dr_addon' AND status IN ('active','trialing','past_due')
+   ORDER BY updated_at DESC LIMIT 1;
+  IF FOUND THEN
+    INSERT INTO public.disaster_recovery_state (user_id, addon_active, addon_source, addon_subscription_id, addon_current_period_end, updated_at)
+    VALUES (p_user, TRUE, 'stripe', v_dr.id, v_dr.current_period_end, NOW())
+    ON CONFLICT (user_id) DO UPDATE SET
+      addon_active = TRUE, addon_source = 'stripe', addon_subscription_id = v_dr.id,
+      addon_current_period_end = v_dr.current_period_end, updated_at = NOW();
+  ELSE
+    UPDATE public.disaster_recovery_state
+       SET addon_active = FALSE, addon_subscription_id = NULL, addon_current_period_end = NULL, updated_at = NOW()
+     WHERE user_id = p_user AND addon_source = 'stripe';
+  END IF;
+
+  PERFORM public.ensure_open_usage_period(p_user);
+END; $$;
+REVOKE EXECUTE ON FUNCTION public.apply_user_entitlements(UUID) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.apply_user_entitlements(UUID) TO service_role;
 COMMIT;
 
 -- ── Checks ──────────────────────────────────────────────────────────────
