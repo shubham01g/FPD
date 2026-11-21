@@ -116,7 +116,7 @@ function StoredOnly({ children }: { children: React.ReactNode }) {
 }
 
 /* ─── Main component ─────────────────────────────────────────────── */
-type Saved = Partial<Record<"general" | "flags" | "security" | "notifications", Record<string, unknown>>>;
+type Saved = Partial<Record<"general" | "flags" | "security" | "notifications" | "vitalClone", Record<string, unknown>>>;
 
 export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId) => void }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
@@ -185,6 +185,25 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
     const next = { ...flags, [k]: !flags[k] };
     setFlags(next);
     void save("flags", next, `${label} ${next[k] ? "enabled" : "disabled"}`).then(ok => { if (!ok) setFlags(before); });
+  };
+
+  /* ── Vital Clone partner link (routes/settings.ts checks and normalises it) ── */
+  const [vcPartnerUrl, setVcPartnerUrl] = useState("");
+  const [vcSavedUrl,   setVcSavedUrl]   = useState("");
+  const saveVcPartnerUrl = async () => {
+    if (!savedData) {
+      toast.error(loadError ? "Settings couldn't be loaded, so nothing was saved. Refresh and try again." : "Settings are still loading. Try again in a moment.");
+      return;
+    }
+    try {
+      const res = await adminApi.put<{ value: { partnerUrl?: string } }>("/settings/vitalClone", { value: { partnerUrl: vcPartnerUrl.trim() } });
+      const url = res?.value?.partnerUrl ?? "";
+      setVcPartnerUrl(url);
+      setVcSavedUrl(url);
+      toast.success(url ? "Vital Clone partner link saved" : "Vital Clone partner link cleared");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save the partner link");
+    }
   };
 
   /* ── Admin users (real accounts; invited and edited in Admin Team & Roles) ── */
@@ -435,6 +454,8 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
       if (typeof g.maintenanceMsg === "string") setMaintenanceMsg(g.maintenanceMsg);
     }
     if (saved.flags) setFlags(f => ({ ...f, ...(saved.flags as Partial<typeof f>) }));
+    const vc = saved.vitalClone as Record<string, unknown> | undefined;
+    if (vc && typeof vc.partnerUrl === "string") { setVcPartnerUrl(vc.partnerUrl); setVcSavedUrl(vc.partnerUrl); }
     const sec = saved.security as Record<string, unknown> | undefined;
     if (sec) {
       if (typeof sec.enforce2FA === "boolean") setEnforce2FA(sec.enforce2FA);
@@ -624,6 +645,28 @@ export function AdminSettings({ onNavigate }: { onNavigate?: (page: AdminPageId)
               <ToggleRow key={f.key} label={f.label} desc={f.desc}
                 value={flags[f.key]} onChange={() => toggleFlag(f.key, f.label)}/>
             ))}
+          </Section>
+
+          <Section title="Vital Clone Partner Link"
+            desc="Final Pass Down is a Vital Clone partner. Members open Vital Clone through this link, so Vital Clone counts every visit and credits every member to Final Pass Down in its Admin → Partners.">
+            <input value={vcPartnerUrl} onChange={e => setVcPartnerUrl(e.target.value)}
+              placeholder="https://vital-clone.vercel.app/r/final-pass-down" style={{ ...INPUT, ...MONO }}
+              aria-label="Vital Clone partner link"/>
+            <div className="mt-3 flex items-center gap-3 flex-wrap">
+              <button onClick={() => void saveVcPartnerUrl()}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold"
+                style={{ background: "rgba(159,122,234,0.1)", color: "#C4A9F5", border: "1px solid rgba(159,122,234,0.2)", cursor: "pointer" }}>
+                <Save size={12}/> Save Link
+              </button>
+              {!vcSavedUrl && (
+                <span className="flex items-center gap-1.5" style={{ color: "#D9A55E", fontSize: 12, fontWeight: 600 }}>
+                  <AlertTriangle size={13}/> Not set: members can still open Vital Clone, but Final Pass Down gets no partner credit.
+                </span>
+              )}
+            </div>
+            <p style={{ color: "#8A9AB8", fontSize: 12, marginTop: 12 }}>
+              Copy it from Vital Clone's master admin → Partners → Final Pass Down → Referral link. It looks like https://&lt;vital clone address&gt;/r/&lt;name&gt;.
+            </p>
           </Section>
 
           <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
