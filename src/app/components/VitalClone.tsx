@@ -96,7 +96,7 @@ const VITAL_CSS = `
 .fpd-vital .bar{position:relative;z-index:1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,0.06);background:#0E1524;}
 .fpd-vital .bar-title{display:flex;align-items:center;gap:8px;color:${TEXT};font-weight:600;font-size:15.5px;}
 .fpd-vital .bar-gap{flex:1;}
-.fpd-vital .frame-box{position:relative;z-index:1;flex:1;min-height:560px;background:#0B1120;}
+.fpd-vital .frame-box{position:relative;z-index:1;flex:1;min-height:360px;background:#0B1120;}
 .fpd-vital .frame-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#0B1120;}
 .fpd-vital .frame-cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:${MUTED};font-size:15.5px;text-align:center;padding:24px;}
 
@@ -112,7 +112,7 @@ const VITAL_CSS = `
   .fpd-vital .cta-row .btn-primary{width:100%;}
   .fpd-vital .bar{padding:8px 12px;}
   .fpd-vital .bar .signed-as{display:none;}
-  .fpd-vital .frame-box{min-height:480px;}
+  .fpd-vital .frame-box{min-height:360px;}
 }
 `;
 
@@ -153,6 +153,28 @@ export function VitalClone() {
   const [opening, setOpening] = useState(false);
   const reconnects = useRef<number[]>([]);
   const minting = useRef(false);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [fitHeight, setFitHeight] = useState<number | null>(null);
+
+  /* Fill exactly the visible part of the page's scroll area. Banners above
+     this page (Starter countdown, past due) would otherwise push the bottom
+     of Vital Clone out of view behind a second scrollbar. */
+  useEffect(() => {
+    if (phase.kind !== "frame") return;
+    const root = rootRef.current;
+    const main = root?.closest("main");
+    if (!root || !main) return;
+    const fit = () => {
+      const top = root.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
+      setFitHeight(Math.max(main.clientHeight - top, 480));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(main);
+    window.addEventListener("resize", fit);
+    return () => { ro.disconnect(); window.removeEventListener("resize", fit); };
+  }, [phase.kind]);
 
   /* A fresh sign-in into the frame. */
   const loadFrame = useCallback(async () => {
@@ -196,7 +218,8 @@ export function VitalClone() {
   useEffect(() => {
     if (!status) return;
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== status.origin) return;
+      // From Vital Clone's origin AND from our own frame, nothing else.
+      if (event.origin !== status.origin || event.source !== frameRef.current?.contentWindow) return;
       const data = event.data as { source?: unknown; type?: unknown } | null;
       if (!data || data.source !== "vitalclone" || data.type !== "vc:reconnect") return;
       const now = Date.now();
@@ -255,7 +278,7 @@ export function VitalClone() {
   /* ── The framed app ── */
   if (phase.kind === "frame") {
     return (
-      <div className="fpd-vital is-frame">
+      <div className="fpd-vital is-frame" ref={rootRef} style={fitHeight ? { height: fitHeight } : undefined}>
         <style dangerouslySetInnerHTML={{ __html: VITAL_CSS }} />
         <div className="bar">
           <div className="bar-title"><Activity size={15} color={ACCENT2} /> Vital Clone</div>
@@ -271,6 +294,7 @@ export function VitalClone() {
         <div className="frame-box">
           {frameSrc && (
             <iframe
+              ref={frameRef}
               key={frameKey}
               src={frameSrc}
               title="Vital Clone"
