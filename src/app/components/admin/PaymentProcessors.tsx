@@ -526,7 +526,7 @@ export function PaymentProcessors() {
               <div style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, background: stripeLive ? "#5FBE91" : "#8A9AB8" }}/>
               <div className="flex-1 min-w-0">
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#E8EDF5", marginBottom: 2 }}>
-                  checkout.session.completed · invoice.paid · invoice.payment_failed · customer.subscription.deleted
+                  checkout.session.completed · customer.subscription.updated · customer.subscription.deleted · invoice.created · invoice.paid · invoice.payment_failed · invoice.upcoming · charge.refunded · charge.dispute.created · charge.dispute.closed
                 </div>
                 <div style={{ fontSize: 11, ...MONO, color: "#8A9AB8", wordBreak: "break-all" }}>{STRIPE_WEBHOOK_URL}</div>
               </div>
@@ -544,7 +544,7 @@ export function PaymentProcessors() {
               </button>
             </div>
             <p style={{ color: "#8A9AB8", fontSize: 12, marginTop: 8, lineHeight: 1.6 }}>
-              In the Stripe dashboard, add this URL as a webhook endpoint for the four events above, then paste its signing secret into Stripe's Webhook Secret field on the Processors tab. Every incoming event is rejected unless its signature matches that secret. Delivery history is in the Stripe dashboard; this app does not keep a copy.
+              In the Stripe dashboard, add this URL as a webhook endpoint for the ten events above. Its signing secret is stored as the Supabase secret STRIPE_WEBHOOK_SECRET (Stripe Billing → Check webhook confirms the endpoint and its events). Every incoming event is rejected unless its signature matches that secret. Delivery history is in the Stripe dashboard; this app does not keep a copy.
             </p>
           </div>
         </div>
