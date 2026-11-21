@@ -4,14 +4,13 @@ import { Toaster } from "sonner";
 import { supabase } from "./services/supabase";
 import { trackPageView, trackHeartbeat, HEARTBEAT_INTERVAL_MS } from "./services/engagement";
 import { DemoProvider, useDemo } from "./context/DemoContext";
-import { StarterUpgradeWall, StarterCountdownBanner, PastDueBanner } from "./components/StarterUpgradeWall";
+import { PlanWall, PastDueBanner } from "./components/PlanWall";
 import { usePaymentReturn } from "./hooks/usePaymentReturn";
 import { captureReferral } from "./utils/referral";
 
 // An affiliate link (/r/CODE or ?ref=CODE) is remembered before anything
 // renders, so it survives the visitor browsing around before signing up.
 captureReferral();
-import { starterDaysLeft } from "./utils/starterPlan";
 import { LegacyClaimSubmit } from "./components/LegacyClaimSubmit";
 import { VaultResetPage } from "./components/VaultResetPage";
 import { ContactAcceptPage } from "./components/ContactAcceptPage";
@@ -362,12 +361,11 @@ function UserRoute() {
   // Pages whose feature flag is switched off fall back to the dashboard.
   const hidden = hiddenPages(platform.flags);
 
-  // Starter is a 14-day introductory plan (migration 026). Once it runs out
-  // the portal is replaced by the upgrade screen until a bigger plan is chosen.
-  const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
-  // A paid (or comped) plan that ended — cancelled, or the card kept failing —
-  // gets the same choice, worded as reactivating. Nothing stored is lost.
-  const walled = starterDays === 0 || user.planStatus === "cancelled";
+  // There is no free plan (migration 059). An account that hasn't bought a
+  // plan yet ("none") chooses one before the vault opens; a paid (or comped)
+  // plan that ended — cancelled, or the card kept failing — gets the same
+  // choice, worded as reactivating. Nothing stored is lost.
+  const walled = user.plan === "none" || user.planStatus === "cancelled";
   // Just paid: the webhook lifts the wall within seconds, so don't flash it.
   if (walled && confirming) {
     return (
@@ -376,8 +374,10 @@ function UserRoute() {
         actionLabel="Sign out" onAction={leave}/>
     );
   }
-  if (user.planStatus === "cancelled") return <StarterUpgradeWall reason="cancelled" onSignOut={leave}/>;
-  if (starterDays === 0) return <StarterUpgradeWall onSignOut={leave}/>;
+  if (walled) {
+    return <PlanWall reason={user.plan === "none" ? "choose" : "cancelled"} onSignOut={leave}
+      onOpenShared={hasShared ? () => navigate("/access") : undefined}/>;
+  }
 
   const renderUserPage = () => {
     const nav = (p: string) => setUserPage(p as PageId);
@@ -439,9 +439,6 @@ function UserRoute() {
         onOpenShared={hasShared ? () => navigate("/access") : undefined}
       >
         {user.planStatus === "past_due" && <PastDueBanner/>}
-        {starterDays !== null && userPage !== "storage-usage" && (
-          <StarterCountdownBanner daysLeft={starterDays} onUpgrade={() => setUserPage("storage-usage")}/>
-        )}
         {renderUserPage()}
       </Layout>
       {userPage !== "fpd-ai" && platform.flags.aiAssistant && <AIAgent/>}

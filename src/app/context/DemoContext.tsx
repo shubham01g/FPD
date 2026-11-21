@@ -99,13 +99,11 @@ export interface Notification {
 }
 export interface UserProfile {
   name: string; email: string; phone: string;
-  plan: "starter"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
+  /** "none" until the account buys a plan (migration 059; there is no free plan). */
+  plan: "none"|"foundation"|"family_archive"|"legacy_pro"|"legacy_vault";
   storageUsed: number; storageLimit: number; avatar: string;
   /* Profile photo (users.avatar_url): a record-photos storage path, "" if none. */
   photoUrl: string;
-  /* When the 14-day Starter clock started (migration 026); null if the
-     account has never been on Starter. See utils/starterPlan.ts. */
-  starterStartedAt: string | null;
   /* Set once an admin marks the account holder deceased (migration 027);
      the portal is frozen from then on. */
   deceasedAt: string | null;
@@ -121,12 +119,12 @@ export interface UserProfile {
 
 /* Fallback only; the real allowances are read from subscription_plans. */
 const PLAN_STORAGE_GB: Record<UserProfile["plan"], number> = {
-  starter: 1, foundation: 50, family_archive: 250, legacy_pro: 500, legacy_vault: 1024,
+  none: 0, foundation: 50, family_archive: 250, legacy_pro: 500, legacy_vault: 1024,
 };
 
 const EMPTY_USER: UserProfile = {
   name: "", email: "", phone: "", plan: "foundation", storageUsed: 0, storageLimit: 50, avatar: "", photoUrl: "",
-  starterStartedAt: null, deceasedAt: null, suspended: false, planStatus: "active",
+  deceasedAt: null, suspended: false, planStatus: "active",
   gender: "", birthdate: "", country: "", referralSource: "",
 };
 
@@ -402,7 +400,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
           plan: userRes.data.plan, storageUsed: Number(used.toFixed(2)), storageLimit: planGb.current[userRes.data.plan] ?? PLAN_STORAGE_GB[userRes.data.plan],
           avatar: initials(userRes.data.full_name),
           photoUrl: userRes.data.avatar_url ?? "",
-          starterStartedAt: userRes.data.starter_started_at ?? null,
           deceasedAt: userRes.data.deceased_at ?? null,
           suspended: userRes.data.plan_status === "paused",
           planStatus: userRes.data.plan_status,
@@ -475,7 +472,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setUser(u => ({
       ...u, plan: data.plan, planStatus: data.plan_status, suspended: data.plan_status === "paused",
       storageLimit: planGb.current[data.plan] ?? PLAN_STORAGE_GB[data.plan],
-      starterStartedAt: data.starter_started_at ?? null,
     }));
   }, [uid]);
 

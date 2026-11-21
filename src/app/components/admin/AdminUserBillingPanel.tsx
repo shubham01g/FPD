@@ -125,7 +125,7 @@ export function AdminUserBillingPanel({ userId, onChanged }: { userId: string; o
       {/* Subscriptions */}
       <div style={CARD}>
         <Title>SUBSCRIPTIONS</Title>
-        {data.subscriptions.length === 0 && <div style={{ color: "#8A9AB8", fontSize: 14.5 }}>None. {data.account.plan === "starter" ? "On the free Starter plan." : "Plan predates card billing."}</div>}
+        {data.subscriptions.length === 0 && <div style={{ color: "#8A9AB8", fontSize: 14.5 }}>None. {data.account.plan === "none" ? "No plan bought yet." : "Plan predates card billing."}</div>}
         {data.subscriptions.map(s => (
           <div key={s.id} className="flex flex-wrap items-center gap-3 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", fontSize: 14.5, color: "#C9D3E6" }}>
             <span style={{ ...MONO, fontSize: 12.5, color: "#8A9AB8", minWidth: 190 }}>{s.id}</span>

@@ -8,14 +8,16 @@ const pricing = new Hono();
 
 const THRESHOLD_KEYS = [
   "overage_rate_per_gb", "storage_alert_80", "storage_alert_90", "storage_alert_95",
-  "continuation_fee_amount", "continuation_fee_period_months", "starter_trial_days",
+  "continuation_fee_amount", "continuation_fee_period_months",
 ] as const;
 
 // GET /admin/pricing — plans + storage/overage thresholds in one payload
 pricing.get("/", async (c) => {
   const db = adminClient();
   const [{ data: plans, error: plansErr }, { data: settings, error: settingsErr }, { data: products, error: productsErr }] = await Promise.all([
-    db.from("subscription_plans").select("*").order("price_monthly", { ascending: true }),
+    // Only the plans that are sold: the retired Starter row and the hidden
+    // 'none' (no plan yet) row are never shown or edited (migration 059).
+    db.from("subscription_plans").select("*").eq("billable", true).order("price_monthly", { ascending: true }),
     db.from("admin_settings").select("key, value, updated_at").in("key", THRESHOLD_KEYS as unknown as string[]),
     db.from("billing_products").select("*").order("sort_order"),
   ]);
@@ -34,12 +36,18 @@ pricing.patch("/plans/:id", async (c) => {
   const allowed = ["name", "price_monthly", "price_annual", "storage_gb", "max_contacts", "overage_rate", "is_active"] as const;
   const patch: Record<string, unknown> = {};
   for (const key of allowed) if (key in body) patch[key] = body[key];
+  // Nothing is sold at $0 (migration 059); Stripe's minimum charge is $0.50.
+  for (const key of ["price_monthly", "price_annual"] as const) {
+    if (key in patch && !(Number(patch[key]) >= 0.5)) {
+      return c.json({ error: "Plan prices must be at least $0.50 (nothing is offered for free)" }, 400);
+    }
+  }
 
   if (Object.keys(patch).length === 0) {
     return c.json({ error: "No updatable fields provided" }, 400);
   }
 
-  const { data, error } = await adminClient().from("subscription_plans").update(patch).eq("id", id).select().maybeSingle();
+  const { data, error } = await adminClient().from("subscription_plans").update(patch).eq("id", id).eq("billable", true).select().maybeSingle();
   if (error) return c.json({ error: error.message }, 500);
   if (!data) return c.json({ error: "Plan not found" }, 404);
   // A new price only reaches checkout after Billing → Sync catalog creates it
@@ -81,6 +89,9 @@ pricing.patch("/settings/:key", async (c) => {
   }
   const { value } = await c.req.json().catch(() => ({ value: undefined }));
   if (typeof value !== "string") return c.json({ error: "'value' must be a string" }, 400);
+  if (key === "continuation_fee_amount" && !(Number(value) >= 0.5)) {
+    return c.json({ error: "The Legacy Continuation Fee must be at least $0.50" }, 400);
+  }
 
   const admin = c.get("admin") as { id: string } | undefined;
   const { data, error } = await adminClient()

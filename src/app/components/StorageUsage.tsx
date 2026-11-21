@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { deriveStorageBreakdown, deriveMonthlyUsage, projectEndOfMonth } from "../utils/storageBreakdown";
 import { useDemo } from "../context/DemoContext";
 import { usePlatform } from "../services/platform";
-import { starterDaysLeft } from "../utils/starterPlan";
 import { billing, notifyBillingChanged, type Interval } from "../services/billing";
 import { useBillingSummary } from "../hooks/useBillingSummary";
 import { annualSavingPct, formatPrice, formatStorage, usePlans, useProducts } from "../utils/planCatalog";
@@ -237,7 +236,6 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
   useEffect(() => { if (paidSub?.interval) setBillingInterval(paidSub.interval); }, [paidSub?.interval]);
   useEffect(() => { if (summary) setCapDraft((summary.capCents / 100).toFixed(2)); }, [summary?.capCents]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const starterDays = starterDaysLeft(user.plan, user.starterStartedAt, platform.starterTrialDays);
   const currentPlan = plans.find(p => p.id === user.plan);
   const overageRate = currentPlan?.overageRate ?? 0;
   const usage = summary?.usage ?? null;
@@ -342,7 +340,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
               <div className="sub-meta">
                 {comped ? "Provided by Final Pass Down. No charge."
                   : paidSub ? `${paidSub.interval === "year" ? formatPrice(currentPlan?.priceAnnual ?? 0) + "/yr" : formatPrice(currentPlan?.priceMonthly ?? 0) + "/mo"} · ${paidSub.cancel_at_period_end ? `Ends ${longDate(paidSub.current_period_end)}` : `Renews ${longDate(paidSub.current_period_end)}`}`
-                  : user.plan === "starter" ? `Free for ${platform.starterTrialDays} days${starterDays !== null ? ` · ${starterDays} day${starterDays === 1 ? "" : "s"} left` : ""}`
+                  : user.plan === "none" ? "No plan yet. Choose one below to open your vault."
                   : "No card subscription on this account yet."}
               </div>
             </div>
@@ -404,7 +402,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
                 <div className="cap-sub">
                   {overageAllowed
                     ? `Storage above your plan is ${usd(overageRate)}/GB (the peak over the period). Uploads pause before overage would pass ${usd(cap)} a month.`
-                    : user.plan === "starter" ? "Starter includes 1 GB with no overage. Uploads stop at the limit."
+                    : user.plan === "none" ? "Choose a plan to start storing files."
                     : comped ? "Your plan has no overage. Uploads stop at the limit."
                     : "Overage applies to paid plans."}
                 </div>
@@ -558,7 +556,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
             </div>
           </div>
           <div className="plan-grid">
-            {plans.filter(p => p.billable || p.id === user.plan).map(plan => {
+            {plans.filter(p => p.billable).map(plan => {
               const isCurrent = plan.id === user.plan && (!paidSub || paidSub.interval === interval) && user.planStatus !== "cancelled";
               const price = interval === "year" ? plan.priceAnnual : plan.priceMonthly;
               return (
@@ -566,11 +564,11 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
                   {isCurrent && <div className="plan-tag">CURRENT PLAN</div>}
                   <div className="plan-name">{plan.name}</div>
                   <div className="flex items-baseline gap-1" style={{ marginBottom: 4 }}>
-                    <span className="plan-price">{plan.billable ? formatPrice(price) : "Free"}</span>
-                    <span className="plan-price-sub">{plan.billable ? `/${interval === "year" ? "yr" : "mo"}` : ` for ${platform.starterTrialDays} days`}</span>
+                    <span className="plan-price">{formatPrice(price)}</span>
+                    <span className="plan-price-sub">/{interval === "year" ? "yr" : "mo"}</span>
                   </div>
                   <div className="plan-detail" style={{ marginBottom: 8, fontSize: 14, minHeight: 20 }}>
-                    {plan.billable && interval === "year" ? `${formatPrice(+(plan.priceAnnual / 12).toFixed(2))}/mo billed yearly` : ""}
+                    {interval === "year" ? `${formatPrice(+(plan.priceAnnual / 12).toFixed(2))}/mo billed yearly` : ""}
                   </div>
                   <div className="plan-detail" style={{ marginBottom: 4 }}>{formatStorage(plan.storageGb)} storage</div>
                   <div className="plan-detail" style={{ marginBottom: 12, fontSize: 14 }}>{plan.overageRate > 0 ? `Overage: ${usd(plan.overageRate)}/GB` : "No overage"}</div>
@@ -589,7 +587,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
             <ArrowUp size={13} color={NEG} />
             <span>
               Upgrades apply right away with a prorated charge; downgrades start when your current period ends. Overage on paid plans is the peak GB above your plan,
-              at <strong style={{ color: TEXT }}>{usd(overageRate || 0.4)}/GB</strong>, never more than your overage limit. Starter has no overage.
+              at <strong style={{ color: TEXT }}>{usd(overageRate || 0.4)}/GB</strong>, never more than your overage limit.
             </span>
           </div>
         </div>
@@ -624,7 +622,7 @@ export function StorageUsage({ onNavigate }: { onNavigate?: (page: string) => vo
                   <div style={{ fontSize: 11, color: MUTED, marginBottom: 10 }}>or {usd(drMonthly / 100)}/mo monthly</div>
                   {!platform.flags.disasterProtection ? (
                     <div style={{ fontSize: 12.5, color: MUTED, maxWidth: 180 }}>Not available right now.</div>
-                  ) : user.plan === "starter" || user.planStatus === "cancelled" ? (
+                  ) : user.plan === "none" || user.planStatus === "cancelled" ? (
                     <div style={{ fontSize: 12.5, color: MUTED, maxWidth: 180 }}>Available with a paid plan.</div>
                   ) : (
                     <div className="flex gap-2 justify-end">

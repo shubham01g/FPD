@@ -272,7 +272,7 @@ export function DisasterRecovery() {
 
   const { docs, user } = useDemo();
   const { authUser } = useAuth();
-  const canBuy = user.plan !== "starter" && user.planStatus !== "cancelled";
+  const canBuy = user.plan !== "none" && user.planStatus !== "cancelled";
   useEffect(() => {
     const on = () => void refreshBypass();
     window.addEventListener("fpd:billing-changed", on);

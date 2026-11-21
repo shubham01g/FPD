@@ -87,7 +87,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
   /* Real payment: Stripe Checkout (product partner_setup, migration 053).
      No card details are typed into this page. The webhook creates the
      partner record once Stripe confirms; the dashboard then shows it.
-     Paying needs a (free) Final Pass Down account to attach it to. */
+     Paying needs a Final Pass Down sign-in to attach it to. */
   const submitPayment = async () => {
     if (!session) { navigate(`/login?next=${encodeURIComponent("/partner" + window.location.search)}`); return; }
     if (org.name.trim().length < 2) { toast.error("Enter your organization's name"); setStep("details"); return; }
@@ -318,7 +318,7 @@ function WizardOnboarding({ onComplete }: { onComplete: () => void }) {
                 </p>
                 {!session && (
                   <p style={{ color:"#F6AD55", fontSize:15, lineHeight:1.6 }}>
-                    Sign in or create a free Final Pass Down account first, so your partner dashboard has somewhere to live.
+                    Sign in or create a Final Pass Down sign-in first, so your partner dashboard has somewhere to live.
                   </p>
                 )}
               </div>
