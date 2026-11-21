@@ -16,10 +16,11 @@ import { clearIpAllowlistCache } from "../middleware/ipAllowlist.ts";
 import { EMAIL_CONFIGURED, EMAIL_FROM_ADDRESS } from "../lib/email.ts";
 import { hasSecondFactor } from "../lib/twoFactorGate.ts";
 import danger from "./dangerZone.ts";
+import { parsePartnerUrl } from "../lib/vitalClone.ts";
 
 const settings = new Hono();
 
-const SECTIONS = ["general", "flags", "security", "notifications"] as const;
+const SECTIONS = ["general", "flags", "security", "notifications", "vitalClone"] as const;
 type Section = typeof SECTIONS[number];
 const keyFor = (section: Section) => `platform.${section}`;
 
@@ -124,16 +125,29 @@ settings.put("/:section", async (c) => {
     }
   }
 
+  // The Vital Clone partner link (lib/vitalClone.ts): stored only in the form
+  // Vital Clone issues, so members always load a working address. Empty clears it.
+  let stored: object = value;
+  if (section === "vitalClone") {
+    const raw = (value as { partnerUrl?: unknown }).partnerUrl;
+    const blank = raw === undefined || raw === null || (typeof raw === "string" && raw.trim() === "");
+    const link = blank ? null : parsePartnerUrl(raw);
+    if (!blank && !link) {
+      return c.json({ error: "That isn't a Vital Clone partner link. Paste it exactly as Vital Clone shows it, like https://vital-clone.vercel.app/r/final-pass-down." }, 400);
+    }
+    stored = { partnerUrl: link ? link.url : "" };
+  }
+
   const admin = c.get("admin") as AdminUser;
   const { error } = await adminClient()
     .from("admin_settings")
     .upsert(
-      { key: keyFor(section), value: JSON.stringify(value), updated_by: admin.id, updated_at: new Date().toISOString() },
+      { key: keyFor(section), value: JSON.stringify(stored), updated_by: admin.id, updated_at: new Date().toISOString() },
       { onConflict: "key" },
     );
   if (error) return c.json({ error: error.message }, 500);
   if (section === "security") clearIpAllowlistCache();
-  return c.json({ section, value });
+  return c.json({ section, value: stored });
 });
 
 // Danger Zone tools (super admin only) — routes/dangerZone.ts

@@ -441,7 +441,8 @@ function UserRoute() {
         {user.planStatus === "past_due" && <PastDueBanner/>}
         {renderUserPage()}
       </Layout>
-      {userPage !== "fpd-ai" && platform.flags.aiAssistant && <AIAgent/>}
+      {/* Not over Vital Clone: its own assistant button sits in the same corner of the frame. */}
+      {userPage !== "fpd-ai" && userPage !== "vital-clone" && platform.flags.aiAssistant && <AIAgent/>}
       <DemoBar/>
     </div>
   );

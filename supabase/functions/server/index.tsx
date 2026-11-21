@@ -231,7 +231,7 @@ account.route("/password", password);
 account.route("/secret-vault", secretVault);
 account.route("/receipts", receiptsRoute);
 account.route("/partner", partnerAccount);
-account.route("/vital-clone/handoff", vitalCloneHandoff);
+account.route("/vital-clone", vitalCloneHandoff); // /status, /consent, /handoff
 account.route("/billing", billing);
 account.route("/contacts", contacts);
 account.route("/affiliate", affiliateJoin);
