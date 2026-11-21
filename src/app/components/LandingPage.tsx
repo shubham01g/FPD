@@ -770,50 +770,87 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </button>
           <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save up to 20%</span></span>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch fpd-stagger">
-          {PLANS.map(plan => (
-            <div key={plan.id} className="relative p-7 rounded-2xl flex flex-col glow-surface fpd-hover-lift"
-              style={{ background: CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none" }}>
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap" }}>MOST POPULAR</div>
-              )}
-              <div style={{ ...MONO, color: plan.color, fontSize: 14, letterSpacing: "0.12em", marginBottom: 12 }}>{plan.name.toUpperCase()}</div>
-              <div className="flex items-baseline gap-1 mb-2">
-                {plan.price === 0 ? (<>
-                  <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>Free</span>
-                  <span style={{ color: MUTED, fontSize: 17.5 }}>/{starterTrialDays} days</span>
-                </>) : (<>
-                  <span style={{ ...DISPLAY, fontSize: 50.5, fontWeight: 800, color: TEXT }}>${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}</span>
-                  <span style={{ color: MUTED, fontSize: 17.5 }}>/mo</span>
-                </>)}
+        {/* Plan cards: only what differs between plans. 5 across on wide screens,
+            3 + 2 (centred) on laptops, 2 on tablets, 1 on phones. Every card has the
+            same rows in the same order so prices, rows and buttons line up. */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-5 gap-5 pt-3 fpd-stagger">
+          {PLANS.map((plan, i) => {
+            // Each card spans 2 of 4 (tablet) / 2 of 6 (laptop) columns; a short last row is
+            // centred by pushing its first card over one column.
+            const n = PLANS.length;
+            const place = [
+              "sm:col-span-2 xl:col-span-1 xl:col-start-auto",
+              n % 2 === 1 && i === n - 1 ? "sm:col-start-2" : "",
+              n % 3 === 2 && i === n - 2 ? "lg:col-start-2" : n % 3 === 1 && i === n - 1 ? "lg:col-start-3" : "lg:col-start-auto",
+            ].join(" ");
+            const contacts = plan.contacts === -1 ? "Unlimited" : String(plan.contacts);
+            const priority = plan.features.includes("Priority Support");
+            const rows: { label: string; value: string; accent?: boolean }[] = [
+              { label: "Storage", value: plan.storage },
+              { label: "Contacts", value: contacts },
+              { label: "Overage", value: plan.overage > 0 ? `$${plan.overage.toFixed(2)}/GB` : "Stops at limit", accent: plan.overage > 0 },
+              { label: "Support", value: priority ? "Priority" : "Email" },
+            ];
+            const note = plan.price === 0
+              ? `${starterTrialDays}-day trial · no card needed`
+              : annual ? `Billed $${plan.priceAnnual.toFixed(2)}/yr` : "Billed monthly";
+            return (
+              <div key={plan.id}
+                className={`relative rounded-2xl flex flex-col glow-surface fpd-hover-lift p-6 ${place}`}
+                style={{ background: plan.popular ? "linear-gradient(180deg, rgba(126,107,216,0.10), rgba(16,23,40,0) 45%), #101728" : CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none", containerType: "inline-size" }}>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap", letterSpacing: "0.08em" }}>MOST POPULAR</div>
+                )}
+                <div className="truncate" style={{ ...MONO, color: plan.color, fontSize: 13, letterSpacing: "0.12em" }}>{plan.name.toUpperCase()}</div>
+
+                <div className="flex items-baseline gap-1 mt-4 whitespace-nowrap">
+                  <span style={{ ...DISPLAY, fontSize: "clamp(30px, 18cqi, 44px)", lineHeight: 1, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>
+                    {plan.price === 0 ? "Free" : `$${annual ? (plan.priceAnnual / 12).toFixed(2) : plan.price}`}
+                  </span>
+                  {plan.price > 0 && <span style={{ color: MUTED, fontSize: 15 }}>/mo</span>}
+                </div>
+                <div className="mt-2 truncate" style={{ color: plan.price === 0 ? plan.color : MUTED, fontSize: 13.5 }}>{note}</div>
+
+                <dl className="mt-5 mb-6 flex-1" style={{ borderTop: "1px solid rgba(91,110,225,0.14)" }}>
+                  {rows.map(r => (
+                    <div key={r.label} className="flex items-center justify-between gap-3 py-2.5" style={{ borderBottom: "1px solid rgba(91,110,225,0.08)" }}>
+                      <dt style={{ color: MUTED, fontSize: 14 }}>{r.label}</dt>
+                      <dd className="text-right" style={{ color: r.accent ? plan.color : TEXT, fontSize: 14.5, fontWeight: 600, margin: 0 }}>{r.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold text-sm fpd-btn-lift"
+                  style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.25)" }}>
+                  {plan.price === 0 ? "Start Free Trial" : "Get Started"}
+                </button>
               </div>
-              {annual && plan.price > 0 && <div style={{ color: MUTED, fontSize: 14, marginTop: -4, marginBottom: 6 }}>Billed ${plan.priceAnnual.toFixed(2)}/yr</div>}
-              <div style={{ color: MUTED, fontSize: 16, marginBottom: 10 }}>{plan.storage} storage · {plan.contacts === -1 ? "Unlimited" : plan.contacts} contacts</div>
-              {plan.id === "starter" && (
-                <div style={{ color: plan.color, fontSize: 15, marginBottom: 10 }}>Free for your first {starterTrialDays} days, no card needed. Then choose a paid plan.</div>
-              )}
-              <div style={{ ...MONO, color: MUTED, fontSize: 12.5, marginBottom: 22, padding: "4px 10px", background: "rgba(91,110,225,0.06)", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 4, width: "fit-content" }}>
-                {plan.overage > 0 ? (<>
-                  <span>Overage:</span>
-                  <span style={{ color: plan.color, fontWeight: 700 }}>${plan.overage.toFixed(2)}/GB</span>
-                  <span>above limit</span>
-                </>) : <span>No overage · stops at the limit</span>}
+            );
+          })}
+        </div>
+
+        {/* Everything every plan gets, listed once instead of repeated in each card. */}
+        {(() => {
+          const covered = new Set(["Legacy Storage", "Email Support", "Priority Support"]); // shown in the card rows
+          const shared = (PLANS[0]?.features ?? []).filter(f => !covered.has(f) && PLANS.every(p => p.features.includes(f)));
+          if (!shared.length) return null;
+          return (
+            <div className="mt-8 rounded-2xl glow-surface" style={{ background: CARD, border: "1px solid rgba(91,110,225,0.16)", padding: "26px 28px" }}>
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-5">
+                <div style={{ ...DISPLAY, fontSize: 20, fontWeight: 700, color: TEXT }}>Every plan includes</div>
+                <div style={{ color: MUTED, fontSize: 14 }}>Legacy &amp; Guardian Contacts on all plans, up to each plan's limit</div>
               </div>
-              <ul className="flex flex-col gap-3 flex-1 mb-7">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2">
-                    <CheckCircle2 size={13} color={plan.color} style={{ marginTop: 3, flexShrink: 0 }} />
-                    <span style={{ color: SOFT, fontSize: 16 }}>{f}</span>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3">
+                {shared.map(f => (
+                  <li key={f} className="flex items-center gap-2.5">
+                    <CheckCircle2 size={16} color="#6FAE8B" style={{ flexShrink: 0 }} />
+                    <span style={{ color: SOFT, fontSize: 15.5 }}>{f}</span>
                   </li>
                 ))}
               </ul>
-              <button onClick={onStart} className="w-full py-3 rounded-xl font-semibold text-sm fpd-btn-lift"
-                style={plan.popular ? { background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", boxShadow: "0 8px 24px rgba(91,110,225,0.4)" } : { background: "rgba(91,110,225,0.08)", color: "#6FAE8B", border: "1px solid rgba(91,110,225,0.25)" }}>
-                Get Started
-              </button>
             </div>
-          ))}
-        </div>
+          );
+        })()}
         <p className="text-center mt-8" style={{ color: MUTED, fontSize: 16 }}>All plans billed in USD. No contracts. Cancel anytime. Overage auto-billed at end of cycle.</p>
 
         {/* Optional add-on — Disaster Recovery Protection */}
