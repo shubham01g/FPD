@@ -27,7 +27,7 @@ export interface WhiteLabelConfig {
     secretVault: boolean;
   };
   /** Keyed by the real plan ids (subscription_plans.id). */
-  planNames: { foundation: string; family_archive: string; legacy_pro: string; legacy_vault: string };
+  planNames: { starter: string; foundation: string; family_archive: string; legacy_pro: string; legacy_vault: string };
   footerText: string;
   termsUrl: string;
   privacyUrl: string;
@@ -62,7 +62,7 @@ export const defaultConfig: WhiteLabelConfig = {
     personalAssets: true, familyMemories: true, contacts: true,
     affiliate: true, partnership: true, videoMessages: true, secretVault: true,
   },
-  planNames: { foundation: "Foundation", family_archive: "Legacy Archive", legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault" },
+  planNames: { starter: "Starter", foundation: "Foundation", family_archive: "Legacy Archive", legacy_pro: "Legacy Pro", legacy_vault: "Legacy Vault" },
   footerText: "© 2026 Final Pass Down Inc. All rights reserved.",
   // Set per white-label brand in White Label Config; blank until provided.
   termsUrl: "",

@@ -6,7 +6,7 @@ import type { AdminUser } from "../middleware/adminAuth.ts";
 const users = new Hono();
 
 /** The plans an admin can comp (everything sold; see migration 059). */
-const PAID_PLANS: unknown[] = ["foundation", "family_archive", "legacy_pro", "legacy_vault"];
+const PAID_PLANS: unknown[] = ["starter", "foundation", "family_archive", "legacy_pro", "legacy_vault"];
 
 // GET /admin/users?search=&plan=&status=&page=&pageSize=
 users.get("/", async (c) => {

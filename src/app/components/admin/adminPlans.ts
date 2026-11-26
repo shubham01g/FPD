@@ -17,12 +17,11 @@ export interface AdminPlan {
 }
 
 const PLAN_COLOR: Record<string, string> = {
-  none: "#5A6A88", foundation: "#6E90C9", family_archive: "#5B6EE1", legacy_pro: "#7E6BD8", legacy_vault: "#6FAE8B",
+  none: "#5A6A88", starter: "#D99A6B", foundation: "#6E90C9", family_archive: "#5B6EE1", legacy_pro: "#7E6BD8", legacy_vault: "#6FAE8B",
 };
 const OTHER_COLOR = "#8A9AB8";
-/* Ids the catalog never lists: an account that hasn't bought a plan, and the
-   retired Starter plan (migration 059). */
-const UNLISTED_NAME: Record<string, string> = { none: "No plan", starter: "Starter (retired)" };
+/* An id the catalog never lists: an account that hasn't bought a plan (059). */
+const UNLISTED_NAME: Record<string, string> = { none: "No plan" };
 
 export function toAdminPlan(p: Plan): AdminPlan {
   return {

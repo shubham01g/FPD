@@ -524,7 +524,7 @@ function buildTopMetrics(
    ───────────────────────────────────────────────────────────────── */
 
 type NotifType = "marketing" | "feature" | "update" | "alert" | "reminder";
-type NotifTarget = "all" | "none" | "foundation" | "family_archive" | "legacy_pro" | "legacy_vault" | "white_glove";
+type NotifTarget = "all" | "none" | "starter" | "foundation" | "family_archive" | "legacy_pro" | "legacy_vault" | "white_glove";
 
 interface SentNotification {
   id: string; title: string; body: string; type: NotifType; target: NotifTarget;
@@ -543,7 +543,7 @@ const NOTIF_TYPE_COLORS: Record<NotifType, string> = {
    no longer exist ("essential"/"premium"/"enterprise"), so three segments
    silently rendered as undefined. */
 const TARGET_LABELS: Record<NotifTarget, string> = {
-  all:"All Users", none:"No plan yet", foundation:"Foundation",
+  all:"All Users", none:"No plan yet", starter:"Starter", foundation:"Foundation",
   family_archive:"Legacy Archive", legacy_pro:"Legacy Pro",
   legacy_vault:"Legacy Vault", white_glove:"White Glove Clients",
 };
@@ -554,6 +554,7 @@ function targetCounts(usersByPlan: Record<string, number>, totalUsers: number): 
   return {
     all: totalUsers,
     none: usersByPlan["none"] ?? 0,
+    starter: usersByPlan["starter"] ?? 0,
     foundation: usersByPlan["foundation"] ?? 0,
     family_archive: usersByPlan["family_archive"] ?? 0,
     legacy_pro: usersByPlan["legacy_pro"] ?? 0,
@@ -1500,7 +1501,7 @@ export function MasterAdmin({ onNavigate }: { onNavigate?: (page: AdminPageId) =
                   <label style={{ color:"#8A9AB8", fontSize:12.5, fontFamily:"var(--font-mono)", display:"block", marginBottom:4 }}>PLAN</label>
                   <select value={userPlanFilter} onChange={e=>setUserPlanFilter(e.target.value)} style={{ width:"100%", marginBottom:10, background:"#141B2E", border:"1px solid rgba(91,110,225,0.3)", color:"#E8EDF5", borderRadius:8, padding:"6px 8px", fontSize:15 }}>
                     <option value="">All Plans</option>
-                    {["none","foundation","family_archive","legacy_pro","legacy_vault"].map(p=>(
+                    {["none","starter","foundation","family_archive","legacy_pro","legacy_vault"].map(p=>(
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>

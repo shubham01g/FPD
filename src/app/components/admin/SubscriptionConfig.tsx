@@ -34,7 +34,7 @@ interface DBProduct { slug: string; name: string; kind: "one_time" | "recurring"
 interface ThresholdSetting { key: string; value: string; updated_at: string; }
 
 const PLAN_COLORS: Record<string, string> = {
-  foundation: "#6FAE8B", family_archive: "#6E90C9", legacy_pro: "#6FAE8B", legacy_vault: "#ED8936",
+  starter: "#D99A6B", foundation: "#6FAE8B", family_archive: "#6E90C9", legacy_pro: "#6FAE8B", legacy_vault: "#ED8936",
 };
 
 function toPlanConfig(p: DBPlan): PlanConfig {
@@ -43,7 +43,7 @@ function toPlanConfig(p: DBPlan): PlanConfig {
     name: p.name,
     price: Number(p.price_monthly),
     annualPrice: Number(p.price_annual),
-    billable: p.billable ?? (p.id !== "starter" && p.id !== "none"),
+    billable: p.billable ?? p.id !== "none",
     storage: p.storage_gb,
     overageRate: Number(p.overage_rate),
     maxContacts: p.max_contacts === -1 ? 999 : p.max_contacts,

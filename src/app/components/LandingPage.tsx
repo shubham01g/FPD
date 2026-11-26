@@ -718,15 +718,17 @@ interface DBPlan { id: string; name: string; price_monthly: number; price_annual
  * it stays here, keyed by the same plan id as subscription_plans, and is merged with the
  * live pricing/storage/contacts/overage numbers fetched from /public/plans. */
 const PLAN_META: Record<string, Pick<Plan, "color" | "popular" | "features">> = {
+  starter: { color: "#D99A6B", popular: false, features: ["Legacy Storage", "Legacy Contact", "Guardian Contact", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
   foundation: { color: "#6E90C9", popular: false, features: ["Legacy Storage", "Legacy Contacts", "Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Email Support"] },
   family_archive: { color: "#A98CC7", popular: true, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
   legacy_pro: { color: "#A98CC7", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
   legacy_vault: { color: "#ED8936", popular: false, features: ["Legacy Storage", "Unlimited Legacy Contacts", "Unlimited Guardian Contacts", "Document Vault", "Encrypted Documents", "Media Uploads", "Photos and Videos", "Legacy Messaging", "Text, Video & Voice Messages", "Calendar Reminders", "Access Control", "Advanced Security", "Priority Support", "Email Support"] },
 };
 
-/* Same 4 plans, same numbers, kept as a fallback so the pricing page still
+/* Same 5 plans, same numbers, kept as a fallback so the pricing page still
  * renders if the backend isn't reachable (no project connected yet, etc). */
 const FALLBACK_PLANS: Plan[] = [
+  { id: "starter", name: "Starter", price: 1.99, priceAnnual: 19.10, storage: "1 GB", contacts: 1, overage: 0.50, ...PLAN_META.starter },
   { id: "foundation", name: "Foundation", price: 9.99, priceAnnual: 95.90, storage: "50 GB", contacts: 3, overage: 0.40, ...PLAN_META.foundation },
   { id: "family_archive", name: "Legacy Archive", price: 24.99, priceAnnual: 239.90, storage: "250 GB", contacts: -1, overage: 0.40, ...PLAN_META.family_archive },
   { id: "legacy_pro", name: "Legacy Pro", price: 49.99, priceAnnual: 479.90, storage: "500 GB", contacts: -1, overage: 0.40, ...PLAN_META.legacy_pro },
@@ -759,7 +761,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
     <>
     <PageBanner poster="/media/pricing-bg.jpg" tone="deep" overlay={0.6}
       kicker="Simple pricing" title={<>Invest in Your<br />Family's Future</>}
-      sub={`Pick a plan and pay by card, monthly or yearly. Every plan includes its storage; anything above it is $${(PLANS.find(p => p.overage > 0)?.overage ?? 0.4).toFixed(2)}/GB (the peak each month), never more than the monthly limit you set.`} />
+      sub="Pick a plan and pay by card, monthly or yearly. Every plan includes its storage; anything above it is billed per GB at the plan's overage rate (the peak each month), never more than the monthly limit you set." />
     <section id="pricing" className="relative py-16 sm:py-28 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-12">
@@ -769,11 +771,19 @@ function Pricing({ onStart }: { onStart: () => void }) {
           </button>
           <span style={{ color: annual ? "#6FAE8B" : MUTED, fontSize: 17.5 }}>Annual <span style={{ color: "#D99A6B", fontSize: 15 }}>Save up to 20%</span></span>
         </div>
-        {/* Plan cards: only what differs between plans. 4 across on wide screens,
-            2 + 2 on tablets and laptops, 1 on phones. Every card has the same rows in
-            the same order so prices, rows and buttons line up. */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 pt-3 fpd-stagger">
-          {PLANS.map((plan) => {
+        {/* Plan cards: only what differs between plans. 5 across on wide screens,
+            3 + 2 (centred) on laptops, 2 on tablets, 1 on phones. Every card has the
+            same rows in the same order so prices, rows and buttons line up. */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-5 gap-5 pt-3 fpd-stagger">
+          {PLANS.map((plan, i) => {
+            // Each card spans 2 of 4 (tablet) / 2 of 6 (laptop) columns; a short last row is
+            // centred by pushing its first card over one column.
+            const n = PLANS.length;
+            const place = [
+              "sm:col-span-2 xl:col-span-1 xl:col-start-auto",
+              n % 2 === 1 && i === n - 1 ? "sm:col-start-2" : "",
+              n % 3 === 2 && i === n - 2 ? "lg:col-start-2" : n % 3 === 1 && i === n - 1 ? "lg:col-start-3" : "lg:col-start-auto",
+            ].join(" ");
             const contacts = plan.contacts === -1 ? "Unlimited" : String(plan.contacts);
             const priority = plan.features.includes("Priority Support");
             const rows: { label: string; value: string; accent?: boolean }[] = [
@@ -785,7 +795,7 @@ function Pricing({ onStart }: { onStart: () => void }) {
             const note = annual ? `Billed $${plan.priceAnnual.toFixed(2)}/yr` : "Billed monthly";
             return (
               <div key={plan.id}
-                className="relative rounded-2xl flex flex-col glow-surface fpd-hover-lift p-6"
+                className={`relative rounded-2xl flex flex-col glow-surface fpd-hover-lift p-6 ${place}`}
                 style={{ background: plan.popular ? "linear-gradient(180deg, rgba(126,107,216,0.10), rgba(16,23,40,0) 45%), #101728" : CARD, border: plan.popular ? `1.5px solid ${plan.color}` : "1px solid rgba(91,110,225,0.16)", boxShadow: plan.popular ? "0 0 40px rgba(91,110,225,0.25)" : "none", containerType: "inline-size" }}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `linear-gradient(135deg,${PRIMARY},${ACCENT})`, color: "#fff", ...MONO, whiteSpace: "nowrap", letterSpacing: "0.08em" }}>MOST POPULAR</div>
