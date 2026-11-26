@@ -56,7 +56,7 @@ export function PlanWall({ onSignOut, reason = "choose", onOpenShared }: {
 
   return (
     <div className="size-full overflow-y-auto" style={{ background: "#070A12", fontFamily: "var(--font-body)" }}>
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 16px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 16px" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div className="flex items-center justify-center gap-2" style={{ color: choosing ? ACCENT : NEG, fontSize: 14, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", marginBottom: 12 }}>
             {choosing ? <><Shield size={14}/> CHOOSE YOUR PLAN</> : <><RotateCcw size={14}/> PLAN ENDED</>}
@@ -85,7 +85,7 @@ export function PlanWall({ onSignOut, reason = "choose", onOpenShared }: {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {plans.map(plan => {
             const price = interval === "year" ? plan.priceAnnual : plan.priceMonthly;
             return (

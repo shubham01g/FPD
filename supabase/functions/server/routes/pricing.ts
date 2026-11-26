@@ -15,8 +15,8 @@ const THRESHOLD_KEYS = [
 pricing.get("/", async (c) => {
   const db = adminClient();
   const [{ data: plans, error: plansErr }, { data: settings, error: settingsErr }, { data: products, error: productsErr }] = await Promise.all([
-    // Only the plans that are sold: the retired Starter row and the hidden
-    // 'none' (no plan yet) row are never shown or edited (migration 059).
+    // Only the plans that are sold: the hidden 'none' (no plan yet) row is
+    // never shown or edited (migration 059).
     db.from("subscription_plans").select("*").eq("billable", true).order("price_monthly", { ascending: true }),
     db.from("admin_settings").select("key, value, updated_at").in("key", THRESHOLD_KEYS as unknown as string[]),
     db.from("billing_products").select("*").order("sort_order"),

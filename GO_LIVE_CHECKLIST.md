@@ -13,7 +13,7 @@ and the commit that fixed it.
 
 | Slug | What | Kind | Price | Notes |
 |---|---|---|---|---|
-| ~~`starter`~~ | ~~Starter~~ | **removed 2026-11-21** | — | Owner: nothing is offered at $0. Was free for 14 days (decided Oct 24 on a misleadingly worded question; it had been $1.99). Migration 059: new signups have no plan (`none`, 0 GB, uploads refused) and see Choose your plan; Foundation is the entry plan. |
+| `starter` | Starter | plan | $1.99 / mo · $19.10 / yr | 1 GB, 1 contact, $0.50/GB overage. **Sold again from 2026-11-26** (migration 060, owner's numbers). History: it was $1.99, became free for 14 days on Oct 24 (a misleadingly worded question), and was removed on 2026-11-21 (059). Still nothing at $0: new signups have no plan (`none`, 0 GB, uploads refused) and see Choose your plan. |
 | `foundation` | Foundation | plan | $9.99 / mo · $95.90 / yr | 50 GB, 3 contacts |
 | `family_archive` | Legacy Archive | plan | $24.99 / mo · $239.90 / yr | 250 GB, unlimited contacts |
 | `legacy_pro` | Legacy Pro | plan | $49.99 / mo · $479.90 / yr | 500 GB, unlimited contacts |

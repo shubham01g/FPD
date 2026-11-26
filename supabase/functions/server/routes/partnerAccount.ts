@@ -40,7 +40,7 @@ partnerAccount.get("/", async (c) => {
     payouts: payouts ?? [],
     stats: {
       totalAccounts: referrals.length,
-      activePaid: referrals.filter((r) => r.plan !== "none" && r.plan !== "starter" && r.status === "active").length,
+      activePaid: referrals.filter((r) => r.plan !== "none" && r.status === "active").length,
       totalEarned: Number(partner.total_earned ?? 0),
     },
   });

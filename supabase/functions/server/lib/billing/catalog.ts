@@ -32,8 +32,8 @@ export class CatalogError extends Error {
   constructor(message: string, status: 400 | 409 = 409) { super(message); this.status = status; }
 }
 
-/** The Stripe price to sell a plan at. Refuses unsold rows (retired Starter,
- *  the hidden 'none'), inactive plans, and
+/** The Stripe price to sell a plan at. Refuses unsold rows (the hidden
+ *  'none'), inactive plans, and
  *  plans whose price changed since the last catalog sync. */
 export async function planPrice(planId: string, interval: Interval): Promise<{ plan: PlanRow; priceId: string; amountCents: number }> {
   const { data: plan } = await adminClient().from("subscription_plans").select("*").eq("id", planId).maybeSingle<PlanRow>();
